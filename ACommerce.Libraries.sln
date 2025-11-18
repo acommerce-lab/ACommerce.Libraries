@@ -118,13 +118,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.SharedKernel.Infr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.SharedKernel.AspNetCore", "AspNetCore\ACommerce.SharedKernel.AspNetCore\ACommerce.SharedKernel.AspNetCore.csproj", "{BFC50B33-76D4-D426-4590-8177167C153E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{4A872C3E-AC5B-43E4-93CB-C23E626D742E}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{54A4DEB0-2A57-4844-9EF2-3B1F475759C0}"
-	ProjectSection(SolutionItems) = preProject
-		publish.yml = publish.yml
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -777,7 +770,6 @@ Global
 		{8ED9B822-777C-1F9D-A143-1B219A84F767} = {FBF56CC3-7AE6-AD2D-3F14-7F97FD322CD6}
 		{CF9D8D06-2687-53E8-3F39-DAD501A7863C} = {FBF56CC3-7AE6-AD2D-3F14-7F97FD322CD6}
 		{BFC50B33-76D4-D426-4590-8177167C153E} = {D70FA35D-25AA-0A46-E46A-25A48C79F5AD}
-		{54A4DEB0-2A57-4844-9EF2-3B1F475759C0} = {4A872C3E-AC5B-43E4-93CB-C23E626D742E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2335E803-317D-466A-9117-E446644730F7}
