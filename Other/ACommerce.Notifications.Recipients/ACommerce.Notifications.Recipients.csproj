@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>ACommerce.Notifications.Recipients</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>ACommerce</Authors>
+    <Description># ACommerce.Notifications.Recipients</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
+  </ItemGroup>
+</Project>

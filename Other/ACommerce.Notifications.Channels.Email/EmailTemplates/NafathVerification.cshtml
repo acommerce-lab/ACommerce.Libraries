@@ -1,0 +1,49 @@
+﻿@model dynamic
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>@Model.Title</title>
+	<style>
+		/* نفس الـ styles من Default */
+	</style>
+</head>
+<body>
+	<div class="email-container">
+		<div class="header" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+			<h1>✓ تم التحقق بنجاح</h1>
+			<p>@Model.CreatedAt</p>
+		</div>
+
+		<div class="content">
+			<p style="font-size: 18px; font-weight: bold; color: #11998e;">
+				مرحباً بك في منصة عشير!
+			</p>
+
+			<p>@Model.Message</p>
+
+			<div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+				<p style="margin: 0; font-size: 14px; color: #6c757d;">
+					<strong>معرف المعاملة:</strong> @Model.Data["transactionId"]
+				</p>
+			</div>
+
+			@if (!string.IsNullOrEmpty(Model.ActionUrl))
+			{
+				<div style="text-align: center;">
+					<a href="@Model.ActionUrl" class="action-button" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+						الدخول إلى الحساب
+					</a>
+				</div>
+			}
+		</div>
+
+		<div class="footer">
+			<p><strong>منصة عشير للعقارات</strong></p>
+			<p>© 2025 ACommerce. جميع الحقوق محفوظة.</p>
+		</div>
+	</div>
+</body>
+</html>
