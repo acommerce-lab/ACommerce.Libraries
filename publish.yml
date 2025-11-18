@@ -26,5 +26,12 @@ jobs:
       - name: Pack all projects
         run: dotnet pack --configuration Release
 
-      - name: Push all packages to NuGet
-        run: dotnet nuget push **/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+      - name: Push only new packages
+        run: |
+          for pkg in $(find . -name "*.nupkg"); do
+            echo "🔍 Checking $pkg"
+            dotnet nuget push "$pkg" \
+              --api-key ${{ secrets.NUGET_API_KEY }} \
+              --source https://api.nuget.org/v3/index.json \
+              --skip-duplicate
+          done
