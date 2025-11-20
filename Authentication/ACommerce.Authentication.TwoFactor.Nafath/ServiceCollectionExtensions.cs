@@ -1,7 +1,9 @@
 ﻿// ACommerce.Authentication.TwoFactor.Nafath/ServiceCollectionExtensions.cs
 using ACommerce.Authentication.Abstractions;
 using ACommerce.Authentication.Abstractions.Contracts;
+using ACommerce.Authentication.AspNetCore.Services;
 using ACommerce.Authentication.TwoFactor.Abstractions;
+using ACommerce.Messaging.Abstractions.Contracts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

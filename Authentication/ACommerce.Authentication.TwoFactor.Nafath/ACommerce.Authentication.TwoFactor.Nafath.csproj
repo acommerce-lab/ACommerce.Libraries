@@ -13,6 +13,8 @@
     <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.10" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ACommerce.Messaging.Abstractions\ACommerce.Messaging.Abstractions.csproj" />
+    <ProjectReference Include="..\..\AspNetCore\ACommerce.Authentication.AspNetCore\ACommerce.Authentication.AspNetCore.csproj" />
     <ProjectReference Include="..\ACommerce.Authentication.TwoFactor.Abstractions\ACommerce.Authentication.TwoFactor.Abstractions.csproj" />
   </ItemGroup>
 </Project>

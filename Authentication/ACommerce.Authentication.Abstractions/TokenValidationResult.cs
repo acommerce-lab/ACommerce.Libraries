@@ -7,4 +7,3 @@ public record TokenValidationResult
 	public IReadOnlyDictionary<string, string>? Claims { get; init; }
 	public string? Error { get; init; }
 }
-

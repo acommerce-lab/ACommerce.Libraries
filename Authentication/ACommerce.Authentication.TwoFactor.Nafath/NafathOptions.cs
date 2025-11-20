@@ -28,4 +28,3 @@ public class NafathOptions
 	[Range(1, 60, ErrorMessage = "Session expiration must be between 1 and 60 minutes")]
 	public int SessionExpirationMinutes { get; set; } = 5;
 }
-

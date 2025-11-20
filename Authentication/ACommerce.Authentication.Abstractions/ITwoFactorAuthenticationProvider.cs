@@ -16,14 +16,14 @@ public interface ITwoFactorAuthenticationProvider
 	/// Initiates a two-factor authentication flow
 	/// </summary>
 	Task<TwoFactorInitiationResult> InitiateAsync(
-		TwoFactorInitiationRequest request,
+        TwoFactorInitiationRequest request,
 		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Verifies a two-factor authentication attempt
 	/// </summary>
 	Task<TwoFactorVerificationResult> VerifyAsync(
-		TwoFactorVerificationRequest request,
+        TwoFactorVerificationRequest request,
 		CancellationToken cancellationToken = default);
 
 	/// <summary>

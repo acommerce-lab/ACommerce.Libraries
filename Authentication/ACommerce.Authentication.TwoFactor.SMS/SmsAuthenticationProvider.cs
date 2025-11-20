@@ -1,287 +1,158 @@
-using ACommerce.Authentication.Abstractions;
+﻿using ACommerce.Authentication.Abstractions;
+using ACommerce.Authentication.Abstractions.Contracts;
 using ACommerce.Authentication.TwoFactor.Abstractions;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace ACommerce.Authentication.TwoFactor.SMS;
 
 public class SmsAuthenticationProvider : ITwoFactorAuthenticationProvider
 {
-	private readonly ISmsService _smsService;
-	private readonly ITwoFactorSessionStore _sessionStore;
-	private readonly SmsOptions _options;
-	private readonly ILogger<SmsAuthenticationProvider> _logger;
-	private static readonly Random _random = new();
+    private readonly ISmsProvider _smsProvider;
+    private readonly ITwoFactorSessionStore _sessionStore;
+    private readonly ILogger<SmsAuthenticationProvider> _logger;
+    private IAuthenticationEventPublisher? _eventPublisher;
 
-	public string ProviderName => "SMS";
+    public string ProviderName => "SMS";
 
-	public SmsAuthenticationProvider(
-		ISmsService smsService,
-		ITwoFactorSessionStore sessionStore,
-		IOptions<SmsOptions> options,
-		ILogger<SmsAuthenticationProvider> logger)
-	{
-		_smsService = smsService ?? throw new ArgumentNullException(nameof(smsService));
-		_sessionStore = sessionStore ?? throw new ArgumentNullException(nameof(sessionStore));
-		_options = options.Value ?? throw new ArgumentNullException(nameof(options));
-		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
+    public SmsAuthenticationProvider(
+        ISmsProvider smsProvider,
+        ITwoFactorSessionStore sessionStore,
+        ILogger<SmsAuthenticationProvider> logger)
+    {
+        _smsProvider = smsProvider;
+        _sessionStore = sessionStore;
+        _logger = logger;
+    }
 
-	public async Task<TwoFactorInitiationResult> InitiateAsync(
-		TwoFactorInitiationRequest request,
-		CancellationToken cancellationToken = default)
-	{
-		try
-		{
-			var code = GenerateVerificationCode();
-			var transactionId = Guid.NewGuid().ToString();
-			var expiresIn = _options.CodeLifetime;
+    public void SetEventPublisher(IAuthenticationEventPublisher? publisher)
+    {
+        _eventPublisher = publisher;
+    }
 
-			var session = new TwoFactorSession
-			{
-				TransactionId = transactionId,
-				Identifier = request.Identifier,
-				Provider = ProviderName,
-				CreatedAt = DateTimeOffset.UtcNow,
-				ExpiresAt = DateTimeOffset.UtcNow.Add(expiresIn),
-				VerificationCode = code,
-				Status = TwoFactorSessionStatus.Pending,
-				Metadata = request.Metadata
-			};
+    public async Task<TwoFactorInitiationResult> InitiateAsync(
+        TwoFactorInitiationRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var code = GenerateCode();
+            var transactionId = Guid.NewGuid().ToString();
 
-			await _sessionStore.CreateSessionAsync(session, cancellationToken);
+            var session = new TwoFactorSession
+            {
+                TransactionId = transactionId,
+                Identifier = request.Identifier,
+                Provider = ProviderName,
+                CreatedAt = DateTimeOffset.UtcNow,
+                ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(5),
+                VerificationCode = code,
+                Status = TwoFactorSessionStatus.Pending,
+                Metadata = request.Metadata
+            };
 
-			var message = string.Format(_options.MessageTemplate, code);
-			await _smsService.SendAsync(request.Identifier, message, cancellationToken);
+            await _sessionStore.CreateSessionAsync(session, cancellationToken);
 
-			_logger.LogInformation(
-				"SMS verification code sent to {PhoneNumber}",
-				MaskPhoneNumber(request.Identifier));
+            await _smsProvider.SendAsync(
+                request.Identifier,
+                $"Your code is: {code}",
+                cancellationToken);
 
-			return new TwoFactorInitiationResult
-			{
-				Success = true,
-				TransactionId = transactionId,
-				Message = "?? ????? ??? ?????? ??? ??? ?????",
-				ExpiresIn = expiresIn
-			};
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "Failed to send SMS verification code");
+            return TwoFactorInitiationResult.Ok(transactionId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send SMS");
+            return TwoFactorInitiationResult.Fail(new()
+            {
+                Message = ex.Message,
+                Code = "SMS_SENDING_FAILED",
+                Details = ex.StackTrace
+            });
+        }
+    }
 
-			return new TwoFactorInitiationResult
-			{
-				Success = false,
-				Error = new TwoFactorError
-				{
-					Code = "SMS_SEND_FAILED",
-					Message = "??? ????? ??? ??????"
-				}
-			};
-		}
-	}
+    public async Task<TwoFactorVerificationResult> VerifyAsync(
+        TwoFactorVerificationRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var session = await _sessionStore.GetSessionAsync(
+                request.TransactionId,
+                cancellationToken);
 
-	public async Task<TwoFactorVerificationResult> VerifyAsync(
-		TwoFactorVerificationRequest request,
-		CancellationToken cancellationToken = default)
-	{
-		try
-		{
-			var session = await _sessionStore.GetSessionAsync(
-				request.TransactionId,
-				cancellationToken);
+            if (session == null)
+            {
+                return TwoFactorVerificationResult.Fail(new()
+                {
+                    Message = "Transaction not found",
+                    Code = "TRANSACTION_NOT_FOUND",
+                    Details = $"No session found for TransactionId: {request.TransactionId}"
+                });
+            }
 
-			if (session == null)
-			{
-				return CreateErrorResult("SESSION_NOT_FOUND", "?????? ??? ??????");
-			}
+            if (session.ExpiresAt < DateTimeOffset.UtcNow)
+            {
+                return TwoFactorVerificationResult.Fail(new()
+                {
+                    Message = "Code expired",
+                    Code = "CODE_EXPIRED",
+                    Details = "The verification code has expired"
+                });
+            }
 
-			if (session.ExpiresAt < DateTimeOffset.UtcNow)
-			{
-				await UpdateSessionStatusAsync(
-					session.TransactionId,
-					TwoFactorSessionStatus.Expired,
-					cancellationToken);
+            if (session.VerificationCode != request.Code)
+            {
+                return TwoFactorVerificationResult.Fail(new()
+                {
+                    Message = "Invalid code",
+                    Code = "INVALID_CODE",
+                    Details = "The provided verification code is incorrect"
+                });
+            }
 
-				return CreateErrorResult("CODE_EXPIRED", "????? ?????? ?????");
-			}
+            session = session with { Status = TwoFactorSessionStatus.Verified };
+            await _sessionStore.UpdateSessionAsync(session, cancellationToken);
 
-			if (session.VerificationCode != request.VerificationCode)
-			{
-				_logger.LogWarning(
-					"Invalid verification code attempt for session {TransactionId}",
-					request.TransactionId);
+            return TwoFactorVerificationResult.Ok(request.TransactionId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to verify");
+            return TwoFactorVerificationResult.Fail(new()
+            {
+                Message = ex.Message,
+                Code = "VERIFICATION_FAILED",
+                Details = ex.StackTrace
+            });
+        }
+    }
 
-				return CreateErrorResult("INVALID_CODE", "????? ??? ????");
-			}
+    public async Task<bool> CancelAsync(
+        string transactionId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var session = await _sessionStore.GetSessionAsync(
+                transactionId,
+                cancellationToken);
 
-			await UpdateSessionStatusAsync(
-				session.TransactionId,
-				TwoFactorSessionStatus.Verified,
-				cancellationToken);
+            if (session == null)
+                return false;
 
-			return new TwoFactorVerificationResult
-			{
-				Success = true,
-				UserId = session.Identifier,
-				UserClaims = new Dictionary<string, string>
-				{
-					["phone_number"] = session.Identifier,
-					["provider"] = ProviderName
-				}
-			};
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "Error during SMS verification");
-			return CreateErrorResult("VERIFICATION_ERROR", "??? ??? ????? ??????");
-		}
-	}
+            session = session with { Status = TwoFactorSessionStatus.Cancelled };
+            await _sessionStore.UpdateSessionAsync(session, cancellationToken);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 
-	public async Task<bool> CancelAsync(
-		string transactionId,
-		CancellationToken cancellationToken = default)
-	{
-		try
-		{
-			await UpdateSessionStatusAsync(
-				transactionId,
-				TwoFactorSessionStatus.Cancelled,
-				cancellationToken);
-
-			return true;
-		}
-		catch
-		{
-			return false;
-		}
-	}
-
-	private string GenerateVerificationCode()
-	{
-		return _random.Next(100000, 999999).ToString();
-	}
-
-	private async Task UpdateSessionStatusAsync(
-		string transactionId,
-		TwoFactorSessionStatus status,
-		CancellationToken cancellationToken)
-	{
-		var session = await _sessionStore.GetSessionAsync(transactionId, cancellationToken);
-		if (session != null)
-		{
-			var updatedSession = session with { Status = status };
-			await _sessionStore.UpdateSessionAsync(updatedSession, cancellationToken);
-		}
-	}
-
-	private TwoFactorVerificationResult CreateErrorResult(string code, string message)
-	{
-		return new TwoFactorVerificationResult
-		{
-			Success = false,
-			Error = new TwoFactorError
-			{
-				Code = code,
-				Message = message
-			}
-		};
-	}
-
-	private static string MaskPhoneNumber(string phoneNumber)
-	{
-		if (phoneNumber.Length < 4) return "****";
-		return $"****{phoneNumber[^4..]}";
-	}
+    private static string GenerateCode()
+    {
+        return new Random().Next(100000, 999999).ToString();
+    }
 }
-
-/// <summary>
-/// Interface for SMS sending service
-/// Implement this interface with your preferred SMS provider (Twilio, AWS SNS, etc.)
-/// </summary>
-public interface ISmsService
-{
-	Task SendAsync(
-		string phoneNumber,
-		string message,
-		CancellationToken cancellationToken = default);
-}
-
-/// <summary>
-/// Fake SMS service for development/testing
-/// </summary>
-public class FakeSmsService : ISmsService
-{
-	private readonly ILogger<FakeSmsService> _logger;
-
-	public FakeSmsService(ILogger<FakeSmsService> logger)
-	{
-		_logger = logger;
-	}
-
-	public Task SendAsync(
-		string phoneNumber,
-		string message,
-		CancellationToken cancellationToken = default)
-	{
-		_logger.LogInformation(
-			"?? [FAKE SMS] To: {PhoneNumber} | Message: {Message}",
-			phoneNumber,
-			message);
-
-		return Task.CompletedTask;
-	}
-}
-
-public class SmsOptions
-{
-	public const string SectionName = "Authentication:TwoFactor:SMS";
-
-	public TimeSpan CodeLifetime { get; set; } = TimeSpan.FromMinutes(5);
-
-	public string MessageTemplate { get; set; } = "??? ?????? ????? ?? ??: {0}";
-}
-
-public static class ServiceCollectionExtensions
-{
-	public static IServiceCollection AddSmsTwoFactor(
-		this IServiceCollection services,
-		IConfiguration configuration)
-	{
-		services.AddOptions<SmsOptions>()
-			.Bind(configuration.GetSection(SmsOptions.SectionName))
-			.ValidateDataAnnotations()
-			.ValidateOnStart();
-
-		services.AddScoped<ITwoFactorAuthenticationProvider, SmsAuthenticationProvider>();
-
-		return services;
-	}
-
-	public static IServiceCollection AddSmsTwoFactor(
-		this IServiceCollection services,
-		Action<SmsOptions> configure)
-	{
-		services.AddOptions<SmsOptions>()
-			.Configure(configure)
-			.ValidateDataAnnotations()
-			.ValidateOnStart();
-
-		services.AddScoped<ITwoFactorAuthenticationProvider, SmsAuthenticationProvider>();
-
-		return services;
-	}
-
-	/// <summary>
-	/// Adds fake SMS service for development/testing
-	/// </summary>
-	public static IServiceCollection AddFakeSmsService(this IServiceCollection services)
-	{
-		services.AddScoped<ISmsService, FakeSmsService>();
-		return services;
-	}
-}
-
