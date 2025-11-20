@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>ACommerce.Chats.Core</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>ACommerce</Authors>
     <Description># ACommerce.Chats.Core</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

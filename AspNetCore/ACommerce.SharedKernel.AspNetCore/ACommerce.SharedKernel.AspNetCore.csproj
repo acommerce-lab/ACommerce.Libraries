@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>ACommerce.SharedKernel.AspNetCore</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>ACommerce</Authors>
     <Description># ACommerce.SharedKernel.AspNetCore</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
