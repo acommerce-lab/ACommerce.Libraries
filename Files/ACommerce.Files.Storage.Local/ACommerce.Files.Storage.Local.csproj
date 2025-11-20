@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>ACommerce.Files.Storage.Local</PackageId>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <Authors>ACommerce</Authors>
     <Description>Default description for ACommerce.Files.Storage.Local</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

@@ -116,5 +116,15 @@ public static class ServiceCollectionExtensions
 		services.AddHostedService<NotificationRetryWorker>();
 		return services;
 	}
+
+    /// <summary>
+    /// Add Messaging-based publisher (for microservices)
+    /// </summary>
+    public static IServiceCollection AddMessagingNotificationPublisher(
+        this IServiceCollection services)
+    {
+        services.AddScoped<INotificationPublisher, MessagingNotificationPublisher>();
+        return services;
+    }
 }
 

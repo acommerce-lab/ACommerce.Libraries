@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>ACommerce.Messaging.Abstractions</PackageId>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <Authors>ACommerce</Authors>
     <Description># ACommerce.Messaging.Abstractions</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
