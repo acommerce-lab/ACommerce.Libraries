@@ -1,0 +1,1565 @@
+### ACommerce Solution Class Hierarchy Report ###
+---
+
+## Project: Controllers
+File: AuthenticationController.cs
+- [class] **AuthController** : Inherits/Implements (AuthenticationControllerBase)
+- [abstract class] **AuthenticationControllerBase** : Inherits/Implements (ControllerBase)
+
+## Project: Controllers
+File: RolesController.cs
+- [class] **RolesController** : Inherits/Implements (ControllerBase)
+
+## Project: Controllers
+File: UsersController.cs
+- [class] **UsersController** : Inherits/Implements (ControllerBase)
+
+## Project: Claims
+File: AddClaimDto.cs
+- [class] **AddClaimDto**
+
+## Project: Claims
+File: ClaimDto.cs
+- [class] **ClaimDto**
+
+## Project: Claims
+File: RemoveClaimDto.cs
+- [class] **RemoveClaimDto**
+
+## Project: Roles
+File: AddUserToRoleDto.cs
+- [class] **AddUserToRoleDto**
+
+## Project: Roles
+File: CreateRoleDto.cs
+- [class] **CreateRoleDto**
+
+## Project: Roles
+File: RoleResponseDto.cs
+- [class] **RoleResponseDto**
+
+## Project: Roles
+File: UpdateRoleDto.cs
+- [class] **UpdateRoleDto**
+
+## Project: Users
+File: ChangePasswordDto.cs
+- [class] **ChangePasswordDto**
+
+## Project: Users
+File: ConfirmEmailDto.cs
+- [class] **ConfirmEmailDto**
+
+## Project: Users
+File: CreateUserDto.cs
+- [class] **CreateUserDto**
+
+## Project: Users
+File: ForgotPasswordDto.cs
+- [class] **ForgotPasswordDto**
+
+## Project: Users
+File: ResetPasswordDto.cs
+- [class] **ResetPasswordDto**
+
+## Project: Users
+File: UpdateUserDto.cs
+- [class] **UpdateUserDto**
+
+## Project: Users
+File: UserResponseDto.cs
+- [class] **UserResponseDto**
+
+## Project: Roles
+File: AddClaimDtoValidator.cs
+- [class] **AddClaimDtoValidator** : Inherits/Implements (AbstractValidator<AddClaimDto>)
+
+## Project: Roles
+File: AddUserToRoleDtoValidator.cs
+- [class] **AddUserToRoleDtoValidator** : Inherits/Implements (AbstractValidator<AddUserToRoleDto>)
+
+## Project: Roles
+File: CreateRoleDtoValidator.cs
+- [class] **CreateRoleDtoValidator** : Inherits/Implements (AbstractValidator<CreateRoleDto>)
+
+## Project: Roles
+File: RemoveClaimDtoValidator.cs
+- [class] **RemoveClaimDtoValidator** : Inherits/Implements (AbstractValidator<RemoveClaimDto>)
+
+## Project: Roles
+File: UpdateRoleDtoValidator.cs
+- [class] **UpdateRoleDtoValidator** : Inherits/Implements (AbstractValidator<UpdateRoleDto>)
+
+## Project: Users
+File: ChangePasswordDtoValidator.cs
+- [class] **ChangePasswordDtoValidator** : Inherits/Implements (AbstractValidator<ChangePasswordDto>)
+
+## Project: Users
+File: ConfirmEmailDtoValidator.cs
+- [class] **ConfirmEmailDtoValidator** : Inherits/Implements (AbstractValidator<ConfirmEmailDto>)
+
+## Project: Users
+File: CreateUserDtoValidator.cs
+- [class] **CreateUserDtoValidator** : Inherits/Implements (AbstractValidator<CreateUserDto>)
+
+## Project: Users
+File: ForgotPasswordDtoValidator.cs
+- [class] **ForgotPasswordDtoValidator** : Inherits/Implements (AbstractValidator<ForgotPasswordDto>)
+
+## Project: Users
+File: ResetPasswordDtoValidator.cs
+- [class] **ResetPasswordDtoValidator** : Inherits/Implements (AbstractValidator<ResetPasswordDto>)
+
+## Project: Users
+File: UpdateUserDtoValidator.cs
+- [class] **UpdateUserDtoValidator** : Inherits/Implements (AbstractValidator<UpdateUserDto>)
+
+## Project: Controllers
+File: NafathWebhookController.cs
+- [class] **NafathWebhookController** : Inherits/Implements (NafathWebhookControllerBase)
+- [abstract class] **NafathWebhookControllerBase** : Inherits/Implements (ControllerBase)
+
+## Project: ACommerce.Authentication.AspNetCore.Swagger
+File: ApplicationBuilderExtensions.cs
+- [class] **ACommerceSwaggerUIOptions**
+
+## Project: ACommerce.Authentication.AspNetCore.Swagger
+File: SwaggerAuthMiddleware.cs
+- [class] **SwaggerAuthMiddleware**
+
+## Project: ACommerce.Authentication.AspNetCore.Swagger
+File: SwaggerServiceExtensions.cs
+- [class] **ACommerceSwaggerOptions**
+- [class] **ContactInfo**
+- [class] **LicenseInfo**
+
+## Project: ACommerce.Authentication.AspNetCore.Swagger
+File: TwoFactorOperationFilter.cs
+- [class] **TwoFactorOperationFilter** : Inherits/Implements (IOperationFilter)
+
+## Project: Controllers
+File: FilesController.cs
+- [class] **FilesController** : Inherits/Implements (ControllerBase)
+
+## Project: Processing
+File: ProcessImageDto.cs
+- [class] **ProcessImageDto**
+- [class] **CropImageDto**
+
+## Project: Upload
+File: FileResponseDto.cs
+- [class] **FileResponseDto**
+
+## Project: Upload
+File: UploadFileDto.cs
+- [class] **UploadFileDto**
+
+## Project: Upload
+File: UploadMultipleFilesDto.cs
+- [class] **UploadMultipleFilesDto**
+
+## Project: Validators
+File: UploadFileDtoValidator.cs
+- [class] **UploadFileDtoValidator** : Inherits/Implements (AbstractValidator<UploadFileDto>)
+
+## Project: Controllers
+File: BaseCommandController.cs
+- [abstract class] **BaseCommandController**
+
+## Project: Controllers
+File: BaseCrudController.cs
+- [abstract class] **BaseCrudController**
+
+## Project: Controllers
+File: BaseQueryController.cs
+- [abstract class] **BaseQueryController**
+
+## Project: Middleware
+File: GlobalExceptionMiddleware.cs
+- [class] **GlobalExceptionMiddleware**
+
+## Project: ACommerce.Authentication.Abstractions
+File: AuthenticationError.cs
+- [record] **AuthenticationError**
+
+## Project: ACommerce.Authentication.Abstractions
+File: AuthenticationException.cs
+- [class] **AuthenticationException** : Inherits/Implements (Exception)
+
+## Project: ACommerce.Authentication.Abstractions
+File: AuthenticationRequest.cs
+- [record] **AuthenticationRequest**
+
+## Project: ACommerce.Authentication.Abstractions
+File: AuthenticationResult.cs
+- [record] **AuthenticationResult**
+
+## Project: ACommerce.Authentication.Abstractions
+File: IAuthenticationProvider.cs
+- [interface] **IAuthenticationProvider**
+
+## Project: ACommerce.Authentication.Abstractions
+File: ITwoFactorAuthenticationProvider.cs
+- [interface] **ITwoFactorAuthenticationProvider**
+
+## Project: ACommerce.Authentication.Abstractions
+File: TokenValidationResult.cs
+- [record] **TokenValidationResult**
+
+## Project: ACommerce.Authentication.Abstractions
+File: TwoFactorAuthenticationException.cs
+- [class] **TwoFactorAuthenticationException** : Inherits/Implements (AuthenticationException)
+
+## Project: ACommerce.Authentication.Abstractions
+File: TwoFactorError.cs
+- [record] **TwoFactorError**
+
+## Project: ACommerce.Authentication.Abstractions
+File: TwoFactorInitiationRequest.cs
+- [record] **TwoFactorInitiationRequest**
+
+## Project: ACommerce.Authentication.Abstractions
+File: TwoFactorInitiationResult.cs
+- [record] **TwoFactorInitiationResult**
+
+## Project: ACommerce.Authentication.Abstractions
+File: TwoFactorVerificationRequest.cs
+- [record] **TwoFactorVerificationRequest**
+
+## Project: ACommerce.Authentication.Abstractions
+File: TwoFactorVerificationResult.cs
+- [record] **TwoFactorVerificationResult**
+
+## Project: ACommerce.Authentication.JWT
+File: InMemoryClaimProvider.cs
+- [class] **InMemoryClaimProvider** : Inherits/Implements (IClaimProvider)
+
+## Project: ACommerce.Authentication.JWT
+File: InMemoryRoleProvider.cs
+- [class] **InMemoryRoleProvider** : Inherits/Implements (IRoleProvider)
+- [class] **InMemoryRole**
+
+## Project: ACommerce.Authentication.JWT
+File: InMemoryUserProvider.cs
+- [class] **InMemoryUserProvider** : Inherits/Implements (IUserProvider)
+- [class] **InMemoryUser**
+
+## Project: ACommerce.Authentication.JWT
+File: JwtAuthenticationProvider.cs
+- [class] **JwtAuthenticationProvider** : Inherits/Implements (IAuthenticationProvider)
+- [class] **JwtOptions**
+
+## Project: ACommerce.Authentication.TwoFactor.Abstractions
+File: InMemorySessionStore.cs
+- [class] **InMemoryTwoFactorSessionStore** : Inherits/Implements (ITwoFactorSessionStore)
+
+## Project: ACommerce.Authentication.TwoFactor.Abstractions
+File: ITwoFactorSessionStore.cs
+- [interface] **ITwoFactorSessionStore**
+- [record] **TwoFactorSession**
+
+## Project: ACommerce.Authentication.TwoFactor.Nafath
+File: NafathAuthenticationProvider.cs
+- [class] **NafathAuthenticationProvider** : Inherits/Implements (ITwoFactorAuthenticationProvider)
+- [record] **NafathApiInitResponse**
+- [record] **NafathWebhookRequest**
+
+## Project: ACommerce.Authentication.TwoFactor.Nafath
+File: NafathOptions.cs
+- [class] **NafathOptions**
+
+## Project: ACommerce.Authentication.TwoFactor.SMS
+File: SmsAuthenticationProvider.cs
+- [class] **SmsAuthenticationProvider** : Inherits/Implements (ITwoFactorAuthenticationProvider)
+- [interface] **ISmsService**
+- [class] **FakeSmsService** : Inherits/Implements (ISmsService)
+- [class] **SmsOptions**
+
+## Project: Entities
+File: Role.cs
+- [class] **Role** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: RoleClaim.cs
+- [class] **RoleClaim** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: User.cs
+- [class] **User** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: UserClaim.cs
+- [class] **UserClaim** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: UserRole.cs
+- [class] **UserRole** : Inherits/Implements (IBaseEntity)
+
+## Project: Exceptions
+File: RoleException.cs
+- [class] **RoleException** : Inherits/Implements (Exception)
+
+## Project: Exceptions
+File: UserException.cs
+- [class] **UserException** : Inherits/Implements (Exception)
+
+## Project: Models
+File: CreateRoleRequest.cs
+- [record] **CreateRoleRequest**
+
+## Project: Models
+File: CreateUserRequest.cs
+- [record] **CreateUserRequest**
+
+## Project: Models
+File: RoleError.cs
+- [record] **RoleError**
+
+## Project: Models
+File: RoleInfo.cs
+- [record] **RoleInfo**
+
+## Project: Models
+File: RoleResult.cs
+- [record] **RoleResult**
+
+## Project: Models
+File: UpdateRoleRequest.cs
+- [record] **UpdateRoleRequest**
+
+## Project: Models
+File: UpdateUserRequest.cs
+- [record] **UpdateUserRequest**
+
+## Project: Models
+File: UserError.cs
+- [record] **UserError**
+
+## Project: Models
+File: UserInfo.cs
+- [record] **UserInfo**
+
+## Project: Models
+File: UserResult.cs
+- [record] **UserResult**
+
+## Project: Providers
+File: IClaimProvider.cs
+- [interface] **IClaimProvider**
+
+## Project: Providers
+File: IRoleProvider.cs
+- [interface] **IRoleProvider**
+
+## Project: Providers
+File: IUserProvider.cs
+- [interface] **IUserProvider**
+
+## Project: DTOs
+File: ChatDto.cs
+- [class] **ChatDto**
+
+## Project: DTOs
+File: CreateChatDto.cs
+- [class] **CreateChatDto**
+
+## Project: DTOs
+File: MarkAsReadRequest.cs
+- [class] **MarkAsReadRequest**
+
+## Project: DTOs
+File: MessageDto.cs
+- [class] **MessageDto**
+
+## Project: DTOs
+File: PaginationRequest.cs
+- [class] **PaginationRequest**
+
+## Project: DTOs
+File: ParticipantDto.cs
+- [class] **ParticipantDto**
+
+## Project: DTOs
+File: SendMessageDto.cs
+- [class] **SendMessageDto**
+
+## Project: DTOs
+File: TypingIndicatorDto.cs
+- [class] **TypingIndicatorDto**
+
+## Project: DTOs
+File: UpdateMessageDto.cs
+- [class] **UpdateMessageDto**
+
+## Project: Events
+File: ChatCreatedEvent.cs
+- [class] **ChatCreatedEvent** : Inherits/Implements (INotification)
+
+## Project: Events
+File: MessageDeletedEvent.cs
+- [class] **MessageDeletedEvent** : Inherits/Implements (INotification)
+
+## Project: Events
+File: MessageReadEvent.cs
+- [class] **MessageReadEvent** : Inherits/Implements (INotification)
+
+## Project: Events
+File: MessageSentEvent.cs
+- [class] **MessageSentEvent** : Inherits/Implements (INotification)
+
+## Project: Events
+File: ParticipantJoinedEvent.cs
+- [class] **ParticipantJoinedEvent** : Inherits/Implements (INotification)
+
+## Project: Events
+File: ParticipantLeftEvent.cs
+- [class] **ParticipantLeftEvent** : Inherits/Implements (INotification)
+
+## Project: Providers
+File: IChatProvider.cs
+- [interface] **IChatProvider**
+- [class] **UpdateChatDto**
+- [class] **AddParticipantDto**
+
+## Project: Providers
+File: IMessageProvider.cs
+- [interface] **IMessageProvider**
+
+## Project: Providers
+File: IPresenceProvider.cs
+- [interface] **IPresenceProvider**
+
+## Project: Providers
+File: IRealtimeChatProvider.cs
+- [interface] **IRealtimeChatProvider**
+
+## Project: Contracts
+File: INotificationChannel.cs
+- [interface] **INotificationChannel**
+
+## Project: Contracts
+File: INotificationPublisher.cs
+- [interface] **INotificationPublisher**
+
+## Project: Contracts
+File: INotificationService.cs
+- [interface] **INotificationService**
+
+## Project: Exceptions
+File: NotificationException.cs
+- [class] **NotificationException** : Inherits/Implements (Exception)
+- [class] **ChannelDeliveryException** : Inherits/Implements (NotificationException)
+
+## Project: Models
+File: ChannelDelivery.cs
+- [class] **ChannelDelivery**
+
+## Project: Models
+File: Notification.cs
+- [record] **Notification**
+
+## Project: Models
+File: NotificationEvent.cs
+- [record] **NotificationEvent**
+- [record] **ChannelConfiguration**
+
+## Project: Models
+File: NotificationResult.cs
+- [record] **NotificationResult**
+
+## Project: Contracts
+File: IRealtimeClient.cs
+- [interface] **IRealtimeClient**
+
+## Project: Contracts
+File: IRealtimeHub.cs
+- [interface] **IRealtimeHub**
+
+## Project: Models
+File: RealtimeMessage.cs
+- [record] **RealtimeMessage**
+
+## Project: Entities
+File: IBaseEntity.cs
+- [interface] **IBaseEntity**
+
+## Project: Exceptions
+File: DomainException.cs
+- [class] **DomainException** : Inherits/Implements (Exception)
+- [class] **EntityNotFoundException** : Inherits/Implements (DomainException)
+- [class] **ValidationException** : Inherits/Implements (DomainException)
+- [class] **UnauthorizedException** : Inherits/Implements (DomainException)
+- [class] **ConcurrencyException** : Inherits/Implements (DomainException)
+
+## Project: Queries
+File: FilterItem.cs
+- [class] **FilterItem**
+
+## Project: Queries
+File: PagedResult.cs
+- [class] **PagedResult**
+
+## Project: Queries
+File: SmartSearchRequest.cs
+- [class] **SmartSearchRequest**
+
+## Project: Repositories
+File: IBaseAsyncRepository.cs
+- [interface] **IBaseAsyncRepository**
+
+## Project: Repositories
+File: IRepositoryFactory.cs
+- [interface] **IRepositoryFactory**
+
+## Project: Results
+File: OperationResult.cs
+- [class] **OperationResult**
+- [class] **OperationResult**
+
+## Project: Behaviors
+File: LoggingBehavior.cs
+- [class] **LoggingBehavior**
+
+## Project: Behaviors
+File: PerformanceBehavior.cs
+- [class] **PerformanceBehavior**
+
+## Project: Behaviors
+File: ValidationBehavior.cs
+- [class] **ValidationBehavior**
+
+## Project: Commands
+File: CreateCommand.cs
+- [class] **CreateCommand**
+
+## Project: Commands
+File: DeleteCommand.cs
+- [class] **DeleteCommand**
+
+## Project: Commands
+File: PartialUpdateCommand.cs
+- [class] **PartialUpdateCommand**
+
+## Project: Commands
+File: RestoreCommand.cs
+- [class] **RestoreCommand**
+
+## Project: Commands
+File: UpdateCommand.cs
+- [class] **UpdateCommand**
+
+## Project: Handlers
+File: CreateCommandHandler.cs
+- [class] **CreateCommandHandler**
+
+## Project: Handlers
+File: DeleteCommandHandler.cs
+- [class] **DeleteCommandHandler**
+
+## Project: Handlers
+File: GetByIdQueryHandler.cs
+- [class] **GetByIdQueryHandler**
+
+## Project: Handlers
+File: PartialUpdateCommandHandler.cs
+- [class] **PartialUpdateCommandHandler**
+
+## Project: Handlers
+File: RestoreCommandHandler.cs
+- [class] **RestoreCommandHandler**
+
+## Project: Handlers
+File: SmartSearchQueryHandler.cs
+- [class] **SmartSearchQueryHandler**
+
+## Project: Handlers
+File: UpdateCommandHandler.cs
+- [class] **UpdateCommandHandler**
+
+## Project: Mapping
+File: ConventionMappingProfile.cs
+- [class] **ConventionMappingProfile** : Inherits/Implements (Profile)
+
+## Project: Queries
+File: GetByIdQuery.cs
+- [class] **GetByIdQuery**
+
+## Project: Queries
+File: SmartSearchQuery.cs
+- [class] **SmartSearchQuery**
+
+## Project: Factories
+File: RepositoryFactory.cs
+- [class] **RepositoryFactory** : Inherits/Implements (IRepositoryFactory)
+
+## Project: Repositories
+File: BaseAsyncRepository.cs
+- [class] **BaseAsyncRepository**
+
+## Project: Exceptions
+File: FileException.cs
+- [class] **FileException** : Inherits/Implements (Exception)
+
+## Project: Exceptions
+File: ImageProcessingException.cs
+- [class] **ImageProcessingException** : Inherits/Implements (FileException)
+
+## Project: Exceptions
+File: StorageException.cs
+- [class] **StorageException** : Inherits/Implements (FileException)
+
+## Project: Models
+File: FileError.cs
+- [record] **FileError**
+
+## Project: Models
+File: FileInfo.cs
+- [record] **FileInfo**
+
+## Project: Models
+File: ImageProcessingOptions.cs
+- [record] **ImageProcessingOptions**
+
+## Project: Models
+File: UploadRequest.cs
+- [record] **UploadRequest**
+
+## Project: Models
+File: UploadResult.cs
+- [record] **UploadResult**
+
+## Project: Providers
+File: IFileProvider.cs
+- [interface] **IFileProvider**
+
+## Project: Providers
+File: IImageProcessor.cs
+- [interface] **IImageProcessor**
+
+## Project: Providers
+File: ImageInfo.cs
+- [record] **ImageInfo**
+
+## Project: Providers
+File: IStorageProvider.cs
+- [interface] **IStorageProvider**
+
+## Project: Configuration
+File: ImageProcessingOptions.cs
+- [class] **ImageProcessorSettings**
+
+## Project: Providers
+File: ImageSharpProcessor.cs
+- [class] **ImageSharpProcessor** : Inherits/Implements (IImageProcessor)
+
+## Project: Configuration
+File: LocalStorageOptions.cs
+- [class] **LocalStorageOptions**
+
+## Project: Providers
+File: InMemoryFileProvider.cs
+- [class] **InMemoryFileProvider** : Inherits/Implements (IFileProvider)
+
+## Project: Providers
+File: LocalStorageProvider.cs
+- [class] **LocalStorageProvider** : Inherits/Implements (IStorageProvider)
+
+## Project: Account
+File: AccountResponseDto.cs
+- [class] **AccountResponseDto**
+
+## Project: Account
+File: CreateAccountDto.cs
+- [class] **CreateAccountDto**
+
+## Project: AccountingEntry
+File: AccountingEntryResponseDto.cs
+- [class] **AccountingEntryResponseDto**
+
+## Project: AccountingEntry
+File: CreateAccountingEntryDto.cs
+- [class] **CreateAccountingEntryDto**
+
+## Project: ChartOfAccounts
+File: ChartOfAccountsResponseDto.cs
+- [class] **ChartOfAccountsResponseDto**
+
+## Project: ChartOfAccounts
+File: CreateChartOfAccountsDto.cs
+- [class] **CreateChartOfAccountsDto**
+
+## Project: CostCenter
+File: CostCenterResponseDto.cs
+- [class] **CostCenterResponseDto**
+
+## Project: CostCenter
+File: CreateCostCenterDto.cs
+- [class] **CreateCostCenterDto**
+
+## Project: EntrySide
+File: CreateEntrySideDto.cs
+- [class] **CreateEntrySideDto**
+
+## Project: EntrySide
+File: EntrySideResponseDto.cs
+- [class] **EntrySideResponseDto**
+
+## Project: Entities
+File: Account.cs
+- [class] **Account** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: AccountingEntry.cs
+- [class] **AccountingEntry** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: ChartOfAccounts.cs
+- [class] **ChartOfAccounts** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: CostCenter.cs
+- [class] **CostCenter** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: EntrySide.cs
+- [class] **EntrySide** : Inherits/Implements (IBaseEntity)
+
+## Project: Validators
+File: CreateAccountingEntryValidator.cs
+- [class] **CreateAccountingEntryValidator** : Inherits/Implements (AbstractValidator<CreateAccountingEntryDto>)
+
+## Project: Validators
+File: CreateAccountValidator.cs
+- [class] **CreateAccountValidator** : Inherits/Implements (AbstractValidator<CreateAccountDto>)
+
+## Project: Validators
+File: CreateEntrySideValidator.cs
+- [class] **CreateEntrySideValidator** : Inherits/Implements (AbstractValidator<CreateEntrySideDto>)
+
+## Project: Controllers
+File: AccountingEntriesController.cs
+- [class] **AccountingEntriesController** : Inherits/Implements (BaseCrudController<)
+- [class] **UpdateAccountingEntryDto**
+- [class] **PartialUpdateAccountingEntryDto**
+- [class] **ApproveEntryRequest**
+- [class] **PostEntryRequest**
+- [class] **ReverseEntryRequest**
+
+## Project: Controllers
+File: AccountsController.cs
+- [class] **AccountsController** : Inherits/Implements (BaseCrudController<)
+- [class] **UpdateAccountDto**
+- [class] **PartialUpdateAccountDto**
+
+## Project: Controllers
+File: ChartOfAccountsController.cs
+- [class] **ChartOfAccountsController** : Inherits/Implements (BaseCrudController<)
+- [class] **UpdateChartOfAccountsDto**
+- [class] **PartialUpdateChartOfAccountsDto**
+
+## Project: Controllers
+File: CostCentersController.cs
+- [class] **CostCentersController** : Inherits/Implements (BaseCrudController<)
+- [class] **UpdateCostCenterDto**
+- [class] **PartialUpdateCostCenterDto**
+
+## Project: DTOs
+File: NafathOptions.cs
+- [class] **NafathOptions**
+
+## Project: ACommerce.Auth.Authentica
+File: NafathAuthService.cs
+- [class] **NafathAuthService**
+
+## Project: ACommerce.Auth.Authentica
+File: NafathDependencyRegistrar.cs
+- [class] **NafathAuthConfigurator** : Inherits/Implements (IAuthConfigurator)
+
+## Project: Contracts
+File: IAuthConfigurator.cs
+- [interface] **IAuthConfigurator**
+
+## Project: Contracts
+File: IAuthService.cs
+- [interface] **IAuthService**
+
+## Project: Login
+File: LoginCommand.cs
+- [record] **LoginCommand**
+
+## Project: Login
+File: LoginCommandHandler.cs
+- [class] **LoginCommandHandler**
+
+## Project: Models
+File: AuthResult.cs
+- [class] **AuthResult**
+
+## Project: DTOs
+File: JwtOptions.cs
+- [class] **JwtOptions**
+
+## Project: ACommerce.Auth.JWT
+File: JwtAuthConfigurator.cs
+- [class] **JwtAuthConfigurator** : Inherits/Implements (IAuthConfigurator)
+
+## Project: ACommerce.Auth.JWT
+File: JwtAuthService.cs
+- [class] **JwtAuthService**
+
+## Project: DTOs
+File: OpenIddictOptions.cs
+- [class] **OpenIddictOptions**
+
+## Project: ACommerce.Auth.OpenIddict
+File: OpenIddictAuthService.cs
+- [class] **OpenIddictAuthService**
+
+## Project: ACommerce.Auth.OpenIddict
+File: OpenIddictDependencyRegistrar.cs
+- [class] **OpenIddictAuthConfigurator** : Inherits/Implements (IAuthConfigurator)
+
+## Project: AttributeDefinition
+File: AttributeDefinitionResponseDto.cs
+- [class] **AttributeDefinitionResponseDto**
+
+## Project: AttributeDefinition
+File: CreateAttributeDefinitionDto.cs
+- [class] **CreateAttributeDefinitionDto**
+
+## Project: AttributeDefinition
+File: PartialUpdateAttributeDefinitionDto.cs
+- [class] **PartialUpdateAttributeDefinitionDto**
+
+## Project: AttributeDefinition
+File: UpdateAttributeDefinitionDto.cs
+- [class] **UpdateAttributeDefinitionDto**
+
+## Project: AttributeValue
+File: AttributeValueResponseDto.cs
+- [class] **AttributeValueResponseDto**
+
+## Project: AttributeValue
+File: CreateAttributeValueDto.cs
+- [class] **CreateAttributeValueDto**
+
+## Project: AttributeValue
+File: PartialUpdateAttributeValueDto.cs
+- [class] **PartialUpdateAttributeValueDto**
+
+## Project: AttributeValue
+File: UpdateAttributeValueDto.cs
+- [class] **UpdateAttributeValueDto**
+
+## Project: Entities
+File: AttributeDefinition.cs
+- [class] **AttributeDefinition** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: AttributeValue.cs
+- [class] **AttributeValue** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: AttributeValueRelationship.cs
+- [class] **AttributeValueRelationship** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: CrossAttributeConstraint.cs
+- [class] **CrossAttributeConstraint** : Inherits/Implements (IBaseEntity)
+
+## Project: Mappings
+File: AttributeMappingProfile.cs
+- [class] **AttributeMappingProfile** : Inherits/Implements (Profile)
+
+## Project: Validators
+File: CreateAttributeDefinitionValidator.cs
+- [class] **CreateAttributeDefinitionValidator** : Inherits/Implements (AbstractValidator<CreateAttributeDefinitionDto>)
+
+## Project: Validators
+File: CreateAttributeValueValidator.cs
+- [class] **CreateAttributeValueValidator** : Inherits/Implements (AbstractValidator<CreateAttributeValueDto>)
+
+## Project: Controllers
+File: AttributeDefinitionsController.cs
+- [class] **AttributeDefinitionsController** : Inherits/Implements (BaseCrudController<)
+
+## Project: Controllers
+File: AttributeRelationshipsController.cs
+- [class] **AttributeRelationshipsController** : Inherits/Implements (ControllerBase)
+- [class] **CreateRelationshipRequest**
+
+## Project: Controllers
+File: AttributeValuesController.cs
+- [class] **AttributeValuesController** : Inherits/Implements (BaseCrudController<)
+
+## Project: Controllers
+File: CrossAttributeConstraintsController.cs
+- [class] **CrossAttributeConstraintsController** : Inherits/Implements (ControllerBase)
+- [class] **CreateConstraintRequest**
+- [class] **ValidationResult**
+
+## Project: Conversion
+File: CurrencyConversionRequest.cs
+- [class] **CurrencyConversionRequest**
+
+## Project: Conversion
+File: CurrencyConversionResponse.cs
+- [class] **CurrencyConversionResponse**
+
+## Project: Currency
+File: CreateCurrencyDto.cs
+- [class] **CreateCurrencyDto**
+
+## Project: Currency
+File: CurrencyResponseDto.cs
+- [class] **CurrencyResponseDto**
+
+## Project: ExchangeRate
+File: CreateExchangeRateDto.cs
+- [class] **CreateExchangeRateDto**
+
+## Project: ExchangeRate
+File: ExchangeRateResponseDto.cs
+- [class] **ExchangeRateResponseDto**
+
+## Project: Entities
+File: Currency.cs
+- [class] **Currency** : Inherits/Implements (Unit)
+
+## Project: Entities
+File: ExchangeRate.cs
+- [class] **ExchangeRate** : Inherits/Implements (IBaseEntity)
+
+## Project: Services
+File: CurrencyConversionService.cs
+- [class] **CurrencyConversionService** : Inherits/Implements (ICurrencyConversionService)
+
+## Project: Services
+File: ICurrencyConversionService.cs
+- [interface] **ICurrencyConversionService**
+
+## Project: Validators
+File: CreateCurrencyValidator.cs
+- [class] **CreateCurrencyValidator** : Inherits/Implements (AbstractValidator<CreateCurrencyDto>)
+
+## Project: Validators
+File: CreateExchangeRateValidator.cs
+- [class] **CreateExchangeRateValidator** : Inherits/Implements (AbstractValidator<CreateExchangeRateDto>)
+
+## Project: Controllers
+File: CurrenciesController.cs
+- [class] **CurrenciesController** : Inherits/Implements (BaseCrudController<)
+- [class] **UpdateCurrencyDto**
+- [class] **PartialUpdateCurrencyDto**
+- [class] **FormatAmountRequest**
+
+## Project: Controllers
+File: CurrencyConversionsController.cs
+- [class] **CurrencyConversionsController** : Inherits/Implements (ControllerBase)
+- [class] **BatchCurrencyConversionRequest**
+
+## Project: Controllers
+File: ExchangeRatesController.cs
+- [class] **ExchangeRatesController** : Inherits/Implements (BaseCrudController<)
+- [class] **UpdateExchangeRateDto**
+- [class] **PartialUpdateExchangeRateDto**
+- [class] **UpdateRateRequest**
+
+## Project: Product
+File: CreateProductDto.cs
+- [class] **CreateProductDto**
+
+## Project: Product
+File: PartialUpdateProductDto.cs
+- [class] **PartialUpdateProductDto**
+
+## Project: Product
+File: ProductAttributeDto.cs
+- [class] **ProductAttributeDto**
+
+## Project: Product
+File: ProductBrandDto.cs
+- [class] **ProductBrandDto**
+
+## Project: Product
+File: ProductCategoryDto.cs
+- [class] **ProductCategoryDto**
+
+## Project: Product
+File: ProductDetailResponseDto.cs
+- [class] **ProductDetailResponseDto** : Inherits/Implements (ProductResponseDto)
+
+## Project: Product
+File: ProductInventoryDto.cs
+- [class] **ProductInventoryDto**
+
+## Project: Product
+File: ProductPriceDto.cs
+- [class] **ProductPriceDto**
+
+## Project: Product
+File: ProductResponseDto.cs
+- [class] **ProductResponseDto**
+
+## Project: Product
+File: ProductReviewSummaryDto.cs
+- [class] **ProductReviewSummaryDto**
+
+## Project: Product
+File: UpdateProductDto.cs
+- [class] **UpdateProductDto**
+
+## Project: ProductBrand
+File: CreateProductBrandDto.cs
+- [class] **CreateProductBrandDto**
+
+## Project: ProductBrand
+File: ProductBrandResponseDto.cs
+- [class] **ProductBrandResponseDto**
+
+## Project: ProductCategory
+File: CreateProductCategoryDto.cs
+- [class] **CreateProductCategoryDto**
+
+## Project: ProductCategory
+File: ProductCategoryResponseDto.cs
+- [class] **ProductCategoryResponseDto**
+
+## Project: ProductInventory
+File: CreateProductInventoryDto.cs
+- [class] **CreateProductInventoryDto**
+
+## Project: ProductInventory
+File: UpdateInventoryDto.cs
+- [class] **UpdateInventoryDto**
+
+## Project: ProductPrice
+File: CreateProductPriceDto.cs
+- [class] **CreateProductPriceDto**
+
+## Project: ProductReview
+File: CreateProductReviewDto.cs
+- [class] **CreateProductReviewDto**
+
+## Project: ProductReview
+File: ProductReviewResponseDto.cs
+- [class] **ProductReviewResponseDto**
+
+## Project: Entities
+File: Product.cs
+- [class] **Product** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: ProductAttribute.cs
+- [class] **ProductAttribute** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: ProductBrand.cs
+- [class] **ProductBrand** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: ProductBrandMapping.cs
+- [class] **ProductBrandMapping** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: ProductCategory.cs
+- [class] **ProductCategory** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: ProductCategoryMapping.cs
+- [class] **ProductCategoryMapping** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: ProductInventory.cs
+- [class] **ProductInventory** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: ProductPrice.cs
+- [class] **ProductPrice** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: ProductRelation.cs
+- [class] **ProductRelation** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: ProductReview.cs
+- [class] **ProductReview** : Inherits/Implements (IBaseEntity)
+
+## Project: Services
+File: IInventoryService.cs
+- [interface] **IInventoryService**
+
+## Project: Services
+File: IProductService.cs
+- [interface] **IProductService**
+
+## Project: Services
+File: ProductSearchRequest.cs
+- [class] **ProductSearchRequest**
+
+## Project: Services
+File: ProductService.cs
+- [class] **ProductService** : Inherits/Implements (IProductService)
+
+## Project: Validators
+File: CreateProductCategoryValidator.cs
+- [class] **CreateProductCategoryValidator** : Inherits/Implements (AbstractValidator<CreateProductCategoryDto>)
+
+## Project: Validators
+File: CreateProductPriceValidator.cs
+- [class] **CreateProductPriceValidator** : Inherits/Implements (AbstractValidator<CreateProductPriceDto>)
+
+## Project: Validators
+File: CreateProductReviewValidator.cs
+- [class] **CreateProductReviewValidator** : Inherits/Implements (AbstractValidator<CreateProductReviewDto>)
+
+## Project: Validators
+File: CreateProductValidator.cs
+- [class] **CreateProductValidator** : Inherits/Implements (AbstractValidator<CreateProductDto>)
+
+## Project: Controllers
+File: ProductBrandsController.cs
+- [class] **ProductBrandsController** : Inherits/Implements (BaseCrudController<)
+- [class] **UpdateProductBrandDto**
+- [class] **PartialUpdateProductBrandDto**
+
+## Project: Controllers
+File: ProductCategoriesController.cs
+- [class] **ProductCategoriesController** : Inherits/Implements (BaseCrudController<)
+- [class] **UpdateProductCategoryDto**
+- [class] **PartialUpdateProductCategoryDto**
+
+## Project: Controllers
+File: ProductInventoryController.cs
+- [class] **ProductInventoryController** : Inherits/Implements (ControllerBase)
+- [class] **StockAdjustmentRequest**
+- [class] **ReserveStockRequest**
+- [class] **ReleaseStockRequest**
+
+## Project: Controllers
+File: ProductPricesController.cs
+- [class] **ProductPricesController** : Inherits/Implements (BaseCrudController<)
+- [class] **UpdateProductPriceDto**
+- [class] **PartialUpdateProductPriceDto**
+
+## Project: Controllers
+File: ProductReviewsController.cs
+- [class] **ProductReviewsController** : Inherits/Implements (BaseCrudController<)
+- [class] **UpdateProductReviewDto**
+- [class] **PartialUpdateProductReviewDto**
+
+## Project: Controllers
+File: ProductsController.cs
+- [class] **ProductsController** : Inherits/Implements (BaseCrudController<)
+- [class] **AddCategoryRequest**
+- [class] **AddBrandRequest**
+- [class] **AddAttributeRequest**
+- [class] **AddRelatedProductRequest**
+
+## Project: Controllers
+File: SimpleCatalogController.cs
+- [class] **SimpleCatalogController** : Inherits/Implements (ControllerBase)
+- [class] **AddAttributeValueRequest**
+
+## Project: Controllers
+File: SimpleProductsController.cs
+- [class] **SimpleProductsController** : Inherits/Implements (ControllerBase)
+
+## Project: Controllers
+File: SimpleSetupController.cs
+- [class] **SimpleSetupController** : Inherits/Implements (ControllerBase)
+- [class] **AutoSetupRequest**
+- [class] **SetupResult**
+- [class] **CurrencyInfo**
+- [class] **UnitInfo**
+- [class] **SetupStatus**
+
+## Project: DTOs
+File: SimpleCategoryDto.cs
+- [class] **SimpleCategoryDto**
+- [class] **SimpleAttributeDto**
+- [class] **SimpleAttributeValueDto**
+- [class] **CreateSimpleCategoryRequest**
+- [class] **CreateSimpleAttributeRequest**
+
+## Project: DTOs
+File: SimpleProductDto.cs
+- [class] **SimpleProductDto**
+- [class] **CreateSimpleProductRequest**
+- [class] **UpdateSimpleProductRequest**
+
+## Project: Conversion
+File: ConversionRequest.cs
+- [class] **ConversionRequest**
+
+## Project: Conversion
+File: ConversionResponse.cs
+- [class] **ConversionResponse**
+
+## Project: MeasurementSystem
+File: CreateMeasurementSystemDto.cs
+- [class] **CreateMeasurementSystemDto**
+
+## Project: MeasurementSystem
+File: MeasurementSystemResponseDto.cs
+- [class] **MeasurementSystemResponseDto**
+
+## Project: Unit
+File: CreateUnitDto.cs
+- [class] **CreateUnitDto**
+
+## Project: Unit
+File: UnitResponseDto.cs
+- [class] **UnitResponseDto**
+
+## Project: Entities
+File: MeasurementCategory.cs
+- [class] **MeasurementCategory** : Inherits/Implements (AttributeDefinition)
+
+## Project: Entities
+File: MeasurementSystem.cs
+- [class] **MeasurementSystem** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: Unit.cs
+- [class] **Unit** : Inherits/Implements (AttributeDefinition)
+
+## Project: Entities
+File: UnitConversion.cs
+- [class] **UnitConversion** : Inherits/Implements (IBaseEntity)
+
+## Project: Services
+File: IUnitConversionService.cs
+- [interface] **IUnitConversionService**
+- [class] **UnitConversionService** : Inherits/Implements (IUnitConversionService)
+
+## Project: Validators
+File: CreateUnitValidator.cs
+- [class] **CreateUnitValidator** : Inherits/Implements (AbstractValidator<CreateUnitDto>)
+
+## Project: Controllers
+File: MeasurementCategoriesController.cs
+- [class] **MeasurementCategoriesController** : Inherits/Implements (BaseCrudController<)
+- [class] **CreateMeasurementCategoryDto**
+- [class] **UpdateMeasurementCategoryDto**
+- [class] **PartialUpdateMeasurementCategoryDto**
+- [class] **MeasurementCategoryResponseDto**
+
+## Project: Controllers
+File: MeasurementSystemsController.cs
+- [class] **MeasurementSystemsController** : Inherits/Implements (BaseCrudController<)
+- [class] **UpdateMeasurementSystemDto**
+- [class] **PartialUpdateMeasurementSystemDto**
+
+## Project: Controllers
+File: UnitConversionsController.cs
+- [class] **UnitConversionsController** : Inherits/Implements (ControllerBase)
+- [class] **BatchConversionRequest**
+
+## Project: Controllers
+File: UnitsController.cs
+- [class] **UnitsController** : Inherits/Implements (BaseCrudController<)
+- [class] **UpdateUnitDto**
+- [class] **PartialUpdateUnitDto**
+
+## Project: Controllers
+File: ChatsController.cs
+- [class] **ChatsController** : Inherits/Implements (BaseCrudController<)
+- [class] **UpdateChatDto**
+- [class] **PartialUpdateChatDto**
+- [class] **SendMessageRequest**
+
+## Project: Controllers
+File: ChatStatsController.cs
+- [class] **ChatStatsController** : Inherits/Implements (ControllerBase)
+- [class] **UserChatStats**
+- [class] **ChatStats**
+
+## Project: Entities
+File: Chat.cs
+- [class] **Chat** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: ChatParticipant.cs
+- [class] **ChatParticipant** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: Message.cs
+- [class] **Message** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: MessageRead.cs
+- [class] **MessageRead** : Inherits/Implements (IBaseEntity)
+
+## Project: EventHandlers
+File: MessageSentEventHandler.cs
+- [class] **MessageSentEventHandler** : Inherits/Implements (INotificationHandler<MessageSentEvent>)
+
+## Project: Hubs
+File: ChatHub.cs
+- [class] **ChatHub** : Inherits/Implements (BaseRealtimeHub<IChatClient>)
+- [interface] **IChatClient** : Inherits/Implements (IRealtimeClient)
+
+## Project: Providers
+File: DatabaseChatProvider.cs
+- [class] **DatabaseChatProvider** : Inherits/Implements (IChatProvider)
+
+## Project: Providers
+File: DatabaseMessageProvider.cs
+- [class] **DatabaseMessageProvider** : Inherits/Implements (IMessageProvider)
+
+## Project: Providers
+File: InMemoryPresenceProvider.cs
+- [class] **InMemoryPresenceProvider** : Inherits/Implements (IPresenceProvider)
+
+## Project: Providers
+File: SignalRRealtimeChatProvider.cs
+- [class] **SignalRRealtimeChatProvider** : Inherits/Implements (IRealtimeChatProvider)
+
+## Project: Options
+File: EmailOptions.cs
+- [class] **EmailOptions**
+
+## Project: Services
+File: EmailTemplateService.cs
+- [class] **EmailTemplateService**
+
+## Project: ACommerce.Notifications.Channels.Email
+File: EmailNotificationChannel.cs
+- [class] **EmailNotificationChannel** : Inherits/Implements (INotificationChannel)
+
+## Project: Models
+File: FirebaseDeviceToken.cs
+- [class] **FirebaseDeviceToken**
+- [class] **CustomBatchResponse**
+
+## Project: Options
+File: FirebaseOptions.cs
+- [class] **FirebaseOptions**
+
+## Project: Services
+File: FirebaseMessagingService.cs
+- [class] **FirebaseMessagingService**
+
+## Project: Storage
+File: IFirebaseTokenStore.cs
+- [interface] **IFirebaseTokenStore**
+
+## Project: Storage
+File: InMemoryFirebaseTokenStore.cs
+- [class] **InMemoryFirebaseTokenStore** : Inherits/Implements (IFirebaseTokenStore)
+
+## Project: ACommerce.Notifications.Channels.Firebase
+File: FirebaseNotificationChannel.cs
+- [class] **FirebaseNotificationChannel** : Inherits/Implements (INotificationChannel)
+
+## Project: Options
+File: InAppNotificationOptions.cs
+- [class] **InAppNotificationOptions**
+
+## Project: Services
+File: InAppNotificationService.cs
+- [class] **InAppNotificationService**
+
+## Project: ACommerce.Notifications.Channels.InApp
+File: InAppNotificationChannel.cs
+- [class] **InAppNotificationChannel** : Inherits/Implements (INotificationChannel)
+
+## Project: Options
+File: NotificationOptions.cs
+- [class] **NotificationOptions**
+
+## Project: Publishers
+File: HttpNotificationPublisher.cs
+- [class] **HttpNotificationPublisher** : Inherits/Implements (INotificationPublisher)
+- [class] **HttpNotificationPublisherOptions**
+
+## Project: Publishers
+File: InMemoryNotificationPublisher.cs
+- [class] **InMemoryNotificationPublisher** : Inherits/Implements (INotificationPublisher)
+
+## Project: Services
+File: NotificationService.cs
+- [class] **NotificationService** : Inherits/Implements (INotificationService)
+
+## Project: Storage
+File: INotificationStore.cs
+- [interface] **INotificationStore**
+
+## Project: Workers
+File: NotificationRetryWorker.cs
+- [class] **NotificationRetryWorker** : Inherits/Implements (BackgroundService)
+
+## Project: ContactPoint
+File: ContactPointResponseDto.cs
+- [class] **ContactPointResponseDto**
+
+## Project: ContactPoint
+File: CreateContactPointDto.cs
+- [class] **CreateContactPointDto**
+
+## Project: ContactPoint
+File: PartialUpdateContactPointDto.cs
+- [class] **PartialUpdateContactPointDto**
+
+## Project: ContactPoint
+File: UpdateContactPointDto.cs
+- [class] **UpdateContactPointDto**
+
+## Project: RecipientGroup
+File: CreateRecipientGroupDto.cs
+- [class] **CreateRecipientGroupDto**
+
+## Project: RecipientGroup
+File: PartialUpdateRecipientGroupDto.cs
+- [class] **PartialUpdateRecipientGroupDto**
+
+## Project: RecipientGroup
+File: RecipientGroupResponseDto.cs
+- [class] **RecipientGroupResponseDto**
+
+## Project: RecipientGroup
+File: UpdateRecipientGroupDto.cs
+- [class] **UpdateRecipientGroupDto**
+
+## Project: UserRecipient
+File: CreateUserRecipientDto.cs
+- [class] **CreateUserRecipientDto**
+
+## Project: UserRecipient
+File: PartialUpdateUserRecipientDto.cs
+- [class] **PartialUpdateUserRecipientDto**
+
+## Project: UserRecipient
+File: UpdateUserRecipientDto.cs
+- [class] **UpdateUserRecipientDto**
+
+## Project: UserRecipient
+File: UserRecipientResponseDto.cs
+- [class] **UserRecipientResponseDto**
+
+## Project: Entities
+File: ContactPoint.cs
+- [class] **ContactPoint** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: RecipientGroup.cs
+- [class] **RecipientGroup** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: UserRecipient.cs
+- [class] **UserRecipient** : Inherits/Implements (IBaseEntity)
+
+## Project: Mappings
+File: RecipientMappingProfile.cs
+- [class] **RecipientMappingProfile** : Inherits/Implements (Profile)
+
+## Project: Validators
+File: CreateContactPointValidator.cs
+- [class] **CreateContactPointValidator** : Inherits/Implements (AbstractValidator<CreateContactPointDto>)
+
+## Project: Validators
+File: CreateRecipientGroupValidator.cs
+- [class] **CreateRecipientGroupValidator** : Inherits/Implements (AbstractValidator<CreateRecipientGroupDto>)
+
+## Project: Validators
+File: CreateUserRecipientValidator.cs
+- [class] **CreateUserRecipientValidator** : Inherits/Implements (AbstractValidator<CreateUserRecipientDto>)
+
+## Project: Controllers
+File: ContactPointsController.cs
+- [class] **ContactPointsController** : Inherits/Implements (BaseCrudController<)
+
+## Project: Controllers
+File: RecipientGroupsController.cs
+- [class] **RecipientGroupsController** : Inherits/Implements (BaseCrudController<)
+
+## Project: Controllers
+File: RecipientsController.cs
+- [class] **RecipientsController** : Inherits/Implements (BaseCrudController<)
+
+## Project: Hubs
+File: BaseRealtimeHub.cs
+- [abstract class] **BaseRealtimeHub**
+
+## Project: Services
+File: SignalRRealtimeHub.cs
+- [class] **SignalRRealtimeHub**
+
+## Project: DocumentOperation
+File: CreateDocumentOperationDto.cs
+- [class] **CreateDocumentOperationDto**
+
+## Project: DocumentType
+File: CreateDocumentTypeDto.cs
+- [class] **CreateDocumentTypeDto**
+
+## Project: DocumentType
+File: DocumentTypeResponseDto.cs
+- [class] **DocumentTypeResponseDto**
+
+## Project: DocumentTypeRelation
+File: CreateDocumentTypeRelationDto.cs
+- [class] **CreateDocumentTypeRelationDto**
+
+## Project: OperationNotification
+File: CreateOperationNotificationDto.cs
+- [class] **CreateOperationNotificationDto**
+
+## Project: Entities
+File: DocumentOperation.cs
+- [class] **DocumentOperation** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: DocumentType.cs
+- [class] **DocumentType** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: DocumentTypeAttribute.cs
+- [class] **DocumentTypeAttribute** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: DocumentTypeRelation.cs
+- [class] **DocumentTypeRelation** : Inherits/Implements (IBaseEntity)
+
+## Project: Entities
+File: OperationNotification.cs
+- [class] **OperationNotification** : Inherits/Implements (IBaseEntity)
+
+## Project: Validators
+File: CreateDocumentOperationValidator.cs
+- [class] **CreateDocumentOperationValidator** : Inherits/Implements (AbstractValidator<CreateDocumentOperationDto>)
+
+## Project: Validators
+File: CreateDocumentTypeValidator.cs
+- [class] **CreateDocumentTypeValidator** : Inherits/Implements (AbstractValidator<CreateDocumentTypeDto>)
+
+## Project: Controllers
+File: DocumentOperationsController.cs
+- [class] **DocumentOperationsController** : Inherits/Implements (BaseCrudController<)
+- [class] **UpdateDocumentOperationDto**
+- [class] **PartialUpdateDocumentOperationDto**
+- [class] **OperationNotificationResponseDto**
+
+## Project: Controllers
+File: DocumentTypeRelationsController.cs
+- [class] **DocumentTypeRelationsController** : Inherits/Implements (BaseCrudController<)
+- [class] **UpdateDocumentTypeRelationDto**
+- [class] **PartialUpdateDocumentTypeRelationDto**
+
+## Project: Controllers
+File: DocumentTypesController.cs
+- [class] **DocumentTypesController** : Inherits/Implements (BaseCrudController<)
+- [class] **UpdateDocumentTypeDto**
+- [class] **PartialUpdateDocumentTypeDto**
+- [class] **DocumentOperationResponseDto**
+- [class] **DocumentTypeAttributeResponseDto**
+- [class] **DocumentTypeRelationResponseDto**
+
+## Project: Controllers
+File: OperationNotificationsController.cs
+- [class] **OperationNotificationsController** : Inherits/Implements (BaseCrudController<)
+- [class] **UpdateOperationNotificationDto**
+- [class] **PartialUpdateOperationNotificationDto**
+---
+### End of Report ###

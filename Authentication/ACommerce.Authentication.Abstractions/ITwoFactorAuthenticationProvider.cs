@@ -1,3 +1,5 @@
+﻿using ACommerce.Authentication.Abstractions.Contracts;
+
 namespace ACommerce.Authentication.Abstractions;
 
 /// <summary>
@@ -30,5 +32,8 @@ public interface ITwoFactorAuthenticationProvider
 	Task<bool> CancelAsync(
 		string transactionId,
 		CancellationToken cancellationToken = default);
+
+    // ✅ إضافة EventPublisher (optional)
+    void SetEventPublisher(IAuthenticationEventPublisher? publisher);
 }
 

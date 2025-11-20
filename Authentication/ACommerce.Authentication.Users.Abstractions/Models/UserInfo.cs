@@ -22,4 +22,3 @@ public record UserInfo
 	public Dictionary<string, string> Claims { get; init; } = new();
 	public Dictionary<string, string> Metadata { get; init; } = new();
 }
-

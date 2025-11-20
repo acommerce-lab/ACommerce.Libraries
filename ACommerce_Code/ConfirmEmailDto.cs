@@ -1,0 +1,21 @@
+// DTOs/Users/ConfirmEmailDto.cs
+namespace ACommerce.Authentication.AspNetCore.DTOs.Users;
+
+// DTOs/Users/ConfirmEmailDto.cs
+/// <summary>
+/// DTO ?????? ?????? ??????????
+/// </summary>
+public class ConfirmEmailDto
+{
+	/// <summary>
+	/// ???? ????????
+	/// </summary>
+	public required string UserId { get; init; }
+
+	/// <summary>
+	/// ??? ???????
+	/// </summary>
+	public required string Token { get; init; }
+}
+
+

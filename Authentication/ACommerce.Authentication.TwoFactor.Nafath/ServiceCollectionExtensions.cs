@@ -1,5 +1,6 @@
-// ACommerce.Authentication.TwoFactor.Nafath/ServiceCollectionExtensions.cs
+﻿// ACommerce.Authentication.TwoFactor.Nafath/ServiceCollectionExtensions.cs
 using ACommerce.Authentication.Abstractions;
+using ACommerce.Authentication.Abstractions.Contracts;
 using ACommerce.Authentication.TwoFactor.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -60,7 +61,16 @@ public static class ServiceCollectionExtensions
 		// Provider
 		services.AddScoped<ITwoFactorAuthenticationProvider, NafathAuthenticationProvider>();
 
-		return services;
+        // ✅ Register event publisher if IMessagePublisher is available
+        services.AddScoped<IAuthenticationEventPublisher>(sp =>
+        {
+            var messagePublisher = sp.GetService<IMessagePublisher>();
+            return messagePublisher != null
+                ? new MessagingAuthenticationEventPublisher(messagePublisher)
+                : new NullAuthenticationEventPublisher();
+        });
+
+        return services;
 	}
 }
 
