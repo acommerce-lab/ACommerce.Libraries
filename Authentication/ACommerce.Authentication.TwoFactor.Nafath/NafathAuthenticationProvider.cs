@@ -1,28 +1,21 @@
 ﻿using ACommerce.Authentication.Abstractions;
 using ACommerce.Authentication.Abstractions.Contracts;
 using ACommerce.Authentication.TwoFactor.Abstractions;
+using ACommerce.Authentication.TwoFactor.Abstractions.Events;
+using Microsoft.AspNetCore.Session;
 using Microsoft.Extensions.Logging;
 
 namespace ACommerce.Authentication.TwoFactor.Nafath;
 
-public class NafathAuthenticationProvider : ITwoFactorAuthenticationProvider
+public class NafathAuthenticationProvider(
+    INafathApiClient apiClient,
+    ITwoFactorSessionStore sessionStore,
+    ILogger<NafathAuthenticationProvider> logger)
+    : ITwoFactorAuthenticationProvider
 {
-    private readonly INafathApiClient _apiClient;
-    private readonly ITwoFactorSessionStore _sessionStore;
-    private readonly ILogger<NafathAuthenticationProvider> _logger;
     private IAuthenticationEventPublisher? _eventPublisher;
 
     public string ProviderName => "Nafath";
-
-    public NafathAuthenticationProvider(
-        INafathApiClient apiClient,
-        ITwoFactorSessionStore sessionStore,
-        ILogger<NafathAuthenticationProvider> logger)
-    {
-        _apiClient = apiClient;
-        _sessionStore = sessionStore;
-        _logger = logger;
-    }
 
     public void SetEventPublisher(IAuthenticationEventPublisher? publisher)
     {
@@ -35,7 +28,7 @@ public class NafathAuthenticationProvider : ITwoFactorAuthenticationProvider
     {
         try
         {
-            var nafathResponse = await _apiClient.InitiateAuthenticationAsync(
+            var nafathResponse = await apiClient.InitiateAuthenticationAsync(
                 request.Identifier,
                 cancellationToken);
 
@@ -61,7 +54,7 @@ public class NafathAuthenticationProvider : ITwoFactorAuthenticationProvider
                 Metadata = request.Metadata
             };
 
-            await _sessionStore.CreateSessionAsync(session, cancellationToken);
+            await sessionStore.CreateSessionAsync(session, cancellationToken);
 
             return TwoFactorInitiationResult.Ok(
                 session.TransactionId,
@@ -72,7 +65,7 @@ public class NafathAuthenticationProvider : ITwoFactorAuthenticationProvider
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to initiate Nafath");
+            logger.LogError(ex, "Failed to initiate Nafath");
             return TwoFactorInitiationResult.Fail(new()
             {
                 Code = "INITIATION_FAILED",
@@ -88,7 +81,7 @@ public class NafathAuthenticationProvider : ITwoFactorAuthenticationProvider
     {
         try
         {
-            var session = await _sessionStore.GetSessionAsync(
+            var session = await sessionStore.GetSessionAsync(
                 request.TransactionId,
                 cancellationToken);
 
@@ -117,14 +110,14 @@ public class NafathAuthenticationProvider : ITwoFactorAuthenticationProvider
                 });
             }
 
-            var statusResponse = await _apiClient.CheckStatusAsync(
+            var statusResponse = await apiClient.CheckStatusAsync(
                 request.TransactionId,
                 cancellationToken);
 
             if (statusResponse.IsCompleted)
             {
                 session = session with { Status = TwoFactorSessionStatus.Verified };
-                await _sessionStore.UpdateSessionAsync(session, cancellationToken);
+                await sessionStore.UpdateSessionAsync(session, cancellationToken);
                 return TwoFactorVerificationResult.Ok(request.TransactionId);
             }
 
@@ -137,7 +130,7 @@ public class NafathAuthenticationProvider : ITwoFactorAuthenticationProvider
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to verify");
+            logger.LogError(ex, "Failed to verify");
             return TwoFactorVerificationResult.Fail(new()
             {
                 Message = ex.Message,
@@ -153,7 +146,7 @@ public class NafathAuthenticationProvider : ITwoFactorAuthenticationProvider
     {
         try
         {
-            var session = await _sessionStore.GetSessionAsync(
+            var session = await sessionStore.GetSessionAsync(
                 transactionId,
                 cancellationToken);
 
@@ -161,39 +154,88 @@ public class NafathAuthenticationProvider : ITwoFactorAuthenticationProvider
                 return false;
 
             session = session with { Status = TwoFactorSessionStatus.Cancelled };
-            await _sessionStore.UpdateSessionAsync(session, cancellationToken);
+            await sessionStore.UpdateSessionAsync(session, cancellationToken);
             return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to cancel");
+            logger.LogError(ex, "Failed to cancel");
             return false;
         }
     }
 
     public async Task<bool> HandleWebhookAsync(
-        NafathWebhookRequest request,
-        CancellationToken cancellationToken = default)
+    NafathWebhookRequest request,
+    CancellationToken cancellationToken = default)
     {
         try
         {
-            var session = await _sessionStore.GetSessionAsync(
+            var session = await sessionStore.GetSessionAsync(
                 request.TransactionId,
                 cancellationToken);
 
             if (session == null)
+            {
+                logger.LogWarning(
+                    "Received webhook for unknown transaction: {TransactionId}",
+                    request.TransactionId);
                 return false;
+            }
 
+            // Update session based on webhook
             var newStatus = request.Status == "COMPLETED"
                 ? TwoFactorSessionStatus.Verified
                 : TwoFactorSessionStatus.Failed;
 
             session = session with { Status = newStatus };
-            await _sessionStore.UpdateSessionAsync(session, cancellationToken);
+            await sessionStore.UpdateSessionAsync(session, cancellationToken);
+
+            logger.LogInformation(
+                "Nafath webhook processed - TransactionId: {TransactionId}, Status: {Status}",
+                request.TransactionId,
+                request.Status);
+
+            // ✅ Publish events if publisher is available
+            if (_eventPublisher != null)
+            {
+                if (newStatus == TwoFactorSessionStatus.Verified)
+                {
+                    await _eventPublisher.PublishAsync(
+                        new TwoFactorSucceededEvent
+                        {
+                            TransactionId = request.TransactionId,
+                            Identifier = request.NationalId,
+                            Provider = ProviderName
+                        },
+                        cancellationToken);
+
+                    logger.LogInformation(
+                        "Published TwoFactorSucceededEvent for {TransactionId}",
+                        request.TransactionId);
+                }
+                else
+                {
+                    await _eventPublisher.PublishAsync(
+                        new TwoFactorFailedEvent
+                        {
+                            TransactionId = request.TransactionId,
+                            Identifier = request.NationalId,
+                            Provider = ProviderName,
+                            Reason = request.Status
+                        },
+                        cancellationToken);
+
+                    logger.LogInformation(
+                        "Published TwoFactorFailedEvent for {TransactionId}",
+                        request.TransactionId);
+                }
+            }
+
             return true;
         }
-        catch
+        catch (Exception ex)
         {
+            logger.LogError(ex, "Failed to process Nafath webhook");
             return false;
         }
     }
