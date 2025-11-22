@@ -51,7 +51,8 @@ public class NafathAuthenticationProvider(
                 CreatedAt = DateTimeOffset.UtcNow,
                 ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(5),
                 Status = TwoFactorSessionStatus.Pending,
-                Metadata = request.Metadata
+                Metadata = request.Metadata,
+                VerificationCode = nafathResponse.VerificationCode, // ✅ حفظ الكود
             };
 
             await sessionStore.CreateSessionAsync(session, cancellationToken);
@@ -60,6 +61,7 @@ public class NafathAuthenticationProvider(
                 session.TransactionId,
                 new Dictionary<string, string>
                 {
+                    ["verificationCode"] = nafathResponse.VerificationCode ?? "",
                     ["expiresAt"] = session.ExpiresAt.ToString("o")
                 });
         }

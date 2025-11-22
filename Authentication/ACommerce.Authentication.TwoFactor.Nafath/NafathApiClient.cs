@@ -132,11 +132,13 @@ public class NafathApiClient : INafathApiClient
         await Task.Delay(100, cancellationToken);
 
         var transactionId = Guid.NewGuid().ToString();
+        var verificationCode = "00"; // Nafath Test Code
 
         return new NafathInitiationResponse
         {
             Success = true,
-            TransactionId = transactionId
+            TransactionId = transactionId,
+            VerificationCode = verificationCode // ✅ إرجاع الكود
         };
     }
 
@@ -199,7 +201,8 @@ public class NafathApiClient : INafathApiClient
             return new NafathInitiationResponse
             {
                 Success = true,
-                TransactionId = result.Data.TransactionId
+                TransactionId = result.Data.TransactionId,
+                VerificationCode = result.Data.Code // ✅ من Production API
             };
         }
         catch (Exception ex)

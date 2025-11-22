@@ -17,6 +17,7 @@ public record NafathInitiationResponse
 {
     public bool Success { get; init; }
     public string? TransactionId { get; init; }
+    public string? VerificationCode { get; init; } // ✅ أضف هذا
     public TwoFactorError? Error { get; init; }
 }
 
