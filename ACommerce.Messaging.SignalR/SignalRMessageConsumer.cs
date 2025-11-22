@@ -242,4 +242,29 @@ public class SignalRMessageConsumer : IMessageConsumer, IAsyncDisposable
         public required Type MessageType { get; init; }
         public required Func<string, MessageMetadata, Task<bool>> Handler { get; init; }
     }
+
+    public async Task UnsubscribeAsync(
+    string topic,
+    CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // إزالة جميع الـ handlers لهذا الـ topic
+            _handlers.TryRemove(topic, out _);
+
+            // إلغاء الاشتراك من الـ Hub
+            await _connection.InvokeAsync("UnsubscribeFromTopic", topic, cancellationToken);
+
+            _logger.LogInformation(
+                "[SignalR Consumer] 🚫 Unsubscribed from topic '{Topic}'",
+                topic);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "[SignalR Consumer] 💥 Failed to unsubscribe from topic '{Topic}'",
+                topic);
+            throw;
+        }
+    }
 }
