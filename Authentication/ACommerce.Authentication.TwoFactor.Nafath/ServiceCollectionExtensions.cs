@@ -32,7 +32,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<INafathApiClient, NafathApiClient>();
 
         // Session Store (In-Memory للتطوير - استبدل بـ Redis للإنتاج)
-        services.AddScoped<ITwoFactorSessionStore, InMemoryTwoFactorSessionStore>();
+        //services.AddSingleton<ITwoFactorSessionStore, InMemoryTwoFactorSessionStore>();
 
         // ✅ Provider مع EventPublisher
         services.AddScoped<ITwoFactorAuthenticationProvider>(sp =>

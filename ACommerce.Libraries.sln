@@ -131,6 +131,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.Notifications.Mes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.Messaging.SignalR.Hub", "ACommerce.Messaging.SignalR.Hub\ACommerce.Messaging.SignalR.Hub.csproj", "{680A799E-A019-48A1-9705-7CD8E1BEFF4A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.Authentication.TwoFactor.SessionStore.InMemory", "ACommerce.Authentication.TwoFactor.SessionStore.InMemory\ACommerce.Authentication.TwoFactor.SessionStore.InMemory.csproj", "{99BCC2F3-E0D3-4A58-9A64-A642178B6589}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.Authentication.TwoFactor.SessionStore.EntityFramework", "ACommerce.Authentication.TwoFactor.SessionStore.EntityFramework\ACommerce.Authentication.TwoFactor.SessionStore.EntityFramework.csproj", "{30558812-BA85-4FA3-91FC-C3B49E50882E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -801,6 +805,30 @@ Global
 		{680A799E-A019-48A1-9705-7CD8E1BEFF4A}.Release|x64.Build.0 = Release|Any CPU
 		{680A799E-A019-48A1-9705-7CD8E1BEFF4A}.Release|x86.ActiveCfg = Release|Any CPU
 		{680A799E-A019-48A1-9705-7CD8E1BEFF4A}.Release|x86.Build.0 = Release|Any CPU
+		{99BCC2F3-E0D3-4A58-9A64-A642178B6589}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99BCC2F3-E0D3-4A58-9A64-A642178B6589}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99BCC2F3-E0D3-4A58-9A64-A642178B6589}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{99BCC2F3-E0D3-4A58-9A64-A642178B6589}.Debug|x64.Build.0 = Debug|Any CPU
+		{99BCC2F3-E0D3-4A58-9A64-A642178B6589}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{99BCC2F3-E0D3-4A58-9A64-A642178B6589}.Debug|x86.Build.0 = Debug|Any CPU
+		{99BCC2F3-E0D3-4A58-9A64-A642178B6589}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99BCC2F3-E0D3-4A58-9A64-A642178B6589}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99BCC2F3-E0D3-4A58-9A64-A642178B6589}.Release|x64.ActiveCfg = Release|Any CPU
+		{99BCC2F3-E0D3-4A58-9A64-A642178B6589}.Release|x64.Build.0 = Release|Any CPU
+		{99BCC2F3-E0D3-4A58-9A64-A642178B6589}.Release|x86.ActiveCfg = Release|Any CPU
+		{99BCC2F3-E0D3-4A58-9A64-A642178B6589}.Release|x86.Build.0 = Release|Any CPU
+		{30558812-BA85-4FA3-91FC-C3B49E50882E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30558812-BA85-4FA3-91FC-C3B49E50882E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30558812-BA85-4FA3-91FC-C3B49E50882E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{30558812-BA85-4FA3-91FC-C3B49E50882E}.Debug|x64.Build.0 = Debug|Any CPU
+		{30558812-BA85-4FA3-91FC-C3B49E50882E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{30558812-BA85-4FA3-91FC-C3B49E50882E}.Debug|x86.Build.0 = Debug|Any CPU
+		{30558812-BA85-4FA3-91FC-C3B49E50882E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30558812-BA85-4FA3-91FC-C3B49E50882E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30558812-BA85-4FA3-91FC-C3B49E50882E}.Release|x64.ActiveCfg = Release|Any CPU
+		{30558812-BA85-4FA3-91FC-C3B49E50882E}.Release|x64.Build.0 = Release|Any CPU
+		{30558812-BA85-4FA3-91FC-C3B49E50882E}.Release|x86.ActiveCfg = Release|Any CPU
+		{30558812-BA85-4FA3-91FC-C3B49E50882E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -861,6 +889,8 @@ Global
 		{378D3EE9-D492-4772-A0FB-41ECF13F6F93} = {A36FAAB1-3B70-FACF-6B1E-E7138A3CFC44}
 		{9F8615A7-12BE-4800-9AC1-A678739629E4} = {A36FAAB1-3B70-FACF-6B1E-E7138A3CFC44}
 		{680A799E-A019-48A1-9705-7CD8E1BEFF4A} = {A36FAAB1-3B70-FACF-6B1E-E7138A3CFC44}
+		{99BCC2F3-E0D3-4A58-9A64-A642178B6589} = {A36FAAB1-3B70-FACF-6B1E-E7138A3CFC44}
+		{30558812-BA85-4FA3-91FC-C3B49E50882E} = {A36FAAB1-3B70-FACF-6B1E-E7138A3CFC44}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2335E803-317D-466A-9117-E446644730F7}
