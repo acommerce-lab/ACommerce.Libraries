@@ -13,25 +13,18 @@ namespace ACommerce.Notifications.Channels.Email;
 /// <summary>
 /// ???? ????? ????????? ??? ?????? ??????????
 /// </summary>
-public class EmailNotificationChannel : INotificationChannel
+public class EmailNotificationChannel(
+    EmailOptions options,
+    EmailTemplateService templateService,
+    ILogger<EmailNotificationChannel> logger) : INotificationChannel
 {
-	private readonly EmailOptions _options;
-	private readonly EmailTemplateService _templateService;
-	private readonly ILogger<EmailNotificationChannel> _logger;
+	private readonly EmailOptions _options = options ?? throw new ArgumentNullException(nameof(options));
+	private readonly EmailTemplateService _templateService = templateService ?? throw new ArgumentNullException(nameof(templateService));
+	private readonly ILogger<EmailNotificationChannel> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 	public NotificationChannel Channel => NotificationChannel.Email;
 
-	public EmailNotificationChannel(
-		EmailOptions options,
-		EmailTemplateService templateService,
-		ILogger<EmailNotificationChannel> logger)
-	{
-		_options = options ?? throw new ArgumentNullException(nameof(options));
-		_templateService = templateService ?? throw new ArgumentNullException(nameof(templateService));
-		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
-
-	public async Task<NotificationResult> SendAsync(
+    public async Task<NotificationResult> SendAsync(
 		Notification notification,
 		CancellationToken cancellationToken = default)
 	{
