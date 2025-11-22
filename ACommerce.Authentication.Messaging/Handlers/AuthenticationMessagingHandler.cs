@@ -1,81 +1,107 @@
-﻿using ACommerce.Authentication.TwoFactor.Abstractions.Events;
+﻿using ACommerce.Authentication.Messaging.Commands;
+using ACommerce.Authentication.Messaging.Options;
+using ACommerce.Authentication.TwoFactor.Abstractions.Events;
 using ACommerce.Messaging.Abstractions.Contracts;
 using ACommerce.Messaging.Abstractions.Models;
+using ACommerce.Notifications.Abstractions.Enums;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ACommerce.Authentication.Messaging.Handlers;
 
-/// <summary>
-/// Background service that listens to authentication events and publishes notifications
-/// </summary>
-public class AuthenticationMessagingHandler(
-    IMessageConsumer consumer,
-    IMessagePublisher publisher,
-    ILogger<AuthenticationMessagingHandler> logger) : BackgroundService
+public class AuthenticationMessagingHandler : BackgroundService
 {
+    private readonly IMessageConsumer _consumer;
+    private readonly IMessagePublisher _publisher;
+    private readonly ILogger<AuthenticationMessagingHandler> _logger;
+    private readonly AuthenticationMessagingOptions _options;
+
+    public AuthenticationMessagingHandler(
+        IMessageConsumer consumer,
+        IMessagePublisher publisher,
+        ILogger<AuthenticationMessagingHandler> logger,
+        IOptions<AuthenticationMessagingOptions> options)
+    {
+        _consumer = consumer;
+        _publisher = publisher;
+        _logger = logger;
+        _options = options.Value;
+    }
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("[Auth Messaging] 🎧 Starting authentication messaging handler");
+        _logger.LogInformation(
+            "[Auth Messaging] 🎧 Starting handler with channels: {Channels}",
+            string.Join(", ", _options.NotificationChannels));
 
-        // ✅ Listen to TwoFactorSucceeded events
-        await consumer.SubscribeAsync<TwoFactorSucceededEvent>(
-            "auth.events.authentication.twofactorsucceeded",
-            HandleTwoFactorSucceeded,
-            stoppingToken);
+        // Subscribe based on configuration
+        if (_options.NotifyOnSuccess)
+        {
+            await _consumer.SubscribeAsync<TwoFactorSucceededEvent>(
+                "auth.events.authentication.twofactorsucceeded",
+                HandleSucceeded,
+                stoppingToken);
+        }
 
-        // ✅ Listen to TwoFactorFailed events
-        await consumer.SubscribeAsync<TwoFactorFailedEvent>(
-            "auth.events.authentication.twofactorfailed",
-            HandleTwoFactorFailed,
-            stoppingToken);
+        if (_options.NotifyOnFailure)
+        {
+            await _consumer.SubscribeAsync<TwoFactorFailedEvent>(
+                "auth.events.authentication.twofactorfailed",
+                HandleFailed,
+                stoppingToken);
+        }
 
-        // ✅ Listen to TwoFactorInitiated events
-        await consumer.SubscribeAsync<TwoFactorInitiatedEvent>(
-            "auth.events.authentication.twofactorinitiated",
-            HandleTwoFactorInitiated,
-            stoppingToken);
+        if (_options.NotifyOnInitiation)
+        {
+            await _consumer.SubscribeAsync<TwoFactorInitiatedEvent>(
+                "auth.events.authentication.twofactorinitiated",
+                HandleInitiated,
+                stoppingToken);
+        }
 
-        // ✅ Listen to TwoFactorExpired events
-        await consumer.SubscribeAsync<TwoFactorExpiredEvent>(
-            "auth.events.authentication.twofactorexpired",
-            HandleTwoFactorExpired,
-            stoppingToken);
+        if (_options.NotifyOnExpiration)
+        {
+            await _consumer.SubscribeAsync<TwoFactorExpiredEvent>(
+                "auth.events.authentication.twofactorexpired",
+                HandleExpired,
+                stoppingToken);
+        }
 
-        logger.LogInformation("[Auth Messaging] ✅ Authentication messaging handler started");
+        _logger.LogInformation("[Auth Messaging] ✅ Handler started");
 
-        // Keep running
         await Task.Delay(Timeout.Infinite, stoppingToken);
     }
 
-    private async Task<bool> HandleTwoFactorSucceeded(
+    private async Task<bool> HandleSucceeded(
         TwoFactorSucceededEvent evt,
         MessageMetadata metadata)
     {
         try
         {
-            logger.LogInformation(
-                "[Auth Messaging] ✅ 2FA succeeded for {Identifier}, publishing notification",
+            _logger.LogInformation(
+                "[Auth Messaging] ✅ 2FA succeeded for {Identifier}",
                 evt.Identifier);
 
-            // Publish notification command
-            await publisher.PublishAsync(
-                new
-                {
-                    UserId = evt.Identifier,
-                    Title = "تم تسجيل الدخول بنجاح",
-                    Message = $"تم التحقق من هويتك عبر {evt.Provider} بنجاح",
-                    Type = 5, // SecurityAlert
-                    Priority = 2, // High
-                    Channels = new[] { 2 }, // Email
-                    Data = new Dictionary<string, object>
-                    {
-                        ["transactionId"] = evt.TransactionId,
-                        ["provider"] = evt.Provider,
-                        ["timestamp"] = evt.OccurredAt,
-                        ["email"] = evt.Identifier
-                    }
-                },
+            var title = _options.TitleTemplates?.GetValueOrDefault("TwoFactorSucceeded")
+                ?? "تم تسجيل الدخول بنجاح";
+
+            var message = _options.MessageTemplates?.GetValueOrDefault("TwoFactorSucceeded")
+                ?? $"تم التحقق من هويتك عبر {evt.Provider} بنجاح";
+
+            var command = new SendNotificationCommand
+            {
+                UserId = evt.Identifier,
+                Title = title,
+                Message = message,
+                Type = NotificationType.SecurityAlert,
+                Priority = _options.SuccessPriority,
+                Channels = _options.NotificationChannels,
+                Data = BuildEventData(evt)
+            };
+
+            await _publisher.PublishAsync(
+                command,
                 topic: TopicNames.Command("notify", "send"),
                 metadata: metadata with { SourceService = "auth" },
                 CancellationToken.None);
@@ -84,39 +110,41 @@ public class AuthenticationMessagingHandler(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex,
-                "[Auth Messaging] 💥 Failed to handle TwoFactorSucceeded event");
+            _logger.LogError(ex, "[Auth Messaging] Failed to handle TwoFactorSucceeded");
             return false;
         }
     }
 
-    private async Task<bool> HandleTwoFactorFailed(
+    private async Task<bool> HandleFailed(
         TwoFactorFailedEvent evt,
         MessageMetadata metadata)
     {
         try
         {
-            logger.LogWarning(
-                "[Auth Messaging] ⚠️ 2FA failed for {Identifier}, publishing alert",
-                evt.Identifier);
+            _logger.LogWarning(
+                "[Auth Messaging] ⚠️ 2FA failed for {Identifier}: {Reason}",
+                evt.Identifier,
+                evt.Reason);
 
-            await publisher.PublishAsync(
-                new
-                {
-                    UserId = evt.Identifier,
-                    Title = "فشل التحقق من الهوية",
-                    Message = $"فشلت محاولة التحقق من هويتك: {evt.Reason}",
-                    Type = 5, // SecurityAlert
-                    Priority = 3, // Urgent
-                    Channels = new[] { 2 }, // Email
-                    Data = new Dictionary<string, object>
-                    {
-                        ["transactionId"] = evt.TransactionId,
-                        ["reason"] = evt.Reason,
-                        ["timestamp"] = evt.OccurredAt,
-                        ["email"] = evt.Identifier
-                    }
-                },
+            var title = _options.TitleTemplates?.GetValueOrDefault("TwoFactorFailed")
+                ?? "فشل التحقق من الهوية";
+
+            var message = _options.MessageTemplates?.GetValueOrDefault("TwoFactorFailed")
+                ?? $"فشلت محاولة التحقق من هويتك: {evt.Reason}";
+
+            var command = new SendNotificationCommand
+            {
+                UserId = evt.Identifier,
+                Title = title,
+                Message = message,
+                Type = NotificationType.SecurityAlert,
+                Priority = _options.FailurePriority,
+                Channels = _options.NotificationChannels,
+                Data = BuildEventData(evt, extraData: new() { ["reason"] = evt.Reason })
+            };
+
+            await _publisher.PublishAsync(
+                command,
                 topic: TopicNames.Command("notify", "send"),
                 metadata: metadata with { SourceService = "auth" },
                 CancellationToken.None);
@@ -125,39 +153,40 @@ public class AuthenticationMessagingHandler(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex,
-                "[Auth Messaging] 💥 Failed to handle TwoFactorFailed event");
+            _logger.LogError(ex, "[Auth Messaging] Failed to handle TwoFactorFailed");
             return false;
         }
     }
 
-    private async Task<bool> HandleTwoFactorInitiated(
+    private async Task<bool> HandleInitiated(
         TwoFactorInitiatedEvent evt,
         MessageMetadata metadata)
     {
         try
         {
-            logger.LogInformation(
+            _logger.LogInformation(
                 "[Auth Messaging] 🔐 2FA initiated for {Identifier}",
                 evt.Identifier);
 
-            await publisher.PublishAsync(
-                new
-                {
-                    UserId = evt.Identifier,
-                    Title = "طلب تحقق جديد",
-                    Message = $"تم بدء عملية التحقق من الهوية عبر {evt.Provider}",
-                    Type = 1, // Info
-                    Priority = 1, // Normal
-                    Channels = new[] { 2 }, // Email
-                    Data = new Dictionary<string, object>
-                    {
-                        ["transactionId"] = evt.TransactionId,
-                        ["provider"] = evt.Provider,
-                        ["timestamp"] = evt.OccurredAt,
-                        ["email"] = evt.Identifier
-                    }
-                },
+            var title = _options.TitleTemplates?.GetValueOrDefault("TwoFactorInitiated")
+                ?? "طلب تحقق جديد";
+
+            var message = _options.MessageTemplates?.GetValueOrDefault("TwoFactorInitiated")
+                ?? $"تم بدء عملية التحقق من الهوية عبر {evt.Provider}";
+
+            var command = new SendNotificationCommand
+            {
+                UserId = evt.Identifier,
+                Title = title,
+                Message = message,
+                Type = NotificationType.Info,
+                Priority = _options.InitiationPriority,
+                Channels = _options.NotificationChannels,
+                Data = BuildEventData(evt)
+            };
+
+            await _publisher.PublishAsync(
+                command,
                 topic: TopicNames.Command("notify", "send"),
                 metadata: metadata with { SourceService = "auth" },
                 CancellationToken.None);
@@ -166,39 +195,40 @@ public class AuthenticationMessagingHandler(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex,
-                "[Auth Messaging] 💥 Failed to handle TwoFactorInitiated event");
+            _logger.LogError(ex, "[Auth Messaging] Failed to handle TwoFactorInitiated");
             return false;
         }
     }
 
-    private async Task<bool> HandleTwoFactorExpired(
+    private async Task<bool> HandleExpired(
         TwoFactorExpiredEvent evt,
         MessageMetadata metadata)
     {
         try
         {
-            logger.LogWarning(
+            _logger.LogWarning(
                 "[Auth Messaging] ⏰ 2FA expired for {Identifier}",
                 evt.Identifier);
 
-            await publisher.PublishAsync(
-                new
-                {
-                    UserId = evt.Identifier,
-                    Title = "انتهت صلاحية التحقق",
-                    Message = $"انتهت صلاحية طلب التحقق عبر {evt.Provider}",
-                    Type = 2, // Warning
-                    Priority = 1, // Normal
-                    Channels = new[] { 2 }, // Email
-                    Data = new Dictionary<string, object>
-                    {
-                        ["transactionId"] = evt.TransactionId,
-                        ["provider"] = evt.Provider,
-                        ["timestamp"] = evt.OccurredAt,
-                        ["email"] = evt.Identifier
-                    }
-                },
+            var title = _options.TitleTemplates?.GetValueOrDefault("TwoFactorExpired")
+                ?? "انتهت صلاحية التحقق";
+
+            var message = _options.MessageTemplates?.GetValueOrDefault("TwoFactorExpired")
+                ?? $"انتهت صلاحية طلب التحقق عبر {evt.Provider}";
+
+            var command = new SendNotificationCommand
+            {
+                UserId = evt.Identifier,
+                Title = title,
+                Message = message,
+                Type = NotificationType.Warning,
+                Priority = _options.ExpirationPriority,
+                Channels = _options.NotificationChannels,
+                Data = BuildEventData(evt)
+            };
+
+            await _publisher.PublishAsync(
+                command,
                 topic: TopicNames.Command("notify", "send"),
                 metadata: metadata with { SourceService = "auth" },
                 CancellationToken.None);
@@ -207,9 +237,49 @@ public class AuthenticationMessagingHandler(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex,
-                "[Auth Messaging] 💥 Failed to handle TwoFactorExpired event");
+            _logger.LogError(ex, "[Auth Messaging] Failed to handle TwoFactorExpired");
             return false;
         }
+    }
+
+    private Dictionary<string, object> BuildEventData(
+        object evt,
+        Dictionary<string, object>? extraData = null)
+    {
+        var data = new Dictionary<string, object>();
+
+        // Extract common properties using reflection
+        var eventType = evt.GetType();
+        var transactionIdProp = eventType.GetProperty("TransactionId");
+        var identifierProp = eventType.GetProperty("Identifier");
+        var providerProp = eventType.GetProperty("Provider");
+        var occurredAtProp = eventType.GetProperty("OccurredAt");
+
+        if (_options.IncludeTransactionDetails)
+        {
+            if (transactionIdProp != null)
+                data["transactionId"] = transactionIdProp.GetValue(evt) ?? "";
+
+            if (providerProp != null)
+                data["provider"] = providerProp.GetValue(evt) ?? "";
+
+            if (occurredAtProp != null)
+                data["timestamp"] = occurredAtProp.GetValue(evt) ?? DateTimeOffset.UtcNow;
+        }
+
+        // Always include email
+        if (identifierProp != null)
+            data["email"] = identifierProp.GetValue(evt) ?? "";
+
+        // Add extra data
+        if (extraData != null)
+        {
+            foreach (var (key, value) in extraData)
+            {
+                data[key] = value;
+            }
+        }
+
+        return data;
     }
 }
