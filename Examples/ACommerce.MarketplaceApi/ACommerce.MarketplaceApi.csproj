@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Core -->
+    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
+    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.Infrastructure.EFCores\ACommerce.SharedKernel.Infrastructure.EFCores.csproj" />
+    <ProjectReference Include="..\..\Core\ACommerce.Configuration\ACommerce.Configuration.csproj" />
+
+    <!-- Identity -->
+    <ProjectReference Include="..\..\Identity\ACommerce.Profiles\ACommerce.Profiles.csproj" />
+    <ProjectReference Include="..\..\Identity\ACommerce.Profiles.Api\ACommerce.Profiles.Api.csproj" />
+
+    <!-- Marketplace -->
+    <ProjectReference Include="..\..\Marketplace\ACommerce.Vendors\ACommerce.Vendors.csproj" />
+    <ProjectReference Include="..\..\Marketplace\ACommerce.Vendors.Api\ACommerce.Vendors.Api.csproj" />
+
+    <!-- Catalog -->
+    <ProjectReference Include="..\..\Catalog\ACommerce.Catalog.Listings\ACommerce.Catalog.Listings.csproj" />
+    <ProjectReference Include="..\..\Catalog\ACommerce.Catalog.Listings.Api\ACommerce.Catalog.Listings.Api.csproj" />
+
+    <!-- Sales -->
+    <ProjectReference Include="..\..\Sales\ACommerce.Cart\ACommerce.Cart.csproj" />
+    <ProjectReference Include="..\..\Sales\ACommerce.Orders\ACommerce.Orders.csproj" />
+    <ProjectReference Include="..\..\Sales\ACommerce.Orders.Api\ACommerce.Orders.Api.csproj" />
+
+    <!-- Payments -->
+    <ProjectReference Include="..\..\Payments\ACommerce.Payments.Abstractions\ACommerce.Payments.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Payments\ACommerce.Payments.Moyasar\ACommerce.Payments.Moyasar.csproj" />
+
+    <!-- Shipping -->
+    <ProjectReference Include="..\..\Shipping\ACommerce.Shipping.Abstractions\ACommerce.Shipping.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Shipping\ACommerce.Shipping.Mock\ACommerce.Shipping.Mock.csproj" />
+
+    <!-- Modules -->
+    <ProjectReference Include="..\..\Modules\ACommerce.Reviews\ACommerce.Reviews.csproj" />
+    <ProjectReference Include="..\..\Modules\ACommerce.Localization\ACommerce.Localization.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="12.4.0" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+</Project>
