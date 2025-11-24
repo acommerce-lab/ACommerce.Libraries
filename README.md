@@ -284,8 +284,10 @@ dotnet pack ACommerce.Profiles/ACommerce.Profiles.csproj -c Release
 ## 📚 **التوثيق**
 
 ### **📖 البداية:**
+- [⚡ البداية السريعة (QUICK_START.md)](QUICK_START.md) - من الصفر إلى متجر في 30 دقيقة
 - [🧪 دليل الاختبار (TESTING_GUIDE.md)](TESTING_GUIDE.md) - اختبار Backend خطوة بخطوة
 - [📊 تحليل النحافة (LEANNESS_ANALYSIS.md)](LEANNESS_ANALYSIS.md) - مقارنة الأداء والمقاييس
+- [📦 إدارة المكتبات (TRANSITIVE_DEPENDENCIES_GUIDE.md)](TRANSITIVE_DEPENDENCIES_GUIDE.md) - **مهم!** تجنب تعارض الإصدارات
 - [🎉 ملخص الإنجاز (ACHIEVEMENT_SUMMARY.md)](ACHIEVEMENT_SUMMARY.md) - نظرة شاملة
 
 ### **📦 المكتبات:**

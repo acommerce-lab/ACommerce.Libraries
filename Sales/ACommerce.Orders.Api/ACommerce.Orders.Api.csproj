@@ -17,7 +17,5 @@
     <ProjectReference Include="..\..\AspNetCore\ACommerce.SharedKernel.AspNetCore\ACommerce.SharedKernel.AspNetCore.csproj" />
     <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="MediatR" Version="12.4.0" />
-  </ItemGroup>
+  <!-- MediatR inherited from SharedKernel.CQRS -->
 </Project>

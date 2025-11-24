@@ -7,18 +7,14 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services
+// Add Controllers from libraries (ZERO custom controllers!)
+// Note: MediatR, AutoMapper, FluentValidation are automatically inherited
+// from the referenced library projects (via SharedKernel.CQRS)
 builder.Services.AddControllers()
 	.AddApplicationPart(typeof(ACommerce.Profiles.Api.Controllers.ProfilesController).Assembly)
 	.AddApplicationPart(typeof(ACommerce.Vendors.Api.Controllers.VendorsController).Assembly)
 	.AddApplicationPart(typeof(ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController).Assembly)
 	.AddApplicationPart(typeof(ACommerce.Orders.Api.Controllers.OrdersController).Assembly);
-
-// MediatR
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
-
-// AutoMapper
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 // In-Memory Database للتجربة
 builder.Services.AddDbContext<DbContext>(options =>

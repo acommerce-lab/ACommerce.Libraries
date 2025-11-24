@@ -352,6 +352,37 @@ ITranslationService → يمكن تبديله بأي خدمة ترجمة
 3. **اقرأ التوثيق** لفهم المعمارية
 4. **جرب كل endpoint** لفهم الـ flow
 5. **استخدم InMemory DB** للتطوير السريع
+6. **لا تضف مكتبات مكررة!** اقرأ [دليل إدارة المكتبات](TRANSITIVE_DEPENDENCIES_GUIDE.md)
+
+---
+
+## ⚠️ تنبيه مهم: إدارة المكتبات
+
+### **لا تضف PackageReferences موجودة في ProjectReferences!**
+
+```xml
+<!-- ❌ خطأ شائع -->
+<ItemGroup>
+  <ProjectReference Include="ACommerce.Orders.Api" />
+  <PackageReference Include="MediatR" /> <!-- ❌ موجود بالفعل في Orders.Api! -->
+  <PackageReference Include="AutoMapper" /> <!-- ❌ موجود بالفعل! -->
+</ItemGroup>
+
+<!-- ✅ الصحيح -->
+<ItemGroup>
+  <ProjectReference Include="ACommerce.Orders.Api" />
+  <!-- MediatR, AutoMapper, EF Core ورثناهم تلقائياً -->
+  <!-- نضيف فقط ما لا يوجد في المكتبات -->
+  <PackageReference Include="Swashbuckle.AspNetCore" />
+</ItemGroup>
+```
+
+**الفوائد:**
+- ✅ تجنب تعارض الإصدارات
+- ✅ تقليل حجم المشروع
+- ✅ سهولة الصيانة
+
+📖 **اقرأ المزيد:** [دليل إدارة المكتبات والاعتمادات](TRANSITIVE_DEPENDENCIES_GUIDE.md)
 
 ---
 
