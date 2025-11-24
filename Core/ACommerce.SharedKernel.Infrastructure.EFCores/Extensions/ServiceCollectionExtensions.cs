@@ -1,26 +1,29 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using ACommerce.SharedKernel.Infrastructure.EFCores.Context;
+using ACommerce.SharedKernel.Infrastructure.EFCores.Factories;
 using ACommerce.SharedKernel.Abstractions.Repositories;
-using ACommerce.SharedKernel.Infrastructure.EFCore.Factories;
-using ACommerce.SharedKernel.Infrastructure.EFCore.Repositories;
-using System.Reflection;
 
-namespace ACommerce.SharedKernel.Infrastructure.EFCore.Extensions;
+namespace ACommerce.SharedKernel.Infrastructure.EFCores.Extensions;
 
+/// <summary>
+/// Extension methods لتسجيل ACommerce Database Context
+/// </summary>
 public static class ServiceCollectionExtensions
 {
 	/// <summary>
-	/// إضافة EF Core Infrastructure مع DbContext محدد
+	/// تسجيل ApplicationDbContext مع Auto-Discovery
+	/// سطر واحد يكفي! ✨
 	/// </summary>
-	public static IServiceCollection AddEfCoreInfrastructure<TDbContext>(
-		this IServiceCollection services)
-		where TDbContext : DbContext
+	public static IServiceCollection AddACommerceDbContext(
+		this IServiceCollection services,
+		Action<DbContextOptionsBuilder> optionsAction)
 	{
-		// تسجيل DbContext كـ Generic
-		services.AddScoped<DbContext>(provider => provider.GetRequiredService<TDbContext>());
+		// تسجيل ApplicationDbContext
+		services.AddDbContext<ApplicationDbContext>(optionsAction);
 
-		// تسجيل المستودع العام
-		services.AddScoped(typeof(IBaseAsyncRepository<>), typeof(BaseAsyncRepository<>));
+		// تسجيل DbContext العادي (للتوافق مع الكود القديم)
+		services.AddScoped<DbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
 		// تسجيل Repository Factory
 		services.AddScoped<IRepositoryFactory, RepositoryFactory>();
@@ -29,20 +32,46 @@ public static class ServiceCollectionExtensions
 	}
 
 	/// <summary>
-	/// إضافة EF Core Infrastructure مع CQRS
+	/// تسجيل InMemory Database (للتجربة)
 	/// </summary>
-	public static IServiceCollection AddEfCoreWithCQRS<TDbContext>(
+	public static IServiceCollection AddACommerceInMemoryDatabase(
 		this IServiceCollection services,
-		params Assembly[] assemblies)
-		where TDbContext : DbContext
+		string databaseName = "ACommerceDb")
 	{
-		// إضافة Infrastructure
-		services.AddEfCoreInfrastructure<TDbContext>();
+		return services.AddACommerceDbContext(options =>
+			options.UseInMemoryDatabase(databaseName));
+	}
 
-		// إضافة CQRS (من المكتبة الأخرى)
-		// يتم استدعاء AddSharedKernelCQRS من ACommerce.SharedKernel.CQRS
-		// services.AddSharedKernelCQRS(assemblies);
+	/// <summary>
+	/// تسجيل SQL Server
+	/// </summary>
+	public static IServiceCollection AddACommerceSqlServer(
+		this IServiceCollection services,
+		string connectionString)
+	{
+		return services.AddACommerceDbContext(options =>
+			options.UseSqlServer(connectionString));
+	}
 
-		return services;
+	/// <summary>
+	/// تسجيل PostgreSQL
+	/// </summary>
+	public static IServiceCollection AddACommercePostgreSQL(
+		this IServiceCollection services,
+		string connectionString)
+	{
+		return services.AddACommerceDbContext(options =>
+			options.UseNpgsql(connectionString));
+	}
+
+	/// <summary>
+	/// تسجيل SQLite
+	/// </summary>
+	public static IServiceCollection AddACommerceSQLite(
+		this IServiceCollection services,
+		string connectionString)
+	{
+		return services.AddACommerceDbContext(options =>
+			options.UseSqlite(connectionString));
 	}
 }

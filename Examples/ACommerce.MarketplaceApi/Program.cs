@@ -4,7 +4,7 @@ using ACommerce.Payments.Moyasar.Models;
 using ACommerce.Shipping.Abstractions.Contracts;
 using ACommerce.Shipping.Mock.Services;
 using ACommerce.MarketplaceApi.Services;
-using Microsoft.EntityFrameworkCore;
+using ACommerce.SharedKernel.Infrastructure.EFCores.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,13 +18,8 @@ builder.Services.AddControllers()
 	.AddApplicationPart(typeof(ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController).Assembly)
 	.AddApplicationPart(typeof(ACommerce.Orders.Api.Controllers.OrdersController).Assembly);
 
-// In-Memory Database للتجربة
-builder.Services.AddDbContext<DbContext>(options =>
-	options.UseInMemoryDatabase("MarketplaceDb"));
-
-// Repository Factory
-builder.Services.AddScoped<ACommerce.SharedKernel.Abstractions.Repositories.IRepositoryFactory,
-	ACommerce.SharedKernel.Infrastructure.EFCore.Factories.RepositoryFactory>();
+// ✨ Database - سطر واحد يكفي! Auto-Discovery لجميع Entities من جميع المكتبات
+builder.Services.AddACommerceInMemoryDatabase("MarketplaceDb");
 
 // Payment Provider
 builder.Services.Configure<MoyasarOptions>(options =>
