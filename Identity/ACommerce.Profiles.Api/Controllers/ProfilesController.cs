@@ -10,19 +10,15 @@ namespace ACommerce.Profiles.Api.Controllers;
 /// <summary>
 /// متحكم البروفايلات
 /// </summary>
-public class ProfilesController : BaseCrudController<Profile, CreateProfileDto, UpdateProfileDto, ProfileResponseDto, UpdateProfileDto>
+public class ProfilesController(
+        IMediator mediator,
+        ILogger<ProfilesController> logger) : BaseCrudController<Profile, CreateProfileDto, UpdateProfileDto, ProfileResponseDto, UpdateProfileDto>(mediator, logger)
 {
-	public ProfilesController(
-		IMediator mediator,
-		ILogger<ProfilesController> logger)
-		: base(mediator, logger)
-	{
-	}
 
-	/// <summary>
-	/// الحصول على بروفايل بواسطة UserId
-	/// </summary>
-	[HttpGet("by-user/{userId}")]
+    /// <summary>
+    /// الحصول على بروفايل بواسطة UserId
+    /// </summary>
+    [HttpGet("by-user/{userId}")]
 	public async Task<ActionResult<ProfileResponseDto>> GetByUserId(string userId)
 	{
 		try
@@ -31,19 +27,19 @@ public class ProfilesController : BaseCrudController<Profile, CreateProfileDto, 
 			{
 				PageSize = 1,
 				PageNumber = 1,
-				Filters = new List<SharedKernel.Abstractions.Queries.FilterItem>
-				{
-					new() { PropertyName = "UserId", Value = userId, Operator = SharedKernel.Abstractions.Queries.FilterOperator.Equals }
-				}
+				Filters =
+                [
+                    new() { PropertyName = "UserId", Value = userId, Operator = SharedKernel.Abstractions.Queries.FilterOperator.Equals }
+				]
 			};
 
 			var query = new SharedKernel.CQRS.Queries.SmartSearchQuery<Profile, ProfileResponseDto> { Request = searchRequest };
 			var result = await _mediator.Send(query);
 
-			if (result.Data.Count == 0)
+			if (result.Items.Count == 0)
 				return NotFound(new { message = "Profile not found" });
 
-			return Ok(result.Data.First());
+			return Ok(result.Items.First());
 		}
 		catch (Exception ex)
 		{

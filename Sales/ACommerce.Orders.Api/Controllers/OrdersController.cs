@@ -10,19 +10,16 @@ namespace ACommerce.Orders.Api.Controllers;
 /// <summary>
 /// متحكم الطلبات
 /// </summary>
-public class OrdersController : BaseCrudController<Order, CreateOrderDto, CreateOrderDto, OrderResponseDto, CreateOrderDto>
+public class OrdersController(
+    IMediator mediator,
+    ILogger<OrdersController> logger)
+	: BaseCrudController<Order, CreateOrderDto, CreateOrderDto, OrderResponseDto, CreateOrderDto>(mediator, logger)
 {
-	public OrdersController(
-		IMediator mediator,
-		ILogger<OrdersController> logger)
-		: base(mediator, logger)
-	{
-	}
 
-	/// <summary>
-	/// الحصول على طلبات العميل
-	/// </summary>
-	[HttpGet("customer/{customerId}")]
+    /// <summary>
+    /// الحصول على طلبات العميل
+    /// </summary>
+    [HttpGet("customer/{customerId}")]
 	public async Task<ActionResult> GetCustomerOrders(string customerId)
 	{
 		try
@@ -31,12 +28,12 @@ public class OrdersController : BaseCrudController<Order, CreateOrderDto, Create
 			{
 				PageSize = 50,
 				PageNumber = 1,
-				Filters = new List<SharedKernel.Abstractions.Queries.FilterItem>
-				{
-					new() { PropertyName = "CustomerId", Value = customerId, Operator = SharedKernel.Abstractions.Queries.FilterOperator.Equals }
-				},
-				SortBy = "CreatedAt",
-				SortDescending = true
+                Filters =
+                [
+                    new() { PropertyName = "CustomerId", Value = customerId, Operator = SharedKernel.Abstractions.Queries.FilterOperator.Equals }
+				],
+				OrderBy = "CreatedAt",
+                Ascending = false,
 			};
 
 			var query = new SharedKernel.CQRS.Queries.SmartSearchQuery<Order, OrderResponseDto> { Request = searchRequest };
@@ -63,12 +60,12 @@ public class OrdersController : BaseCrudController<Order, CreateOrderDto, Create
 			{
 				PageSize = 50,
 				PageNumber = 1,
-				Filters = new List<SharedKernel.Abstractions.Queries.FilterItem>
-				{
-					new() { PropertyName = "VendorId", Value = vendorId.ToString(), Operator = SharedKernel.Abstractions.Queries.FilterOperator.Equals }
-				},
-				SortBy = "CreatedAt",
-				SortDescending = true
+				Filters =
+                [
+                    new() { PropertyName = "VendorId", Value = vendorId.ToString(), Operator = SharedKernel.Abstractions.Queries.FilterOperator.Equals }
+				],
+				OrderBy = "CreatedAt",
+				Ascending = false
 			};
 
 			var query = new SharedKernel.CQRS.Queries.SmartSearchQuery<Order, OrderResponseDto> { Request = searchRequest };

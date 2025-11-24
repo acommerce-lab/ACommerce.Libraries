@@ -22,7 +22,7 @@ builder.Services.AddDbContext<DbContext>(options =>
 
 // Repository Factory
 builder.Services.AddScoped<ACommerce.SharedKernel.Abstractions.Repositories.IRepositoryFactory,
-	ACommerce.SharedKernel.Infrastructure.EFCores.Factories.RepositoryFactory>();
+	ACommerce.SharedKernel.Infrastructure.EFCore.Factories.RepositoryFactory>();
 
 // Payment Provider
 builder.Services.Configure<MoyasarOptions>(options =>

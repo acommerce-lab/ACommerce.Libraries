@@ -10,19 +10,15 @@ namespace ACommerce.Catalog.Listings.Api.Controllers;
 /// <summary>
 /// متحكم عروض المنتجات
 /// </summary>
-public class ProductListingsController : BaseCrudController<ProductListing, CreateListingDto, CreateListingDto, ListingResponseDto, CreateListingDto>
+public class ProductListingsController(
+    IMediator mediator,
+    ILogger<ProductListingsController> logger) : BaseCrudController<ProductListing, CreateListingDto, CreateListingDto, ListingResponseDto, CreateListingDto>(mediator, logger)
 {
-	public ProductListingsController(
-		IMediator mediator,
-		ILogger<ProductListingsController> logger)
-		: base(mediator, logger)
-	{
-	}
 
-	/// <summary>
-	/// الحصول على جميع عروض منتج معين
-	/// </summary>
-	[HttpGet("by-product/{productId}")]
+    /// <summary>
+    /// الحصول على جميع عروض منتج معين
+    /// </summary>
+    [HttpGet("by-product/{productId}")]
 	public async Task<ActionResult> GetByProduct(Guid productId, [FromQuery] bool activeOnly = true)
 	{
 		try
@@ -31,10 +27,10 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
 			{
 				PageSize = 100,
 				PageNumber = 1,
-				Filters = new List<SharedKernel.Abstractions.Queries.FilterItem>
-				{
-					new() { PropertyName = "ProductId", Value = productId.ToString(), Operator = SharedKernel.Abstractions.Queries.FilterOperator.Equals }
-				}
+				Filters =
+                [
+                    new() { PropertyName = "ProductId", Value = productId.ToString(), Operator = SharedKernel.Abstractions.Queries.FilterOperator.Equals }
+				]
 			};
 
 			if (activeOnly)
