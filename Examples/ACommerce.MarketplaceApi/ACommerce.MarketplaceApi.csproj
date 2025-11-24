@@ -21,6 +21,8 @@
     <ProjectReference Include="..\..\Marketplace\ACommerce.Vendors.Api\ACommerce.Vendors.Api.csproj" />
 
     <!-- Catalog -->
+    <ProjectReference Include="..\..\Other\ACommerce.Catalog.Products\ACommerce.Catalog.Products.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Catalog.Products.Api\ACommerce.Catalog.Products.Api.csproj" />
     <ProjectReference Include="..\..\Catalog\ACommerce.Catalog.Listings\ACommerce.Catalog.Listings.csproj" />
     <ProjectReference Include="..\..\Catalog\ACommerce.Catalog.Listings.Api\ACommerce.Catalog.Listings.Api.csproj" />
 
