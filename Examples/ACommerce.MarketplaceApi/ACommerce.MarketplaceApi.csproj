@@ -21,6 +21,8 @@
     <ProjectReference Include="..\..\Marketplace\ACommerce.Vendors.Api\ACommerce.Vendors.Api.csproj" />
 
     <!-- Catalog -->
+    <ProjectReference Include="..\..\Other\ACommerce.Catalog.Products\ACommerce.Catalog.Products.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Catalog.Products.Api\ACommerce.Catalog.Products.Api.csproj" />
     <ProjectReference Include="..\..\Catalog\ACommerce.Catalog.Listings\ACommerce.Catalog.Listings.csproj" />
     <ProjectReference Include="..\..\Catalog\ACommerce.Catalog.Listings.Api\ACommerce.Catalog.Listings.Api.csproj" />
 
@@ -43,9 +45,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MediatR" Version="12.4.0" />
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
+    <!-- Swagger UI for API documentation -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+
+    <!-- InMemory database for development/testing -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
+
+    <!-- All other dependencies inherited from referenced projects:
+         - MediatR → from SharedKernel.CQRS (via .Api projects)
+         - AutoMapper → from SharedKernel.CQRS (via .Api projects)
+         - EF Core → from SharedKernel.AspNetCore (via .Api projects)
+         - FluentValidation → from SharedKernel.CQRS (via .Api projects)
+    -->
   </ItemGroup>
 </Project>
