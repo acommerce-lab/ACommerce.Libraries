@@ -1,0 +1,87 @@
+<div class="nav-menu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <h3 class="text-white">🛒 ACommerce Shop</h3>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
+                <span class="icon">🏠</span> الرئيسية
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/products">
+                <span class="icon">📦</span> المنتجات
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/cart">
+                <span class="icon">🛒</span> السلة
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/orders">
+                <span class="icon">📋</span> الطلبات
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/profile">
+                <span class="icon">👤</span> الملف الشخصي
+            </NavLink>
+        </div>
+
+        <hr class="text-white" />
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/admin/vendors">
+                <span class="icon">🏪</span> البائعون
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/admin/currencies">
+                <span class="icon">💱</span> العملات
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/admin/units">
+                <span class="icon">📏</span> الوحدات
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+<style>
+    .nav-menu {
+        padding: 1rem;
+        height: 100%;
+    }
+
+    .nav-link {
+        color: white;
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+
+    .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .icon {
+        margin-left: 0.5rem;
+        font-size: 1.2rem;
+    }
+</style>
