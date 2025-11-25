@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RootNamespace>ACommerce.Client.Vendors</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
+		<ProjectReference Include="..\..\Core\ACommerce.Vendors\ACommerce.Vendors.csproj" />
+	</ItemGroup>
+
+</Project>

@@ -25,12 +25,28 @@ public static class ServiceCollectionExtensions
 		// ✨ Service Registry Client (مع Cache تلقائي)
 		services.AddServiceRegistryClient(registryUrl);
 
+		// Localization Provider
+		if (options.LocalizationProvider != null)
+		{
+			services.AddSingleton(options.LocalizationProvider);
+		}
+		else if (options.EnableLocalization)
+		{
+			services.AddSingleton<ILocalizationProvider, DefaultLocalizationProvider>();
+		}
+
 		// HttpClient مع Interceptors
 		var httpClientBuilder = services.AddHttpClient<DynamicHttpClient>()
 			.ConfigureHttpClient(client =>
 			{
 				client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
 			});
+
+		// Localization Interceptor
+		if (options.EnableLocalization)
+		{
+			httpClientBuilder.AddHttpMessageHandler<LocalizationInterceptor>();
+		}
 
 		// Authentication Interceptor
 		if (options.EnableAuthentication && options.TokenProvider != null)
@@ -81,4 +97,14 @@ public class ClientOptions
 	/// Token Provider للـ Authentication
 	/// </summary>
 	public Func<IServiceProvider, ITokenProvider>? TokenProvider { get; set; }
+
+	/// <summary>
+	/// تفعيل Localization تلقائي؟ (افتراضياً: true)
+	/// </summary>
+	public bool EnableLocalization { get; set; } = true;
+
+	/// <summary>
+	/// Localization Provider مخصص (اختياري)
+	/// </summary>
+	public Func<IServiceProvider, ILocalizationProvider>? LocalizationProvider { get; set; }
 }
