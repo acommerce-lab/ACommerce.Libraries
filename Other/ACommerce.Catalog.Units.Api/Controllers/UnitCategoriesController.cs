@@ -11,22 +11,22 @@ using Unit = ACommerce.Catalog.Units.Entities.Unit;
 namespace ACommerce.Catalog.Units.Api.Controllers;
 
 /// <summary>
-/// ????? ???? ?????? (Measurement Categories)
+/// ????? ???? ?????? (Unit Categories)
 /// ???: ?????? ?????? ?????
 /// </summary>
 [ApiController]
-[Route("api/catalog/measurement-categories")]
+[Route("api/catalog/unit-categories")]
 [Produces("application/json")]
-public class MeasurementCategoriesController : BaseCrudController<
-	MeasurementCategory,
-	CreateMeasurementCategoryDto,
-	UpdateMeasurementCategoryDto,
-	MeasurementCategoryResponseDto,
-	PartialUpdateMeasurementCategoryDto>
+public class UnitCategoriesController : BaseCrudController<
+	UnitCategory,
+	CreateUnitCategoryDto,
+	UpdateUnitCategoryDto,
+	UnitCategoryResponseDto,
+	PartialUpdateUnitCategoryDto>
 {
-	public MeasurementCategoriesController(
+	public UnitCategoriesController(
 		IMediator mediator,
-		ILogger<MeasurementCategoriesController> logger)
+		ILogger<UnitCategoriesController> logger)
 		: base(mediator, logger)
 	{
 	}
@@ -37,17 +37,17 @@ public class MeasurementCategoriesController : BaseCrudController<
 
 	/// <summary>
 	/// ????? ?? ??? ??????
-	/// GET /api/catalog/measurement-categories/by-code/{code}
+	/// GET /api/catalog/unit-categories/by-code/{code}
 	/// </summary>
 	[HttpGet("by-code/{code}")]
-	[ProducesResponseType(typeof(MeasurementCategoryResponseDto), 200)]
+	[ProducesResponseType(typeof(UnitCategoryResponseDto), 200)]
 	[ProducesResponseType(404)]
 	[ProducesResponseType(500)]
-	public async Task<ActionResult<MeasurementCategoryResponseDto>> GetByCode(string code)
+	public async Task<ActionResult<UnitCategoryResponseDto>> GetByCode(string code)
 	{
 		try
 		{
-			_logger.LogDebug("Getting measurement category by code {Code}", code);
+			_logger.LogDebug("Getting unit category by code {Code}", code);
 
 			var searchRequest = new SmartSearchRequest
 			{
@@ -55,7 +55,7 @@ public class MeasurementCategoriesController : BaseCrudController<
 				{
 					new()
 					{
-						PropertyName = nameof(MeasurementCategory.CategoryCode),
+						PropertyName = nameof(UnitCategory.Code),
 						Value = code.ToLower(),
 						Operator = FilterOperator.Equals
 					}
@@ -64,7 +64,7 @@ public class MeasurementCategoriesController : BaseCrudController<
 				PageNumber = 1
 			};
 
-			var query = new SmartSearchQuery<MeasurementCategory, MeasurementCategoryResponseDto>
+			var query = new SmartSearchQuery<UnitCategory, UnitCategoryResponseDto>
 			{
 				Request = searchRequest
 			};
@@ -72,15 +72,15 @@ public class MeasurementCategoriesController : BaseCrudController<
 
 			if (result.Items.Count == 0)
 			{
-				_logger.LogWarning("Measurement category with code {Code} not found", code);
-				return NotFound(new { message = "Measurement category not found" });
+				_logger.LogWarning("Unit category with code {Code} not found", code);
+				return NotFound(new { message = "Unit category not found" });
 			}
 
 			return Ok(result.Items[0]);
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Error getting measurement category by code {Code}", code);
+			_logger.LogError(ex, "Error getting unit category by code {Code}", code);
 			return StatusCode(500, new
 			{
 				message = "An error occurred while processing your request",
@@ -91,7 +91,7 @@ public class MeasurementCategoriesController : BaseCrudController<
 
 	/// <summary>
 	/// ?????? ??? ??????? ?? ??? ?????
-	/// GET /api/catalog/measurement-categories/{id}/units
+	/// GET /api/catalog/unit-categories/{id}/units
 	/// </summary>
 	[HttpGet("{id}/units")]
 	[ProducesResponseType(typeof(PagedResult<UnitResponseDto>), 200)]
@@ -105,10 +105,10 @@ public class MeasurementCategoriesController : BaseCrudController<
 	{
 		try
 		{
-			_logger.LogDebug("Getting units for measurement category {CategoryId}", id);
+			_logger.LogDebug("Getting units for unit category {CategoryId}", id);
 
 			// ?????? ?? ???? ?????
-			var getQuery = new GetByIdQuery<MeasurementCategory, MeasurementCategoryResponseDto>
+			var getQuery = new GetByIdQuery<UnitCategory, UnitCategoryResponseDto>
 			{
 				Id = id
 			};
@@ -116,8 +116,8 @@ public class MeasurementCategoriesController : BaseCrudController<
 
 			if (category == null)
 			{
-				_logger.LogWarning("Measurement category {CategoryId} not found", id);
-				return NotFound(new { message = "Measurement category not found" });
+				_logger.LogWarning("Unit category {CategoryId} not found", id);
+				return NotFound(new { message = "Unit category not found" });
 			}
 
 			// ????? ?? ???????
@@ -125,7 +125,7 @@ public class MeasurementCategoriesController : BaseCrudController<
 			{
 				new()
 				{
-					PropertyName = nameof(Unit.MeasurementCategoryId),
+					PropertyName = nameof(Unit.UnitCategoryId),
 					Value = id,
 					Operator = FilterOperator.Equals
 				}
@@ -171,7 +171,7 @@ public class MeasurementCategoriesController : BaseCrudController<
 
 	/// <summary>
 	/// ?????? ??? ?????? ???????? ???? ?????
-	/// GET /api/catalog/measurement-categories/{id}/base-unit
+	/// GET /api/catalog/unit-categories/{id}/base-unit
 	/// </summary>
 	[HttpGet("{id}/base-unit")]
 	[ProducesResponseType(typeof(UnitResponseDto), 200)]
@@ -181,10 +181,10 @@ public class MeasurementCategoriesController : BaseCrudController<
 	{
 		try
 		{
-			_logger.LogDebug("Getting base unit for measurement category {CategoryId}", id);
+			_logger.LogDebug("Getting base unit for unit category {CategoryId}", id);
 
 			// ?????? ??? ?????
-			var getQuery = new GetByIdQuery<MeasurementCategory, MeasurementCategoryResponseDto>
+			var getQuery = new GetByIdQuery<UnitCategory, UnitCategoryResponseDto>
 			{
 				Id = id
 			};
@@ -192,8 +192,8 @@ public class MeasurementCategoriesController : BaseCrudController<
 
 			if (category == null)
 			{
-				_logger.LogWarning("Measurement category {CategoryId} not found", id);
-				return NotFound(new { message = "Measurement category not found" });
+				_logger.LogWarning("Unit category {CategoryId} not found", id);
+				return NotFound(new { message = "Unit category not found" });
 			}
 
 			if (!category.BaseUnitId.HasValue)
@@ -217,7 +217,7 @@ public class MeasurementCategoriesController : BaseCrudController<
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Error getting base unit for measurement category {CategoryId}", id);
+			_logger.LogError(ex, "Error getting base unit for unit category {CategoryId}", id);
 			return StatusCode(500, new
 			{
 				message = "An error occurred while processing your request",
@@ -227,43 +227,48 @@ public class MeasurementCategoriesController : BaseCrudController<
 	}
 }
 
-// DTOs ?????? ??? MeasurementCategory
-public class CreateMeasurementCategoryDto
+// DTOs ?????? ??? UnitCategory
+public class CreateUnitCategoryDto
 {
 	public required string Name { get; set; }
 	public required string Code { get; set; }
-	public required string CategoryCode { get; set; }
 	public string? Description { get; set; }
 	public Guid? BaseUnitId { get; set; }
+	public int SortOrder { get; set; }
 	public Dictionary<string, string>? Metadata { get; set; }
 }
 
-public class UpdateMeasurementCategoryDto
+public class UpdateUnitCategoryDto
 {
 	public string? Name { get; set; }
+	public string? Code { get; set; }
 	public string? Description { get; set; }
 	public Guid? BaseUnitId { get; set; }
+	public int SortOrder { get; set; }
 	public Dictionary<string, string>? Metadata { get; set; }
 }
 
-public class PartialUpdateMeasurementCategoryDto
+public class PartialUpdateUnitCategoryDto
 {
 	public string? Name { get; set; }
+	public string? Code { get; set; }
 	public string? Description { get; set; }
 	public Guid? BaseUnitId { get; set; }
+	public int SortOrder { get; set; }
 	public Dictionary<string, string>? Metadata { get; set; }
 }
 
-public class MeasurementCategoryResponseDto
+public class UnitCategoryResponseDto
 {
 	public Guid Id { get; set; }
 	public string Name { get; set; } = string.Empty;
 	public string Code { get; set; } = string.Empty;
-	public string CategoryCode { get; set; } = string.Empty;
 	public string? Description { get; set; }
 	public Guid? BaseUnitId { get; set; }
 	public string? BaseUnitName { get; set; }
+	public string? BaseUnitSymbol { get; set; }
 	public int UnitsCount { get; set; }
+	public int SortOrder { get; set; }
 	public Dictionary<string, string> Metadata { get; set; } = new();
 	public DateTime CreatedAt { get; set; }
 	public DateTime? UpdatedAt { get; set; }

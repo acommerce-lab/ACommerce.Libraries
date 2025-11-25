@@ -16,10 +16,13 @@ public class CreateExchangeRateValidator : AbstractValidator<CreateExchangeRateD
 		RuleFor(x => x.Rate)
 			.GreaterThan(0).WithMessage("Exchange rate must be greater than 0");
 
-		RuleFor(x => x.ExpiryDate)
-			.GreaterThan(x => x.EffectiveDate ?? DateTime.UtcNow)
-			.When(x => x.ExpiryDate.HasValue)
-			.WithMessage("Expiry date must be after effective date");
+		RuleFor(x => x.EffectiveFrom)
+			.NotEmpty().WithMessage("Effective from date is required");
+
+		RuleFor(x => x.EffectiveTo)
+			.GreaterThan(x => x.EffectiveFrom)
+			.When(x => x.EffectiveTo.HasValue)
+			.WithMessage("Effective to date must be after effective from date");
 	}
 }
 

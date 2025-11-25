@@ -6,10 +6,12 @@ public class UnitResponseDto
 	public string Name { get; set; } = string.Empty;
 	public string Symbol { get; set; } = string.Empty;
 	public string Code { get; set; } = string.Empty;
-	public Guid MeasurementCategoryId { get; set; }
-	public string MeasurementCategoryName { get; set; } = string.Empty;
+	public Guid UnitCategoryId { get; set; }
+	public string UnitCategoryName { get; set; } = string.Empty;
+	public string UnitCategoryCode { get; set; } = string.Empty;
 	public Guid MeasurementSystemId { get; set; }
 	public string MeasurementSystemName { get; set; } = string.Empty;
+	public string MeasurementSystemCode { get; set; } = string.Empty;
 	public decimal ConversionToBase { get; set; }
 	public string? ConversionFormula { get; set; }
 	public int DecimalPlaces { get; set; }

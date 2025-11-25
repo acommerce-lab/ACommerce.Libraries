@@ -15,11 +15,13 @@ public class ProductResponseDto
 	public decimal? Weight { get; set; }
 	public Guid? WeightUnitId { get; set; }
 	public string? WeightUnitName { get; set; }
+	public string? WeightUnitSymbol { get; set; }
 	public decimal? Length { get; set; }
 	public decimal? Width { get; set; }
 	public decimal? Height { get; set; }
 	public Guid? DimensionUnitId { get; set; }
 	public string? DimensionUnitName { get; set; }
+	public string? DimensionUnitSymbol { get; set; }
 	public List<string> Images { get; set; } = new();
 	public string? FeaturedImage { get; set; }
 	public List<string> Tags { get; set; } = new();

@@ -194,7 +194,7 @@ public class UnitConversionsController : ControllerBase
 			}
 
 			// ??? ??????
-			var canConvert = fromUnit.MeasurementCategoryId == toUnit.MeasurementCategoryId;
+			var canConvert = fromUnit.UnitCategoryId == toUnit.UnitCategoryId;
 
 			return Ok(canConvert);
 		}
