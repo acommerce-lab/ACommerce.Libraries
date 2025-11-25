@@ -2,6 +2,9 @@ using ACommerce.SharedKernel.Abstractions.Repositories;
 using ACommerce.Profiles.Entities;
 using ACommerce.Vendors.Entities;
 using ACommerce.Catalog.Listings.Entities;
+using ACommerce.Profiles.Enums;
+using ACommerce.Vendors.Enums;
+using ACommerce.Catalog.Listings.Enums;
 
 namespace ACommerce.MarketplaceApi.Services;
 
@@ -29,10 +32,10 @@ public class SeedDataService
 
 	private async Task SeedProfilesAsync()
 	{
-		var repo = _repositoryFactory.GetRepository<Profile>();
+		var repo = _repositoryFactory.CreateRepository<Profile>();
 
 		// تحقق إذا كانت البيانات موجودة
-		var existing = await repo.GetAllAsync();
+		var existing = await repo.GetAllWithPredicateAsync();
 		if (existing.Any()) return;
 
 		// إنشاء Profiles من المستخدمين التجريبيين
@@ -65,15 +68,15 @@ public class SeedDataService
 
 	private async Task SeedVendorsAsync()
 	{
-		var repo = _repositoryFactory.GetRepository<Vendor>();
-		var profileRepo = _repositoryFactory.GetRepository<Profile>();
+		var repo = _repositoryFactory.CreateRepository<Vendor>();
+		var profileRepo = _repositoryFactory.CreateRepository<Profile>();
 
-		var existing = await repo.GetAllAsync();
+		var existing = await repo.GetAllWithPredicateAsync();
 		if (existing.Any()) return;
 
 		// الحصول على Profile البائع
 		var vendorUser = _authService.GetAllUsers().First(u => u.Role == "Vendor");
-		var profiles = await profileRepo.GetAllAsync();
+		var profiles = await profileRepo.GetAllWithPredicateAsync();
 		var vendorProfile = profiles.FirstOrDefault(p => p.UserId == vendorUser.Id);
 
 		if (vendorProfile == null) return;
@@ -91,7 +94,7 @@ public class SeedDataService
 			AvailableBalance = 0,
 			PendingBalance = 0,
 			TotalSales = 0,
-			TotalOrders = 0,
+			//TotalOrders = 0,
 			Rating = 4.5m,
 			CreatedAt = DateTime.UtcNow,
 			UpdatedAt = DateTime.UtcNow
@@ -109,13 +112,13 @@ public class SeedDataService
 
 	private async Task SeedListingsAsync()
 	{
-		var repo = _repositoryFactory.GetRepository<ProductListing>();
-		var vendorRepo = _repositoryFactory.GetRepository<Vendor>();
+		var repo = _repositoryFactory.CreateRepository<ProductListing>();
+		var vendorRepo = _repositoryFactory.CreateRepository<Vendor>();
 
-		var existing = await repo.GetAllAsync();
+		var existing = await repo.GetAllWithPredicateAsync();
 		if (existing.Any()) return;
 
-		var vendors = await vendorRepo.GetAllAsync();
+		var vendors = await vendorRepo.GetAllWithPredicateAsync();
 		var vendor = vendors.FirstOrDefault();
 
 		if (vendor == null) return;

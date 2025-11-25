@@ -10,19 +10,15 @@ namespace ACommerce.Vendors.Api.Controllers;
 /// <summary>
 /// متحكم البائعين
 /// </summary>
-public class VendorsController : BaseCrudController<Vendor, CreateVendorDto, CreateVendorDto, VendorResponseDto, CreateVendorDto>
+public class VendorsController(
+    IMediator mediator,
+    ILogger<VendorsController> logger) : BaseCrudController<Vendor, CreateVendorDto, CreateVendorDto, VendorResponseDto, CreateVendorDto>(mediator, logger)
 {
-	public VendorsController(
-		IMediator mediator,
-		ILogger<VendorsController> logger)
-		: base(mediator, logger)
-	{
-	}
 
-	/// <summary>
-	/// الحصول على بائع بواسطة الـ Slug
-	/// </summary>
-	[HttpGet("by-slug/{slug}")]
+    /// <summary>
+    /// الحصول على بائع بواسطة الـ Slug
+    /// </summary>
+    [HttpGet("by-slug/{slug}")]
 	public async Task<ActionResult<VendorResponseDto>> GetBySlug(string slug)
 	{
 		try
@@ -31,19 +27,19 @@ public class VendorsController : BaseCrudController<Vendor, CreateVendorDto, Cre
 			{
 				PageSize = 1,
 				PageNumber = 1,
-				Filters = new List<SharedKernel.Abstractions.Queries.FilterItem>
-				{
-					new() { PropertyName = "StoreSlug", Value = slug, Operator = SharedKernel.Abstractions.Queries.FilterOperator.Equals }
-				}
+				Filters =
+                [
+                    new() { PropertyName = "StoreSlug", Value = slug, Operator = SharedKernel.Abstractions.Queries.FilterOperator.Equals }
+				]
 			};
 
 			var query = new SharedKernel.CQRS.Queries.SmartSearchQuery<Vendor, VendorResponseDto> { Request = searchRequest };
 			var result = await _mediator.Send(query);
 
-			if (result.Data.Count == 0)
+			if (result.Items.Count == 0)
 				return NotFound(new { message = "Vendor not found" });
 
-			return Ok(result.Data.First());
+			return Ok(result.Items.First());
 		}
 		catch (Exception ex)
 		{

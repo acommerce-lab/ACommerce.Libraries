@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -18,7 +18,7 @@
     <ProjectReference Include="..\..\AspNetCore\ACommerce.SharedKernel.AspNetCore\ACommerce.SharedKernel.AspNetCore.csproj" />
     <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
   </ItemGroup>
-  <ItemGroup>
+  <!--<ItemGroup>
     <PackageReference Include="MediatR" Version="12.4.0" />
-  </ItemGroup>
+  </ItemGroup>-->
 </Project>
