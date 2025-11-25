@@ -1,0 +1,314 @@
+@* Product Card Component *@
+
+<SfCard CssClass="product-card">
+	<CardContent>
+		<!-- Product Image -->
+		<div class="product-image-container">
+			@if (!string.IsNullOrEmpty(Listing.ImageUrl))
+			{
+				<img src="@Listing.ImageUrl" alt="@Listing.ProductName" class="product-image" />
+			}
+			else
+			{
+				<div class="product-image-placeholder">
+					📦
+				</div>
+			}
+
+			@if (Listing.IsFeatured)
+			{
+				<span class="featured-badge">⭐ مميز</span>
+			}
+
+			@if (Listing.DiscountPercentage > 0)
+			{
+				<span class="discount-badge">-@Listing.DiscountPercentage%</span>
+			}
+		</div>
+
+		<!-- Product Info -->
+		<div class="product-info">
+			<h4 class="product-name" @onclick="ViewDetails">@Listing.ProductName</h4>
+
+			@if (!string.IsNullOrEmpty(Listing.VendorName))
+			{
+				<p class="product-vendor">بواسطة @Listing.VendorName</p>
+			}
+
+			<!-- Dynamic Properties Preview -->
+			@if (Listing.Properties.Any())
+			{
+				<div class="product-properties">
+					@foreach (var prop in Listing.Properties.Take(3))
+					{
+						<span class="property-tag">@prop.Key: @prop.Value</span>
+					}
+				</div>
+			}
+
+			<!-- Rating -->
+			@if (Listing.AverageRating > 0)
+			{
+				<div class="product-rating">
+					<span class="rating-stars">@GetStars(Listing.AverageRating)</span>
+					<span class="rating-text">(@Listing.RatingsCount)</span>
+				</div>
+			}
+
+			<!-- Price -->
+			<div class="product-price-container">
+				@if (Listing.DiscountPercentage > 0)
+				{
+					<span class="original-price">@Listing.OriginalPrice.ToString("C")</span>
+				}
+				<span class="product-price">@Listing.Price.ToString("C")</span>
+			</div>
+
+			<!-- Stock Status -->
+			@if (Listing.StockQuantity > 0)
+			{
+				<p class="stock-available">✓ متوفر</p>
+			}
+			else
+			{
+				<p class="stock-unavailable">نفذت الكمية</p>
+			}
+		</div>
+	</CardContent>
+
+	<CardFooter>
+		<div class="product-actions">
+			<SfButton IsPrimary="true"
+					  CssClass="add-to-cart-btn"
+					  Disabled="@(Listing.StockQuantity == 0)"
+					  OnClick="HandleAddToCart">
+				🛒 أضف للسلة
+			</SfButton>
+			<SfButton IconCss="e-icons e-heart"
+					  CssClass="wishlist-btn"
+					  OnClick="AddToWishlist">
+			</SfButton>
+		</div>
+	</CardFooter>
+</SfCard>
+
+@code {
+	[Parameter]
+	public ProductListingDto Listing { get; set; } = new();
+
+	[Parameter]
+	public EventCallback<Guid> OnAddToCart { get; set; }
+
+	private void ViewDetails()
+	{
+		// Navigate to product details
+		Navigation.NavigateTo($"/products/{Listing.Id}");
+	}
+
+	private async Task HandleAddToCart()
+	{
+		await OnAddToCart.InvokeAsync(Listing.Id);
+	}
+
+	private void AddToWishlist()
+	{
+		// Add to wishlist logic
+		Notification.ShowInfo("تمت الإضافة إلى قائمة الأمنيات");
+	}
+
+	private string GetStars(decimal rating)
+	{
+		var fullStars = (int)Math.Floor(rating);
+		var hasHalfStar = (rating - fullStars) >= 0.5m;
+		var emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+		var stars = string.Concat(Enumerable.Repeat("⭐", fullStars));
+		if (hasHalfStar) stars += "✨";
+		stars += string.Concat(Enumerable.Repeat("☆", emptyStars));
+
+		return stars;
+	}
+
+	// Model
+	public class ProductListingDto
+	{
+		public Guid Id { get; set; }
+		public string ProductName { get; set; } = string.Empty;
+		public decimal Price { get; set; }
+		public decimal OriginalPrice { get; set; }
+		public int DiscountPercentage { get; set; }
+		public string? ImageUrl { get; set; }
+		public string? VendorName { get; set; }
+		public bool IsFeatured { get; set; }
+		public int StockQuantity { get; set; }
+		public decimal AverageRating { get; set; }
+		public int RatingsCount { get; set; }
+		public Dictionary<string, object> Properties { get; set; } = new();
+	}
+}
+
+<style>
+	.product-card {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		transition: all 0.3s;
+		cursor: pointer;
+	}
+
+	.product-card:hover {
+		transform: translateY(-4px);
+		box-shadow: var(--shadow-lg);
+	}
+
+	.product-image-container {
+		position: relative;
+		width: 100%;
+		height: 200px;
+		overflow: hidden;
+		border-radius: var(--border-radius);
+		background: var(--bg-secondary);
+	}
+
+	.product-image {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 0.3s;
+	}
+
+	.product-card:hover .product-image {
+		transform: scale(1.05);
+	}
+
+	.product-image-placeholder {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 64px;
+		opacity: 0.3;
+	}
+
+	.featured-badge,
+	.discount-badge {
+		position: absolute;
+		top: var(--spacing-sm);
+		padding: var(--spacing-xs) var(--spacing-sm);
+		border-radius: var(--border-radius);
+		font-size: var(--font-size-xs);
+		font-weight: 600;
+		color: white;
+	}
+
+	.featured-badge {
+		left: var(--spacing-sm);
+		background: var(--warning-color);
+	}
+
+	.discount-badge {
+		right: var(--spacing-sm);
+		background: var(--error-color);
+	}
+
+	.product-info {
+		padding: var(--spacing-md);
+		flex: 1;
+	}
+
+	.product-name {
+		margin: 0 0 var(--spacing-xs) 0;
+		font-size: var(--font-size-base);
+		font-weight: 600;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+	}
+
+	.product-vendor {
+		margin: 0;
+		font-size: var(--font-size-sm);
+		color: var(--text-secondary);
+		margin-bottom: var(--spacing-sm);
+	}
+
+	.product-properties {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--spacing-xs);
+		margin: var(--spacing-sm) 0;
+	}
+
+	.property-tag {
+		background: var(--bg-tertiary);
+		padding: 2px 8px;
+		border-radius: 12px;
+		font-size: var(--font-size-xs);
+		color: var(--text-secondary);
+	}
+
+	.product-rating {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-xs);
+		margin: var(--spacing-sm) 0;
+	}
+
+	.rating-stars {
+		color: var(--warning-color);
+		font-size: var(--font-size-sm);
+	}
+
+	.rating-text {
+		font-size: var(--font-size-xs);
+		color: var(--text-secondary);
+	}
+
+	.product-price-container {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-sm);
+		margin: var(--spacing-md) 0;
+	}
+
+	.product-price {
+		font-size: 24px;
+		font-weight: 700;
+		color: var(--price-color);
+	}
+
+	.original-price {
+		font-size: var(--font-size-base);
+		color: var(--text-secondary);
+		text-decoration: line-through;
+	}
+
+	.stock-available {
+		color: var(--success-color);
+		font-size: var(--font-size-sm);
+		margin: 0;
+	}
+
+	.stock-unavailable {
+		color: var(--error-color);
+		font-size: var(--font-size-sm);
+		margin: 0;
+	}
+
+	.product-actions {
+		display: flex;
+		gap: var(--spacing-sm);
+		padding: var(--spacing-md);
+	}
+
+	.add-to-cart-btn {
+		flex: 1;
+	}
+
+	.wishlist-btn {
+		width: 44px;
+	}
+</style>

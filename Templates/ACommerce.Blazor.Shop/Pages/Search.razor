@@ -1,0 +1,453 @@
+@page "/search"
+@inject ProductListingsClient ListingsClient
+@inject CategoriesClient CategoriesClient
+@inject CartStateService CartState
+@inject NavigationManager Navigation
+@inject NotificationService Notification
+
+<PageTitle>البحث والفلاتر - Search & Filters</PageTitle>
+
+<div class="search-page">
+	<!-- Search Bar -->
+	<div class="search-header">
+		<SfTextBox @bind-Value="searchQuery"
+				   Placeholder="ابحث عن المنتجات..."
+				   CssClass="search-input"
+				   @onkeyup="HandleSearchKeyPress">
+			<InputGroupButtons>
+				<InputGroupButton>
+					<SfButton IsPrimary="true" OnClick="PerformSearch">
+						🔍 بحث
+					</SfButton>
+				</InputGroupButton>
+			</InputGroupButtons>
+		</SfTextBox>
+	</div>
+
+	<div class="search-content">
+		<!-- Filters Sidebar -->
+		<aside class="filters-sidebar">
+			<SfCard>
+				<CardHeader Title="الفلاتر" />
+				<CardContent>
+					<!-- Category Filter -->
+					<div class="filter-group">
+						<h4>التصنيف</h4>
+						<SfDropDownList TValue="Guid?"
+										TItem="CategoryDto"
+										@bind-Value="filters.CategoryId"
+										DataSource="@categories"
+										Placeholder="اختر التصنيف">
+							<DropDownListFieldSettings Text="Name" Value="Id" />
+							<DropDownListEvents TValue="Guid?" TItem="CategoryDto" ValueChange="OnFilterChanged" />
+						</SfDropDownList>
+					</div>
+
+					<!-- Price Range -->
+					<div class="filter-group">
+						<h4>نطاق السعر</h4>
+						<div class="price-inputs">
+							<SfNumericTextBox @bind-Value="filters.MinPrice"
+											  Placeholder="من"
+											  Format="C0"
+											  Min="0">
+							</SfNumericTextBox>
+							<span>إلى</span>
+							<SfNumericTextBox @bind-Value="filters.MaxPrice"
+											  Placeholder="إلى"
+											  Format="C0"
+											  Min="0">
+							</SfNumericTextBox>
+						</div>
+						<SfButton CssClass="apply-filter-btn" OnClick="OnFilterChanged">
+							تطبيق
+						</SfButton>
+					</div>
+
+					<!-- Rating Filter -->
+					<div class="filter-group">
+						<h4>التقييم</h4>
+						<SfDropDownList TValue="int?"
+										TItem="RatingOption"
+										@bind-Value="filters.MinRating"
+										DataSource="@ratingOptions"
+										Placeholder="اختر التقييم">
+							<DropDownListFieldSettings Text="Label" Value="Value" />
+							<DropDownListEvents TValue="int?" TItem="RatingOption" ValueChange="OnFilterChanged" />
+						</SfDropDownList>
+					</div>
+
+					<!-- Availability -->
+					<div class="filter-group">
+						<SfCheckBox @bind-Checked="filters.InStockOnly"
+									Label="المنتجات المتوفرة فقط"
+									TChecked="bool">
+							<CheckBoxEvents TChecked="bool" Change="OnFilterChanged" />
+						</SfCheckBox>
+					</div>
+
+					<!-- Featured -->
+					<div class="filter-group">
+						<SfCheckBox @bind-Checked="filters.FeaturedOnly"
+									Label="المنتجات المميزة فقط"
+									TChecked="bool">
+							<CheckBoxEvents TChecked="bool" Change="OnFilterChanged" />
+						</SfCheckBox>
+					</div>
+
+					<!-- Clear Filters -->
+					<SfButton CssClass="clear-filters-btn" OnClick="ClearFilters">
+						مسح الفلاتر
+					</SfButton>
+				</CardContent>
+			</SfCard>
+		</aside>
+
+		<!-- Results -->
+		<div class="search-results">
+			<div class="results-header">
+				<h3>@GetResultsText()</h3>
+				<SfDropDownList TValue="string"
+								TItem="SortOption"
+								@bind-Value="sortBy"
+								DataSource="@sortOptions"
+								Placeholder="ترتيب حسب">
+					<DropDownListFieldSettings Text="Label" Value="Value" />
+					<DropDownListEvents TValue="string" TItem="SortOption" ValueChange="OnSortChanged" />
+				</SfDropDownList>
+			</div>
+
+			@if (isLoading)
+			{
+				<div class="loading-container">
+					<SfSpinner />
+					<p>جارٍ البحث...</p>
+				</div>
+			}
+			else if (searchResults == null || !searchResults.Any())
+			{
+				<div class="no-results">
+					<div class="no-results-icon">🔍</div>
+					<h3>لا توجد نتائج</h3>
+					<p>جرب تغيير معايير البحث أو الفلاتر</p>
+				</div>
+			}
+			else
+			{
+				<div class="products-grid">
+					@foreach (var listing in searchResults)
+					{
+						<ProductCard Listing="@listing" OnAddToCart="HandleAddToCart" />
+					}
+				</div>
+
+				<!-- Pagination -->
+				@if (totalPages > 1)
+				{
+					<div class="pagination">
+						<SfPager CurrentPage="@currentPage"
+								 PageCount="@totalPages"
+								 PageSize="@pageSize"
+								 TotalItemsCount="@totalItems">
+							<PagerEvents PageChanged="OnPageChanged" />
+						</SfPager>
+					</div>
+				}
+			}
+		</div>
+	</div>
+</div>
+
+@code {
+	[SupplyParameterFromQuery]
+	private string? q { get; set; }
+
+	private string searchQuery = "";
+	private List<CategoryDto>? categories;
+	private List<ProductListingDto>? searchResults;
+	private bool isLoading = false;
+
+	private SearchFilters filters = new();
+	private string sortBy = "relevance";
+
+	private int currentPage = 1;
+	private int pageSize = 20;
+	private int totalItems = 0;
+	private int totalPages = 0;
+
+	private List<SortOption> sortOptions = new()
+	{
+		new() { Value = "relevance", Label = "الأكثر صلة" },
+		new() { Value = "price_asc", Label = "السعر: من الأقل للأعلى" },
+		new() { Value = "price_desc", Label = "السعر: من الأعلى للأقل" },
+		new() { Value = "newest", Label = "الأحدث" },
+		new() { Value = "bestsellers", Label = "الأكثر مبيعاً" },
+		new() { Value = "rating", Label = "الأعلى تقييماً" }
+	};
+
+	private List<RatingOption> ratingOptions = new()
+	{
+		new() { Value = 4, Label = "⭐⭐⭐⭐ وأعلى" },
+		new() { Value = 3, Label = "⭐⭐⭐ وأعلى" },
+		new() { Value = 2, Label = "⭐⭐ وأعلى" }
+	};
+
+	protected override async Task OnInitializedAsync()
+	{
+		searchQuery = q ?? "";
+		await LoadCategories();
+		await PerformSearch();
+	}
+
+	private async Task LoadCategories()
+	{
+		try
+		{
+			categories = await CategoriesClient.GetAllAsync();
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ في تحميل التصنيفات: {ex.Message}");
+		}
+	}
+
+	private async Task PerformSearch()
+	{
+		isLoading = true;
+		try
+		{
+			var request = new SearchListingsRequest
+			{
+				Query = searchQuery,
+				CategoryId = filters.CategoryId,
+				MinPrice = filters.MinPrice,
+				MaxPrice = filters.MaxPrice,
+				MinRating = filters.MinRating,
+				InStockOnly = filters.InStockOnly,
+				IsFeatured = filters.FeaturedOnly ? true : null,
+				PageNumber = currentPage,
+				PageSize = pageSize,
+				SortBy = GetSortField(sortBy),
+				SortDescending = sortBy.EndsWith("_desc") || sortBy == "newest" || sortBy == "bestsellers" || sortBy == "rating"
+			};
+
+			var result = await ListingsClient.SearchAsync(request);
+			searchResults = result?.Items ?? new();
+			totalItems = result?.TotalCount ?? 0;
+			totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ في البحث: {ex.Message}");
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private string GetSortField(string sort) => sort switch
+	{
+		"price_asc" or "price_desc" => "Price",
+		"newest" => "CreatedAt",
+		"bestsellers" => "Sales",
+		"rating" => "Rating",
+		_ => "Relevance"
+	};
+
+	private void HandleSearchKeyPress(KeyboardEventArgs e)
+	{
+		if (e.Key == "Enter")
+		{
+			_ = PerformSearch();
+		}
+	}
+
+	private async Task OnFilterChanged(ChangeEventArgs<Guid?, CategoryDto>? args = null)
+	{
+		currentPage = 1;
+		await PerformSearch();
+	}
+
+	private async Task OnSortChanged(ChangeEventArgs<string, SortOption>? args = null)
+	{
+		currentPage = 1;
+		await PerformSearch();
+	}
+
+	private async Task OnPageChanged(PageChangedEventArgs args)
+	{
+		currentPage = args.CurrentPage;
+		await PerformSearch();
+	}
+
+	private async Task ClearFilters()
+	{
+		filters = new SearchFilters();
+		sortBy = "relevance";
+		currentPage = 1;
+		await PerformSearch();
+	}
+
+	private async Task HandleAddToCart(Guid listingId)
+	{
+		var success = await CartState.AddToCartAsync(listingId, 1);
+		if (success)
+		{
+			Notification.ShowSuccess("تمت الإضافة إلى السلة");
+		}
+	}
+
+	private string GetResultsText()
+	{
+		if (totalItems == 0) return "لا توجد نتائج";
+		return $"عرض {searchResults?.Count ?? 0} من {totalItems} منتج";
+	}
+
+	// Models
+	private class SearchFilters
+	{
+		public Guid? CategoryId { get; set; }
+		public decimal? MinPrice { get; set; }
+		public decimal? MaxPrice { get; set; }
+		public int? MinRating { get; set; }
+		public bool InStockOnly { get; set; }
+		public bool FeaturedOnly { get; set; }
+	}
+
+	private class SortOption
+	{
+		public string Value { get; set; } = string.Empty;
+		public string Label { get; set; } = string.Empty;
+	}
+
+	private class RatingOption
+	{
+		public int Value { get; set; }
+		public string Label { get; set; } = string.Empty;
+	}
+}
+
+<style>
+	.search-page {
+		padding: var(--spacing-lg);
+	}
+
+	.search-header {
+		margin-bottom: var(--spacing-xl);
+	}
+
+	.search-input {
+		width: 100%;
+		max-width: 800px;
+		margin: 0 auto;
+	}
+
+	.search-content {
+		display: grid;
+		grid-template-columns: 280px 1fr;
+		gap: var(--spacing-xl);
+	}
+
+	/* Filters */
+	.filters-sidebar {
+		position: sticky;
+		top: var(--spacing-lg);
+		height: fit-content;
+	}
+
+	.filter-group {
+		margin-bottom: var(--spacing-lg);
+		padding-bottom: var(--spacing-lg);
+		border-bottom: 1px solid var(--border-color);
+	}
+
+	.filter-group:last-child {
+		border-bottom: none;
+	}
+
+	.filter-group h4 {
+		margin-bottom: var(--spacing-md);
+		font-size: var(--font-size-base);
+		font-weight: 600;
+	}
+
+	.price-inputs {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-sm);
+	}
+
+	.apply-filter-btn {
+		width: 100%;
+		margin-top: var(--spacing-sm);
+	}
+
+	.clear-filters-btn {
+		width: 100%;
+		margin-top: var(--spacing-md);
+	}
+
+	/* Results */
+	.search-results {
+		min-height: 600px;
+	}
+
+	.results-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: var(--spacing-lg);
+		padding-bottom: var(--spacing-md);
+		border-bottom: 2px solid var(--border-color);
+	}
+
+	.products-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+		gap: var(--spacing-lg);
+		margin-bottom: var(--spacing-xl);
+	}
+
+	.no-results {
+		text-align: center;
+		padding: var(--spacing-xl) 0;
+	}
+
+	.no-results-icon {
+		font-size: 64px;
+		margin-bottom: var(--spacing-md);
+		opacity: 0.5;
+	}
+
+	.no-results h3 {
+		margin-bottom: var(--spacing-sm);
+		color: var(--text-primary);
+	}
+
+	.no-results p {
+		color: var(--text-secondary);
+	}
+
+	.pagination {
+		margin-top: var(--spacing-xl);
+		display: flex;
+		justify-content: center;
+	}
+
+	.loading-container {
+		text-align: center;
+		padding: var(--spacing-xl);
+	}
+
+	/* Responsive */
+	@media (max-width: 768px) {
+		.search-content {
+			grid-template-columns: 1fr;
+		}
+
+		.filters-sidebar {
+			position: static;
+		}
+	}
+</style>

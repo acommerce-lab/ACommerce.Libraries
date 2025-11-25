@@ -1,0 +1,211 @@
+@* Orders List Component *@
+
+@if (Items == null || !Items.Any())
+{
+	<div class="empty-orders">
+		<p>لا توجد طلبات في هذه الفئة</p>
+	</div>
+}
+else
+{
+	<div class="orders-list">
+		@foreach (var order in Items)
+		{
+			<SfCard CssClass="order-card">
+				<CardContent>
+					<div class="order-header">
+						<div class="order-info">
+							<h4>طلب #@order.OrderNumber</h4>
+							<p class="order-date">@FormatDate(order.CreatedAt)</p>
+						</div>
+						<div class="order-status">
+							<span class="status-badge status-@order.Status.ToLower()">
+								@GetStatusText(order.Status)
+							</span>
+						</div>
+					</div>
+
+					<div class="order-details">
+						<div class="detail-item">
+							<span class="detail-label">عدد المنتجات:</span>
+							<span class="detail-value">@order.ItemsCount</span>
+						</div>
+						<div class="detail-item">
+							<span class="detail-label">الإجمالي:</span>
+							<span class="detail-value price">@order.Total.ToString("C")</span>
+						</div>
+					</div>
+
+					<div class="order-actions">
+						<SfButton IsPrimary="true" OnClick="() => OnViewDetails.InvokeAsync(order.Id)">
+							عرض التفاصيل
+						</SfButton>
+
+						@if (order.Status == "Shipped" || order.Status == "InTransit")
+						{
+							<SfButton OnClick="() => TrackOrder(order.Id)">
+								تتبع الشحنة
+							</SfButton>
+						}
+
+						@if (order.Status == "Delivered")
+						{
+							<SfButton OnClick="() => ReorderItems(order.Id)">
+								إعادة الطلب
+							</SfButton>
+						}
+					</div>
+				</CardContent>
+			</SfCard>
+		}
+	</div>
+}
+
+@code {
+	[Parameter]
+	public List<OrderDto>? Items { get; set; }
+
+	[Parameter]
+	public EventCallback<Guid> OnViewDetails { get; set; }
+
+	private string GetStatusText(string status) => status switch
+	{
+		"Pending" => "قيد الانتظار",
+		"Processing" => "قيد المعالجة",
+		"Shipped" => "تم الشحن",
+		"InTransit" => "في الطريق",
+		"Delivered" => "تم التسليم",
+		"Completed" => "مكتمل",
+		"Cancelled" => "ملغي",
+		_ => status
+	};
+
+	private string FormatDate(DateTime date)
+	{
+		return date.ToString("dd MMMM yyyy");
+	}
+
+	private void TrackOrder(Guid orderId)
+	{
+		// Track shipment
+	}
+
+	private void ReorderItems(Guid orderId)
+	{
+		// Reorder logic
+	}
+
+	public class OrderDto
+	{
+		public Guid Id { get; set; }
+		public string OrderNumber { get; set; } = string.Empty;
+		public string Status { get; set; } = string.Empty;
+		public decimal Total { get; set; }
+		public DateTime CreatedAt { get; set; }
+		public int ItemsCount { get; set; }
+	}
+}
+
+<style>
+	.empty-orders {
+		text-align: center;
+		padding: var(--spacing-xl);
+		color: var(--text-secondary);
+	}
+
+	.orders-list {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-lg);
+	}
+
+	.order-card {
+		transition: box-shadow 0.2s;
+	}
+
+	.order-card:hover {
+		box-shadow: var(--shadow-lg);
+	}
+
+	.order-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		margin-bottom: var(--spacing-md);
+		padding-bottom: var(--spacing-md);
+		border-bottom: 1px solid var(--border-color);
+	}
+
+	.order-info h4 {
+		margin: 0 0 var(--spacing-xs) 0;
+		font-size: var(--font-size-lg);
+	}
+
+	.order-date {
+		margin: 0;
+		font-size: var(--font-size-sm);
+		color: var(--text-secondary);
+	}
+
+	.status-badge {
+		padding: var(--spacing-xs) var(--spacing-md);
+		border-radius: 20px;
+		font-size: var(--font-size-sm);
+		font-weight: 600;
+	}
+
+	.status-pending,
+	.status-processing {
+		background: var(--warning-bg);
+		color: var(--warning-color);
+	}
+
+	.status-shipped,
+	.status-intransit {
+		background: var(--info-bg);
+		color: var(--info-color);
+	}
+
+	.status-delivered,
+	.status-completed {
+		background: var(--success-bg);
+		color: var(--success-color);
+	}
+
+	.status-cancelled {
+		background: var(--error-bg);
+		color: var(--error-color);
+	}
+
+	.order-details {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: var(--spacing-md);
+		margin-bottom: var(--spacing-lg);
+	}
+
+	.detail-item {
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.detail-label {
+		color: var(--text-secondary);
+		font-size: var(--font-size-sm);
+	}
+
+	.detail-value {
+		font-weight: 600;
+	}
+
+	.detail-value.price {
+		color: var(--price-color);
+		font-size: var(--font-size-lg);
+	}
+
+	.order-actions {
+		display: flex;
+		gap: var(--spacing-sm);
+		flex-wrap: wrap;
+	}
+</style>

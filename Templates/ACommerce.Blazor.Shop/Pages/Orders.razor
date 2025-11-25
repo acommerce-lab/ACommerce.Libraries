@@ -1,0 +1,144 @@
+@page "/orders"
+@inject OrdersClient OrdersClient
+@inject NavigationManager Navigation
+@inject NotificationService Notification
+
+<PageTitle>طلباتي - My Orders</PageTitle>
+
+<div class="orders-page">
+	<h1>طلباتي</h1>
+
+	@if (isLoading)
+	{
+		<div class="loading-container">
+			<SfSpinner />
+		</div>
+	}
+	else if (orders == null || !orders.Any())
+	{
+		<div class="empty-state">
+			<div class="empty-icon">📋</div>
+			<h3>لا توجد طلبات</h3>
+			<p>ابدأ التسوق واطلب منتجاتك المفضلة</p>
+			<SfButton IsPrimary="true" OnClick="() => Navigation.NavigateTo(\"/products\")">
+				تصفح المنتجات
+			</SfButton>
+		</div>
+	}
+	else
+	{
+		<SfTab>
+			<TabItems>
+				<TabItem>
+					<ChildContent>
+						<TabHeader Text="@($\"الكل ({orders.Count})\")" />
+					</ChildContent>
+					<ContentTemplate>
+						<OrdersList Items="@orders" OnViewDetails="ViewOrderDetails" />
+					</ContentTemplate>
+				</TabItem>
+
+				<TabItem>
+					<ChildContent>
+						<TabHeader Text="@($\"قيد المعالجة ({pendingOrders.Count})\")" />
+					</ChildContent>
+					<ContentTemplate>
+						<OrdersList Items="@pendingOrders" OnViewDetails="ViewOrderDetails" />
+					</ContentTemplate>
+				</TabItem>
+
+				<TabItem>
+					<ChildContent>
+						<TabHeader Text="@($\"قيد الشحن ({shippingOrders.Count})\")" />
+					</ChildContent>
+					<ContentTemplate>
+						<OrdersList Items="@shippingOrders" OnViewDetails="ViewOrderDetails" />
+					</ContentTemplate>
+				</TabItem>
+
+				<TabItem>
+					<ChildContent>
+						<TabHeader Text="@($\"مكتملة ({completedOrders.Count})\")" />
+					</ChildContent>
+					<ContentTemplate>
+						<OrdersList Items="@completedOrders" OnViewDetails="ViewOrderDetails" />
+					</ContentTemplate>
+				</TabItem>
+			</TabItems>
+		</SfTab>
+	}
+</div>
+
+@code {
+	private List<OrderDto>? orders;
+	private List<OrderDto> pendingOrders => orders?.Where(o => o.Status == "Pending" || o.Status == "Processing").ToList() ?? new();
+	private List<OrderDto> shippingOrders => orders?.Where(o => o.Status == "Shipped" || o.Status == "InTransit").ToList() ?? new();
+	private List<OrderDto> completedOrders => orders?.Where(o => o.Status == "Delivered" || o.Status == "Completed").ToList() ?? new();
+
+	private bool isLoading = true;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadOrders();
+	}
+
+	private async Task LoadOrders()
+	{
+		isLoading = true;
+		try
+		{
+			orders = await OrdersClient.GetMyOrdersAsync();
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private void ViewOrderDetails(Guid orderId)
+	{
+		Navigation.NavigateTo($"/orders/{orderId}");
+	}
+
+	private class OrderDto
+	{
+		public Guid Id { get; set; }
+		public string OrderNumber { get; set; } = string.Empty;
+		public string Status { get; set; } = string.Empty;
+		public decimal Total { get; set; }
+		public DateTime CreatedAt { get; set; }
+		public int ItemsCount { get; set; }
+	}
+}
+
+<style>
+	.orders-page {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: var(--spacing-lg);
+	}
+
+	.orders-page h1 {
+		margin-bottom: var(--spacing-xl);
+	}
+
+	.empty-state {
+		text-align: center;
+		padding: var(--spacing-xl) 0;
+	}
+
+	.empty-icon {
+		font-size: 80px;
+		margin-bottom: var(--spacing-md);
+		opacity: 0.3;
+	}
+
+	.loading-container {
+		text-align: center;
+		padding: var(--spacing-xl);
+	}
+</style>

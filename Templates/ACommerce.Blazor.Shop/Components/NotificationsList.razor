@@ -1,0 +1,185 @@
+@* Notification List Component *@
+
+@if (Items == null || !Items.Any())
+{
+	<div class="empty-notifications">
+		<div class="empty-icon">🔔</div>
+		<h3>لا توجد إشعارات</h3>
+		<p>ستظهر الإشعارات هنا</p>
+	</div>
+}
+else
+{
+	<div class="notifications-items">
+		@foreach (var notification in Items)
+		{
+			<div class="notification-item @(notification.IsRead ? "" : "unread")"
+				 @onclick="() => OnItemClick.InvokeAsync(notification.Id)">
+				<div class="notification-icon">
+					@GetNotificationIcon(notification.Type)
+				</div>
+				<div class="notification-content">
+					<h4>@notification.Title</h4>
+					<p>@notification.Message</p>
+					<span class="notification-time">@FormatTime(notification.CreatedAt)</span>
+				</div>
+				<div class="notification-actions">
+					@if (!notification.IsRead)
+					{
+						<span class="unread-indicator">●</span>
+					}
+					<SfButton IconCss="e-icons e-close"
+							  CssClass="delete-btn"
+							  OnClick="(e) => HandleDeleteClick(e, notification.Id)" />
+				</div>
+			</div>
+		}
+	</div>
+}
+
+@code {
+	[Parameter]
+	public List<NotificationDto>? Items { get; set; }
+
+	[Parameter]
+	public EventCallback<Guid> OnItemClick { get; set; }
+
+	[Parameter]
+	public EventCallback<Guid> OnDelete { get; set; }
+
+	private string GetNotificationIcon(string type) => type switch
+	{
+		"Order" => "📦",
+		"Message" => "💬",
+		"Payment" => "💳",
+		"Shipping" => "🚚",
+		"Promotion" => "🎉",
+		"System" => "⚙️",
+		_ => "🔔"
+	};
+
+	private string FormatTime(DateTime dateTime)
+	{
+		var now = DateTime.UtcNow;
+		var diff = now - dateTime;
+
+		if (diff.TotalMinutes < 1) return "الآن";
+		if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes} دقيقة";
+		if (diff.TotalHours < 24) return $"{(int)diff.TotalHours} ساعة";
+		if (diff.TotalDays < 7) return $"{(int)diff.TotalDays} يوم";
+		return dateTime.ToString("dd/MM/yyyy");
+	}
+
+	private async Task HandleDeleteClick(MouseEventArgs e, Guid notificationId)
+	{
+		e.StopPropagation();
+		await OnDelete.InvokeAsync(notificationId);
+	}
+
+	// Models
+	public class NotificationDto
+	{
+		public Guid Id { get; set; }
+		public string Type { get; set; } = string.Empty;
+		public string Title { get; set; } = string.Empty;
+		public string Message { get; set; } = string.Empty;
+		public string? ActionUrl { get; set; }
+		public bool IsRead { get; set; }
+		public DateTime CreatedAt { get; set; }
+	}
+}
+
+<style>
+	.empty-notifications {
+		text-align: center;
+		padding: var(--spacing-xl);
+	}
+
+	.empty-icon {
+		font-size: 64px;
+		margin-bottom: var(--spacing-md);
+		opacity: 0.5;
+	}
+
+	.notifications-items {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.notification-item {
+		display: flex;
+		gap: var(--spacing-md);
+		padding: var(--spacing-md);
+		border-bottom: 1px solid var(--border-color);
+		cursor: pointer;
+		transition: background 0.2s;
+	}
+
+	.notification-item:hover {
+		background: var(--bg-secondary);
+	}
+
+	.notification-item.unread {
+		background: var(--bg-highlight);
+	}
+
+	.notification-icon {
+		width: 48px;
+		height: 48px;
+		border-radius: 50%;
+		background: var(--bg-secondary);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 24px;
+		flex-shrink: 0;
+	}
+
+	.notification-content {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.notification-content h4 {
+		margin: 0 0 var(--spacing-xs) 0;
+		font-size: var(--font-size-base);
+		font-weight: 600;
+	}
+
+	.notification-content p {
+		margin: 0;
+		color: var(--text-secondary);
+		font-size: var(--font-size-sm);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+	}
+
+	.notification-time {
+		font-size: var(--font-size-xs);
+		color: var(--text-secondary);
+		display: block;
+		margin-top: var(--spacing-xs);
+	}
+
+	.notification-actions {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-sm);
+	}
+
+	.unread-indicator {
+		color: var(--primary-color);
+		font-size: 20px;
+	}
+
+	.delete-btn {
+		opacity: 0.6;
+	}
+
+	.delete-btn:hover {
+		opacity: 1;
+	}
+</style>

@@ -1,0 +1,435 @@
+@page "/onboarding"
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>مرحباً - Welcome</PageTitle>
+
+<div class="onboarding-page">
+	<div class="onboarding-container">
+		<!-- Progress Indicators -->
+		<div class="progress-dots">
+			@for (int i = 0; i < slides.Count; i++)
+			{
+				<span class="dot @(currentSlide == i ? "active" : "")"
+					  @onclick="() => GoToSlide(i)"></span>
+			}
+		</div>
+
+		<!-- Slides -->
+		<div class="slides-container">
+			@if (currentSlide == 0)
+			{
+				<div class="slide slide-1">
+					<div class="slide-icon">🛍️</div>
+					<h1>مرحباً بك في متجرنا</h1>
+					<p>أفضل تجربة تسوق إلكتروني مع آلاف المنتجات من تجار موثوقين</p>
+					<div class="slide-illustration">
+						<div class="illustration-box">
+							<span class="illust-icon">📱</span>
+							<span class="illust-icon">👕</span>
+							<span class="illust-icon">📚</span>
+						</div>
+					</div>
+				</div>
+			}
+			else if (currentSlide == 1)
+			{
+				<div class="slide slide-2">
+					<div class="slide-icon">🎯</div>
+					<h1>تسوق بذكاء</h1>
+					<p>بحث متقدم وفلاتر ذكية للعثور على ما تريد بسرعة</p>
+					<div class="slide-illustration">
+						<div class="search-demo">
+							<div class="demo-search-bar">🔍 ابحث عن أي شيء...</div>
+							<div class="demo-filters">
+								<span class="demo-filter">📦 الفئات</span>
+								<span class="demo-filter">💰 السعر</span>
+								<span class="demo-filter">⭐ التقييم</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			}
+			else if (currentSlide == 2)
+			{
+				<div class="slide slide-3">
+					<div class="slide-icon">🚀</div>
+					<h1>شحن سريع وآمن</h1>
+					<p>توصيل سريع لجميع المناطق مع إمكانية تتبع شحنتك لحظة بلحظة</p>
+					<div class="slide-illustration">
+						<div class="shipping-demo">
+							<div class="truck-icon">🚚</div>
+							<div class="tracking-steps">
+								<span class="step done">✓ تم الاستلام</span>
+								<span class="step done">✓ قيد الشحن</span>
+								<span class="step current">📍 في الطريق</span>
+								<span class="step">⏳ التسليم</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			}
+			else if (currentSlide == 3)
+			{
+				<div class="slide slide-4">
+					<div class="slide-icon">💳</div>
+					<h1>دفع آمن ومتنوع</h1>
+					<p>ادفع بالطريقة التي تناسبك: مدى، فيزا، ماستركارد، Apple Pay</p>
+					<div class="slide-illustration">
+						<div class="payment-methods">
+							<span class="payment-icon">💳</span>
+							<span class="payment-icon">📱</span>
+							<span class="payment-icon">🍎</span>
+							<span class="payment-icon">🔒</span>
+						</div>
+					</div>
+				</div>
+			}
+			else if (currentSlide == 4)
+			{
+				<div class="slide slide-5">
+					<div class="slide-icon">✨</div>
+					<h1>ابدأ التسوق الآن!</h1>
+					<p>جاهز للبدء؟ سجّل الدخول أو أنشئ حساب جديد</p>
+					<div class="final-actions">
+						<SfButton IsPrimary="true"
+								  CssClass="action-btn"
+								  OnClick="GoToRegister">
+							إنشاء حساب جديد
+						</SfButton>
+						<SfButton CssClass="action-btn secondary"
+								  OnClick="GoToLogin">
+							لدي حساب بالفعل
+						</SfButton>
+						<SfButton CssClass="skip-btn"
+								  OnClick="SkipOnboarding">
+							تخطي والاستمرار كضيف
+						</SfButton>
+					</div>
+				</div>
+			}
+		</div>
+
+		<!-- Navigation -->
+		<div class="onboarding-nav">
+			@if (currentSlide > 0)
+			{
+				<SfButton CssClass="nav-btn prev-btn" OnClick="PreviousSlide">
+					← السابق
+				</SfButton>
+			}
+			else
+			{
+				<div></div>
+			}
+
+			@if (currentSlide < slides.Count - 1)
+			{
+				<SfButton IsPrimary="true" CssClass="nav-btn next-btn" OnClick="NextSlide">
+					التالي →
+				</SfButton>
+			}
+			else
+			{
+				<div></div>
+			}
+		</div>
+
+		<!-- Skip Button (except last slide) -->
+		@if (currentSlide < slides.Count - 1)
+		{
+			<div class="skip-container">
+				<SfButton CssClass="skip-btn" OnClick="SkipOnboarding">
+					تخطي
+				</SfButton>
+			</div>
+		}
+	</div>
+</div>
+
+@code {
+	private int currentSlide = 0;
+	private List<string> slides = new() { "welcome", "search", "shipping", "payment", "start" };
+
+	private void NextSlide()
+	{
+		if (currentSlide < slides.Count - 1)
+		{
+			currentSlide++;
+		}
+	}
+
+	private void PreviousSlide()
+	{
+		if (currentSlide > 0)
+		{
+			currentSlide--;
+		}
+	}
+
+	private void GoToSlide(int index)
+	{
+		if (index >= 0 && index < slides.Count)
+		{
+			currentSlide = index;
+		}
+	}
+
+	private async Task SkipOnboarding()
+	{
+		// Mark onboarding as completed
+		await JS.InvokeVoidAsync("localStorage.setItem", "onboarding_completed", "true");
+		Navigation.NavigateTo("/");
+	}
+
+	private async Task GoToRegister()
+	{
+		await JS.InvokeVoidAsync("localStorage.setItem", "onboarding_completed", "true");
+		Navigation.NavigateTo("/register");
+	}
+
+	private async Task GoToLogin()
+	{
+		await JS.InvokeVoidAsync("localStorage.setItem", "onboarding_completed", "true");
+		Navigation.NavigateTo("/login");
+	}
+}
+
+<style>
+	.onboarding-page {
+		height: 100vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		color: white;
+	}
+
+	.onboarding-container {
+		width: 100%;
+		max-width: 800px;
+		padding: var(--spacing-xl);
+		position: relative;
+	}
+
+	/* Progress Dots */
+	.progress-dots {
+		display: flex;
+		justify-content: center;
+		gap: var(--spacing-sm);
+		margin-bottom: var(--spacing-xl);
+	}
+
+	.dot {
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.3);
+		cursor: pointer;
+		transition: all 0.3s;
+	}
+
+	.dot.active {
+		background: white;
+		width: 32px;
+		border-radius: 6px;
+	}
+
+	/* Slides */
+	.slides-container {
+		min-height: 500px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.slide {
+		text-align: center;
+		animation: slideIn 0.5s ease-out;
+	}
+
+	@keyframes slideIn {
+		from {
+			opacity: 0;
+			transform: translateX(30px);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(0);
+		}
+	}
+
+	.slide-icon {
+		font-size: 80px;
+		margin-bottom: var(--spacing-lg);
+	}
+
+	.slide h1 {
+		font-size: 36px;
+		margin-bottom: var(--spacing-md);
+		font-weight: 700;
+	}
+
+	.slide p {
+		font-size: 18px;
+		margin-bottom: var(--spacing-xl);
+		opacity: 0.9;
+		max-width: 600px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	/* Illustrations */
+	.slide-illustration {
+		margin-top: var(--spacing-xl);
+	}
+
+	.illustration-box {
+		display: flex;
+		justify-content: center;
+		gap: var(--spacing-xl);
+		font-size: 64px;
+	}
+
+	.illust-icon {
+		animation: float 3s ease-in-out infinite;
+	}
+
+	.illust-icon:nth-child(2) {
+		animation-delay: 0.5s;
+	}
+
+	.illust-icon:nth-child(3) {
+		animation-delay: 1s;
+	}
+
+	@keyframes float {
+		0%, 100% { transform: translateY(0); }
+		50% { transform: translateY(-20px); }
+	}
+
+	/* Search Demo */
+	.search-demo {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-md);
+		max-width: 400px;
+		margin: 0 auto;
+	}
+
+	.demo-search-bar {
+		padding: var(--spacing-md);
+		background: rgba(255, 255, 255, 0.2);
+		border-radius: var(--border-radius);
+		text-align: right;
+	}
+
+	.demo-filters {
+		display: flex;
+		gap: var(--spacing-sm);
+		justify-content: center;
+	}
+
+	.demo-filter {
+		padding: var(--spacing-xs) var(--spacing-md);
+		background: rgba(255, 255, 255, 0.2);
+		border-radius: 20px;
+		font-size: var(--font-size-sm);
+	}
+
+	/* Shipping Demo */
+	.shipping-demo {
+		max-width: 500px;
+		margin: 0 auto;
+	}
+
+	.truck-icon {
+		font-size: 64px;
+		margin-bottom: var(--spacing-lg);
+	}
+
+	.tracking-steps {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-sm);
+		text-align: right;
+	}
+
+	.step {
+		padding: var(--spacing-sm) var(--spacing-md);
+		background: rgba(255, 255, 255, 0.1);
+		border-radius: var(--border-radius);
+		font-size: var(--font-size-sm);
+	}
+
+	.step.done {
+		background: rgba(16, 185, 129, 0.3);
+	}
+
+	.step.current {
+		background: rgba(255, 255, 255, 0.3);
+		font-weight: 600;
+	}
+
+	/* Payment Methods */
+	.payment-methods {
+		display: flex;
+		justify-content: center;
+		gap: var(--spacing-xl);
+		font-size: 64px;
+	}
+
+	/* Final Actions */
+	.final-actions {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-md);
+		max-width: 400px;
+		margin: 0 auto;
+	}
+
+	.action-btn {
+		width: 100%;
+		padding: var(--spacing-md);
+		font-size: 18px;
+		font-weight: 600;
+	}
+
+	.action-btn.secondary {
+		background: rgba(255, 255, 255, 0.2);
+		border: 2px solid white;
+	}
+
+	/* Navigation */
+	.onboarding-nav {
+		display: flex;
+		justify-content: space-between;
+		margin-top: var(--spacing-xl);
+	}
+
+	.nav-btn {
+		padding: var(--spacing-sm) var(--spacing-lg);
+		background: rgba(255, 255, 255, 0.2);
+		color: white;
+		border: 1px solid rgba(255, 255, 255, 0.3);
+	}
+
+	.nav-btn:hover {
+		background: rgba(255, 255, 255, 0.3);
+	}
+
+	.skip-container {
+		text-align: center;
+		margin-top: var(--spacing-lg);
+	}
+
+	.skip-btn {
+		background: transparent;
+		color: white;
+		opacity: 0.7;
+	}
+
+	.skip-btn:hover {
+		opacity: 1;
+	}
+</style>

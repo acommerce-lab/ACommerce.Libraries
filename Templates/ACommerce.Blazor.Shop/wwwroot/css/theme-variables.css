@@ -1,0 +1,98 @@
+/* ============================================
+   🎨 ACommerce Theme Variables
+   قابل للتخصيص الكامل - غير القيم فقط!
+   ============================================ */
+
+:root {
+	/* ===== Colors - الألوان الأساسية ===== */
+	--primary-color: #6366f1;
+	--primary-dark: #4f46e5;
+	--primary-light: #818cf8;
+
+	--secondary-color: #ec4899;
+	--secondary-dark: #db2777;
+	--secondary-light: #f472b6;
+
+	--success-color: #10b981;
+	--warning-color: #f59e0b;
+	--danger-color: #ef4444;
+	--info-color: #3b82f6;
+
+	/* ===== Backgrounds ===== */
+	--bg-primary: #ffffff;
+	--bg-secondary: #f9fafb;
+	--bg-tertiary: #f3f4f6;
+	--bg-card: #ffffff;
+	--bg-hover: #f3f4f6;
+
+	/* ===== Text Colors ===== */
+	--text-primary: #111827;
+	--text-secondary: #6b7280;
+	--text-tertiary: #9ca3af;
+	--text-on-primary: #ffffff;
+
+	/* ===== Borders ===== */
+	--border-color: #e5e7eb;
+	--border-radius: 8px;
+	--border-radius-lg: 12px;
+	--border-radius-sm: 4px;
+
+	/* ===== Spacing ===== */
+	--spacing-xs: 4px;
+	--spacing-sm: 8px;
+	--spacing-md: 16px;
+	--spacing-lg: 24px;
+	--spacing-xl: 32px;
+	--spacing-2xl: 48px;
+
+	/* ===== Shadows ===== */
+	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+	--shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+	--shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+
+	/* ===== Typography ===== */
+	--font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+	--font-size-xs: 12px;
+	--font-size-sm: 14px;
+	--font-size-base: 16px;
+	--font-size-lg: 18px;
+	--font-size-xl: 20px;
+	--font-size-2xl: 24px;
+	--font-size-3xl: 30px;
+
+	/* ===== E-Commerce Specific ===== */
+	--price-color: #10b981;
+	--discount-color: #ef4444;
+	--stock-low-color: #f59e0b;
+	--stock-out-color: #ef4444;
+
+	/* ===== Animation ===== */
+	--transition-fast: 150ms ease;
+	--transition-normal: 300ms ease;
+	--transition-slow: 500ms ease;
+}
+
+/* ===== Dark Theme Variables ===== */
+[data-theme="dark"] {
+	--bg-primary: #111827;
+	--bg-secondary: #1f2937;
+	--bg-tertiary: #374151;
+	--bg-card: #1f2937;
+	--bg-hover: #374151;
+
+	--text-primary: #f9fafb;
+	--text-secondary: #d1d5db;
+	--text-tertiary: #9ca3af;
+
+	--border-color: #374151;
+
+	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+	--shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+}
+
+/* ===== RTL Support ===== */
+[dir="rtl"] {
+	--font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}

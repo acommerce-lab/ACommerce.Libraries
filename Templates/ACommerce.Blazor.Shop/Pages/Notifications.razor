@@ -1,0 +1,421 @@
+@page "/notifications"
+@inject NotificationsClient NotificationsClient
+@inject RealtimeClient RealtimeClient
+@inject NavigationManager Navigation
+@inject NotificationService Notification
+@implements IAsyncDisposable
+
+<PageTitle>الإشعارات - Notifications</PageTitle>
+
+<div class="notifications-page">
+	<SfCard>
+		<CardHeader>
+			<div class="notifications-header">
+				<h2>الإشعارات</h2>
+				<div class="header-actions">
+					@if (unreadCount > 0)
+					{
+						<SfButton OnClick="MarkAllAsRead">
+							✓ تعليم الكل كمقروء
+						</SfButton>
+					}
+					<SfButton OnClick="ManagePushNotifications">
+						⚙️ إدارة الإشعارات
+					</SfButton>
+				</div>
+			</div>
+		</CardHeader>
+
+		<!-- Tabs -->
+		<CardContent>
+			<SfTab>
+				<TabItems>
+					<TabItem>
+						<ChildContent>
+							<TabHeader Text="الكل (@totalCount)" />
+						</ChildContent>
+						<ContentTemplate>
+							<div class="notifications-list">
+								@if (isLoading)
+								{
+									<div class="loading-container">
+										<SfSpinner />
+									</div>
+								}
+								else
+								{
+									<NotificationsList Items="@allNotifications"
+													   OnItemClick="HandleNotificationClick"
+													   OnDelete="HandleDelete" />
+								}
+							</div>
+						</ContentTemplate>
+					</TabItem>
+
+					<TabItem>
+						<ChildContent>
+							<TabHeader Text="غير المقروءة (@unreadCount)" />
+						</ChildContent>
+						<ContentTemplate>
+							<div class="notifications-list">
+								<NotificationsList Items="@unreadNotifications"
+												   OnItemClick="HandleNotificationClick"
+												   OnDelete="HandleDelete" />
+							</div>
+						</ContentTemplate>
+					</TabItem>
+
+					<TabItem>
+						<ChildContent>
+							<TabHeader Text="الطلبات" />
+						</ChildContent>
+						<ContentTemplate>
+							<div class="notifications-list">
+								<NotificationsList Items="@orderNotifications"
+												   OnItemClick="HandleNotificationClick"
+												   OnDelete="HandleDelete" />
+							</div>
+						</ContentTemplate>
+					</TabItem>
+
+					<TabItem>
+						<ChildContent>
+							<TabHeader Text="الرسائل" />
+						</ChildContent>
+						<ContentTemplate>
+							<div class="notifications-list">
+								<NotificationsList Items="@messageNotifications"
+												   OnItemClick="HandleNotificationClick"
+												   OnDelete="HandleDelete" />
+							</div>
+						</ContentTemplate>
+					</TabItem>
+				</TabItems>
+			</SfTab>
+		</CardContent>
+	</SfCard>
+</div>
+
+<!-- Push Notification Settings Dialog -->
+<SfDialog @bind-Visible="showPushSettings"
+		  Width="500px"
+		  IsModal="true">
+	<DialogTemplates>
+		<Header>⚙️ إعدادات الإشعارات</Header>
+		<Content>
+			<div class="push-settings-content">
+				<div class="settings-info">
+					<p>إدارة إشعارات الدفع (Push Notifications) لتلقي التحديثات على هاتفك</p>
+				</div>
+
+				<div class="settings-group">
+					<SfCheckBox @bind-Checked="pushSettings.EnablePush"
+								Label="تفعيل الإشعارات الفورية"
+								TChecked="bool" />
+				</div>
+
+				<div class="settings-group">
+					<h4>أنواع الإشعارات:</h4>
+					<SfCheckBox @bind-Checked="pushSettings.OrderUpdates"
+								Label="تحديثات الطلبات"
+								TChecked="bool" />
+					<SfCheckBox @bind-Checked="pushSettings.ChatMessages"
+								Label="الرسائل الجديدة"
+								TChecked="bool" />
+					<SfCheckBox @bind-Checked="pushSettings.Promotions"
+								Label="العروض والخصومات"
+								TChecked="bool" />
+					<SfCheckBox @bind-Checked="pushSettings.SystemAlerts"
+								Label="تنبيهات النظام"
+								TChecked="bool" />
+				</div>
+
+				<div class="settings-group">
+					<h4>الأوقات المفضلة:</h4>
+					<SfTimePicker @bind-Value="pushSettings.QuietTimeStart"
+								  Placeholder="بداية الوقت الهادئ" />
+					<SfTimePicker @bind-Value="pushSettings.QuietTimeEnd"
+								  Placeholder="نهاية الوقت الهادئ" />
+					<p class="settings-hint">لن تتلقى إشعارات خلال هذه الفترة</p>
+				</div>
+
+				@if (pushSettings.EnablePush && !isPushSubscribed)
+				{
+					<div class="firebase-info">
+						<p>🔔 انقر على "حفظ" لتفعيل الإشعارات الفورية</p>
+					</div>
+				}
+			</div>
+		</Content>
+		<FooterTemplate>
+			<SfButton IsPrimary="true" OnClick="SavePushSettings">حفظ</SfButton>
+			<SfButton OnClick="() => showPushSettings = false">إلغاء</SfButton>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+@code {
+	private List<NotificationDto>? allNotifications;
+	private List<NotificationDto>? unreadNotifications => allNotifications?.Where(n => !n.IsRead).ToList();
+	private List<NotificationDto>? orderNotifications => allNotifications?.Where(n => n.Type == "Order").ToList();
+	private List<NotificationDto>? messageNotifications => allNotifications?.Where(n => n.Type == "Message").ToList();
+
+	private bool isLoading = true;
+	private int totalCount => allNotifications?.Count ?? 0;
+	private int unreadCount => unreadNotifications?.Count ?? 0;
+
+	private bool showPushSettings = false;
+	private bool isPushSubscribed = false;
+	private PushSettings pushSettings = new();
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadNotifications();
+		await ConnectToRealtime();
+		await CheckPushSubscription();
+	}
+
+	private async Task LoadNotifications()
+	{
+		isLoading = true;
+		try
+		{
+			allNotifications = await NotificationsClient.GetMyNotificationsAsync();
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ في تحميل الإشعارات: {ex.Message}");
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private async Task ConnectToRealtime()
+	{
+		try
+		{
+			await RealtimeClient.ConnectAsync("Notifications", "/hubs/notifications");
+
+			// Listen for new notifications
+			RealtimeClient.On<NotificationDto>("NewNotification", async (notification) =>
+			{
+				allNotifications ??= new();
+				allNotifications.Insert(0, notification);
+				await InvokeAsync(StateHasChanged);
+
+				// Show toast
+				Notification.ShowInfo(notification.Title);
+			});
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ في الاتصال المباشر: {ex.Message}");
+		}
+	}
+
+	private async Task CheckPushSubscription()
+	{
+		try
+		{
+			var settings = await NotificationsClient.GetPushSettingsAsync();
+			if (settings != null)
+			{
+				pushSettings = settings;
+				isPushSubscribed = settings.EnablePush && !string.IsNullOrEmpty(settings.FirebaseToken);
+			}
+		}
+		catch (Exception ex)
+		{
+			// Silent fail - push notifications are optional
+		}
+	}
+
+	private async Task HandleNotificationClick(Guid notificationId)
+	{
+		try
+		{
+			// Mark as read
+			await NotificationsClient.MarkAsReadAsync(notificationId);
+
+			// Update local state
+			var notification = allNotifications?.FirstOrDefault(n => n.Id == notificationId);
+			if (notification != null)
+			{
+				notification.IsRead = true;
+				StateHasChanged();
+
+				// Navigate to related resource
+				if (!string.IsNullOrEmpty(notification.ActionUrl))
+				{
+					Navigation.NavigateTo(notification.ActionUrl);
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+	}
+
+	private async Task HandleDelete(Guid notificationId)
+	{
+		try
+		{
+			await NotificationsClient.DeleteNotificationAsync(notificationId);
+			allNotifications?.RemoveAll(n => n.Id == notificationId);
+			StateHasChanged();
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+	}
+
+	private async Task MarkAllAsRead()
+	{
+		try
+		{
+			await NotificationsClient.MarkAllAsReadAsync();
+			if (allNotifications != null)
+			{
+				foreach (var n in allNotifications)
+				{
+					n.IsRead = true;
+				}
+				StateHasChanged();
+			}
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+	}
+
+	private void ManagePushNotifications()
+	{
+		showPushSettings = true;
+	}
+
+	private async Task SavePushSettings()
+	{
+		try
+		{
+			if (pushSettings.EnablePush && !isPushSubscribed)
+			{
+				// Request Firebase permission and get token
+				// This would use JavaScript Interop to Firebase SDK
+				// var token = await JS.InvokeAsync<string>("requestFirebaseToken");
+				// pushSettings.FirebaseToken = token;
+			}
+
+			await NotificationsClient.UpdatePushSettingsAsync(pushSettings);
+			isPushSubscribed = pushSettings.EnablePush;
+			showPushSettings = false;
+			Notification.ShowSuccess("تم حفظ الإعدادات");
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+	}
+
+	public async ValueTask DisposeAsync()
+	{
+		await RealtimeClient.DisconnectAsync();
+	}
+
+	// Models
+	public class NotificationDto
+	{
+		public Guid Id { get; set; }
+		public string Type { get; set; } = string.Empty;
+		public string Title { get; set; } = string.Empty;
+		public string Message { get; set; } = string.Empty;
+		public string? ActionUrl { get; set; }
+		public bool IsRead { get; set; }
+		public DateTime CreatedAt { get; set; }
+	}
+
+	private class PushSettings
+	{
+		public bool EnablePush { get; set; }
+		public bool OrderUpdates { get; set; } = true;
+		public bool ChatMessages { get; set; } = true;
+		public bool Promotions { get; set; } = true;
+		public bool SystemAlerts { get; set; } = true;
+		public TimeSpan? QuietTimeStart { get; set; }
+		public TimeSpan? QuietTimeEnd { get; set; }
+		public string? FirebaseToken { get; set; }
+	}
+}
+
+<style>
+	.notifications-page {
+		padding: var(--spacing-lg);
+		max-width: 1000px;
+		margin: 0 auto;
+	}
+
+	.notifications-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: var(--spacing-md);
+	}
+
+	.header-actions {
+		display: flex;
+		gap: var(--spacing-sm);
+	}
+
+	.notifications-list {
+		min-height: 400px;
+	}
+
+	.loading-container {
+		text-align: center;
+		padding: var(--spacing-xl);
+	}
+
+	/* Push Settings */
+	.push-settings-content {
+		padding: var(--spacing-md);
+	}
+
+	.settings-info {
+		padding: var(--spacing-md);
+		background: var(--bg-secondary);
+		border-radius: var(--border-radius);
+		margin-bottom: var(--spacing-lg);
+	}
+
+	.settings-group {
+		margin-bottom: var(--spacing-lg);
+		padding-bottom: var(--spacing-lg);
+		border-bottom: 1px solid var(--border-color);
+	}
+
+	.settings-group:last-child {
+		border-bottom: none;
+	}
+
+	.settings-group h4 {
+		margin-bottom: var(--spacing-md);
+	}
+
+	.settings-hint {
+		font-size: var(--font-size-sm);
+		color: var(--text-secondary);
+		margin-top: var(--spacing-xs);
+	}
+
+	.firebase-info {
+		padding: var(--spacing-md);
+		background: var(--info-bg);
+		border: 1px solid var(--info-border);
+		border-radius: var(--border-radius);
+		color: var(--info-text);
+	}
+</style>

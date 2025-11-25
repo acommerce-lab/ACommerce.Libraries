@@ -1,0 +1,694 @@
+@page "/chats/{ConversationId:guid}"
+@inject ChatsClient ChatsClient
+@inject RealtimeClient RealtimeClient
+@inject NavigationManager Navigation
+@inject NotificationService Notification
+@implements IAsyncDisposable
+
+<PageTitle>محادثة - Chat</PageTitle>
+
+<div class="chat-room">
+	<SfCard CssClass="chat-card">
+		<!-- Chat Header -->
+		<CardHeader>
+			<div class="chat-header">
+				<SfButton CssClass="back-btn" OnClick="GoBack">
+					← رجوع
+				</SfButton>
+				<div class="chat-party-info">
+					<div class="party-avatar">@GetAvatarInitials(otherPartyName)</div>
+					<div class="party-details">
+						<h3>@otherPartyName</h3>
+						<span class="status @(isOnline ? "online" : "offline")">
+							@(isOnline ? "متصل الآن" : "غير متصل")
+						</span>
+					</div>
+				</div>
+				<SfButton IconCss="e-icons e-more-vertical-1" CssClass="more-btn" />
+			</div>
+		</CardHeader>
+
+		<!-- Messages -->
+		<CardContent>
+			<div class="messages-container" @ref="messagesContainer">
+				@if (isLoadingMessages)
+				{
+					<div class="loading-container">
+						<SfSpinner />
+					</div>
+				}
+				else if (messages == null || !messages.Any())
+				{
+					<div class="empty-messages">
+						<p>لا توجد رسائل بعد</p>
+						<p>ابدأ المحادثة بإرسال رسالة</p>
+					</div>
+				}
+				else
+				{
+					@foreach (var message in messages)
+					{
+						<div class="message @(message.IsMine ? "message-mine" : "message-theirs")">
+							@if (!message.IsMine)
+							{
+								<div class="message-avatar">@GetAvatarInitials(otherPartyName)</div>
+							}
+							<div class="message-content">
+								<div class="message-bubble">
+									<p>@message.Text</p>
+									@if (!string.IsNullOrEmpty(message.AttachmentUrl))
+									{
+										<div class="message-attachment">
+											<a href="@message.AttachmentUrl" target="_blank">
+												📎 @message.AttachmentName
+											</a>
+										</div>
+									}
+								</div>
+								<div class="message-meta">
+									<span class="message-time">@FormatTime(message.SentAt)</span>
+									@if (message.IsMine)
+									{
+										<span class="message-status">
+											@(message.IsRead ? "✓✓" : "✓")
+										</span>
+									}
+								</div>
+							</div>
+						</div>
+					}
+					<div @ref="messagesEndRef"></div>
+				}
+			</div>
+		</CardContent>
+
+		<!-- Input -->
+		<CardFooter>
+			<div class="message-input-container">
+				<SfButton IconCss="e-icons e-attachment" CssClass="attach-btn" OnClick="HandleAttachment" />
+				<SfTextBox @bind-Value="messageText"
+						   Placeholder="اكتب رسالتك..."
+						   CssClass="message-input"
+						   @onkeyup="HandleKeyPress">
+				</SfTextBox>
+				<SfButton IsPrimary="true"
+						  IconCss="e-icons e-send"
+						  Disabled="@(string.IsNullOrWhiteSpace(messageText) || isSending)"
+						  OnClick="SendMessage">
+					@if (isSending) { <SfSpinner /> } else { <span>إرسال</span> }
+				</SfButton>
+			</div>
+		</CardFooter>
+	</SfCard>
+</div>
+
+@code {
+	[Parameter]
+	public Guid ConversationId { get; set; }
+
+	private List<MessageDto>? messages;
+	private string otherPartyName = "";
+	private bool isOnline = false;
+	private bool isLoadingMessages = true;
+	private bool isSending = false;
+	private string messageText = "";
+
+	private ElementReference messagesContainer;
+	private ElementReference messagesEndRef;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadConversation();
+		await LoadMessages();
+		await ConnectToRealtime();
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender || messages?.Any() == true)
+		{
+			await ScrollToBottom();
+		}
+	}
+
+	private async Task LoadConversation()
+	{
+		try
+		{
+			var conversation = await ChatsClient.GetConversationAsync(ConversationId);
+			if (conversation != null)
+			{
+				otherPartyName = conversation.OtherPartyName;
+				isOnline = conversation.IsOnline;
+			}
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ في تحميل المحادثة: {ex.Message}");
+		}
+	}
+
+	private async Task LoadMessages()
+	{
+		isLoadingMessages = true;
+		try
+		{
+			messages = await ChatsClient.GetMessagesAsync(ConversationId);
+
+			// Mark as read
+			await ChatsClient.MarkAsReadAsync(ConversationId);
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ في تحميل الرسائل: {ex.Message}");
+		}
+		finally
+		{
+			isLoadingMessages = false;
+		}
+	}
+
+	private async Task ConnectToRealtime()
+	{
+		try
+		{
+			await RealtimeClient.ConnectAsync("Chats", "/hubs/chat");
+
+			// Join conversation room
+			await RealtimeClient.InvokeAsync("JoinConversation", ConversationId.ToString());
+
+			// Listen for new messages
+			RealtimeClient.On<MessageDto>("NewMessage", async (message) =>
+			{
+				if (message.ConversationId == ConversationId)
+				{
+					messages ??= new();
+					messages.Add(message);
+					await InvokeAsync(StateHasChanged);
+					await ScrollToBottom();
+
+					// Mark as read
+					await ChatsClient.MarkAsReadAsync(ConversationId);
+				}
+			});
+
+			// Listen for typing indicator
+			RealtimeClient.On<TypingDto>("UserTyping", async (typing) =>
+			{
+				if (typing.ConversationId == ConversationId)
+				{
+					// Show typing indicator
+					await InvokeAsync(StateHasChanged);
+				}
+			});
+
+			// Listen for online status
+			RealtimeClient.On<OnlineStatusDto>("OnlineStatusChanged", async (status) =>
+			{
+				isOnline = status.IsOnline;
+				await InvokeAsync(StateHasChanged);
+			});
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ في الاتصال المباشر: {ex.Message}");
+		}
+	}
+
+	private async Task SendMessage()
+	{
+		if (string.IsNullOrWhiteSpace(messageText)) return;
+
+		isSending = true;
+		var textToSend = messageText;
+		messageText = ""; // Clear immediately for better UX
+
+		try
+		{
+			var message = await ChatsClient.SendMessageAsync(new SendMessageRequest
+			{
+				ConversationId = ConversationId,
+				Text = textToSend
+			});
+
+			if (message != null)
+			{
+				// Message will be added via SignalR
+				await ScrollToBottom();
+			}
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ في إرسال الرسالة: {ex.Message}");
+			messageText = textToSend; // Restore on error
+		}
+		finally
+		{
+			isSending = false;
+		}
+	}
+
+	private async Task HandleKeyPress(KeyboardEventArgs e)
+	{
+		if (e.Key == "Enter" && !e.ShiftKey)
+		{
+			await SendMessage();
+		}
+	}
+
+	private async Task HandleAttachment()
+	{
+		Notification.ShowInfo("ميزة المرفقات قريباً");
+	}
+
+	private async Task ScrollToBottom()
+	{
+		// JavaScript interop to scroll
+		// await JS.InvokeVoidAsync("scrollToBottom", messagesEndRef);
+	}
+
+	private void GoBack()
+	{
+		Navigation.NavigateTo("/chats");
+	}
+
+	private string GetAvatarInitials(string name)
+	{
+		if (string.IsNullOrEmpty(name)) return "?";
+		var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+		if (parts.Length >= 2)
+			return $"{parts[0][0]}{parts[1][0]}".ToUpper();
+		return name[0].ToString().ToUpper();
+	}
+
+	private string FormatTime(DateTime dateTime)
+	{
+		var now = DateTime.UtcNow;
+		var diff = now - dateTime;
+
+		if (diff.TotalMinutes < 1) return "الآن";
+		if (diff.TotalHours < 1) return dateTime.ToString("HH:mm");
+		if (diff.TotalDays < 1) return dateTime.ToString("HH:mm");
+		return dateTime.ToString("dd/MM HH:mm");
+	}
+
+	public async ValueTask DisposeAsync()
+	{
+		await RealtimeClient.InvokeAsync("LeaveConversation", ConversationId.ToString());
+		await RealtimeClient.DisconnectAsync();
+	}
+
+	// Models
+	private class MessageDto
+	{
+		public Guid Id { get; set; }
+		public Guid ConversationId { get; set; }
+		public Guid SenderId { get; set; }
+		public string Text { get; set; } = string.Empty;
+		public string? AttachmentUrl { get; set; }
+		public string? AttachmentName { get; set; }
+		public DateTime SentAt { get; set; }
+		public bool IsRead { get; set; }
+		public bool IsMine { get; set; }
+	}
+
+	private class TypingDto
+	{
+		public Guid ConversationId { get; set; }
+		public string UserName { get; set; } = string.Empty;
+	}
+
+	private class OnlineStatusDto
+	{
+		public Guid UserId { get; set; }
+		public bool IsOnline { get; set; }
+	}
+
+	private class SendMessageRequest
+	{
+		public Guid ConversationId { get; set; }
+		public string Text { get; set; } = string.Empty;
+	}
+}
+
+<style>
+	.chat-room {
+		height: calc(100vh - 80px);
+		padding: var(--spacing-lg);
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.chat-card {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.chat-header {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-md);
+		padding: var(--spacing-md);
+		border-bottom: 1px solid var(--border-color);
+	}
+
+	.back-btn {
+		font-size: 18px;
+	}
+
+	.chat-party-info {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-md);
+	}
+
+	.party-avatar {
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		background: var(--primary-color);
+		color: white;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 600;
+	}
+
+	.party-details h3 {
+		margin: 0;
+		font-size: var(--font-size-base);
+	}
+
+	.status {
+		font-size: var(--font-size-xs);
+		color: var(--text-secondary);
+	}
+
+	.status.online {
+		color: var(--success-color);
+	}
+
+	/* Messages */
+	.messages-container {
+		flex: 1;
+		overflow-y: auto;
+		padding: var(--spacing-lg);
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-md);
+	}
+
+	.message {
+		display: flex;
+		gap: var(--spacing-sm);
+		max-width: 70%;
+	}
+
+	.message-mine {
+		align-self: flex-end;
+		flex-direction: row-reverse;
+	}
+
+	.message-theirs {
+		align-self: flex-start;
+	}
+
+	.message-avatar {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		background: var(--secondary-color);
+		color: white;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 12px;
+		font-weight: 600;
+		flex-shrink: 0;
+	}
+
+	.message-content {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-xs);
+	}
+
+	.message-bubble {
+		padding: var(--spacing-sm) var(--spacing-md);
+		border-radius: var(--border-radius);
+		background: var(--bg-secondary);
+		word-wrap: break-word;
+	}
+
+	.message-mine .message-bubble {
+		background: var(--primary-color);
+		color: white;
+	}
+
+	.message-bubble p {
+		margin: 0;
+		white-space: pre-wrap;
+	}
+
+	.message-attachment {
+		margin-top: var(--spacing-xs);
+		padding-top: var(--spacing-xs);
+		border-top: 1px solid rgba(255,255,255,0.2);
+	}
+
+	.message-attachment a {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.message-meta {
+		display: flex;
+		gap: var(--spacing-xs);
+		align-items: center;
+		font-size: var(--font-size-xs);
+		color: var(--text-secondary);
+	}
+
+	.message-mine .message-meta {
+		justify-content: flex-end;
+	}
+
+	.message-status {
+		color: var(--success-color);
+	}
+
+	/* Input */
+	.message-input-container {
+		display: flex;
+		gap: var(--spacing-sm);
+		padding: var(--spacing-md);
+		border-top: 1px solid var(--border-color);
+	}
+
+	.message-input {
+		flex: 1;
+	}
+
+	.empty-messages {
+		text-align: center;
+		padding: var(--spacing-xl);
+		color: var(--text-secondary);
+	}
+
+	.loading-container {
+		text-align: center;
+		padding: var(--spacing-xl);
+	}
+</style>
+
+@code {
+	[Parameter]
+	public Guid ConversationId { get; set; }
+
+	private List<MessageDto>? messages;
+	private string otherPartyName = "";
+	private bool isOnline = false;
+	private bool isLoadingMessages = true;
+	private bool isSending = false;
+	private string messageText = "";
+
+	private ElementReference messagesContainer;
+	private ElementReference messagesEndRef;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadConversation();
+		await LoadMessages();
+		await ConnectToRealtime();
+	}
+
+	private async Task LoadConversation()
+	{
+		try
+		{
+			var conversation = await ChatsClient.GetConversationAsync(ConversationId);
+			if (conversation != null)
+			{
+				otherPartyName = conversation.OtherPartyName;
+				isOnline = conversation.IsOnline;
+			}
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+	}
+
+	private async Task LoadMessages()
+	{
+		isLoadingMessages = true;
+		try
+		{
+			messages = await ChatsClient.GetMessagesAsync(ConversationId);
+			await ChatsClient.MarkAsReadAsync(ConversationId);
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+		finally
+		{
+			isLoadingMessages = false;
+		}
+	}
+
+	private async Task ConnectToRealtime()
+	{
+		try
+		{
+			await RealtimeClient.ConnectAsync("Chats", "/hubs/chat");
+			await RealtimeClient.InvokeAsync("JoinConversation", ConversationId.ToString());
+
+			// Listen for new messages
+			RealtimeClient.On<MessageDto>("NewMessage", async (message) =>
+			{
+				if (message.ConversationId == ConversationId)
+				{
+					messages ??= new();
+					messages.Add(message);
+					await InvokeAsync(StateHasChanged);
+					await ChatsClient.MarkAsReadAsync(ConversationId);
+				}
+			});
+
+			// Listen for online status
+			RealtimeClient.On<OnlineStatusDto>("OnlineStatusChanged", async (status) =>
+			{
+				isOnline = status.IsOnline;
+				await InvokeAsync(StateHasChanged);
+			});
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ في الاتصال: {ex.Message}");
+		}
+	}
+
+	private async Task SendMessage()
+	{
+		if (string.IsNullOrWhiteSpace(messageText)) return;
+
+		isSending = true;
+		var textToSend = messageText;
+		messageText = "";
+
+		try
+		{
+			var message = await ChatsClient.SendMessageAsync(new SendMessageRequest
+			{
+				ConversationId = ConversationId,
+				Text = textToSend
+			});
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+			messageText = textToSend;
+		}
+		finally
+		{
+			isSending = false;
+		}
+	}
+
+	private async Task HandleKeyPress(KeyboardEventArgs e)
+	{
+		if (e.Key == "Enter" && !e.ShiftKey)
+		{
+			await SendMessage();
+		}
+	}
+
+	private void HandleAttachment()
+	{
+		Notification.ShowInfo("ميزة المرفقات قريباً");
+	}
+
+	private async Task ScrollToBottom()
+	{
+		// JavaScript interop needed
+	}
+
+	private void GoBack()
+	{
+		Navigation.NavigateTo("/chats");
+	}
+
+	private string GetAvatarInitials(string name)
+	{
+		if (string.IsNullOrEmpty(name)) return "?";
+		var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+		if (parts.Length >= 2)
+			return $"{parts[0][0]}{parts[1][0]}".ToUpper();
+		return name[0].ToString().ToUpper();
+	}
+
+	private string FormatTime(DateTime dateTime)
+	{
+		var now = DateTime.UtcNow;
+		var diff = now - dateTime;
+
+		if (diff.TotalMinutes < 1) return "الآن";
+		if (diff.TotalHours < 1) return dateTime.ToString("HH:mm");
+		if (diff.TotalDays < 1) return dateTime.ToString("HH:mm");
+		return dateTime.ToString("dd/MM HH:mm");
+	}
+
+	public async ValueTask DisposeAsync()
+	{
+		await RealtimeClient.InvokeAsync("LeaveConversation", ConversationId.ToString());
+		await RealtimeClient.DisconnectAsync();
+	}
+
+	private class MessageDto
+	{
+		public Guid Id { get; set; }
+		public Guid ConversationId { get; set; }
+		public Guid SenderId { get; set; }
+		public string Text { get; set; } = string.Empty;
+		public string? AttachmentUrl { get; set; }
+		public string? AttachmentName { get; set; }
+		public DateTime SentAt { get; set; }
+		public bool IsRead { get; set; }
+		public bool IsMine { get; set; }
+	}
+
+	private class OnlineStatusDto
+	{
+		public Guid UserId { get; set; }
+		public bool IsOnline { get; set; }
+	}
+
+	private class SendMessageRequest
+	{
+		public Guid ConversationId { get; set; }
+		public string Text { get; set; } = string.Empty;
+	}
+}

@@ -1,0 +1,105 @@
+@page "/auth/nafath-callback"
+@inject AuthClient AuthClient
+@inject NavigationManager Navigation
+@inject NotificationService Notification
+
+<PageTitle>Nafath Authentication...</PageTitle>
+
+<div class="callback-container">
+	<SfCard>
+		<CardContent>
+			<div class="loading-container">
+				<SfSpinner />
+				<h3>جارٍ التحقق من هويتك عبر نفاذ...</h3>
+				<p>الرجاء الانتظار</p>
+			</div>
+		</CardContent>
+	</SfCard>
+</div>
+
+@code {
+	[SupplyParameterFromQuery]
+	private string? code { get; set; }
+
+	[SupplyParameterFromQuery]
+	private string? state { get; set; }
+
+	[SupplyParameterFromQuery]
+	private string? error { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		if (!string.IsNullOrEmpty(error))
+		{
+			Notification.ShowError($"فشل التحقق: {error}");
+			Navigation.NavigateTo("/login");
+			return;
+		}
+
+		if (string.IsNullOrEmpty(code))
+		{
+			Notification.ShowError("رمز التحقق مفقود");
+			Navigation.NavigateTo("/login");
+			return;
+		}
+
+		try
+		{
+			var result = await AuthClient.CompleteNafathAuthAsync(new CompleteNafathAuthRequest
+			{
+				Code = code,
+				State = state ?? ""
+			});
+
+			if (result?.RequiresNumberSelection == true)
+			{
+				// User has multiple phone numbers registered with Nafath
+				Navigation.NavigateTo($"/auth/nafath-select-number?sessionId={result.SessionId}");
+			}
+			else if (result?.Token != null)
+			{
+				await StoreTokenAndRedirect(result.Token);
+			}
+			else
+			{
+				Notification.ShowError("فشل التحقق من الهوية");
+				Navigation.NavigateTo("/login");
+			}
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+			Navigation.NavigateTo("/login");
+		}
+	}
+
+	private async Task StoreTokenAndRedirect(string token)
+	{
+		await AuthClient.SetTokenAsync(token);
+		Navigation.NavigateTo("/");
+	}
+}
+
+<style>
+	.callback-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: 80vh;
+	}
+
+	.loading-container {
+		text-align: center;
+		padding: var(--spacing-xl);
+	}
+
+	.loading-container h3 {
+		margin-top: var(--spacing-lg);
+		color: var(--text-primary);
+	}
+
+	.loading-container p {
+		color: var(--text-secondary);
+		margin-top: var(--spacing-sm);
+	}
+</style>

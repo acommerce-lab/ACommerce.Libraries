@@ -1,0 +1,278 @@
+@inherits LayoutComponentBase
+@inject ThemeService ThemeService
+@inject CartStateService CartState
+@inject AuthClient AuthClient
+@inject NavigationManager Navigation
+
+<div class="page" data-theme="@currentTheme">
+	<div class="sidebar">
+		<NavMenu />
+	</div>
+
+	<main>
+		<div class="top-row px-4">
+			<div class="search-bar-container">
+				<SfTextBox Placeholder="ابحث عن منتجات..."
+						   CssClass="header-search"
+						   @onkeyup="HandleSearchKeyPress">
+					<InputGroupButtons>
+						<InputGroupButton>
+							<SfButton IconCss="e-icons e-search" />
+						</InputGroupButton>
+					</InputGroupButtons>
+				</SfTextBox>
+			</div>
+
+			<div class="header-actions">
+				<ThemeToggle />
+
+				<div class="header-icon-btn" @onclick="() => Navigation.NavigateTo(\"/notifications\")">
+					<span class="icon">🔔</span>
+					@if (unreadNotifications > 0)
+					{
+						<span class="notification-badge">@unreadNotifications</span>
+					}
+				</div>
+
+				<CartIcon />
+
+				@if (isAuthenticated)
+				{
+					<div class="user-menu">
+						<SfDropDownButton Content="@userName" CssClass="user-btn">
+							<DropDownButtonEvents ItemSelected="OnUserMenuItemSelected" />
+							<DropDownMenuItems>
+								<DropDownMenuItem Text="الملف الشخصي" Id="profile" IconCss="e-icons e-user" />
+								<DropDownMenuItem Text="طلباتي" Id="orders" IconCss="e-icons e-shopping-cart" />
+								<DropDownMenuItem Separator="true" />
+								<DropDownMenuItem Text="تسجيل الخروج" Id="logout" IconCss="e-icons e-logout" />
+							</DropDownMenuItems>
+						</SfDropDownButton>
+					</div>
+				}
+				else
+				{
+					<SfButton OnClick="() => Navigation.NavigateTo(\"/login\")">
+						تسجيل الدخول
+					</SfButton>
+				}
+			</div>
+		</div>
+
+		<article class="content px-4">
+			@Body
+		</article>
+	</main>
+</div>
+
+<!-- Toast Notifications -->
+<SfToast @ref="toastObj" Position="X: Right, Y: Top" ShowCloseButton="true">
+	<ToastTemplates>
+		<Template>
+			<div class="toast-content">
+				<span class="toast-icon">@currentToastIcon</span>
+				<span>@currentToastMessage</span>
+			</div>
+		</Template>
+	</ToastTemplates>
+</SfToast>
+
+@code {
+	private string currentTheme = "light";
+	private bool isAuthenticated = false;
+	private string userName = "User";
+	private int unreadNotifications = 0;
+	private string searchQuery = "";
+
+	private SfToast? toastObj;
+	private string currentToastMessage = "";
+	private string currentToastIcon = "";
+
+	protected override async Task OnInitializedAsync()
+	{
+		// Load theme
+		currentTheme = await ThemeService.GetCurrentThemeAsync();
+		ThemeService.OnThemeChanged += OnThemeChanged;
+
+		// Load cart
+		await CartState.LoadCartAsync();
+
+		// Check auth
+		isAuthenticated = await AuthClient.IsAuthenticatedAsync();
+		if (isAuthenticated)
+		{
+			var user = await AuthClient.GetCurrentUserAsync();
+			userName = user?.FullName ?? "User";
+		}
+
+		// Subscribe to notifications
+		Notification.OnShow += ShowToast;
+	}
+
+	private void OnThemeChanged(string theme)
+	{
+		currentTheme = theme;
+		StateHasChanged();
+	}
+
+	private async void ShowToast(string message, NotificationType type)
+	{
+		currentToastMessage = message;
+		currentToastIcon = type switch
+		{
+			NotificationType.Success => "✅",
+			NotificationType.Error => "❌",
+			NotificationType.Warning => "⚠️",
+			NotificationType.Info => "ℹ️",
+			_ => "ℹ️"
+		};
+
+		await toastObj!.ShowAsync(new ToastModel
+		{
+			Title = "",
+			Content = message,
+			CssClass = $"toast-{type.ToString().ToLower()}"
+		});
+	}
+
+	private async Task OnUserMenuItemSelected(MenuEventArgs args)
+	{
+		switch (args.Item.Id)
+		{
+			case "profile":
+				Navigation.NavigateTo("/profile");
+				break;
+			case "orders":
+				Navigation.NavigateTo("/orders");
+				break;
+			case "logout":
+				await AuthClient.LogoutAsync();
+				Navigation.NavigateTo("/login");
+				break;
+		}
+	}
+
+	private void HandleSearchKeyPress(KeyboardEventArgs e)
+	{
+		if (e.Key == "Enter")
+		{
+			Navigation.NavigateTo($"/search?q={searchQuery}");
+		}
+	}
+
+	public void Dispose()
+	{
+		ThemeService.OnThemeChanged -= OnThemeChanged;
+		Notification.OnShow -= ShowToast;
+		CartState.OnCartChanged -= StateHasChanged;
+	}
+}
+
+<style>
+	.page {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		min-height: 100vh;
+		background: var(--bg-primary);
+		color: var(--text-primary);
+	}
+
+	main {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.sidebar {
+		background: var(--bg-secondary);
+		border-right: 1px solid var(--border-color);
+	}
+
+	.top-row {
+		background: var(--bg-primary);
+		border-bottom: 1px solid var(--border-color);
+		height: 64px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0 var(--spacing-lg);
+		position: sticky;
+		top: 0;
+		z-index: 100;
+	}
+
+	.search-bar-container {
+		flex: 1;
+		max-width: 600px;
+	}
+
+	.header-search {
+		width: 100%;
+	}
+
+	.header-actions {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-md);
+	}
+
+	.header-icon-btn {
+		position: relative;
+		cursor: pointer;
+		padding: var(--spacing-sm);
+		border-radius: var(--border-radius);
+		transition: background 0.2s;
+	}
+
+	.header-icon-btn:hover {
+		background: var(--bg-secondary);
+	}
+
+	.header-icon-btn .icon {
+		font-size: 24px;
+	}
+
+	.notification-badge {
+		position: absolute;
+		top: 0;
+		right: 0;
+		background: var(--error-color);
+		color: white;
+		border-radius: 10px;
+		padding: 2px 6px;
+		font-size: 10px;
+		font-weight: 600;
+	}
+
+	.content {
+		padding: var(--spacing-lg);
+	}
+
+	/* Toast */
+	.toast-content {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-sm);
+	}
+
+	.toast-icon {
+		font-size: 20px;
+	}
+
+	/* Responsive */
+	@media (min-width: 768px) {
+		.page {
+			flex-direction: row;
+		}
+
+		.sidebar {
+			width: 260px;
+			flex-shrink: 0;
+		}
+
+		main {
+			flex: 1;
+		}
+	}
+</style>

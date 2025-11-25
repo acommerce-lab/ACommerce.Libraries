@@ -1,0 +1,889 @@
+@page "/profile"
+@inject ProfilesClient ProfilesClient
+@inject ContactPointsClient ContactPointsClient
+@inject AuthClient AuthClient
+@inject NotificationService Notification
+
+<PageTitle>الملف الشخصي - Profile</PageTitle>
+
+<div class="profile-page">
+	<SfTab>
+		<TabItems>
+			<!-- Profile Info Tab -->
+			<TabItem>
+				<ChildContent>
+					<TabHeader Text="المعلومات الشخصية" />
+				</ChildContent>
+				<ContentTemplate>
+					<SfCard>
+						<CardContent>
+							@if (isLoadingProfile)
+							{
+								<div class="loading-container">
+									<SfSpinner />
+								</div>
+							}
+							else if (profile != null)
+							{
+								<div class="profile-section">
+									<div class="profile-avatar-section">
+										<div class="profile-avatar-large">
+											@GetAvatarInitials(profile.FullName)
+										</div>
+										<SfButton OnClick="ChangeAvatar">تغيير الصورة</SfButton>
+									</div>
+
+									<EditForm Model="@profile" OnValidSubmit="SaveProfile">
+										<DataAnnotationsValidator />
+										<ValidationSummary />
+
+										<div class="form-grid">
+											<SfTextBox @bind-Value="profile.FullName"
+													   FloatLabelType="FloatLabelType.Auto">
+												<label>الاسم الكامل</label>
+											</SfTextBox>
+
+											<SfTextBox @bind-Value="profile.Username"
+													   FloatLabelType="FloatLabelType.Auto">
+												<label>اسم المستخدم</label>
+											</SfTextBox>
+
+											<SfDatePicker @bind-Value="profile.DateOfBirth"
+														  FloatLabelType="FloatLabelType.Auto">
+												<label>تاريخ الميلاد</label>
+											</SfDatePicker>
+
+											<SfDropDownList TValue="string"
+															TItem="GenderOption"
+															@bind-Value="profile.Gender"
+															DataSource="@genderOptions"
+															FloatLabelType="FloatLabelType.Auto">
+												<DropDownListFieldSettings Text="Label" Value="Value" />
+												<label>الجنس</label>
+											</SfDropDownList>
+
+											<SfTextBox @bind-Value="profile.Bio"
+													   Multiline="true"
+													   FloatLabelType="FloatLabelType.Auto">
+												<label>نبذة عني</label>
+											</SfTextBox>
+										</div>
+
+										<div class="form-actions">
+											<SfButton Type="Submit" IsPrimary="true" Disabled="@isSaving">
+												@if (isSaving) { <SfSpinner /> } else { <span>حفظ التغييرات</span> }
+											</SfButton>
+										</div>
+									</EditForm>
+								</div>
+							}
+						</CardContent>
+					</SfCard>
+				</ContentTemplate>
+			</TabItem>
+
+			<!-- Contact Points Tab -->
+			<TabItem>
+				<ChildContent>
+					<TabHeader Text="نقاط الاتصال" />
+				</ChildContent>
+				<ContentTemplate>
+					<SfCard>
+						<CardHeader>
+							<div class="section-header">
+								<h3>نقاط الاتصال</h3>
+								<SfButton IsPrimary="true" OnClick="ShowAddContactPointDialog">
+									+ إضافة جديدة
+								</SfButton>
+							</div>
+						</CardHeader>
+						<CardContent>
+							@if (isLoadingContactPoints)
+							{
+								<div class="loading-container">
+									<SfSpinner />
+								</div>
+							}
+							else if (contactPoints == null || !contactPoints.Any())
+							{
+								<div class="empty-state">
+									<div class="empty-icon">📇</div>
+									<h3>لا توجد نقاط اتصال</h3>
+									<p>أضف بريد إلكتروني أو رقم جوال للتواصل</p>
+								</div>
+							}
+							else
+							{
+								<div class="contact-points-list">
+									@foreach (var cp in contactPoints)
+									{
+										<div class="contact-point-item">
+											<div class="cp-icon">@GetContactPointIcon(cp.Type)</div>
+											<div class="cp-info">
+												<div class="cp-header">
+													<strong>@cp.Value</strong>
+													@if (cp.IsPrimary)
+													{
+														<span class="primary-badge">أساسي</span>
+													}
+													@if (cp.IsVerified)
+													{
+														<span class="verified-badge">✓ موثق</span>
+													}
+												</div>
+												<div class="cp-meta">
+													<span class="cp-type">@cp.Type</span>
+													<span class="cp-label">@cp.Label</span>
+												</div>
+											</div>
+											<div class="cp-actions">
+												@if (!cp.IsVerified)
+												{
+													<SfButton CssClass="verify-btn" OnClick="() => VerifyContactPoint(cp.Id)">
+														تحقق
+													</SfButton>
+												}
+												@if (!cp.IsPrimary)
+												{
+													<SfButton OnClick="() => SetPrimary(cp.Id)">
+														تعيين كأساسي
+													</SfButton>
+												}
+												<SfButton IconCss="e-icons e-edit" OnClick="() => EditContactPoint(cp)" />
+												<SfButton IconCss="e-icons e-delete" OnClick="() => DeleteContactPoint(cp.Id)" />
+											</div>
+										</div>
+									}
+								</div>
+							}
+						</CardContent>
+					</SfCard>
+				</ContentTemplate>
+			</TabItem>
+
+			<!-- Security Tab -->
+			<TabItem>
+				<ChildContent>
+					<TabHeader Text="الأمان" />
+				</ChildContent>
+				<ContentTemplate>
+					<SfCard>
+						<CardContent>
+							<div class="security-section">
+								<div class="security-item">
+									<div class="security-info">
+										<h4>تغيير كلمة المرور</h4>
+										<p>تحديث كلمة المرور الخاصة بك</p>
+									</div>
+									<SfButton OnClick="ShowChangePasswordDialog">تغيير</SfButton>
+								</div>
+
+								<div class="security-item">
+									<div class="security-info">
+										<h4>المصادقة الثنائية</h4>
+										<p>طبقة أمان إضافية لحسابك</p>
+									</div>
+									<SfCheckBox @bind-Checked="twoFactorEnabled" Label="@(twoFactorEnabled ? "مفعّل" : "معطّل")" TChecked="bool">
+										<CheckBoxEvents TChecked="bool" Change="ToggleTwoFactor" />
+									</SfCheckBox>
+								</div>
+
+								<div class="security-item">
+									<div class="security-info">
+										<h4>الجلسات النشطة</h4>
+										<p>إدارة الأجهزة المتصلة بحسابك</p>
+									</div>
+									<SfButton OnClick="() => Navigation.NavigateTo(\"/profile/sessions\")">
+										عرض الجلسات
+									</SfButton>
+								</div>
+							</div>
+						</CardContent>
+					</SfCard>
+				</ContentTemplate>
+			</TabItem>
+
+			<!-- Preferences Tab -->
+			<TabItem>
+				<ChildContent>
+					<TabHeader Text="التفضيلات" />
+				</ChildContent>
+				<ContentTemplate>
+					<SfCard>
+						<CardContent>
+							<div class="preferences-section">
+								<div class="preference-group">
+									<h4>اللغة</h4>
+									<SfDropDownList TValue="string"
+													TItem="LanguageOption"
+													@bind-Value="selectedLanguage"
+													DataSource="@languageOptions">
+										<DropDownListFieldSettings Text="Label" Value="Value" />
+										<DropDownListEvents TValue="string" TItem="LanguageOption" ValueChange="OnLanguageChanged" />
+									</SfDropDownList>
+								</div>
+
+								<div class="preference-group">
+									<h4>العملة المفضلة</h4>
+									<SfDropDownList TValue="string"
+													TItem="CurrencyOption"
+													@bind-Value="selectedCurrency"
+													DataSource="@currencyOptions">
+										<DropDownListFieldSettings Text="Label" Value="Value" />
+									</SfDropDownList>
+								</div>
+
+								<div class="preference-group">
+									<h4>الإشعارات</h4>
+									<SfCheckBox @bind-Checked="emailNotifications" Label="إشعارات البريد الإلكتروني" TChecked="bool" />
+									<SfCheckBox @bind-Checked="smsNotifications" Label="إشعارات SMS" TChecked="bool" />
+									<SfCheckBox @bind-Checked="pushNotifications" Label="الإشعارات الفورية" TChecked="bool" />
+								</div>
+
+								<SfButton IsPrimary="true" OnClick="SavePreferences">
+									حفظ التفضيلات
+								</SfButton>
+							</div>
+						</CardContent>
+					</SfCard>
+				</ContentTemplate>
+			</TabItem>
+		</TabItems>
+	</SfTab>
+</div>
+
+<!-- Add Contact Point Dialog -->
+<SfDialog @bind-Visible="showAddContactDialog"
+		  Width="500px"
+		  IsModal="true">
+	<DialogTemplates>
+		<Header>إضافة نقطة اتصال جديدة</Header>
+		<Content>
+			<div class="contact-point-form">
+				<SfDropDownList TValue="string"
+								TItem="ContactTypeOption"
+								@bind-Value="newContactPoint.Type"
+								DataSource="@contactTypeOptions"
+								FloatLabelType="FloatLabelType.Auto">
+					<DropDownListFieldSettings Text="Label" Value="Value" />
+					<label>النوع</label>
+				</SfDropDownList>
+
+				<SfTextBox @bind-Value="newContactPoint.Value"
+						   Placeholder="@GetPlaceholder(newContactPoint.Type)"
+						   FloatLabelType="FloatLabelType.Auto">
+					<label>القيمة</label>
+				</SfTextBox>
+
+				<SfTextBox @bind-Value="newContactPoint.Label"
+						   FloatLabelType="FloatLabelType.Auto">
+					<label>التسمية (مثلاً: منزل، عمل)</label>
+				</SfTextBox>
+
+				<SfCheckBox @bind-Checked="newContactPoint.SetAsPrimary"
+							Label="تعيين كأساسي"
+							TChecked="bool" />
+			</div>
+		</Content>
+		<FooterTemplate>
+			<SfButton IsPrimary="true" OnClick="AddContactPoint">إضافة</SfButton>
+			<SfButton OnClick="() => showAddContactDialog = false">إلغاء</SfButton>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Verify Contact Point Dialog -->
+<SfDialog @bind-Visible="showVerifyDialog"
+		  Width="400px"
+		  IsModal="true">
+	<DialogTemplates>
+		<Header>التحقق من نقطة الاتصال</Header>
+		<Content>
+			<div class="verify-form">
+				<p>تم إرسال رمز التحقق إلى @verifyingContactValue</p>
+				<SfTextBox @bind-Value="verificationCode"
+						   Placeholder="XXXXXX"
+						   CssClass="verification-input"
+						   FloatLabelType="FloatLabelType.Auto">
+					<label>رمز التحقق</label>
+				</SfTextBox>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<SfButton IsPrimary="true" OnClick="ConfirmVerification">تحقق</SfButton>
+			<SfButton OnClick="() => showVerifyDialog = false">إلغاء</SfButton>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+@code {
+	private ProfileDto? profile;
+	private List<ContactPointDto>? contactPoints;
+	private bool isLoadingProfile = true;
+	private bool isLoadingContactPoints = true;
+	private bool isSaving = false;
+
+	// Contact Points
+	private bool showAddContactDialog = false;
+	private bool showVerifyDialog = false;
+	private AddContactPointRequest newContactPoint = new();
+	private Guid verifyingContactId;
+	private string verifyingContactValue = "";
+	private string verificationCode = "";
+
+	// Security
+	private bool twoFactorEnabled = false;
+	private bool showChangePasswordDialog = false;
+
+	// Preferences
+	private string selectedLanguage = "ar";
+	private string selectedCurrency = "SAR";
+	private bool emailNotifications = true;
+	private bool smsNotifications = true;
+	private bool pushNotifications = true;
+
+	private List<GenderOption> genderOptions = new()
+	{
+		new() { Value = "Male", Label = "ذكر" },
+		new() { Value = "Female", Label = "أنثى" },
+		new() { Value = "Other", Label = "آخر" }
+	};
+
+	private List<ContactTypeOption> contactTypeOptions = new()
+	{
+		new() { Value = "Email", Label = "بريد إلكتروني" },
+		new() { Value = "Phone", Label = "رقم جوال" },
+		new() { Value = "Address", Label = "عنوان" },
+		new() { Value = "Social", Label = "حساب اجتماعي" }
+	};
+
+	private List<LanguageOption> languageOptions = new()
+	{
+		new() { Value = "ar", Label = "العربية" },
+		new() { Value = "en", Label = "English" }
+	};
+
+	private List<CurrencyOption> currencyOptions = new()
+	{
+		new() { Value = "SAR", Label = "ريال سعودي (SAR)" },
+		new() { Value = "USD", Label = "دولار أمريكي (USD)" },
+		new() { Value = "EUR", Label = "يورو (EUR)" }
+	};
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadProfile();
+		await LoadContactPoints();
+	}
+
+	private async Task LoadProfile()
+	{
+		isLoadingProfile = true;
+		try
+		{
+			profile = await ProfilesClient.GetMyProfileAsync();
+			if (profile != null)
+			{
+				twoFactorEnabled = profile.TwoFactorEnabled;
+			}
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ في تحميل الملف الشخصي: {ex.Message}");
+		}
+		finally
+		{
+			isLoadingProfile = false;
+		}
+	}
+
+	private async Task LoadContactPoints()
+	{
+		isLoadingContactPoints = true;
+		try
+		{
+			contactPoints = await ContactPointsClient.GetMyContactPointsAsync();
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ في تحميل نقاط الاتصال: {ex.Message}");
+		}
+		finally
+		{
+			isLoadingContactPoints = false;
+		}
+	}
+
+	private async Task SaveProfile()
+	{
+		if (profile == null) return;
+
+		isSaving = true;
+		try
+		{
+			await ProfilesClient.UpdateMyProfileAsync(new UpdateProfileRequest
+			{
+				FullName = profile.FullName,
+				Username = profile.Username,
+				DateOfBirth = profile.DateOfBirth,
+				Gender = profile.Gender,
+				Bio = profile.Bio
+			});
+
+			Notification.ShowSuccess("تم حفظ التغييرات");
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+		finally
+		{
+			isSaving = false;
+		}
+	}
+
+	// Contact Points Management
+	private void ShowAddContactPointDialog()
+	{
+		newContactPoint = new AddContactPointRequest { Type = "Email" };
+		showAddContactDialog = true;
+	}
+
+	private async Task AddContactPoint()
+	{
+		try
+		{
+			var result = await ContactPointsClient.AddContactPointAsync(newContactPoint);
+			if (result != null)
+			{
+				contactPoints ??= new();
+				contactPoints.Add(result);
+				showAddContactDialog = false;
+				Notification.ShowSuccess("تمت الإضافة بنجاح");
+
+				// Verify if needed
+				if (!result.IsVerified)
+				{
+					await VerifyContactPoint(result.Id);
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+	}
+
+	private async Task VerifyContactPoint(Guid contactPointId)
+	{
+		try
+		{
+			var cp = contactPoints?.FirstOrDefault(c => c.Id == contactPointId);
+			if (cp == null) return;
+
+			var result = await ContactPointsClient.RequestVerificationAsync(contactPointId);
+			if (result != null)
+			{
+				verifyingContactId = contactPointId;
+				verifyingContactValue = cp.Value;
+				verificationCode = "";
+				showVerifyDialog = true;
+				Notification.ShowSuccess("تم إرسال رمز التحقق");
+			}
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+	}
+
+	private async Task ConfirmVerification()
+	{
+		try
+		{
+			var result = await ContactPointsClient.VerifyCodeAsync(verifyingContactId, verificationCode);
+			if (result != null)
+			{
+				// Update local state
+				var cp = contactPoints?.FirstOrDefault(c => c.Id == verifyingContactId);
+				if (cp != null)
+				{
+					cp.IsVerified = true;
+				}
+				showVerifyDialog = false;
+				Notification.ShowSuccess("تم التحقق بنجاح");
+			}
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"رمز التحقق غير صحيح");
+		}
+	}
+
+	private async Task SetPrimary(Guid contactPointId)
+	{
+		try
+		{
+			var result = await ContactPointsClient.SetPrimaryAsync(contactPointId);
+			if (result != null)
+			{
+				// Update all contact points
+				foreach (var cp in contactPoints ?? new())
+				{
+					cp.IsPrimary = cp.Id == contactPointId;
+				}
+				StateHasChanged();
+				Notification.ShowSuccess("تم التعيين كأساسي");
+			}
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+	}
+
+	private void EditContactPoint(ContactPointDto cp)
+	{
+		// Show edit dialog (similar to add)
+		Notification.ShowInfo("ميزة التعديل قريباً");
+	}
+
+	private async Task DeleteContactPoint(Guid contactPointId)
+	{
+		try
+		{
+			await ContactPointsClient.DeleteContactPointAsync(contactPointId);
+			contactPoints?.RemoveAll(c => c.Id == contactPointId);
+			StateHasChanged();
+			Notification.ShowSuccess("تم الحذف");
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+	}
+
+	private string GetContactPointIcon(string type) => type switch
+	{
+		"Email" => "📧",
+		"Phone" => "📱",
+		"Address" => "📍",
+		"Social" => "🌐",
+		_ => "📇"
+	};
+
+	private string GetPlaceholder(string type) => type switch
+	{
+		"Email" => "example@domain.com",
+		"Phone" => "05XXXXXXXX",
+		"Address" => "الشارع، المدينة، الرمز البريدي",
+		"Social" => "@username أو رابط الملف الشخصي",
+		_ => ""
+	};
+
+	// Other methods
+	private void ChangeAvatar()
+	{
+		Notification.ShowInfo("ميزة تغيير الصورة قريباً");
+	}
+
+	private void ShowChangePasswordDialog()
+	{
+		Notification.ShowInfo("ميزة تغيير كلمة المرور قريباً");
+	}
+
+	private async Task ToggleTwoFactor(ChangeEventArgs<bool> args)
+	{
+		try
+		{
+			await AuthClient.ToggleTwoFactorAsync(twoFactorEnabled);
+			Notification.ShowSuccess(twoFactorEnabled ? "تم تفعيل المصادقة الثنائية" : "تم تعطيل المصادقة الثنائية");
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+			twoFactorEnabled = !twoFactorEnabled; // Revert
+		}
+	}
+
+	private async Task OnLanguageChanged(ChangeEventArgs<string, LanguageOption> args)
+	{
+		// Update language preference
+		Notification.ShowSuccess($"تم تغيير اللغة إلى {args.ItemData?.Label}");
+	}
+
+	private async Task SavePreferences()
+	{
+		Notification.ShowSuccess("تم حفظ التفضيلات");
+	}
+
+	private string GetAvatarInitials(string name)
+	{
+		if (string.IsNullOrEmpty(name)) return "?";
+		var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+		if (parts.Length >= 2)
+			return $"{parts[0][0]}{parts[1][0]}".ToUpper();
+		return name[0].ToString().ToUpper();
+	}
+
+	// Models
+	private class ProfileDto
+	{
+		public Guid Id { get; set; }
+		public string FullName { get; set; } = string.Empty;
+		public string Username { get; set; } = string.Empty;
+		public string? AvatarUrl { get; set; }
+		public DateTime? DateOfBirth { get; set; }
+		public string? Gender { get; set; }
+		public string? Bio { get; set; }
+		public bool TwoFactorEnabled { get; set; }
+	}
+
+	private class ContactPointDto
+	{
+		public Guid Id { get; set; }
+		public string Type { get; set; } = string.Empty;
+		public string Value { get; set; } = string.Empty;
+		public string Label { get; set; } = string.Empty;
+		public bool IsPrimary { get; set; }
+		public bool IsVerified { get; set; }
+	}
+
+	private class UpdateProfileRequest
+	{
+		public string? FullName { get; set; }
+		public string? Username { get; set; }
+		public DateTime? DateOfBirth { get; set; }
+		public string? Gender { get; set; }
+		public string? Bio { get; set; }
+	}
+
+	private class AddContactPointRequest
+	{
+		public string Type { get; set; } = string.Empty;
+		public string Value { get; set; } = string.Empty;
+		public string Label { get; set; } = string.Empty;
+		public bool SetAsPrimary { get; set; }
+	}
+
+	private class GenderOption
+	{
+		public string Value { get; set; } = string.Empty;
+		public string Label { get; set; } = string.Empty;
+	}
+
+	private class ContactTypeOption
+	{
+		public string Value { get; set; } = string.Empty;
+		public string Label { get; set; } = string.Empty;
+	}
+
+	private class LanguageOption
+	{
+		public string Value { get; set; } = string.Empty;
+		public string Label { get; set; } = string.Empty;
+	}
+
+	private class CurrencyOption
+	{
+		public string Value { get; set; } = string.Empty;
+		public string Label { get; set; } = string.Empty;
+	}
+}
+
+<style>
+	.profile-page {
+		padding: var(--spacing-lg);
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.section-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: var(--spacing-md);
+	}
+
+	/* Profile Section */
+	.profile-section {
+		padding: var(--spacing-lg);
+	}
+
+	.profile-avatar-section {
+		text-align: center;
+		margin-bottom: var(--spacing-xl);
+	}
+
+	.profile-avatar-large {
+		width: 120px;
+		height: 120px;
+		border-radius: 50%;
+		background: var(--primary-color);
+		color: white;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 48px;
+		font-weight: 600;
+		margin: 0 auto var(--spacing-md) auto;
+	}
+
+	.form-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		gap: var(--spacing-lg);
+		margin-bottom: var(--spacing-xl);
+	}
+
+	.form-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: var(--spacing-sm);
+	}
+
+	/* Contact Points */
+	.contact-points-list {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-md);
+	}
+
+	.contact-point-item {
+		display: flex;
+		gap: var(--spacing-md);
+		padding: var(--spacing-md);
+		border: 1px solid var(--border-color);
+		border-radius: var(--border-radius);
+		align-items: center;
+	}
+
+	.cp-icon {
+		width: 48px;
+		height: 48px;
+		border-radius: 50%;
+		background: var(--bg-secondary);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 24px;
+		flex-shrink: 0;
+	}
+
+	.cp-info {
+		flex: 1;
+	}
+
+	.cp-header {
+		display: flex;
+		gap: var(--spacing-sm);
+		align-items: center;
+		margin-bottom: var(--spacing-xs);
+	}
+
+	.primary-badge {
+		background: var(--primary-color);
+		color: white;
+		padding: 2px 8px;
+		border-radius: 12px;
+		font-size: var(--font-size-xs);
+		font-weight: 600;
+	}
+
+	.verified-badge {
+		background: var(--success-color);
+		color: white;
+		padding: 2px 8px;
+		border-radius: 12px;
+		font-size: var(--font-size-xs);
+		font-weight: 600;
+	}
+
+	.cp-meta {
+		display: flex;
+		gap: var(--spacing-md);
+		font-size: var(--font-size-sm);
+		color: var(--text-secondary);
+	}
+
+	.cp-actions {
+		display: flex;
+		gap: var(--spacing-xs);
+	}
+
+	.verify-btn {
+		background: var(--warning-color);
+		color: white;
+	}
+
+	/* Security */
+	.security-section {
+		padding: var(--spacing-lg);
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-lg);
+	}
+
+	.security-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: var(--spacing-md);
+		border: 1px solid var(--border-color);
+		border-radius: var(--border-radius);
+	}
+
+	.security-info h4 {
+		margin: 0 0 var(--spacing-xs) 0;
+	}
+
+	.security-info p {
+		margin: 0;
+		font-size: var(--font-size-sm);
+		color: var(--text-secondary);
+	}
+
+	/* Preferences */
+	.preferences-section {
+		padding: var(--spacing-lg);
+	}
+
+	.preference-group {
+		margin-bottom: var(--spacing-lg);
+	}
+
+	.preference-group h4 {
+		margin-bottom: var(--spacing-md);
+	}
+
+	/* Dialogs */
+	.contact-point-form,
+	.verify-form {
+		padding: var(--spacing-md);
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-md);
+	}
+
+	.verification-input {
+		text-align: center;
+		font-size: 24px;
+		letter-spacing: 8px;
+	}
+
+	.empty-state {
+		text-align: center;
+		padding: var(--spacing-xl);
+	}
+
+	.empty-icon {
+		font-size: 64px;
+		margin-bottom: var(--spacing-md);
+		opacity: 0.5;
+	}
+
+	.loading-container {
+		text-align: center;
+		padding: var(--spacing-xl);
+	}
+</style>

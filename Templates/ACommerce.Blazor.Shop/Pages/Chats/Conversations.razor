@@ -1,0 +1,359 @@
+@page "/chats"
+@inject ChatsClient ChatsClient
+@inject RealtimeClient RealtimeClient
+@inject NavigationManager Navigation
+@inject NotificationService Notification
+
+<PageTitle>المحادثات - Chats</PageTitle>
+
+<div class="chats-page">
+	<SfCard>
+		<CardHeader>
+			<div class="conversations-header">
+				<h2>المحادثات</h2>
+				<SfButton IsPrimary="true" OnClick="ShowNewChatDialog">
+					+ محادثة جديدة
+				</SfButton>
+			</div>
+		</CardHeader>
+		<CardContent>
+			@if (isLoading)
+			{
+				<div class="loading-container">
+					<SfSpinner />
+				</div>
+			}
+			else if (conversations == null || !conversations.Any())
+			{
+				<div class="empty-state">
+					<div class="empty-icon">💬</div>
+					<h3>لا توجد محادثات</h3>
+					<p>ابدأ محادثة جديدة مع التجار أو الدعم الفني</p>
+					<SfButton IsPrimary="true" OnClick="ShowNewChatDialog">
+						محادثة جديدة
+					</SfButton>
+				</div>
+			}
+			else
+			{
+				<div class="conversations-list">
+					@foreach (var conversation in conversations)
+					{
+						<div class="conversation-item @(conversation.HasUnread ? "has-unread" : "")"
+							 @onclick="() => OpenConversation(conversation.Id)">
+							<div class="conversation-avatar">
+								@GetAvatarInitials(conversation.OtherPartyName)
+							</div>
+							<div class="conversation-info">
+								<div class="conversation-header-row">
+									<h4>@conversation.OtherPartyName</h4>
+									<span class="conversation-time">@FormatTime(conversation.LastMessageAt)</span>
+								</div>
+								<div class="conversation-last-message">
+									<p>@conversation.LastMessageText</p>
+									@if (conversation.UnreadCount > 0)
+									{
+										<span class="unread-badge">@conversation.UnreadCount</span>
+									}
+								</div>
+							</div>
+						</div>
+					}
+				</div>
+			}
+		</CardContent>
+	</SfCard>
+</div>
+
+<!-- New Chat Dialog -->
+<SfDialog @bind-Visible="showNewChatDialog"
+		  Width="400px"
+		  IsModal="true">
+	<DialogTemplates>
+		<Header>محادثة جديدة</Header>
+		<Content>
+			<div class="new-chat-content">
+				<SfTextBox @bind-Value="newChatRecipient"
+						   Placeholder="اسم المستخدم أو البريد الإلكتروني"
+						   FloatLabelType="FloatLabelType.Auto">
+					<label>المستلم</label>
+				</SfTextBox>
+
+				<SfTextBox @bind-Value="newChatMessage"
+						   Multiline="true"
+						   Placeholder="اكتب رسالتك..."
+						   FloatLabelType="FloatLabelType.Auto">
+					<label>الرسالة</label>
+				</SfTextBox>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<SfButton IsPrimary="true" OnClick="CreateNewChat">إرسال</SfButton>
+			<SfButton OnClick="() => showNewChatDialog = false">إلغاء</SfButton>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+@code {
+	private List<ConversationDto>? conversations;
+	private bool isLoading = true;
+	private bool showNewChatDialog = false;
+	private string newChatRecipient = "";
+	private string newChatMessage = "";
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadConversations();
+		await ConnectToRealtime();
+	}
+
+	private async Task LoadConversations()
+	{
+		isLoading = true;
+		try
+		{
+			conversations = await ChatsClient.GetMyConversationsAsync();
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ في تحميل المحادثات: {ex.Message}");
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private async Task ConnectToRealtime()
+	{
+		try
+		{
+			await RealtimeClient.ConnectAsync("Chats", "/hubs/chat");
+
+			// Listen for new messages
+			RealtimeClient.On<MessageReceivedDto>("MessageReceived", async (message) =>
+			{
+				await LoadConversations();
+				await InvokeAsync(StateHasChanged);
+			});
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ في الاتصال المباشر: {ex.Message}");
+		}
+	}
+
+	private void OpenConversation(Guid conversationId)
+	{
+		Navigation.NavigateTo($"/chats/{conversationId}");
+	}
+
+	private void ShowNewChatDialog()
+	{
+		showNewChatDialog = true;
+		newChatRecipient = "";
+		newChatMessage = "";
+	}
+
+	private async Task CreateNewChat()
+	{
+		if (string.IsNullOrWhiteSpace(newChatRecipient) || string.IsNullOrWhiteSpace(newChatMessage))
+		{
+			Notification.ShowError("الرجاء ملء جميع الحقول");
+			return;
+		}
+
+		try
+		{
+			var conversation = await ChatsClient.CreateConversationAsync(new CreateConversationRequest
+			{
+				RecipientIdentifier = newChatRecipient,
+				InitialMessage = newChatMessage
+			});
+
+			if (conversation != null)
+			{
+				showNewChatDialog = false;
+				Navigation.NavigateTo($"/chats/{conversation.Id}");
+			}
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+	}
+
+	private string GetAvatarInitials(string name)
+	{
+		if (string.IsNullOrEmpty(name)) return "?";
+		var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+		if (parts.Length >= 2)
+			return $"{parts[0][0]}{parts[1][0]}".ToUpper();
+		return name[0].ToString().ToUpper();
+	}
+
+	private string FormatTime(DateTime dateTime)
+	{
+		var now = DateTime.UtcNow;
+		var diff = now - dateTime;
+
+		if (diff.TotalMinutes < 1) return "الآن";
+		if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes} د";
+		if (diff.TotalHours < 24) return $"{(int)diff.TotalHours} س";
+		if (diff.TotalDays < 7) return $"{(int)diff.TotalDays} يوم";
+		return dateTime.ToString("dd/MM/yyyy");
+	}
+
+	public async ValueTask DisposeAsync()
+	{
+		await RealtimeClient.DisconnectAsync();
+	}
+
+	// Models
+	private class ConversationDto
+	{
+		public Guid Id { get; set; }
+		public string OtherPartyName { get; set; } = string.Empty;
+		public string LastMessageText { get; set; } = string.Empty;
+		public DateTime LastMessageAt { get; set; }
+		public int UnreadCount { get; set; }
+		public bool HasUnread => UnreadCount > 0;
+	}
+
+	private class MessageReceivedDto
+	{
+		public Guid ConversationId { get; set; }
+		public string Text { get; set; } = string.Empty;
+		public Guid SenderId { get; set; }
+	}
+
+	private class CreateConversationRequest
+	{
+		public string RecipientIdentifier { get; set; } = string.Empty;
+		public string InitialMessage { get; set; } = string.Empty;
+	}
+}
+
+<style>
+	.chats-page {
+		padding: var(--spacing-lg);
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.conversations-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		width: 100%;
+		padding: var(--spacing-md);
+	}
+
+	.conversations-list {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.conversation-item {
+		display: flex;
+		gap: var(--spacing-md);
+		padding: var(--spacing-md);
+		border-bottom: 1px solid var(--border-color);
+		cursor: pointer;
+		transition: background 0.2s;
+	}
+
+	.conversation-item:hover {
+		background: var(--bg-secondary);
+	}
+
+	.conversation-item.has-unread {
+		background: var(--bg-highlight);
+	}
+
+	.conversation-avatar {
+		width: 48px;
+		height: 48px;
+		border-radius: 50%;
+		background: var(--primary-color);
+		color: white;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 600;
+		font-size: 18px;
+		flex-shrink: 0;
+	}
+
+	.conversation-info {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.conversation-header-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: var(--spacing-xs);
+	}
+
+	.conversation-header-row h4 {
+		font-size: var(--font-size-base);
+		font-weight: 600;
+		margin: 0;
+	}
+
+	.conversation-time {
+		font-size: var(--font-size-sm);
+		color: var(--text-secondary);
+	}
+
+	.conversation-last-message {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.conversation-last-message p {
+		margin: 0;
+		color: var(--text-secondary);
+		font-size: var(--font-size-sm);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.unread-badge {
+		background: var(--primary-color);
+		color: white;
+		border-radius: 12px;
+		padding: 2px 8px;
+		font-size: var(--font-size-xs);
+		font-weight: 600;
+		flex-shrink: 0;
+		margin-left: var(--spacing-sm);
+	}
+
+	.empty-state {
+		text-align: center;
+		padding: var(--spacing-xl) 0;
+	}
+
+	.empty-icon {
+		font-size: 64px;
+		margin-bottom: var(--spacing-md);
+		opacity: 0.5;
+	}
+
+	.loading-container {
+		text-align: center;
+		padding: var(--spacing-xl);
+	}
+
+	.new-chat-content {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-md);
+		padding: var(--spacing-md);
+	}
+</style>

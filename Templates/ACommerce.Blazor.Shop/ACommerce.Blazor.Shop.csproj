@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- ACommerce Client SDKs -->
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Auth\ACommerce.Client.Auth.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Cart\ACommerce.Client.Cart.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Products\ACommerce.Client.Products.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.ProductListings\ACommerce.Client.ProductListings.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Orders\ACommerce.Client.Orders.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Payments\ACommerce.Client.Payments.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Shipping\ACommerce.Client.Shipping.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Profiles\ACommerce.Client.Profiles.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Notifications\ACommerce.Client.Notifications.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Files\ACommerce.Client.Files.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Realtime\ACommerce.Client.Realtime.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Chats\ACommerce.Client.Chats.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Vendors\ACommerce.Client.Vendors.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.ContactPoints\ACommerce.Client.ContactPoints.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Categories\ACommerce.Client.Categories.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- Blazor -->
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.0" PrivateAssets="all" />
+
+		<!-- Syncfusion Blazor Components -->
+		<PackageReference Include="Syncfusion.Blazor.Grid" Version="27.1.48" />
+		<PackageReference Include="Syncfusion.Blazor.Inputs" Version="27.1.48" />
+		<PackageReference Include="Syncfusion.Blazor.Buttons" Version="27.1.48" />
+		<PackageReference Include="Syncfusion.Blazor.Navigations" Version="27.1.48" />
+		<PackageReference Include="Syncfusion.Blazor.Notifications" Version="27.1.48" />
+		<PackageReference Include="Syncfusion.Blazor.Layouts" Version="27.1.48" />
+		<PackageReference Include="Syncfusion.Blazor.Cards" Version="27.1.48" />
+		<PackageReference Include="Syncfusion.Blazor.DropDowns" Version="27.1.48" />
+		<PackageReference Include="Syncfusion.Blazor.Calendars" Version="27.1.48" />
+		<PackageReference Include="Syncfusion.Blazor.Popups" Version="27.1.48" />
+		<PackageReference Include="Syncfusion.Blazor.Spinner" Version="27.1.48" />
+		<PackageReference Include="Syncfusion.Blazor.Themes" Version="27.1.48" />
+	</ItemGroup>
+
+</Project>

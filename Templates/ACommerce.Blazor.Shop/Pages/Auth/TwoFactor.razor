@@ -1,0 +1,266 @@
+@page "/auth/two-factor"
+@inject AuthClient AuthClient
+@inject NavigationManager Navigation
+@inject NotificationService Notification
+
+<PageTitle>التحقق بخطوتين - Two-Factor Authentication</PageTitle>
+
+<div class="auth-container">
+	<SfCard CssClass="auth-card">
+		<CardHeader Title="التحقق بخطوتين" />
+		<CardContent>
+			<div class="two-factor-info">
+				<p>تم إرسال رمز التحقق إلى @contactInfo</p>
+				<p class="timer">@GetTimerText()</p>
+			</div>
+
+			<EditForm Model="@verifyModel" OnValidSubmit="HandleVerify">
+				<DataAnnotationsValidator />
+				<ValidationSummary />
+
+				<div class="otp-input-container">
+					<SfTextBox @bind-Value="verifyModel.Code"
+							   Placeholder="XXXXXX"
+							   CssClass="otp-input"
+							   FloatLabelType="FloatLabelType.Auto">
+						<label>رمز التحقق</label>
+					</SfTextBox>
+				</div>
+
+				<div class="auth-actions">
+					<SfButton Type="Submit" IsPrimary="true" Disabled="@isLoading">
+						@if (isLoading) { <SfSpinner /> } else { <span>تحقق</span> }
+					</SfButton>
+
+					<SfButton OnClick="ResendCode" Disabled="@(!canResend)">
+						إعادة إرسال الرمز
+					</SfButton>
+
+					<SfButton OnClick="() => Navigation.NavigateTo(\"/login\")">
+						رجوع
+					</SfButton>
+				</div>
+			</EditForm>
+
+			@if (showNumberSelection)
+			{
+				<div class="number-selection">
+					<h5>اختر الرقم الذي تريد استقبال رمز التحقق عليه:</h5>
+					@foreach (var number in availableNumbers)
+					{
+						<SfButton CssClass="number-option" OnClick="() => SelectNumber(number)">
+							@MaskNumber(number)
+						</SfButton>
+					}
+				</div>
+			}
+		</CardContent>
+	</SfCard>
+</div>
+
+@code {
+	[SupplyParameterFromQuery]
+	private string? phone { get; set; }
+
+	[SupplyParameterFromQuery]
+	private string? email { get; set; }
+
+	private VerifyModel verifyModel = new();
+	private bool isLoading = false;
+	private bool canResend = false;
+	private int remainingSeconds = 60;
+	private string contactInfo = "";
+	private System.Threading.Timer? timer;
+
+	private bool showNumberSelection = false;
+	private List<string> availableNumbers = new();
+
+	protected override void OnInitialized()
+	{
+		contactInfo = !string.IsNullOrEmpty(phone) ? MaskNumber(phone) : email ?? "";
+		StartTimer();
+	}
+
+	private void StartTimer()
+	{
+		remainingSeconds = 60;
+		canResend = false;
+
+		timer = new System.Threading.Timer(_ =>
+		{
+			remainingSeconds--;
+			if (remainingSeconds <= 0)
+			{
+				canResend = true;
+				timer?.Dispose();
+			}
+			InvokeAsync(StateHasChanged);
+		}, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+	}
+
+	private string GetTimerText()
+	{
+		if (canResend)
+			return "يمكنك إعادة إرسال الرمز الآن";
+		return $"يمكنك إعادة الإرسال بعد {remainingSeconds} ثانية";
+	}
+
+	private string MaskNumber(string number)
+	{
+		if (number.Length < 4) return number;
+		return $"***{number[^4..]}";
+	}
+
+	private async Task HandleVerify()
+	{
+		isLoading = true;
+		try
+		{
+			var result = await AuthClient.VerifyTwoFactorAsync(new VerifyTwoFactorRequest
+			{
+				Code = verifyModel.Code,
+				PhoneOrEmail = phone ?? email ?? ""
+			});
+
+			if (result?.Token != null)
+			{
+				await StoreTokenAndRedirect(result.Token);
+			}
+			else
+			{
+				Notification.ShowError("رمز التحقق غير صحيح");
+			}
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private async Task ResendCode()
+	{
+		if (!canResend) return;
+
+		isLoading = true;
+		try
+		{
+			if (!string.IsNullOrEmpty(phone))
+			{
+				await AuthClient.RequestPhoneOtpAsync(new RequestPhoneOtpRequest
+				{
+					PhoneNumber = phone
+				});
+			}
+			else if (!string.IsNullOrEmpty(email))
+			{
+				await AuthClient.RequestEmailOtpAsync(new RequestEmailOtpRequest
+				{
+					Email = email
+				});
+			}
+
+			Notification.ShowSuccess("تم إعادة إرسال الرمز");
+			StartTimer();
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private void SelectNumber(string number)
+	{
+		phone = number;
+		contactInfo = MaskNumber(number);
+		showNumberSelection = false;
+		StateHasChanged();
+	}
+
+	private async Task StoreTokenAndRedirect(string token)
+	{
+		await AuthClient.SetTokenAsync(token);
+		Navigation.NavigateTo("/");
+	}
+
+	public void Dispose()
+	{
+		timer?.Dispose();
+	}
+
+	private class VerifyModel
+	{
+		public string Code { get; set; } = string.Empty;
+	}
+}
+
+<style>
+	.auth-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: 80vh;
+		padding: var(--spacing-lg);
+	}
+
+	.auth-card {
+		width: 100%;
+		max-width: 500px;
+	}
+
+	.two-factor-info {
+		text-align: center;
+		margin-bottom: var(--spacing-lg);
+		padding: var(--spacing-md);
+		background: var(--bg-secondary);
+		border-radius: var(--border-radius);
+	}
+
+	.timer {
+		color: var(--text-secondary);
+		font-size: var(--font-size-sm);
+		margin-top: var(--spacing-sm);
+	}
+
+	.otp-input-container {
+		margin: var(--spacing-lg) 0;
+	}
+
+	.otp-input {
+		text-align: center;
+		font-size: 24px;
+		letter-spacing: 8px;
+	}
+
+	.auth-actions {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-sm);
+	}
+
+	.number-selection {
+		margin-top: var(--spacing-xl);
+		padding: var(--spacing-lg);
+		background: var(--bg-secondary);
+		border-radius: var(--border-radius);
+	}
+
+	.number-selection h5 {
+		margin-bottom: var(--spacing-md);
+	}
+
+	.number-option {
+		width: 100%;
+		margin-bottom: var(--spacing-sm);
+		padding: var(--spacing-md);
+		font-family: monospace;
+		font-size: 18px;
+	}
+</style>

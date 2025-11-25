@@ -1,0 +1,428 @@
+@page "/cart"
+@inject CartStateService CartState
+@inject NavigationManager Navigation
+@inject NotificationService Notification
+
+<PageTitle>سلة التسوق - Shopping Cart</PageTitle>
+
+<div class="cart-page">
+	<h1>سلة التسوق</h1>
+
+	@if (CartState.IsLoading)
+	{
+		<div class="loading-container">
+			<SfSpinner />
+		</div>
+	}
+	else if (CartState.CurrentCart == null || !CartState.CurrentCart.Items.Any())
+	{
+		<div class="empty-cart">
+			<div class="empty-icon">🛒</div>
+			<h3>سلة التسوق فارغة</h3>
+			<p>ابدأ بإضافة منتجات إلى سلتك</p>
+			<SfButton IsPrimary="true" OnClick="() => Navigation.NavigateTo(\"/products\")">
+				تصفح المنتجات
+			</SfButton>
+		</div>
+	}
+	else
+	{
+		<div class="cart-content">
+			<div class="cart-items-section">
+				<SfCard>
+					<CardHeader Title="المنتجات" />
+					<CardContent>
+						<div class="cart-items">
+							@foreach (var item in CartState.CurrentCart.Items)
+							{
+								<div class="cart-item">
+									<div class="item-image">
+										@if (!string.IsNullOrEmpty(item.ImageUrl))
+										{
+											<img src="@item.ImageUrl" alt="@item.ProductName" />
+										}
+										else
+										{
+											<div class="image-placeholder">📦</div>
+										}
+									</div>
+
+									<div class="item-info">
+										<h4>@item.ProductName</h4>
+										<p class="item-vendor">@item.VendorName</p>
+										@if (item.Properties.Any())
+										{
+											<div class="item-properties">
+												@foreach (var prop in item.Properties)
+												{
+													<span class="property-tag">@prop.Key: @prop.Value</span>
+												}
+											</div>
+										}
+									</div>
+
+									<div class="item-quantity">
+										<SfNumericTextBox @bind-Value="item.Quantity"
+														  Min="1"
+														  Max="@item.MaxQuantity"
+														  ShowSpinButton="true"
+														  Format="n0">
+											<NumericTextBoxEvents ValueChange="() => UpdateQuantity(item.Id, item.Quantity)" />
+										</SfNumericTextBox>
+									</div>
+
+									<div class="item-price">
+										<p class="price">@item.TotalPrice.ToString("C")</p>
+										<p class="unit-price">@item.UnitPrice.ToString("C") / وحدة</p>
+									</div>
+
+									<div class="item-actions">
+										<SfButton IconCss="e-icons e-delete"
+												  CssClass="delete-btn"
+												  OnClick="() => RemoveItem(item.Id)">
+										</SfButton>
+									</div>
+								</div>
+							}
+						</div>
+					</CardContent>
+				</SfCard>
+			</div>
+
+			<div class="cart-summary-section">
+				<SfCard CssClass="summary-card">
+					<CardHeader Title="ملخص الطلب" />
+					<CardContent>
+						<div class="summary-row">
+							<span>المجموع الفرعي</span>
+							<span>@CartState.SubTotal.ToString("C")</span>
+						</div>
+
+						@if (CartState.CurrentCart.DiscountAmount > 0)
+						{
+							<div class="summary-row discount">
+								<span>الخصم</span>
+								<span>-@CartState.CurrentCart.DiscountAmount.ToString("C")</span>
+							</div>
+						}
+
+						<div class="summary-row">
+							<span>الشحن</span>
+							<span>@GetShippingText()</span>
+						</div>
+
+						<div class="summary-row">
+							<span>الضريبة</span>
+							<span>@CartState.CurrentCart.TaxAmount.ToString("C")</span>
+						</div>
+
+						<div class="summary-divider"></div>
+
+						<div class="summary-row total">
+							<strong>الإجمالي</strong>
+							<strong class="total-amount">@CartState.Total.ToString("C")</strong>
+						</div>
+
+						<!-- Coupon -->
+						<div class="coupon-section">
+							<SfTextBox @bind-Value="couponCode"
+									   Placeholder="رمز الخصم">
+								<InputGroupButtons>
+									<InputGroupButton>
+										<SfButton OnClick="ApplyCoupon" Disabled="@isApplyingCoupon">
+											تطبيق
+										</SfButton>
+									</InputGroupButton>
+								</InputGroupButtons>
+							</SfTextBox>
+						</div>
+
+						<SfButton IsPrimary="true"
+								  CssClass="checkout-btn"
+								  OnClick="GoToCheckout">
+							متابعة إلى الدفع
+						</SfButton>
+					</CardContent>
+				</SfCard>
+
+				<!-- Payment Methods Info -->
+				<div class="payment-methods-info">
+					<p>طرق الدفع المتاحة:</p>
+					<div class="payment-icons">
+						<span>💳</span>
+						<span>📱</span>
+						<span>🍎</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+</div>
+
+@code {
+	private string couponCode = "";
+	private bool isApplyingCoupon = false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await CartState.LoadCartAsync();
+	}
+
+	private async Task UpdateQuantity(Guid itemId, int newQuantity)
+	{
+		await CartState.UpdateItemQuantityAsync(itemId, newQuantity);
+	}
+
+	private async Task RemoveItem(Guid itemId)
+	{
+		var success = await CartState.RemoveFromCartAsync(itemId);
+		if (success)
+		{
+			Notification.ShowSuccess("تمت الإزالة من السلة");
+		}
+	}
+
+	private async Task ApplyCoupon()
+	{
+		if (string.IsNullOrWhiteSpace(couponCode)) return;
+
+		isApplyingCoupon = true;
+		try
+		{
+			var success = await CartState.ApplyCouponAsync(couponCode);
+			if (success)
+			{
+				Notification.ShowSuccess("تم تطبيق رمز الخصم");
+				couponCode = "";
+			}
+			else
+			{
+				Notification.ShowError("رمز الخصم غير صحيح أو منتهي الصلاحية");
+			}
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+		finally
+		{
+			isApplyingCoupon = false;
+		}
+	}
+
+	private void GoToCheckout()
+	{
+		Navigation.NavigateTo("/checkout");
+	}
+
+	private string GetShippingText()
+	{
+		var shipping = CartState.CurrentCart?.ShippingAmount ?? 0;
+		return shipping == 0 ? "مجاناً" : shipping.ToString("C");
+	}
+}
+
+<style>
+	.cart-page {
+		max-width: 1400px;
+		margin: 0 auto;
+		padding: var(--spacing-lg);
+	}
+
+	.cart-page h1 {
+		margin-bottom: var(--spacing-xl);
+	}
+
+	.cart-content {
+		display: grid;
+		grid-template-columns: 1fr 400px;
+		gap: var(--spacing-xl);
+	}
+
+	/* Cart Items */
+	.cart-items {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-md);
+	}
+
+	.cart-item {
+		display: flex;
+		gap: var(--spacing-md);
+		padding: var(--spacing-md);
+		border-bottom: 1px solid var(--border-color);
+		align-items: center;
+	}
+
+	.item-image {
+		width: 100px;
+		height: 100px;
+		border-radius: var(--border-radius);
+		overflow: hidden;
+		background: var(--bg-secondary);
+		flex-shrink: 0;
+	}
+
+	.item-image img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.image-placeholder {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 48px;
+		opacity: 0.3;
+	}
+
+	.item-info {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.item-info h4 {
+		margin: 0 0 var(--spacing-xs) 0;
+		font-size: var(--font-size-base);
+	}
+
+	.item-vendor {
+		margin: 0;
+		font-size: var(--font-size-sm);
+		color: var(--text-secondary);
+	}
+
+	.item-properties {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--spacing-xs);
+		margin-top: var(--spacing-sm);
+	}
+
+	.property-tag {
+		background: var(--bg-tertiary);
+		padding: 2px 8px;
+		border-radius: 12px;
+		font-size: var(--font-size-xs);
+	}
+
+	.item-quantity {
+		width: 120px;
+	}
+
+	.item-price {
+		text-align: center;
+		min-width: 100px;
+	}
+
+	.item-price .price {
+		margin: 0;
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--price-color);
+	}
+
+	.item-price .unit-price {
+		margin: 0;
+		font-size: var(--font-size-xs);
+		color: var(--text-secondary);
+	}
+
+	/* Summary */
+	.cart-summary-section {
+		position: sticky;
+		top: 80px;
+		height: fit-content;
+	}
+
+	.summary-card {
+		margin-bottom: var(--spacing-md);
+	}
+
+	.summary-row {
+		display: flex;
+		justify-content: space-between;
+		padding: var(--spacing-sm) 0;
+	}
+
+	.summary-row.discount {
+		color: var(--success-color);
+	}
+
+	.summary-row.total {
+		font-size: var(--font-size-lg);
+		padding-top: var(--spacing-md);
+	}
+
+	.total-amount {
+		color: var(--price-color);
+		font-size: 24px;
+	}
+
+	.summary-divider {
+		height: 1px;
+		background: var(--border-color);
+		margin: var(--spacing-md) 0;
+	}
+
+	.coupon-section {
+		margin: var(--spacing-lg) 0;
+	}
+
+	.checkout-btn {
+		width: 100%;
+		padding: var(--spacing-md);
+		font-size: 18px;
+		font-weight: 600;
+	}
+
+	.payment-methods-info {
+		text-align: center;
+		padding: var(--spacing-md);
+		background: var(--bg-secondary);
+		border-radius: var(--border-radius);
+	}
+
+	.payment-methods-info p {
+		margin-bottom: var(--spacing-sm);
+		font-size: var(--font-size-sm);
+		color: var(--text-secondary);
+	}
+
+	.payment-icons {
+		display: flex;
+		justify-content: center;
+		gap: var(--spacing-md);
+		font-size: 32px;
+	}
+
+	.empty-cart {
+		text-align: center;
+		padding: var(--spacing-xl) 0;
+	}
+
+	.empty-icon {
+		font-size: 80px;
+		margin-bottom: var(--spacing-md);
+		opacity: 0.3;
+	}
+
+	.loading-container {
+		text-align: center;
+		padding: var(--spacing-xl);
+	}
+
+	/* Responsive */
+	@media (max-width: 1024px) {
+		.cart-content {
+			grid-template-columns: 1fr;
+		}
+
+		.cart-summary-section {
+			position: static;
+		}
+	}
+</style>

@@ -1,0 +1,221 @@
+@page "/register"
+@inject AuthClient AuthClient
+@inject NavigationManager Navigation
+@inject NotificationService Notification
+
+<PageTitle>إنشاء حساب جديد - Register</PageTitle>
+
+<div class="auth-container">
+	<SfCard CssClass="auth-card">
+		<CardHeader Title="إنشاء حساب جديد" />
+		<CardContent>
+			<EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
+				<DataAnnotationsValidator />
+				<ValidationSummary />
+
+				<SfTextBox @bind-Value="registerModel.FullName"
+						   Placeholder="الاسم الكامل"
+						   FloatLabelType="FloatLabelType.Auto">
+					<label>الاسم الكامل</label>
+				</SfTextBox>
+
+				<SfTextBox @bind-Value="registerModel.Email"
+						   Placeholder="example@domain.com"
+						   FloatLabelType="FloatLabelType.Auto">
+					<label>البريد الإلكتروني</label>
+				</SfTextBox>
+
+				<SfTextBox @bind-Value="registerModel.PhoneNumber"
+						   Placeholder="05XXXXXXXX"
+						   FloatLabelType="FloatLabelType.Auto">
+					<label>رقم الجوال (اختياري)</label>
+				</SfTextBox>
+
+				<SfTextBox @bind-Value="registerModel.Password"
+						   Type="InputType.Password"
+						   FloatLabelType="FloatLabelType.Auto">
+					<label>كلمة المرور</label>
+				</SfTextBox>
+
+				<SfTextBox @bind-Value="registerModel.ConfirmPassword"
+						   Type="InputType.Password"
+						   FloatLabelType="FloatLabelType.Auto">
+					<label>تأكيد كلمة المرور</label>
+				</SfTextBox>
+
+				<div class="checkbox-container">
+					<SfCheckBox @bind-Checked="registerModel.AgreeToTerms" Label="أوافق على الشروط والأحكام" />
+				</div>
+
+				<div class="auth-actions">
+					<SfButton Type="Submit" IsPrimary="true" Disabled="@isLoading">
+						@if (isLoading) { <SfSpinner /> } else { <span>إنشاء الحساب</span> }
+					</SfButton>
+					<SfButton OnClick="() => Navigation.NavigateTo(\"/login\")">
+						لديك حساب؟ تسجيل الدخول
+					</SfButton>
+				</div>
+			</EditForm>
+
+			<div class="divider">
+				<span>أو</span>
+			</div>
+
+			<div class="social-auth">
+				<SfButton CssClass="social-btn google-btn" OnClick="RegisterWithGoogle">
+					<span class="icon">🔵</span>
+					<span>إنشاء حساب عبر Google</span>
+				</SfButton>
+
+				<SfButton CssClass="social-btn apple-btn" OnClick="RegisterWithApple">
+					<span class="icon">🍎</span>
+					<span>إنشاء حساب عبر Apple</span>
+				</SfButton>
+			</div>
+		</CardContent>
+	</SfCard>
+</div>
+
+@code {
+	private RegisterModel registerModel = new();
+	private bool isLoading = false;
+
+	private async Task HandleRegister()
+	{
+		if (registerModel.Password != registerModel.ConfirmPassword)
+		{
+			Notification.ShowError("كلمات المرور غير متطابقة");
+			return;
+		}
+
+		if (!registerModel.AgreeToTerms)
+		{
+			Notification.ShowError("يجب الموافقة على الشروط والأحكام");
+			return;
+		}
+
+		isLoading = true;
+		try
+		{
+			var result = await AuthClient.RegisterAsync(new RegisterRequest
+			{
+				FullName = registerModel.FullName,
+				Email = registerModel.Email,
+				PhoneNumber = registerModel.PhoneNumber,
+				Password = registerModel.Password
+			});
+
+			if (result?.Success == true)
+			{
+				// Redirect to verify email/phone
+				if (!string.IsNullOrEmpty(registerModel.Email))
+				{
+					Navigation.NavigateTo($"/auth/verify-email?email={registerModel.Email}");
+				}
+				else
+				{
+					Navigation.NavigateTo("/login");
+				}
+				Notification.ShowSuccess("تم إنشاء الحساب بنجاح");
+			}
+			else
+			{
+				Notification.ShowError(result?.Message ?? "فشل إنشاء الحساب");
+			}
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private void RegisterWithGoogle()
+	{
+		Navigation.NavigateTo("/api/auth/external/google?mode=register", forceLoad: true);
+	}
+
+	private void RegisterWithApple()
+	{
+		Navigation.NavigateTo("/api/auth/external/apple?mode=register", forceLoad: true);
+	}
+
+	private class RegisterModel
+	{
+		public string FullName { get; set; } = string.Empty;
+		public string Email { get; set; } = string.Empty;
+		public string PhoneNumber { get; set; } = string.Empty;
+		public string Password { get; set; } = string.Empty;
+		public string ConfirmPassword { get; set; } = string.Empty;
+		public bool AgreeToTerms { get; set; }
+	}
+}
+
+<style>
+	.auth-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: 80vh;
+		padding: var(--spacing-lg);
+	}
+
+	.auth-card {
+		width: 100%;
+		max-width: 500px;
+	}
+
+	.checkbox-container {
+		margin: var(--spacing-md) 0;
+	}
+
+	.auth-actions {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-sm);
+		margin-top: var(--spacing-lg);
+	}
+
+	.divider {
+		text-align: center;
+		margin: var(--spacing-lg) 0;
+		position: relative;
+	}
+
+	.divider::before {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 0;
+		right: 0;
+		height: 1px;
+		background: var(--border-color);
+	}
+
+	.divider span {
+		background: var(--bg-primary);
+		padding: 0 var(--spacing-md);
+		position: relative;
+		z-index: 1;
+	}
+
+	.social-auth {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-sm);
+	}
+
+	.social-btn {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-sm);
+	}
+
+	.social-btn .icon {
+		font-size: 20px;
+	}
+</style>
