@@ -1,0 +1,143 @@
+@page "/"
+
+<PageTitle>الرئيسية - ACommerce Shop</PageTitle>
+
+<div class="hero-section p-3">
+    <h1 class="display-4">🛒 مرحباً بك في متجر ACommerce</h1>
+    <p class="lead">منصة تجارة إلكترونية متطورة بنية معمارية نظيفة</p>
+</div>
+
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <SfCard>
+                <CardHeader Title="📦 كتالوج المنتجات" />
+                <CardContent>
+                    <p>نظام كتالوج متطور مع:</p>
+                    <ul>
+                        <li>خصائص ديناميكية</li>
+                        <li>وحدات قياس مستقلة</li>
+                        <li>عملات متعددة</li>
+                        <li>دعم Multi-Vendor</li>
+                    </ul>
+                    <SfButton CssClass="e-primary" @onclick="NavigateToProducts">
+                        عرض المنتجات
+                    </SfButton>
+                </CardContent>
+            </SfCard>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <SfCard>
+                <CardHeader Title="🛍️ التسوق الذكي" />
+                <CardContent>
+                    <p>تجربة تسوق سلسة مع:</p>
+                    <ul>
+                        <li>سلة تسوق متقدمة</li>
+                        <li>معالجة دفع آمنة</li>
+                        <li>تتبع الطلبات</li>
+                        <li>إشعارات فورية</li>
+                    </ul>
+                    <SfButton CssClass="e-success" @onclick="NavigateToCart">
+                        عرض السلة
+                    </SfButton>
+                </CardContent>
+            </SfCard>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <SfCard>
+                <CardHeader Title="👥 إدارة متطورة" />
+                <CardContent>
+                    <p>أدوات إدارية قوية:</p>
+                    <ul>
+                        <li>لوحة تحكم البائعين</li>
+                        <li>إدارة العملات</li>
+                        <li>إدارة الوحدات</li>
+                        <li>تقارير شاملة</li>
+                    </ul>
+                    <SfButton CssClass="e-info" @onclick="NavigateToAdmin">
+                        الإدارة
+                    </SfButton>
+                </CardContent>
+            </SfCard>
+        </div>
+    </div>
+
+    <div class="architecture-info mt-3 p-3">
+        <h2>🏗️ البنية المعمارية</h2>
+        <div class="row mt-2">
+            <div class="col-md-6">
+                <h4>✅ ما تم إنجازه:</h4>
+                <ul>
+                    <li>✨ فصل كامل للأنظمة (Separation of Concerns)</li>
+                    <li>🔄 إزالة الوراثة الدائرية (Circular Inheritance)</li>
+                    <li>📦 4 أنظمة مستقلة (Attributes, Units, Currencies, Products)</li>
+                    <li>🎯 Composition over Inheritance</li>
+                    <li>✅ EF Core متوافق تماماً</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h4>🚀 التقنيات:</h4>
+                <ul>
+                    <li>.NET 9.0</li>
+                    <li>MAUI Blazor Hybrid</li>
+                    <li>Entity Framework Core</li>
+                    <li>OpenIddict</li>
+                    <li>SignalR</li>
+                    <li>Syncfusion Components</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    private void NavigateToProducts() => Navigation.NavigateTo("/products");
+    private void NavigateToCart() => Navigation.NavigateTo("/cart");
+    private void NavigateToAdmin() => Navigation.NavigateTo("/admin/vendors");
+}
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #6200ea, #3700b3);
+        color: white;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .architecture-info {
+        background: #f5f5f5;
+        border-radius: 12px;
+    }
+
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -8px;
+    }
+
+    [class*="col-"] {
+        padding: 0 8px;
+    }
+
+    .col-md-4 {
+        flex: 0 0 33.333%;
+        max-width: 33.333%;
+    }
+
+    .col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+
+    @media (max-width: 768px) {
+        .col-md-4, .col-md-6 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+    }
+</style>

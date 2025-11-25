@@ -1,0 +1,144 @@
+@page "/products"
+@using ACommerce.Client.Catalog.Products
+@inject ProductsClient ProductsClient
+
+<PageTitle>المنتجات - ACommerce Shop</PageTitle>
+
+<h1>📦 كتالوج المنتجات</h1>
+
+<div class="filters-section mb-3">
+    <SfTextBox Placeholder="بحث عن منتج..." @bind-Value="@searchQuery" />
+    <SfButton CssClass="e-primary" @onclick="SearchProducts">بحث</SfButton>
+</div>
+
+@if (isLoading)
+{
+    <div class="text-center">
+        <div class="loading-spinner"></div>
+        <p>جاري تحميل المنتجات...</p>
+    </div>
+}
+else if (products?.Any() == true)
+{
+    <div class="products-grid">
+        @foreach (var product in products)
+        {
+            <div class="product-card">
+                <img src="@(product.FeaturedImage ?? "https://via.placeholder.com/300x200?text=No+Image")"
+                     alt="@product.Name"
+                     class="product-image" />
+                <div class="p-2">
+                    <h3 class="product-title">@product.Name</h3>
+                    <p class="text-secondary">@product.ShortDescription</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="product-price">@GetFormattedPrice(product)</span>
+                        <SfButton CssClass="e-success" @onclick="() => AddToCart(product)">
+                            أضف للسلة 🛒
+                        </SfButton>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="text-center p-3">
+        <p>لا توجد منتجات حالياً</p>
+        <SfButton CssClass="e-info" @onclick="LoadProducts">تحديث</SfButton>
+    </div>
+}
+
+@code {
+    private List<ProductResponseDto>? products;
+    private string searchQuery = string.Empty;
+    private bool isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProducts();
+    }
+
+    private async Task LoadProducts()
+    {
+        try
+        {
+            isLoading = true;
+            StateHasChanged();
+
+            // TODO: Implement actual API call
+            // products = await ProductsClient.GetAllAsync();
+
+            // Mock data for now
+            products = new List<ProductResponseDto>
+            {
+                new() { Id = Guid.NewGuid(), Name = "منتج تجريبي 1", ShortDescription = "وصف قصير", FeaturedImage = null },
+                new() { Id = Guid.NewGuid(), Name = "منتج تجريبي 2", ShortDescription = "وصف قصير", FeaturedImage = null }
+            };
+
+            await Task.Delay(500); // Simulate network delay
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading products: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SearchProducts()
+    {
+        await LoadProducts(); // TODO: Implement search with query
+    }
+
+    private string GetFormattedPrice(ProductResponseDto product)
+    {
+        // TODO: Get actual price from product
+        return "100 ر.س";
+    }
+
+    private void AddToCart(ProductResponseDto product)
+    {
+        // TODO: Implement add to cart
+        Console.WriteLine($"Added {product.Name} to cart");
+    }
+
+    // Temporary DTO for demo
+    public class ProductResponseDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? ShortDescription { get; set; }
+        public string? FeaturedImage { get; set; }
+    }
+}
+
+<style>
+    .filters-section {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .d-flex {
+        display: flex;
+    }
+
+    .justify-content-between {
+        justify-content: space-between;
+    }
+
+    .align-items-center {
+        align-items: center;
+    }
+</style>
