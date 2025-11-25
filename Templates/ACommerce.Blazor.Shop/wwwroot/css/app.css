@@ -1,0 +1,227 @@
+/* ============================================
+   🎨 ACommerce App Styles
+   استخدام CSS Variables للتخصيص السهل
+   ============================================ */
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	font-family: var(--font-family);
+	font-size: var(--font-size-base);
+	color: var(--text-primary);
+	background-color: var(--bg-primary);
+	line-height: 1.6;
+}
+
+/* ===== Loading Screen ===== */
+.loading-screen {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
+	background: var(--bg-primary);
+}
+
+.spinner {
+	width: 48px;
+	height: 48px;
+	border: 4px solid var(--border-color);
+	border-top-color: var(--primary-color);
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	to { transform: rotate(360deg); }
+}
+
+/* ===== Container ===== */
+.container {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0 var(--spacing-md);
+}
+
+.container-fluid {
+	padding: 0 var(--spacing-md);
+}
+
+/* ===== Cards ===== */
+.card {
+	background: var(--bg-card);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	padding: var(--spacing-lg);
+	box-shadow: var(--shadow-sm);
+	transition: box-shadow var(--transition-normal);
+}
+
+.card:hover {
+	box-shadow: var(--shadow-md);
+}
+
+.card-header {
+	font-size: var(--font-size-xl);
+	font-weight: 600;
+	margin-bottom: var(--spacing-md);
+	color: var(--text-primary);
+}
+
+.card-body {
+	color: var(--text-secondary);
+}
+
+/* ===== Product Card ===== */
+.product-card {
+	position: relative;
+	overflow: hidden;
+	cursor: pointer;
+	transition: transform var(--transition-normal);
+}
+
+.product-card:hover {
+	transform: translateY(-4px);
+}
+
+.product-image {
+	width: 100%;
+	height: 200px;
+	object-fit: cover;
+	border-radius: var(--border-radius);
+}
+
+.product-badge {
+	position: absolute;
+	top: var(--spacing-sm);
+	right: var(--spacing-sm);
+	background: var(--danger-color);
+	color: white;
+	padding: var(--spacing-xs) var(--spacing-sm);
+	border-radius: var(--border-radius-sm);
+	font-size: var(--font-size-xs);
+	font-weight: 600;
+}
+
+.product-title {
+	font-size: var(--font-size-lg);
+	font-weight: 600;
+	margin: var(--spacing-sm) 0;
+	color: var(--text-primary);
+}
+
+.product-price {
+	font-size: var(--font-size-xl);
+	font-weight: 700;
+	color: var(--price-color);
+}
+
+.product-price-old {
+	font-size: var(--font-size-sm);
+	color: var(--text-tertiary);
+	text-decoration: line-through;
+	margin-left: var(--spacing-sm);
+}
+
+/* ===== Buttons ===== */
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--spacing-sm);
+	padding: var(--spacing-sm) var(--spacing-lg);
+	border: none;
+	border-radius: var(--border-radius);
+	font-size: var(--font-size-base);
+	font-weight: 500;
+	cursor: pointer;
+	transition: all var(--transition-fast);
+	text-decoration: none;
+}
+
+.btn-primary {
+	background: var(--primary-color);
+	color: white;
+}
+
+.btn-primary:hover {
+	background: var(--primary-dark);
+}
+
+.btn-secondary {
+	background: var(--secondary-color);
+	color: white;
+}
+
+.btn-outline {
+	background: transparent;
+	border: 2px solid var(--primary-color);
+	color: var(--primary-color);
+}
+
+.btn-outline:hover {
+	background: var(--primary-color);
+	color: white;
+}
+
+/* ===== Grid ===== */
+.grid {
+	display: grid;
+	gap: var(--spacing-lg);
+}
+
+.grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+@media (max-width: 768px) {
+	.grid-cols-2, .grid-cols-3, .grid-cols-4 {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* ===== Badge ===== */
+.badge {
+	display: inline-block;
+	padding: var(--spacing-xs) var(--spacing-sm);
+	border-radius: var(--border-radius-sm);
+	font-size: var(--font-size-xs);
+	font-weight: 600;
+}
+
+.badge-success {
+	background: var(--success-color);
+	color: white;
+}
+
+.badge-warning {
+	background: var(--warning-color);
+	color: white;
+}
+
+.badge-danger {
+	background: var(--danger-color);
+	color: white;
+}
+
+/* ===== Utilities ===== */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+
+.mt-1 { margin-top: var(--spacing-sm); }
+.mt-2 { margin-top: var(--spacing-md); }
+.mt-3 { margin-top: var(--spacing-lg); }
+
+.mb-1 { margin-bottom: var(--spacing-sm); }
+.mb-2 { margin-bottom: var(--spacing-md); }
+.mb-3 { margin-bottom: var(--spacing-lg); }
+
+.p-1 { padding: var(--spacing-sm); }
+.p-2 { padding: var(--spacing-md); }
+.p-3 { padding: var(--spacing-lg); }
