@@ -1,0 +1,311 @@
+@page "/login"
+@inject AuthClient AuthClient
+@inject NavigationManager Navigation
+@inject NotificationService Notification
+
+<PageTitle>تسجيل الدخول - Login</PageTitle>
+
+<div class="auth-container">
+	<SfCard CssClass="auth-card">
+		<CardHeader Title="@GetTitle()" />
+		<CardContent>
+			@if (authMode == AuthMode.Selection)
+			{
+				<div class="auth-methods">
+					<h4>اختر طريقة تسجيل الدخول</h4>
+
+					<SfButton CssClass="auth-method-btn" OnClick="() => SelectAuthMethod(AuthMode.Phone)">
+						<span class="icon">📱</span>
+						<span>تسجيل الدخول برقم الجوال</span>
+					</SfButton>
+
+					<SfButton CssClass="auth-method-btn" OnClick="() => SelectAuthMethod(AuthMode.Email)">
+						<span class="icon">📧</span>
+						<span>تسجيل الدخول بالبريد الإلكتروني</span>
+					</SfButton>
+
+					<SfButton CssClass="auth-method-btn" OnClick="() => SelectAuthMethod(AuthMode.Google)">
+						<span class="icon">🔵</span>
+						<span>تسجيل الدخول عبر Google</span>
+					</SfButton>
+
+					<SfButton CssClass="auth-method-btn" OnClick="() => SelectAuthMethod(AuthMode.Apple)">
+						<span class="icon">🍎</span>
+						<span>تسجيل الدخول عبر Apple</span>
+					</SfButton>
+
+					<SfButton CssClass="auth-method-btn" OnClick="() => SelectAuthMethod(AuthMode.Nafath)">
+						<span class="icon">🇸🇦</span>
+						<span>تسجيل الدخول عبر نفاذ (الهوية الوطنية)</span>
+					</SfButton>
+				</div>
+			}
+			else if (authMode == AuthMode.Phone)
+			{
+				<EditForm Model="@phoneModel" OnValidSubmit="LoginWithPhone">
+					<DataAnnotationsValidator />
+					<ValidationSummary />
+
+					<SfTextBox @bind-Value="phoneModel.PhoneNumber"
+							   Placeholder="05XXXXXXXX"
+							   FloatLabelType="FloatLabelType.Auto">
+						<label>رقم الجوال</label>
+					</SfTextBox>
+
+					<div class="auth-actions">
+						<SfButton Type="Submit" IsPrimary="true" Disabled="@isLoading">
+							@if (isLoading) { <SfSpinner /> } else { <span>إرسال كود التحقق</span> }
+						</SfButton>
+						<SfButton OnClick="BackToSelection">رجوع</SfButton>
+					</div>
+				</EditForm>
+			}
+			else if (authMode == AuthMode.Email)
+			{
+				<EditForm Model="@emailModel" OnValidSubmit="LoginWithEmail">
+					<DataAnnotationsValidator />
+					<ValidationSummary />
+
+					<SfTextBox @bind-Value="emailModel.Email"
+							   Placeholder="example@domain.com"
+							   FloatLabelType="FloatLabelType.Auto">
+						<label>البريد الإلكتروني</label>
+					</SfTextBox>
+
+					<SfTextBox @bind-Value="emailModel.Password"
+							   Type="InputType.Password"
+							   FloatLabelType="FloatLabelType.Auto">
+						<label>كلمة المرور</label>
+					</SfTextBox>
+
+					<div class="auth-actions">
+						<SfButton Type="Submit" IsPrimary="true" Disabled="@isLoading">
+							@if (isLoading) { <SfSpinner /> } else { <span>تسجيل الدخول</span> }
+						</SfButton>
+						<SfButton OnClick="BackToSelection">رجوع</SfButton>
+					</div>
+				</EditForm>
+			}
+			else if (authMode == AuthMode.Nafath)
+			{
+				<div class="nafath-info">
+					<p>سيتم توجيهك إلى منصة نفاذ للمصادقة باستخدام الهوية الوطنية</p>
+					<SfButton IsPrimary="true" OnClick="LoginWithNafath" Disabled="@isLoading">
+						@if (isLoading) { <SfSpinner /> } else { <span>الاستمرار إلى نفاذ</span> }
+					</SfButton>
+					<SfButton OnClick="BackToSelection">رجوع</SfButton>
+				</div>
+			}
+		</CardContent>
+		<CardFooter>
+			<div class="auth-footer">
+				<p>ليس لديك حساب؟ <a href="/register">إنشاء حساب جديد</a></p>
+			</div>
+		</CardFooter>
+	</SfCard>
+</div>
+
+@code {
+	private enum AuthMode { Selection, Phone, Email, Google, Apple, Nafath }
+
+	private AuthMode authMode = AuthMode.Selection;
+	private bool isLoading = false;
+
+	private PhoneLoginModel phoneModel = new();
+	private EmailLoginModel emailModel = new();
+
+	private string GetTitle() => authMode switch
+	{
+		AuthMode.Phone => "تسجيل الدخول برقم الجوال",
+		AuthMode.Email => "تسجيل الدخول بالبريد الإلكتروني",
+		AuthMode.Nafath => "تسجيل الدخول عبر نفاذ",
+		_ => "تسجيل الدخول"
+	};
+
+	private void SelectAuthMethod(AuthMode mode)
+	{
+		authMode = mode;
+
+		// OAuth methods - redirect immediately
+		if (mode == AuthMode.Google)
+		{
+			Navigation.NavigateTo("/api/auth/external/google", forceLoad: true);
+		}
+		else if (mode == AuthMode.Apple)
+		{
+			Navigation.NavigateTo("/api/auth/external/apple", forceLoad: true);
+		}
+	}
+
+	private void BackToSelection()
+	{
+		authMode = AuthMode.Selection;
+		phoneModel = new();
+		emailModel = new();
+	}
+
+	private async Task LoginWithPhone()
+	{
+		isLoading = true;
+		try
+		{
+			var result = await AuthClient.RequestPhoneOtpAsync(new RequestPhoneOtpRequest
+			{
+				PhoneNumber = phoneModel.PhoneNumber
+			});
+
+			if (result?.Success == true)
+			{
+				Navigation.NavigateTo($"/auth/two-factor?phone={phoneModel.PhoneNumber}");
+			}
+			else
+			{
+				Notification.ShowError("فشل إرسال كود التحقق");
+			}
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private async Task LoginWithEmail()
+	{
+		isLoading = true;
+		try
+		{
+			var result = await AuthClient.LoginAsync(new LoginRequest
+			{
+				Email = emailModel.Email,
+				Password = emailModel.Password
+			});
+
+			if (result?.RequiresTwoFactor == true)
+			{
+				Navigation.NavigateTo($"/auth/two-factor?email={emailModel.Email}");
+			}
+			else if (result?.Token != null)
+			{
+				// Store token and redirect to home
+				await StoreTokenAndRedirect(result.Token);
+			}
+			else
+			{
+				Notification.ShowError("بيانات الدخول غير صحيحة");
+			}
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private async Task LoginWithNafath()
+	{
+		isLoading = true;
+		try
+		{
+			// Request Nafath authentication
+			var result = await AuthClient.InitiateNafathAuthAsync(new NafathAuthRequest
+			{
+				RedirectUrl = $"{Navigation.BaseUri}auth/nafath-callback"
+			});
+
+			if (result?.AuthUrl != null)
+			{
+				Navigation.NavigateTo(result.AuthUrl, forceLoad: true);
+			}
+			else
+			{
+				Notification.ShowError("فشل الاتصال بمنصة نفاذ");
+			}
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private async Task StoreTokenAndRedirect(string token)
+	{
+		// Store token in localStorage or secure storage
+		await AuthClient.SetTokenAsync(token);
+		Navigation.NavigateTo("/");
+	}
+
+	// Models
+	private class PhoneLoginModel
+	{
+		public string PhoneNumber { get; set; } = string.Empty;
+	}
+
+	private class EmailLoginModel
+	{
+		public string Email { get; set; } = string.Empty;
+		public string Password { get; set; } = string.Empty;
+	}
+}
+
+<style>
+	.auth-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: 80vh;
+		padding: var(--spacing-lg);
+	}
+
+	.auth-card {
+		width: 100%;
+		max-width: 500px;
+	}
+
+	.auth-methods {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-md);
+	}
+
+	.auth-method-btn {
+		width: 100%;
+		padding: var(--spacing-md);
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-sm);
+		justify-content: flex-start;
+		text-align: right;
+	}
+
+	.auth-method-btn .icon {
+		font-size: 24px;
+	}
+
+	.auth-actions {
+		display: flex;
+		gap: var(--spacing-sm);
+		margin-top: var(--spacing-lg);
+	}
+
+	.auth-footer {
+		text-align: center;
+		padding: var(--spacing-md);
+	}
+
+	.auth-footer a {
+		color: var(--primary-color);
+		text-decoration: none;
+		font-weight: 600;
+	}
+</style>

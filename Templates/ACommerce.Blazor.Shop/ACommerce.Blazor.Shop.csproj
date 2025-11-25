@@ -19,6 +19,10 @@
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Notifications\ACommerce.Client.Notifications.csproj" />
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Files\ACommerce.Client.Files.csproj" />
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Realtime\ACommerce.Client.Realtime.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Chats\ACommerce.Client.Chats.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Vendors\ACommerce.Client.Vendors.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.ContactPoints\ACommerce.Client.ContactPoints.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Categories\ACommerce.Client.Categories.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

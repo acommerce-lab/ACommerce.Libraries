@@ -1,0 +1,56 @@
+@inject ThemeService ThemeService
+@implements IDisposable
+
+<SfButton IconCss="@GetThemeIcon()"
+		  CssClass="theme-toggle-btn"
+		  OnClick="ToggleTheme"
+		  Title="@GetThemeTooltip()">
+</SfButton>
+
+@code {
+	private string currentTheme = "light";
+
+	protected override async Task OnInitializedAsync()
+	{
+		currentTheme = await ThemeService.GetCurrentThemeAsync();
+		ThemeService.OnThemeChanged += OnThemeChanged;
+	}
+
+	private void OnThemeChanged(string theme)
+	{
+		currentTheme = theme;
+		StateHasChanged();
+	}
+
+	private async Task ToggleTheme()
+	{
+		var newTheme = currentTheme == "light" ? "dark" : "light";
+		await ThemeService.SetThemeAsync(newTheme);
+	}
+
+	private string GetThemeIcon()
+	{
+		return currentTheme == "light" ? "e-icons e-moon" : "e-icons e-sun";
+	}
+
+	private string GetThemeTooltip()
+	{
+		return currentTheme == "light" ? "الوضع الداكن" : "الوضع الفاتح";
+	}
+
+	public void Dispose()
+	{
+		ThemeService.OnThemeChanged -= OnThemeChanged;
+	}
+}
+
+<style>
+	.theme-toggle-btn {
+		border-radius: 50%;
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+</style>

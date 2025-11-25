@@ -25,6 +25,10 @@ public class CartStateService
 
 	public decimal Total => _currentCart?.Total ?? 0;
 
+	public decimal SubTotal => _currentCart?.SubTotal ?? 0;
+
+	public bool IsLoading { get; private set; }
+
 	/// <summary>
 	/// تحميل السلة
 	/// </summary>
@@ -55,6 +59,14 @@ public class CartStateService
 		{
 			return false;
 		}
+	}
+
+	/// <summary>
+	/// تحديث الكمية
+	/// </summary>
+	public async Task<bool> UpdateItemQuantityAsync(Guid itemId, int quantity)
+	{
+		return await UpdateQuantityAsync(itemId, quantity);
 	}
 
 	/// <summary>
@@ -104,6 +116,27 @@ public class CartStateService
 		{
 			await _cartClient.ClearCartAsync(_userId);
 			_currentCart = null;
+			OnCartChanged?.Invoke();
+			return true;
+		}
+		catch
+		{
+			return false;
+		}
+	}
+
+	/// <summary>
+	/// تطبيق كوبون خصم
+	/// </summary>
+	public async Task<bool> ApplyCouponAsync(string couponCode)
+	{
+		try
+		{
+			_currentCart = await _cartClient.ApplyCouponAsync(_userId, new ApplyCouponRequest
+			{
+				CouponCode = couponCode
+			});
+
 			OnCartChanged?.Invoke();
 			return true;
 		}

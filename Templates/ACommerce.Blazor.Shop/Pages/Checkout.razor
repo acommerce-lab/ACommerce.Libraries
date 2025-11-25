@@ -1,0 +1,617 @@
+@page "/checkout"
+@inject CartStateService CartState
+@inject OrdersClient OrdersClient
+@inject PaymentsClient PaymentsClient
+@inject ShippingClient ShippingClient
+@inject ContactPointsClient ContactPointsClient
+@inject NavigationManager Navigation
+@inject NotificationService Notification
+
+<PageTitle>إتمام الطلب - Checkout</PageTitle>
+
+<div class="checkout-page">
+	<h1>إتمام الطلب</h1>
+
+	@if (isLoading)
+	{
+		<div class="loading-container">
+			<SfSpinner />
+		</div>
+	}
+	else
+	{
+		<div class="checkout-content">
+			<div class="checkout-steps">
+				<!-- Step 1: Shipping Address -->
+				<SfCard CssClass="@(currentStep == 1 ? "active-step" : "")">
+					<CardHeader>
+						<div class="step-header">
+							<span class="step-number">1</span>
+							<h3>عنوان الشحن</h3>
+						</div>
+					</CardHeader>
+					<CardContent>
+						@if (currentStep >= 1)
+						{
+							<div class="address-selection">
+								@if (savedAddresses.Any())
+								{
+									@foreach (var address in savedAddresses)
+									{
+										<div class="address-option @(selectedAddressId == address.Id ? "selected" : "")"
+											 @onclick="() => SelectAddress(address.Id)">
+											<div class="address-content">
+												<strong>@address.Label</strong>
+												<p>@address.FullAddress</p>
+												<p>@address.City, @address.PostalCode</p>
+											</div>
+											@if (selectedAddressId == address.Id)
+											{
+												<span class="selected-icon">✓</span>
+											}
+										</div>
+									}
+									<SfButton OnClick="ShowNewAddressForm">+ عنوان جديد</SfButton>
+								}
+								else
+								{
+									<EditForm Model="@shippingAddress" OnValidSubmit="SaveShippingAddress">
+										<DataAnnotationsValidator />
+										<div class="form-grid">
+											<SfTextBox @bind-Value="shippingAddress.Street" FloatLabelType="FloatLabelType.Auto">
+												<label>الشارع</label>
+											</SfTextBox>
+											<SfTextBox @bind-Value="shippingAddress.City" FloatLabelType="FloatLabelType.Auto">
+												<label>المدينة</label>
+											</SfTextBox>
+											<SfTextBox @bind-Value="shippingAddress.PostalCode" FloatLabelType="FloatLabelType.Auto">
+												<label>الرمز البريدي</label>
+											</SfTextBox>
+											<SfTextBox @bind-Value="shippingAddress.Phone" FloatLabelType="FloatLabelType.Auto">
+												<label>رقم الجوال</label>
+											</SfTextBox>
+										</div>
+										<SfButton Type="Submit" IsPrimary="true">حفظ والمتابعة</SfButton>
+									</EditForm>
+								}
+							</div>
+						}
+					</CardContent>
+				</SfCard>
+
+				<!-- Step 2: Shipping Method -->
+				<SfCard CssClass="@(currentStep == 2 ? "active-step" : "")">
+					<CardHeader>
+						<div class="step-header">
+							<span class="step-number">2</span>
+							<h3>طريقة الشحن</h3>
+						</div>
+					</CardHeader>
+					<CardContent>
+						@if (currentStep >= 2)
+						{
+							<div class="shipping-methods">
+								@foreach (var method in shippingMethods)
+								{
+									<div class="shipping-option @(selectedShippingMethod == method.Id ? "selected" : "")"
+										 @onclick="() => SelectShippingMethod(method.Id)">
+										<div class="method-info">
+											<strong>@method.Name</strong>
+											<p>@method.Description</p>
+											<p class="delivery-time">التسليم: @method.EstimatedDays أيام</p>
+										</div>
+										<div class="method-price">
+											@method.Price.ToString("C")
+										</div>
+									</div>
+								}
+							</div>
+							<SfButton IsPrimary="true" OnClick="() => currentStep = 3">المتابعة</SfButton>
+						}
+					</CardContent>
+				</SfCard>
+
+				<!-- Step 3: Payment -->
+				<SfCard CssClass="@(currentStep == 3 ? "active-step" : "")">
+					<CardHeader>
+						<div class="step-header">
+							<span class="step-number">3</span>
+							<h3>الدفع</h3>
+						</div>
+					</CardHeader>
+					<CardContent>
+						@if (currentStep >= 3)
+						{
+							<div class="payment-methods">
+								<div class="payment-option @(selectedPaymentMethod == "Mada" ? "selected" : "")"
+									 @onclick="() => selectedPaymentMethod = \"Mada\"">
+									<span class="payment-icon">💳</span>
+									<span>مدى</span>
+								</div>
+								<div class="payment-option @(selectedPaymentMethod == "CreditCard" ? "selected" : "")"
+									 @onclick="() => selectedPaymentMethod = \"CreditCard\"">
+									<span class="payment-icon">💳</span>
+									<span>بطاقة ائتمان</span>
+								</div>
+								<div class="payment-option @(selectedPaymentMethod == "ApplePay" ? "selected" : "")"
+									 @onclick="() => selectedPaymentMethod = \"ApplePay\"">
+									<span class="payment-icon">🍎</span>
+									<span>Apple Pay</span>
+								</div>
+								<div class="payment-option @(selectedPaymentMethod == "COD" ? "selected" : "")"
+									 @onclick="() => selectedPaymentMethod = \"COD\"">
+									<span class="payment-icon">💵</span>
+									<span>الدفع عند الاستلام</span>
+								</div>
+							</div>
+
+							<SfButton IsPrimary="true"
+									  CssClass="place-order-btn"
+									  Disabled="@isPlacingOrder"
+									  OnClick="PlaceOrder">
+								@if (isPlacingOrder) { <SfSpinner /> } else { <span>تأكيد الطلب</span> }
+							</SfButton>
+						}
+					</CardContent>
+				</SfCard>
+			</div>
+
+			<!-- Order Summary Sidebar -->
+			<div class="order-summary-sidebar">
+				<SfCard>
+					<CardHeader Title="ملخص الطلب" />
+					<CardContent>
+						<div class="summary-items">
+							@foreach (var item in CartState.CurrentCart?.Items ?? new())
+							{
+								<div class="summary-item">
+									<span>@item.ProductName x @item.Quantity</span>
+									<span>@item.TotalPrice.ToString("C")</span>
+								</div>
+							}
+						</div>
+
+						<div class="summary-divider"></div>
+
+						<div class="summary-row">
+							<span>المجموع الفرعي</span>
+							<span>@CartState.SubTotal.ToString("C")</span>
+						</div>
+
+						<div class="summary-row">
+							<span>الشحن</span>
+							<span>@(selectedShippingCost?.ToString("C") ?? "0")</span>
+						</div>
+
+						<div class="summary-row">
+							<span>الضريبة</span>
+							<span>@CartState.CurrentCart?.TaxAmount.ToString("C")</span>
+						</div>
+
+						<div class="summary-divider"></div>
+
+						<div class="summary-row total">
+							<strong>الإجمالي</strong>
+							<strong class="total-amount">@GetGrandTotal().ToString("C")</strong>
+						</div>
+					</CardContent>
+				</SfCard>
+			</div>
+		</div>
+	}
+</div>
+
+@code {
+	private int currentStep = 1;
+	private bool isLoading = false;
+	private bool isPlacingOrder = false;
+
+	private List<AddressDto> savedAddresses = new();
+	private Guid? selectedAddressId;
+	private ShippingAddressModel shippingAddress = new();
+
+	private List<ShippingMethodDto> shippingMethods = new()
+	{
+		new() { Id = Guid.NewGuid(), Name = "شحن عادي", Description = "3-5 أيام عمل", EstimatedDays = "3-5", Price = 20 },
+		new() { Id = Guid.NewGuid(), Name = "شحن سريع", Description = "1-2 أيام عمل", EstimatedDays = "1-2", Price = 50 },
+		new() { Id = Guid.NewGuid(), Name = "شحن فوري", Description = "نفس اليوم", EstimatedDays = "نفس اليوم", Price = 100 }
+	};
+	private Guid? selectedShippingMethod;
+	private decimal? selectedShippingCost;
+
+	private string selectedPaymentMethod = "Mada";
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadSavedAddresses();
+	}
+
+	private async Task LoadSavedAddresses()
+	{
+		try
+		{
+			var contactPoints = await ContactPointsClient.GetMyContactPointsAsync();
+			savedAddresses = contactPoints?
+				.Where(cp => cp.Type == "Address")
+				.Select(cp => new AddressDto
+				{
+					Id = cp.Id,
+					Label = cp.Label,
+					FullAddress = cp.Value
+				})
+				.ToList() ?? new();
+		}
+		catch
+		{
+			// Continue without saved addresses
+		}
+	}
+
+	private void SelectAddress(Guid addressId)
+	{
+		selectedAddressId = addressId;
+		currentStep = 2;
+	}
+
+	private void ShowNewAddressForm()
+	{
+		savedAddresses.Clear(); // Force show form
+	}
+
+	private void SaveShippingAddress()
+	{
+		currentStep = 2;
+	}
+
+	private void SelectShippingMethod(Guid methodId)
+	{
+		selectedShippingMethod = methodId;
+		var method = shippingMethods.FirstOrDefault(m => m.Id == methodId);
+		selectedShippingCost = method?.Price;
+	}
+
+	private decimal GetGrandTotal()
+	{
+		return CartState.Total + (selectedShippingCost ?? 0);
+	}
+
+	private async Task PlaceOrder()
+	{
+		if (selectedAddressId == null && string.IsNullOrEmpty(shippingAddress.Street))
+		{
+			Notification.ShowError("الرجاء اختيار عنوان الشحن");
+			return;
+		}
+
+		if (selectedShippingMethod == null)
+		{
+			Notification.ShowError("الرجاء اختيار طريقة الشحن");
+			return;
+		}
+
+		isPlacingOrder = true;
+		try
+		{
+			// Create order
+			var order = await OrdersClient.CreateOrderAsync(new CreateOrderRequest
+			{
+				ShippingAddressId = selectedAddressId,
+				ShippingMethodId = selectedShippingMethod.Value,
+				PaymentMethod = selectedPaymentMethod
+			});
+
+			if (order != null)
+			{
+				// Create payment
+				var payment = await PaymentsClient.CreatePaymentAsync(new CreatePaymentRequest
+				{
+					OrderId = order.Id,
+					Amount = GetGrandTotal(),
+					Currency = "SAR",
+					PaymentMethod = selectedPaymentMethod
+				});
+
+				if (payment?.PaymentUrl != null)
+				{
+					// Redirect to payment gateway
+					Navigation.NavigateTo(payment.PaymentUrl, forceLoad: true);
+				}
+				else
+				{
+					// COD or successful payment
+					Navigation.NavigateTo($"/orders/{order.Id}?success=true");
+					Notification.ShowSuccess("تم إنشاء الطلب بنجاح");
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+		finally
+		{
+			isPlacingOrder = false;
+		}
+	}
+
+	// Models
+	private class ShippingAddressModel
+	{
+		public string Street { get; set; } = string.Empty;
+		public string City { get; set; } = string.Empty;
+		public string PostalCode { get; set; } = string.Empty;
+		public string Phone { get; set; } = string.Empty;
+	}
+
+	private class AddressDto
+	{
+		public Guid Id { get; set; }
+		public string Label { get; set; } = string.Empty;
+		public string FullAddress { get; set; } = string.Empty;
+		public string City { get; set; } = string.Empty;
+		public string PostalCode { get; set; } = string.Empty;
+	}
+
+	private class ShippingMethodDto
+	{
+		public Guid Id { get; set; }
+		public string Name { get; set; } = string.Empty;
+		public string Description { get; set; } = string.Empty;
+		public string EstimatedDays { get; set; } = string.Empty;
+		public decimal Price { get; set; }
+	}
+
+	private class CreateOrderRequest
+	{
+		public Guid? ShippingAddressId { get; set; }
+		public Guid ShippingMethodId { get; set; }
+		public string PaymentMethod { get; set; } = string.Empty;
+	}
+
+	private class CreatePaymentRequest
+	{
+		public Guid OrderId { get; set; }
+		public decimal Amount { get; set; }
+		public string Currency { get; set; } = string.Empty;
+		public string PaymentMethod { get; set; } = string.Empty;
+	}
+}
+
+<style>
+	.checkout-page {
+		max-width: 1400px;
+		margin: 0 auto;
+		padding: var(--spacing-lg);
+	}
+
+	.checkout-page h1 {
+		margin-bottom: var(--spacing-xl);
+	}
+
+	.checkout-content {
+		display: grid;
+		grid-template-columns: 1fr 400px;
+		gap: var(--spacing-xl);
+	}
+
+	/* Steps */
+	.checkout-steps {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-lg);
+	}
+
+	.active-step {
+		border: 2px solid var(--primary-color);
+	}
+
+	.step-header {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-md);
+		padding: var(--spacing-md);
+	}
+
+	.step-number {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		background: var(--primary-color);
+		color: white;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 600;
+	}
+
+	.step-header h3 {
+		margin: 0;
+	}
+
+	/* Address Selection */
+	.address-selection {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-md);
+	}
+
+	.address-option {
+		display: flex;
+		justify-content: space-between;
+		padding: var(--spacing-md);
+		border: 2px solid var(--border-color);
+		border-radius: var(--border-radius);
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.address-option:hover {
+		border-color: var(--primary-color);
+	}
+
+	.address-option.selected {
+		border-color: var(--primary-color);
+		background: var(--bg-highlight);
+	}
+
+	.address-content p {
+		margin: var(--spacing-xs) 0 0 0;
+		color: var(--text-secondary);
+		font-size: var(--font-size-sm);
+	}
+
+	.selected-icon {
+		color: var(--primary-color);
+		font-size: 24px;
+		font-weight: 600;
+	}
+
+	/* Shipping Methods */
+	.shipping-methods {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-md);
+		margin-bottom: var(--spacing-lg);
+	}
+
+	.shipping-option {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: var(--spacing-md);
+		border: 2px solid var(--border-color);
+		border-radius: var(--border-radius);
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.shipping-option:hover {
+		border-color: var(--primary-color);
+	}
+
+	.shipping-option.selected {
+		border-color: var(--primary-color);
+		background: var(--bg-highlight);
+	}
+
+	.method-info p {
+		margin: var(--spacing-xs) 0 0 0;
+		color: var(--text-secondary);
+		font-size: var(--font-size-sm);
+	}
+
+	.delivery-time {
+		color: var(--success-color) !important;
+	}
+
+	.method-price {
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--price-color);
+	}
+
+	/* Payment Methods */
+	.payment-methods {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: var(--spacing-md);
+		margin-bottom: var(--spacing-lg);
+	}
+
+	.payment-option {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--spacing-sm);
+		padding: var(--spacing-lg);
+		border: 2px solid var(--border-color);
+		border-radius: var(--border-radius);
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.payment-option:hover {
+		border-color: var(--primary-color);
+	}
+
+	.payment-option.selected {
+		border-color: var(--primary-color);
+		background: var(--bg-highlight);
+	}
+
+	.payment-icon {
+		font-size: 32px;
+	}
+
+	.place-order-btn {
+		width: 100%;
+		padding: var(--spacing-md);
+		font-size: 18px;
+		font-weight: 600;
+	}
+
+	/* Sidebar */
+	.order-summary-sidebar {
+		position: sticky;
+		top: 80px;
+		height: fit-content;
+	}
+
+	.summary-items {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-sm);
+		margin-bottom: var(--spacing-md);
+	}
+
+	.summary-item {
+		display: flex;
+		justify-content: space-between;
+		font-size: var(--font-size-sm);
+	}
+
+	.summary-row {
+		display: flex;
+		justify-content: space-between;
+		padding: var(--spacing-xs) 0;
+	}
+
+	.summary-row.total {
+		font-size: var(--font-size-lg);
+		padding-top: var(--spacing-md);
+	}
+
+	.total-amount {
+		color: var(--price-color);
+		font-size: 24px;
+	}
+
+	.summary-divider {
+		height: 1px;
+		background: var(--border-color);
+		margin: var(--spacing-md) 0;
+	}
+
+	.form-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: var(--spacing-md);
+		margin-bottom: var(--spacing-lg);
+	}
+
+	.loading-container {
+		text-align: center;
+		padding: var(--spacing-xl);
+	}
+
+	/* Responsive */
+	@media (max-width: 1024px) {
+		.checkout-content {
+			grid-template-columns: 1fr;
+		}
+
+		.order-summary-sidebar {
+			position: static;
+		}
+	}
+</style>

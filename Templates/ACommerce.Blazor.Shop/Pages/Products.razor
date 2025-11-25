@@ -1,0 +1,174 @@
+@page "/products"
+@inject ProductListingsClient ListingsClient
+@inject CartStateService CartState
+@inject NotificationService Notification
+
+<PageTitle>المنتجات - Products</PageTitle>
+
+<div class="products-page">
+	<div class="page-header">
+		<h1>جميع المنتجات</h1>
+		<p>تصفح مجموعتنا الكاملة من المنتجات</p>
+	</div>
+
+	@if (isLoading)
+	{
+		<div class="loading-container">
+			<SfSpinner />
+			<p>جارٍ تحميل المنتجات...</p>
+		</div>
+	}
+	else if (products == null || !products.Any())
+	{
+		<div class="empty-state">
+			<div class="empty-icon">📦</div>
+			<h3>لا توجد منتجات</h3>
+			<p>تحقق لاحقاً للمنتجات الجديدة</p>
+		</div>
+	}
+	else
+	{
+		<div class="products-grid">
+			@foreach (var listing in products)
+			{
+				<ProductCard Listing="@listing" OnAddToCart="HandleAddToCart" />
+			}
+		</div>
+
+		@if (totalPages > 1)
+		{
+			<div class="pagination">
+				<SfPager CurrentPage="@currentPage"
+						 PageCount="@totalPages"
+						 PageSize="@pageSize"
+						 TotalItemsCount="@totalItems">
+					<PagerEvents PageChanged="OnPageChanged" />
+				</SfPager>
+			</div>
+		}
+	}
+</div>
+
+@code {
+	private List<ProductListingDto>? products;
+	private bool isLoading = true;
+	private int currentPage = 1;
+	private int pageSize = 20;
+	private int totalItems = 0;
+	private int totalPages = 0;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadProducts();
+	}
+
+	private async Task LoadProducts()
+	{
+		isLoading = true;
+		try
+		{
+			var result = await ListingsClient.GetAllAsync(new GetListingsRequest
+			{
+				PageNumber = currentPage,
+				PageSize = pageSize
+			});
+
+			products = result?.Items;
+			totalItems = result?.TotalCount ?? 0;
+			totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+		}
+		catch (Exception ex)
+		{
+			Notification.ShowError($"خطأ: {ex.Message}");
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private async Task OnPageChanged(PageChangedEventArgs args)
+	{
+		currentPage = args.CurrentPage;
+		await LoadProducts();
+	}
+
+	private async Task HandleAddToCart(Guid listingId)
+	{
+		var success = await CartState.AddToCartAsync(listingId, 1);
+		if (success)
+		{
+			Notification.ShowSuccess("تمت الإضافة إلى السلة");
+		}
+	}
+
+	private class GetListingsRequest
+	{
+		public int PageNumber { get; set; } = 1;
+		public int PageSize { get; set; } = 20;
+	}
+
+	private class ProductListingDto
+	{
+		public Guid Id { get; set; }
+		public string ProductName { get; set; } = string.Empty;
+		public decimal Price { get; set; }
+		public decimal OriginalPrice { get; set; }
+		public int DiscountPercentage { get; set; }
+		public string? ImageUrl { get; set; }
+		public string? VendorName { get; set; }
+		public bool IsFeatured { get; set; }
+		public int StockQuantity { get; set; }
+		public decimal AverageRating { get; set; }
+		public int RatingsCount { get; set; }
+		public Dictionary<string, object> Properties { get; set; } = new();
+	}
+}
+
+<style>
+	.products-page {
+		max-width: 1400px;
+		margin: 0 auto;
+		padding: var(--spacing-lg);
+	}
+
+	.page-header {
+		margin-bottom: var(--spacing-xl);
+		text-align: center;
+	}
+
+	.page-header h1 {
+		font-size: 36px;
+		margin-bottom: var(--spacing-sm);
+	}
+
+	.page-header p {
+		color: var(--text-secondary);
+		font-size: var(--font-size-lg);
+	}
+
+	.products-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+		gap: var(--spacing-lg);
+		margin-bottom: var(--spacing-xl);
+	}
+
+	.pagination {
+		display: flex;
+		justify-content: center;
+		margin-top: var(--spacing-xl);
+	}
+
+	.loading-container,
+	.empty-state {
+		text-align: center;
+		padding: var(--spacing-xl) 0;
+	}
+
+	.empty-icon {
+		font-size: 64px;
+		margin-bottom: var(--spacing-md);
+		opacity: 0.5;
+	}
+</style>

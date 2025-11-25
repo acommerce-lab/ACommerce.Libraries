@@ -1,0 +1,261 @@
+@inject NavigationManager Navigation
+@inject AuthClient AuthClient
+
+<div class="nav-menu">
+	<div class="nav-brand">
+		<h2>🛍️ ACommerce</h2>
+	</div>
+
+	<nav class="nav-items">
+		<NavLink class="nav-item" href="/" Match="NavLinkMatch.All">
+			<span class="nav-icon">🏠</span>
+			<span class="nav-text">الرئيسية</span>
+		</NavLink>
+
+		<NavLink class="nav-item" href="/search">
+			<span class="nav-icon">🔍</span>
+			<span class="nav-text">البحث</span>
+		</NavLink>
+
+		<NavLink class="nav-item" href="/products">
+			<span class="nav-icon">📦</span>
+			<span class="nav-text">المنتجات</span>
+		</NavLink>
+
+		<NavLink class="nav-item" href="/cart">
+			<span class="nav-icon">🛒</span>
+			<span class="nav-text">السلة</span>
+			@if (cartItemCount > 0)
+			{
+				<span class="nav-badge">@cartItemCount</span>
+			}
+		</NavLink>
+
+		<NavLink class="nav-item" href="/orders">
+			<span class="nav-icon">📋</span>
+			<span class="nav-text">طلباتي</span>
+		</NavLink>
+
+		<div class="nav-divider"></div>
+
+		<NavLink class="nav-item" href="/chats">
+			<span class="nav-icon">💬</span>
+			<span class="nav-text">المحادثات</span>
+			@if (unreadMessages > 0)
+			{
+				<span class="nav-badge">@unreadMessages</span>
+			}
+		</NavLink>
+
+		<NavLink class="nav-item" href="/notifications">
+			<span class="nav-icon">🔔</span>
+			<span class="nav-text">الإشعارات</span>
+			@if (unreadNotifications > 0)
+			{
+				<span class="nav-badge">@unreadNotifications</span>
+			}
+		</NavLink>
+
+		<div class="nav-divider"></div>
+
+		<NavLink class="nav-item" href="/profile">
+			<span class="nav-icon">👤</span>
+			<span class="nav-text">الملف الشخصي</span>
+		</NavLink>
+
+		@if (isVendor)
+		{
+			<NavLink class="nav-item" href="/vendor/dashboard">
+				<span class="nav-icon">🏪</span>
+				<span class="nav-text">لوحة التاجر</span>
+			</NavLink>
+		}
+
+		<div class="nav-divider"></div>
+
+		<NavLink class="nav-item" href="/settings">
+			<span class="nav-icon">⚙️</span>
+			<span class="nav-text">الإعدادات</span>
+		</NavLink>
+
+		<NavLink class="nav-item" href="/help">
+			<span class="nav-icon">❓</span>
+			<span class="nav-text">المساعدة</span>
+		</NavLink>
+	</nav>
+
+	<div class="nav-footer">
+		<div class="nav-user-info">
+			@if (isAuthenticated)
+			{
+				<div class="user-avatar">@GetUserInitials()</div>
+				<div class="user-details">
+					<strong>@userName</strong>
+					<span class="user-email">@userEmail</span>
+				</div>
+			}
+			else
+			{
+				<SfButton IsPrimary="true" OnClick="() => Navigation.NavigateTo(\"/login\")">
+					تسجيل الدخول
+				</SfButton>
+			}
+		</div>
+	</div>
+</div>
+
+@code {
+	private bool isAuthenticated = false;
+	private bool isVendor = false;
+	private string userName = "";
+	private string userEmail = "";
+	private int cartItemCount = 0;
+	private int unreadMessages = 0;
+	private int unreadNotifications = 0;
+
+	protected override async Task OnInitializedAsync()
+	{
+		isAuthenticated = await AuthClient.IsAuthenticatedAsync();
+		if (isAuthenticated)
+		{
+			var user = await AuthClient.GetCurrentUserAsync();
+			userName = user?.FullName ?? "";
+			userEmail = user?.Email ?? "";
+			isVendor = user?.Roles?.Contains("Vendor") ?? false;
+		}
+	}
+
+	private string GetUserInitials()
+	{
+		if (string.IsNullOrEmpty(userName)) return "?";
+		var parts = userName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+		if (parts.Length >= 2)
+			return $"{parts[0][0]}{parts[1][0]}".ToUpper();
+		return userName[0].ToString().ToUpper();
+	}
+}
+
+<style>
+	.nav-menu {
+		height: 100vh;
+		display: flex;
+		flex-direction: column;
+		background: var(--bg-secondary);
+		border-right: 1px solid var(--border-color);
+		position: sticky;
+		top: 0;
+	}
+
+	.nav-brand {
+		padding: var(--spacing-lg);
+		border-bottom: 1px solid var(--border-color);
+	}
+
+	.nav-brand h2 {
+		margin: 0;
+		font-size: 24px;
+		font-weight: 700;
+		color: var(--primary-color);
+	}
+
+	.nav-items {
+		flex: 1;
+		overflow-y: auto;
+		padding: var(--spacing-md);
+	}
+
+	.nav-item {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-md);
+		padding: var(--spacing-sm) var(--spacing-md);
+		margin-bottom: var(--spacing-xs);
+		border-radius: var(--border-radius);
+		color: var(--text-primary);
+		text-decoration: none;
+		transition: all 0.2s;
+		position: relative;
+	}
+
+	.nav-item:hover {
+		background: var(--bg-hover);
+	}
+
+	.nav-item.active {
+		background: var(--primary-color);
+		color: white;
+	}
+
+	.nav-icon {
+		font-size: 20px;
+		width: 24px;
+		text-align: center;
+	}
+
+	.nav-text {
+		flex: 1;
+	}
+
+	.nav-badge {
+		background: var(--error-color);
+		color: white;
+		border-radius: 10px;
+		padding: 2px 8px;
+		font-size: 11px;
+		font-weight: 600;
+		min-width: 20px;
+		text-align: center;
+	}
+
+	.nav-divider {
+		height: 1px;
+		background: var(--border-color);
+		margin: var(--spacing-md) 0;
+	}
+
+	.nav-footer {
+		padding: var(--spacing-md);
+		border-top: 1px solid var(--border-color);
+	}
+
+	.nav-user-info {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-sm);
+	}
+
+	.user-avatar {
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		background: var(--primary-color);
+		color: white;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 600;
+		flex-shrink: 0;
+	}
+
+	.user-details {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.user-details strong {
+		font-size: var(--font-size-sm);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.user-email {
+		font-size: var(--font-size-xs);
+		color: var(--text-secondary);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+</style>

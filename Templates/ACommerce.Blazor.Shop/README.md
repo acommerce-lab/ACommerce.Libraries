@@ -40,27 +40,39 @@ dotnet run
 
 ```
 ACommerce.Blazor.Shop/
-├── Pages/                    # الصفحات الرئيسية
-│   ├── Index.razor          # الصفحة الرئيسية
-│   ├── Products.razor       # قائمة المنتجات (مع Dynamic Properties)
-│   ├── ProductDetails.razor # تفاصيل المنتج
-│   ├── Cart.razor           # سلة التسوق
-│   ├── Checkout.razor       # إتمام الطلب
-│   ├── Orders.razor         # طلباتي
-│   ├── Profile.razor        # الملف الشخصي
-│   └── Login.razor          # تسجيل الدخول
+├── Pages/                        # الصفحات الرئيسية
+│   ├── Index.razor              # الصفحة الرئيسية (Hero + Categories + Featured)
+│   ├── Products.razor           # قائمة المنتجات (مع Dynamic Properties)
+│   ├── Search.razor             # البحث والفلاتر المتقدمة
+│   ├── Cart.razor               # سلة التسوق
+│   ├── Checkout.razor           # إتمام الطلب (3 خطوات)
+│   ├── Orders.razor             # طلباتي (مع التتبع)
+│   ├── Profile.razor            # الملف الشخصي (معلومات + نقاط اتصال + أمان)
+│   ├── Notifications.razor      # الإشعارات (InApp + Firebase)
+│   ├── Onboarding.razor         # صفحات البداية (5 شاشات)
+│   ├── Auth/
+│   │   ├── Login.razor          # تسجيل الدخول (Phone/Email/Google/Apple/Nafath)
+│   │   ├── Register.razor       # إنشاء حساب
+│   │   ├── TwoFactor.razor      # المصادقة الثنائية (OTP)
+│   │   ├── NafathCallback.razor # استقبال نفاذ
+│   │   └── NafathSelectNumber.razor # اختيار رقم نفاذ
+│   └── Chats/
+│       ├── Conversations.razor  # قائمة المحادثات
+│       └── ChatRoom.razor       # غرفة المحادثة (SignalR Realtime)
 │
-├── Components/              # المكونات القابلة لإعادة الاستخدام
-│   ├── MainLayout.razor    # التخطيط الرئيسي
-│   ├── NavMenu.razor       # القائمة
-│   ├── ProductCard.razor   # بطاقة المنتج
-│   ├── CartIcon.razor      # أيقونة السلة
-│   └── ThemeToggle.razor   # تبديل الثيم
+├── Components/                  # المكونات القابلة لإعادة الاستخدام
+│   ├── MainLayout.razor        # التخطيط الرئيسي (Header + Sidebar)
+│   ├── NavMenu.razor           # القائمة الجانبية
+│   ├── ProductCard.razor       # بطاقة المنتج
+│   ├── CartIcon.razor          # أيقونة السلة (مع العدد والإجمالي)
+│   ├── ThemeToggle.razor       # تبديل الثيم (Light/Dark)
+│   ├── NotificationsList.razor # قائمة الإشعارات
+│   └── OrdersList.razor        # قائمة الطلبات
 │
-├── Services/                # الخدمات
-│   ├── CartStateService.cs # حالة السلة (Shared State)
-│   ├── ThemeService.cs     # إدارة الثيم
-│   └── NotificationService.cs # الإشعارات
+├── Services/                    # الخدمات
+│   ├── CartStateService.cs     # حالة السلة (Shared State + Events)
+│   ├── ThemeService.cs         # إدارة الثيم
+│   └── NotificationService.cs  # الإشعارات (Toast)
 │
 ├── wwwroot/
 │   ├── css/
@@ -68,8 +80,8 @@ ACommerce.Blazor.Shop/
 │   │   └── app.css              # Styles التطبيق
 │   └── index.html
 │
-├── Program.cs              # تسجيل الخدمات
-└── _Imports.razor          # Imports عامة
+├── Program.cs                   # تسجيل الخدمات (All 15 Client SDKs)
+└── _Imports.razor               # Imports عامة
 ```
 
 ---
@@ -501,9 +513,109 @@ dotnet publish -c Release
 - ✅ **Theme System** قابل للتخصيص بالكامل
 - ✅ **Dynamic Properties** للمرونة
 - ✅ **Syncfusion Components** للسرعة
-- ✅ **All 14 Client SDKs** مدمجة
+- ✅ **All 15 Client SDKs** مدمجة
 - ✅ **RTL + Dark Mode** جاهز
 - ✅ **أقل عدد أسطر** ممكن
 - ✅ **Production-ready**
+
+---
+
+## 🔐 Authentication Features
+
+### طرق تسجيل الدخول المتعددة:
+
+1. **📱 رقم الجوال (OTP)**
+   - إرسال كود التحقق عبر SMS
+   - صفحة TwoFactor للتحقق
+
+2. **📧 البريد الإلكتروني**
+   - تسجيل دخول تقليدي (Email + Password)
+   - دعم المصادقة الثنائية
+
+3. **🔵 Google OAuth**
+   - تسجيل دخول فوري عبر Google
+
+4. **🍎 Apple Sign In**
+   - تسجيل دخول فوري عبر Apple
+
+5. **🇸🇦 نفاذ (الهوية الوطنية)**
+   - تكامل مع منصة نفاذ
+   - اختيار رقم الجوال من الأرقام المسجلة
+
+---
+
+## 💬 Chat & Realtime Features
+
+### المحادثات المباشرة:
+
+- **SignalR Integration** - اتصال مباشر ثنائي الاتجاه
+- **Real-time Messages** - الرسائل تصل فوراً
+- **Online Status** - معرفة حالة الاتصال
+- **Typing Indicators** - مؤشر الكتابة
+- **Message Read Status** - حالة قراءة الرسائل
+
+---
+
+## 🔔 Notifications System
+
+### نوعين من الإشعارات:
+
+1. **InApp Notifications**
+   - إشعارات داخل التطبيق
+   - تصنيف حسب النوع (طلبات، رسائل، عروض)
+   - SignalR للتحديثات الفورية
+
+2. **Firebase Push Notifications**
+   - إشعارات فورية على الجوال
+   - إعدادات مخصصة (أنواع + أوقات هادئة)
+   - تكامل مع Firebase Cloud Messaging
+
+---
+
+## 👤 Profile & Contact Points
+
+### إدارة الملف الشخصي:
+
+1. **المعلومات الشخصية**
+   - الاسم، اسم المستخدم، تاريخ الميلاد
+   - الصورة الشخصية، النبذة
+
+2. **نقاط الاتصال** (Contact Points)
+   - Email, Phone, Address, Social Media
+   - تحقق OTP للإيميل والجوال
+   - تعيين نقطة اتصال أساسية
+   - دعم متعدد (عدة إيميلات/جوالات/عناوين)
+
+3. **الأمان**
+   - تغيير كلمة المرور
+   - تفعيل/تعطيل المصادقة الثنائية
+   - إدارة الجلسات النشطة
+
+4. **التفضيلات**
+   - اختيار اللغة (عربي/English)
+   - العملة المفضلة
+   - إعدادات الإشعارات
+
+---
+
+## 🎯 Complete Pages List
+
+### ✅ Pages جاهزة:
+
+- ✅ **/** - Home (Hero + Categories + Featured + New + Bestsellers)
+- ✅ **/search** - Search & Advanced Filters
+- ✅ **/products** - Products Grid with Pagination
+- ✅ **/cart** - Shopping Cart with Coupon Support
+- ✅ **/checkout** - 3-Step Checkout (Address + Shipping + Payment)
+- ✅ **/orders** - My Orders with Tracking
+- ✅ **/profile** - Complete Profile Management
+- ✅ **/notifications** - InApp + Firebase Push Notifications
+- ✅ **/chats** - Conversations List
+- ✅ **/chats/{id}** - Chat Room with SignalR Realtime
+- ✅ **/onboarding** - Welcome Slides (5 screens)
+- ✅ **/login** - Multi-Auth Login (Phone/Email/OAuth/Nafath)
+- ✅ **/register** - Registration with Email/Social
+- ✅ **/auth/two-factor** - OTP Verification
+- ✅ **/auth/nafath-select-number** - Nafath Number Selection
 
 **ابدأ التطوير الآن!** 🚀
