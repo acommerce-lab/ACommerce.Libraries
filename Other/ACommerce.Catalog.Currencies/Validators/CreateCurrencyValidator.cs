@@ -12,7 +12,7 @@ public class CreateCurrencyValidator : AbstractValidator<CreateCurrencyDto>
 			.NotEmpty().WithMessage("Name is required")
 			.MaximumLength(200).WithMessage("Name cannot exceed 200 characters");
 
-		RuleFor(x => x.CurrencyCode)
+		RuleFor(x => x.Code)
 			.NotEmpty().WithMessage("Currency code is required")
 			.Length(3).WithMessage("Currency code must be exactly 3 characters (ISO 4217)")
 			.Matches("^[A-Z]{3}$").WithMessage("Currency code must be 3 uppercase letters (e.g., SAR, USD)");

@@ -81,10 +81,10 @@ public class UnitConversionService : IUnitConversionService
 			return value;
 
 		// ?????? ?? ??? ?????
-		if (fromUnit.MeasurementCategoryId != toUnit.MeasurementCategoryId)
+		if (fromUnit.UnitCategoryId != toUnit.UnitCategoryId)
 		{
 			throw new InvalidOperationException(
-				$"Cannot convert between different measurement categories");
+				$"Cannot convert between different unit categories");
 		}
 
 		_logger.LogDebug(
@@ -150,7 +150,7 @@ public class UnitConversionService : IUnitConversionService
 		CancellationToken cancellationToken = default)
 	{
 		// ???? ??????? ??? ???? ??? ?????
-		return fromUnit.MeasurementCategoryId == toUnit.MeasurementCategoryId;
+		return fromUnit.UnitCategoryId == toUnit.UnitCategoryId;
 	}
 
 	public async Task<List<Unit>> GetCompatibleUnitsAsync(
@@ -158,7 +158,7 @@ public class UnitConversionService : IUnitConversionService
 		CancellationToken cancellationToken = default)
 	{
 		var units = await _unitRepository.GetAllWithPredicateAsync(
-			u => u.MeasurementCategoryId == unit.MeasurementCategoryId && u.Id != unit.Id,
+			u => u.UnitCategoryId == unit.UnitCategoryId && u.Id != unit.Id,
 			includeDeleted: false);
 
 		return units.ToList();

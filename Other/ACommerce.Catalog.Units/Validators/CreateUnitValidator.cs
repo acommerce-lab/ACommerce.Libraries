@@ -20,8 +20,8 @@ public class CreateUnitValidator : AbstractValidator<CreateUnitDto>
 			.MaximumLength(50).WithMessage("Code cannot exceed 50 characters")
 			.Matches("^[a-z0-9_]+$").WithMessage("Code must be lowercase alphanumeric with underscores only");
 
-		RuleFor(x => x.MeasurementCategoryId)
-			.NotEmpty().WithMessage("MeasurementCategoryId is required");
+		RuleFor(x => x.UnitCategoryId)
+			.NotEmpty().WithMessage("UnitCategoryId is required");
 
 		RuleFor(x => x.MeasurementSystemId)
 			.NotEmpty().WithMessage("MeasurementSystemId is required");

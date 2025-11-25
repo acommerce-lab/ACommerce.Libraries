@@ -15,14 +15,14 @@ namespace ACommerce.Catalog.Simple.Api.Controllers;
 public class SimpleSetupController : ControllerBase
 {
 	private readonly IBaseAsyncRepository<Currency> _currencyRepository;
-	private readonly IBaseAsyncRepository<MeasurementCategory> _categoryRepository;
+	private readonly IBaseAsyncRepository<UnitCategory> _categoryRepository;
 	private readonly IBaseAsyncRepository<MeasurementSystem> _systemRepository;
 	private readonly IBaseAsyncRepository<Unit> _unitRepository;
 	private readonly ILogger<SimpleSetupController> _logger;
 
 	public SimpleSetupController(
 		IBaseAsyncRepository<Currency> currencyRepository,
-		IBaseAsyncRepository<MeasurementCategory> categoryRepository,
+		IBaseAsyncRepository<UnitCategory> categoryRepository,
 		IBaseAsyncRepository<MeasurementSystem> systemRepository,
 		IBaseAsyncRepository<Unit> unitRepository,
 		ILogger<SimpleSetupController> logger)
@@ -112,20 +112,20 @@ public class SimpleSetupController : ControllerBase
 
 			// ????? ??? ?????? ?????????? (Piece/Unit)
 			var existingCategory = await _categoryRepository.GetAllWithPredicateAsync(
-				c => c.CategoryCode == "piece",
+				c => c.Code == "piece",
 				includeDeleted: false);
 
-			MeasurementCategory category;
+			UnitCategory category;
 			if (existingCategory.Count == 0)
 			{
-				category = new MeasurementCategory
+				category = new UnitCategory
 				{
 					Name = "Piece",
 					Code = "piece",
-					CategoryCode = "piece"
+					Description = "Countable items"
 				};
 				category = await _categoryRepository.AddAsync(category);
-				_logger.LogInformation("Created default measurement category");
+				_logger.LogInformation("Created default unit category");
 			}
 			else
 			{
@@ -144,7 +144,7 @@ public class SimpleSetupController : ControllerBase
 					Name = "Piece",
 					Symbol = "pc",
 					Code = "piece",
-					MeasurementCategoryId = category.Id,
+					UnitCategoryId = category.Id,
 					MeasurementSystemId = system.Id,
 					ConversionToBase = 1,
 					IsStandard = true

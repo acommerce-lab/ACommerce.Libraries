@@ -47,5 +47,10 @@ public class ProductAttribute : IBaseEntity
 	/// ????? ?????
 	/// </summary>
 	public int SortOrder { get; set; }
+
+	/// <summary>
+	/// ??????? ??????
+	/// </summary>
+	public Dictionary<string, string> Metadata { get; set; } = new();
 }
 

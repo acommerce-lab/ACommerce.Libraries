@@ -3,9 +3,10 @@ using ACommerce.SharedKernel.Abstractions.Entities;
 namespace ACommerce.Catalog.Units.Entities;
 
 /// <summary>
-/// نظام القياس (Metric, Imperial, US Customary, etc.)
+/// فئة الوحدات (الوزن، الطول، الحجم، المساحة، الحرارة، إلخ)
+/// نظام مستقل - لا يرث من AttributeDefinition
 /// </summary>
-public class MeasurementSystem : IBaseEntity
+public class UnitCategory : IBaseEntity
 {
 	public Guid Id { get; set; }
 	public DateTime CreatedAt { get; set; }
@@ -13,14 +14,14 @@ public class MeasurementSystem : IBaseEntity
 	public bool IsDeleted { get; set; }
 
 	/// <summary>
-	/// اسم النظام
-	/// مثال: "النظام المتري", "النظام الإمبراطوري", "النظام الأمريكي"
+	/// اسم الفئة
+	/// مثال: "الوزن", "الطول", "الحجم", "المساحة"
 	/// </summary>
 	public required string Name { get; set; }
 
 	/// <summary>
-	/// الرمز
-	/// مثال: "metric", "imperial", "us_customary"
+	/// رمز الفئة
+	/// مثال: "weight", "length", "volume", "area", "temperature"
 	/// </summary>
 	public required string Code { get; set; }
 
@@ -30,14 +31,16 @@ public class MeasurementSystem : IBaseEntity
 	public string? Description { get; set; }
 
 	/// <summary>
-	/// هل هو النظام الافتراضي؟
+	/// معرف الوحدة الأساسية في هذه الفئة
+	/// مثال: Gram للوزن، Meter للطول
 	/// </summary>
-	public bool IsDefault { get; set; }
+	public Guid? BaseUnitId { get; set; }
+	public Unit? BaseUnit { get; set; }
 
 	/// <summary>
-	/// الدول/المناطق التي تستخدم هذا النظام
+	/// ترتيب العرض
 	/// </summary>
-	public List<string> Countries { get; set; } = new();
+	public int SortOrder { get; set; }
 
 	/// <summary>
 	/// معلومات إضافية
@@ -45,7 +48,7 @@ public class MeasurementSystem : IBaseEntity
 	public Dictionary<string, string> Metadata { get; set; } = new();
 
 	/// <summary>
-	/// الوحدات في هذا النظام
+	/// الوحدات في هذه الفئة
 	/// </summary>
 	public List<Unit> Units { get; set; } = new();
 }

@@ -172,7 +172,7 @@ public class UnitsController : BaseCrudController<
 			{
 				filters.Add(new FilterItem
 				{
-					PropertyName = nameof(Unit.MeasurementCategoryId),
+					PropertyName = nameof(Unit.UnitCategoryId),
 					Value = categoryId.Value,
 					Operator = FilterOperator.Equals
 				});
@@ -247,8 +247,8 @@ public class UnitsController : BaseCrudController<
 				{
 					new()
 					{
-						PropertyName = nameof(Unit.MeasurementCategoryId),
-						Value = unit.MeasurementCategoryId,
+						PropertyName = nameof(Unit.UnitCategoryId),
+						Value = unit.UnitCategoryId,
 						Operator = FilterOperator.Equals
 					}
 				},
