@@ -67,13 +67,11 @@
   <ItemGroup>
     <!-- Client SDKs -->
     <ProjectReference Include="..\..\Clients\ACommerce.Client.Profiles\ACommerce.Client.Profiles.csproj" />
-    <ProjectReference Include="..\..\Clients\ACommerce.Client.Catalog.Attributes\ACommerce.Client.Catalog.Attributes.csproj" />
-    <ProjectReference Include="..\..\Clients\ACommerce.Client.Catalog.Products\ACommerce.Client.Catalog.Products.csproj" />
-    <ProjectReference Include="..\..\Clients\ACommerce.Client.Catalog.Units\ACommerce.Client.Catalog.Units.csproj" />
-    <ProjectReference Include="..\..\Clients\ACommerce.Client.Catalog.Currencies\ACommerce.Client.Catalog.Currencies.csproj" />
-    <ProjectReference Include="..\..\Clients\ACommerce.Client.Carts\ACommerce.Client.Carts.csproj" />
+    <ProjectReference Include="..\..\Clients\ACommerce.Client.Products\ACommerce.Client.Products.csproj" />
+    <ProjectReference Include="..\..\Clients\ACommerce.Client.Cart\ACommerce.Client.Cart.csproj" />
     <ProjectReference Include="..\..\Clients\ACommerce.Client.Orders\ACommerce.Client.Orders.csproj" />
     <ProjectReference Include="..\..\Clients\ACommerce.Client.Vendors\ACommerce.Client.Vendors.csproj" />
+    <ProjectReference Include="..\..\Clients\ACommerce.Client.Realtime\ACommerce.Client.Realtime.csproj" />
   </ItemGroup>
 
 </Project>

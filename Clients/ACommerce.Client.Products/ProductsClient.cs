@@ -1,4 +1,3 @@
-using ACommerce.Catalog.Products.Entities;
 using ACommerce.Client.Core.Http;
 
 namespace ACommerce.Client.Products;
@@ -19,9 +18,9 @@ public sealed class ProductsClient
 	/// <summary>
 	/// الحصول على جميع المنتجات
 	/// </summary>
-	public async Task<List<Product>?> GetAllAsync(CancellationToken cancellationToken = default)
+	public async Task<List<ProductDto>?> GetAllAsync(CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.GetAsync<List<Product>>(
+		return await _httpClient.GetAsync<List<ProductDto>>(
 			ServiceName,
 			"/api/products",
 			cancellationToken);
@@ -30,9 +29,9 @@ public sealed class ProductsClient
 	/// <summary>
 	/// الحصول على منتج محدد
 	/// </summary>
-	public async Task<Product?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
+	public async Task<ProductDto?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.GetAsync<Product>(
+		return await _httpClient.GetAsync<ProductDto>(
 			ServiceName,
 			$"/api/products/{id}",
 			cancellationToken);
@@ -41,11 +40,11 @@ public sealed class ProductsClient
 	/// <summary>
 	/// إنشاء منتج جديد
 	/// </summary>
-	public async Task<Product?> CreateAsync(
+	public async Task<ProductDto?> CreateAsync(
 		CreateProductRequest request,
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PostAsync<CreateProductRequest, Product>(
+		return await _httpClient.PostAsync<CreateProductRequest, ProductDto>(
 			ServiceName,
 			"/api/products",
 			request,
@@ -55,12 +54,12 @@ public sealed class ProductsClient
 	/// <summary>
 	/// تحديث منتج
 	/// </summary>
-	public async Task<Product?> UpdateAsync(
+	public async Task<ProductDto?> UpdateAsync(
 		string id,
 		UpdateProductRequest request,
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PutAsync<UpdateProductRequest, Product>(
+		return await _httpClient.PutAsync<UpdateProductRequest, ProductDto>(
 			ServiceName,
 			$"/api/products/{id}",
 			request,
@@ -77,6 +76,28 @@ public sealed class ProductsClient
 			$"/api/products/{id}",
 			cancellationToken);
 	}
+}
+
+/// <summary>
+/// Product DTO for client-side use
+/// </summary>
+public sealed class ProductDto
+{
+	public Guid Id { get; set; }
+	public string Name { get; set; } = string.Empty;
+	public string Sku { get; set; } = string.Empty;
+	public string? ShortDescription { get; set; }
+	public string? LongDescription { get; set; }
+	public string? FeaturedImage { get; set; }
+	public List<string> Images { get; set; } = new();
+	public decimal? Price { get; set; }
+	public string? Currency { get; set; }
+	public int? StockQuantity { get; set; }
+	public bool IsFeatured { get; set; }
+	public bool IsNew { get; set; }
+	public string? Status { get; set; }
+	public DateTime CreatedAt { get; set; }
+	public DateTime? UpdatedAt { get; set; }
 }
 
 /// <summary>

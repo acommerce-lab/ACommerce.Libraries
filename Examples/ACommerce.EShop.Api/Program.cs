@@ -5,9 +5,10 @@ using ACommerce.SharedKernel.Infrastructure.EFCores.Extensions;
 using ACommerce.SharedKernel.CQRS.Extensions;
 using ACommerce.SharedKernel.AspNetCore.Extensions;
 using ACommerce.Authentication.JWT;
-using ACommerce.Realtime.SignalR.Hubs;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using ACommerce.SharedKernel.Infrastructure.EFCore.Repositories;
+using ACommerce.SharedKernel.Infrastructure.EFCore.Factories;
+using ACommerce.Realtime.SignalR.Hubs;
 using ACommerce.Chats.Core.Hubs;
 
 // ════════════════════════════════════════════════════════════════
@@ -60,7 +61,7 @@ try
     });
 
     // Repository & Unit of Work
-    builder.Services.AddRepositoryFactory();
+    builder.Services.AddScoped<IRepositoryFactory, RepositoryFactory>();
     builder.Services.AddScoped(typeof(IBaseAsyncRepository<>), typeof(BaseAsyncRepository<>));
 
     // ════════════════════════════════════════════════════════════════
@@ -75,10 +76,8 @@ try
     // ════════════════════════════════════════════════════════════════
     // 🗺️ AutoMapper & CQRS
     // ════════════════════════════════════════════════════════════════
-    builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-    builder.Services.AddMediatR(cfg =>
-        cfg.RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies()));
-    builder.Services.AddSharedKernelCQRS();
+    // AddSharedKernelCQRS includes AutoMapper, MediatR, and FluentValidation
+    builder.Services.AddSharedKernelCQRS(AppDomain.CurrentDomain.GetAssemblies());
 
     // ════════════════════════════════════════════════════════════════
     // 📡 SignalR for Real-time Communication
