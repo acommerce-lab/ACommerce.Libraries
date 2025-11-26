@@ -107,7 +107,7 @@ public class UnitsController : BaseCrudController<
 				{
 					new()
 					{
-						PropertyName = nameof(Unit.Code),
+						PropertyName = nameof(Unit.Symbol),
 						Value = code.ToLower(),
 						Operator = FilterOperator.Equals
 					}

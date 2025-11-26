@@ -78,7 +78,7 @@ public class ExchangeRatesController : BaseCrudController<
 				},
 				new()
 				{
-					PropertyName = nameof(ExchangeRate.EffectiveDate),
+					PropertyName = nameof(ExchangeRate.EffectiveFrom),
 					Value = DateTime.UtcNow,
 					Operator = FilterOperator.LessThanOrEqual
 				}
@@ -87,7 +87,7 @@ public class ExchangeRatesController : BaseCrudController<
 			var searchRequest = new SmartSearchRequest
 			{
 				Filters = filters,
-				OrderBy = nameof(ExchangeRate.EffectiveDate),
+				OrderBy = nameof(ExchangeRate.EffectiveFrom),
 				Ascending = false,
 				PageSize = 1
 			};
@@ -167,7 +167,7 @@ public class ExchangeRatesController : BaseCrudController<
 				},
 				new()
 				{
-					PropertyName = nameof(ExchangeRate.EffectiveDate),
+					PropertyName = nameof(ExchangeRate.EffectiveFrom),
 					Value = startDate,
 					SecondValue = endDate,
 					Operator = FilterOperator.Between
@@ -177,7 +177,7 @@ public class ExchangeRatesController : BaseCrudController<
 			var searchRequest = new SmartSearchRequest
 			{
 				Filters = filters,
-				OrderBy = nameof(ExchangeRate.EffectiveDate),
+				OrderBy = nameof(ExchangeRate.EffectiveFrom),
 				Ascending = true,
 				PageSize = 1000
 			};
@@ -234,7 +234,7 @@ public class ExchangeRatesController : BaseCrudController<
 				},
 				new()
 				{
-					PropertyName = nameof(ExchangeRate.EffectiveDate),
+					PropertyName = nameof(ExchangeRate.EffectiveFrom),
 					Value = DateTime.UtcNow,
 					Operator = FilterOperator.LessThanOrEqual
 				}
@@ -243,7 +243,7 @@ public class ExchangeRatesController : BaseCrudController<
 			var searchRequest = new SmartSearchRequest
 			{
 				Filters = filters,
-				OrderBy = nameof(ExchangeRate.EffectiveDate),
+				OrderBy = nameof(ExchangeRate.EffectiveFrom),
 				Ascending = false,
 				PageSize = 100
 			};
@@ -296,7 +296,7 @@ public class ExchangeRatesController : BaseCrudController<
 				FromCurrencyId = request.FromCurrencyId,
 				ToCurrencyId = request.ToCurrencyId,
 				Rate = request.Rate,
-				EffectiveDate = request.EffectiveDate ?? DateTime.UtcNow,
+				EffectiveFrom = request.EffectiveDate ?? DateTime.UtcNow,
 				Source = request.Source,
 				RateType = request.RateType ?? "official",
 				Priority = 1
@@ -322,7 +322,7 @@ public class ExchangeRatesController : BaseCrudController<
 				ToCurrencyId = exchangeRate.ToCurrencyId,
 				Rate = exchangeRate.Rate,
 				InverseRate = exchangeRate.InverseRate,
-				EffectiveDate = exchangeRate.EffectiveDate,
+				EffectiveFrom = exchangeRate.EffectiveFrom,
 				Source = exchangeRate.Source,
 				RateType = exchangeRate.RateType,
 				CreatedAt = exchangeRate.CreatedAt

@@ -12,7 +12,7 @@ public class AttributeValueRelationshipConfiguration : IEntityTypeConfiguration<
 
 		builder.HasKey(e => e.Id);
 
-		builder.Property(e => e.RelationType)
+		builder.Property(e => e.Type)
 			.IsRequired()
 			.HasMaxLength(50);
 
