@@ -1,10 +1,6 @@
 using Serilog;
 using Microsoft.EntityFrameworkCore;
-using ACommerce.SharedKernel.Infrastructure.EFCores.Context;
-using ACommerce.SharedKernel.Infrastructure.EFCores.Extensions;
-using ACommerce.SharedKernel.CQRS.Extensions;
-using ACommerce.SharedKernel.AspNetCore.Extensions;
-using ACommerce.Authentication.OpenIddict.Extensions;
+using ACommerce.Authentication.JWT;
 using ACommerce.Realtime.SignalR.Hubs;
 
 // ════════════════════════════════════════════════════════════════
@@ -48,34 +44,40 @@ try
     // ════════════════════════════════════════════════════════════════
     // 🗄️ Database Configuration (SQLite for simplicity)
     // ════════════════════════════════════════════════════════════════
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    {
-        options.UseSqlite(
-            builder.Configuration.GetConnectionString("DefaultConnection")
-            ?? "Data Source=eshop.db");
-        options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
-    });
-
-    // Repository & Unit of Work
-    builder.Services.AddRepositoryFactory();
-    builder.Services.AddScoped(typeof(IBaseAsyncRepository<>), typeof(BaseAsyncRepository<>));
+    // TODO: Add DbContext when implementing database features
+    // builder.Services.AddDbContext<YourDbContext>(options =>
+    // {
+    //     options.UseSqlite(
+    //         builder.Configuration.GetConnectionString("DefaultConnection")
+    //         ?? "Data Source=eshop.db");
+    //     options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
+    // });
 
     // ════════════════════════════════════════════════════════════════
-    // 🔐 Authentication & Authorization (OpenIddict)
+    // 🔐 Authentication & Authorization (JWT)
     // ════════════════════════════════════════════════════════════════
-    builder.Services.AddOpenIddictAuthentication(options =>
+    builder.Services.AddJwtAuthentication(options =>
     {
-        options.Issuer = builder.Configuration["Authentication:Issuer"]
+        options.SecretKey = builder.Configuration["Authentication:JWT:SecretKey"]
+            ?? "your-super-secret-key-at-least-32-characters-long-for-dev";
+        options.Issuer = builder.Configuration["Authentication:JWT:Issuer"]
             ?? "https://localhost:5001";
+        options.Audience = builder.Configuration["Authentication:JWT:Audience"]
+            ?? "https://localhost:5000";
+        options.AccessTokenLifetime = TimeSpan.FromHours(2);
     });
 
     // ════════════════════════════════════════════════════════════════
     // 🗺️ AutoMapper & CQRS
     // ════════════════════════════════════════════════════════════════
-    builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+    builder.Services.AddAutoMapper(cfg =>
+    {
+        // Add AutoMapper profiles from all loaded assemblies
+        cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies());
+    });
+
     builder.Services.AddMediatR(cfg =>
         cfg.RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies()));
-    builder.Services.AddCQRS();
 
     // ════════════════════════════════════════════════════════════════
     // 📡 SignalR for Real-time Communication
@@ -95,27 +97,26 @@ try
 # 🛒 Complete E-Commerce Backend API
 
 ## ✨ Features:
-- 👤 **Authentication & Authorization** (OpenIddict + JWT)
+- 👤 **Authentication & Authorization** (JWT Bearer)
 - 📦 **Product Catalog** (Attributes, Units, Currencies, Products)
 - 🛍️ **Shopping Cart & Orders**
 - 💳 **Payment Processing**
 - 🚚 **Shipping Management**
 - 👥 **Vendor Marketplace**
-- 💬 **Chat & Real-time Notifications**
+- 💬 **Chat & Real-time Notifications** (SignalR)
 - 📧 **Contact Points Management**
 - 📊 **User Profiles**
 
 ## 🏗️ Architecture:
 - Clean Architecture + DDD
 - CQRS with MediatR
-- Repository Pattern
 - Separation of Concerns
 - Independent Domain Systems
 
 ## 🔧 Technologies:
 - .NET 9.0
 - Entity Framework Core
-- OpenIddict
+- JWT Authentication
 - SignalR
 - AutoMapper
 - FluentValidation
@@ -186,20 +187,19 @@ try
 
     // SignalR Hubs
     app.MapHub<ChatHub>("/hubs/chat");
-    app.MapHub<NotificationHub>("/hubs/notifications");
+    // app.MapHub<NotificationHub>("/hubs/notifications"); // Implement NotificationHub when needed
 
     // ════════════════════════════════════════════════════════════════
     // 🗄️ Database Migration & Seeding
     // ════════════════════════════════════════════════════════════════
-    using (var scope = app.Services.CreateScope())
-    {
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-        Log.Information("📊 Ensuring database is created...");
-        await dbContext.Database.EnsureCreatedAsync();
-
-        Log.Information("✅ Database ready!");
-    }
+    // TODO: Uncomment when DbContext is implemented
+    // using (var scope = app.Services.CreateScope())
+    // {
+    //     var dbContext = scope.ServiceProvider.GetRequiredService<YourDbContext>();
+    //     Log.Information("📊 Ensuring database is created...");
+    //     await dbContext.Database.EnsureCreatedAsync();
+    //     Log.Information("✅ Database ready!");
+    // }
 
     // ════════════════════════════════════════════════════════════════
     // 🚀 Run Application
