@@ -9,4 +9,10 @@
     <Description># ACommerce.Catalog.Currencies - Independent currency management system</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\AspNetCore\ACommerce.SharedKernel.AspNetCore\ACommerce.SharedKernel.AspNetCore.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.0" />
+  </ItemGroup>
 </Project>

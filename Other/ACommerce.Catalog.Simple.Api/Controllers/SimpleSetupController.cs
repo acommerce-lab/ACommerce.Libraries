@@ -143,7 +143,7 @@ public class SimpleSetupController : ControllerBase
 				{
 					Name = "Piece",
 					Symbol = "pc",
-					Code = "piece",
+					//Code = "piece",
 					UnitCategoryId = category.Id,
 					MeasurementSystemId = system.Id,
 					ConversionToBase = 1,

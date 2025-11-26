@@ -4,8 +4,11 @@ using ACommerce.SharedKernel.Infrastructure.EFCores.Context;
 using ACommerce.SharedKernel.Infrastructure.EFCores.Extensions;
 using ACommerce.SharedKernel.CQRS.Extensions;
 using ACommerce.SharedKernel.AspNetCore.Extensions;
-using ACommerce.Authentication.OpenIddict.Extensions;
+using ACommerce.Authentication.JWT;
 using ACommerce.Realtime.SignalR.Hubs;
+using ACommerce.SharedKernel.Abstractions.Repositories;
+using ACommerce.SharedKernel.Infrastructure.EFCore.Repositories;
+using ACommerce.Chats.Core.Hubs;
 
 // ════════════════════════════════════════════════════════════════
 // 🎯 ACommerce E-Shop API - Complete E-Commerce Backend
@@ -63,7 +66,7 @@ try
     // ════════════════════════════════════════════════════════════════
     // 🔐 Authentication & Authorization (OpenIddict)
     // ════════════════════════════════════════════════════════════════
-    builder.Services.AddOpenIddictAuthentication(options =>
+    builder.Services.AddJwtAuthentication(options =>
     {
         options.Issuer = builder.Configuration["Authentication:Issuer"]
             ?? "https://localhost:5001";
@@ -75,7 +78,7 @@ try
     builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
     builder.Services.AddMediatR(cfg =>
         cfg.RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies()));
-    builder.Services.AddCQRS();
+    builder.Services.AddSharedKernelCQRS();
 
     // ════════════════════════════════════════════════════════════════
     // 📡 SignalR for Real-time Communication
@@ -181,7 +184,7 @@ try
 
     app.UseAuthentication();
     app.UseAuthorization();
-
+    
     app.MapControllers();
 
     // SignalR Hubs

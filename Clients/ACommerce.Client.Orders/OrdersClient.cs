@@ -1,5 +1,6 @@
 using ACommerce.Client.Core.Http;
-using ACommerce.Orders.Abstractions.Entities;
+  using ACommerce.Orders.Entities;
+using ACommerce.Orders.Enums;
 
 namespace ACommerce.Client.Orders;
 

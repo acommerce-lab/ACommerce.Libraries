@@ -19,5 +19,7 @@ public class ExchangeRateResponseDto
 	public Dictionary<string, string> Metadata { get; set; } = new();
 	public DateTime CreatedAt { get; set; }
 	public DateTime? UpdatedAt { get; set; }
+    public decimal InverseRate { get; set; }
+    public string? RateType { get; set; }
 }
 

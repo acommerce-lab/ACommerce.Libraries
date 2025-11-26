@@ -17,41 +17,37 @@ namespace ACommerce.Catalog.Units.Api.Controllers;
 [ApiController]
 [Route("api/catalog/measurement-systems")]
 [Produces("application/json")]
-public class MeasurementSystemsController : BaseCrudController<
+public class MeasurementSystemsController(
+    IMediator mediator,
+    ILogger<MeasurementSystemsController> logger) : BaseCrudController<
 	MeasurementSystem,
 	CreateMeasurementSystemDto,
 	UpdateMeasurementSystemDto,
 	MeasurementSystemResponseDto,
-	PartialUpdateMeasurementSystemDto>
+	PartialUpdateMeasurementSystemDto>(mediator, logger)
 {
-	public MeasurementSystemsController(
-		IMediator mediator,
-		ILogger<MeasurementSystemsController> logger)
-		: base(mediator, logger)
-	{
-	}
 
-	// ====================================================================================
-	// ??? Endpoints ???????? ?????? ?? BaseCrudController:
-	// - GET    /api/catalog/measurement-systems/{id}
-	// - POST   /api/catalog/measurement-systems/search
-	// - GET    /api/catalog/measurement-systems/count
-	// - POST   /api/catalog/measurement-systems
-	// - PUT    /api/catalog/measurement-systems/{id}
-	// - PATCH  /api/catalog/measurement-systems/{id}
-	// - DELETE /api/catalog/measurement-systems/{id}
-	// - POST   /api/catalog/measurement-systems/{id}/restore
-	// ====================================================================================
+    // ====================================================================================
+    // ??? Endpoints ???????? ?????? ?? BaseCrudController:
+    // - GET    /api/catalog/measurement-systems/{id}
+    // - POST   /api/catalog/measurement-systems/search
+    // - GET    /api/catalog/measurement-systems/count
+    // - POST   /api/catalog/measurement-systems
+    // - PUT    /api/catalog/measurement-systems/{id}
+    // - PATCH  /api/catalog/measurement-systems/{id}
+    // - DELETE /api/catalog/measurement-systems/{id}
+    // - POST   /api/catalog/measurement-systems/{id}/restore
+    // ====================================================================================
 
-	// ====================================================================================
-	// Custom Endpoints
-	// ====================================================================================
+    // ====================================================================================
+    // Custom Endpoints
+    // ====================================================================================
 
-	/// <summary>
-	/// ????? ?? ???? ???? ??????
-	/// GET /api/catalog/measurement-systems/by-code/{code}
-	/// </summary>
-	[HttpGet("by-code/{code}")]
+    /// <summary>
+    /// ????? ?? ???? ???? ??????
+    /// GET /api/catalog/measurement-systems/by-code/{code}
+    /// </summary>
+    [HttpGet("by-code/{code}")]
 	[ProducesResponseType(typeof(MeasurementSystemResponseDto), 200)]
 	[ProducesResponseType(404)]
 	[ProducesResponseType(500)]

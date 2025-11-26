@@ -7,6 +7,7 @@ using ACommerce.SharedKernel.Abstractions.Queries;
 using ACommerce.SharedKernel.AspNetCore.Controllers;
 using ACommerce.SharedKernel.CQRS.Queries;
 using Unit = ACommerce.Catalog.Units.Entities.Unit;
+using ACommerce.Catalog.Units.DTOs.UnitCategory;
 
 namespace ACommerce.Catalog.Units.Api.Controllers;
 
@@ -226,51 +227,3 @@ public class UnitCategoriesController : BaseCrudController<
 		}
 	}
 }
-
-// DTOs ?????? ??? UnitCategory
-public class CreateUnitCategoryDto
-{
-	public required string Name { get; set; }
-	public required string Code { get; set; }
-	public string? Description { get; set; }
-	public Guid? BaseUnitId { get; set; }
-	public int SortOrder { get; set; }
-	public Dictionary<string, string>? Metadata { get; set; }
-}
-
-public class UpdateUnitCategoryDto
-{
-	public string? Name { get; set; }
-	public string? Code { get; set; }
-	public string? Description { get; set; }
-	public Guid? BaseUnitId { get; set; }
-	public int SortOrder { get; set; }
-	public Dictionary<string, string>? Metadata { get; set; }
-}
-
-public class PartialUpdateUnitCategoryDto
-{
-	public string? Name { get; set; }
-	public string? Code { get; set; }
-	public string? Description { get; set; }
-	public Guid? BaseUnitId { get; set; }
-	public int SortOrder { get; set; }
-	public Dictionary<string, string>? Metadata { get; set; }
-}
-
-public class UnitCategoryResponseDto
-{
-	public Guid Id { get; set; }
-	public string Name { get; set; } = string.Empty;
-	public string Code { get; set; } = string.Empty;
-	public string? Description { get; set; }
-	public Guid? BaseUnitId { get; set; }
-	public string? BaseUnitName { get; set; }
-	public string? BaseUnitSymbol { get; set; }
-	public int UnitsCount { get; set; }
-	public int SortOrder { get; set; }
-	public Dictionary<string, string> Metadata { get; set; } = new();
-	public DateTime CreatedAt { get; set; }
-	public DateTime? UpdatedAt { get; set; }
-}
-

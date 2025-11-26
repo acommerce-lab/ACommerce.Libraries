@@ -10,16 +10,11 @@ namespace ACommerce.SharedKernel.Infrastructure.EFCore.Factories;
 /// <summary>
 /// مصنع المستودعات
 /// </summary>
-public class RepositoryFactory : IRepositoryFactory
+public class RepositoryFactory(IServiceProvider serviceProvider) : IRepositoryFactory
 {
-	private readonly IServiceProvider _serviceProvider;
+    private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
-	public RepositoryFactory(IServiceProvider serviceProvider)
-	{
-		_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-	}
-
-	public IBaseAsyncRepository<T> CreateRepository<T>() where T : class, IBaseEntity
+    public IBaseAsyncRepository<T> CreateRepository<T>() where T : class, IBaseEntity
 	{
 		var dbContext = _serviceProvider.GetRequiredService<DbContext>();
 		var logger = _serviceProvider.GetRequiredService<ILogger<BaseAsyncRepository<T>>>();

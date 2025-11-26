@@ -123,7 +123,7 @@ public class CurrencyConversionService : ICurrencyConversionService
 			},
 			new()
 			{
-				PropertyName = nameof(ExchangeRate.EffectiveDate),
+				PropertyName = nameof(ExchangeRate.EffectiveFrom),
 				Value = date,
 				Operator = FilterOperator.LessThanOrEqual
 			},
@@ -138,7 +138,7 @@ public class CurrencyConversionService : ICurrencyConversionService
 		var searchRequest = new SmartSearchRequest
 		{
 			Filters = filters,
-			OrderBy = nameof(ExchangeRate.EffectiveDate),
+			OrderBy = nameof(ExchangeRate.EffectiveFrom),
 			Ascending = false, // ?????? ?????
 			PageSize = 1
 		};
@@ -159,7 +159,7 @@ public class CurrencyConversionService : ICurrencyConversionService
 		var exchangeRate = result.Items[0];
 
 		// ?????? ?? ????? ????????
-		if (exchangeRate.ExpiryDate.HasValue && exchangeRate.ExpiryDate.Value < date)
+		if (exchangeRate.EffectiveTo.HasValue && exchangeRate.EffectiveTo.Value < date)
 		{
 			throw new InvalidOperationException(
 				$"Exchange rate from {fromCurrency.Code} to {toCurrency.Code} has expired");
@@ -201,7 +201,7 @@ public class CurrencyConversionService : ICurrencyConversionService
 			},
 			new()
 			{
-				PropertyName = nameof(ExchangeRate.EffectiveDate),
+				PropertyName = nameof(ExchangeRate.EffectiveFrom),
 				Value = startDate,
 				SecondValue = endDate,
 				Operator = FilterOperator.Between
@@ -217,7 +217,7 @@ public class CurrencyConversionService : ICurrencyConversionService
 		var searchRequest = new SmartSearchRequest
 		{
 			Filters = filters,
-			OrderBy = nameof(ExchangeRate.EffectiveDate),
+			OrderBy = nameof(ExchangeRate.EffectiveFrom),
 			Ascending = true,
 			PageSize = 1000 // ?? ???? ???????
 		};
@@ -248,7 +248,7 @@ public class CurrencyConversionService : ICurrencyConversionService
 			FromCurrencyId = fromCurrency.Id,
 			ToCurrencyId = toCurrency.Id,
 			Rate = rate,
-			EffectiveDate = DateTime.UtcNow,
+			EffectiveFrom = DateTime.UtcNow,
 			Source = source,
 			RateType = rateType,
 			Priority = 1

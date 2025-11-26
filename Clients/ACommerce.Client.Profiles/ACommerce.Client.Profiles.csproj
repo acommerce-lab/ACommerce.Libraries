@@ -8,8 +8,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\Identity\ACommerce.Profiles\ACommerce.Profiles.csproj" />
 		<ProjectReference Include="..\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
-		<ProjectReference Include="..\..\Core\ACommerce.Profiles\ACommerce.Profiles.csproj" />
 	</ItemGroup>
 
 </Project>

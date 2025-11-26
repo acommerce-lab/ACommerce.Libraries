@@ -10,5 +10,6 @@ public class CreateExchangeRateDto
 	public string Source { get; set; } = "Manual";
 	public bool IsActive { get; set; } = true;
 	public Dictionary<string, string>? Metadata { get; set; }
+    public string? RateType { get; set; }
+    public int? Priority { get; set; }
 }
-

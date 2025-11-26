@@ -17,7 +17,6 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
     <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
   </ItemGroup>
 </Project>
