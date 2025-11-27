@@ -47,11 +47,11 @@
 
     <!-- Payments -->
     <ProjectReference Include="..\..\Payments\ACommerce.Payments.Abstractions\ACommerce.Payments.Abstractions.csproj" />
-    <ProjectReference Include="..\..\Payments\ACommerce.Payments.Api\ACommerce.Payments.Api.csproj" />
+    <!-- <ProjectReference Include="..\..\Payments\ACommerce.Payments.Api\ACommerce.Payments.Api.csproj" /> TODO: Not implemented yet -->
 
     <!-- Shipping -->
     <ProjectReference Include="..\..\Shipping\ACommerce.Shipping.Abstractions\ACommerce.Shipping.Abstractions.csproj" />
-    <ProjectReference Include="..\..\Shipping\ACommerce.Shipping.Api\ACommerce.Shipping.Api.csproj" />
+    <!-- <ProjectReference Include="..\..\Shipping\ACommerce.Shipping.Api\ACommerce.Shipping.Api.csproj" /> TODO: Not implemented yet -->
 
     <!-- Notifications & Chat -->
     <ProjectReference Include="..\..\Other\ACommerce.Notifications.Core\ACommerce.Notifications.Core.csproj" />
