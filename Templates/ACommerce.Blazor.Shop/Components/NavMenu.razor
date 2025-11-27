@@ -96,7 +96,7 @@
 			}
 			else
 			{
-				<SfButton IsPrimary="true" OnClick="() => Navigation.NavigateTo(\"/login\")">
+				<SfButton IsPrimary="true" OnClick="@(() => Navigation.NavigateTo("/login"))">
 					تسجيل الدخول
 				</SfButton>
 			}
@@ -113,16 +113,15 @@
 	private int unreadMessages = 0;
 	private int unreadNotifications = 0;
 
-	protected override async Task OnInitializedAsync()
+	protected override Task OnInitializedAsync()
 	{
-		isAuthenticated = await AuthClient.IsAuthenticatedAsync();
-		if (isAuthenticated)
-		{
-			var user = await AuthClient.GetCurrentUserAsync();
-			userName = user?.FullName ?? "";
-			userEmail = user?.Email ?? "";
-			isVendor = user?.Roles?.Contains("Vendor") ?? false;
-		}
+		// TODO: Implement AuthClient state methods when available
+		// For now using mock data
+		isAuthenticated = false;
+		userName = "";
+		userEmail = "";
+		isVendor = false;
+		return Task.CompletedTask;
 	}
 
 	private string GetUserInitials()

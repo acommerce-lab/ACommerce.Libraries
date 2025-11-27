@@ -20,7 +20,7 @@
 			<div class="empty-icon">🛒</div>
 			<h3>سلة التسوق فارغة</h3>
 			<p>ابدأ بإضافة منتجات إلى سلتك</p>
-			<SfButton IsPrimary="true" OnClick="() => Navigation.NavigateTo(\"/products\")">
+			<SfButton IsPrimary="true" OnClick="@(() => Navigation.NavigateTo("/products"))">
 				تصفح المنتجات
 			</SfButton>
 		</div>
@@ -416,7 +416,7 @@
 	}
 
 	/* Responsive */
-	@media (max-width: 1024px) {
+	@@media (max-width: 1024px) {
 		.cart-content {
 			grid-template-columns: 1fr;
 		}

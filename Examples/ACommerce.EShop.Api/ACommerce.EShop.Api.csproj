@@ -21,8 +21,10 @@
     <!-- Identity & Profiles -->
     <ProjectReference Include="..\..\Identity\ACommerce.Profiles\ACommerce.Profiles.csproj" />
     <ProjectReference Include="..\..\Identity\ACommerce.Profiles.Api\ACommerce.Profiles.Api.csproj" />
-    <ProjectReference Include="..\..\Identity\ACommerce.ContactPoints\ACommerce.ContactPoints.csproj" />
-    <ProjectReference Include="..\..\Identity\ACommerce.ContactPoints.Api\ACommerce.ContactPoints.Api.csproj" />
+
+    <!-- Contact Points (Notifications Recipients) -->
+    <ProjectReference Include="..\..\Other\ACommerce.Notifications.Recipients\ACommerce.Notifications.Recipients.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Notifications.Recipients.Api\ACommerce.Notifications.Recipients.Api.csproj" />
 
     <!-- Catalog System -->
     <ProjectReference Include="..\..\Other\ACommerce.Catalog.Attributes\ACommerce.Catalog.Attributes.csproj" />
@@ -40,7 +42,6 @@
 
     <!-- Orders & Cart -->
     <ProjectReference Include="..\..\Sales\ACommerce.Cart\ACommerce.Cart.csproj" />
-    <!-- <ProjectReference Include="..\..\Sales\ACommerce.Cart.Api\ACommerce.Cart.Api.csproj" /> TODO: Not implemented yet -->
     <ProjectReference Include="..\..\Sales\ACommerce.Orders\ACommerce.Orders.csproj" />
     <ProjectReference Include="..\..\Sales\ACommerce.Orders.Api\ACommerce.Orders.Api.csproj" />
 

@@ -10,22 +10,21 @@
 @code {
 	private string currentTheme = "light";
 
-	protected override async Task OnInitializedAsync()
+	protected override void OnInitialized()
 	{
-		currentTheme = await ThemeService.GetCurrentThemeAsync();
+		currentTheme = ThemeService.CurrentTheme;
 		ThemeService.OnThemeChanged += OnThemeChanged;
 	}
 
-	private void OnThemeChanged(string theme)
+	private void OnThemeChanged()
 	{
-		currentTheme = theme;
+		currentTheme = ThemeService.CurrentTheme;
 		StateHasChanged();
 	}
 
-	private async Task ToggleTheme()
+	private void ToggleTheme()
 	{
-		var newTheme = currentTheme == "light" ? "dark" : "light";
-		await ThemeService.SetThemeAsync(newTheme);
+		ThemeService.ToggleTheme();
 	}
 
 	private string GetThemeIcon()

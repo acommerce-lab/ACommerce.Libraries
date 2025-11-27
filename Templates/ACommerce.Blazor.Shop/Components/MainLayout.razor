@@ -3,6 +3,7 @@
 @inject CartStateService CartState
 @inject AuthClient AuthClient
 @inject NavigationManager Navigation
+@inject NotificationService NotificationSvc
 
 <div class="page" data-theme="@currentTheme">
 	<div class="sidebar">
@@ -26,7 +27,7 @@
 			<div class="header-actions">
 				<ThemeToggle />
 
-				<div class="header-icon-btn" @onclick="() => Navigation.NavigateTo(\"/notifications\")">
+				<div class="header-icon-btn" @onclick="@(() => Navigation.NavigateTo("/notifications"))">
 					<span class="icon">🔔</span>
 					@if (unreadNotifications > 0)
 					{
@@ -52,7 +53,7 @@
 				}
 				else
 				{
-					<SfButton OnClick="() => Navigation.NavigateTo(\"/login\")">
+					<SfButton OnClick="@(() => Navigation.NavigateTo("/login"))">
 						تسجيل الدخول
 					</SfButton>
 				}
@@ -90,28 +91,25 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		// Load theme
-		currentTheme = await ThemeService.GetCurrentThemeAsync();
+		// Load theme - using mock for now
+		// TODO: Implement ThemeService.GetCurrentThemeAsync when available
+		currentTheme = ThemeService.CurrentTheme;
 		ThemeService.OnThemeChanged += OnThemeChanged;
 
 		// Load cart
 		await CartState.LoadCartAsync();
 
-		// Check auth
-		isAuthenticated = await AuthClient.IsAuthenticatedAsync();
-		if (isAuthenticated)
-		{
-			var user = await AuthClient.GetCurrentUserAsync();
-			userName = user?.FullName ?? "User";
-		}
+		// Check auth - using mock for now
+		// TODO: Implement AuthClient auth state methods when available
+		isAuthenticated = false; // Mock: not authenticated by default
 
 		// Subscribe to notifications
-		Notification.OnShow += ShowToast;
+		NotificationSvc.OnShow += ShowToast;
 	}
 
-	private void OnThemeChanged(string theme)
+	private void OnThemeChanged()
 	{
-		currentTheme = theme;
+		currentTheme = ThemeService.CurrentTheme;
 		StateHasChanged();
 	}
 
@@ -127,15 +125,18 @@
 			_ => "ℹ️"
 		};
 
-		await toastObj!.ShowAsync(new ToastModel
+		if (toastObj != null)
 		{
-			Title = "",
-			Content = message,
-			CssClass = $"toast-{type.ToString().ToLower()}"
-		});
+			await toastObj.ShowAsync(new ToastModel
+			{
+				Title = "",
+				Content = message,
+				CssClass = $"toast-{type.ToString().ToLower()}"
+			});
+		}
 	}
 
-	private async Task OnUserMenuItemSelected(MenuEventArgs args)
+	private async Task OnUserMenuItemSelected(MenuEventArgs<MenuItem> args)
 	{
 		switch (args.Item.Id)
 		{
@@ -163,8 +164,7 @@
 	public void Dispose()
 	{
 		ThemeService.OnThemeChanged -= OnThemeChanged;
-		Notification.OnShow -= ShowToast;
-		CartState.OnCartChanged -= StateHasChanged;
+		NotificationSvc.OnShow -= ShowToast;
 	}
 }
 
@@ -261,7 +261,7 @@
 	}
 
 	/* Responsive */
-	@media (min-width: 768px) {
+	@@media (min-width: 768px) {
 		.page {
 			flex-direction: row;
 		}

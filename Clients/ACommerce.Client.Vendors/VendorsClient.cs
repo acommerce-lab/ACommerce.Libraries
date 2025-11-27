@@ -1,5 +1,4 @@
 using ACommerce.Client.Core.Http;
-using ACommerce.Vendors.Entities;
 
 namespace ACommerce.Client.Vendors;
 
@@ -13,30 +12,48 @@ public sealed class VendorsClient
 		_httpClient = httpClient;
 	}
 
-	public async Task<List<Vendor>?> GetAllAsync(CancellationToken cancellationToken = default)
+	public async Task<List<VendorDto>?> GetAllAsync(CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.GetAsync<List<Vendor>>(ServiceName, "/api/vendors", cancellationToken);
+		return await _httpClient.GetAsync<List<VendorDto>>(ServiceName, "/api/vendors", cancellationToken);
 	}
 
-	public async Task<Vendor?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+	public async Task<VendorDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.GetAsync<Vendor>(ServiceName, $"/api/vendors/{id}", cancellationToken);
+		return await _httpClient.GetAsync<VendorDto>(ServiceName, $"/api/vendors/{id}", cancellationToken);
 	}
 
-	public async Task<Vendor?> CreateAsync(CreateVendorRequest request, CancellationToken cancellationToken = default)
+	public async Task<VendorDto?> CreateAsync(CreateVendorRequest request, CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PostAsync<CreateVendorRequest, Vendor>(ServiceName, "/api/vendors", request, cancellationToken);
+		return await _httpClient.PostAsync<CreateVendorRequest, VendorDto>(ServiceName, "/api/vendors", request, cancellationToken);
 	}
 
-	public async Task<Vendor?> UpdateAsync(Guid id, UpdateVendorRequest request, CancellationToken cancellationToken = default)
+	public async Task<VendorDto?> UpdateAsync(Guid id, UpdateVendorRequest request, CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PutAsync<UpdateVendorRequest, Vendor>(ServiceName, $"/api/vendors/{id}", request, cancellationToken);
+		return await _httpClient.PutAsync<UpdateVendorRequest, VendorDto>(ServiceName, $"/api/vendors/{id}", request, cancellationToken);
 	}
 
 	public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
 	{
 		await _httpClient.DeleteAsync(ServiceName, $"/api/vendors/{id}", cancellationToken);
 	}
+}
+
+/// <summary>
+/// Vendor DTO for client-side use
+/// </summary>
+public sealed class VendorDto
+{
+	public Guid Id { get; set; }
+	public string Name { get; set; } = string.Empty;
+	public string? Description { get; set; }
+	public string? ContactEmail { get; set; }
+	public string? ContactPhone { get; set; }
+	public string? LogoUrl { get; set; }
+	public string? Status { get; set; }
+	public decimal? Rating { get; set; }
+	public int? ReviewCount { get; set; }
+	public DateTime CreatedAt { get; set; }
+	public DateTime? UpdatedAt { get; set; }
 }
 
 public sealed class CreateVendorRequest

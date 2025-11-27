@@ -27,6 +27,18 @@ public sealed class NotificationsClient
 	}
 
 	/// <summary>
+	/// الحصول على إشعاراتي
+	/// </summary>
+	public async Task<List<NotificationResponse>?> GetMyNotificationsAsync(
+		CancellationToken cancellationToken = default)
+	{
+		return await _httpClient.GetAsync<List<NotificationResponse>>(
+			ServiceName,
+			"/api/notifications/me",
+			cancellationToken);
+	}
+
+	/// <summary>
 	/// الحصول على عدد الإشعارات غير المقروءة
 	/// </summary>
 	public async Task<UnreadCountResponse?> GetUnreadCountAsync(
@@ -90,6 +102,32 @@ public sealed class NotificationsClient
 			request,
 			cancellationToken);
 	}
+
+	/// <summary>
+	/// الحصول على إعدادات الإشعارات Push
+	/// </summary>
+	public async Task<PushSettings?> GetPushSettingsAsync(
+		CancellationToken cancellationToken = default)
+	{
+		return await _httpClient.GetAsync<PushSettings>(
+			ServiceName,
+			"/api/notifications/push-settings",
+			cancellationToken);
+	}
+
+	/// <summary>
+	/// تحديث إعدادات الإشعارات Push
+	/// </summary>
+	public async Task UpdatePushSettingsAsync(
+		PushSettings settings,
+		CancellationToken cancellationToken = default)
+	{
+		await _httpClient.PutAsync<PushSettings>(
+			ServiceName,
+			"/api/notifications/push-settings",
+			settings,
+			cancellationToken);
+	}
 }
 
 public sealed class NotificationResponse
@@ -112,4 +150,16 @@ public sealed class RegisterDeviceTokenRequest
 {
 	public string DeviceToken { get; set; } = string.Empty;
 	public string Platform { get; set; } = string.Empty; // "iOS", "Android", "Web"
+}
+
+public sealed class PushSettings
+{
+	public bool EnablePush { get; set; }
+	public bool OrderUpdates { get; set; } = true;
+	public bool ChatMessages { get; set; } = true;
+	public bool Promotions { get; set; } = true;
+	public bool SystemAlerts { get; set; } = true;
+	public TimeSpan? QuietTimeStart { get; set; }
+	public TimeSpan? QuietTimeEnd { get; set; }
+	public string? FirebaseToken { get; set; }
 }

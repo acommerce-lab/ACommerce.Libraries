@@ -1,4 +1,5 @@
 @page "/chats/{ConversationId:guid}"
+@using ACommerce.Client.Chats
 @inject ChatsClient ChatsClient
 @inject RealtimeClient RealtimeClient
 @inject NavigationManager Navigation
@@ -106,7 +107,7 @@
 	[Parameter]
 	public Guid ConversationId { get; set; }
 
-	private List<MessageDto>? messages;
+	private List<MessageResponse>? messages;
 	private string otherPartyName = "";
 	private bool isOnline = false;
 	private bool isLoadingMessages = true;
@@ -178,7 +179,7 @@
 			await RealtimeClient.InvokeAsync("JoinConversation", ConversationId.ToString());
 
 			// Listen for new messages
-			RealtimeClient.On<MessageDto>("NewMessage", async (message) =>
+			RealtimeClient.On<MessageResponse>("NewMessage", async (message) =>
 			{
 				if (message.ConversationId == ConversationId)
 				{
@@ -225,11 +226,7 @@
 
 		try
 		{
-			var message = await ChatsClient.SendMessageAsync(new SendMessageRequest
-			{
-				ConversationId = ConversationId,
-				Text = textToSend
-			});
+			var message = await ChatsClient.SendMessageAsync(ConversationId, textToSend);
 
 			if (message != null)
 			{
@@ -298,20 +295,7 @@
 		await RealtimeClient.DisconnectAsync();
 	}
 
-	// Models
-	private class MessageDto
-	{
-		public Guid Id { get; set; }
-		public Guid ConversationId { get; set; }
-		public Guid SenderId { get; set; }
-		public string Text { get; set; } = string.Empty;
-		public string? AttachmentUrl { get; set; }
-		public string? AttachmentName { get; set; }
-		public DateTime SentAt { get; set; }
-		public bool IsRead { get; set; }
-		public bool IsMine { get; set; }
-	}
-
+	// Local SignalR DTOs (not from SDK)
 	private class TypingDto
 	{
 		public Guid ConversationId { get; set; }
@@ -322,12 +306,6 @@
 	{
 		public Guid UserId { get; set; }
 		public bool IsOnline { get; set; }
-	}
-
-	private class SendMessageRequest
-	{
-		public Guid ConversationId { get; set; }
-		public string Text { get; set; } = string.Empty;
 	}
 }
 
@@ -503,192 +481,3 @@
 	}
 </style>
 
-@code {
-	[Parameter]
-	public Guid ConversationId { get; set; }
-
-	private List<MessageDto>? messages;
-	private string otherPartyName = "";
-	private bool isOnline = false;
-	private bool isLoadingMessages = true;
-	private bool isSending = false;
-	private string messageText = "";
-
-	private ElementReference messagesContainer;
-	private ElementReference messagesEndRef;
-
-	protected override async Task OnInitializedAsync()
-	{
-		await LoadConversation();
-		await LoadMessages();
-		await ConnectToRealtime();
-	}
-
-	private async Task LoadConversation()
-	{
-		try
-		{
-			var conversation = await ChatsClient.GetConversationAsync(ConversationId);
-			if (conversation != null)
-			{
-				otherPartyName = conversation.OtherPartyName;
-				isOnline = conversation.IsOnline;
-			}
-		}
-		catch (Exception ex)
-		{
-			Notification.ShowError($"خطأ: {ex.Message}");
-		}
-	}
-
-	private async Task LoadMessages()
-	{
-		isLoadingMessages = true;
-		try
-		{
-			messages = await ChatsClient.GetMessagesAsync(ConversationId);
-			await ChatsClient.MarkAsReadAsync(ConversationId);
-		}
-		catch (Exception ex)
-		{
-			Notification.ShowError($"خطأ: {ex.Message}");
-		}
-		finally
-		{
-			isLoadingMessages = false;
-		}
-	}
-
-	private async Task ConnectToRealtime()
-	{
-		try
-		{
-			await RealtimeClient.ConnectAsync("Chats", "/hubs/chat");
-			await RealtimeClient.InvokeAsync("JoinConversation", ConversationId.ToString());
-
-			// Listen for new messages
-			RealtimeClient.On<MessageDto>("NewMessage", async (message) =>
-			{
-				if (message.ConversationId == ConversationId)
-				{
-					messages ??= new();
-					messages.Add(message);
-					await InvokeAsync(StateHasChanged);
-					await ChatsClient.MarkAsReadAsync(ConversationId);
-				}
-			});
-
-			// Listen for online status
-			RealtimeClient.On<OnlineStatusDto>("OnlineStatusChanged", async (status) =>
-			{
-				isOnline = status.IsOnline;
-				await InvokeAsync(StateHasChanged);
-			});
-		}
-		catch (Exception ex)
-		{
-			Notification.ShowError($"خطأ في الاتصال: {ex.Message}");
-		}
-	}
-
-	private async Task SendMessage()
-	{
-		if (string.IsNullOrWhiteSpace(messageText)) return;
-
-		isSending = true;
-		var textToSend = messageText;
-		messageText = "";
-
-		try
-		{
-			var message = await ChatsClient.SendMessageAsync(new SendMessageRequest
-			{
-				ConversationId = ConversationId,
-				Text = textToSend
-			});
-		}
-		catch (Exception ex)
-		{
-			Notification.ShowError($"خطأ: {ex.Message}");
-			messageText = textToSend;
-		}
-		finally
-		{
-			isSending = false;
-		}
-	}
-
-	private async Task HandleKeyPress(KeyboardEventArgs e)
-	{
-		if (e.Key == "Enter" && !e.ShiftKey)
-		{
-			await SendMessage();
-		}
-	}
-
-	private void HandleAttachment()
-	{
-		Notification.ShowInfo("ميزة المرفقات قريباً");
-	}
-
-	private async Task ScrollToBottom()
-	{
-		// JavaScript interop needed
-	}
-
-	private void GoBack()
-	{
-		Navigation.NavigateTo("/chats");
-	}
-
-	private string GetAvatarInitials(string name)
-	{
-		if (string.IsNullOrEmpty(name)) return "?";
-		var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-		if (parts.Length >= 2)
-			return $"{parts[0][0]}{parts[1][0]}".ToUpper();
-		return name[0].ToString().ToUpper();
-	}
-
-	private string FormatTime(DateTime dateTime)
-	{
-		var now = DateTime.UtcNow;
-		var diff = now - dateTime;
-
-		if (diff.TotalMinutes < 1) return "الآن";
-		if (diff.TotalHours < 1) return dateTime.ToString("HH:mm");
-		if (diff.TotalDays < 1) return dateTime.ToString("HH:mm");
-		return dateTime.ToString("dd/MM HH:mm");
-	}
-
-	public async ValueTask DisposeAsync()
-	{
-		await RealtimeClient.InvokeAsync("LeaveConversation", ConversationId.ToString());
-		await RealtimeClient.DisconnectAsync();
-	}
-
-	private class MessageDto
-	{
-		public Guid Id { get; set; }
-		public Guid ConversationId { get; set; }
-		public Guid SenderId { get; set; }
-		public string Text { get; set; } = string.Empty;
-		public string? AttachmentUrl { get; set; }
-		public string? AttachmentName { get; set; }
-		public DateTime SentAt { get; set; }
-		public bool IsRead { get; set; }
-		public bool IsMine { get; set; }
-	}
-
-	private class OnlineStatusDto
-	{
-		public Guid UserId { get; set; }
-		public bool IsOnline { get; set; }
-	}
-
-	private class SendMessageRequest
-	{
-		public Guid ConversationId { get; set; }
-		public string Text { get; set; } = string.Empty;
-	}
-}

@@ -25,6 +25,15 @@ public sealed class ChatsClient
 	}
 
 	/// <summary>
+	/// الحصول على محادثاتي (اسم بديل)
+	/// </summary>
+	public Task<List<ConversationResponse>?> GetMyConversationsAsync(
+		CancellationToken cancellationToken = default)
+	{
+		return GetConversationsAsync(cancellationToken);
+	}
+
+	/// <summary>
 	/// الحصول على محادثة محددة
 	/// </summary>
 	public async Task<ConversationResponse?> GetConversationAsync(
@@ -68,6 +77,17 @@ public sealed class ChatsClient
 	}
 
 	/// <summary>
+	/// إرسال رسالة نصية بسيطة
+	/// </summary>
+	public Task<MessageResponse?> SendMessageAsync(
+		Guid conversationId,
+		string content,
+		CancellationToken cancellationToken = default)
+	{
+		return SendMessageAsync(conversationId, new SendMessageRequest { Content = content }, cancellationToken);
+	}
+
+	/// <summary>
 	/// بدء محادثة جديدة
 	/// </summary>
 	public async Task<ConversationResponse?> StartConversationAsync(
@@ -79,6 +99,26 @@ public sealed class ChatsClient
 			"/api/chats/conversations",
 			request,
 			cancellationToken);
+	}
+
+	/// <summary>
+	/// إنشاء محادثة جديدة (اسم بديل)
+	/// </summary>
+	public Task<ConversationResponse?> CreateConversationAsync(
+		CreateConversationRequest request,
+		CancellationToken cancellationToken = default)
+	{
+		var participants = request.ParticipantIds;
+		if (!string.IsNullOrEmpty(request.RecipientIdentifier) && !participants.Contains(request.RecipientIdentifier))
+		{
+			participants = new List<string>(participants) { request.RecipientIdentifier };
+		}
+		return StartConversationAsync(new StartConversationRequest
+		{
+			ParticipantIds = participants,
+			Title = request.Title,
+			InitialMessage = request.InitialMessage
+		}, cancellationToken);
 	}
 
 	/// <summary>
@@ -100,9 +140,15 @@ public sealed class ConversationResponse
 {
 	public Guid Id { get; set; }
 	public string Title { get; set; } = string.Empty;
+	public string OtherPartyName { get; set; } = string.Empty;
+	public string? OtherPartyAvatar { get; set; }
+	public bool IsOnline { get; set; }
 	public List<string> Participants { get; set; } = new();
 	public MessageResponse? LastMessage { get; set; }
+	public string LastMessageText => LastMessage?.Content ?? string.Empty;
+	public DateTime LastMessageAt => LastMessage?.CreatedAt ?? CreatedAt;
 	public int UnreadCount { get; set; }
+	public bool HasUnread => UnreadCount > 0;
 	public DateTime CreatedAt { get; set; }
 	public DateTime? UpdatedAt { get; set; }
 }
@@ -114,10 +160,20 @@ public sealed class MessageResponse
 	public string SenderId { get; set; } = string.Empty;
 	public string SenderName { get; set; } = string.Empty;
 	public string Content { get; set; } = string.Empty;
+	/// <summary>
+	/// Alias for Content property
+	/// </summary>
+	public string Text { get => Content; set => Content = value; }
 	public string Type { get; set; } = "Text"; // "Text", "Image", "File"
 	public string? AttachmentUrl { get; set; }
+	public string? AttachmentName { get; set; }
 	public bool IsRead { get; set; }
+	public bool IsMine { get; set; }
 	public DateTime CreatedAt { get; set; }
+	/// <summary>
+	/// Alias for CreatedAt property
+	/// </summary>
+	public DateTime SentAt { get => CreatedAt; set => CreatedAt = value; }
 }
 
 public sealed class SendMessageRequest
@@ -130,6 +186,17 @@ public sealed class SendMessageRequest
 public sealed class StartConversationRequest
 {
 	public List<string> ParticipantIds { get; set; } = new();
+	public string? Title { get; set; }
+	public string? InitialMessage { get; set; }
+}
+
+public sealed class CreateConversationRequest
+{
+	public List<string> ParticipantIds { get; set; } = new();
+	/// <summary>
+	/// Alternative to ParticipantIds - specify a single recipient by username/email
+	/// </summary>
+	public string? RecipientIdentifier { get; set; }
 	public string? Title { get; set; }
 	public string? InitialMessage { get; set; }
 }

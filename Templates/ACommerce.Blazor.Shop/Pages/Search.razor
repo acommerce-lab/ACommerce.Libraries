@@ -1,4 +1,6 @@
 @page "/search"
+@using ACommerce.Client.Categories
+@using ACommerce.Client.ProductListings
 @inject ProductListingsClient ListingsClient
 @inject CategoriesClient CategoriesClient
 @inject CartStateService CartState
@@ -441,7 +443,7 @@
 	}
 
 	/* Responsive */
-	@media (max-width: 768px) {
+	@@media (max-width: 768px) {
 		.search-content {
 			grid-template-columns: 1fr;
 		}

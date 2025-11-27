@@ -1,6 +1,4 @@
 using ACommerce.Client.Core.Http;
-  using ACommerce.Orders.Entities;
-using ACommerce.Orders.Enums;
 
 namespace ACommerce.Client.Orders;
 
@@ -20,20 +18,31 @@ public sealed class OrdersClient
 	/// <summary>
 	/// الحصول على جميع الطلبات
 	/// </summary>
-	public async Task<List<Order>?> GetAllAsync(CancellationToken cancellationToken = default)
+	public async Task<List<OrderDto>?> GetAllAsync(CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.GetAsync<List<Order>>(
+		return await _httpClient.GetAsync<List<OrderDto>>(
 			ServiceName,
 			"/api/orders",
 			cancellationToken);
 	}
 
 	/// <summary>
+	/// الحصول على طلباتي
+	/// </summary>
+	public async Task<List<OrderDto>?> GetMyOrdersAsync(CancellationToken cancellationToken = default)
+	{
+		return await _httpClient.GetAsync<List<OrderDto>>(
+			ServiceName,
+			"/api/orders/me",
+			cancellationToken);
+	}
+
+	/// <summary>
 	/// الحصول على طلب محدد
 	/// </summary>
-	public async Task<Order?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
+	public async Task<OrderDto?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.GetAsync<Order>(
+		return await _httpClient.GetAsync<OrderDto>(
 			ServiceName,
 			$"/api/orders/{id}",
 			cancellationToken);
@@ -42,11 +51,11 @@ public sealed class OrdersClient
 	/// <summary>
 	/// إنشاء طلب جديد
 	/// </summary>
-	public async Task<Order?> CreateAsync(
+	public async Task<OrderDto?> CreateAsync(
 		CreateOrderRequest request,
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PostAsync<CreateOrderRequest, Order>(
+		return await _httpClient.PostAsync<CreateOrderRequest, OrderDto>(
 			ServiceName,
 			"/api/orders",
 			request,
@@ -54,14 +63,24 @@ public sealed class OrdersClient
 	}
 
 	/// <summary>
-	/// تحديث حالة طلب
+	/// إنشاء طلب جديد (اسم بديل)
 	/// </summary>
-	public async Task<Order?> UpdateStatusAsync(
-		string id,
-		OrderStatus newStatus,
+	public Task<OrderDto?> CreateOrderAsync(
+		CreateOrderRequest request,
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PatchAsync<UpdateStatusRequest, Order>(
+		return CreateAsync(request, cancellationToken);
+	}
+
+	/// <summary>
+	/// تحديث حالة طلب
+	/// </summary>
+	public async Task<OrderDto?> UpdateStatusAsync(
+		string id,
+		string newStatus,
+		CancellationToken cancellationToken = default)
+	{
+		return await _httpClient.PatchAsync<UpdateStatusRequest, OrderDto>(
 			ServiceName,
 			$"/api/orders/{id}/status",
 			new UpdateStatusRequest { Status = newStatus },
@@ -81,10 +100,40 @@ public sealed class OrdersClient
 	}
 }
 
+/// <summary>
+/// Order DTO for client-side use
+/// </summary>
+public sealed class OrderDto
+{
+	public Guid Id { get; set; }
+	public string OrderNumber { get; set; } = string.Empty;
+	public string Status { get; set; } = string.Empty;
+	public string? CustomerId { get; set; }
+	public decimal TotalAmount { get; set; }
+	public string? Currency { get; set; }
+	public string? ShippingAddress { get; set; }
+	public List<OrderItemDto> Items { get; set; } = new();
+	public DateTime CreatedAt { get; set; }
+	public DateTime? UpdatedAt { get; set; }
+}
+
+public sealed class OrderItemDto
+{
+	public Guid Id { get; set; }
+	public string ProductId { get; set; } = string.Empty;
+	public string? ProductName { get; set; }
+	public int Quantity { get; set; }
+	public decimal UnitPrice { get; set; }
+	public decimal TotalPrice { get; set; }
+}
+
 public sealed class CreateOrderRequest
 {
-	public List<OrderItemRequest> Items { get; set; } = new();
-	public string ShippingAddress { get; set; } = string.Empty;
+	public List<OrderItemRequest>? Items { get; set; }
+	public string? ShippingAddress { get; set; }
+	public Guid? ShippingAddressId { get; set; }
+	public Guid? ShippingMethodId { get; set; }
+	public string? PaymentMethod { get; set; }
 }
 
 public sealed class OrderItemRequest
@@ -96,5 +145,5 @@ public sealed class OrderItemRequest
 
 public sealed class UpdateStatusRequest
 {
-	public OrderStatus Status { get; set; }
+	public string Status { get; set; } = string.Empty;
 }

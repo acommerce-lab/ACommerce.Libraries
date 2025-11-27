@@ -40,7 +40,7 @@
 							  OnClick="ConfirmSelection">
 						@if (isSubmitting) { <SfSpinner /> } else { <span>تأكيد الاختيار</span> }
 					</SfButton>
-					<SfButton OnClick="() => Navigation.NavigateTo(\"/login\")">
+					<SfButton OnClick="@(() => Navigation.NavigateTo("/login"))">
 						إلغاء
 					</SfButton>
 				</div>
@@ -49,7 +49,7 @@
 			{
 				<div class="error-container">
 					<p>لا توجد أرقام متاحة</p>
-					<SfButton OnClick="() => Navigation.NavigateTo(\"/login\")">
+					<SfButton OnClick="@(() => Navigation.NavigateTo("/login"))">
 						رجوع لتسجيل الدخول
 					</SfButton>
 				</div>
