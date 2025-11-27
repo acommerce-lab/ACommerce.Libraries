@@ -41,7 +41,7 @@
 										DataSource="@categories"
 										Placeholder="اختر التصنيف">
 							<DropDownListFieldSettings Text="Name" Value="Id" />
-							<DropDownListEvents TValue="Guid?" TItem="CategoryDto" ValueChange="OnFilterChanged" />
+							<DropDownListEvents TValue="Guid?" TItem="CategoryDto" ValueChange="OnCategoryFilterChanged" />
 						</SfDropDownList>
 					</div>
 
@@ -61,7 +61,7 @@
 											  Min="0">
 							</SfNumericTextBox>
 						</div>
-						<SfButton CssClass="apply-filter-btn" OnClick="OnFilterChanged">
+						<SfButton CssClass="apply-filter-btn" OnClick="ApplyFilters">
 							تطبيق
 						</SfButton>
 					</div>
@@ -75,7 +75,7 @@
 										DataSource="@ratingOptions"
 										Placeholder="اختر التقييم">
 							<DropDownListFieldSettings Text="Label" Value="Value" />
-							<DropDownListEvents TValue="int?" TItem="RatingOption" ValueChange="OnFilterChanged" />
+							<DropDownListEvents TValue="int?" TItem="RatingOption" ValueChange="OnRatingFilterChanged" />
 						</SfDropDownList>
 					</div>
 
@@ -84,7 +84,7 @@
 						<SfCheckBox @bind-Checked="filters.InStockOnly"
 									Label="المنتجات المتوفرة فقط"
 									TChecked="bool">
-							<CheckBoxEvents TChecked="bool" Change="OnFilterChanged" />
+							<CheckBoxEvents TChecked="bool" ValueChange="OnCheckboxFilterChanged" />
 						</SfCheckBox>
 					</div>
 
@@ -93,7 +93,7 @@
 						<SfCheckBox @bind-Checked="filters.FeaturedOnly"
 									Label="المنتجات المميزة فقط"
 									TChecked="bool">
-							<CheckBoxEvents TChecked="bool" Change="OnFilterChanged" />
+							<CheckBoxEvents TChecked="bool" ValueChange="OnCheckboxFilterChanged" />
 						</SfCheckBox>
 					</div>
 
@@ -265,7 +265,25 @@
 		}
 	}
 
-	private async Task OnFilterChanged(ChangeEventArgs<Guid?, CategoryDto>? args = null)
+	private async Task ApplyFilters()
+	{
+		currentPage = 1;
+		await PerformSearch();
+	}
+
+	private async Task OnCategoryFilterChanged(ChangeEventArgs<Guid?, CategoryDto> args)
+	{
+		currentPage = 1;
+		await PerformSearch();
+	}
+
+	private async Task OnRatingFilterChanged(ChangeEventArgs<int?, RatingOption> args)
+	{
+		currentPage = 1;
+		await PerformSearch();
+	}
+
+	private async Task OnCheckboxFilterChanged(ChangeEventArgs<bool> args)
 	{
 		currentPage = 1;
 		await PerformSearch();

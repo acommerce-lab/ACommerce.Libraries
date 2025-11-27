@@ -63,11 +63,12 @@
 
 									<div class="item-quantity">
 										<SfNumericTextBox @bind-Value="item.Quantity"
+														  TValue="int"
 														  Min="1"
 														  Max="@item.MaxQuantity"
 														  ShowSpinButton="true"
 														  Format="n0">
-											<NumericTextBoxEvents ValueChange="() => UpdateQuantity(item.Id, item.Quantity)" />
+											<NumericTextBoxEvents TValue="int" ValueChange="@(args => UpdateQuantity(item.Id, args.Value))" />
 										</SfNumericTextBox>
 									</div>
 
@@ -102,7 +103,7 @@
 						{
 							<div class="summary-row discount">
 								<span>الخصم</span>
-								<span>-@CartState.CurrentCart.DiscountAmount.ToString("C")</span>
+								<span>-@((CartState.CurrentCart.DiscountAmount ?? 0).ToString("C"))</span>
 							</div>
 						}
 
