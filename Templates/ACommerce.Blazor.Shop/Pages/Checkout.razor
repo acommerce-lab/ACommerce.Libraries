@@ -124,22 +124,22 @@
 						{
 							<div class="payment-methods">
 								<div class="payment-option @(selectedPaymentMethod == "Mada" ? "selected" : "")"
-									 @onclick="() => selectedPaymentMethod = \"Mada\"">
+									 @onclick="@(() => selectedPaymentMethod = "Mada")">
 									<span class="payment-icon">💳</span>
 									<span>مدى</span>
 								</div>
 								<div class="payment-option @(selectedPaymentMethod == "CreditCard" ? "selected" : "")"
-									 @onclick="() => selectedPaymentMethod = \"CreditCard\"">
+									 @onclick="@(() => selectedPaymentMethod = "CreditCard")">
 									<span class="payment-icon">💳</span>
 									<span>بطاقة ائتمان</span>
 								</div>
 								<div class="payment-option @(selectedPaymentMethod == "ApplePay" ? "selected" : "")"
-									 @onclick="() => selectedPaymentMethod = \"ApplePay\"">
+									 @onclick="@(() => selectedPaymentMethod = "ApplePay")">
 									<span class="payment-icon">🍎</span>
 									<span>Apple Pay</span>
 								</div>
 								<div class="payment-option @(selectedPaymentMethod == "COD" ? "selected" : "")"
-									 @onclick="() => selectedPaymentMethod = \"COD\"">
+									 @onclick="@(() => selectedPaymentMethod = "COD")">
 									<span class="payment-icon">💵</span>
 									<span>الدفع عند الاستلام</span>
 								</div>
@@ -605,7 +605,7 @@
 	}
 
 	/* Responsive */
-	@media (max-width: 1024px) {
+	@@media (max-width: 1024px) {
 		.checkout-content {
 			grid-template-columns: 1fr;
 		}
