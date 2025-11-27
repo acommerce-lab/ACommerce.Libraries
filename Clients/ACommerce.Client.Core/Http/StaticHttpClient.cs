@@ -1,28 +1,27 @@
 using System.Net.Http.Json;
 using System.Text.Json;
-using ACommerce.ServiceRegistry.Client;
 using Microsoft.Extensions.Logging;
 
 namespace ACommerce.Client.Core.Http;
 
 /// <summary>
-/// HTTP Client مع Dynamic Service URLs
-/// يستخدم Service Registry للحصول على URLs ديناميكياً
+/// HTTP Client مع Static Base URL
+/// للتطبيقات المستقلة التي لا تستخدم Service Registry
 /// </summary>
-public sealed class DynamicHttpClient : IApiClient
+public sealed class StaticHttpClient : IApiClient
 {
 	private readonly HttpClient _httpClient;
-	private readonly ServiceRegistryClient _registryClient;
-	private readonly ILogger<DynamicHttpClient> _logger;
+	private readonly string _baseUrl;
+	private readonly ILogger<StaticHttpClient>? _logger;
 	private readonly JsonSerializerOptions _jsonOptions;
 
-	public DynamicHttpClient(
+	public StaticHttpClient(
 		HttpClient httpClient,
-		ServiceRegistryClient registryClient,
-		ILogger<DynamicHttpClient> logger)
+		string baseUrl,
+		ILogger<StaticHttpClient>? logger = null)
 	{
 		_httpClient = httpClient;
-		_registryClient = registryClient;
+		_baseUrl = baseUrl.TrimEnd('/');
 		_logger = logger;
 
 		_jsonOptions = new JsonSerializerOptions
@@ -40,8 +39,8 @@ public sealed class DynamicHttpClient : IApiClient
 		string path,
 		CancellationToken cancellationToken = default)
 	{
-		var url = await BuildUrlAsync(serviceName, path, cancellationToken);
-		_logger.LogDebug("GET {Url}", url);
+		var url = BuildUrl(path);
+		_logger?.LogDebug("GET {Url}", url);
 
 		try
 		{
@@ -52,7 +51,7 @@ public sealed class DynamicHttpClient : IApiClient
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "GET {Url} failed", url);
+			_logger?.LogError(ex, "GET {Url} failed", url);
 			throw;
 		}
 	}
@@ -66,8 +65,8 @@ public sealed class DynamicHttpClient : IApiClient
 		TRequest data,
 		CancellationToken cancellationToken = default)
 	{
-		var url = await BuildUrlAsync(serviceName, path, cancellationToken);
-		_logger.LogDebug("POST {Url}", url);
+		var url = BuildUrl(path);
+		_logger?.LogDebug("POST {Url}", url);
 
 		try
 		{
@@ -78,7 +77,7 @@ public sealed class DynamicHttpClient : IApiClient
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "POST {Url} failed", url);
+			_logger?.LogError(ex, "POST {Url} failed", url);
 			throw;
 		}
 	}
@@ -92,8 +91,8 @@ public sealed class DynamicHttpClient : IApiClient
 		TRequest data,
 		CancellationToken cancellationToken = default)
 	{
-		var url = await BuildUrlAsync(serviceName, path, cancellationToken);
-		_logger.LogDebug("POST {Url}", url);
+		var url = BuildUrl(path);
+		_logger?.LogDebug("POST {Url}", url);
 
 		try
 		{
@@ -102,7 +101,7 @@ public sealed class DynamicHttpClient : IApiClient
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "POST {Url} failed", url);
+			_logger?.LogError(ex, "POST {Url} failed", url);
 			throw;
 		}
 	}
@@ -116,8 +115,8 @@ public sealed class DynamicHttpClient : IApiClient
 		TRequest data,
 		CancellationToken cancellationToken = default)
 	{
-		var url = await BuildUrlAsync(serviceName, path, cancellationToken);
-		_logger.LogDebug("PUT {Url}", url);
+		var url = BuildUrl(path);
+		_logger?.LogDebug("PUT {Url}", url);
 
 		try
 		{
@@ -128,7 +127,7 @@ public sealed class DynamicHttpClient : IApiClient
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "PUT {Url} failed", url);
+			_logger?.LogError(ex, "PUT {Url} failed", url);
 			throw;
 		}
 	}
@@ -142,8 +141,8 @@ public sealed class DynamicHttpClient : IApiClient
 		TRequest data,
 		CancellationToken cancellationToken = default)
 	{
-		var url = await BuildUrlAsync(serviceName, path, cancellationToken);
-		_logger.LogDebug("PUT {Url}", url);
+		var url = BuildUrl(path);
+		_logger?.LogDebug("PUT {Url}", url);
 
 		try
 		{
@@ -152,7 +151,7 @@ public sealed class DynamicHttpClient : IApiClient
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "PUT {Url} failed", url);
+			_logger?.LogError(ex, "PUT {Url} failed", url);
 			throw;
 		}
 	}
@@ -165,8 +164,8 @@ public sealed class DynamicHttpClient : IApiClient
 		string path,
 		CancellationToken cancellationToken = default)
 	{
-		var url = await BuildUrlAsync(serviceName, path, cancellationToken);
-		_logger.LogDebug("DELETE {Url}", url);
+		var url = BuildUrl(path);
+		_logger?.LogDebug("DELETE {Url}", url);
 
 		try
 		{
@@ -175,7 +174,7 @@ public sealed class DynamicHttpClient : IApiClient
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "DELETE {Url} failed", url);
+			_logger?.LogError(ex, "DELETE {Url} failed", url);
 			throw;
 		}
 	}
@@ -189,8 +188,8 @@ public sealed class DynamicHttpClient : IApiClient
 		TRequest data,
 		CancellationToken cancellationToken = default)
 	{
-		var url = await BuildUrlAsync(serviceName, path, cancellationToken);
-		_logger.LogDebug("PATCH {Url}", url);
+		var url = BuildUrl(path);
+		_logger?.LogDebug("PATCH {Url}", url);
 
 		try
 		{
@@ -201,29 +200,17 @@ public sealed class DynamicHttpClient : IApiClient
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "PATCH {Url} failed", url);
+			_logger?.LogError(ex, "PATCH {Url} failed", url);
 			throw;
 		}
 	}
 
 	/// <summary>
-	/// بناء URL الكامل من Service Name + Path
+	/// بناء URL الكامل من Base URL + Path
 	/// </summary>
-	private async Task<string> BuildUrlAsync(
-		string serviceName,
-		string path,
-		CancellationToken cancellationToken)
+	private string BuildUrl(string path)
 	{
-		var endpoint = await _registryClient.DiscoverAsync(serviceName, cancellationToken);
-
-		if (endpoint == null)
-		{
-			throw new InvalidOperationException($"Service not found: {serviceName}");
-		}
-
-		var baseUrl = endpoint.BaseUrl.TrimEnd('/');
 		var cleanPath = path.StartsWith('/') ? path : $"/{path}";
-
-		return $"{baseUrl}{cleanPath}";
+		return $"{_baseUrl}{cleanPath}";
 	}
 }

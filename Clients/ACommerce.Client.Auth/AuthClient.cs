@@ -8,13 +8,13 @@ namespace ACommerce.Client.Auth;
 /// </summary>
 public sealed class AuthClient
 {
-	private readonly DynamicHttpClient _httpClient;
+	private readonly IApiClient _httpClient;
 	private const string ServiceName = "Marketplace"; // أو "Auth" إذا كانت خدمة منفصلة
 
 	// Token storage for client-side apps
 	private string? _currentToken;
 
-	public AuthClient(DynamicHttpClient httpClient)
+	public AuthClient(IApiClient httpClient)
 	{
 		_httpClient = httpClient;
 	}

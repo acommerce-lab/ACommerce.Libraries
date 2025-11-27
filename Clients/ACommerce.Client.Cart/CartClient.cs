@@ -8,10 +8,10 @@ namespace ACommerce.Client.Cart;
 /// </summary>
 public sealed class CartClient
 {
-	private readonly DynamicHttpClient _httpClient;
+	private readonly IApiClient _httpClient;
 	private const string ServiceName = "Marketplace";
 
-	public CartClient(DynamicHttpClient httpClient)
+	public CartClient(IApiClient httpClient)
 	{
 		_httpClient = httpClient;
 	}
@@ -113,16 +113,16 @@ public sealed class CartClient
 	}
 }
 
-// Extension لـ DynamicHttpClient لدعم DELETE مع Response
+// Extension لـ IApiClient لدعم DELETE مع Response
 public static class HttpClientExtensions
 {
 	public static async Task<T?> DeleteAsync<T>(
-		this DynamicHttpClient httpClient,
+		this IApiClient httpClient,
 		string serviceName,
 		string path,
 		CancellationToken cancellationToken = default)
 	{
-		// سنضيف هذا للـ DynamicHttpClient لاحقاً
+		// Delete غير مدعوم مع Response حالياً، نحتاج لإضافته للواجهة
 		throw new NotImplementedException("DeleteAsync<T> not implemented yet");
 	}
 }

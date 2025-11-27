@@ -5,14 +5,13 @@ using ACommerce.Client.Cart;
 using ACommerce.Client.Categories;
 using ACommerce.Client.Chats;
 using ACommerce.Client.ContactPoints;
-using ACommerce.Client.Files;
+using ACommerce.Client.Core.Extensions;
 using ACommerce.Client.Notifications;
 using ACommerce.Client.Orders;
 using ACommerce.Client.Payments;
 using ACommerce.Client.ProductListings;
 using ACommerce.Client.Products;
 using ACommerce.Client.Profiles;
-using ACommerce.Client.Realtime;
 using ACommerce.Client.Shipping;
 using ACommerce.Client.Vendors;
 using Microsoft.AspNetCore.Components.Web;
@@ -25,13 +24,12 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 // Base API URL
-const string baseUrl = "http://localhost:5001/api/";
+const string baseUrl = "http://localhost:5001";
 
-// HTTP Client
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(baseUrl) });
+// ACommerce Client SDK with Static URL (for standalone Blazor WASM app)
+builder.Services.AddACommerceStaticClient(baseUrl);
 
-// ACommerce Client SDKs (simplified - direct registration)
-// TODO: Implement proper service discovery with ServiceRegistry
+// ACommerce Client SDKs (they depend on IApiClient which is now registered)
 builder.Services.AddScoped<AuthClient>();
 builder.Services.AddScoped<ContactPointsClient>();
 builder.Services.AddScoped<ProductsClient>();
@@ -44,8 +42,6 @@ builder.Services.AddScoped<VendorsClient>();
 builder.Services.AddScoped<ProfilesClient>();
 builder.Services.AddScoped<NotificationsClient>();
 builder.Services.AddScoped<ChatsClient>();
-builder.Services.AddScoped<RealtimeClient>();
-builder.Services.AddScoped<FilesClient>();
 builder.Services.AddScoped<CategoriesClient>();
 
 // Syncfusion Blazor

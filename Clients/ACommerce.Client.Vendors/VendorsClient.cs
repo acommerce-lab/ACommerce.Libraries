@@ -4,10 +4,10 @@ namespace ACommerce.Client.Vendors;
 
 public sealed class VendorsClient
 {
-	private readonly DynamicHttpClient _httpClient;
+	private readonly IApiClient _httpClient;
 	private const string ServiceName = "Marketplace";
 
-	public VendorsClient(DynamicHttpClient httpClient)
+	public VendorsClient(IApiClient httpClient)
 	{
 		_httpClient = httpClient;
 	}

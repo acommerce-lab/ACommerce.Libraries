@@ -65,13 +65,22 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Client Core (required for IApiClient) -->
+    <ProjectReference Include="..\..\Clients\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
+
     <!-- Client SDKs -->
+    <ProjectReference Include="..\..\Clients\ACommerce.Client.Auth\ACommerce.Client.Auth.csproj" />
     <ProjectReference Include="..\..\Clients\ACommerce.Client.Profiles\ACommerce.Client.Profiles.csproj" />
     <ProjectReference Include="..\..\Clients\ACommerce.Client.Products\ACommerce.Client.Products.csproj" />
+    <ProjectReference Include="..\..\Clients\ACommerce.Client.ProductListings\ACommerce.Client.ProductListings.csproj" />
     <ProjectReference Include="..\..\Clients\ACommerce.Client.Cart\ACommerce.Client.Cart.csproj" />
     <ProjectReference Include="..\..\Clients\ACommerce.Client.Orders\ACommerce.Client.Orders.csproj" />
     <ProjectReference Include="..\..\Clients\ACommerce.Client.Vendors\ACommerce.Client.Vendors.csproj" />
+    <ProjectReference Include="..\..\Clients\ACommerce.Client.Categories\ACommerce.Client.Categories.csproj" />
     <ProjectReference Include="..\..\Clients\ACommerce.Client.Realtime\ACommerce.Client.Realtime.csproj" />
+
+    <!-- Blazor Shop Template (for shared services and components) -->
+    <ProjectReference Include="..\..\Templates\ACommerce.Blazor.Shop\ACommerce.Blazor.Shop.csproj" />
   </ItemGroup>
 
 </Project>

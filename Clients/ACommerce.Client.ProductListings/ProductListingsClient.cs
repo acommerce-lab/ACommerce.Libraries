@@ -2,7 +2,7 @@ using ACommerce.Client.Core.Http;
 
 namespace ACommerce.Client.ProductListings;
 
-public sealed class ProductListingsClient(DynamicHttpClient httpClient)
+public sealed class ProductListingsClient(IApiClient httpClient)
 {
     private const string ServiceName = "Marketplace";
 

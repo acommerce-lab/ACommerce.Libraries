@@ -7,10 +7,10 @@ namespace ACommerce.Client.Categories;
 /// </summary>
 public sealed class CategoriesClient
 {
-	private readonly DynamicHttpClient _httpClient;
+	private readonly IApiClient _httpClient;
 	private const string ServiceName = "Marketplace";
 
-	public CategoriesClient(DynamicHttpClient httpClient)
+	public CategoriesClient(IApiClient httpClient)
 	{
 		_httpClient = httpClient;
 	}

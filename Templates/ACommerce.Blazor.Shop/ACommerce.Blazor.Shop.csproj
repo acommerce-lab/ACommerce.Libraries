@@ -7,6 +7,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<!-- ACommerce Client Core (required for IApiClient and extensions) -->
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
+
 		<!-- ACommerce Client SDKs -->
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Auth\ACommerce.Client.Auth.csproj" />
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Cart\ACommerce.Client.Cart.csproj" />

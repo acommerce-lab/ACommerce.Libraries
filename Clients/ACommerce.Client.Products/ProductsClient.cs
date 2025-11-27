@@ -7,10 +7,10 @@ namespace ACommerce.Client.Products;
 /// </summary>
 public sealed class ProductsClient
 {
-	private readonly DynamicHttpClient _httpClient;
+	private readonly IApiClient _httpClient;
 	private const string ServiceName = "Marketplace"; // أو "Products" إذا كانت خدمة منفصلة
 
-	public ProductsClient(DynamicHttpClient httpClient)
+	public ProductsClient(IApiClient httpClient)
 	{
 		_httpClient = httpClient;
 	}
