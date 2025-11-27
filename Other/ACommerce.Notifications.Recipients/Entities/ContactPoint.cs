@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Notifications.Recipients.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
 
@@ -41,6 +42,7 @@ public class ContactPoint : IBaseEntity
 	/// <summary>
 	/// ??????? ?????? (???: platform ??? DeviceToken)
 	/// </summary>
+	[NotMapped]
 	public Dictionary<string, string> Metadata { get; init; } = new();
 
 	/// <summary>

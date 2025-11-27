@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Orders.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
 
@@ -137,6 +138,7 @@ public class Order : IBaseEntity
 	/// <summary>
 	/// بيانات إضافية
 	/// </summary>
+	[NotMapped]
 	public Dictionary<string, string> Metadata { get; set; } = new();
 }
 
@@ -213,5 +215,6 @@ public class OrderItem : IBaseEntity
 	/// <summary>
 	/// بيانات إضافية
 	/// </summary>
+	[NotMapped]
 	public Dictionary<string, string> Metadata { get; set; } = new();
 }

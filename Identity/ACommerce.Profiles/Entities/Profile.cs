@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Profiles.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
 
@@ -91,5 +92,6 @@ public class Profile : IBaseEntity
 	/// <summary>
 	/// بيانات إضافية مرنة (JSON)
 	/// </summary>
+	[NotMapped]
 	public Dictionary<string, string> Metadata { get; set; } = new();
 }

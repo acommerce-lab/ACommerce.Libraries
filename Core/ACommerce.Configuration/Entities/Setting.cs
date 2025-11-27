@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.SharedKernel.Abstractions.Entities;
 
 namespace ACommerce.Configuration.Entities;
@@ -55,5 +56,6 @@ public class Setting : IBaseEntity
 	/// <summary>
 	/// بيانات إضافية
 	/// </summary>
+	[NotMapped]
 	public Dictionary<string, string> Metadata { get; set; } = new();
 }

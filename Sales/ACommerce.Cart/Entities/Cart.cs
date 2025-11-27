@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.SharedKernel.Abstractions.Entities;
 
 namespace ACommerce.Cart.Entities;
@@ -40,6 +41,7 @@ public class Cart : IBaseEntity
 	/// <summary>
 	/// بيانات إضافية
 	/// </summary>
+	[NotMapped]
 	public Dictionary<string, string> Metadata { get; set; } = new();
 
 	/// <summary>
@@ -85,5 +87,6 @@ public class CartItem : IBaseEntity
 	/// <summary>
 	/// بيانات إضافية
 	/// </summary>
+	[NotMapped]
 	public Dictionary<string, string> Metadata { get; set; } = new();
 }

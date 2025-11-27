@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Vendors.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
 
@@ -121,5 +122,6 @@ public class Vendor : IBaseEntity
 	/// <summary>
 	/// بيانات إضافية
 	/// </summary>
+	[NotMapped]
 	public Dictionary<string, string> Metadata { get; set; } = new();
 }

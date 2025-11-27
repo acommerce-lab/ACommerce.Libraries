@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.SharedKernel.Abstractions.Entities;
 
 namespace ACommerce.Accounting.Core.Entities;
@@ -51,6 +52,7 @@ public class CostCenter : IBaseEntity
 	/// <summary>
 	/// ??????? ??????
 	/// </summary>
+	[NotMapped]
 	public Dictionary<string, string> Metadata { get; set; } = new();
 }
 

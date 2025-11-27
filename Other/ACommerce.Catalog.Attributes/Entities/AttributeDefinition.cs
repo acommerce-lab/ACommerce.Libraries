@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Catalog.Attributes.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
 
@@ -75,6 +76,7 @@ public class AttributeDefinition : IBaseEntity
 	/// <summary>
 	/// معلومات إضافية
 	/// </summary>
+	[NotMapped]
 	public Dictionary<string, string> Metadata { get; set; } = new();
 
 	/// <summary>

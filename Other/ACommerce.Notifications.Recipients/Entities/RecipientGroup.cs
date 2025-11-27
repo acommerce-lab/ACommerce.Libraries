@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.SharedKernel.Abstractions.Entities;
 
 namespace ACommerce.Notifications.Recipients.Entities;
@@ -30,6 +31,7 @@ public class RecipientGroup : IBaseEntity
 	/// <summary>
 	/// ??????? ??????
 	/// </summary>
+	[NotMapped]
 	public Dictionary<string, string> Metadata { get; init; } = new();
 
 	/// <summary>

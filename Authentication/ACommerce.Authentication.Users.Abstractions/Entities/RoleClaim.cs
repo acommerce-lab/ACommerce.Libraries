@@ -1,4 +1,5 @@
 // Entities/RoleClaim.cs
+using System.ComponentModel.DataAnnotations.Schema;
 using SharedKernel;
 using SharedKernel.Abstractions.Entities;
 
@@ -33,6 +34,7 @@ public class RoleClaim : IBaseEntity
 	/// <summary>
 	/// ??????? ??????
 	/// </summary>
+	[NotMapped]
 	public Dictionary<string, string> Metadata { get; init; } = new();
 }
 
