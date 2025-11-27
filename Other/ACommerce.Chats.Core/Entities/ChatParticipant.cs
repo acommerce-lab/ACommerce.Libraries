@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Chats.Abstractions.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
 
@@ -25,6 +26,7 @@ public class ChatParticipant : IBaseEntity
 	public bool IsMuted { get; set; }
 	public bool IsPinned { get; set; }
 
+	[NotMapped]
 	public Dictionary<string, string> Metadata { get; set; } = new();
 }
 

@@ -1,4 +1,6 @@
 // Entities/User.cs
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace ACommerce.Authentication.Users.Abstractions.Entities;
 
 /// <summary>
@@ -94,6 +96,7 @@ public class User : IBaseEntity
 	/// <summary>
 	/// ??????? ??????
 	/// </summary>
+	[NotMapped]
 	public Dictionary<string, string> Metadata { get; init; } = new();
 }
 

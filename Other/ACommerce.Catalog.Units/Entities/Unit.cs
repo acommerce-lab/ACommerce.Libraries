@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.SharedKernel.Abstractions.Entities;
 
 namespace ACommerce.Catalog.Units.Entities;
@@ -82,6 +83,7 @@ public class Unit : IBaseEntity
 	/// <summary>
 	/// معلومات إضافية
 	/// </summary>
+	[NotMapped]
 	public Dictionary<string, string> Metadata { get; set; } = new();
 
 	/// <summary>

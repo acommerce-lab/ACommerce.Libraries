@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Catalog.Listings.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
 
@@ -117,5 +118,6 @@ public class ProductListing : IBaseEntity
 	/// <summary>
 	/// بيانات إضافية
 	/// </summary>
+	[NotMapped]
 	public Dictionary<string, string> Metadata { get; set; } = new();
 }

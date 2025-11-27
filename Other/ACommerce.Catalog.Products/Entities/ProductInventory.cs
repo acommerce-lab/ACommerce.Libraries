@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Catalog.Products.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
 
@@ -72,6 +73,7 @@ public class ProductInventory : IBaseEntity
 	/// <summary>
 	/// ??????? ??????
 	/// </summary>
+	[NotMapped]
 	public Dictionary<string, string> Metadata { get; set; } = new();
 }
 
