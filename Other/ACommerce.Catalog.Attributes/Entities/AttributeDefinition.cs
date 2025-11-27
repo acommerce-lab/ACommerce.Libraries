@@ -1,5 +1,6 @@
 using ACommerce.Catalog.Attributes.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Catalog.Attributes.Entities;
 
@@ -72,10 +73,10 @@ public class AttributeDefinition : IBaseEntity
 	/// </summary>
 	public string? DefaultValue { get; set; }
 
-	/// <summary>
-	/// معلومات إضافية
-	/// </summary>
-	public Dictionary<string, string> Metadata { get; set; } = new();
+    /// <summary>
+    /// معلومات إضافية
+    /// </summary>
+    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
 
 	/// <summary>
 	/// القيم الممكنة لهذه الخاصية (للأنواع Select)

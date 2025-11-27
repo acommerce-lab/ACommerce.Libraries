@@ -1,4 +1,5 @@
 using ACommerce.SharedKernel.Abstractions.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 
 namespace ACommerce.Catalog.Currencies.Entities;
@@ -65,7 +66,7 @@ public class ExchangeRate : IBaseEntity
     /// <summary>
     /// معلومات إضافية
     /// </summary>
-    public Dictionary<string, string> Metadata { get; set; } = [];
+    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = [];
     public decimal InverseRate { get; private set; }
 
     public void CalculateInverseRate()

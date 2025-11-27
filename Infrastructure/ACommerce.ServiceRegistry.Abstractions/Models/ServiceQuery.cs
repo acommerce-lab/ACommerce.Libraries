@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace ACommerce.ServiceRegistry.Abstractions.Models;
 
 /// <summary>
@@ -25,8 +27,8 @@ public sealed class ServiceQuery
 	/// </summary>
 	public bool OnlyHealthy { get; set; } = true;
 
-	/// <summary>
-	/// Tags للتصفية (اختياري)
-	/// </summary>
-	public Dictionary<string, string>? Tags { get; set; }
+    /// <summary>
+    /// Tags للتصفية (اختياري)
+    /// </summary>
+    [NotMapped] public Dictionary<string, string>? Tags { get; set; }
 }

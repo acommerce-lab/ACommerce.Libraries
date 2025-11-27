@@ -1,5 +1,6 @@
 using ACommerce.Chats.Abstractions.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Chats.Core.Entities;
 
@@ -28,9 +29,9 @@ public class Chat : IBaseEntity
 	/// </summary>
 	public List<Message> Messages { get; set; } = new();
 
-	/// <summary>
-	/// ??????? ??????
-	/// </summary>
-	public Dictionary<string, string> Metadata { get; set; } = new();
+    /// <summary>
+    /// ??????? ??????
+    /// </summary>
+    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
 }
 

@@ -1,4 +1,5 @@
 using ACommerce.SharedKernel.Abstractions.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Configuration.Entities;
 
@@ -52,8 +53,8 @@ public class Setting : IBaseEntity
 	/// </summary>
 	public bool IsUserEditable { get; set; } = true;
 
-	/// <summary>
-	/// بيانات إضافية
-	/// </summary>
-	public Dictionary<string, string> Metadata { get; set; } = new();
+    /// <summary>
+    /// بيانات إضافية
+    /// </summary>
+    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
 }

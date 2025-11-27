@@ -1,4 +1,5 @@
 using ACommerce.SharedKernel.Abstractions.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Catalog.Units.Entities;
 
@@ -39,10 +40,10 @@ public class MeasurementSystem : IBaseEntity
 	/// </summary>
 	public List<string> Countries { get; set; } = new();
 
-	/// <summary>
-	/// معلومات إضافية
-	/// </summary>
-	public Dictionary<string, string> Metadata { get; set; } = new();
+    /// <summary>
+    /// معلومات إضافية
+    /// </summary>
+    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
 
 	/// <summary>
 	/// الوحدات في هذا النظام

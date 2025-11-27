@@ -1,4 +1,5 @@
 using ACommerce.SharedKernel.Abstractions.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Reviews.Entities;
 
@@ -85,5 +86,5 @@ public class Review : IBaseEntity
 	/// <summary>
 	/// بيانات إضافية
 	/// </summary>
-	public Dictionary<string, string> Metadata { get; set; } = new();
+	[NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
 }

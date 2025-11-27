@@ -1,4 +1,5 @@
 using ACommerce.SharedKernel.Abstractions.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Catalog.Products.Entities;
 
@@ -58,14 +59,14 @@ public class ProductCategory : IBaseEntity
 	/// </summary>
 	public bool IsActive { get; set; } = true;
 
-	/// <summary>
-	/// ??????? ??????
-	/// </summary>
-	public Dictionary<string, string> Metadata { get; set; } = new();
+    /// <summary>
+    /// ??????? ??????
+    /// </summary>
+    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
 
-	/// <summary>
-	/// ???????? ?? ??? ?????
-	/// </summary>
-	public List<ProductCategoryMapping> Products { get; set; } = new();
+    /// <summary>
+    /// ???????? ?? ??? ?????
+    /// </summary>
+    public List<ProductCategoryMapping> Products { get; set; } = new();
 }
 

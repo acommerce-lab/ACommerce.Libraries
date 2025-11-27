@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace ACommerce.ServiceRegistry.Abstractions.Models;
 
 /// <summary>
@@ -30,10 +32,10 @@ public sealed class ServiceRegistration
 	/// </summary>
 	public int Weight { get; set; } = 100;
 
-	/// <summary>
-	/// Tags إضافية (اختياري)
-	/// </summary>
-	public Dictionary<string, string>? Tags { get; set; }
+    /// <summary>
+    /// Tags إضافية (اختياري)
+    /// </summary>
+    [NotMapped] public Dictionary<string, string>? Tags { get; set; }
 
 	/// <summary>
 	/// هل تريد تفعيل Health Checks؟ (افتراضياً: نعم)

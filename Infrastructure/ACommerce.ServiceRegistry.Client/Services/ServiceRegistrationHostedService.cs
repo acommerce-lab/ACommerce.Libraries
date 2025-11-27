@@ -2,6 +2,7 @@ using ACommerce.ServiceRegistry.Abstractions.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.ServiceRegistry.Client.Services;
 
@@ -109,7 +110,7 @@ public class ServiceRegistrationOptions
 	public string BaseUrl { get; set; } = string.Empty;
 	public string Environment { get; set; } = "Development";
 	public int Weight { get; set; } = 100;
-	public Dictionary<string, string>? Tags { get; set; }
+    [NotMapped] public Dictionary<string, string>? Tags { get; set; }
 	public bool EnableHealthCheck { get; set; } = true;
 	public string HealthCheckPath { get; set; } = "/health";
 	public int HealthCheckIntervalSeconds { get; set; } = 30;

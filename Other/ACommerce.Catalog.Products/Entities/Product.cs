@@ -1,6 +1,7 @@
 using ACommerce.Catalog.Products.Enums;
 using ACommerce.Catalog.Units.Entities;
 using ACommerce.SharedKernel.Abstractions.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Catalog.Products.Entities;
 
@@ -126,10 +127,10 @@ public class Product : IBaseEntity
 	/// </summary>
 	public List<string> Tags { get; set; } = new();
 
-	/// <summary>
-	/// ??????? ??????
-	/// </summary>
-	public Dictionary<string, string> Metadata { get; set; } = new();
+    /// <summary>
+    /// ??????? ??????
+    /// </summary>
+    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
 
 	// ====================================================================================
 	// ????????

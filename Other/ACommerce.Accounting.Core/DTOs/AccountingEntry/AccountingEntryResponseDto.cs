@@ -1,5 +1,6 @@
 using ACommerce.Accounting.Core.DTOs.EntrySide;
 using ACommerce.Accounting.Core.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Accounting.Core.DTOs.AccountingEntry;
 
@@ -24,7 +25,7 @@ public class AccountingEntryResponseDto
 	public decimal TotalDebitAmount { get; set; }
 	public decimal TotalCreditAmount { get; set; }
 	public List<EntrySideResponseDto> Sides { get; set; } = new();
-	public Dictionary<string, string> Metadata { get; set; } = new();
+    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
 	public DateTime CreatedAt { get; set; }
 	public DateTime? UpdatedAt { get; set; }
 }

@@ -1,4 +1,5 @@
 using ACommerce.SharedKernel.Abstractions.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Accounting.Core.Entities;
 
@@ -48,9 +49,9 @@ public class CostCenter : IBaseEntity
 	/// </summary>
 	public bool IsActive { get; set; } = true;
 
-	/// <summary>
-	/// ??????? ??????
-	/// </summary>
-	public Dictionary<string, string> Metadata { get; set; } = new();
+    /// <summary>
+    /// ??????? ??????
+    /// </summary>
+    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
 }
 

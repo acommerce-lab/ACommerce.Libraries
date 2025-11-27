@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace ACommerce.ServiceRegistry.Abstractions.Models;
 
 /// <summary>
@@ -35,10 +37,10 @@ public sealed class ServiceEndpoint
 	/// </summary>
 	public int Weight { get; set; } = 100;
 
-	/// <summary>
-	/// Tags إضافية للتصنيف
-	/// </summary>
-	public Dictionary<string, string> Tags { get; set; } = new();
+    /// <summary>
+    /// Tags إضافية للتصنيف
+    /// </summary>
+    [NotMapped] public Dictionary<string, string> Tags { get; set; } = new();
 
 	/// <summary>
 	/// معلومات الصحة الحالية

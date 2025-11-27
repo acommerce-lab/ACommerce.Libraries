@@ -1,5 +1,6 @@
-using ACommerce.Transactions.Core.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
+using ACommerce.Transactions.Core.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Transactions.Core.Entities;
 
@@ -76,10 +77,10 @@ public class DocumentOperation : IBaseEntity
 	/// </summary>
 	public string? ColorHex { get; set; }
 
-	/// <summary>
-	/// ??????? ??????
-	/// </summary>
-	public Dictionary<string, string> Metadata { get; set; } = new();
+    /// <summary>
+    /// ??????? ??????
+    /// </summary>
+    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
 
 	/// <summary>
 	/// ????????? ???????? ???? ???????
