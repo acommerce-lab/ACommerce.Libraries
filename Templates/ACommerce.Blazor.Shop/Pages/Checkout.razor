@@ -1,4 +1,6 @@
 @page "/checkout"
+@using ACommerce.Client.Orders
+@using ACommerce.Client.Payments
 @inject CartStateService CartState
 @inject OrdersClient OrdersClient
 @inject PaymentsClient PaymentsClient
@@ -361,20 +363,6 @@
 		public decimal Price { get; set; }
 	}
 
-	private class CreateOrderRequest
-	{
-		public Guid? ShippingAddressId { get; set; }
-		public Guid ShippingMethodId { get; set; }
-		public string PaymentMethod { get; set; } = string.Empty;
-	}
-
-	private class CreatePaymentRequest
-	{
-		public Guid OrderId { get; set; }
-		public decimal Amount { get; set; }
-		public string Currency { get; set; } = string.Empty;
-		public string PaymentMethod { get; set; } = string.Empty;
-	}
 }
 
 <style>

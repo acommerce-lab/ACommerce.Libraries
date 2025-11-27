@@ -1,4 +1,5 @@
 @page "/chats"
+@using ACommerce.Client.Chats
 @inject ChatsClient ChatsClient
 @inject RealtimeClient RealtimeClient
 @inject NavigationManager Navigation
@@ -95,7 +96,7 @@
 </SfDialog>
 
 @code {
-	private List<ConversationDto>? conversations;
+	private List<ConversationResponse>? conversations;
 	private bool isLoading = true;
 	private bool showNewChatDialog = false;
 	private string newChatRecipient = "";
@@ -209,28 +210,12 @@
 		await RealtimeClient.DisconnectAsync();
 	}
 
-	// Models
-	private class ConversationDto
-	{
-		public Guid Id { get; set; }
-		public string OtherPartyName { get; set; } = string.Empty;
-		public string LastMessageText { get; set; } = string.Empty;
-		public DateTime LastMessageAt { get; set; }
-		public int UnreadCount { get; set; }
-		public bool HasUnread => UnreadCount > 0;
-	}
-
+	// Local SignalR DTO (not from SDK)
 	private class MessageReceivedDto
 	{
 		public Guid ConversationId { get; set; }
 		public string Text { get; set; } = string.Empty;
 		public Guid SenderId { get; set; }
-	}
-
-	private class CreateConversationRequest
-	{
-		public string RecipientIdentifier { get; set; } = string.Empty;
-		public string InitialMessage { get; set; } = string.Empty;
 	}
 }
 

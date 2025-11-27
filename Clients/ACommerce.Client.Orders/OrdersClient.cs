@@ -63,6 +63,16 @@ public sealed class OrdersClient
 	}
 
 	/// <summary>
+	/// إنشاء طلب جديد (اسم بديل)
+	/// </summary>
+	public Task<OrderDto?> CreateOrderAsync(
+		CreateOrderRequest request,
+		CancellationToken cancellationToken = default)
+	{
+		return CreateAsync(request, cancellationToken);
+	}
+
+	/// <summary>
 	/// تحديث حالة طلب
 	/// </summary>
 	public async Task<OrderDto?> UpdateStatusAsync(
@@ -119,8 +129,11 @@ public sealed class OrderItemDto
 
 public sealed class CreateOrderRequest
 {
-	public List<OrderItemRequest> Items { get; set; } = new();
-	public string ShippingAddress { get; set; } = string.Empty;
+	public List<OrderItemRequest>? Items { get; set; }
+	public string? ShippingAddress { get; set; }
+	public Guid? ShippingAddressId { get; set; }
+	public Guid? ShippingMethodId { get; set; }
+	public string? PaymentMethod { get; set; }
 }
 
 public sealed class OrderItemRequest
