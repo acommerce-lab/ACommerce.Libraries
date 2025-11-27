@@ -27,6 +27,17 @@ public sealed class OrdersClient
 	}
 
 	/// <summary>
+	/// الحصول على طلباتي
+	/// </summary>
+	public async Task<List<OrderDto>?> GetMyOrdersAsync(CancellationToken cancellationToken = default)
+	{
+		return await _httpClient.GetAsync<List<OrderDto>>(
+			ServiceName,
+			"/api/orders/me",
+			cancellationToken);
+	}
+
+	/// <summary>
 	/// الحصول على طلب محدد
 	/// </summary>
 	public async Task<OrderDto?> GetByIdAsync(string id, CancellationToken cancellationToken = default)

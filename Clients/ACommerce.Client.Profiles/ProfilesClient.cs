@@ -31,6 +31,14 @@ public sealed class ProfilesClient
 	{
 		return await _httpClient.PutAsync<UpdateProfileRequest, ProfileDto>(ServiceName, $"/api/profiles/{id}", request, cancellationToken);
 	}
+
+	/// <summary>
+	/// تحديث بروفايلي
+	/// </summary>
+	public async Task<ProfileDto?> UpdateMyProfileAsync(UpdateProfileRequest request, CancellationToken cancellationToken = default)
+	{
+		return await _httpClient.PutAsync<UpdateProfileRequest, ProfileDto>(ServiceName, "/api/profiles/me", request, cancellationToken);
+	}
 }
 
 /// <summary>

@@ -1,6 +1,6 @@
 ﻿using ACommerce.Messaging.Abstractions.Contracts;
 using ACommerce.Messaging.Abstractions.Models;
-using ACommerce.Profiles.Core.Events;
+using ACommerce.Profiles.Events;
 using Microsoft.Extensions.Logging;
 
 namespace ACommerce.Notifications.Messaging.Handlers;

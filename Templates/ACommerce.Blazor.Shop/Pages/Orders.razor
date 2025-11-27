@@ -20,7 +20,7 @@
 			<div class="empty-icon">📋</div>
 			<h3>لا توجد طلبات</h3>
 			<p>ابدأ التسوق واطلب منتجاتك المفضلة</p>
-			<SfButton IsPrimary="true" OnClick="() => Navigation.NavigateTo(\"/products\")">
+			<SfButton IsPrimary="true" OnClick="@(() => Navigation.NavigateTo("/products"))">
 				تصفح المنتجات
 			</SfButton>
 		</div>
@@ -31,7 +31,7 @@
 			<TabItems>
 				<TabItem>
 					<ChildContent>
-						<TabHeader Text="@($\"الكل ({orders.Count})\")" />
+						<TabHeader Text="@($"الكل ({orders.Count})")" />
 					</ChildContent>
 					<ContentTemplate>
 						<OrdersList Items="@orders" OnViewDetails="ViewOrderDetails" />
@@ -40,7 +40,7 @@
 
 				<TabItem>
 					<ChildContent>
-						<TabHeader Text="@($\"قيد المعالجة ({pendingOrders.Count})\")" />
+						<TabHeader Text="@($"قيد المعالجة ({pendingOrders.Count})")" />
 					</ChildContent>
 					<ContentTemplate>
 						<OrdersList Items="@pendingOrders" OnViewDetails="ViewOrderDetails" />
@@ -49,7 +49,7 @@
 
 				<TabItem>
 					<ChildContent>
-						<TabHeader Text="@($\"قيد الشحن ({shippingOrders.Count})\")" />
+						<TabHeader Text="@($"قيد الشحن ({shippingOrders.Count})")" />
 					</ChildContent>
 					<ContentTemplate>
 						<OrdersList Items="@shippingOrders" OnViewDetails="ViewOrderDetails" />
@@ -58,7 +58,7 @@
 
 				<TabItem>
 					<ChildContent>
-						<TabHeader Text="@($\"مكتملة ({completedOrders.Count})\")" />
+						<TabHeader Text="@($"مكتملة ({completedOrders.Count})")" />
 					</ChildContent>
 					<ContentTemplate>
 						<OrdersList Items="@completedOrders" OnViewDetails="ViewOrderDetails" />
