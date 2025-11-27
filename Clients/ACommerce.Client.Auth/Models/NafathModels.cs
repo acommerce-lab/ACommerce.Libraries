@@ -27,6 +27,7 @@ public sealed class NafathAuthResponse
 	public string? RandomNumber { get; set; }
 	public int? ExpiresInSeconds { get; set; }
 	public string? Message { get; set; }
+	public string? AuthUrl { get; set; }
 }
 
 /// <summary>
