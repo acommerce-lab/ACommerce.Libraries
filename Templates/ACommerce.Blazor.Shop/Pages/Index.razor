@@ -18,7 +18,7 @@
 						<div class="hero-content">
 							<h1>مرحباً بك في متجرنا</h1>
 							<p>أفضل المنتجات من آلاف التجار</p>
-							<SfButton CssClass="hero-btn" OnClick="() => Navigation.NavigateTo(\"/products\")">
+							<SfButton CssClass="hero-btn" OnClick="@(() => Navigation.NavigateTo("/products"))">
 								تصفح المنتجات
 							</SfButton>
 						</div>
@@ -29,7 +29,7 @@
 						<div class="hero-content">
 							<h1>عروض حصرية</h1>
 							<p>خصومات تصل إلى 70%</p>
-							<SfButton CssClass="hero-btn" OnClick="() => Navigation.NavigateTo(\"/products?filter=sale\")">
+							<SfButton CssClass="hero-btn" OnClick="@(() => Navigation.NavigateTo("/products?filter=sale"))">
 								تسوق الآن
 							</SfButton>
 						</div>
@@ -40,7 +40,7 @@
 						<div class="hero-content">
 							<h1>شحن مجاني</h1>
 							<p>على جميع الطلبات فوق 200 ريال</p>
-							<SfButton CssClass="hero-btn" OnClick="() => Navigation.NavigateTo(\"/products\")">
+							<SfButton CssClass="hero-btn" OnClick="@(() => Navigation.NavigateTo("/products"))">
 								ابدأ التسوق
 							</SfButton>
 						</div>
@@ -62,7 +62,7 @@
 			{
 				@foreach (var category in categories.Take(8))
 				{
-					<SfCard CssClass="category-card" OnClick="() => Navigation.NavigateTo($\"/products?category={category.Id}\")">
+					<SfCard CssClass="category-card" OnClick="@(() => Navigation.NavigateTo($"/products?category={category.Id}"))">
 						<CardContent>
 							<div class="category-icon">@GetCategoryIcon(category.Name)</div>
 							<h4>@category.Name</h4>
@@ -78,7 +78,7 @@
 	<section class="featured-section">
 		<div class="section-header">
 			<h2>منتجات مميزة</h2>
-			<SfButton OnClick="() => Navigation.NavigateTo(\"/products\")">
+			<SfButton OnClick="@(() => Navigation.NavigateTo("/products"))">
 				عرض الكل
 			</SfButton>
 		</div>
@@ -104,7 +104,7 @@
 	<section class="new-arrivals-section">
 		<div class="section-header">
 			<h2>وصل حديثاً</h2>
-			<SfButton OnClick="() => Navigation.NavigateTo(\"/products?sort=newest\")">
+			<SfButton OnClick="@(() => Navigation.NavigateTo("/products?sort=newest"))">
 				عرض الكل
 			</SfButton>
 		</div>
@@ -130,7 +130,7 @@
 	<section class="bestsellers-section">
 		<div class="section-header">
 			<h2>الأكثر مبيعاً</h2>
-			<SfButton OnClick="() => Navigation.NavigateTo(\"/products?sort=bestsellers\")">
+			<SfButton OnClick="@(() => Navigation.NavigateTo("/products?sort=bestsellers"))">
 				عرض الكل
 			</SfButton>
 		</div>

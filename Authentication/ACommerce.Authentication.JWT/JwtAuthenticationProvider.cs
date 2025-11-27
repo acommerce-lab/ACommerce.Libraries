@@ -207,5 +207,3 @@ public class JwtOptions
 
 	public TimeSpan AccessTokenLifetime { get; set; } = TimeSpan.FromHours(1);
 }
-
-}

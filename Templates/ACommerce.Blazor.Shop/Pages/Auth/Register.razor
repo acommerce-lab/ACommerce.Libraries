@@ -51,7 +51,7 @@
 					<SfButton Type="Submit" IsPrimary="true" Disabled="@isLoading">
 						@if (isLoading) { <SfSpinner /> } else { <span>إنشاء الحساب</span> }
 					</SfButton>
-					<SfButton OnClick="() => Navigation.NavigateTo(\"/login\")">
+					<SfButton OnClick="@(() => Navigation.NavigateTo("/login"))">
 						لديك حساب؟ تسجيل الدخول
 					</SfButton>
 				</div>
