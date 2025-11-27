@@ -32,7 +32,7 @@
 				<TabItems>
 					<TabItem>
 						<ChildContent>
-							<TabHeader Text="الكل (@totalCount)" />
+							<TabHeader Text="@($"الكل ({totalCount})")" />
 						</ChildContent>
 						<ContentTemplate>
 							<div class="notifications-list">
@@ -54,7 +54,7 @@
 
 					<TabItem>
 						<ChildContent>
-							<TabHeader Text="غير المقروءة (@unreadCount)" />
+							<TabHeader Text="@($"غير المقروءة ({unreadCount})")" />
 						</ChildContent>
 						<ContentTemplate>
 							<div class="notifications-list">
@@ -155,10 +155,10 @@
 </SfDialog>
 
 @code {
-	private List<NotificationDto>? allNotifications;
-	private List<NotificationDto>? unreadNotifications => allNotifications?.Where(n => !n.IsRead).ToList();
-	private List<NotificationDto>? orderNotifications => allNotifications?.Where(n => n.Type == "Order").ToList();
-	private List<NotificationDto>? messageNotifications => allNotifications?.Where(n => n.Type == "Message").ToList();
+	private List<Components.NotificationsList.NotificationDto>? allNotifications;
+	private List<Components.NotificationsList.NotificationDto>? unreadNotifications => allNotifications?.Where(n => !n.IsRead).ToList();
+	private List<Components.NotificationsList.NotificationDto>? orderNotifications => allNotifications?.Where(n => n.Type == "Order").ToList();
+	private List<Components.NotificationsList.NotificationDto>? messageNotifications => allNotifications?.Where(n => n.Type == "Message").ToList();
 
 	private bool isLoading = true;
 	private int totalCount => allNotifications?.Count ?? 0;
@@ -183,7 +183,7 @@
 			// TODO: Map from ACommerce.Client.Notifications.NotificationResponse to local NotificationDto
 			// var sdkNotifications = await NotificationsClient.GetMyNotificationsAsync();
 			// For now using mock data
-			allNotifications = new List<NotificationDto>
+			allNotifications = new List<Components.NotificationsList.NotificationDto>
 			{
 				new() { Id = Guid.NewGuid(), Type = "Order", Title = "طلب جديد", Message = "تم إنشاء طلبك بنجاح", IsRead = false, CreatedAt = DateTime.Now.AddHours(-1) },
 				new() { Id = Guid.NewGuid(), Type = "Message", Title = "رسالة جديدة", Message = "لديك رسالة جديدة من البائع", IsRead = true, CreatedAt = DateTime.Now.AddDays(-1) },
@@ -208,7 +208,7 @@
 			await RealtimeClient.ConnectAsync("Notifications", "/hubs/notifications");
 
 			// Listen for new notifications
-			RealtimeClient.On<NotificationDto>("NewNotification", async (notification) =>
+			RealtimeClient.On<Components.NotificationsList.NotificationDto>("NewNotification", async (notification) =>
 			{
 				allNotifications ??= new();
 				allNotifications.Insert(0, notification);
@@ -345,18 +345,7 @@
 		await RealtimeClient.DisconnectAsync();
 	}
 
-	// Models
-	public class NotificationDto
-	{
-		public Guid Id { get; set; }
-		public string Type { get; set; } = string.Empty;
-		public string Title { get; set; } = string.Empty;
-		public string Message { get; set; } = string.Empty;
-		public string? ActionUrl { get; set; }
-		public bool IsRead { get; set; }
-		public DateTime CreatedAt { get; set; }
-	}
-
+	// PushSettings class for local state
 	private class PushSettings
 	{
 		public bool EnablePush { get; set; }

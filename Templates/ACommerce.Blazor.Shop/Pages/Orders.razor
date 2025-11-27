@@ -70,10 +70,10 @@
 </div>
 
 @code {
-	private List<OrderDto>? orders;
-	private List<OrderDto> pendingOrders => orders?.Where(o => o.Status == "Pending" || o.Status == "Processing").ToList() ?? new();
-	private List<OrderDto> shippingOrders => orders?.Where(o => o.Status == "Shipped" || o.Status == "InTransit").ToList() ?? new();
-	private List<OrderDto> completedOrders => orders?.Where(o => o.Status == "Delivered" || o.Status == "Completed").ToList() ?? new();
+	private List<Components.OrdersList.OrderDto>? orders;
+	private List<Components.OrdersList.OrderDto> pendingOrders => orders?.Where(o => o.Status == "Pending" || o.Status == "Processing").ToList() ?? new();
+	private List<Components.OrdersList.OrderDto> shippingOrders => orders?.Where(o => o.Status == "Shipped" || o.Status == "InTransit").ToList() ?? new();
+	private List<Components.OrdersList.OrderDto> completedOrders => orders?.Where(o => o.Status == "Delivered" || o.Status == "Completed").ToList() ?? new();
 
 	private bool isLoading = true;
 
@@ -90,7 +90,7 @@
 			// TODO: Map from ACommerce.Client.Orders.OrderDto to local OrderDto
 			// var sdkOrders = await OrdersClient.GetMyOrdersAsync();
 			// For now using mock data
-			orders = new List<OrderDto>
+			orders = new List<Components.OrdersList.OrderDto>
 			{
 				new() { Id = Guid.NewGuid(), OrderNumber = "ORD-001", Status = "Pending", Total = 150.00m, CreatedAt = DateTime.Now.AddDays(-1), ItemsCount = 3 },
 				new() { Id = Guid.NewGuid(), OrderNumber = "ORD-002", Status = "Shipped", Total = 89.99m, CreatedAt = DateTime.Now.AddDays(-5), ItemsCount = 1 },
@@ -111,16 +111,6 @@
 	private void ViewOrderDetails(Guid orderId)
 	{
 		Navigation.NavigateTo($"/orders/{orderId}");
-	}
-
-	private class OrderDto
-	{
-		public Guid Id { get; set; }
-		public string OrderNumber { get; set; } = string.Empty;
-		public string Status { get; set; } = string.Empty;
-		public decimal Total { get; set; }
-		public DateTime CreatedAt { get; set; }
-		public int ItemsCount { get; set; }
 	}
 }
 
