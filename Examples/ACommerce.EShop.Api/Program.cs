@@ -9,7 +9,9 @@ using ACommerce.SharedKernel.Abstractions.Repositories;
 using ACommerce.SharedKernel.Infrastructure.EFCore.Repositories;
 using ACommerce.SharedKernel.Infrastructure.EFCore.Factories;
 using ACommerce.Realtime.SignalR.Hubs;
+using ACommerce.Realtime.SignalR.Extensions;
 using ACommerce.Chats.Core.Hubs;
+using ACommerce.Chats.Core.Extensions;
 
 // ════════════════════════════════════════════════════════════════
 // 🎯 ACommerce E-Shop API - Complete E-Commerce Backend
@@ -82,7 +84,12 @@ try
     // ════════════════════════════════════════════════════════════════
     // 📡 SignalR for Real-time Communication
     // ════════════════════════════════════════════════════════════════
-    builder.Services.AddSignalR();
+    builder.Services.AddACommerceSignalR<ChatHub, IChatClient>();
+
+    // ════════════════════════════════════════════════════════════════
+    // 💬 Chat Services
+    // ════════════════════════════════════════════════════════════════
+    builder.Services.AddChatsCore();
 
     // ════════════════════════════════════════════════════════════════
     // 📝 Swagger Documentation
