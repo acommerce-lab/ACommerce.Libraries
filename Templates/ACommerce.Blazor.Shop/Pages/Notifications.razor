@@ -180,7 +180,16 @@
 		isLoading = true;
 		try
 		{
-			allNotifications = await NotificationsClient.GetMyNotificationsAsync();
+			// TODO: Map from ACommerce.Client.Notifications.NotificationResponse to local NotificationDto
+			// var sdkNotifications = await NotificationsClient.GetMyNotificationsAsync();
+			// For now using mock data
+			allNotifications = new List<NotificationDto>
+			{
+				new() { Id = Guid.NewGuid(), Type = "Order", Title = "طلب جديد", Message = "تم إنشاء طلبك بنجاح", IsRead = false, CreatedAt = DateTime.Now.AddHours(-1) },
+				new() { Id = Guid.NewGuid(), Type = "Message", Title = "رسالة جديدة", Message = "لديك رسالة جديدة من البائع", IsRead = true, CreatedAt = DateTime.Now.AddDays(-1) },
+				new() { Id = Guid.NewGuid(), Type = "Order", Title = "تم الشحن", Message = "طلبك في الطريق إليك", IsRead = false, CreatedAt = DateTime.Now.AddDays(-2) }
+			};
+			await Task.Delay(100); // Simulate load
 		}
 		catch (Exception ex)
 		{
@@ -219,12 +228,19 @@
 	{
 		try
 		{
-			var settings = await NotificationsClient.GetPushSettingsAsync();
-			if (settings != null)
+			// TODO: Map from ACommerce.Client.Notifications.PushSettings to local PushSettings
+			// var sdkSettings = await NotificationsClient.GetPushSettingsAsync();
+			// For now using mock data
+			pushSettings = new PushSettings
 			{
-				pushSettings = settings;
-				isPushSubscribed = settings.EnablePush && !string.IsNullOrEmpty(settings.FirebaseToken);
-			}
+				EnablePush = false,
+				OrderUpdates = true,
+				ChatMessages = true,
+				Promotions = false,
+				SystemAlerts = true
+			};
+			isPushSubscribed = pushSettings.EnablePush && !string.IsNullOrEmpty(pushSettings.FirebaseToken);
+			await Task.Delay(50); // Simulate load
 		}
 		catch (Exception ex)
 		{
@@ -310,7 +326,10 @@
 				// pushSettings.FirebaseToken = token;
 			}
 
-			await NotificationsClient.UpdatePushSettingsAsync(pushSettings);
+			// TODO: Map to ACommerce.Client.Notifications.PushSettings and call SDK
+			// await NotificationsClient.UpdatePushSettingsAsync(new Client.Notifications.PushSettings { ... });
+			// For now simulating save
+			await Task.Delay(300);
 			isPushSubscribed = pushSettings.EnablePush;
 			showPushSettings = false;
 			Notification.ShowSuccess("تم حفظ الإعدادات");

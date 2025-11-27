@@ -66,4 +66,32 @@ public sealed class AuthClient
 			new { },
 			cancellationToken);
 	}
+
+	/// <summary>
+	/// تفعيل/إلغاء المصادقة الثنائية
+	/// </summary>
+	public async Task<TwoFactorResponse?> ToggleTwoFactorAsync(
+		bool enable,
+		CancellationToken cancellationToken = default)
+	{
+		return await _httpClient.PostAsync<ToggleTwoFactorRequest, TwoFactorResponse>(
+			ServiceName,
+			"/api/auth/two-factor",
+			new ToggleTwoFactorRequest { Enable = enable },
+			cancellationToken);
+	}
+
+	/// <summary>
+	/// التحقق من كود المصادقة الثنائية
+	/// </summary>
+	public async Task<LoginResponse?> VerifyTwoFactorAsync(
+		string code,
+		CancellationToken cancellationToken = default)
+	{
+		return await _httpClient.PostAsync<VerifyTwoFactorRequest, LoginResponse>(
+			ServiceName,
+			"/api/auth/two-factor/verify",
+			new VerifyTwoFactorRequest { Code = code },
+			cancellationToken);
+	}
 }

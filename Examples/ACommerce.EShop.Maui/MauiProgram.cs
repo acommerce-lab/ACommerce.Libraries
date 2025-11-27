@@ -34,62 +34,10 @@ public static class MauiProgram
             client.Timeout = TimeSpan.FromSeconds(30);
         });
 
-        // Register Client SDKs
-        builder.Services.AddScoped(sp =>
-        {
-            var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
-            var httpClient = httpClientFactory.CreateClient("EShopAPI");
-            return new ACommerce.Client.Profiles.ProfilesClient(httpClient);
-        });
-
-        builder.Services.AddScoped(sp =>
-        {
-            var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
-            var httpClient = httpClientFactory.CreateClient("EShopAPI");
-            return new ACommerce.Client.Catalog.Products.ProductsClient(httpClient);
-        });
-
-        builder.Services.AddScoped(sp =>
-        {
-            var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
-            var httpClient = httpClientFactory.CreateClient("EShopAPI");
-            return new ACommerce.Client.Catalog.Attributes.AttributesClient(httpClient);
-        });
-
-        builder.Services.AddScoped(sp =>
-        {
-            var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
-            var httpClient = httpClientFactory.CreateClient("EShopAPI");
-            return new ACommerce.Client.Catalog.Units.UnitsClient(httpClient);
-        });
-
-        builder.Services.AddScoped(sp =>
-        {
-            var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
-            var httpClient = httpClientFactory.CreateClient("EShopAPI");
-            return new ACommerce.Client.Catalog.Currencies.CurrenciesClient(httpClient);
-        });
-
-        builder.Services.AddScoped(sp =>
-        {
-            var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
-            var httpClient = httpClientFactory.CreateClient("EShopAPI");
-            return new ACommerce.Client.Carts.CartsClient(httpClient);
-        });
-
-        builder.Services.AddScoped(sp =>
-        {
-            var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
-            var httpClient = httpClientFactory.CreateClient("EShopAPI");
-            return new ACommerce.Client.Orders.OrdersClient(httpClient);
-        });
-
-        builder.Services.AddScoped(sp =>
-        {
-            var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
-            var httpClient = httpClientFactory.CreateClient("EShopAPI");
-            return new ACommerce.Client.Vendors.VendorsClient(httpClient);
-        });
+        // TODO: Client SDK integration requires DynamicHttpClient and ServiceRegistry setup
+        // For now, MAUI app should use direct HTTP calls or implement simplified clients
+        // The ACommerce.Client.* SDKs are designed for microservices with service discovery
+        // See ACommerce.Client.Core.Extensions.AddACommerceClient() for proper setup
 
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();

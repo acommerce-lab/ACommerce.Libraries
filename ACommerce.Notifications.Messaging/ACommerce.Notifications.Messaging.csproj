@@ -18,6 +18,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\ACommerce.Messaging.Abstractions\ACommerce.Messaging.Abstractions.csproj" />
 		<ProjectReference Include="..\Core\ACommerce.Notifications.Abstractions\ACommerce.Notifications.Abstractions.csproj" />
+		<ProjectReference Include="..\Identity\ACommerce.Profiles\ACommerce.Profiles.csproj" />
 	</ItemGroup>
 
 </Project>
