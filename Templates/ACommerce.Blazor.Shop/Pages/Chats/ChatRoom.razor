@@ -176,7 +176,7 @@
 			await RealtimeClient.ConnectAsync("Chats", "/hubs/chat");
 
 			// Join conversation room
-			await RealtimeClient.InvokeAsync("JoinConversation", ConversationId.ToString());
+			await RealtimeClient.SendAsync("JoinConversation", ConversationId.ToString());
 
 			// Listen for new messages
 			RealtimeClient.On<MessageResponse>("NewMessage", async (message) =>
@@ -291,7 +291,7 @@
 
 	public async ValueTask DisposeAsync()
 	{
-		await RealtimeClient.InvokeAsync("LeaveConversation", ConversationId.ToString());
+		await RealtimeClient.SendAsync("LeaveConversation", ConversationId.ToString());
 		await RealtimeClient.DisconnectAsync();
 	}
 
