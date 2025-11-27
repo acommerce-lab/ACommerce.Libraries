@@ -40,17 +40,17 @@
 
     <!-- Orders & Cart -->
     <ProjectReference Include="..\..\Sales\ACommerce.Cart\ACommerce.Cart.csproj" />
-    <ProjectReference Include="..\..\Sales\ACommerce.Carts.Api\ACommerce.Carts.Api.csproj" />
+    <!-- <ProjectReference Include="..\..\Sales\ACommerce.Cart.Api\ACommerce.Cart.Api.csproj" /> TODO: Not implemented yet -->
     <ProjectReference Include="..\..\Sales\ACommerce.Orders\ACommerce.Orders.csproj" />
     <ProjectReference Include="..\..\Sales\ACommerce.Orders.Api\ACommerce.Orders.Api.csproj" />
 
     <!-- Payments -->
     <ProjectReference Include="..\..\Payments\ACommerce.Payments.Abstractions\ACommerce.Payments.Abstractions.csproj" />
-    <ProjectReference Include="..\..\Payments\ACommerce.Payments.Api\ACommerce.Payments.Api.csproj" />
+    <!-- <ProjectReference Include="..\..\Payments\ACommerce.Payments.Api\ACommerce.Payments.Api.csproj" /> TODO: Not implemented yet -->
 
     <!-- Shipping -->
     <ProjectReference Include="..\..\Shipping\ACommerce.Shipping.Abstractions\ACommerce.Shipping.Abstractions.csproj" />
-    <ProjectReference Include="..\..\Shipping\ACommerce.Shipping.Api\ACommerce.Shipping.Api.csproj" />
+    <!-- <ProjectReference Include="..\..\Shipping\ACommerce.Shipping.Api\ACommerce.Shipping.Api.csproj" /> TODO: Not implemented yet -->
 
     <!-- Notifications & Chat -->
     <ProjectReference Include="..\..\Other\ACommerce.Notifications.Core\ACommerce.Notifications.Core.csproj" />
