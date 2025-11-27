@@ -25,4 +25,6 @@ public sealed class TwoFactorResponse
 public sealed class VerifyTwoFactorRequest
 {
 	public string Code { get; set; } = string.Empty;
+	public string? PhoneOrEmail { get; set; }
+	public string? SessionId { get; set; }
 }

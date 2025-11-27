@@ -9,6 +9,11 @@ public sealed class NafathAuthRequest
 	/// رقم الهوية الوطنية
 	/// </summary>
 	public string NationalId { get; set; } = string.Empty;
+
+	/// <summary>
+	/// رابط إعادة التوجيه بعد المصادقة
+	/// </summary>
+	public string? RedirectUrl { get; set; }
 }
 
 /// <summary>
@@ -49,4 +54,6 @@ public sealed class CompleteNafathAuthRequest
 {
 	public string SessionId { get; set; } = string.Empty;
 	public string TransactionId { get; set; } = string.Empty;
+	public string? Code { get; set; }
+	public string? State { get; set; }
 }
