@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ACommerce.SharedKernel.Abstractions.Entities;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace ACommerce.SharedKernel.Infrastructure.EFCores.Context;
 
@@ -21,10 +22,16 @@ public class ApplicationDbContext : DbContext
 
 		// 1. Auto-discover جميع IBaseEntity types من جميع Assemblies
 		var entityTypes = DiscoverEntityTypes();
-
-		foreach (var entityType in entityTypes)
+		Console.WriteLine(entityTypes.Count());
+        foreach (var entityType in entityTypes)
 		{
-			modelBuilder.Entity(entityType);
+			Console.Write(entityType);
+            if (string.IsNullOrWhiteSpace(entityType.Name))
+            {
+                throw new Exception($"❌ Entity type has empty name: {entityType.FullName}");
+            }
+
+            modelBuilder.Entity(entityType);
 		}
 
 		// 2. تطبيق Configurations إذا وجدت
@@ -51,6 +58,7 @@ public class ApplicationDbContext : DbContext
 					.Where(t => typeof(IBaseEntity).IsAssignableFrom(t)
 						&& t.IsClass
 						&& !t.IsAbstract
+						&& !t.IsGenericType
 						&& t != typeof(IBaseEntity))
 					.ToList();
 

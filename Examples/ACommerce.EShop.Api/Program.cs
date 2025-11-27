@@ -34,6 +34,7 @@ try
 
     // Logging
     builder.Host.UseSerilog();
+    builder.Services.AddScoped<DbContext, ApplicationDbContext>();
 
     // CORS
     builder.Services.AddCors(options =>
@@ -69,6 +70,11 @@ try
     // ════════════════════════════════════════════════════════════════
     // 🔐 Authentication & Authorization (OpenIddict)
     // ════════════════════════════════════════════════════════════════
+    builder.Services.AddOptions<JwtOptions>()
+    .Bind(builder.Configuration.GetSection(JwtOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
     builder.Services.AddJwtAuthentication(options =>
     {
         options.Issuer = builder.Configuration["Authentication:Issuer"]

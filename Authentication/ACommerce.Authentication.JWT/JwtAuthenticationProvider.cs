@@ -193,7 +193,7 @@ public class JwtAuthenticationProvider : IAuthenticationProvider
 
 public class JwtOptions
 {
-	public const string SectionName = "Authentication:JWT";
+	public const string SectionName = "JWT";
 
 	[Required(ErrorMessage = "JWT SecretKey is required")]
 	[MinLength(32, ErrorMessage = "JWT SecretKey must be at least 32 characters")]
