@@ -23,14 +23,14 @@ else
 					<p>@notification.Message</p>
 					<span class="notification-time">@FormatTime(notification.CreatedAt)</span>
 				</div>
-				<div class="notification-actions">
+				<div class="notification-actions" @onclick:stopPropagation="true">
 					@if (!notification.IsRead)
 					{
 						<span class="unread-indicator">●</span>
 					}
 					<SfButton IconCss="e-icons e-close"
 							  CssClass="delete-btn"
-							  OnClick="(e) => HandleDeleteClick(e, notification.Id)" />
+							  OnClick="@(() => OnDelete.InvokeAsync(notification.Id))" />
 				</div>
 			</div>
 		}
@@ -68,12 +68,6 @@ else
 		if (diff.TotalHours < 24) return $"{(int)diff.TotalHours} ساعة";
 		if (diff.TotalDays < 7) return $"{(int)diff.TotalDays} يوم";
 		return dateTime.ToString("dd/MM/yyyy");
-	}
-
-	private async Task HandleDeleteClick(MouseEventArgs e, Guid notificationId)
-	{
-		e.StopPropagation();
-		await OnDelete.InvokeAsync(notificationId);
 	}
 
 	// Models
