@@ -44,7 +44,8 @@ public static class MauiProgram
 		});
 
 		// Add app services
-		builder.Services.AddSingleton<IAppNavigationService, AppNavigationService>();
+		// AppNavigationService must be scoped because it depends on NavigationManager (which is scoped)
+		builder.Services.AddScoped<IAppNavigationService, AppNavigationService>();
 		builder.Services.AddSingleton<MockDataService>();
 
 		return builder.Build();
