@@ -16,7 +16,7 @@ namespace ACommerce.EShop.Maui;
 public static class MauiProgram
 {
     // API Base URL - change this to match your backend server
-    private const string ApiBaseUrl = "http://localhost:5001";
+    private const string ApiBaseUrl = "https://localhost:5001";
 
     public static MauiApp CreateMauiApp()
     {

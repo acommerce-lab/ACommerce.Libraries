@@ -24,7 +24,7 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 // Base API URL
-const string baseUrl = "http://localhost:5001";
+const string baseUrl = "https://localhost:5001";
 
 // ACommerce Client SDK with Static URL (for standalone Blazor WASM app)
 builder.Services.AddACommerceStaticClient(baseUrl);
