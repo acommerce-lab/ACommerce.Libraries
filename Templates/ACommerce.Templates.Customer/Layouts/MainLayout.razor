@@ -1,5 +1,4 @@
 @namespace ACommerce.Templates.Customer.Layouts
-@inherits LayoutComponentBase
 @inject ThemeService ThemeService
 
 <div class="ac-app @(ThemeService.IsDarkMode ? "ac-dark" : "ac-light")" style="@ThemeService.GenerateInlineStyles()">
@@ -18,7 +17,7 @@
     }
 
     <main class="ac-main @(ShowNavbar ? "ac-has-navbar" : "") @(ShowBottomNav ? "ac-has-bottom-nav" : "")">
-        @Body
+        @ChildContent
     </main>
 
     @if (ShowBottomNav)
@@ -30,6 +29,7 @@
 </div>
 
 @code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter] public string? BrandName { get; set; } = "ACommerce";
     [Parameter] public string? LogoUrl { get; set; }
     [Parameter] public bool ShowNavbar { get; set; } = true;
