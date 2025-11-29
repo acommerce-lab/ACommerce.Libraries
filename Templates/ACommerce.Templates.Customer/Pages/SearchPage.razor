@@ -40,10 +40,10 @@
     <div class="ac-results-info">
         <span>@TotalResults نتيجة</span>
         <div class="ac-view-toggle">
-            <button class="@(ViewMode == "grid" ? "active" : "")" @onclick="() => SetViewMode(\"grid\")">
+            <button class="@(ViewMode == "grid" ? "active" : "")" @onclick="SetViewModeGrid">
                 <i class="bi bi-grid-3x3-gap"></i>
             </button>
-            <button class="@(ViewMode == "list" ? "active" : "")" @onclick="() => SetViewMode(\"list\")">
+            <button class="@(ViewMode == "list" ? "active" : "")" @onclick="SetViewModeList">
                 <i class="bi bi-list"></i>
             </button>
         </div>
@@ -100,6 +100,7 @@
 
     @* Filters Modal *@
     <AcModal @bind-IsOpen="ShowFiltersModal" Title="تصفية النتائج" Size="ModalSize.Large">
+        <ChildContent>
         <div class="ac-filters-content">
             @* Price Range *@
             <div class="ac-filter-group">
@@ -175,7 +176,7 @@
                 }
             </div>
         </div>
-
+        </ChildContent>
         <FooterContent>
             <AcButton Text="مسح الكل" Variant="ButtonVariant.Secondary" OnClick="ClearAllFilters" />
             <AcButton Text="تطبيق" Variant="ButtonVariant.Primary" OnClick="ApplyFilters" />
@@ -255,6 +256,8 @@
     private void ToggleFilters() => ShowFiltersModal = !ShowFiltersModal;
     private void ToggleSort() => ShowSortModal = !ShowSortModal;
     private void SetViewMode(string mode) => ViewMode = mode;
+    private void SetViewModeGrid() => ViewMode = "grid";
+    private void SetViewModeList() => ViewMode = "list";
 
     private void ToggleCategoryFilter(FilterCategoryItem category) => category.IsSelected = !category.IsSelected;
     private void ToggleAttributeFilter(AttributeFilterGroup group, AttributeFilterValue value) => value.IsSelected = !value.IsSelected;

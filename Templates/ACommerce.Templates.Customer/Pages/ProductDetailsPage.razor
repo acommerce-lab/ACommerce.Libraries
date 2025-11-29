@@ -143,15 +143,15 @@
         <div class="ac-product-tabs">
             <div class="ac-tabs-header">
                 <button class="ac-tab @(ActiveTab == "description" ? "active" : "")"
-                        @onclick="() => SetActiveTab(\"description\")">
+                        @onclick="SetTabDescription">
                     الوصف
                 </button>
                 <button class="ac-tab @(ActiveTab == "specs" ? "active" : "")"
-                        @onclick="() => SetActiveTab(\"specs\")">
+                        @onclick="SetTabSpecs">
                     المواصفات
                 </button>
                 <button class="ac-tab @(ActiveTab == "reviews" ? "active" : "")"
-                        @onclick="() => SetActiveTab(\"reviews\")">
+                        @onclick="SetTabReviews">
                     التقييمات (@Product.ReviewCount)
                 </button>
             </div>
@@ -308,6 +308,9 @@
         : 0;
 
     private void SetActiveTab(string tab) => ActiveTab = tab;
+    private void SetTabDescription() => ActiveTab = "description";
+    private void SetTabSpecs() => ActiveTab = "specs";
+    private void SetTabReviews() => ActiveTab = "reviews";
 
     private async Task HandleAddToCart()
     {

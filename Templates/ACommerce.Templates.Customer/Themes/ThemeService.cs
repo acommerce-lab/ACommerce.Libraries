@@ -16,6 +16,8 @@ public class ThemeService
 
 	public ThemeOptions Current => _currentTheme;
 
+	public bool IsDarkMode => _currentTheme.Mode == ThemeMode.Dark;
+
 	public void SetTheme(ThemeOptions theme)
 	{
 		_currentTheme = theme;
