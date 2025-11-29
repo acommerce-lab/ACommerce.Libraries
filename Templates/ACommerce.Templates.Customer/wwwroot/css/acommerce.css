@@ -2,6 +2,102 @@
    ACommerce Customer Template - Base Styles
    ========================================================================== */
 
+/* Default CSS Variables - can be overridden by ThemeService inline styles */
+:root {
+	/* Colors - Primary */
+	--ac-primary: #6366F1;
+	--ac-primary-dark: #4F46E5;
+	--ac-primary-light: #818CF8;
+
+	/* Colors - Secondary */
+	--ac-secondary: #EC4899;
+	--ac-secondary-dark: #DB2777;
+	--ac-secondary-light: #F472B6;
+
+	/* Colors - Accent */
+	--ac-accent: #F59E0B;
+	--ac-accent-dark: #D97706;
+	--ac-accent-light: #FBBF24;
+
+	/* Colors - Background */
+	--ac-bg: #FFFFFF;
+	--ac-bg-alt: #F9FAFB;
+	--ac-surface: #FFFFFF;
+	--ac-surface-alt: #F3F4F6;
+
+	/* Colors - Text */
+	--ac-text: #111827;
+	--ac-text-secondary: #6B7280;
+	--ac-text-muted: #9CA3AF;
+	--ac-text-on-primary: #FFFFFF;
+
+	/* Colors - States */
+	--ac-success: #10B981;
+	--ac-warning: #F59E0B;
+	--ac-error: #EF4444;
+	--ac-info: #3B82F6;
+
+	/* Colors - Borders */
+	--ac-border: #E5E7EB;
+	--ac-border-light: #F3F4F6;
+	--ac-border-dark: #D1D5DB;
+
+	/* Colors - Special */
+	--ac-sale: #EF4444;
+	--ac-new: #10B981;
+	--ac-featured: #F59E0B;
+
+	/* Typography */
+	--ac-font-family: 'Cairo', 'Segoe UI', sans-serif;
+	--ac-font-family-heading: 'Cairo', 'Segoe UI', sans-serif;
+	--ac-font-family-mono: 'Fira Code', monospace;
+
+	--ac-font-xs: 0.75rem;
+	--ac-font-sm: 0.875rem;
+	--ac-font-base: 1rem;
+	--ac-font-lg: 1.125rem;
+	--ac-font-xl: 1.25rem;
+	--ac-font-2xl: 1.5rem;
+	--ac-font-3xl: 1.875rem;
+	--ac-font-4xl: 2.25rem;
+
+	--ac-font-light: 300;
+	--ac-font-normal: 400;
+	--ac-font-medium: 500;
+	--ac-font-semibold: 600;
+	--ac-font-bold: 700;
+
+	--ac-leading-tight: 1.25;
+	--ac-leading-normal: 1.5;
+	--ac-leading-relaxed: 1.75;
+
+	/* Spacing */
+	--ac-space-xs: 0.25rem;
+	--ac-space-sm: 0.5rem;
+	--ac-space-md: 1rem;
+	--ac-space-lg: 1.5rem;
+	--ac-space-xl: 2rem;
+	--ac-space-2xl: 3rem;
+
+	--ac-container-max: 1280px;
+	--ac-container-padding: 1rem;
+
+	/* Borders & Shadows */
+	--ac-radius-sm: 0.25rem;
+	--ac-radius-md: 0.5rem;
+	--ac-radius-lg: 0.75rem;
+	--ac-radius-xl: 1rem;
+	--ac-radius-full: 9999px;
+
+	--ac-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+	--ac-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+	--ac-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+	--ac-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+	/* Direction */
+	--ac-direction: rtl;
+}
+
 /* Reset & Base */
 *, *::before, *::after {
 	box-sizing: border-box;
