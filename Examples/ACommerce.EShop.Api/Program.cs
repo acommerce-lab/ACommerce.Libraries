@@ -62,6 +62,9 @@ try
         options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
     });
 
+    // Register DbContext base type for repositories that depend on it
+    builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
+
     // Repository & Unit of Work
     builder.Services.AddScoped<IRepositoryFactory, RepositoryFactory>();
     builder.Services.AddScoped(typeof(IBaseAsyncRepository<>), typeof(BaseAsyncRepository<>));
