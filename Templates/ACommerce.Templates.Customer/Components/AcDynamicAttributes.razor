@@ -1,0 +1,97 @@
+@namespace ACommerce.Templates.Customer.Components
+
+<div class="ac-dynamic-attributes @(Layout == AttributeLayout.Grid ? "ac-attributes-grid" : "ac-attributes-list") @Class">
+    @if (Attributes != null)
+    {
+        @foreach (var attr in Attributes)
+        {
+            <div class="ac-attribute-item @(attr.IsHighlighted ? "ac-attribute-highlighted" : "")">
+                @if (attr.Type == AttributeDisplayType.ColorSwatch)
+                {
+                    <span class="ac-attribute-label">@attr.Label:</span>
+                    <div class="ac-attribute-colors">
+                        @if (attr.Values != null)
+                        {
+                            @foreach (var color in attr.Values)
+                            {
+                                <span class="ac-color-swatch @(color == attr.SelectedValue ? "selected" : "")"
+                                      style="background-color: @color"
+                                      title="@color"
+                                      @onclick="() => SelectValue(attr, color)"></span>
+                            }
+                        }
+                    </div>
+                }
+                else if (attr.Type == AttributeDisplayType.ButtonGroup)
+                {
+                    <span class="ac-attribute-label">@attr.Label:</span>
+                    <div class="ac-attribute-buttons">
+                        @if (attr.Values != null)
+                        {
+                            @foreach (var value in attr.Values)
+                            {
+                                <button class="ac-attribute-btn @(value == attr.SelectedValue ? "selected" : "") @(attr.DisabledValues?.Contains(value) == true ? "disabled" : "")"
+                                        disabled="@(attr.DisabledValues?.Contains(value) == true)"
+                                        @onclick="() => SelectValue(attr, value)">
+                                    @value
+                                </button>
+                            }
+                        }
+                    </div>
+                }
+                else if (attr.Type == AttributeDisplayType.Dropdown)
+                {
+                    <span class="ac-attribute-label">@attr.Label:</span>
+                    <select class="ac-input ac-attribute-select" @onchange="e => SelectValue(attr, e.Value?.ToString())">
+                        <option value="">اختر @attr.Label</option>
+                        @if (attr.Values != null)
+                        {
+                            @foreach (var value in attr.Values)
+                            {
+                                <option value="@value" selected="@(value == attr.SelectedValue)">@value</option>
+                            }
+                        }
+                    </select>
+                }
+                else if (attr.Type == AttributeDisplayType.ImageSwatch)
+                {
+                    <span class="ac-attribute-label">@attr.Label:</span>
+                    <div class="ac-attribute-images">
+                        @if (attr.ValueImages != null)
+                        {
+                            @foreach (var (value, image) in attr.ValueImages)
+                            {
+                                <button class="ac-image-swatch @(value == attr.SelectedValue ? "selected" : "")"
+                                        @onclick="() => SelectValue(attr, value)">
+                                    <img src="@image" alt="@value" />
+                                </button>
+                            }
+                        }
+                    </div>
+                }
+                else
+                {
+                    @* Text display (default) *@
+                    <span class="ac-attribute-label">@attr.Label:</span>
+                    <span class="ac-attribute-value">@attr.Value</span>
+                }
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public List<DynamicAttribute>? Attributes { get; set; }
+    [Parameter] public AttributeLayout Layout { get; set; } = AttributeLayout.List;
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public EventCallback<(DynamicAttribute Attribute, string Value)> OnValueSelected { get; set; }
+
+    private async Task SelectValue(DynamicAttribute attr, string? value)
+    {
+        if (value != null)
+        {
+            attr.SelectedValue = value;
+            await OnValueSelected.InvokeAsync((attr, value));
+        }
+    }
+}

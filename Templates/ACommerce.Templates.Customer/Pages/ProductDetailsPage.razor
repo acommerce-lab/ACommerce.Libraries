@@ -1,0 +1,335 @@
+@namespace ACommerce.Templates.Customer.Pages
+
+<div class="ac-page ac-product-details-page">
+    @if (IsLoading)
+    {
+        <div class="ac-product-loading">
+            <AcSkeleton Type="SkeletonType.Image" Height="300px" />
+            <div class="ac-product-loading-content">
+                <AcSkeleton Type="SkeletonType.Text" Lines="1" />
+                <AcSkeleton Type="SkeletonType.Text" Lines="2" />
+                <AcSkeleton Type="SkeletonType.Text" Lines="1" />
+            </div>
+        </div>
+    }
+    else if (Product != null)
+    {
+        @* Image Gallery *@
+        <AcImageGallery Images="@Product.Images"
+                        ShowThumbnails="true"
+                        ShowZoom="true" />
+
+        @* Product Info *@
+        <div class="ac-product-info">
+            @if (!string.IsNullOrEmpty(Product.Brand))
+            {
+                <span class="ac-product-brand">@Product.Brand</span>
+            }
+
+            <h1 class="ac-product-title">@Product.Name</h1>
+
+            @* Rating *@
+            <div class="ac-product-rating-row">
+                <AcRating Value="@Product.Rating"
+                          ReadOnly="true"
+                          ShowValue="true"
+                          ShowCount="true"
+                          Count="@Product.ReviewCount" />
+                <a href="#reviews" class="ac-link">اقرأ التقييمات</a>
+            </div>
+
+            @* Price *@
+            <div class="ac-product-price-section">
+                <span class="ac-product-current-price">@Product.Price.ToString("N2") @Currency</span>
+                @if (Product.OldPrice > 0 && Product.OldPrice > Product.Price)
+                {
+                    <span class="ac-product-original-price">@Product.OldPrice.ToString("N2") @Currency</span>
+                    <span class="ac-product-discount">خصم @DiscountPercent%</span>
+                }
+            </div>
+
+            @* Stock Status *@
+            <div class="ac-product-stock">
+                @if (Product.StockQuantity > 0)
+                {
+                    <span class="ac-stock-available">
+                        <i class="bi bi-check-circle-fill"></i>
+                        متوفر @(Product.StockQuantity < 10 ? $"({Product.StockQuantity} قطع فقط)" : "")
+                    </span>
+                }
+                else
+                {
+                    <span class="ac-stock-unavailable">
+                        <i class="bi bi-x-circle-fill"></i>
+                        غير متوفر حالياً
+                    </span>
+                }
+            </div>
+
+            @* Dynamic Attributes (Variants) *@
+            @if (Product.Attributes != null && Product.Attributes.Any())
+            {
+                <div class="ac-product-variants">
+                    <AcDynamicAttributes Attributes="@Product.Attributes"
+                                         Layout="AttributeLayout.List"
+                                         OnValueSelected="HandleAttributeSelected" />
+                </div>
+            }
+
+            @* Quantity Selector *@
+            <div class="ac-product-quantity-section">
+                <span class="ac-quantity-label">الكمية:</span>
+                <AcQuantitySelector @bind-Value="Quantity"
+                                    Min="1"
+                                    Max="@(Product.StockQuantity ?? 99)" />
+            </div>
+
+            @* Short Description *@
+            @if (!string.IsNullOrEmpty(Product.ShortDescription))
+            {
+                <div class="ac-product-short-desc">
+                    @Product.ShortDescription
+                </div>
+            }
+
+            @* Action Buttons *@
+            <div class="ac-product-actions">
+                <AcButton Text="إضافة للسلة"
+                          Icon="bi-cart-plus"
+                          Variant="ButtonVariant.Primary"
+                          Block="true"
+                          Disabled="@(Product.StockQuantity <= 0)"
+                          Loading="IsAddingToCart"
+                          OnClick="HandleAddToCart" />
+
+                <AcButton Icon="@(IsInWishlist ? "bi-heart-fill" : "bi-heart")"
+                          Variant="ButtonVariant.Secondary"
+                          Outline="true"
+                          OnClick="HandleToggleWishlist" />
+
+                <AcButton Icon="bi-share"
+                          Variant="ButtonVariant.Secondary"
+                          Outline="true"
+                          OnClick="HandleShare" />
+            </div>
+
+            @* Delivery Info *@
+            <div class="ac-product-delivery-info">
+                <div class="ac-delivery-item">
+                    <i class="bi bi-truck"></i>
+                    <div>
+                        <span class="ac-delivery-title">التوصيل</span>
+                        <span class="ac-delivery-value">@(Product.DeliveryInfo ?? "2-5 أيام عمل")</span>
+                    </div>
+                </div>
+                <div class="ac-delivery-item">
+                    <i class="bi bi-arrow-return-left"></i>
+                    <div>
+                        <span class="ac-delivery-title">الإرجاع</span>
+                        <span class="ac-delivery-value">@(Product.ReturnPolicy ?? "إرجاع مجاني خلال 14 يوم")</span>
+                    </div>
+                </div>
+                <div class="ac-delivery-item">
+                    <i class="bi bi-shield-check"></i>
+                    <div>
+                        <span class="ac-delivery-title">الضمان</span>
+                        <span class="ac-delivery-value">@(Product.Warranty ?? "ضمان لمدة سنة")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* Tabs: Description, Specifications, Reviews *@
+        <div class="ac-product-tabs">
+            <div class="ac-tabs-header">
+                <button class="ac-tab @(ActiveTab == "description" ? "active" : "")"
+                        @onclick="() => SetActiveTab(\"description\")">
+                    الوصف
+                </button>
+                <button class="ac-tab @(ActiveTab == "specs" ? "active" : "")"
+                        @onclick="() => SetActiveTab(\"specs\")">
+                    المواصفات
+                </button>
+                <button class="ac-tab @(ActiveTab == "reviews" ? "active" : "")"
+                        @onclick="() => SetActiveTab(\"reviews\")">
+                    التقييمات (@Product.ReviewCount)
+                </button>
+            </div>
+
+            <div class="ac-tabs-content">
+                @if (ActiveTab == "description")
+                {
+                    <div class="ac-tab-panel">
+                        @((MarkupString)(Product.LongDescription ?? Product.ShortDescription ?? "لا يوجد وصف"))
+                    </div>
+                }
+                else if (ActiveTab == "specs")
+                {
+                    <div class="ac-tab-panel ac-specs-panel">
+                        @if (Product.Specifications != null)
+                        {
+                            <table class="ac-specs-table">
+                                @foreach (var spec in Product.Specifications)
+                                {
+                                    <tr>
+                                        <th>@spec.Key</th>
+                                        <td>@spec.Value</td>
+                                    </tr>
+                                }
+                            </table>
+                        }
+                        else
+                        {
+                            <p>لا توجد مواصفات</p>
+                        }
+                    </div>
+                }
+                else if (ActiveTab == "reviews")
+                {
+                    <div class="ac-tab-panel ac-reviews-panel" id="reviews">
+                        @if (Reviews != null && Reviews.Any())
+                        {
+                            <div class="ac-reviews-summary">
+                                <div class="ac-reviews-average">
+                                    <span class="ac-rating-number">@Product.Rating.ToString("0.0")</span>
+                                    <AcRating Value="@Product.Rating" ReadOnly="true" />
+                                    <span>من @Product.ReviewCount تقييم</span>
+                                </div>
+                            </div>
+
+                            <div class="ac-reviews-list">
+                                @foreach (var review in Reviews)
+                                {
+                                    <div class="ac-review-item">
+                                        <div class="ac-review-header">
+                                            <div class="ac-review-author">
+                                                <div class="ac-review-avatar">@review.AuthorName.FirstOrDefault()</div>
+                                                <div>
+                                                    <span class="ac-review-name">@review.AuthorName</span>
+                                                    <span class="ac-review-date">@review.Date.ToString("dd/MM/yyyy")</span>
+                                                </div>
+                                            </div>
+                                            <AcRating Value="@review.Rating" ReadOnly="true" />
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(review.Title))
+                                        {
+                                            <h4 class="ac-review-title">@review.Title</h4>
+                                        }
+                                        <p class="ac-review-text">@review.Text</p>
+                                        @if (review.Images?.Any() == true)
+                                        {
+                                            <div class="ac-review-images">
+                                                @foreach (var img in review.Images)
+                                                {
+                                                    <img src="@img" alt="" />
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+
+                            <AcButton Text="عرض جميع التقييمات"
+                                      Variant="ButtonVariant.Secondary"
+                                      Outline="true"
+                                      Block="true"
+                                      OnClick="HandleViewAllReviews" />
+                        }
+                        else
+                        {
+                            <AcEmptyState Icon="bi-chat-square-text"
+                                          Title="لا توجد تقييمات"
+                                          Description="كن أول من يقيم هذا المنتج"
+                                          ActionText="أضف تقييمك"
+                                          OnAction="HandleAddReview" />
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        @* Related Products *@
+        @if (RelatedProducts != null && RelatedProducts.Any())
+        {
+            <section class="ac-section">
+                <div class="ac-section-header">
+                    <h2 class="ac-section-title">منتجات مشابهة</h2>
+                </div>
+                <div class="ac-products-scroll">
+                    @foreach (var product in RelatedProducts)
+                    {
+                        <AcProductCard Id="@product.Id"
+                                       Name="@product.Name"
+                                       ImageUrl="@product.Image"
+                                       Price="@product.Price"
+                                       OldPrice="@product.OldPrice"
+                                       Rating="@product.Rating"
+                                       OnClick="HandleRelatedProductClick"
+                                       OnAddToCart="HandleAddRelatedToCart" />
+                    }
+                </div>
+            </section>
+        }
+    }
+    else
+    {
+        <AcEmptyState Icon="bi-box"
+                      Title="المنتج غير موجود"
+                      Description="عذراً، المنتج الذي تبحث عنه غير متوفر"
+                      ActionText="العودة للتسوق"
+                      OnAction="HandleGoBack" />
+    }
+</div>
+
+@code {
+    [Parameter] public ProductDetailsItem? Product { get; set; }
+    [Parameter] public List<ProductReviewItem>? Reviews { get; set; }
+    [Parameter] public List<HomeProductItem>? RelatedProducts { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool IsAddingToCart { get; set; }
+    [Parameter] public bool IsInWishlist { get; set; }
+    [Parameter] public string Currency { get; set; } = "ر.س";
+
+    [Parameter] public EventCallback<AddToCartEventArgs> OnAddToCart { get; set; }
+    [Parameter] public EventCallback OnToggleWishlist { get; set; }
+    [Parameter] public EventCallback OnShare { get; set; }
+    [Parameter] public EventCallback<(DynamicAttribute, string)> OnAttributeSelected { get; set; }
+    [Parameter] public EventCallback OnViewAllReviews { get; set; }
+    [Parameter] public EventCallback OnAddReview { get; set; }
+    [Parameter] public EventCallback<Guid> OnRelatedProductClick { get; set; }
+    [Parameter] public EventCallback<Guid> OnAddRelatedToCart { get; set; }
+    [Parameter] public EventCallback OnGoBack { get; set; }
+
+    private int Quantity { get; set; } = 1;
+    private string ActiveTab { get; set; } = "description";
+
+    private int DiscountPercent => Product?.OldPrice > 0 && Product?.Price > 0
+        ? (int)Math.Round(100 - (Product.Price / Product.OldPrice * 100))
+        : 0;
+
+    private void SetActiveTab(string tab) => ActiveTab = tab;
+
+    private async Task HandleAddToCart()
+    {
+        await OnAddToCart.InvokeAsync(new AddToCartEventArgs
+        {
+            ProductId = Product!.Id,
+            Quantity = Quantity,
+            SelectedAttributes = Product.Attributes?.ToDictionary(a => a.Id, a => a.SelectedValue ?? "")
+        });
+    }
+
+    private async Task HandleToggleWishlist() => await OnToggleWishlist.InvokeAsync();
+    private async Task HandleShare() => await OnShare.InvokeAsync();
+    private async Task HandleViewAllReviews() => await OnViewAllReviews.InvokeAsync();
+    private async Task HandleAddReview() => await OnAddReview.InvokeAsync();
+    private async Task HandleGoBack() => await OnGoBack.InvokeAsync();
+
+    private async Task HandleAttributeSelected((DynamicAttribute Attribute, string Value) args)
+    {
+        await OnAttributeSelected.InvokeAsync(args);
+    }
+
+    private async Task HandleRelatedProductClick(Guid id) => await OnRelatedProductClick.InvokeAsync(id);
+    private async Task HandleAddRelatedToCart(Guid id) => await OnAddRelatedToCart.InvokeAsync(id);
+}

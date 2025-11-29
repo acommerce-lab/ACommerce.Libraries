@@ -1,0 +1,97 @@
+@namespace ACommerce.Templates.Customer.Components
+@implements IDisposable
+
+<div class="ac-toast-container ac-toast-@Position.ToString().ToLower()">
+    @foreach (var toast in _toasts)
+    {
+        <div class="ac-toast ac-toast-@toast.Type.ToString().ToLower() @(toast.IsClosing ? "ac-toast-closing" : "")">
+            <div class="ac-toast-icon">
+                <i class="bi @GetIcon(toast.Type)"></i>
+            </div>
+            <div class="ac-toast-content">
+                @if (!string.IsNullOrEmpty(toast.Title))
+                {
+                    <div class="ac-toast-title">@toast.Title</div>
+                }
+                <div class="ac-toast-message">@toast.Message</div>
+            </div>
+            <button class="ac-toast-close" @onclick="() => RemoveToast(toast.Id)">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public ToastPosition Position { get; set; } = ToastPosition.TopCenter;
+    [Parameter] public int Duration { get; set; } = 3000;
+
+    private List<ToastItem> _toasts = new();
+    private int _toastIdCounter = 0;
+
+    public void Show(string message, ToastType type = ToastType.Info, string? title = null, int? duration = null)
+    {
+        var toast = new ToastItem
+        {
+            Id = ++_toastIdCounter,
+            Message = message,
+            Title = title,
+            Type = type
+        };
+
+        _toasts.Add(toast);
+        StateHasChanged();
+
+        var autoCloseDuration = duration ?? Duration;
+        if (autoCloseDuration > 0)
+        {
+            _ = AutoCloseAsync(toast.Id, autoCloseDuration);
+        }
+    }
+
+    public void Success(string message, string? title = null) => Show(message, ToastType.Success, title);
+    public void Error(string message, string? title = null) => Show(message, ToastType.Error, title);
+    public void Warning(string message, string? title = null) => Show(message, ToastType.Warning, title);
+    public void Info(string message, string? title = null) => Show(message, ToastType.Info, title);
+
+    private async Task AutoCloseAsync(int id, int duration)
+    {
+        await Task.Delay(duration);
+        await RemoveToast(id);
+    }
+
+    private async Task RemoveToast(int id)
+    {
+        var toast = _toasts.FirstOrDefault(t => t.Id == id);
+        if (toast != null)
+        {
+            toast.IsClosing = true;
+            StateHasChanged();
+            await Task.Delay(300);
+            _toasts.Remove(toast);
+            StateHasChanged();
+        }
+    }
+
+    private string GetIcon(ToastType type) => type switch
+    {
+        ToastType.Success => "bi-check-circle-fill",
+        ToastType.Error => "bi-x-circle-fill",
+        ToastType.Warning => "bi-exclamation-triangle-fill",
+        _ => "bi-info-circle-fill"
+    };
+
+    public void Dispose()
+    {
+        _toasts.Clear();
+    }
+
+    private class ToastItem
+    {
+        public int Id { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public string? Title { get; set; }
+        public ToastType Type { get; set; }
+        public bool IsClosing { get; set; }
+    }
+}

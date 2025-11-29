@@ -1,0 +1,231 @@
+@namespace ACommerce.Templates.Customer.Pages
+
+<div class="ac-page ac-cart-page">
+    <div class="ac-page-header">
+        <h1>سلة التسوق</h1>
+        @if (Items?.Any() == true)
+        {
+            <span class="ac-cart-count">(@Items.Count منتج)</span>
+        }
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="ac-cart-loading">
+            @for (int i = 0; i < 3; i++)
+            {
+                <AcSkeleton Type="SkeletonType.ListItem" />
+            }
+        </div>
+    }
+    else if (Items != null && Items.Any())
+    {
+        <div class="ac-cart-content">
+            @* Cart Items *@
+            <div class="ac-cart-items">
+                @foreach (var item in Items)
+                {
+                    <AcCartItem Id="@item.Id"
+                                Name="@item.Name"
+                                ImageUrl="@item.ImageUrl"
+                                Variant="@item.Variant"
+                                Attributes="@item.Attributes"
+                                Price="@item.Price"
+                                OldPrice="@item.OldPrice"
+                                Currency="@Currency"
+                                Quantity="@item.Quantity"
+                                MaxQuantity="@item.MaxQuantity"
+                                Editable="true"
+                                OnQuantityChange="q => HandleQuantityChange(item.Id, q)"
+                                OnRemove="() => HandleRemoveItem(item.Id)" />
+                }
+            </div>
+
+            @* Coupon Section *@
+            <div class="ac-cart-coupon">
+                @if (AppliedCoupon != null)
+                {
+                    <div class="ac-coupon-applied">
+                        <span>
+                            <i class="bi bi-tag-fill"></i>
+                            @AppliedCoupon.Code - خصم @AppliedCoupon.DiscountText
+                        </span>
+                        <button @onclick="HandleRemoveCoupon">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="ac-coupon-input">
+                        <AcInput Placeholder="أدخل كود الخصم"
+                                 @bind-Value="CouponCode"
+                                 HasError="@HasCouponError"
+                                 ErrorMessage="@CouponErrorMessage" />
+                        <AcButton Text="تطبيق"
+                                  Variant="ButtonVariant.Secondary"
+                                  Loading="IsApplyingCoupon"
+                                  Disabled="@string.IsNullOrWhiteSpace(CouponCode)"
+                                  OnClick="HandleApplyCoupon" />
+                    </div>
+                }
+            </div>
+
+            @* Order Summary *@
+            <div class="ac-cart-summary">
+                <h3>ملخص الطلب</h3>
+
+                <div class="ac-summary-row">
+                    <span>المجموع الفرعي</span>
+                    <span>@Subtotal.ToString("N2") @Currency</span>
+                </div>
+
+                @if (Discount > 0)
+                {
+                    <div class="ac-summary-row ac-discount-row">
+                        <span>الخصم</span>
+                        <span>-@Discount.ToString("N2") @Currency</span>
+                    </div>
+                }
+
+                @if (ShippingCost > 0)
+                {
+                    <div class="ac-summary-row">
+                        <span>الشحن</span>
+                        <span>@ShippingCost.ToString("N2") @Currency</span>
+                    </div>
+                }
+                else if (FreeShippingThreshold > 0)
+                {
+                    <div class="ac-summary-row ac-free-shipping">
+                        <span><i class="bi bi-truck"></i> شحن مجاني</span>
+                        <span>0.00 @Currency</span>
+                    </div>
+                }
+
+                @if (Tax > 0)
+                {
+                    <div class="ac-summary-row">
+                        <span>الضريبة (@TaxRate%)</span>
+                        <span>@Tax.ToString("N2") @Currency</span>
+                    </div>
+                }
+
+                <div class="ac-summary-row ac-total-row">
+                    <span>الإجمالي</span>
+                    <span>@Total.ToString("N2") @Currency</span>
+                </div>
+
+                @if (FreeShippingThreshold > 0 && Subtotal < FreeShippingThreshold)
+                {
+                    <div class="ac-free-shipping-notice">
+                        <i class="bi bi-info-circle"></i>
+                        أضف منتجات بقيمة @((FreeShippingThreshold - Subtotal).ToString("N2")) @Currency للحصول على شحن مجاني
+                    </div>
+                }
+            </div>
+
+            @* Checkout Button *@
+            <div class="ac-cart-checkout">
+                <AcButton Text="إتمام الطلب"
+                          Icon="bi-lock-fill"
+                          Variant="ButtonVariant.Primary"
+                          Block="true"
+                          Size="ButtonSize.Large"
+                          OnClick="HandleCheckout" />
+
+                <div class="ac-payment-icons">
+                    <i class="bi bi-credit-card"></i>
+                    <span>طرق دفع آمنة</span>
+                </div>
+            </div>
+
+            @* Continue Shopping *@
+            <div class="ac-continue-shopping">
+                <a href="/" class="ac-link">
+                    <i class="bi bi-arrow-right"></i>
+                    متابعة التسوق
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <AcEmptyState Icon="bi-cart3"
+                      Title="سلة التسوق فارغة"
+                      Description="لم تقم بإضافة أي منتجات للسلة بعد"
+                      ActionText="ابدأ التسوق"
+                      ActionIcon="bi-bag"
+                      OnAction="HandleStartShopping" />
+    }
+</div>
+
+@code {
+    [Parameter] public List<CartItemModel>? Items { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string Currency { get; set; } = "ر.س";
+    [Parameter] public decimal Subtotal { get; set; }
+    [Parameter] public decimal Discount { get; set; }
+    [Parameter] public decimal ShippingCost { get; set; }
+    [Parameter] public decimal Tax { get; set; }
+    [Parameter] public decimal TaxRate { get; set; } = 15;
+    [Parameter] public decimal Total { get; set; }
+    [Parameter] public decimal FreeShippingThreshold { get; set; }
+    [Parameter] public CouponModel? AppliedCoupon { get; set; }
+
+    [Parameter] public EventCallback<(Guid ItemId, int Quantity)> OnQuantityChange { get; set; }
+    [Parameter] public EventCallback<Guid> OnRemoveItem { get; set; }
+    [Parameter] public EventCallback<string> OnApplyCoupon { get; set; }
+    [Parameter] public EventCallback OnRemoveCoupon { get; set; }
+    [Parameter] public EventCallback OnCheckout { get; set; }
+    [Parameter] public EventCallback OnStartShopping { get; set; }
+
+    private string? CouponCode { get; set; }
+    private bool IsApplyingCoupon { get; set; }
+    private bool HasCouponError { get; set; }
+    private string? CouponErrorMessage { get; set; }
+
+    private async Task HandleQuantityChange(Guid itemId, int quantity)
+    {
+        await OnQuantityChange.InvokeAsync((itemId, quantity));
+    }
+
+    private async Task HandleRemoveItem(Guid itemId)
+    {
+        await OnRemoveItem.InvokeAsync(itemId);
+    }
+
+    private async Task HandleApplyCoupon()
+    {
+        if (!string.IsNullOrWhiteSpace(CouponCode))
+        {
+            IsApplyingCoupon = true;
+            HasCouponError = false;
+            await OnApplyCoupon.InvokeAsync(CouponCode);
+            IsApplyingCoupon = false;
+        }
+    }
+
+    private async Task HandleRemoveCoupon()
+    {
+        CouponCode = null;
+        await OnRemoveCoupon.InvokeAsync();
+    }
+
+    private async Task HandleCheckout()
+    {
+        await OnCheckout.InvokeAsync();
+    }
+
+    private async Task HandleStartShopping()
+    {
+        await OnStartShopping.InvokeAsync();
+    }
+
+    public void SetCouponError(string message)
+    {
+        HasCouponError = true;
+        CouponErrorMessage = message;
+        StateHasChanged();
+    }
+}

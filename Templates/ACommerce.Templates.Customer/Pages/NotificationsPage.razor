@@ -1,0 +1,144 @@
+@namespace ACommerce.Templates.Customer.Pages
+
+<div class="ac-page ac-notifications-page">
+    <div class="ac-page-header">
+        <h1>الإشعارات</h1>
+        @if (UnreadCount > 0)
+        {
+            <button class="ac-mark-all-read" @onclick="HandleMarkAllRead">
+                <i class="bi bi-check2-all"></i>
+                قراءة الكل
+            </button>
+        }
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="ac-notifications-loading">
+            @for (int i = 0; i < 5; i++)
+            {
+                <AcSkeleton Type="SkeletonType.ListItem" />
+            }
+        </div>
+    }
+    else if (Notifications?.Any() == true)
+    {
+        <div class="ac-notifications-list">
+            @foreach (var group in GroupedNotifications)
+            {
+                <div class="ac-notifications-group">
+                    <h3 class="ac-notifications-date">@group.Key</h3>
+                    @foreach (var notification in group.Value)
+                    {
+                        <div class="ac-notification-item @(!notification.IsRead ? "ac-unread" : "")"
+                             @onclick="() => HandleNotificationClick(notification)">
+                            <div class="ac-notification-icon @GetIconClass(notification.Type)">
+                                <i class="bi @GetIcon(notification.Type)"></i>
+                            </div>
+                            <div class="ac-notification-content">
+                                <h4 class="ac-notification-title">@notification.Title</h4>
+                                <p class="ac-notification-message">@notification.Message</p>
+                                <span class="ac-notification-time">@GetRelativeTime(notification.Timestamp)</span>
+                            </div>
+                            @if (!notification.IsRead)
+                            {
+                                <span class="ac-notification-dot"></span>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        @if (HasMore)
+        {
+            <div class="ac-load-more">
+                <AcButton Text="تحميل المزيد"
+                          Variant="ButtonVariant.Secondary"
+                          Outline="true"
+                          Loading="IsLoadingMore"
+                          OnClick="HandleLoadMore" />
+            </div>
+        }
+    }
+    else
+    {
+        <AcEmptyState Icon="bi-bell"
+                      Title="لا توجد إشعارات"
+                      Description="ستظهر هنا الإشعارات الجديدة" />
+    }
+</div>
+
+@code {
+    [Parameter] public List<NotificationItem>? Notifications { get; set; }
+    [Parameter] public int UnreadCount { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool IsLoadingMore { get; set; }
+    [Parameter] public bool HasMore { get; set; }
+
+    [Parameter] public EventCallback<NotificationItem> OnNotificationClick { get; set; }
+    [Parameter] public EventCallback OnMarkAllRead { get; set; }
+    [Parameter] public EventCallback OnLoadMore { get; set; }
+
+    private Dictionary<string, List<NotificationItem>> GroupedNotifications =>
+        Notifications?.GroupBy(n => GetDateGroup(n.Timestamp))
+                     .ToDictionary(g => g.Key, g => g.ToList())
+        ?? new();
+
+    private string GetDateGroup(DateTime date)
+    {
+        var today = DateTime.Today;
+        if (date.Date == today) return "اليوم";
+        if (date.Date == today.AddDays(-1)) return "أمس";
+        if (date.Date >= today.AddDays(-7)) return "هذا الأسبوع";
+        return date.ToString("dd MMMM yyyy");
+    }
+
+    private string GetRelativeTime(DateTime timestamp)
+    {
+        var diff = DateTime.Now - timestamp;
+        if (diff.TotalMinutes < 1) return "الآن";
+        if (diff.TotalMinutes < 60) return $"منذ {(int)diff.TotalMinutes} دقيقة";
+        if (diff.TotalHours < 24) return $"منذ {(int)diff.TotalHours} ساعة";
+        if (diff.TotalDays < 7) return $"منذ {(int)diff.TotalDays} يوم";
+        return timestamp.ToString("dd/MM/yyyy");
+    }
+
+    private string GetIcon(NotificationType type) => type switch
+    {
+        NotificationType.Order => "bi-box-seam",
+        NotificationType.Promotion => "bi-gift",
+        NotificationType.Delivery => "bi-truck",
+        NotificationType.Payment => "bi-credit-card",
+        NotificationType.Review => "bi-star",
+        NotificationType.Message => "bi-chat",
+        NotificationType.Account => "bi-person",
+        _ => "bi-bell"
+    };
+
+    private string GetIconClass(NotificationType type) => type switch
+    {
+        NotificationType.Order => "ac-icon-order",
+        NotificationType.Promotion => "ac-icon-promo",
+        NotificationType.Delivery => "ac-icon-delivery",
+        NotificationType.Payment => "ac-icon-payment",
+        NotificationType.Review => "ac-icon-review",
+        NotificationType.Message => "ac-icon-message",
+        _ => "ac-icon-default"
+    };
+
+    private async Task HandleNotificationClick(NotificationItem notification)
+    {
+        await OnNotificationClick.InvokeAsync(notification);
+    }
+
+    private async Task HandleMarkAllRead()
+    {
+        await OnMarkAllRead.InvokeAsync();
+    }
+
+    private async Task HandleLoadMore()
+    {
+        await OnLoadMore.InvokeAsync();
+    }
+}

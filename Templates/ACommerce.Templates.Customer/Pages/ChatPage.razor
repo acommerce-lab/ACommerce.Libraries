@@ -1,0 +1,256 @@
+@namespace ACommerce.Templates.Customer.Pages
+
+<div class="ac-page ac-chat-page">
+    @* Chat Header *@
+    <div class="ac-chat-header">
+        <button class="ac-back-btn" @onclick="HandleBack">
+            <i class="bi bi-arrow-right"></i>
+        </button>
+
+        <div class="ac-chat-contact">
+            <div class="ac-chat-avatar">
+                @if (!string.IsNullOrEmpty(Contact?.AvatarUrl))
+                {
+                    <img src="@Contact.AvatarUrl" alt="@Contact.Name" />
+                }
+                else
+                {
+                    <span>@Contact?.Name.FirstOrDefault()</span>
+                }
+            </div>
+            <div class="ac-chat-contact-info">
+                <span class="ac-chat-contact-name">@Contact?.Name</span>
+                <span class="ac-chat-contact-status">
+                    @if (Contact?.IsOnline == true)
+                    {
+                        <text>متصل الآن</text>
+                    }
+                    else if (Contact?.LastSeen != null)
+                    {
+                        <text>آخر ظهور @GetRelativeTime(Contact.LastSeen.Value)</text>
+                    }
+                </span>
+            </div>
+        </div>
+
+        <div class="ac-chat-actions">
+            <button @onclick="HandleCallClick" title="اتصال">
+                <i class="bi bi-telephone"></i>
+            </button>
+            <button @onclick="HandleMenuClick" title="المزيد">
+                <i class="bi bi-three-dots-vertical"></i>
+            </button>
+        </div>
+    </div>
+
+    @* Related Order/Product (if any) *@
+    @if (RelatedOrder != null)
+    {
+        <div class="ac-chat-related-order" @onclick="HandleOrderClick">
+            <i class="bi bi-box-seam"></i>
+            <div>
+                <span>طلب رقم #@RelatedOrder.OrderNumber</span>
+                <span class="ac-order-status">@RelatedOrder.StatusText</span>
+            </div>
+            <i class="bi bi-chevron-left"></i>
+        </div>
+    }
+
+    @* Messages List *@
+    <div class="ac-chat-messages" @ref="MessagesContainer">
+        @if (IsLoadingHistory)
+        {
+            <div class="ac-chat-loading-history">
+                <AcSpinner Size="SpinnerSize.Small" />
+            </div>
+        }
+
+        @if (Messages != null)
+        {
+            var lastDate = DateTime.MinValue;
+            @foreach (var message in Messages)
+            {
+                @* Date Separator *@
+                @if (message.Timestamp.Date != lastDate)
+                {
+                    lastDate = message.Timestamp.Date;
+                    <div class="ac-chat-date-separator">
+                        <span>@GetDateLabel(message.Timestamp)</span>
+                    </div>
+                }
+
+                <AcChatBubble Message="@message.Text"
+                              Type="@message.Type"
+                              IsSent="@message.IsSent"
+                              Timestamp="@message.Timestamp"
+                              IsDelivered="@message.IsDelivered"
+                              IsRead="@message.IsRead"
+                              ShowAvatar="@(!message.IsSent)"
+                              SenderName="@(message.IsSent ? null : Contact?.Name)"
+                              AvatarUrl="@Contact?.AvatarUrl"
+                              MediaUrl="@message.MediaUrl"
+                              ProductName="@message.ProductName"
+                              ProductImage="@message.ProductImage"
+                              ProductPrice="@message.ProductPrice"
+                              ProductId="@message.ProductId"
+                              OrderNumber="@message.OrderNumber"
+                              OnImageClick="() => HandleMediaClick(message)"
+                              OnProductClick="() => HandleProductClick(message)" />
+            }
+        }
+
+        @if (IsTyping)
+        {
+            <div class="ac-typing-indicator">
+                <span>@Contact?.Name يكتب</span>
+                <div class="ac-typing-dots">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+        }
+    </div>
+
+    @* Message Input *@
+    <div class="ac-chat-input-container">
+        <button class="ac-chat-attachment" @onclick="HandleAttachmentClick">
+            <i class="bi bi-plus-circle"></i>
+        </button>
+
+        <div class="ac-chat-input-wrapper">
+            <input type="text"
+                   class="ac-chat-input"
+                   placeholder="اكتب رسالة..."
+                   @bind="MessageText"
+                   @bind:event="oninput"
+                   @onkeydown="HandleKeyDown" />
+
+            @if (!string.IsNullOrWhiteSpace(MessageText))
+            {
+                <button class="ac-chat-send" @onclick="HandleSendMessage">
+                    <i class="bi bi-send-fill"></i>
+                </button>
+            }
+            else
+            {
+                <button class="ac-chat-voice" @onclick="HandleVoiceMessage">
+                    <i class="bi bi-mic"></i>
+                </button>
+            }
+        </div>
+    </div>
+
+    @* Attachment Menu *@
+    @if (ShowAttachmentMenu)
+    {
+        <div class="ac-attachment-menu-backdrop" @onclick="() => ShowAttachmentMenu = false"></div>
+        <div class="ac-attachment-menu">
+            <button @onclick="HandleSelectImage">
+                <i class="bi bi-image"></i>
+                <span>صورة</span>
+            </button>
+            <button @onclick="HandleSelectProduct">
+                <i class="bi bi-box"></i>
+                <span>منتج</span>
+            </button>
+            <button @onclick="HandleSelectOrder">
+                <i class="bi bi-receipt"></i>
+                <span>طلب</span>
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public ChatContactInfo? Contact { get; set; }
+    [Parameter] public List<ChatMessageItem>? Messages { get; set; }
+    [Parameter] public RelatedOrderInfo? RelatedOrder { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool IsLoadingHistory { get; set; }
+    [Parameter] public bool IsTyping { get; set; }
+    [Parameter] public bool IsSending { get; set; }
+
+    [Parameter] public EventCallback OnBack { get; set; }
+    [Parameter] public EventCallback<string> OnSendMessage { get; set; }
+    [Parameter] public EventCallback OnAttachImage { get; set; }
+    [Parameter] public EventCallback OnAttachProduct { get; set; }
+    [Parameter] public EventCallback OnAttachOrder { get; set; }
+    [Parameter] public EventCallback OnVoiceMessage { get; set; }
+    [Parameter] public EventCallback OnCall { get; set; }
+    [Parameter] public EventCallback OnMenu { get; set; }
+    [Parameter] public EventCallback OnOrderClick { get; set; }
+    [Parameter] public EventCallback<ChatMessageItem> OnMediaClick { get; set; }
+    [Parameter] public EventCallback<Guid> OnProductClick { get; set; }
+    [Parameter] public EventCallback OnLoadMoreHistory { get; set; }
+
+    private ElementReference MessagesContainer { get; set; }
+    private string? MessageText { get; set; }
+    private bool ShowAttachmentMenu { get; set; }
+
+    private string GetRelativeTime(DateTime timestamp)
+    {
+        var diff = DateTime.Now - timestamp;
+        if (diff.TotalMinutes < 1) return "الآن";
+        if (diff.TotalMinutes < 60) return $"منذ {(int)diff.TotalMinutes} دقيقة";
+        if (diff.TotalHours < 24) return $"منذ {(int)diff.TotalHours} ساعة";
+        return timestamp.ToString("dd/MM HH:mm");
+    }
+
+    private string GetDateLabel(DateTime date)
+    {
+        var today = DateTime.Today;
+        if (date.Date == today) return "اليوم";
+        if (date.Date == today.AddDays(-1)) return "أمس";
+        return date.ToString("dd MMMM yyyy");
+    }
+
+    private async Task HandleBack() => await OnBack.InvokeAsync();
+
+    private async Task HandleSendMessage()
+    {
+        if (!string.IsNullOrWhiteSpace(MessageText))
+        {
+            var text = MessageText;
+            MessageText = string.Empty;
+            await OnSendMessage.InvokeAsync(text);
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {
+            await HandleSendMessage();
+        }
+    }
+
+    private void HandleAttachmentClick() => ShowAttachmentMenu = !ShowAttachmentMenu;
+
+    private async Task HandleSelectImage()
+    {
+        ShowAttachmentMenu = false;
+        await OnAttachImage.InvokeAsync();
+    }
+
+    private async Task HandleSelectProduct()
+    {
+        ShowAttachmentMenu = false;
+        await OnAttachProduct.InvokeAsync();
+    }
+
+    private async Task HandleSelectOrder()
+    {
+        ShowAttachmentMenu = false;
+        await OnAttachOrder.InvokeAsync();
+    }
+
+    private async Task HandleVoiceMessage() => await OnVoiceMessage.InvokeAsync();
+    private async Task HandleCallClick() => await OnCall.InvokeAsync();
+    private async Task HandleMenuClick() => await OnMenu.InvokeAsync();
+    private async Task HandleOrderClick() => await OnOrderClick.InvokeAsync();
+    private async Task HandleMediaClick(ChatMessageItem message) => await OnMediaClick.InvokeAsync(message);
+    private async Task HandleProductClick(ChatMessageItem message)
+    {
+        if (message.ProductId.HasValue)
+            await OnProductClick.InvokeAsync(message.ProductId.Value);
+    }
+}

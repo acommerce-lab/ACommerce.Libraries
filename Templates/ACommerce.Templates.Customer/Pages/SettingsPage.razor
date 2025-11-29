@@ -1,0 +1,281 @@
+@namespace ACommerce.Templates.Customer.Pages
+@inject ThemeService ThemeService
+
+<div class="ac-page ac-settings-page">
+    <div class="ac-page-header">
+        <h1>الإعدادات</h1>
+    </div>
+
+    <div class="ac-settings-list">
+        @* Appearance *@
+        <div class="ac-settings-section">
+            <h3>المظهر</h3>
+
+            <div class="ac-settings-item">
+                <div class="ac-settings-info">
+                    <i class="bi bi-moon-stars"></i>
+                    <div>
+                        <span class="ac-settings-label">الوضع الداكن</span>
+                        <span class="ac-settings-desc">تفعيل الوضع الداكن للتطبيق</span>
+                    </div>
+                </div>
+                <label class="ac-switch">
+                    <input type="checkbox" checked="@IsDarkMode" @onchange="HandleDarkModeToggle" />
+                    <span class="ac-switch-slider"></span>
+                </label>
+            </div>
+
+            <div class="ac-settings-item" @onclick="HandleThemeColorClick">
+                <div class="ac-settings-info">
+                    <i class="bi bi-palette"></i>
+                    <div>
+                        <span class="ac-settings-label">لون التطبيق</span>
+                        <span class="ac-settings-desc">اختر اللون الرئيسي للتطبيق</span>
+                    </div>
+                </div>
+                <div class="ac-color-preview" style="background-color: @SelectedColor"></div>
+                <i class="bi bi-chevron-left"></i>
+            </div>
+
+            <div class="ac-settings-item" @onclick="HandleFontSizeClick">
+                <div class="ac-settings-info">
+                    <i class="bi bi-fonts"></i>
+                    <div>
+                        <span class="ac-settings-label">حجم الخط</span>
+                        <span class="ac-settings-desc">@FontSizeLabel</span>
+                    </div>
+                </div>
+                <i class="bi bi-chevron-left"></i>
+            </div>
+        </div>
+
+        @* Notifications *@
+        <div class="ac-settings-section">
+            <h3>الإشعارات</h3>
+
+            <div class="ac-settings-item">
+                <div class="ac-settings-info">
+                    <i class="bi bi-bell"></i>
+                    <div>
+                        <span class="ac-settings-label">إشعارات الدفع</span>
+                        <span class="ac-settings-desc">استلام إشعارات على الجهاز</span>
+                    </div>
+                </div>
+                <label class="ac-switch">
+                    <input type="checkbox" checked="@PushNotificationsEnabled" @onchange="HandlePushToggle" />
+                    <span class="ac-switch-slider"></span>
+                </label>
+            </div>
+
+            <div class="ac-settings-item">
+                <div class="ac-settings-info">
+                    <i class="bi bi-envelope"></i>
+                    <div>
+                        <span class="ac-settings-label">إشعارات البريد</span>
+                        <span class="ac-settings-desc">استلام التحديثات عبر البريد</span>
+                    </div>
+                </div>
+                <label class="ac-switch">
+                    <input type="checkbox" checked="@EmailNotificationsEnabled" @onchange="HandleEmailToggle" />
+                    <span class="ac-switch-slider"></span>
+                </label>
+            </div>
+
+            <div class="ac-settings-item">
+                <div class="ac-settings-info">
+                    <i class="bi bi-chat-left-text"></i>
+                    <div>
+                        <span class="ac-settings-label">إشعارات SMS</span>
+                        <span class="ac-settings-desc">استلام رسائل نصية قصيرة</span>
+                    </div>
+                </div>
+                <label class="ac-switch">
+                    <input type="checkbox" checked="@SmsNotificationsEnabled" @onchange="HandleSmsToggle" />
+                    <span class="ac-switch-slider"></span>
+                </label>
+            </div>
+        </div>
+
+        @* Privacy & Security *@
+        <div class="ac-settings-section">
+            <h3>الخصوصية والأمان</h3>
+
+            <div class="ac-settings-item">
+                <div class="ac-settings-info">
+                    <i class="bi bi-fingerprint"></i>
+                    <div>
+                        <span class="ac-settings-label">البصمة / Face ID</span>
+                        <span class="ac-settings-desc">استخدام البيومترية لتسجيل الدخول</span>
+                    </div>
+                </div>
+                <label class="ac-switch">
+                    <input type="checkbox" checked="@BiometricEnabled" @onchange="HandleBiometricToggle" />
+                    <span class="ac-switch-slider"></span>
+                </label>
+            </div>
+
+            <div class="ac-settings-item" @onclick="HandlePrivacyClick">
+                <div class="ac-settings-info">
+                    <i class="bi bi-shield-check"></i>
+                    <div>
+                        <span class="ac-settings-label">إعدادات الخصوصية</span>
+                        <span class="ac-settings-desc">التحكم في بياناتك</span>
+                    </div>
+                </div>
+                <i class="bi bi-chevron-left"></i>
+            </div>
+
+            <div class="ac-settings-item" @onclick="HandleSessionsClick">
+                <div class="ac-settings-info">
+                    <i class="bi bi-phone"></i>
+                    <div>
+                        <span class="ac-settings-label">الجلسات النشطة</span>
+                        <span class="ac-settings-desc">@ActiveSessionsCount جهاز متصل</span>
+                    </div>
+                </div>
+                <i class="bi bi-chevron-left"></i>
+            </div>
+        </div>
+
+        @* Language & Region *@
+        <div class="ac-settings-section">
+            <h3>اللغة والمنطقة</h3>
+
+            <div class="ac-settings-item" @onclick="HandleLanguageClick">
+                <div class="ac-settings-info">
+                    <i class="bi bi-globe"></i>
+                    <div>
+                        <span class="ac-settings-label">اللغة</span>
+                        <span class="ac-settings-desc">@CurrentLanguage</span>
+                    </div>
+                </div>
+                <i class="bi bi-chevron-left"></i>
+            </div>
+
+            <div class="ac-settings-item" @onclick="HandleCurrencyClick">
+                <div class="ac-settings-info">
+                    <i class="bi bi-currency-exchange"></i>
+                    <div>
+                        <span class="ac-settings-label">العملة</span>
+                        <span class="ac-settings-desc">@CurrentCurrency</span>
+                    </div>
+                </div>
+                <i class="bi bi-chevron-left"></i>
+            </div>
+        </div>
+
+        @* Data & Storage *@
+        <div class="ac-settings-section">
+            <h3>البيانات والتخزين</h3>
+
+            <div class="ac-settings-item" @onclick="HandleClearCacheClick">
+                <div class="ac-settings-info">
+                    <i class="bi bi-trash"></i>
+                    <div>
+                        <span class="ac-settings-label">مسح ذاكرة التخزين المؤقت</span>
+                        <span class="ac-settings-desc">@CacheSize</span>
+                    </div>
+                </div>
+                <i class="bi bi-chevron-left"></i>
+            </div>
+
+            <div class="ac-settings-item" @onclick="HandleDownloadDataClick">
+                <div class="ac-settings-info">
+                    <i class="bi bi-download"></i>
+                    <div>
+                        <span class="ac-settings-label">تنزيل بياناتي</span>
+                        <span class="ac-settings-desc">تصدير جميع بياناتك</span>
+                    </div>
+                </div>
+                <i class="bi bi-chevron-left"></i>
+            </div>
+        </div>
+
+        @* Danger Zone *@
+        <div class="ac-settings-section ac-danger-zone">
+            <h3>منطقة الخطر</h3>
+
+            <div class="ac-settings-item ac-danger" @onclick="HandleDeleteAccountClick">
+                <div class="ac-settings-info">
+                    <i class="bi bi-person-x"></i>
+                    <div>
+                        <span class="ac-settings-label">حذف الحساب</span>
+                        <span class="ac-settings-desc">حذف حسابك نهائياً</span>
+                    </div>
+                </div>
+                <i class="bi bi-chevron-left"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsDarkMode { get; set; }
+    [Parameter] public string SelectedColor { get; set; } = "#2563eb";
+    [Parameter] public string FontSizeLabel { get; set; } = "متوسط";
+    [Parameter] public bool PushNotificationsEnabled { get; set; } = true;
+    [Parameter] public bool EmailNotificationsEnabled { get; set; } = true;
+    [Parameter] public bool SmsNotificationsEnabled { get; set; }
+    [Parameter] public bool BiometricEnabled { get; set; }
+    [Parameter] public int ActiveSessionsCount { get; set; } = 1;
+    [Parameter] public string CurrentLanguage { get; set; } = "العربية";
+    [Parameter] public string CurrentCurrency { get; set; } = "ريال سعودي (SAR)";
+    [Parameter] public string CacheSize { get; set; } = "25 MB";
+
+    [Parameter] public EventCallback<bool> OnDarkModeChange { get; set; }
+    [Parameter] public EventCallback OnThemeColorClick { get; set; }
+    [Parameter] public EventCallback OnFontSizeClick { get; set; }
+    [Parameter] public EventCallback<bool> OnPushNotificationsChange { get; set; }
+    [Parameter] public EventCallback<bool> OnEmailNotificationsChange { get; set; }
+    [Parameter] public EventCallback<bool> OnSmsNotificationsChange { get; set; }
+    [Parameter] public EventCallback<bool> OnBiometricChange { get; set; }
+    [Parameter] public EventCallback OnPrivacyClick { get; set; }
+    [Parameter] public EventCallback OnSessionsClick { get; set; }
+    [Parameter] public EventCallback OnLanguageClick { get; set; }
+    [Parameter] public EventCallback OnCurrencyClick { get; set; }
+    [Parameter] public EventCallback OnClearCacheClick { get; set; }
+    [Parameter] public EventCallback OnDownloadDataClick { get; set; }
+    [Parameter] public EventCallback OnDeleteAccountClick { get; set; }
+
+    private async Task HandleDarkModeToggle(ChangeEventArgs e)
+    {
+        IsDarkMode = (bool)(e.Value ?? false);
+        ThemeService.ToggleDarkMode();
+        await OnDarkModeChange.InvokeAsync(IsDarkMode);
+    }
+
+    private async Task HandleThemeColorClick() => await OnThemeColorClick.InvokeAsync();
+    private async Task HandleFontSizeClick() => await OnFontSizeClick.InvokeAsync();
+
+    private async Task HandlePushToggle(ChangeEventArgs e)
+    {
+        PushNotificationsEnabled = (bool)(e.Value ?? false);
+        await OnPushNotificationsChange.InvokeAsync(PushNotificationsEnabled);
+    }
+
+    private async Task HandleEmailToggle(ChangeEventArgs e)
+    {
+        EmailNotificationsEnabled = (bool)(e.Value ?? false);
+        await OnEmailNotificationsChange.InvokeAsync(EmailNotificationsEnabled);
+    }
+
+    private async Task HandleSmsToggle(ChangeEventArgs e)
+    {
+        SmsNotificationsEnabled = (bool)(e.Value ?? false);
+        await OnSmsNotificationsChange.InvokeAsync(SmsNotificationsEnabled);
+    }
+
+    private async Task HandleBiometricToggle(ChangeEventArgs e)
+    {
+        BiometricEnabled = (bool)(e.Value ?? false);
+        await OnBiometricChange.InvokeAsync(BiometricEnabled);
+    }
+
+    private async Task HandlePrivacyClick() => await OnPrivacyClick.InvokeAsync();
+    private async Task HandleSessionsClick() => await OnSessionsClick.InvokeAsync();
+    private async Task HandleLanguageClick() => await OnLanguageClick.InvokeAsync();
+    private async Task HandleCurrencyClick() => await OnCurrencyClick.InvokeAsync();
+    private async Task HandleClearCacheClick() => await OnClearCacheClick.InvokeAsync();
+    private async Task HandleDownloadDataClick() => await OnDownloadDataClick.InvokeAsync();
+    private async Task HandleDeleteAccountClick() => await OnDeleteAccountClick.InvokeAsync();
+}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>ACommerce</title>
+    <base href="/" />
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+
+    <!-- ACommerce Template Styles -->
+    <link rel="stylesheet" href="_content/ACommerce.Templates.Customer/css/acommerce.css" />
+
+    <!-- App Styles -->
+    <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+    <div id="app">
+        <div class="ac-loading-screen">
+            <div class="ac-loading-content">
+                <div class="ac-loading-logo">
+                    <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                        <circle cx="32" cy="32" r="30" stroke="currentColor" stroke-width="4"/>
+                        <path d="M20 32L28 40L44 24" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <p>جاري التحميل...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="blazor-error-ui">
+        حدث خطأ غير متوقع. <a href="" class="reload">إعادة التحميل</a>
+    </div>
+
+    <script src="_framework/blazor.webview.js" autostart="false"></script>
+    <script>
+        Blazor.start();
+    </script>
+</body>
+</html>

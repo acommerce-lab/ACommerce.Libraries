@@ -1,0 +1,181 @@
+@namespace ACommerce.Templates.Customer.Pages
+
+<div class="ac-page ac-home-page">
+    @* Hero Section / Search *@
+    <section class="ac-hero-section">
+        <AcSearchBox Placeholder="ابحث عن منتجات..."
+                     Value="@SearchQuery"
+                     ValueChanged="HandleSearchChange"
+                     OnSearch="HandleSearch"
+                     ShowVoiceSearch="true" />
+    </section>
+
+    @* Categories Section *@
+    @if (Categories != null && Categories.Any())
+    {
+        <section class="ac-section">
+            <div class="ac-section-header">
+                <h2 class="ac-section-title">التصنيفات</h2>
+                <a href="/categories" class="ac-section-link">عرض الكل</a>
+            </div>
+            <div class="ac-categories-scroll">
+                @foreach (var category in Categories)
+                {
+                    <div class="ac-category-item" @onclick="() => OnCategoryClick.InvokeAsync(category.Id)">
+                        @if (!string.IsNullOrEmpty(category.Icon))
+                        {
+                            <div class="ac-category-icon">
+                                <i class="bi @category.Icon"></i>
+                            </div>
+                        }
+                        else if (!string.IsNullOrEmpty(category.Image))
+                        {
+                            <div class="ac-category-image">
+                                <img src="@category.Image" alt="@category.Name" />
+                            </div>
+                        }
+                        <span class="ac-category-name">@category.Name</span>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+
+    @* Banners / Promotions Carousel *@
+    @if (Banners != null && Banners.Any())
+    {
+        <section class="ac-banners-section">
+            <div class="ac-banners-carousel">
+                @foreach (var banner in Banners)
+                {
+                    <div class="ac-banner-item" @onclick="() => OnBannerClick.InvokeAsync(banner)">
+                        <img src="@banner.ImageUrl" alt="@banner.Title" />
+                    </div>
+                }
+            </div>
+        </section>
+    }
+
+    @* Featured Products *@
+    @if (FeaturedProducts != null && FeaturedProducts.Any())
+    {
+        <section class="ac-section">
+            <div class="ac-section-header">
+                <h2 class="ac-section-title">منتجات مميزة</h2>
+                <a href="/products?featured=true" class="ac-section-link">عرض الكل</a>
+            </div>
+            <div class="ac-products-scroll">
+                @foreach (var product in FeaturedProducts)
+                {
+                    <AcProductCard Id="@product.Id"
+                                   Name="@product.Name"
+                                   ImageUrl="@product.Image"
+                                   Price="@product.Price"
+                                   OldPrice="@product.OldPrice"
+                                   Rating="@product.Rating"
+                                   ReviewCount="@product.ReviewCount"
+                                   IsFeatured="true"
+                                   DynamicAttributes="@product.Attributes"
+                                   OnClick="HandleProductClick"
+                                   OnAddToCart="HandleAddToCart" />
+                }
+            </div>
+        </section>
+    }
+
+    @* New Arrivals *@
+    @if (NewProducts != null && NewProducts.Any())
+    {
+        <section class="ac-section">
+            <div class="ac-section-header">
+                <h2 class="ac-section-title">وصل حديثاً</h2>
+                <a href="/products?new=true" class="ac-section-link">عرض الكل</a>
+            </div>
+            <div class="ac-products-scroll">
+                @foreach (var product in NewProducts)
+                {
+                    <AcProductCard Id="@product.Id"
+                                   Name="@product.Name"
+                                   ImageUrl="@product.Image"
+                                   Price="@product.Price"
+                                   OldPrice="@product.OldPrice"
+                                   Rating="@product.Rating"
+                                   IsNew="true"
+                                   DynamicAttributes="@product.Attributes"
+                                   OnClick="HandleProductClick"
+                                   OnAddToCart="HandleAddToCart" />
+                }
+            </div>
+        </section>
+    }
+
+    @* Best Sellers *@
+    @if (BestSellers != null && BestSellers.Any())
+    {
+        <section class="ac-section">
+            <div class="ac-section-header">
+                <h2 class="ac-section-title">الأكثر مبيعاً</h2>
+                <a href="/products?bestseller=true" class="ac-section-link">عرض الكل</a>
+            </div>
+            <div class="ac-products-grid">
+                @foreach (var product in BestSellers.Take(6))
+                {
+                    <AcProductCard Id="@product.Id"
+                                   Name="@product.Name"
+                                   ImageUrl="@product.Image"
+                                   Price="@product.Price"
+                                   OldPrice="@product.OldPrice"
+                                   Rating="@product.Rating"
+                                   ReviewCount="@product.ReviewCount"
+                                   DynamicAttributes="@product.Attributes"
+                                   OnClick="HandleProductClick"
+                                   OnAddToCart="HandleAddToCart" />
+                }
+            </div>
+        </section>
+    }
+
+    @* Loading State *@
+    @if (IsLoading)
+    {
+        <div class="ac-loading-overlay">
+            <AcSpinner Size="SpinnerSize.Large" Text="جاري التحميل..." />
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<HomeCategoryItem>? Categories { get; set; }
+    [Parameter] public List<BannerItem>? Banners { get; set; }
+    [Parameter] public List<HomeProductItem>? FeaturedProducts { get; set; }
+    [Parameter] public List<HomeProductItem>? NewProducts { get; set; }
+    [Parameter] public List<HomeProductItem>? BestSellers { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string? SearchQuery { get; set; }
+
+    [Parameter] public EventCallback<Guid> OnCategoryClick { get; set; }
+    [Parameter] public EventCallback<BannerItem> OnBannerClick { get; set; }
+    [Parameter] public EventCallback<Guid> OnProductClick { get; set; }
+    [Parameter] public EventCallback<Guid> OnAddToCart { get; set; }
+    [Parameter] public EventCallback<string> OnSearch { get; set; }
+
+    private void HandleSearchChange(string value)
+    {
+        SearchQuery = value;
+    }
+
+    private async Task HandleSearch(string query)
+    {
+        await OnSearch.InvokeAsync(query);
+    }
+
+    private async Task HandleProductClick(Guid productId)
+    {
+        await OnProductClick.InvokeAsync(productId);
+    }
+
+    private async Task HandleAddToCart(Guid productId)
+    {
+        await OnAddToCart.InvokeAsync(productId);
+    }
+}

@@ -1,0 +1,48 @@
+@namespace ACommerce.Templates.Customer.Components
+
+<div class="ac-empty-state @Class">
+    @if (!string.IsNullOrEmpty(ImageUrl))
+    {
+        <img src="@ImageUrl" alt="" class="ac-empty-state-image" />
+    }
+    else if (!string.IsNullOrEmpty(Icon))
+    {
+        <div class="ac-empty-state-icon">
+            <i class="bi @Icon"></i>
+        </div>
+    }
+
+    <h3 class="ac-empty-state-title">@Title</h3>
+
+    @if (!string.IsNullOrEmpty(Description))
+    {
+        <p class="ac-empty-state-description">@Description</p>
+    }
+
+    @if (ChildContent != null)
+    {
+        <div class="ac-empty-state-content">
+            @ChildContent
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(ActionText))
+    {
+        <AcButton Text="@ActionText"
+                  Variant="ButtonVariant.Primary"
+                  Icon="@ActionIcon"
+                  OnClick="OnAction" />
+    }
+</div>
+
+@code {
+    [Parameter] public string? Icon { get; set; } = "bi-inbox";
+    [Parameter] public string? ImageUrl { get; set; }
+    [Parameter] public string Title { get; set; } = "لا توجد بيانات";
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public string? ActionText { get; set; }
+    [Parameter] public string? ActionIcon { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnAction { get; set; }
+}

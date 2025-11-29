@@ -1,0 +1,68 @@
+@page "/notifications"
+@inject MockDataService DataService
+@inject IAppNavigationService Navigation
+
+<NotificationsPage Notifications="@_notifications"
+                   UnreadCount="@_unreadCount"
+                   IsLoading="@_isLoading"
+                   IsLoadingMore="@_isLoadingMore"
+                   HasMore="@_hasMore"
+                   OnNotificationClick="HandleNotificationClick"
+                   OnMarkAllRead="HandleMarkAllRead"
+                   OnLoadMore="HandleLoadMore" />
+
+@code {
+    private List<NotificationItem>? _notifications;
+    private int _unreadCount;
+    private bool _isLoading = true;
+    private bool _isLoadingMore;
+    private bool _hasMore = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadNotificationsAsync();
+    }
+
+    private async Task LoadNotificationsAsync()
+    {
+        _isLoading = true;
+
+        await Task.Delay(300);
+
+        _notifications = DataService.GetNotifications();
+        _unreadCount = _notifications.Count(n => !n.IsRead);
+
+        _isLoading = false;
+    }
+
+    private void HandleNotificationClick(NotificationItem notification)
+    {
+        notification.IsRead = true;
+        _unreadCount = _notifications?.Count(n => !n.IsRead) ?? 0;
+
+        if (!string.IsNullOrEmpty(notification.ActionUrl))
+        {
+            Navigation.NavigateTo(notification.ActionUrl);
+        }
+    }
+
+    private void HandleMarkAllRead()
+    {
+        if (_notifications != null)
+        {
+            foreach (var n in _notifications)
+            {
+                n.IsRead = true;
+            }
+            _unreadCount = 0;
+        }
+    }
+
+    private async Task HandleLoadMore()
+    {
+        _isLoadingMore = true;
+        await Task.Delay(500);
+        _hasMore = false;
+        _isLoadingMore = false;
+    }
+}
