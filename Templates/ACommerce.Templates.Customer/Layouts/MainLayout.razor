@@ -2,7 +2,10 @@
 @inherits LayoutComponentBase
 @inject ThemeService ThemeService
 
-<div class="ac-app @(ThemeService.IsDarkMode ? "ac-dark" : "ac-light")" style="@ThemeService.GenerateCssVariables()">
+<style>
+    @((MarkupString)ThemeService.GenerateCssVariables())
+</style>
+<div class="ac-app @(ThemeService.IsDarkMode ? "ac-dark" : "ac-light")">
     @if (ShowNavbar)
     {
         <AcNavbar BrandName="@BrandName"

@@ -1,8 +1,17 @@
 @using Microsoft.AspNetCore.Components.Routing
+@using ACommerce.App.Customer.Components.Layout
 
-<Router AppAssembly="@typeof(Routes).Assembly">
+<Router AppAssembly="@typeof(Routes).Assembly" AdditionalAssemblies="new[] { typeof(ACommerce.Templates.Customer.Components.AcButton).Assembly }">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)" />
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <div class="ac-not-found">
+                <h1>404</h1>
+                <p>الصفحة غير موجودة</p>
+            </div>
+        </LayoutView>
+    </NotFound>
 </Router>

@@ -32,7 +32,7 @@ public static class MauiProgram
 			options.Colors.Primary = "#2563eb";
 			options.Colors.Secondary = "#64748b";
 			options.Colors.Success = "#22c55e";
-			options.Colors.Danger = "#ef4444";
+			options.Colors.Error = "#ef4444";
 			options.Colors.Warning = "#f59e0b";
 			options.Colors.Info = "#3b82f6";
 
