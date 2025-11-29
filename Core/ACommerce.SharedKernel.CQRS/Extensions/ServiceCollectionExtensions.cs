@@ -109,60 +109,39 @@ public static class ServiceCollectionExtensions
 	private static void RegisterCqrsHandlersForEntities(IServiceCollection services, Assembly[] assemblies)
 	{
 		var entityInterface = typeof(IBaseEntity);
+		var registeredPairs = new HashSet<string>();
+
+		// First, collect all entity types and DTO types from all assemblies
+		var allEntityTypes = new List<Type>();
+		var allDtoTypes = new Dictionary<string, Type>();
 
 		foreach (var assembly in assemblies)
 		{
 			try
 			{
-				var entityTypes = assembly.GetTypes()
-					.Where(t => entityInterface.IsAssignableFrom(t)
-						&& t.IsClass
-						&& !t.IsAbstract
-						&& !t.IsGenericType)
-					.ToList();
+				var types = GetLoadableTypes(assembly);
 
-				foreach (var entityType in entityTypes)
+				// Collect entities
+				allEntityTypes.AddRange(types.Where(t =>
+					entityInterface.IsAssignableFrom(t)
+					&& t.IsClass
+					&& !t.IsAbstract
+					&& !t.IsGenericType
+					&& !t.IsNested));
+
+				// Collect DTOs (index by name for fast lookup)
+				foreach (var dtoType in types.Where(t =>
+					t.IsClass
+					&& !t.IsAbstract
+					&& !t.IsGenericType
+					&& (t.Name.EndsWith("ResponseDto") || t.Name.EndsWith("Dto"))))
 				{
-					// Look for matching ResponseDto in the same or related assemblies
-					var responseDtoType = FindResponseDtoForEntity(entityType, assemblies);
-					if (responseDtoType != null)
+					// Use the first DTO found with each name
+					if (!allDtoTypes.ContainsKey(dtoType.Name))
 					{
-						RegisterHandlersForEntity(services, entityType, responseDtoType);
+						allDtoTypes[dtoType.Name] = dtoType;
 					}
 				}
-			}
-			catch (ReflectionTypeLoadException)
-			{
-				// Skip assemblies that can't be loaded
-				continue;
-			}
-		}
-	}
-
-	/// <summary>
-	/// Find a matching ResponseDto for an entity by naming convention
-	/// </summary>
-	private static Type? FindResponseDtoForEntity(Type entityType, Assembly[] assemblies)
-	{
-		var entityName = entityType.Name;
-		var possibleDtoNames = new[]
-		{
-			$"{entityName}ResponseDto",
-			$"{entityName}Dto",
-			$"{entityName}Response"
-		};
-
-		foreach (var assembly in assemblies)
-		{
-			try
-			{
-				var dtoType = assembly.GetTypes()
-					.FirstOrDefault(t => possibleDtoNames.Contains(t.Name)
-						&& t.IsClass
-						&& !t.IsAbstract);
-
-				if (dtoType != null)
-					return dtoType;
 			}
 			catch
 			{
@@ -170,7 +149,57 @@ public static class ServiceCollectionExtensions
 			}
 		}
 
-		return null;
+		// Now match entities with their DTOs and register handlers
+		foreach (var entityType in allEntityTypes)
+		{
+			var entityName = entityType.Name;
+			var pairKey = entityType.FullName ?? entityName;
+
+			if (registeredPairs.Contains(pairKey))
+				continue;
+
+			// Try to find matching DTO
+			Type? responseDtoType = null;
+
+			// Try exact match first: EntityNameResponseDto
+			if (allDtoTypes.TryGetValue($"{entityName}ResponseDto", out var exactMatch))
+			{
+				responseDtoType = exactMatch;
+			}
+			// Try EntityNameDto
+			else if (allDtoTypes.TryGetValue($"{entityName}Dto", out var dtoMatch))
+			{
+				responseDtoType = dtoMatch;
+			}
+
+			if (responseDtoType != null)
+			{
+				try
+				{
+					RegisterHandlersForEntity(services, entityType, responseDtoType);
+					registeredPairs.Add(pairKey);
+				}
+				catch
+				{
+					// Skip entities that fail to register
+				}
+			}
+		}
+	}
+
+	/// <summary>
+	/// Get types from assembly, handling ReflectionTypeLoadException
+	/// </summary>
+	private static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
+	{
+		try
+		{
+			return assembly.GetTypes();
+		}
+		catch (ReflectionTypeLoadException ex)
+		{
+			return ex.Types.Where(t => t != null).Cast<Type>();
+		}
 	}
 
 	/// <summary>
