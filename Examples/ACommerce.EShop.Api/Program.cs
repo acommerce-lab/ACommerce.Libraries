@@ -12,6 +12,7 @@ using ACommerce.Realtime.SignalR.Hubs;
 using ACommerce.Realtime.SignalR.Extensions;
 using ACommerce.Chats.Core.Hubs;
 using ACommerce.Chats.Core.Extensions;
+using ACommerce.Catalog.Products.Services;
 
 // ════════════════════════════════════════════════════════════════
 // 🎯 ACommerce E-Shop API - Complete E-Commerce Backend
@@ -68,6 +69,11 @@ try
     // Repository & Unit of Work
     builder.Services.AddScoped<IRepositoryFactory, RepositoryFactory>();
     builder.Services.AddScoped(typeof(IBaseAsyncRepository<>), typeof(BaseAsyncRepository<>));
+
+    // ════════════════════════════════════════════════════════════════
+    // 📦 Domain Services
+    // ════════════════════════════════════════════════════════════════
+    builder.Services.AddScoped<IProductService, ProductService>();
 
     // ════════════════════════════════════════════════════════════════
     // 🔐 Authentication & Authorization (OpenIddict)
