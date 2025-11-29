@@ -69,11 +69,7 @@ try
     // ════════════════════════════════════════════════════════════════
     // 🔐 Authentication & Authorization (OpenIddict)
     // ════════════════════════════════════════════════════════════════
-    builder.Services.AddJwtAuthentication(options =>
-    {
-        options.Issuer = builder.Configuration["Authentication:Issuer"]
-            ?? "https://localhost:5001";
-    });
+    builder.Services.AddJwtAuthentication(builder.Configuration);
 
     // ════════════════════════════════════════════════════════════════
     // 🗺️ AutoMapper & CQRS
