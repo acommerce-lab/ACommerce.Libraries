@@ -51,7 +51,11 @@ public class ApplicationDbContext : DbContext
 					.Where(t => typeof(IBaseEntity).IsAssignableFrom(t)
 						&& t.IsClass
 						&& !t.IsAbstract
-						&& t != typeof(IBaseEntity))
+						&& t != typeof(IBaseEntity)
+						&& !string.IsNullOrEmpty(t.Name)
+						&& !string.IsNullOrEmpty(t.FullName)
+						&& !t.IsGenericType
+						&& !t.IsNested)
 					.ToList();
 
 				entityTypes.AddRange(types);

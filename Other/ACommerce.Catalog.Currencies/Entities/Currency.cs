@@ -73,6 +73,7 @@ public class Currency : IBaseEntity
 	/// <summary>
 	/// أسماء الدول التي تستخدم هذه العملة
 	/// </summary>
+	[NotMapped]
 	public List<string> Countries { get; set; } = new();
 
 	/// <summary>

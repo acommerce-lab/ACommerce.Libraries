@@ -24,6 +24,7 @@ public class Message : IBaseEntity
 	public Guid? ReplyToMessageId { get; set; }
 	public Message? ReplyToMessage { get; set; }
 
+	[NotMapped]
 	public List<string> Attachments { get; set; } = new();
 
 	public bool IsEdited { get; set; }
