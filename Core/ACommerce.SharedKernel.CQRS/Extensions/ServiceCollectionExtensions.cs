@@ -37,6 +37,15 @@ public static class ServiceCollectionExtensions
 			cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(PerformanceBehavior<,>));
 		});
 
+		// Register open generic handlers for CQRS
+		services.AddScoped(typeof(IRequestHandler<,>), typeof(SmartSearchQueryHandler<,>));
+		services.AddScoped(typeof(IRequestHandler<,>), typeof(GetByIdQueryHandler<,>));
+		services.AddScoped(typeof(IRequestHandler<,>), typeof(CreateCommandHandler<,>));
+		services.AddScoped(typeof(IRequestHandler<,>), typeof(UpdateCommandHandler<,>));
+		services.AddScoped(typeof(IRequestHandler<,>), typeof(PartialUpdateCommandHandler<,>));
+		services.AddScoped(typeof(IRequestHandler<,>), typeof(DeleteCommandHandler<>));
+		services.AddScoped(typeof(IRequestHandler<,>), typeof(RestoreCommandHandler<>));
+
 		// AutoMapper
 		services.AddAutoMapper(cfg =>
 		{
