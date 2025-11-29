@@ -1,7 +1,13 @@
 /* App-specific styles */
 
+/*
+ * DEBUG: If you see a red background, CSS is loading correctly.
+ * Remove this debug style after confirming CSS loads.
+ */
 html, body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--ac-font-family, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
+    /* DEBUG: Uncomment next line to test CSS loading */
+    /* background-color: red !important; */
 }
 
 /* Loading screen */
