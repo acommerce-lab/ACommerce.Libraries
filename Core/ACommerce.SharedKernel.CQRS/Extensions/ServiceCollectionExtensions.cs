@@ -9,6 +9,7 @@ using ACommerce.SharedKernel.CQRS.Handlers;
 using ACommerce.SharedKernel.CQRS.Mapping;
 using ACommerce.SharedKernel.CQRS.Queries;
 using System.Reflection;
+using System.Runtime.Loader;
 
 namespace ACommerce.SharedKernel.CQRS.Extensions;
 
@@ -26,10 +27,13 @@ public static class ServiceCollectionExtensions
 			assemblies = [Assembly.GetCallingAssembly()];
 		}
 
+		// Load all ACommerce assemblies from the application directory
+		var allAssemblies = LoadACommerceAssemblies(assemblies);
+
 		// MediatR
 		services.AddMediatR(cfg =>
 		{
-			cfg.RegisterServicesFromAssemblies(assemblies);
+			cfg.RegisterServicesFromAssemblies(allAssemblies);
 
 			// Behaviors
 			cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
@@ -38,19 +42,65 @@ public static class ServiceCollectionExtensions
 		});
 
 		// Auto-discover and register CQRS handlers for entities
-		RegisterCqrsHandlersForEntities(services, assemblies);
+		RegisterCqrsHandlersForEntities(services, allAssemblies);
 
 		// AutoMapper
 		services.AddAutoMapper(cfg =>
 		{
-			cfg.AddProfile(new ConventionMappingProfile(assemblies));
-			cfg.AddMaps(assemblies);
+			cfg.AddProfile(new ConventionMappingProfile(allAssemblies));
+			cfg.AddMaps(allAssemblies);
 		});
 
 		// FluentValidation
-		services.AddValidatorsFromAssemblies(assemblies);
+		services.AddValidatorsFromAssemblies(allAssemblies);
 
 		return services;
+	}
+
+	/// <summary>
+	/// Load all ACommerce assemblies from the application directory
+	/// </summary>
+	private static Assembly[] LoadACommerceAssemblies(Assembly[] initialAssemblies)
+	{
+		var loadedAssemblies = new HashSet<Assembly>(initialAssemblies);
+
+		// Get the base directory where the application is running
+		var baseDirectory = AppContext.BaseDirectory;
+
+		try
+		{
+			// Find all ACommerce DLLs in the base directory
+			var acommerceFiles = Directory.GetFiles(baseDirectory, "ACommerce.*.dll");
+
+			foreach (var file in acommerceFiles)
+			{
+				try
+				{
+					var assemblyName = AssemblyName.GetAssemblyName(file);
+
+					// Check if already loaded
+					var existingAssembly = loadedAssemblies
+						.FirstOrDefault(a => a.GetName().Name == assemblyName.Name);
+
+					if (existingAssembly == null)
+					{
+						var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(file);
+						loadedAssemblies.Add(assembly);
+					}
+				}
+				catch
+				{
+					// Skip assemblies that can't be loaded
+					continue;
+				}
+			}
+		}
+		catch
+		{
+			// If directory scanning fails, just use the initial assemblies
+		}
+
+		return loadedAssemblies.ToArray();
 	}
 
 	/// <summary>
