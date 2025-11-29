@@ -78,9 +78,6 @@
     <ProjectReference Include="..\..\Clients\ACommerce.Client.Vendors\ACommerce.Client.Vendors.csproj" />
     <ProjectReference Include="..\..\Clients\ACommerce.Client.Categories\ACommerce.Client.Categories.csproj" />
     <ProjectReference Include="..\..\Clients\ACommerce.Client.Realtime\ACommerce.Client.Realtime.csproj" />
-
-    <!-- Blazor Shop Template (for shared services and components) -->
-    <ProjectReference Include="..\..\Templates\ACommerce.Blazor.Shop\ACommerce.Blazor.Shop.csproj" />
   </ItemGroup>
 
 </Project>

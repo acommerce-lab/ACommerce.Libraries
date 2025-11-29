@@ -10,7 +10,6 @@ using ACommerce.Client.ProductListings;
 using ACommerce.Client.Products;
 using ACommerce.Client.Profiles;
 using ACommerce.Client.Vendors;
-using ACommerce.Blazor.Shop.Services;
 
 namespace ACommerce.EShop.Maui;
 
@@ -52,11 +51,6 @@ public static class MauiProgram
         builder.Services.AddScoped<ProfilesClient>();
         builder.Services.AddScoped<VendorsClient>();
         builder.Services.AddScoped<CategoriesClient>();
-
-        // App Services (from Blazor.Shop template)
-        builder.Services.AddScoped<ThemeService>();
-        builder.Services.AddScoped<CartStateService>();
-        builder.Services.AddScoped<NotificationService>();
 
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
