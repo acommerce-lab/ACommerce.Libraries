@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Transactions.Core.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
 
@@ -42,11 +43,13 @@ public class OperationNotification : IBaseEntity
 	/// - Users: ["user-id-1", "user-id-2"]
 	/// - Dynamic: ["creator", "approver", "assigned_user"]
 	/// </summary>
+	[NotMapped]
 	public List<string> Recipients { get; set; } = new();
 
 	/// <summary>
 	/// ???? (CC) - ?????? ??????????
 	/// </summary>
+	[NotMapped]
 	public List<string> CcRecipients { get; set; } = new();
 
 	/// <summary>
@@ -68,6 +71,7 @@ public class OperationNotification : IBaseEntity
 	/// <summary>
 	/// ??????? ?????? (???: webhook URL? API keys? ???)
 	/// </summary>
+	[NotMapped]
 	public Dictionary<string, string> Metadata { get; set; } = new();
 }
 
