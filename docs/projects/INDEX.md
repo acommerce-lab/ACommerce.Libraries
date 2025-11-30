@@ -3,99 +3,125 @@
 ## نظرة عامة
 توثيق شامل لمكتبات ACommerce.Libraries - حل متكامل للتجارة الإلكترونية متعدد البائعين.
 
+**الإحصائيات:**
+- إجمالي المشاريع: 97
+- الملفات الموثقة: 45+
+- نسبة التغطية: ~46%
+
 ---
 
 ## الفئات الرئيسية
 
-### Core (الأساسيات)
-| المكتبة | الوصف | الموقع |
-|---------|-------|--------|
-| SharedKernel.Abstractions | الكيانات والواجهات الأساسية | `/Core` |
-| SharedKernel.CQRS | Commands, Queries, Handlers | `/Core` |
-| SharedKernel.Infrastructure.EFCores | Repository و DbContext | `/Core` |
-| Configuration | الإعدادات (Store, Vendor) | `/Core` |
-| Notifications.Abstractions | الإشعارات متعددة القنوات | `/Core` |
-| Realtime.Abstractions | SignalR Abstractions | `/Core` |
-| Chats.Abstractions | نظام المحادثات | `/Core` |
+### Core (الأساسيات) ✅ 80%
+| المكتبة | الوصف | التوثيق |
+|---------|-------|---------|
+| SharedKernel.Abstractions | الكيانات والواجهات الأساسية | [📄](core/01-SharedKernel.Abstractions.md) |
+| SharedKernel.CQRS | Commands, Queries, Handlers | [📄](core/02-SharedKernel.CQRS.md) |
+| SharedKernel.Infrastructure.EFCore | Repository و DbContext | [📄](core/03-SharedKernel.Infrastructure.EFCore.md) |
+| Configuration | الإعدادات (Store, Vendor) | [📄](core/04-Configuration.md) |
+| Notifications.Abstractions | الإشعارات متعددة القنوات | [📄](notifications/01-Notifications.Abstractions.md) |
+| Realtime.Abstractions | SignalR Abstractions | ⏳ |
+| Chats.Abstractions | نظام المحادثات | ⏳ |
 
-### Authentication (المصادقة)
-| المكتبة | الوصف | الموقع |
-|---------|-------|--------|
-| Authentication.Abstractions | IAuthenticationProvider | `/Authentication` |
-| Authentication.JWT | JWT Token Provider | `/Authentication` |
-| Authentication.TwoFactor.Nafath | مصادقة نفاذ | `/Authentication` |
-| Authentication.TwoFactor.Abstractions | تجريدات 2FA | `/Authentication` |
+### Authentication (المصادقة) ✅ 83%
+| المكتبة | الوصف | التوثيق |
+|---------|-------|---------|
+| Authentication.Abstractions | IAuthenticationProvider | [📄](authentication/01-Authentication.Abstractions.md) |
+| Authentication.JWT | JWT Token Provider | [📄](authentication/02-Authentication.JWT.md) |
+| Authentication.TwoFactor.Nafath | مصادقة نفاذ | [📄](authentication/03-Authentication.TwoFactor.Nafath.md) |
+| Authentication.TwoFactor.Abstractions | تجريدات 2FA | [📄](authentication/04-Authentication.TwoFactor.Abstractions.md) |
+| Authentication.Users.Abstractions | إدارة المستخدمين | ⏳ |
 
-### Catalog (الكاتالوج)
-| المكتبة | الوصف | الموقع |
-|---------|-------|--------|
-| Catalog.Listings | عروض المنتجات (Multi-Vendor) | `/Catalog` |
-| Catalog.Listings.Api | API للعروض | `/Catalog` |
+### Catalog (الكاتالوج) ✅ 80%
+| المكتبة | الوصف | التوثيق |
+|---------|-------|---------|
+| Catalog.Products | إدارة المنتجات | [📄](catalog/01-Catalog.Products.md) |
+| Catalog.Categories | التصنيفات | [📄](catalog/02-Catalog.Categories.md) |
+| Catalog.Attributes | السمات الديناميكية | [📄](catalog/03-Catalog.Attributes.md) |
+| Catalog.Listings | عروض المنتجات (Multi-Vendor) | [📄](catalog/04-Catalog.Listings.md) |
+| Catalog.Listings.Api | API للعروض | ⏳ |
 
-### Sales (المبيعات)
-| المكتبة | الوصف | الموقع |
-|---------|-------|--------|
-| Cart | سلة التسوق | `/Sales` |
-| Orders | الطلبات | `/Sales` |
-| Orders.Api | API للطلبات | `/Sales` |
+### Sales (المبيعات) ✅ 67%
+| المكتبة | الوصف | التوثيق |
+|---------|-------|---------|
+| Cart | سلة التسوق | [📄](sales/01-Cart.md) |
+| Orders | الطلبات | [📄](sales/02-Orders.md) |
+| Orders.Api | API للطلبات | ⏳ |
 
-### Payments (المدفوعات)
-| المكتبة | الوصف | الموقع |
-|---------|-------|--------|
-| Payments.Abstractions | IPaymentProvider | `/Payments` |
-| Payments.Moyasar | بوابة Moyasar | `/Payments` |
-| Payments.Api | API للمدفوعات | `/Payments` |
+### Payments (المدفوعات) ✅ 75%
+| المكتبة | الوصف | التوثيق |
+|---------|-------|---------|
+| Payments.Abstractions | IPaymentProvider | [📄](payments/01-Payments.Abstractions.md) |
+| Payments.Moyasar | بوابة Moyasar | [📄](payments/02-Payments.Moyasar.md) |
+| Payments.Api | API للمدفوعات | [📄](payments/03-Payments.Api.md) |
 
-### Shipping (الشحن)
-| المكتبة | الوصف | الموقع |
-|---------|-------|--------|
-| Shipping.Abstractions | IShippingProvider | `/Shipping` |
-| Shipping.Mock | مزود وهمي للاختبار | `/Shipping` |
-| Shipping.Api | API للشحن | `/Shipping` |
+### Shipping (الشحن) ✅ 75%
+| المكتبة | الوصف | التوثيق |
+|---------|-------|---------|
+| Shipping.Abstractions | IShippingProvider | [📄](shipping/01-Shipping.Abstractions.md) |
+| Shipping.Mock | مزود وهمي للاختبار | [📄](shipping/02-Shipping.Mock.md) |
+| Shipping.Api | API للشحن | [📄](shipping/03-Shipping.Api.md) |
 
-### Files (الملفات)
-| المكتبة | الوصف | الموقع |
-|---------|-------|--------|
-| Files.Abstractions | IStorageProvider, IImageProcessor | `/Files` |
-| Files.Storage.Local | تخزين محلي | `/Files` |
-| Files.ImageProcessing | معالجة الصور (ImageSharp) | `/Files` |
+### Files (الملفات) ✅ 100%
+| المكتبة | الوصف | التوثيق |
+|---------|-------|---------|
+| Files.Abstractions | IStorageProvider, IImageProcessor | [📄](files/01-Files.Abstractions.md) |
+| Files.Storage.Local | تخزين محلي | [📄](files/02-Files.Storage.Local.md) |
+| Files.ImageProcessing | معالجة الصور (ImageSharp) | [📄](files/03-Files.ImageProcessing.md) |
 
-### Clients (SDKs العميل)
-| المكتبة | الوصف | الموقع |
-|---------|-------|--------|
-| Client.Core | IApiClient, Interceptors | `/Clients` |
-| Client.* (15 SDK) | SDKs للخدمات المختلفة | `/Clients` |
+### Notifications (الإشعارات) ✅ 33%
+| المكتبة | الوصف | التوثيق |
+|---------|-------|---------|
+| Notifications.Abstractions | INotificationChannel | [📄](notifications/01-Notifications.Abstractions.md) |
+| Notifications.Channels.* | قنوات الإشعارات | [📄](notifications/02-Notifications.Channels.md) |
+| Notifications.Messaging | تكامل Message Bus | [📄](notifications/03-Notifications.Messaging.md) |
+| Notifications.Core | منطق الإشعارات | ⏳ |
+| Notifications.Recipients | المستلمين | ⏳ |
 
-### Infrastructure (البنية التحتية)
-| المكتبة | الوصف | الموقع |
-|---------|-------|--------|
-| ServiceRegistry.* | Service Discovery | `/Infrastructure` |
+### Modules (الوحدات) ✅ 100%
+| المكتبة | الوصف | التوثيق |
+|---------|-------|---------|
+| Reviews | نظام التقييمات العام | [📄](modules/01-Reviews.md) |
+| Localization | دعم متعدد اللغات | [📄](modules/02-Localization.md) |
 
-### Identity (الهوية)
-| المكتبة | الوصف | الموقع |
-|---------|-------|--------|
-| Profiles | الملفات الشخصية | `/Identity` |
-| Profiles.Api | API للبروفايلات | `/Identity` |
+### Clients (SDKs العميل) ⏳ 13%
+| المكتبة | الوصف | التوثيق |
+|---------|-------|---------|
+| Client.Core | IApiClient, Interceptors | [📄](clients/01-Client.Core.md) |
+| Client.* (15 SDK) | SDKs للخدمات المختلفة | [📄](clients/02-Client-SDKs-Overview.md) |
 
-### Messaging (الرسائل)
-| المكتبة | الوصف | الموقع |
-|---------|-------|--------|
-| Messaging.Abstractions | IMessageBus, Pub/Sub | Root |
-| Messaging.InMemory | للاختبار | Root |
-| Messaging.SignalR | للاتصال اللحظي | Root |
+### Infrastructure (البنية التحتية) ⏳ 50%
+| المكتبة | الوصف | التوثيق |
+|---------|-------|---------|
+| ServiceRegistry.* | Service Discovery | ⏳ |
 
-### Marketplace (السوق)
-| المكتبة | الوصف | الموقع |
-|---------|-------|--------|
-| Vendors | إدارة البائعين | `/Marketplace` |
-| Vendors.Api | API للبائعين | `/Marketplace` |
+### Identity (الهوية) ⏳ 50%
+| المكتبة | الوصف | التوثيق |
+|---------|-------|---------|
+| Profiles | الملفات الشخصية | [📄](identity/01-Profiles.md) |
+| Profiles.Api | API للبروفايلات | ⏳ |
 
-### AspNetCore
-| المكتبة | الوصف | الموقع |
-|---------|-------|--------|
-| SharedKernel.AspNetCore | BaseCrudController | `/AspNetCore` |
-| Authentication.AspNetCore | Controllers للمصادقة | `/AspNetCore` |
-| Files.AspNetCore | Controllers للملفات | `/AspNetCore` |
+### Messaging (الرسائل) ⏳ 50%
+| المكتبة | الوصف | التوثيق |
+|---------|-------|---------|
+| Messaging.Abstractions | IMessageBus, Pub/Sub | ⏳ |
+| Messaging.InMemory | للاختبار | ⏳ |
+| Messaging.SignalR | للاتصال اللحظي | ⏳ |
+
+### Marketplace (السوق) ⏳ 50%
+| المكتبة | الوصف | التوثيق |
+|---------|-------|---------|
+| Vendors | إدارة البائعين | [📄](marketplace/01-Vendors.md) |
+| Vendors.Api | API للبائعين | ⏳ |
+
+### AspNetCore ⏳ 40%
+| المكتبة | الوصف | التوثيق |
+|---------|-------|---------|
+| SharedKernel.AspNetCore | BaseCrudController | [📄](aspnetcore/01-SharedKernel.AspNetCore.md) |
+| Authentication.AspNetCore | Controllers للمصادقة | [📄](aspnetcore/02-Authentication.AspNetCore.md) |
+| Files.AspNetCore | Controllers للملفات | ⏳ |
+| Authentication.AspNetCore.Swagger | Swagger Auth | ⏳ |
+| Authentication.AspNetCore.NafathWH | Nafath Webhook | ⏳ |
 
 ---
 
@@ -107,6 +133,22 @@
 4. **Soft Delete** - حذف منطقي
 5. **Domain Events** - أحداث المجال
 6. **SmartSearch** - بحث متقدم مع فلترة
+
+---
+
+## الأدلة والمقالات
+
+### الأدلة
+| الدليل | الوصف |
+|--------|-------|
+| [Microservices Backend Guide](../guides/Microservices-Backend-Guide.md) | دليل بناء Microservices |
+| [Monolith Backend Guide](../guides/Monolith-Backend-Guide.md) | دليل بناء Monolith |
+| [MAUI Blazor Guide](../guides/MAUI-Blazor-Guide.md) | دليل تطبيقات الموبايل |
+
+### المقالات
+| المقالة | الوصف |
+|---------|-------|
+| [Best Practices](../articles/Best-Practices.md) | أفضل الممارسات |
 
 ---
 
