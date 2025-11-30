@@ -1,0 +1,288 @@
+@namespace ACommerce.Templates.Customer.Components
+@using ACommerce.Templates.Customer.Pages
+
+<div class="ac-dynamic-form @Class">
+    @if (Attributes != null)
+    {
+        @foreach (var attr in Attributes.OrderBy(a => a.SortOrder))
+        {
+            <div class="ac-form-field">
+                @switch (attr.Type.ToLower())
+                {
+                    case "number":
+                        <AcInput Id="@attr.Code"
+                                 Label="@attr.Name"
+                                 Type="number"
+                                 Placeholder="@attr.Description"
+                                 Value="@GetTextValue(attr.Id)"
+                                 ValueChanged="(v) => SetValue(attr.Id, attr.Code, v)"
+                                 Required="@attr.IsRequired"
+                                 HelpText="@attr.Description" />
+                        break;
+
+                    case "text":
+                        <AcInput Id="@attr.Code"
+                                 Label="@attr.Name"
+                                 Type="text"
+                                 Placeholder="@attr.Description"
+                                 Value="@GetTextValue(attr.Id)"
+                                 ValueChanged="(v) => SetValue(attr.Id, attr.Code, v)"
+                                 Required="@attr.IsRequired"
+                                 HelpText="@attr.Description" />
+                        break;
+
+                    case "longtext":
+                        <AcInput Id="@attr.Code"
+                                 Label="@attr.Name"
+                                 Type="textarea"
+                                 Placeholder="@attr.Description"
+                                 Value="@GetTextValue(attr.Id)"
+                                 ValueChanged="(v) => SetValue(attr.Id, attr.Code, v)"
+                                 Required="@attr.IsRequired"
+                                 Rows="4"
+                                 HelpText="@attr.Description" />
+                        break;
+
+                    case "singleselect":
+                        <div class="ac-form-group">
+                            <label class="ac-label" for="@attr.Code">
+                                @attr.Name
+                                @if (attr.IsRequired)
+                                {
+                                    <span class="ac-required">*</span>
+                                }
+                            </label>
+                            <select id="@attr.Code"
+                                    class="ac-input ac-select"
+                                    @onchange="(e) => SetValue(attr.Id, attr.Code, e.Value?.ToString())">
+                                <option value="">اختر @attr.Name</option>
+                                @foreach (var value in attr.Values.OrderBy(v => v.SortOrder))
+                                {
+                                    <option value="@value.Value"
+                                            selected="@(GetTextValue(attr.Id) == value.Value)">
+                                        @(value.DisplayName ?? value.Value)
+                                    </option>
+                                }
+                            </select>
+                            @if (!string.IsNullOrEmpty(attr.Description))
+                            {
+                                <span class="ac-help-text">@attr.Description</span>
+                            }
+                        </div>
+                        break;
+
+                    case "multiselect":
+                        <div class="ac-form-group">
+                            <label class="ac-label">
+                                @attr.Name
+                                @if (attr.IsRequired)
+                                {
+                                    <span class="ac-required">*</span>
+                                }
+                            </label>
+                            <div class="ac-checkbox-group">
+                                @foreach (var value in attr.Values.OrderBy(v => v.SortOrder))
+                                {
+                                    <label class="ac-checkbox-item">
+                                        <input type="checkbox"
+                                               class="ac-checkbox"
+                                               checked="@IsMultiSelectChecked(attr.Id, value.Value)"
+                                               @onchange="(e) => ToggleMultiSelect(attr.Id, attr.Code, value.Value, (bool?)e.Value ?? false)" />
+                                        <span class="ac-checkbox-label">@(value.DisplayName ?? value.Value)</span>
+                                    </label>
+                                }
+                            </div>
+                            @if (!string.IsNullOrEmpty(attr.Description))
+                            {
+                                <span class="ac-help-text">@attr.Description</span>
+                            }
+                        </div>
+                        break;
+
+                    case "boolean":
+                        <div class="ac-form-group">
+                            <label class="ac-toggle-item">
+                                <input type="checkbox"
+                                       class="ac-toggle"
+                                       checked="@GetBoolValue(attr.Id)"
+                                       @onchange="(e) => SetBoolValue(attr.Id, attr.Code, (bool?)e.Value ?? false)" />
+                                <span class="ac-toggle-label">@attr.Name</span>
+                            </label>
+                            @if (!string.IsNullOrEmpty(attr.Description))
+                            {
+                                <span class="ac-help-text">@attr.Description</span>
+                            }
+                        </div>
+                        break;
+
+                    case "date":
+                        <AcInput Id="@attr.Code"
+                                 Label="@attr.Name"
+                                 Type="date"
+                                 Value="@GetDateValue(attr.Id)"
+                                 ValueChanged="(v) => SetDateValue(attr.Id, attr.Code, v)"
+                                 Required="@attr.IsRequired"
+                                 HelpText="@attr.Description" />
+                        break;
+
+                    case "datetime":
+                        <AcInput Id="@attr.Code"
+                                 Label="@attr.Name"
+                                 Type="datetime-local"
+                                 Value="@GetDateValue(attr.Id)"
+                                 ValueChanged="(v) => SetDateValue(attr.Id, attr.Code, v)"
+                                 Required="@attr.IsRequired"
+                                 HelpText="@attr.Description" />
+                        break;
+
+                    case "color":
+                        <div class="ac-form-group">
+                            <label class="ac-label" for="@attr.Code">
+                                @attr.Name
+                                @if (attr.IsRequired)
+                                {
+                                    <span class="ac-required">*</span>
+                                }
+                            </label>
+                            <input type="color"
+                                   id="@attr.Code"
+                                   class="ac-input ac-color-input"
+                                   value="@(GetTextValue(attr.Id) ?? "#000000")"
+                                   @onchange="(e) => SetValue(attr.Id, attr.Code, e.Value?.ToString())" />
+                            @if (!string.IsNullOrEmpty(attr.Description))
+                            {
+                                <span class="ac-help-text">@attr.Description</span>
+                            }
+                        </div>
+                        break;
+
+                    default:
+                        <AcInput Id="@attr.Code"
+                                 Label="@attr.Name"
+                                 Type="text"
+                                 Placeholder="@attr.Description"
+                                 Value="@GetTextValue(attr.Id)"
+                                 ValueChanged="(v) => SetValue(attr.Id, attr.Code, v)"
+                                 Required="@attr.IsRequired"
+                                 HelpText="@attr.Description" />
+                        break;
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <div class="ac-empty-form">
+            <p>لا توجد خصائص للعرض</p>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<ListingAttributeDefinition>? Attributes { get; set; }
+    [Parameter] public List<ListingAttributeInput> Values { get; set; } = new();
+    [Parameter] public EventCallback<List<ListingAttributeInput>> ValuesChanged { get; set; }
+    [Parameter] public string? Class { get; set; }
+
+    private string? GetTextValue(Guid attributeId)
+    {
+        var input = Values.FirstOrDefault(v => v.AttributeId == attributeId);
+        if (input?.NumberValue.HasValue == true)
+            return input.NumberValue.Value.ToString();
+        return input?.TextValue;
+    }
+
+    private bool GetBoolValue(Guid attributeId)
+    {
+        var input = Values.FirstOrDefault(v => v.AttributeId == attributeId);
+        return input?.BooleanValue ?? false;
+    }
+
+    private string? GetDateValue(Guid attributeId)
+    {
+        var input = Values.FirstOrDefault(v => v.AttributeId == attributeId);
+        return input?.DateValue?.ToString("yyyy-MM-dd");
+    }
+
+    private bool IsMultiSelectChecked(Guid attributeId, string value)
+    {
+        var input = Values.FirstOrDefault(v => v.AttributeId == attributeId);
+        return input?.MultiSelectValues?.Contains(value) ?? false;
+    }
+
+    private async Task SetValue(Guid attributeId, string code, string? value)
+    {
+        var input = Values.FirstOrDefault(v => v.AttributeId == attributeId);
+        if (input == null)
+        {
+            input = new ListingAttributeInput { AttributeId = attributeId, Code = code };
+            Values.Add(input);
+        }
+
+        var attr = Attributes?.FirstOrDefault(a => a.Id == attributeId);
+        if (attr?.Type.ToLower() == "number" && decimal.TryParse(value, out var numValue))
+        {
+            input.NumberValue = numValue;
+            input.TextValue = null;
+        }
+        else
+        {
+            input.TextValue = value;
+            input.NumberValue = null;
+        }
+
+        await ValuesChanged.InvokeAsync(Values);
+    }
+
+    private async Task SetBoolValue(Guid attributeId, string code, bool value)
+    {
+        var input = Values.FirstOrDefault(v => v.AttributeId == attributeId);
+        if (input == null)
+        {
+            input = new ListingAttributeInput { AttributeId = attributeId, Code = code };
+            Values.Add(input);
+        }
+        input.BooleanValue = value;
+        await ValuesChanged.InvokeAsync(Values);
+    }
+
+    private async Task SetDateValue(Guid attributeId, string code, string? value)
+    {
+        var input = Values.FirstOrDefault(v => v.AttributeId == attributeId);
+        if (input == null)
+        {
+            input = new ListingAttributeInput { AttributeId = attributeId, Code = code };
+            Values.Add(input);
+        }
+        input.DateValue = DateTime.TryParse(value, out var date) ? date : null;
+        await ValuesChanged.InvokeAsync(Values);
+    }
+
+    private async Task ToggleMultiSelect(Guid attributeId, string code, string value, bool isChecked)
+    {
+        var input = Values.FirstOrDefault(v => v.AttributeId == attributeId);
+        if (input == null)
+        {
+            input = new ListingAttributeInput
+            {
+                AttributeId = attributeId,
+                Code = code,
+                MultiSelectValues = new List<string>()
+            };
+            Values.Add(input);
+        }
+
+        input.MultiSelectValues ??= new List<string>();
+
+        if (isChecked && !input.MultiSelectValues.Contains(value))
+        {
+            input.MultiSelectValues.Add(value);
+        }
+        else if (!isChecked && input.MultiSelectValues.Contains(value))
+        {
+            input.MultiSelectValues.Remove(value);
+        }
+
+        await ValuesChanged.InvokeAsync(Values);
+    }
+}
