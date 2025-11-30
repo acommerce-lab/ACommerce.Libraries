@@ -1,4 +1,11 @@
 using Ashare.App.Services;
+using ACommerce.Client.Auth;
+using ACommerce.Client.Chats;
+using ACommerce.Client.Core;
+using ACommerce.Client.Locations;
+using ACommerce.Client.Notifications;
+using ACommerce.Client.Profiles;
+using ACommerce.Client.Realtime;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Themes;
 using Microsoft.Extensions.Logging;
@@ -25,7 +32,9 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
-        // Add ACommerce Customer Template with Ashare theme
+        // ═══════════════════════════════════════════════════════════════════
+        // ACommerce Customer Template - Ashare Theme
+        // ═══════════════════════════════════════════════════════════════════
         builder.Services.AddACommerceCustomerTemplate(options =>
         {
             // Ashare brand colors - Sky Blue theme
@@ -45,8 +54,77 @@ public static class MauiProgram
             options.Mode = ThemeMode.Light;
         });
 
-        // Add app services
+        // ═══════════════════════════════════════════════════════════════════
+        // API Configuration
+        // ═══════════════════════════════════════════════════════════════════
+        var apiBaseUrl = "https://api.ashare.app";
+#if DEBUG
+        apiBaseUrl = "https://localhost:5001";
+#endif
+
+        // ═══════════════════════════════════════════════════════════════════
+        // Client SDKs
+        // ═══════════════════════════════════════════════════════════════════
+
+        // Core HTTP Client with interceptors
+        builder.Services.AddACommerceClient(options =>
+        {
+            options.BaseUrl = apiBaseUrl;
+            options.Timeout = TimeSpan.FromSeconds(30);
+        });
+
+        // Authentication Client (JWT + Nafath)
+        builder.Services.AddAuthClient(options =>
+        {
+            options.BaseUrl = apiBaseUrl;
+            options.EnableNafath = true;
+        });
+
+        // Profiles Client
+        builder.Services.AddProfilesClient(options =>
+        {
+            options.BaseUrl = apiBaseUrl;
+        });
+
+        // Locations Client
+        builder.Services.AddLocationsClient(options =>
+        {
+            options.BaseUrl = apiBaseUrl;
+        });
+
+        // Chats Client
+        builder.Services.AddChatsClient(options =>
+        {
+            options.BaseUrl = apiBaseUrl;
+        });
+
+        // Notifications Client
+        builder.Services.AddNotificationsClient(options =>
+        {
+            options.BaseUrl = apiBaseUrl;
+        });
+
+        // Real-time Client (SignalR)
+        builder.Services.AddRealtimeClient(options =>
+        {
+            options.HubUrl = $"{apiBaseUrl}/hubs/realtime";
+            options.AutoReconnect = true;
+        });
+
+        // ═══════════════════════════════════════════════════════════════════
+        // App Services
+        // ═══════════════════════════════════════════════════════════════════
+
+        // Localization (AR, EN, UR)
+        builder.Services.AddSingleton<ILocalizationService, LocalizationService>();
+
+        // Theme Service (Dark/Light Mode)
+        builder.Services.AddSingleton<ThemeService>();
+
+        // Navigation Service
         builder.Services.AddScoped<IAppNavigationService, AppNavigationService>();
+
+        // Space Data Service (mock data for development)
         builder.Services.AddSingleton<SpaceDataService>();
 
         return builder.Build();

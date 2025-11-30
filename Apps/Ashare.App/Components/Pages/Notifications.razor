@@ -1,0 +1,140 @@
+@page "/notifications"
+@using ACommerce.Client.Notifications
+@inject INotificationsClient NotificationsClient
+@inject IAppNavigationService Navigation
+@inject ILocalizationService L
+
+<div class="ac-page ashare-notifications-page">
+    <div class="ac-page-header">
+        <h1>@L["Notifications"]</h1>
+        @if (_notifications?.Any(n => !n.IsRead) == true)
+        {
+            <button class="ashare-mark-all-btn" @onclick="MarkAllAsRead">
+                @L["MarkAllRead"]
+            </button>
+        }
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="ashare-loading">
+            <div class="ac-spinner"></div>
+            <span>@L["Loading"]</span>
+        </div>
+    }
+    else if (_notifications?.Any() == true)
+    {
+        <div class="ashare-notifications-list">
+            @foreach (var notification in _notifications)
+            {
+                <div class="ashare-notification-item @(notification.IsRead ? "" : "unread")"
+                     @onclick="() => HandleNotificationClick(notification)">
+                    <div class="ashare-notification-icon @notification.Type.ToLower()">
+                        <i class="bi @GetNotificationIcon(notification.Type)"></i>
+                    </div>
+                    <div class="ashare-notification-content">
+                        <h4>@notification.Title</h4>
+                        <p>@notification.Message</p>
+                        <span class="ashare-notification-time">@FormatTime(notification.CreatedAt)</span>
+                    </div>
+                    @if (!notification.IsRead)
+                    {
+                        <span class="ashare-unread-dot"></span>
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="ashare-empty-state">
+            <i class="bi bi-bell"></i>
+            <h3>@L["NoNotifications"]</h3>
+        </div>
+    }
+</div>
+
+@code {
+    private List<NotificationItem>? _notifications;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _notifications = await NotificationsClient.GetNotificationsAsync();
+        }
+        catch
+        {
+            _notifications = [];
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task MarkAllAsRead()
+    {
+        try
+        {
+            await NotificationsClient.MarkAllAsReadAsync();
+            foreach (var n in _notifications ?? [])
+            {
+                n.IsRead = true;
+            }
+        }
+        catch { }
+    }
+
+    private async Task HandleNotificationClick(NotificationItem notification)
+    {
+        if (!notification.IsRead)
+        {
+            try
+            {
+                await NotificationsClient.MarkAsReadAsync(notification.Id);
+                notification.IsRead = true;
+            }
+            catch { }
+        }
+
+        // Navigate based on notification type
+        if (!string.IsNullOrEmpty(notification.ActionUrl))
+        {
+            Navigation.NavigateTo(notification.ActionUrl);
+        }
+    }
+
+    private string GetNotificationIcon(string type) => type switch
+    {
+        "Booking" => "bi-calendar-check",
+        "Message" => "bi-chat",
+        "Review" => "bi-star",
+        "Payment" => "bi-credit-card",
+        "System" => "bi-info-circle",
+        "Promo" => "bi-gift",
+        _ => "bi-bell"
+    };
+
+    private string FormatTime(DateTime dateTime)
+    {
+        var diff = DateTime.Now - dateTime;
+        if (diff.TotalMinutes < 1) return L["Now"];
+        if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes}m";
+        if (diff.TotalHours < 24) return $"{(int)diff.TotalHours}h";
+        if (diff.TotalDays < 7) return $"{(int)diff.TotalDays}d";
+        return dateTime.ToString("MM/dd");
+    }
+
+    public class NotificationItem
+    {
+        public Guid Id { get; set; }
+        public string Title { get; set; } = "";
+        public string Message { get; set; } = "";
+        public string Type { get; set; } = "System";
+        public string? ActionUrl { get; set; }
+        public bool IsRead { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
+}

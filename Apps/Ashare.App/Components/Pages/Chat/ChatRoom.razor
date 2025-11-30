@@ -1,0 +1,221 @@
+@page "/chat/{ChatId:guid}"
+@using ACommerce.Client.Chats
+@using ACommerce.Client.Realtime
+@inject IChatsClient ChatsClient
+@inject IRealtimeClient RealtimeClient
+@inject IAppNavigationService Navigation
+@inject ILocalizationService L
+@implements IAsyncDisposable
+
+<div class="ac-page ashare-chatroom-page">
+    @* Chat Header *@
+    <div class="ashare-chatroom-header">
+        <button class="ashare-back-btn" @onclick="() => Navigation.NavigateBack()">
+            <i class="bi bi-arrow-right"></i>
+        </button>
+        <div class="ashare-chat-user">
+            <div class="ashare-chat-avatar-sm">
+                @if (!string.IsNullOrEmpty(_chat?.Avatar))
+                {
+                    <img src="@_chat.Avatar" alt="" />
+                }
+                else
+                {
+                    <i class="bi bi-person-circle"></i>
+                }
+            </div>
+            <div class="ashare-chat-user-info">
+                <h3>@_chat?.Name</h3>
+                <span class="@(_isOnline ? "online" : "")">
+                    @(_isOnline ? L["Online"] : L["Offline"])
+                </span>
+            </div>
+        </div>
+        <button class="ashare-chat-menu">
+            <i class="bi bi-three-dots-vertical"></i>
+        </button>
+    </div>
+
+    @* Messages *@
+    <div class="ashare-messages-container" @ref="_messagesContainer">
+        @if (_isLoading)
+        {
+            <div class="ashare-loading">
+                <div class="ac-spinner"></div>
+            </div>
+        }
+        else
+        {
+            @foreach (var message in _messages)
+            {
+                <div class="ashare-message @(message.IsMine ? "mine" : "theirs")">
+                    <div class="ashare-message-bubble">
+                        @if (message.Type == "image")
+                        {
+                            <img src="@message.Content" alt="" class="ashare-message-image" />
+                        }
+                        else
+                        {
+                            <p>@message.Content</p>
+                        }
+                        <span class="ashare-message-time">
+                            @message.SentAt.ToString("HH:mm")
+                            @if (message.IsMine)
+                            {
+                                <i class="bi @(message.IsRead ? "bi-check-all" : "bi-check")"></i>
+                            }
+                        </span>
+                    </div>
+                </div>
+            }
+
+            @if (_isTyping)
+            {
+                <div class="ashare-message theirs">
+                    <div class="ashare-typing-indicator">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    @* Input *@
+    <div class="ashare-chat-input">
+        <button class="ashare-attach-btn">
+            <i class="bi bi-paperclip"></i>
+        </button>
+        <input type="text"
+               class="ac-input"
+               placeholder="@L["TypeMessage"]"
+               @bind="_newMessage"
+               @bind:event="oninput"
+               @onkeyup="HandleKeyUp" />
+        <button class="ashare-send-btn"
+                @onclick="SendMessage"
+                disabled="@string.IsNullOrWhiteSpace(_newMessage)">
+            <i class="bi bi-send-fill"></i>
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Guid ChatId { get; set; }
+
+    private ChatInfo? _chat;
+    private List<ChatMessage> _messages = new();
+    private string _newMessage = "";
+    private bool _isLoading = true;
+    private bool _isOnline;
+    private bool _isTyping;
+    private ElementReference _messagesContainer;
+    private IDisposable? _messageSubscription;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Load chat info
+            _chat = await ChatsClient.GetChatAsync(ChatId);
+
+            // Load messages
+            var messages = await ChatsClient.GetMessagesAsync(ChatId);
+            _messages = messages.ToList();
+
+            // Subscribe to real-time updates
+            await RealtimeClient.ConnectAsync();
+            _messageSubscription = RealtimeClient.OnMessage(HandleNewMessage);
+
+            // Mark as read
+            await ChatsClient.MarkAsReadAsync(ChatId);
+        }
+        catch
+        {
+            // Handle error
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void HandleNewMessage(object message)
+    {
+        // Handle incoming real-time message
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(_newMessage))
+        {
+            await SendMessage();
+        }
+    }
+
+    private async Task SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(_newMessage)) return;
+
+        var message = new ChatMessage
+        {
+            Id = Guid.NewGuid(),
+            Content = _newMessage,
+            Type = "text",
+            IsMine = true,
+            SentAt = DateTime.Now
+        };
+
+        _messages.Add(message);
+        var messageToSend = _newMessage;
+        _newMessage = "";
+
+        try
+        {
+            await ChatsClient.SendMessageAsync(ChatId, new SendMessageRequest
+            {
+                Content = messageToSend,
+                Type = "text"
+            });
+        }
+        catch
+        {
+            // Handle send failure
+            message.IsFailed = true;
+        }
+
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _messageSubscription?.Dispose();
+        await RealtimeClient.DisconnectAsync();
+    }
+
+    // DTOs
+    public class ChatInfo
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
+        public string? Avatar { get; set; }
+    }
+
+    public class ChatMessage
+    {
+        public Guid Id { get; set; }
+        public string Content { get; set; } = "";
+        public string Type { get; set; } = "text";
+        public bool IsMine { get; set; }
+        public bool IsRead { get; set; }
+        public bool IsFailed { get; set; }
+        public DateTime SentAt { get; set; }
+    }
+
+    public class SendMessageRequest
+    {
+        public string Content { get; set; } = "";
+        public string Type { get; set; } = "text";
+    }
+}
