@@ -1,0 +1,379 @@
+@namespace ACommerce.Templates.Customer.Pages
+
+<div class="ac-page ac-checkout-page">
+    <div class="ac-page-header">
+        <h1>إتمام الطلب</h1>
+    </div>
+
+    @if (IsLoading)
+    {
+        <AcSpinner FullPage="true" Text="جاري التحميل..." />
+    }
+    else
+    {
+        <div class="ac-checkout-content">
+            @* Steps Indicator *@
+            <div class="ac-checkout-steps">
+                <div class="ac-step @(CurrentStep >= 1 ? "ac-step-active" : "") @(CurrentStep > 1 ? "ac-step-completed" : "")">
+                    <span class="ac-step-number">1</span>
+                    <span class="ac-step-label">العنوان</span>
+                </div>
+                <div class="ac-step-connector"></div>
+                <div class="ac-step @(CurrentStep >= 2 ? "ac-step-active" : "") @(CurrentStep > 2 ? "ac-step-completed" : "")">
+                    <span class="ac-step-number">2</span>
+                    <span class="ac-step-label">الدفع</span>
+                </div>
+                <div class="ac-step-connector"></div>
+                <div class="ac-step @(CurrentStep >= 3 ? "ac-step-active" : "")">
+                    <span class="ac-step-number">3</span>
+                    <span class="ac-step-label">تأكيد</span>
+                </div>
+            </div>
+
+            @* Step Content *@
+            <div class="ac-checkout-step-content">
+                @if (CurrentStep == 1)
+                {
+                    @* Shipping Address Step *@
+                    <div class="ac-checkout-section">
+                        <h2>عنوان التوصيل</h2>
+
+                        @if (SavedAddresses?.Any() == true)
+                        {
+                            <div class="ac-saved-addresses">
+                                @foreach (var address in SavedAddresses)
+                                {
+                                    <div class="ac-address-card @(SelectedAddressId == address.Id ? "selected" : "")"
+                                         @onclick="() => SelectAddress(address.Id)">
+                                        <div class="ac-address-radio">
+                                            <i class="bi @(SelectedAddressId == address.Id ? "bi-check-circle-fill" : "bi-circle")"></i>
+                                        </div>
+                                        <div class="ac-address-details">
+                                            <span class="ac-address-name">@address.Name</span>
+                                            <span class="ac-address-line">@address.Street</span>
+                                            <span class="ac-address-line">@address.City, @address.Region @address.PostalCode</span>
+                                            <span class="ac-address-phone">@address.Phone</span>
+                                        </div>
+                                        @if (address.IsDefault)
+                                        {
+                                            <AcBadge Text="افتراضي" Variant="BadgeVariant.Primary" Size="BadgeSize.Small" />
+                                        }
+                                    </div>
+                                }
+
+                                <button class="ac-add-address-btn" @onclick="() => ShowNewAddressForm = true">
+                                    <i class="bi bi-plus-circle"></i>
+                                    إضافة عنوان جديد
+                                </button>
+                            </div>
+                        }
+
+                        @if (!SavedAddresses?.Any() == true || ShowNewAddressForm)
+                        {
+                            <div class="ac-address-form">
+                                <div class="ac-form-row">
+                                    <AcInput Label="الاسم الكامل"
+                                             @bind-Value="NewAddress.Name"
+                                             Required="true"
+                                             Placeholder="أدخل اسمك الكامل" />
+                                </div>
+
+                                <div class="ac-form-row">
+                                    <AcInput Label="رقم الهاتف"
+                                             Type="tel"
+                                             @bind-Value="NewAddress.Phone"
+                                             Required="true"
+                                             Placeholder="05xxxxxxxx" />
+                                </div>
+
+                                <div class="ac-form-row">
+                                    <AcInput Label="العنوان"
+                                             @bind-Value="NewAddress.Street"
+                                             Required="true"
+                                             Placeholder="رقم المبنى، الشارع" />
+                                </div>
+
+                                <div class="ac-form-row ac-form-row-2">
+                                    <AcInput Label="المدينة"
+                                             @bind-Value="NewAddress.City"
+                                             Required="true" />
+                                    <AcInput Label="المنطقة"
+                                             @bind-Value="NewAddress.Region" />
+                                </div>
+
+                                <div class="ac-form-row">
+                                    <AcInput Label="الرمز البريدي"
+                                             @bind-Value="NewAddress.PostalCode" />
+                                </div>
+
+                                <label class="ac-checkbox">
+                                    <input type="checkbox" @bind="SaveAddressForLater" />
+                                    <span>حفظ العنوان للطلبات القادمة</span>
+                                </label>
+                            </div>
+                        }
+                    </div>
+                }
+                else if (CurrentStep == 2)
+                {
+                    @* Payment Method Step *@
+                    <div class="ac-checkout-section">
+                        <h2>طريقة الدفع</h2>
+
+                        <div class="ac-payment-methods">
+                            @foreach (var method in PaymentMethods)
+                            {
+                                <div class="ac-payment-method @(SelectedPaymentMethod == method.Id ? "selected" : "")"
+                                     @onclick="() => SelectPaymentMethod(method.Id)">
+                                    <div class="ac-payment-radio">
+                                        <i class="bi @(SelectedPaymentMethod == method.Id ? "bi-check-circle-fill" : "bi-circle")"></i>
+                                    </div>
+                                    <div class="ac-payment-icon">
+                                        <i class="bi @method.Icon"></i>
+                                    </div>
+                                    <div class="ac-payment-details">
+                                        <span class="ac-payment-name">@method.Name</span>
+                                        @if (!string.IsNullOrEmpty(method.Description))
+                                        {
+                                            <span class="ac-payment-desc">@method.Description</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        @if (SelectedPaymentMethod == "card")
+                        {
+                            <div class="ac-card-form">
+                                <AcInput Label="رقم البطاقة"
+                                         @bind-Value="CardNumber"
+                                         Placeholder="1234 5678 9012 3456"
+                                         IconStart="bi-credit-card" />
+
+                                <div class="ac-form-row ac-form-row-2">
+                                    <AcInput Label="تاريخ الانتهاء"
+                                             @bind-Value="CardExpiry"
+                                             Placeholder="MM/YY" />
+                                    <AcInput Label="CVV"
+                                             Type="password"
+                                             @bind-Value="CardCvv"
+                                             Placeholder="123" />
+                                </div>
+
+                                <AcInput Label="اسم حامل البطاقة"
+                                         @bind-Value="CardholderName"
+                                         Placeholder="الاسم كما يظهر على البطاقة" />
+                            </div>
+                        }
+                    </div>
+                }
+                else if (CurrentStep == 3)
+                {
+                    @* Order Confirmation Step *@
+                    <div class="ac-checkout-section">
+                        <h2>مراجعة الطلب</h2>
+
+                        @* Order Items *@
+                        <div class="ac-order-items">
+                            @foreach (var item in CartItems)
+                            {
+                                <AcCartItem Id="@item.Id"
+                                            Name="@item.Name"
+                                            ImageUrl="@item.ImageUrl"
+                                            Variant="@item.Variant"
+                                            Price="@item.Price"
+                                            Quantity="@item.Quantity"
+                                            Editable="false" />
+                            }
+                        </div>
+
+                        @* Shipping Address Summary *@
+                        <div class="ac-order-summary-section">
+                            <h3>عنوان التوصيل</h3>
+                            <p>@GetSelectedAddressText()</p>
+                        </div>
+
+                        @* Payment Method Summary *@
+                        <div class="ac-order-summary-section">
+                            <h3>طريقة الدفع</h3>
+                            <p>@GetSelectedPaymentText()</p>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @* Order Summary Sidebar *@
+            <div class="ac-checkout-summary">
+                <h3>ملخص الطلب</h3>
+
+                <div class="ac-summary-items">
+                    @foreach (var item in CartItems.Take(3))
+                    {
+                        <div class="ac-summary-item">
+                            <img src="@item.ImageUrl" alt="" />
+                            <div>
+                                <span>@item.Name</span>
+                                <span>×@item.Quantity</span>
+                            </div>
+                            <span>@((item.Price * item.Quantity).ToString("N2")) @Currency</span>
+                        </div>
+                    }
+                    @if (CartItems.Count > 3)
+                    {
+                        <span class="ac-more-items">و @(CartItems.Count - 3) منتجات أخرى...</span>
+                    }
+                </div>
+
+                <div class="ac-summary-totals">
+                    <div class="ac-summary-row">
+                        <span>المجموع الفرعي</span>
+                        <span>@Subtotal.ToString("N2") @Currency</span>
+                    </div>
+                    @if (Discount > 0)
+                    {
+                        <div class="ac-summary-row ac-discount">
+                            <span>الخصم</span>
+                            <span>-@Discount.ToString("N2") @Currency</span>
+                        </div>
+                    }
+                    <div class="ac-summary-row">
+                        <span>الشحن</span>
+                        <span>@(ShippingCost > 0 ? ShippingCost.ToString("N2") : "مجاني") @(ShippingCost > 0 ? Currency : "")</span>
+                    </div>
+                    @if (Tax > 0)
+                    {
+                        <div class="ac-summary-row">
+                            <span>الضريبة</span>
+                            <span>@Tax.ToString("N2") @Currency</span>
+                        </div>
+                    }
+                    <div class="ac-summary-row ac-total">
+                        <span>الإجمالي</span>
+                        <span>@Total.ToString("N2") @Currency</span>
+                    </div>
+                </div>
+            </div>
+
+            @* Navigation Buttons *@
+            <div class="ac-checkout-nav">
+                @if (CurrentStep > 1)
+                {
+                    <AcButton Text="السابق"
+                              Icon="bi-arrow-right"
+                              Variant="ButtonVariant.Secondary"
+                              OnClick="GoToPreviousStep" />
+                }
+
+                @if (CurrentStep < 3)
+                {
+                    <AcButton Text="التالي"
+                              Icon="bi-arrow-left"
+                              IconPosition="ButtonIconPosition.End"
+                              Variant="ButtonVariant.Primary"
+                              OnClick="GoToNextStep" />
+                }
+                else
+                {
+                    <AcButton Text="تأكيد الطلب"
+                              Icon="bi-check-circle"
+                              Variant="ButtonVariant.Primary"
+                              Loading="IsPlacingOrder"
+                              OnClick="HandlePlaceOrder" />
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int CurrentStep { get; set; } = 1;
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool IsPlacingOrder { get; set; }
+    [Parameter] public List<CartItemModel> CartItems { get; set; } = new();
+    [Parameter] public List<AddressModel>? SavedAddresses { get; set; }
+    [Parameter] public List<PaymentMethodModel> PaymentMethods { get; set; } = new();
+    [Parameter] public string Currency { get; set; } = "ر.س";
+    [Parameter] public decimal Subtotal { get; set; }
+    [Parameter] public decimal Discount { get; set; }
+    [Parameter] public decimal ShippingCost { get; set; }
+    [Parameter] public decimal Tax { get; set; }
+    [Parameter] public decimal Total { get; set; }
+
+    [Parameter] public EventCallback<int> OnStepChange { get; set; }
+    [Parameter] public EventCallback<AddressModel> OnAddressSubmit { get; set; }
+    [Parameter] public EventCallback<string> OnPaymentMethodChange { get; set; }
+    [Parameter] public EventCallback<PlaceOrderEventArgs> OnPlaceOrder { get; set; }
+
+    private Guid? SelectedAddressId { get; set; }
+    private string? SelectedPaymentMethod { get; set; }
+    private bool ShowNewAddressForm { get; set; }
+    private bool SaveAddressForLater { get; set; } = true;
+    private AddressModel NewAddress { get; set; } = new();
+
+    private string? CardNumber { get; set; }
+    private string? CardExpiry { get; set; }
+    private string? CardCvv { get; set; }
+    private string? CardholderName { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (SavedAddresses?.Any() == true)
+        {
+            SelectedAddressId = SavedAddresses.FirstOrDefault(a => a.IsDefault)?.Id
+                               ?? SavedAddresses.First().Id;
+        }
+
+        if (PaymentMethods.Any())
+        {
+            SelectedPaymentMethod = PaymentMethods.First().Id;
+        }
+    }
+
+    private void SelectAddress(Guid id) => SelectedAddressId = id;
+    private void SelectPaymentMethod(string id) => SelectedPaymentMethod = id;
+
+    private async Task GoToNextStep()
+    {
+        if (CurrentStep < 3)
+        {
+            CurrentStep++;
+            await OnStepChange.InvokeAsync(CurrentStep);
+        }
+    }
+
+    private async Task GoToPreviousStep()
+    {
+        if (CurrentStep > 1)
+        {
+            CurrentStep--;
+            await OnStepChange.InvokeAsync(CurrentStep);
+        }
+    }
+
+    private async Task HandlePlaceOrder()
+    {
+        var args = new PlaceOrderEventArgs
+        {
+            AddressId = SelectedAddressId,
+            NewAddress = ShowNewAddressForm ? NewAddress : null,
+            PaymentMethodId = SelectedPaymentMethod,
+            SaveAddress = SaveAddressForLater
+        };
+        await OnPlaceOrder.InvokeAsync(args);
+    }
+
+    private string GetSelectedAddressText()
+    {
+        var address = SavedAddresses?.FirstOrDefault(a => a.Id == SelectedAddressId);
+        if (address != null)
+        {
+            return $"{address.Name}, {address.Street}, {address.City}";
+        }
+        return ShowNewAddressForm ? $"{NewAddress.Name}, {NewAddress.Street}, {NewAddress.City}" : "";
+    }
+
+    private string GetSelectedPaymentText()
+    {
+        return PaymentMethods.FirstOrDefault(p => p.Id == SelectedPaymentMethod)?.Name ?? "";
+    }
+}

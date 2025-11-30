@@ -1,0 +1,135 @@
+@page "/cart"
+@using ACommerce.Client.Cart
+@inject CartClient CartClient
+
+<PageTitle>السلة - ACommerce Shop</PageTitle>
+
+<h1>🛒 سلة التسوق</h1>
+
+@if (isLoading)
+{
+    <div class="text-center p-3">
+        <p>جاري تحميل السلة...</p>
+    </div>
+}
+else if (cartItems.Count == 0)
+{
+    <div class="empty-cart text-center p-3">
+        <p class="empty-icon">🛒</p>
+        <h3>السلة فارغة</h3>
+        <p>لم تقم بإضافة أي منتجات بعد</p>
+        <a href="/products" class="btn-primary">تصفح المنتجات</a>
+    </div>
+}
+else
+{
+    <div class="cart-items">
+        @foreach (var item in cartItems)
+        {
+            <div class="cart-item">
+                <img src="@item.ImageUrl" alt="@item.Name" class="item-image" />
+                <div class="item-details">
+                    <h4>@item.Name</h4>
+                    <p class="item-price">@item.Price ر.س</p>
+                </div>
+                <div class="item-quantity">
+                    <SfButton CssClass="e-small" @onclick="() => UpdateQuantity(item.Id, item.Quantity - 1)">-</SfButton>
+                    <span>@item.Quantity</span>
+                    <SfButton CssClass="e-small" @onclick="() => UpdateQuantity(item.Id, item.Quantity + 1)">+</SfButton>
+                </div>
+                <SfButton CssClass="e-danger e-small" @onclick="() => RemoveItem(item.Id)">حذف</SfButton>
+            </div>
+        }
+    </div>
+
+    <div class="cart-summary">
+        <h3>الإجمالي: @Total ر.س</h3>
+        <SfButton CssClass="e-success e-block" @onclick="Checkout">إتمام الشراء</SfButton>
+    </div>
+}
+
+@code {
+    private List<CartItemDto> cartItems = new();
+    private bool isLoading = true;
+    private decimal Total => cartItems.Sum(i => i.Price * i.Quantity);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCart();
+    }
+
+    private async Task LoadCart()
+    {
+        isLoading = true;
+        try
+        {
+            // Mock data for demo
+            cartItems = new List<CartItemDto>
+            {
+                new() { Id = Guid.NewGuid(), Name = "منتج تجريبي 1", Price = 99.99m, Quantity = 2, ImageUrl = "https://via.placeholder.com/80" },
+                new() { Id = Guid.NewGuid(), Name = "منتج تجريبي 2", Price = 149.99m, Quantity = 1, ImageUrl = "https://via.placeholder.com/80" }
+            };
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task UpdateQuantity(Guid itemId, int newQuantity)
+    {
+        if (newQuantity < 1) return;
+        var item = cartItems.FirstOrDefault(i => i.Id == itemId);
+        if (item != null) item.Quantity = newQuantity;
+    }
+
+    private async Task RemoveItem(Guid itemId)
+    {
+        cartItems.RemoveAll(i => i.Id == itemId);
+    }
+
+    private void Checkout()
+    {
+        // TODO: Navigate to checkout
+    }
+
+    private class CartItemDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
+        public decimal Price { get; set; }
+        public int Quantity { get; set; }
+        public string ImageUrl { get; set; } = "";
+    }
+}
+
+<style>
+    .empty-cart { padding: 2rem; }
+    .empty-icon { font-size: 4rem; }
+    .btn-primary {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: #6200ea;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+    .cart-items { margin: 1rem 0; }
+    .cart-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+    .item-image { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
+    .item-details { flex: 1; }
+    .item-quantity { display: flex; align-items: center; gap: 0.5rem; }
+    .cart-summary {
+        padding: 1rem;
+        background: #f5f5f5;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+</style>

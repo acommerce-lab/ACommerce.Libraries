@@ -1,0 +1,207 @@
+@namespace ACommerce.Templates.Customer.Pages
+
+<div class="ac-page ac-auth-page ac-register-page">
+    <div class="ac-auth-card">
+        <div class="ac-auth-header">
+            <h1>إنشاء حساب</h1>
+            <p>أنشئ حسابك للبدء بالتسوق</p>
+        </div>
+
+        <form class="ac-auth-form" @onsubmit="HandleSubmit" @onsubmit:preventDefault>
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="ac-alert ac-alert-danger">
+                    <i class="bi bi-exclamation-circle"></i>
+                    @ErrorMessage
+                </div>
+            }
+
+            <AcInput Label="الاسم الكامل"
+                     @bind-Value="FullName"
+                     Placeholder="أدخل اسمك الكامل"
+                     IconStart="bi-person"
+                     Required="true"
+                     HasError="@NameError"
+                     ErrorMessage="الاسم مطلوب" />
+
+            <AcInput Label="البريد الإلكتروني"
+                     Type="email"
+                     @bind-Value="Email"
+                     Placeholder="example@email.com"
+                     IconStart="bi-envelope"
+                     Required="true"
+                     HasError="@EmailError"
+                     ErrorMessage="البريد الإلكتروني غير صالح" />
+
+            <AcInput Label="رقم الهاتف"
+                     Type="tel"
+                     @bind-Value="Phone"
+                     Placeholder="05xxxxxxxx"
+                     IconStart="bi-phone"
+                     Required="true"
+                     HasError="@PhoneError"
+                     ErrorMessage="رقم الهاتف غير صالح" />
+
+            <AcInput Label="كلمة المرور"
+                     Type="@(ShowPassword ? "text" : "password")"
+                     @bind-Value="Password"
+                     Placeholder="أدخل كلمة مرور قوية"
+                     IconStart="bi-lock"
+                     Required="true"
+                     HasError="@PasswordError"
+                     ErrorMessage="كلمة المرور يجب أن تكون 8 أحرف على الأقل" />
+
+            @if (!string.IsNullOrEmpty(Password))
+            {
+                <div class="ac-password-strength">
+                    <div class="ac-strength-bar">
+                        <div class="ac-strength-fill @PasswordStrengthClass" style="width: @(PasswordStrength * 25)%"></div>
+                    </div>
+                    <span class="@PasswordStrengthClass">@PasswordStrengthText</span>
+                </div>
+            }
+
+            <AcInput Label="تأكيد كلمة المرور"
+                     Type="@(ShowPassword ? "text" : "password")"
+                     @bind-Value="ConfirmPassword"
+                     Placeholder="أعد إدخال كلمة المرور"
+                     IconStart="bi-lock-fill"
+                     Required="true"
+                     HasError="@ConfirmPasswordError"
+                     ErrorMessage="كلمتا المرور غير متطابقتين" />
+
+            <label class="ac-checkbox">
+                <input type="checkbox" @bind="AcceptTerms" />
+                <span>
+                    أوافق على
+                    <a href="/terms" class="ac-link">الشروط والأحكام</a>
+                    و
+                    <a href="/privacy" class="ac-link">سياسة الخصوصية</a>
+                </span>
+            </label>
+
+            <AcButton Text="إنشاء حساب"
+                      Type="submit"
+                      Variant="ButtonVariant.Primary"
+                      Block="true"
+                      Size="ButtonSize.Large"
+                      Loading="IsLoading"
+                      Disabled="@(!IsFormValid)" />
+        </form>
+
+        <div class="ac-auth-divider">
+            <span>أو</span>
+        </div>
+
+        <div class="ac-social-login">
+            @if (ShowGoogleLogin)
+            {
+                <button class="ac-social-btn ac-google-btn" @onclick="HandleGoogleRegister">
+                    <i class="bi bi-google"></i>
+                    <span>التسجيل بـ Google</span>
+                </button>
+            }
+            @if (ShowAppleLogin)
+            {
+                <button class="ac-social-btn ac-apple-btn" @onclick="HandleAppleRegister">
+                    <i class="bi bi-apple"></i>
+                    <span>التسجيل بـ Apple</span>
+                </button>
+            }
+        </div>
+
+        <div class="ac-auth-footer">
+            <span>لديك حساب بالفعل؟</span>
+            <a href="/login" class="ac-link">تسجيل الدخول</a>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string? ErrorMessage { get; set; }
+    [Parameter] public bool ShowGoogleLogin { get; set; } = true;
+    [Parameter] public bool ShowAppleLogin { get; set; } = true;
+
+    [Parameter] public EventCallback<RegisterEventArgs> OnRegister { get; set; }
+    [Parameter] public EventCallback OnGoogleRegister { get; set; }
+    [Parameter] public EventCallback OnAppleRegister { get; set; }
+
+    private string? FullName { get; set; }
+    private string? Email { get; set; }
+    private string? Phone { get; set; }
+    private string? Password { get; set; }
+    private string? ConfirmPassword { get; set; }
+    private bool AcceptTerms { get; set; }
+    private bool ShowPassword { get; set; }
+
+    private bool NameError { get; set; }
+    private bool EmailError { get; set; }
+    private bool PhoneError { get; set; }
+    private bool PasswordError { get; set; }
+    private bool ConfirmPasswordError { get; set; }
+
+    private int PasswordStrength
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(Password)) return 0;
+            int strength = 0;
+            if (Password.Length >= 8) strength++;
+            if (Password.Any(char.IsUpper)) strength++;
+            if (Password.Any(char.IsDigit)) strength++;
+            if (Password.Any(c => !char.IsLetterOrDigit(c))) strength++;
+            return strength;
+        }
+    }
+
+    private string PasswordStrengthClass => PasswordStrength switch
+    {
+        1 => "ac-strength-weak",
+        2 => "ac-strength-fair",
+        3 => "ac-strength-good",
+        4 => "ac-strength-strong",
+        _ => ""
+    };
+
+    private string PasswordStrengthText => PasswordStrength switch
+    {
+        1 => "ضعيفة",
+        2 => "مقبولة",
+        3 => "جيدة",
+        4 => "قوية",
+        _ => ""
+    };
+
+    private bool IsFormValid =>
+        !string.IsNullOrWhiteSpace(FullName) &&
+        !string.IsNullOrWhiteSpace(Email) &&
+        !string.IsNullOrWhiteSpace(Phone) &&
+        !string.IsNullOrWhiteSpace(Password) &&
+        Password?.Length >= 8 &&
+        Password == ConfirmPassword &&
+        AcceptTerms;
+
+    private async Task HandleSubmit()
+    {
+        NameError = string.IsNullOrWhiteSpace(FullName);
+        EmailError = string.IsNullOrWhiteSpace(Email) || !Email.Contains('@');
+        PhoneError = string.IsNullOrWhiteSpace(Phone);
+        PasswordError = string.IsNullOrWhiteSpace(Password) || Password.Length < 8;
+        ConfirmPasswordError = Password != ConfirmPassword;
+
+        if (IsFormValid)
+        {
+            await OnRegister.InvokeAsync(new RegisterEventArgs
+            {
+                FullName = FullName!,
+                Email = Email!,
+                Phone = Phone!,
+                Password = Password!
+            });
+        }
+    }
+
+    private async Task HandleGoogleRegister() => await OnGoogleRegister.InvokeAsync();
+    private async Task HandleAppleRegister() => await OnAppleRegister.InvokeAsync();
+}

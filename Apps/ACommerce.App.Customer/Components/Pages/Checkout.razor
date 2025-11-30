@@ -1,0 +1,82 @@
+@page "/checkout"
+@inject MockDataService DataService
+@inject IAppNavigationService Navigation
+
+<CheckoutPage CurrentStep="@_currentStep"
+              IsLoading="@_isLoading"
+              IsPlacingOrder="@_isPlacingOrder"
+              CartItems="@_cartItems"
+              SavedAddresses="@_savedAddresses"
+              PaymentMethods="@_paymentMethods"
+              Subtotal="@_subtotal"
+              Discount="@_discount"
+              ShippingCost="@_shippingCost"
+              Tax="@_tax"
+              Total="@_total"
+              OnStepChange="HandleStepChange"
+              OnAddressSubmit="HandleAddressSubmit"
+              OnPaymentMethodChange="HandlePaymentMethodChange"
+              OnPlaceOrder="HandlePlaceOrder" />
+
+@code {
+    private int _currentStep = 1;
+    private bool _isLoading = true;
+    private bool _isPlacingOrder;
+    private List<CartItemModel> _cartItems = new();
+    private List<AddressModel>? _savedAddresses;
+    private List<PaymentMethodModel> _paymentMethods = new();
+    private decimal _subtotal;
+    private decimal _discount;
+    private decimal _shippingCost = 25;
+    private decimal _tax;
+    private decimal _total;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _isLoading = true;
+
+        await Task.Delay(300);
+
+        _cartItems = DataService.GetCartItems();
+        _savedAddresses = DataService.GetSavedAddresses();
+        _paymentMethods = DataService.GetPaymentMethods();
+
+        _subtotal = _cartItems.Sum(i => i.Price * i.Quantity);
+        _tax = _subtotal * 0.15m;
+        _total = _subtotal + _shippingCost + _tax;
+
+        _isLoading = false;
+    }
+
+    private void HandleStepChange(int step)
+    {
+        _currentStep = step;
+    }
+
+    private void HandleAddressSubmit(AddressModel address)
+    {
+        Console.WriteLine($"Address submitted: {address.City}");
+    }
+
+    private void HandlePaymentMethodChange(string methodId)
+    {
+        Console.WriteLine($"Payment method changed to: {methodId}");
+    }
+
+    private async Task HandlePlaceOrder(PlaceOrderEventArgs args)
+    {
+        _isPlacingOrder = true;
+
+        await Task.Delay(2000); // Simulate order processing
+
+        // Navigate to order confirmation
+        Navigation.NavigateTo("/order-confirmation/12345");
+
+        _isPlacingOrder = false;
+    }
+}

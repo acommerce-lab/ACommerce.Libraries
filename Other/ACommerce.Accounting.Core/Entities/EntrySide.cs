@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Catalog.Currencies.Entities;
 using ACommerce.Catalog.Units.Entities;
 using ACommerce.SharedKernel.Abstractions.Entities;
@@ -117,10 +118,11 @@ public class EntrySide : IBaseEntity
 	/// </summary>
 	public string? Description { get; set; }
 
-    /// <summary>
-    /// ??????? ??????
-    /// </summary>
-    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
+	/// <summary>
+	/// ??????? ??????
+	/// </summary>
+	[NotMapped]
+	public Dictionary<string, string> Metadata { get; set; } = new();
 
 	/// <summary>
 	/// ?????? ??? ???? ?????? (???? - ????)

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.SharedKernel.Abstractions.Entities;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -43,10 +44,11 @@ public class UnitCategory : IBaseEntity
 	/// </summary>
 	public int SortOrder { get; set; }
 
-    /// <summary>
-    /// معلومات إضافية
-    /// </summary>
-    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
+	/// <summary>
+	/// معلومات إضافية
+	/// </summary>
+	[NotMapped]
+	public Dictionary<string, string> Metadata { get; set; } = new();
 
 	/// <summary>
 	/// الوحدات في هذه الفئة

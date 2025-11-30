@@ -9,10 +9,10 @@ namespace ACommerce.Client.ContactPoints;
 /// </summary>
 public sealed class ContactPointsClient
 {
-	private readonly DynamicHttpClient _httpClient;
+	private readonly IApiClient _httpClient;
 	private const string ServiceName = "Marketplace"; // أو "Users"
 
-	public ContactPointsClient(DynamicHttpClient httpClient)
+	public ContactPointsClient(IApiClient httpClient)
 	{
 		_httpClient = httpClient;
 	}

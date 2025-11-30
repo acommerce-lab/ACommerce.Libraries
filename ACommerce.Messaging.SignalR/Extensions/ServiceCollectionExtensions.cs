@@ -25,7 +25,7 @@ public static class ServiceCollectionExtensions
             ServiceName = serviceName,
             MessagingServiceUrl = configuration["Messaging:ServiceUrl"]
                 ?? configuration["Messaging:ServiceUrl"]
-                ?? "http://localhost:5001"
+                ?? "https://localhost:5001"
         };
 
         services.AddSingleton(options);
@@ -45,7 +45,7 @@ public static class ServiceCollectionExtensions
         var options = new SignalRMessagingOptions
         {
             ServiceName = "unknown",
-            MessagingServiceUrl = "http://localhost:5001"
+            MessagingServiceUrl = "https://localhost:5001"
         };
 
         configureOptions(options);

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.SharedKernel.Abstractions.Entities;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -43,10 +44,11 @@ public class UserRecipient : IBaseEntity
 	/// </summary>
 	public List<RecipientGroup> Groups { get; init; } = new();
 
-    /// <summary>
-    /// ??????? ?????? (???: department, role)
-    /// </summary>
-    [NotMapped] public Dictionary<string, string> Metadata { get; init; } = new();
+	/// <summary>
+	/// ??????? ?????? (???: department, role)
+	/// </summary>
+	[NotMapped]
+	public Dictionary<string, string> Metadata { get; init; } = new();
 
 	/// <summary>
 	/// ?? ???????? ????

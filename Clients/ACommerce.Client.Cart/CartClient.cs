@@ -8,10 +8,11 @@ namespace ACommerce.Client.Cart;
 /// </summary>
 public sealed class CartClient
 {
-	private readonly DynamicHttpClient _httpClient;
+	private readonly IApiClient _httpClient;
 	private const string ServiceName = "Marketplace";
+	private const string BasePath = "/api/cart";
 
-	public CartClient(DynamicHttpClient httpClient)
+	public CartClient(IApiClient httpClient)
 	{
 		_httpClient = httpClient;
 	}
@@ -25,7 +26,7 @@ public sealed class CartClient
 	{
 		return await _httpClient.GetAsync<CartResponse>(
 			ServiceName,
-			$"/api/cart/{userIdOrSessionId}",
+			$"{BasePath}/{userIdOrSessionId}",
 			cancellationToken);
 	}
 
@@ -38,7 +39,7 @@ public sealed class CartClient
 	{
 		return await _httpClient.PostAsync<AddToCartRequest, CartResponse>(
 			ServiceName,
-			"/api/cart/add",
+			$"{BasePath}/add",
 			request,
 			cancellationToken);
 	}
@@ -53,7 +54,7 @@ public sealed class CartClient
 	{
 		return await _httpClient.PutAsync<UpdateCartItemRequest, CartResponse>(
 			ServiceName,
-			$"/api/cart/items/{itemId}",
+			$"{BasePath}/items/{itemId}",
 			request,
 			cancellationToken);
 	}
@@ -67,7 +68,7 @@ public sealed class CartClient
 	{
 		await _httpClient.DeleteAsync(
 			ServiceName,
-			$"/api/cart/items/{itemId}",
+			$"{BasePath}/items/{itemId}",
 			cancellationToken);
 	}
 
@@ -80,7 +81,7 @@ public sealed class CartClient
 	{
 		await _httpClient.DeleteAsync(
 			ServiceName,
-			$"/api/cart/{userIdOrSessionId}",
+			$"{BasePath}/{userIdOrSessionId}",
 			cancellationToken);
 	}
 
@@ -94,7 +95,7 @@ public sealed class CartClient
 	{
 		return await _httpClient.PostAsync<ApplyCouponRequest, CartResponse>(
 			ServiceName,
-			$"/api/cart/{userIdOrSessionId}/coupon",
+			$"{BasePath}/{userIdOrSessionId}/coupon",
 			request,
 			cancellationToken);
 	}
@@ -108,21 +109,21 @@ public sealed class CartClient
 	{
 		return await _httpClient.DeleteAsync<CartResponse>(
 			ServiceName,
-			$"/api/cart/{userIdOrSessionId}/coupon",
+			$"{BasePath}/{userIdOrSessionId}/coupon",
 			cancellationToken);
 	}
 }
 
-// Extension لـ DynamicHttpClient لدعم DELETE مع Response
+// Extension لـ IApiClient لدعم DELETE مع Response
 public static class HttpClientExtensions
 {
 	public static async Task<T?> DeleteAsync<T>(
-		this DynamicHttpClient httpClient,
+		this IApiClient httpClient,
 		string serviceName,
 		string path,
 		CancellationToken cancellationToken = default)
 	{
-		// سنضيف هذا للـ DynamicHttpClient لاحقاً
+		// Delete غير مدعوم مع Response حالياً، نحتاج لإضافته للواجهة
 		throw new NotImplementedException("DeleteAsync<T> not implemented yet");
 	}
 }

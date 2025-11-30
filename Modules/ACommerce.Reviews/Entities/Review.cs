@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.SharedKernel.Abstractions.Entities;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -46,16 +47,19 @@ public class Review : IBaseEntity
 	/// <summary>
 	/// الإيجابيات
 	/// </summary>
+	[NotMapped]
 	public List<string> Pros { get; set; } = new();
 
 	/// <summary>
 	/// السلبيات
 	/// </summary>
+	[NotMapped]
 	public List<string> Cons { get; set; } = new();
 
 	/// <summary>
 	/// الصور المرفقة
 	/// </summary>
+	[NotMapped]
 	public List<string> Images { get; set; } = new();
 
 	/// <summary>
@@ -86,5 +90,6 @@ public class Review : IBaseEntity
 	/// <summary>
 	/// بيانات إضافية
 	/// </summary>
-	[NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
+	[NotMapped]
+	public Dictionary<string, string> Metadata { get; set; } = new();
 }

@@ -1,0 +1,109 @@
+@namespace ACommerce.Templates.Customer.Components
+
+<div class="ac-search-box @(Expanded ? "ac-search-box-expanded" : "") @Class">
+    <div class="ac-search-input-wrapper">
+        <i class="bi bi-search ac-search-icon"></i>
+        <input type="text"
+               class="ac-search-input"
+               placeholder="@Placeholder"
+               value="@Value"
+               @oninput="HandleInput"
+               @onkeydown="HandleKeyDown"
+               @onfocus="HandleFocus"
+               @onblur="HandleBlur" />
+        @if (!string.IsNullOrEmpty(Value))
+        {
+            <button class="ac-search-clear" @onclick="ClearSearch">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        }
+        @if (ShowVoiceSearch)
+        {
+            <button class="ac-search-voice" @onclick="OnVoiceSearch">
+                <i class="bi bi-mic"></i>
+            </button>
+        }
+    </div>
+
+    @if (ShowSuggestions && Suggestions != null && Suggestions.Any() && IsFocused)
+    {
+        <div class="ac-search-suggestions">
+            @foreach (var suggestion in Suggestions)
+            {
+                <div class="ac-search-suggestion" @onclick="() => SelectSuggestion(suggestion)">
+                    <i class="bi @(suggestion.IsHistory ? "bi-clock-history" : "bi-search")"></i>
+                    <span>@suggestion.Text</span>
+                    @if (suggestion.IsHistory)
+                    {
+                        <button class="ac-suggestion-remove" @onclick:stopPropagation="true" @onclick="() => RemoveSuggestion(suggestion)">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "ابحث عن منتجات...";
+    [Parameter] public bool Expanded { get; set; }
+    [Parameter] public bool ShowVoiceSearch { get; set; }
+    [Parameter] public bool ShowSuggestions { get; set; } = true;
+    [Parameter] public List<SearchSuggestion>? Suggestions { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public EventCallback<string> OnSearch { get; set; }
+    [Parameter] public EventCallback OnVoiceSearch { get; set; }
+    [Parameter] public EventCallback<SearchSuggestion> OnSuggestionClick { get; set; }
+    [Parameter] public EventCallback<SearchSuggestion> OnSuggestionRemove { get; set; }
+
+    private bool IsFocused { get; set; }
+
+    private async Task HandleInput(ChangeEventArgs e)
+    {
+        Value = e.Value?.ToString();
+        await ValueChanged.InvokeAsync(Value);
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrEmpty(Value))
+        {
+            await OnSearch.InvokeAsync(Value);
+        }
+    }
+
+    private void HandleFocus()
+    {
+        IsFocused = true;
+    }
+
+    private async Task HandleBlur()
+    {
+        // Delay to allow click on suggestions
+        await Task.Delay(200);
+        IsFocused = false;
+    }
+
+    private async Task ClearSearch()
+    {
+        Value = string.Empty;
+        await ValueChanged.InvokeAsync(Value);
+    }
+
+    private async Task SelectSuggestion(SearchSuggestion suggestion)
+    {
+        Value = suggestion.Text;
+        await ValueChanged.InvokeAsync(Value);
+        await OnSuggestionClick.InvokeAsync(suggestion);
+        await OnSearch.InvokeAsync(Value);
+        IsFocused = false;
+    }
+
+    private async Task RemoveSuggestion(SearchSuggestion suggestion)
+    {
+        await OnSuggestionRemove.InvokeAsync(suggestion);
+    }
+}

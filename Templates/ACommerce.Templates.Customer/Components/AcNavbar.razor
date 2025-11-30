@@ -1,0 +1,103 @@
+@namespace ACommerce.Templates.Customer.Components
+
+<nav class="ac-navbar @(Sticky ? "ac-navbar-sticky" : "") @(Transparent ? "ac-navbar-transparent" : "") @Class">
+    <div class="ac-navbar-container">
+        @if (ShowBackButton)
+        {
+            <button class="ac-navbar-back" @onclick="OnBackClick">
+                <i class="bi bi-arrow-right"></i>
+            </button>
+        }
+
+        @if (LogoContent != null)
+        {
+            <div class="ac-navbar-brand">
+                @LogoContent
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(LogoUrl))
+        {
+            <div class="ac-navbar-brand">
+                <img src="@LogoUrl" alt="@BrandName" class="ac-navbar-logo" />
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(BrandName))
+        {
+            <div class="ac-navbar-brand">
+                <span class="ac-navbar-brand-text">@BrandName</span>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Title))
+        {
+            <h1 class="ac-navbar-title">@Title</h1>
+        }
+
+        @if (CenterContent != null)
+        {
+            <div class="ac-navbar-center">
+                @CenterContent
+            </div>
+        }
+
+        <div class="ac-navbar-actions">
+            @if (ActionsContent != null)
+            {
+                @ActionsContent
+            }
+            else
+            {
+                @if (ShowSearch)
+                {
+                    <button class="ac-navbar-action" @onclick="OnSearchClick" title="بحث">
+                        <i class="bi bi-search"></i>
+                    </button>
+                }
+
+                @if (ShowNotifications)
+                {
+                    <button class="ac-navbar-action" @onclick="OnNotificationsClick" title="الإشعارات">
+                        <i class="bi bi-bell"></i>
+                        @if (NotificationCount > 0)
+                        {
+                            <span class="ac-badge ac-badge-danger ac-badge-dot">@(NotificationCount > 99 ? "99+" : NotificationCount.ToString())</span>
+                        }
+                    </button>
+                }
+
+                @if (ShowCart)
+                {
+                    <button class="ac-navbar-action" @onclick="OnCartClick" title="السلة">
+                        <i class="bi bi-cart3"></i>
+                        @if (CartItemCount > 0)
+                        {
+                            <span class="ac-badge ac-badge-primary">@(CartItemCount > 99 ? "99+" : CartItemCount.ToString())</span>
+                        }
+                    </button>
+                }
+            }
+        </div>
+    </div>
+</nav>
+
+@code {
+    [Parameter] public string? LogoUrl { get; set; }
+    [Parameter] public string? BrandName { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public RenderFragment? LogoContent { get; set; }
+    [Parameter] public RenderFragment? CenterContent { get; set; }
+    [Parameter] public RenderFragment? ActionsContent { get; set; }
+    [Parameter] public bool Sticky { get; set; } = true;
+    [Parameter] public bool Transparent { get; set; }
+    [Parameter] public bool ShowBackButton { get; set; }
+    [Parameter] public bool ShowSearch { get; set; } = true;
+    [Parameter] public bool ShowNotifications { get; set; } = true;
+    [Parameter] public bool ShowCart { get; set; } = true;
+    [Parameter] public int NotificationCount { get; set; }
+    [Parameter] public int CartItemCount { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public EventCallback OnBackClick { get; set; }
+    [Parameter] public EventCallback OnSearchClick { get; set; }
+    [Parameter] public EventCallback OnNotificationsClick { get; set; }
+    [Parameter] public EventCallback OnCartClick { get; set; }
+}

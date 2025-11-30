@@ -9,7 +9,7 @@ namespace ACommerce.Client.Core.Http;
 /// HTTP Client مع Dynamic Service URLs
 /// يستخدم Service Registry للحصول على URLs ديناميكياً
 /// </summary>
-public sealed class DynamicHttpClient
+public sealed class DynamicHttpClient : IApiClient
 {
 	private readonly HttpClient _httpClient;
 	private readonly ServiceRegistryClient _registryClient;

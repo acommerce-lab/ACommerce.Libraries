@@ -1,0 +1,83 @@
+@namespace ACommerce.Templates.Customer.Components
+
+<div class="ac-card @CssClass" @attributes="AdditionalAttributes">
+    @if (HeaderContent != null || !string.IsNullOrEmpty(Title))
+    {
+        <div class="ac-card-header">
+            @if (HeaderContent != null)
+            {
+                @HeaderContent
+            }
+            else
+            {
+                <h3 class="ac-card-title">@Title</h3>
+                @if (!string.IsNullOrEmpty(Subtitle))
+                {
+                    <p class="ac-card-subtitle">@Subtitle</p>
+                }
+            }
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(ImageUrl))
+    {
+        <div class="ac-card-image">
+            <img src="@ImageUrl" alt="@ImageAlt" loading="lazy" />
+            @if (ImageOverlayContent != null)
+            {
+                <div class="ac-card-image-overlay">
+                    @ImageOverlayContent
+                </div>
+            }
+        </div>
+    }
+
+    @if (ChildContent != null)
+    {
+        <div class="ac-card-body @(NoPadding ? "ac-p-0" : "")">
+            @ChildContent
+        </div>
+    }
+
+    @if (FooterContent != null)
+    {
+        <div class="ac-card-footer">
+            @FooterContent
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? HeaderContent { get; set; }
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+    [Parameter] public RenderFragment? ImageOverlayContent { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Subtitle { get; set; }
+    [Parameter] public string? ImageUrl { get; set; }
+    [Parameter] public string? ImageAlt { get; set; }
+    [Parameter] public bool Hoverable { get; set; }
+    [Parameter] public bool Clickable { get; set; }
+    [Parameter] public bool NoPadding { get; set; }
+    [Parameter] public bool NoBorder { get; set; }
+    [Parameter] public bool Flat { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string CssClass
+    {
+        get
+        {
+            var classes = new List<string>();
+
+            if (Hoverable) classes.Add("ac-card-hoverable");
+            if (Clickable) classes.Add("ac-card-clickable");
+            if (NoBorder) classes.Add("ac-card-no-border");
+            if (Flat) classes.Add("ac-card-flat");
+            if (!string.IsNullOrEmpty(Class)) classes.Add(Class);
+
+            return string.Join(" ", classes);
+        }
+    }
+}

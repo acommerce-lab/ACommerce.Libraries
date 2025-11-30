@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Chats.Abstractions.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -24,6 +25,7 @@ public class Message : IBaseEntity
 	public Guid? ReplyToMessageId { get; set; }
 	public Message? ReplyToMessage { get; set; }
 
+	[NotMapped]
 	public List<string> Attachments { get; set; } = new();
 
 	public bool IsEdited { get; set; }
@@ -34,6 +36,7 @@ public class Message : IBaseEntity
 	/// </summary>
 	public List<MessageRead> ReadBy { get; set; } = new();
 
-    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
+	[NotMapped]
+	public Dictionary<string, string> Metadata { get; set; } = new();
 }
 

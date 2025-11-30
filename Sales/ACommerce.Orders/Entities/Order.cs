@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Orders.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -135,10 +136,11 @@ public class Order : IBaseEntity
 	/// </summary>
 	public DateTime? CancelledAt { get; set; }
 
-    /// <summary>
-    /// بيانات إضافية
-    /// </summary>
-    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
+	/// <summary>
+	/// بيانات إضافية
+	/// </summary>
+	[NotMapped]
+	public Dictionary<string, string> Metadata { get; set; } = new();
 }
 
 /// <summary>
@@ -211,8 +213,9 @@ public class OrderItem : IBaseEntity
 	/// </summary>
 	public decimal VendorAmount { get; set; }
 
-    /// <summary>
-    /// بيانات إضافية
-    /// </summary>
-    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
+	/// <summary>
+	/// بيانات إضافية
+	/// </summary>
+	[NotMapped]
+	public Dictionary<string, string> Metadata { get; set; } = new();
 }

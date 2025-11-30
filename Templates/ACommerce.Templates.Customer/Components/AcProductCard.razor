@@ -1,0 +1,143 @@
+@namespace ACommerce.Templates.Customer.Components
+
+<div class="ac-product-card @(Horizontal ? "ac-product-card-horizontal" : "") @Class" @onclick="HandleClick">
+    <div class="ac-product-card-image">
+        @if (!string.IsNullOrEmpty(ImageUrl))
+        {
+            <img src="@ImageUrl" alt="@Name" loading="lazy" />
+        }
+        else
+        {
+            <div class="ac-product-card-no-image">
+                <i class="bi bi-image"></i>
+            </div>
+        }
+
+        @if (DiscountPercent > 0)
+        {
+            <span class="ac-product-badge ac-product-badge-discount">-@DiscountPercent%</span>
+        }
+
+        @if (IsNew)
+        {
+            <span class="ac-product-badge ac-product-badge-new">جديد</span>
+        }
+
+        @if (IsFeatured)
+        {
+            <span class="ac-product-badge ac-product-badge-featured">مميز</span>
+        }
+
+        @if (ShowQuickActions)
+        {
+            <div class="ac-product-quick-actions">
+                <button class="ac-product-quick-btn" @onclick="HandleAddToCart" @onclick:stopPropagation="true" title="إضافة للسلة">
+                    <i class="bi bi-cart-plus"></i>
+                </button>
+                <button class="ac-product-quick-btn" @onclick="HandleAddToWishlist" @onclick:stopPropagation="true" title="إضافة للمفضلة">
+                    <i class="bi @(IsInWishlist ? "bi-heart-fill" : "bi-heart")"></i>
+                </button>
+            </div>
+        }
+    </div>
+
+    <div class="ac-product-card-content">
+        @if (!string.IsNullOrEmpty(Category))
+        {
+            <span class="ac-product-category">@Category</span>
+        }
+
+        <h3 class="ac-product-name" title="@Name">@Name</h3>
+
+        @if (!string.IsNullOrEmpty(ShortDescription))
+        {
+            <p class="ac-product-description">@ShortDescription</p>
+        }
+
+        @if (Rating > 0)
+        {
+            <div class="ac-product-rating">
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <i class="bi @(i <= Rating ? "bi-star-fill" : (i - 0.5 <= Rating ? "bi-star-half" : "bi-star"))"></i>
+                }
+                @if (ReviewCount > 0)
+                {
+                    <span class="ac-product-review-count">(@ReviewCount)</span>
+                }
+            </div>
+        }
+
+        @if (DynamicAttributes != null && DynamicAttributes.Any())
+        {
+            <div class="ac-product-attributes">
+                @foreach (var attr in DynamicAttributes.Take(3))
+                {
+                    <span class="ac-product-attribute" title="@attr.Key">
+                        <span class="ac-attribute-label">@attr.Key:</span>
+                        <span class="ac-attribute-value">@attr.Value</span>
+                    </span>
+                }
+            </div>
+        }
+
+        <div class="ac-product-price-row">
+            <div class="ac-product-prices">
+                <span class="ac-product-price @(OldPrice > 0 ? "ac-product-price-discounted" : "")">
+                    @Price.ToString("N2") @Currency
+                </span>
+                @if (OldPrice > 0)
+                {
+                    <span class="ac-product-old-price">@OldPrice.ToString("N2") @Currency</span>
+                }
+            </div>
+
+            @if (StockQuantity.HasValue)
+            {
+                <span class="ac-product-stock @(StockQuantity > 0 ? "ac-in-stock" : "ac-out-of-stock")">
+                    @(StockQuantity > 0 ? $"متوفر ({StockQuantity})" : "غير متوفر")
+                </span>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    [Parameter] public string Name { get; set; } = string.Empty;
+    [Parameter] public string? ImageUrl { get; set; }
+    [Parameter] public string? ShortDescription { get; set; }
+    [Parameter] public string? Category { get; set; }
+    [Parameter] public decimal Price { get; set; }
+    [Parameter] public decimal OldPrice { get; set; }
+    [Parameter] public string Currency { get; set; } = "ر.س";
+    [Parameter] public int DiscountPercent { get; set; }
+    [Parameter] public double Rating { get; set; }
+    [Parameter] public int ReviewCount { get; set; }
+    [Parameter] public int? StockQuantity { get; set; }
+    [Parameter] public bool IsNew { get; set; }
+    [Parameter] public bool IsFeatured { get; set; }
+    [Parameter] public bool IsInWishlist { get; set; }
+    [Parameter] public bool Horizontal { get; set; }
+    [Parameter] public bool ShowQuickActions { get; set; } = true;
+    [Parameter] public Dictionary<string, string>? DynamicAttributes { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public EventCallback<Guid> OnClick { get; set; }
+    [Parameter] public EventCallback<Guid> OnAddToCart { get; set; }
+    [Parameter] public EventCallback<Guid> OnAddToWishlist { get; set; }
+
+    private async Task HandleClick()
+    {
+        await OnClick.InvokeAsync(Id);
+    }
+
+    private async Task HandleAddToCart()
+    {
+        await OnAddToCart.InvokeAsync(Id);
+    }
+
+    private async Task HandleAddToWishlist()
+    {
+        await OnAddToWishlist.InvokeAsync(Id);
+    }
+}

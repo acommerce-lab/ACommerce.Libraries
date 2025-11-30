@@ -1,0 +1,133 @@
+@namespace ACommerce.Templates.Customer.Components
+
+<div class="ac-image-gallery @Class">
+    <div class="ac-gallery-main">
+        @if (Images != null && Images.Any())
+        {
+            <div class="ac-gallery-main-image">
+                <img src="@Images[SelectedIndex]" alt="@($"صورة {SelectedIndex + 1}")" @onclick="OpenFullscreen" />
+                @if (ShowZoom)
+                {
+                    <button class="ac-gallery-zoom" @onclick="OpenFullscreen">
+                        <i class="bi bi-zoom-in"></i>
+                    </button>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="ac-gallery-no-image">
+                <i class="bi bi-image"></i>
+                <span>لا توجد صور</span>
+            </div>
+        }
+
+        @if (Images != null && Images.Count > 1)
+        {
+            <button class="ac-gallery-nav ac-gallery-prev" @onclick="Previous" disabled="@(SelectedIndex == 0)">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+            <button class="ac-gallery-nav ac-gallery-next" @onclick="Next" disabled="@(SelectedIndex == Images.Count - 1)">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+        }
+    </div>
+
+    @if (ShowThumbnails && Images != null && Images.Count > 1)
+    {
+        <div class="ac-gallery-thumbnails">
+            @for (int i = 0; i < Images.Count; i++)
+            {
+                var index = i;
+                <button class="ac-gallery-thumbnail @(i == SelectedIndex ? "active" : "")"
+                        @onclick="() => SelectImage(index)">
+                    <img src="@Images[i]" alt="@($"صورة مصغرة {i + 1}")" loading="lazy" />
+                </button>
+            }
+        </div>
+    }
+
+    @if (ShowIndicators && Images != null && Images.Count > 1)
+    {
+        <div class="ac-gallery-indicators">
+            @for (int i = 0; i < Images.Count; i++)
+            {
+                var index = i;
+                <button class="ac-gallery-indicator @(i == SelectedIndex ? "active" : "")"
+                        @onclick="() => SelectImage(index)"></button>
+            }
+        </div>
+    }
+</div>
+
+@if (IsFullscreen)
+{
+    <div class="ac-gallery-fullscreen" @onclick="CloseFullscreen">
+        <button class="ac-gallery-fullscreen-close">
+            <i class="bi bi-x-lg"></i>
+        </button>
+
+        <div class="ac-gallery-fullscreen-content" @onclick:stopPropagation="true">
+            <img src="@Images![SelectedIndex]" alt="" />
+        </div>
+
+        @if (Images.Count > 1)
+        {
+            <button class="ac-gallery-fullscreen-nav ac-gallery-fullscreen-prev" @onclick="Previous" @onclick:stopPropagation="true">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+            <button class="ac-gallery-fullscreen-nav ac-gallery-fullscreen-next" @onclick="Next" @onclick:stopPropagation="true">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+        }
+
+        <div class="ac-gallery-fullscreen-counter">
+            @(SelectedIndex + 1) / @Images.Count
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public List<string>? Images { get; set; }
+    [Parameter] public int SelectedIndex { get; set; }
+    [Parameter] public bool ShowThumbnails { get; set; } = true;
+    [Parameter] public bool ShowIndicators { get; set; }
+    [Parameter] public bool ShowZoom { get; set; } = true;
+    [Parameter] public bool EnableSwipe { get; set; } = true;
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public EventCallback<int> OnImageChange { get; set; }
+
+    private bool IsFullscreen { get; set; }
+
+    private void SelectImage(int index)
+    {
+        SelectedIndex = index;
+        OnImageChange.InvokeAsync(index);
+    }
+
+    private void Previous()
+    {
+        if (SelectedIndex > 0)
+        {
+            SelectImage(SelectedIndex - 1);
+        }
+    }
+
+    private void Next()
+    {
+        if (Images != null && SelectedIndex < Images.Count - 1)
+        {
+            SelectImage(SelectedIndex + 1);
+        }
+    }
+
+    private void OpenFullscreen()
+    {
+        IsFullscreen = true;
+    }
+
+    private void CloseFullscreen()
+    {
+        IsFullscreen = false;
+    }
+}

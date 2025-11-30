@@ -9,7 +9,16 @@
 <div class="filters-section mb-3">
     <SfTextBox Placeholder="بحث عن منتج..." @bind-Value="@searchQuery" />
     <SfButton CssClass="e-primary" @onclick="SearchProducts">بحث</SfButton>
+    <SfButton CssClass="e-info" @onclick="LoadProducts">تحديث</SfButton>
 </div>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="error-message">
+        <p>⚠️ @errorMessage</p>
+        <small>تأكد من تشغيل Backend API على المنفذ 5001</small>
+    </div>
+}
 
 @if (isLoading)
 {
@@ -24,12 +33,12 @@ else if (products?.Any() == true)
         @foreach (var product in products)
         {
             <div class="product-card">
-                <img src="@(product.FeaturedImage ?? "https://via.placeholder.com/300x200?text=No+Image")"
+                <img src="@(product.FeaturedImage ?? "https://via.placeholder.com/300x200?text=📦")"
                      alt="@product.Name"
                      class="product-image" />
                 <div class="p-2">
                     <h3 class="product-title">@product.Name</h3>
-                    <p class="text-secondary">@product.ShortDescription</p>
+                    <p class="text-secondary">@(product.ShortDescription ?? "بدون وصف")</p>
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="product-price">@GetFormattedPrice(product)</span>
                         <SfButton CssClass="e-success" @onclick="() => AddToCart(product)">
@@ -41,18 +50,20 @@ else if (products?.Any() == true)
         }
     </div>
 }
-else
+else if (!isLoading)
 {
     <div class="text-center p-3">
+        <p class="empty-icon">📦</p>
         <p>لا توجد منتجات حالياً</p>
         <SfButton CssClass="e-info" @onclick="LoadProducts">تحديث</SfButton>
     </div>
 }
 
 @code {
-    private List<ProductResponseDto>? products;
+    private List<ProductDto>? products;
     private string searchQuery = string.Empty;
     private bool isLoading = false;
+    private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
@@ -64,23 +75,25 @@ else
         try
         {
             isLoading = true;
+            errorMessage = null;
             StateHasChanged();
 
-            // TODO: Implement actual API call
-            // products = await ProductsClient.GetAllAsync();
+            // Try to load from API
+            products = await ProductsClient.GetAllAsync();
 
-            // Mock data for now
-            products = new List<ProductResponseDto>
+            // If API returns empty, show demo data
+            if (products == null || products.Count == 0)
             {
-                new() { Id = Guid.NewGuid(), Name = "منتج تجريبي 1", ShortDescription = "وصف قصير", FeaturedImage = null },
-                new() { Id = Guid.NewGuid(), Name = "منتج تجريبي 2", ShortDescription = "وصف قصير", FeaturedImage = null }
-            };
-
-            await Task.Delay(500); // Simulate network delay
+                products = GetDemoProducts();
+            }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading products: {ex.Message}");
+            errorMessage = $"تعذر الاتصال بالخادم";
+
+            // Fallback to demo data
+            products = GetDemoProducts();
         }
         finally
         {
@@ -89,30 +102,29 @@ else
         }
     }
 
+    private List<ProductDto> GetDemoProducts() => new()
+    {
+        new() { Id = Guid.NewGuid(), Name = "آيفون 15 برو", ShortDescription = "أحدث هواتف آبل", Price = 4999, Currency = "SAR" },
+        new() { Id = Guid.NewGuid(), Name = "سامسونج جالاكسي S24", ShortDescription = "هاتف ذكي متطور", Price = 3999, Currency = "SAR" },
+        new() { Id = Guid.NewGuid(), Name = "ماك بوك برو", ShortDescription = "لابتوب احترافي", Price = 8999, Currency = "SAR" },
+        new() { Id = Guid.NewGuid(), Name = "آيباد برو", ShortDescription = "تابلت للمحترفين", Price = 3499, Currency = "SAR" }
+    };
+
     private async Task SearchProducts()
     {
-        await LoadProducts(); // TODO: Implement search with query
+        await LoadProducts();
     }
 
-    private string GetFormattedPrice(ProductResponseDto product)
+    private string GetFormattedPrice(ProductDto product)
     {
-        // TODO: Get actual price from product
-        return "100 ر.س";
+        var price = product.Price ?? 0;
+        var currency = product.Currency ?? "SAR";
+        return currency == "SAR" ? $"{price:N0} ر.س" : $"{price:N2} {currency}";
     }
 
-    private void AddToCart(ProductResponseDto product)
+    private void AddToCart(ProductDto product)
     {
-        // TODO: Implement add to cart
         Console.WriteLine($"Added {product.Name} to cart");
-    }
-
-    // Temporary DTO for demo
-    public class ProductResponseDto
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string? ShortDescription { get; set; }
-        public string? FeaturedImage { get; set; }
     }
 }
 
@@ -121,6 +133,20 @@ else
         display: flex;
         gap: 1rem;
         margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .error-message {
+        background: #ffebee;
+        color: #c62828;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
     }
 
     .products-grid {
@@ -128,6 +154,40 @@ else
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 1.5rem;
         margin-top: 1rem;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .product-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+
+    .product-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .product-title {
+        font-size: 1.1rem;
+        margin: 0 0 0.5rem;
+    }
+
+    .product-price {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #6200ea;
+    }
+
+    .p-2 {
+        padding: 1rem;
     }
 
     .d-flex {
@@ -140,5 +200,10 @@ else
 
     .align-items-center {
         align-items: center;
+    }
+
+    .text-secondary {
+        color: #666;
+        margin: 0 0 1rem;
     }
 </style>

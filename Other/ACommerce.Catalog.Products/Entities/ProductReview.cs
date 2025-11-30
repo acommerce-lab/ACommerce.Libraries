@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.SharedKernel.Abstractions.Entities;
 
 namespace ACommerce.Catalog.Products.Entities;
@@ -61,6 +62,7 @@ public class ProductReview : IBaseEntity
 	/// <summary>
 	/// ????? ???????
 	/// </summary>
+	[NotMapped]
 	public List<string> Images { get; set; } = new();
 
 	/// <summary>

@@ -1,0 +1,25 @@
+@page "/settings"
+@inject ThemeService ThemeService
+
+<SettingsPage IsDarkMode="@ThemeService.IsDarkMode"
+              SelectedColor="@ThemeService.Current.Colors.Primary"
+              OnDarkModeChange="HandleDarkModeChange"
+              OnThemeColorClick="HandleThemeColorClick"
+              OnClearCacheClick="HandleClearCache" />
+
+@code {
+    private void HandleDarkModeChange(bool isDark)
+    {
+        ThemeService.ToggleDarkMode();
+    }
+
+    private void HandleThemeColorClick()
+    {
+        Console.WriteLine("Open theme color picker");
+    }
+
+    private void HandleClearCache()
+    {
+        Console.WriteLine("Cache cleared");
+    }
+}

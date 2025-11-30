@@ -4,10 +4,10 @@ namespace ACommerce.Client.Chats;
 
 public sealed class ChatsClient
 {
-	private readonly DynamicHttpClient _httpClient;
+	private readonly IApiClient _httpClient;
 	private const string ServiceName = "Chats"; // أو "Marketplace"
 
-	public ChatsClient(DynamicHttpClient httpClient)
+	public ChatsClient(IApiClient httpClient)
 	{
 		_httpClient = httpClient;
 	}

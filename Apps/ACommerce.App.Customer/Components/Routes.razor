@@ -1,0 +1,23 @@
+@using Microsoft.AspNetCore.Components.Routing
+
+<Router AppAssembly="@typeof(Routes).Assembly" AdditionalAssemblies="@_additionalAssemblies">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(ACommerce.App.Customer.Components.Layout.MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(ACommerce.App.Customer.Components.Layout.MainLayout)">
+            <div class="ac-not-found">
+                <h1>404</h1>
+                <p>الصفحة غير موجودة</p>
+            </div>
+        </LayoutView>
+    </NotFound>
+</Router>
+
+@code {
+    private static readonly System.Reflection.Assembly[] _additionalAssemblies = new[]
+    {
+        typeof(ACommerce.Templates.Customer.Components.AcButton).Assembly
+    };
+}

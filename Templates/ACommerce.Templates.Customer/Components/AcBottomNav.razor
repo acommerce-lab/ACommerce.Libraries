@@ -1,0 +1,45 @@
+@namespace ACommerce.Templates.Customer.Components
+
+<nav class="ac-bottom-nav @Class">
+    @if (Items != null)
+    {
+        @foreach (var item in Items)
+        {
+            <a class="ac-bottom-nav-item @(item.IsActive ? "active" : "")"
+               href="@item.Href"
+               @onclick="() => HandleItemClick(item)"
+               @onclick:preventDefault="@(item.Href == "#")">
+                <span class="ac-bottom-nav-icon">
+                    <i class="bi @(item.IsActive ? item.ActiveIcon ?? item.Icon : item.Icon)"></i>
+                    @if (item.BadgeCount > 0)
+                    {
+                        <span class="ac-badge ac-badge-danger ac-badge-sm">
+                            @(item.BadgeCount > 99 ? "99+" : item.BadgeCount.ToString())
+                        </span>
+                    }
+                </span>
+                <span class="ac-bottom-nav-label">@item.Label</span>
+            </a>
+        }
+    }
+</nav>
+
+@code {
+    [Parameter] public List<BottomNavItem>? Items { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public EventCallback<BottomNavItem> OnItemClick { get; set; }
+
+    private async Task HandleItemClick(BottomNavItem item)
+    {
+        if (Items != null)
+        {
+            foreach (var i in Items)
+            {
+                i.IsActive = false;
+            }
+            item.IsActive = true;
+        }
+        await OnItemClick.InvokeAsync(item);
+    }
+}
+

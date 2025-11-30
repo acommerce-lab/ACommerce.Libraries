@@ -5,7 +5,7 @@ namespace ACommerce.Messaging.Abstractions.Models;
 /// <summary>
 /// Message envelope containing payload and routing information
 /// </summary>
-public class MessageEnvelope<T> : IBaseEntity where T : class
+public class MessageEnvelope<T> where T : class
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public required string Topic { get; init; }

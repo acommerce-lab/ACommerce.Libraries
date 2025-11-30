@@ -1,0 +1,92 @@
+@namespace ACommerce.Templates.Customer.Components
+
+@if (IsOpen)
+{
+    <div class="ac-modal-backdrop @(IsClosing ? "ac-modal-backdrop-closing" : "")" @onclick="HandleBackdropClick">
+        <div class="ac-modal @SizeClass @(FullScreen ? "ac-modal-fullscreen" : "") @(IsClosing ? "ac-modal-closing" : "") @Class"
+             @onclick:stopPropagation="true">
+            @if (ShowHeader)
+            {
+                <div class="ac-modal-header">
+                    @if (HeaderContent != null)
+                    {
+                        @HeaderContent
+                    }
+                    else
+                    {
+                        <h2 class="ac-modal-title">@Title</h2>
+                    }
+                    @if (ShowCloseButton)
+                    {
+                        <button class="ac-modal-close" @onclick="Close">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    }
+                </div>
+            }
+
+            <div class="ac-modal-body @(NoPadding ? "ac-p-0" : "")">
+                @ChildContent
+            </div>
+
+            @if (FooterContent != null)
+            {
+                <div class="ac-modal-footer">
+                    @FooterContent
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? HeaderContent { get; set; }
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+    [Parameter] public ModalSize Size { get; set; } = ModalSize.Medium;
+    [Parameter] public bool FullScreen { get; set; }
+    [Parameter] public bool ShowHeader { get; set; } = true;
+    [Parameter] public bool ShowCloseButton { get; set; } = true;
+    [Parameter] public bool CloseOnBackdropClick { get; set; } = true;
+    [Parameter] public bool NoPadding { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private bool IsClosing { get; set; }
+
+    private string SizeClass => Size switch
+    {
+        ModalSize.Small => "ac-modal-sm",
+        ModalSize.Large => "ac-modal-lg",
+        ModalSize.ExtraLarge => "ac-modal-xl",
+        _ => ""
+    };
+
+    private async Task HandleBackdropClick()
+    {
+        if (CloseOnBackdropClick)
+        {
+            await Close();
+        }
+    }
+
+    public async Task Close()
+    {
+        IsClosing = true;
+        StateHasChanged();
+        await Task.Delay(200); // Animation duration
+        IsClosing = false;
+        IsOpen = false;
+        await IsOpenChanged.InvokeAsync(false);
+        await OnClose.InvokeAsync();
+    }
+
+    public async Task Open()
+    {
+        IsOpen = true;
+        await IsOpenChanged.InvokeAsync(true);
+    }
+}

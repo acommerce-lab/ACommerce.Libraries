@@ -1,0 +1,46 @@
+@namespace ACommerce.Templates.Customer.Components
+
+<div class="ac-infinite-scroll @Class">
+    @ChildContent
+
+    @if (IsLoading)
+    {
+        <div class="ac-infinite-scroll-loader">
+            <AcSpinner Size="SpinnerSize.Small" Text="@LoadingText" />
+        </div>
+    }
+    else if (HasMore)
+    {
+        <div class="ac-infinite-scroll-trigger" @ref="_triggerElement">
+            @* Intersection observer target *@
+        </div>
+    }
+    else if (ShowEndMessage && !string.IsNullOrEmpty(EndMessage))
+    {
+        <div class="ac-infinite-scroll-end">
+            @EndMessage
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool HasMore { get; set; } = true;
+    [Parameter] public string LoadingText { get; set; } = "جاري التحميل...";
+    [Parameter] public string EndMessage { get; set; } = "لا يوجد المزيد";
+    [Parameter] public bool ShowEndMessage { get; set; } = true;
+    [Parameter] public int Threshold { get; set; } = 100;
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public EventCallback OnLoadMore { get; set; }
+
+    private ElementReference _triggerElement;
+
+    public async Task LoadMore()
+    {
+        if (!IsLoading && HasMore)
+        {
+            await OnLoadMore.InvokeAsync();
+        }
+    }
+}

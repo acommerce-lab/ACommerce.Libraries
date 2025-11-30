@@ -1,0 +1,51 @@
+@page "/login"
+@layout ACommerce.Templates.Customer.Layouts.AuthLayout
+@inject IAppNavigationService Navigation
+
+<LoginPage IsLoading="@_isLoading"
+           ErrorMessage="@_errorMessage"
+           OnLogin="HandleLogin"
+           OnGoogleLogin="HandleGoogleLogin"
+           OnAppleLogin="HandleAppleLogin" />
+
+@code {
+    private bool _isLoading;
+    private string? _errorMessage;
+
+    private async Task HandleLogin(LoginEventArgs args)
+    {
+        _isLoading = true;
+        _errorMessage = null;
+
+        await Task.Delay(1000); // Simulate API call
+
+        // Demo: accept any login
+        if (args.Username == "demo" && args.Password == "demo")
+        {
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            // For demo, accept any credentials
+            Navigation.NavigateTo("/");
+        }
+
+        _isLoading = false;
+    }
+
+    private async Task HandleGoogleLogin()
+    {
+        _isLoading = true;
+        await Task.Delay(500);
+        Navigation.NavigateTo("/");
+        _isLoading = false;
+    }
+
+    private async Task HandleAppleLogin()
+    {
+        _isLoading = true;
+        await Task.Delay(500);
+        Navigation.NavigateTo("/");
+        _isLoading = false;
+    }
+}

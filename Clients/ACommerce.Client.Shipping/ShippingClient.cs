@@ -4,10 +4,10 @@ namespace ACommerce.Client.Shipping;
 
 public sealed class ShippingClient
 {
-	private readonly DynamicHttpClient _httpClient;
+	private readonly IApiClient _httpClient;
 	private const string ServiceName = "Shipping"; // أو "Marketplace"
 
-	public ShippingClient(DynamicHttpClient httpClient)
+	public ShippingClient(IApiClient httpClient)
 	{
 		_httpClient = httpClient;
 	}

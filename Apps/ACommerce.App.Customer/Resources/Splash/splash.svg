@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="456" height="456" viewBox="0 0 456 456" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Shopping bag icon for splash -->
+    <path d="M128 160H328V360C328 371.046 319.046 380 308 380H148C136.954 380 128 371.046 128 360V160Z" stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M176 160V128C176 99.0721 199.072 76 228 76C256.928 76 280 99.0721 280 128V160" stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M188 240L216 268L268 216" stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

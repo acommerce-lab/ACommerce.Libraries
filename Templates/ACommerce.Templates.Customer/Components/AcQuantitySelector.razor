@@ -1,0 +1,74 @@
+@namespace ACommerce.Templates.Customer.Components
+
+<div class="ac-quantity-selector @SizeClass @Class">
+    <button class="ac-quantity-btn ac-quantity-decrease"
+            disabled="@(Value <= Min)"
+            @onclick="Decrease">
+        <i class="bi bi-dash"></i>
+    </button>
+
+    <input type="number"
+           class="ac-quantity-input"
+           value="@Value"
+           min="@Min"
+           max="@Max"
+           @onchange="HandleChange"
+           @oninput="HandleInput"
+           disabled="@Disabled" />
+
+    <button class="ac-quantity-btn ac-quantity-increase"
+            disabled="@(Value >= Max)"
+            @onclick="Increase">
+        <i class="bi bi-plus"></i>
+    </button>
+</div>
+
+@code {
+    [Parameter] public int Value { get; set; } = 1;
+    [Parameter] public EventCallback<int> ValueChanged { get; set; }
+    [Parameter] public int Min { get; set; } = 1;
+    [Parameter] public int Max { get; set; } = 999;
+    [Parameter] public int Step { get; set; } = 1;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public QuantitySize Size { get; set; } = QuantitySize.Medium;
+    [Parameter] public string? Class { get; set; }
+
+    private string SizeClass => Size switch
+    {
+        QuantitySize.Small => "ac-quantity-sm",
+        QuantitySize.Large => "ac-quantity-lg",
+        _ => ""
+    };
+
+    private async Task Decrease()
+    {
+        if (Value > Min)
+        {
+            Value = Math.Max(Min, Value - Step);
+            await ValueChanged.InvokeAsync(Value);
+        }
+    }
+
+    private async Task Increase()
+    {
+        if (Value < Max)
+        {
+            Value = Math.Min(Max, Value + Step);
+            await ValueChanged.InvokeAsync(Value);
+        }
+    }
+
+    private async Task HandleChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var newValue))
+        {
+            Value = Math.Clamp(newValue, Min, Max);
+            await ValueChanged.InvokeAsync(Value);
+        }
+    }
+
+    private void HandleInput(ChangeEventArgs e)
+    {
+        // Allow typing
+    }
+}

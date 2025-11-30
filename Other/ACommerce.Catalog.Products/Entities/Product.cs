@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Catalog.Products.Enums;
 using ACommerce.Catalog.Units.Entities;
 using ACommerce.SharedKernel.Abstractions.Entities;
@@ -85,6 +86,7 @@ public class Product : IBaseEntity
 	/// <summary>
 	/// ?????
 	/// </summary>
+	[NotMapped]
 	public List<string> Images { get; set; } = new();
 
 	/// <summary>
@@ -95,11 +97,13 @@ public class Product : IBaseEntity
 	/// <summary>
 	/// ??????????
 	/// </summary>
+	[NotMapped]
 	public List<string> Videos { get; set; } = new();
 
 	/// <summary>
 	/// ????????? (PDF, DOC, ???)
 	/// </summary>
+	[NotMapped]
 	public List<string> Documents { get; set; } = new();
 
 	/// <summary>
@@ -125,12 +129,14 @@ public class Product : IBaseEntity
 	/// <summary>
 	/// ??????? ????????? (SEO)
 	/// </summary>
+	[NotMapped]
 	public List<string> Tags { get; set; } = new();
 
-    /// <summary>
-    /// ??????? ??????
-    /// </summary>
-    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
+	/// <summary>
+	/// ??????? ??????
+	/// </summary>
+	[NotMapped]
+	public Dictionary<string, string> Metadata { get; set; } = new();
 
 	// ====================================================================================
 	// ????????

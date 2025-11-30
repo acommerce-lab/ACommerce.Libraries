@@ -1,0 +1,293 @@
+@namespace ACommerce.Templates.Customer.Pages
+
+<div class="ac-page ac-search-page">
+    @* Search Header *@
+    <div class="ac-search-header">
+        <AcSearchBox Value="@SearchQuery"
+                     ValueChanged="HandleSearchChange"
+                     OnSearch="HandleSearch"
+                     Suggestions="@SearchSuggestions"
+                     OnSuggestionClick="HandleSuggestionClick"
+                     Expanded="true" />
+    </div>
+
+    @* Filters Bar *@
+    <div class="ac-filters-bar">
+        <button class="ac-filter-btn" @onclick="ToggleFilters">
+            <i class="bi bi-funnel"></i>
+            <span>تصفية</span>
+            @if (ActiveFilterCount > 0)
+            {
+                <AcBadge Count="ActiveFilterCount" Variant="BadgeVariant.Primary" Size="BadgeSize.Small" />
+            }
+        </button>
+
+        <button class="ac-filter-btn" @onclick="ToggleSort">
+            <i class="bi bi-sort-down"></i>
+            <span>@CurrentSortLabel</span>
+        </button>
+
+        @if (SelectedCategory != null)
+        {
+            <span class="ac-filter-chip">
+                @SelectedCategory.Name
+                <button @onclick="ClearCategory"><i class="bi bi-x"></i></button>
+            </span>
+        }
+    </div>
+
+    @* Results Info *@
+    <div class="ac-results-info">
+        <span>@TotalResults نتيجة</span>
+        <div class="ac-view-toggle">
+            <button class="@(ViewMode == "grid" ? "active" : "")" @onclick="SetViewModeGrid">
+                <i class="bi bi-grid-3x3-gap"></i>
+            </button>
+            <button class="@(ViewMode == "list" ? "active" : "")" @onclick="SetViewModeList">
+                <i class="bi bi-list"></i>
+            </button>
+        </div>
+    </div>
+
+    @* Products Grid/List *@
+    @if (IsLoading && !Products?.Any() == true)
+    {
+        <div class="ac-products-@ViewMode">
+            @for (int i = 0; i < 6; i++)
+            {
+                <AcSkeleton Type="SkeletonType.ProductCard" />
+            }
+        </div>
+    }
+    else if (Products != null && Products.Any())
+    {
+        <AcInfiniteScroll IsLoading="IsLoadingMore"
+                          HasMore="HasMoreProducts"
+                          OnLoadMore="LoadMoreProducts">
+            <div class="ac-products-@ViewMode">
+                @foreach (var product in Products)
+                {
+                    <AcProductCard Id="@product.Id"
+                                   Name="@product.Name"
+                                   ImageUrl="@product.Image"
+                                   ShortDescription="@product.ShortDescription"
+                                   Category="@product.CategoryName"
+                                   Price="@product.Price"
+                                   OldPrice="@product.OldPrice"
+                                   DiscountPercent="@product.DiscountPercent"
+                                   Rating="@product.Rating"
+                                   ReviewCount="@product.ReviewCount"
+                                   StockQuantity="@product.StockQuantity"
+                                   IsNew="@product.IsNew"
+                                   IsFeatured="@product.IsFeatured"
+                                   Horizontal="@(ViewMode == "list")"
+                                   DynamicAttributes="@product.Attributes"
+                                   OnClick="HandleProductClick"
+                                   OnAddToCart="HandleAddToCart"
+                                   OnAddToWishlist="HandleAddToWishlist" />
+                }
+            </div>
+        </AcInfiniteScroll>
+    }
+    else
+    {
+        <AcEmptyState Icon="bi-search"
+                      Title="لا توجد نتائج"
+                      Description="جرب البحث بكلمات مختلفة أو تصفح التصنيفات"
+                      ActionText="تصفح التصنيفات"
+                      OnAction="HandleBrowseCategories" />
+    }
+
+    @* Filters Modal *@
+    <AcModal @bind-IsOpen="ShowFiltersModal" Title="تصفية النتائج" Size="ModalSize.Large">
+        <ChildContent>
+        <div class="ac-filters-content">
+            @* Price Range *@
+            <div class="ac-filter-group">
+                <h4>السعر</h4>
+                <div class="ac-price-range">
+                    <AcInput Type="number" Placeholder="من" @bind-Value="MinPriceString" />
+                    <span>-</span>
+                    <AcInput Type="number" Placeholder="إلى" @bind-Value="MaxPriceString" />
+                </div>
+            </div>
+
+            @* Categories *@
+            @if (FilterCategories != null)
+            {
+                <div class="ac-filter-group">
+                    <h4>التصنيف</h4>
+                    @foreach (var category in FilterCategories)
+                    {
+                        <label class="ac-filter-option">
+                            <input type="checkbox" checked="@category.IsSelected" @onchange="() => ToggleCategoryFilter(category)" />
+                            <span>@category.Name (@category.ProductCount)</span>
+                        </label>
+                    }
+                </div>
+            }
+
+            @* Dynamic Attribute Filters *@
+            @if (AttributeFilters != null)
+            {
+                @foreach (var attrGroup in AttributeFilters)
+                {
+                    <div class="ac-filter-group">
+                        <h4>@attrGroup.Label</h4>
+                        @if (attrGroup.Type == "color")
+                        {
+                            <div class="ac-color-filters">
+                                @foreach (var value in attrGroup.Values)
+                                {
+                                    <button class="ac-color-filter @(value.IsSelected ? "selected" : "")"
+                                            style="background-color: @value.Value"
+                                            @onclick="() => ToggleAttributeFilter(attrGroup, value)">
+                                    </button>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var value in attrGroup.Values)
+                            {
+                                <label class="ac-filter-option">
+                                    <input type="checkbox" checked="@value.IsSelected" @onchange="() => ToggleAttributeFilter(attrGroup, value)" />
+                                    <span>@value.Label (@value.Count)</span>
+                                </label>
+                            }
+                        }
+                    </div>
+                }
+            }
+
+            @* Rating Filter *@
+            <div class="ac-filter-group">
+                <h4>التقييم</h4>
+                @for (int i = 4; i >= 1; i--)
+                {
+                    var rating = i;
+                    <label class="ac-filter-option">
+                        <input type="radio" name="rating" checked="@(MinRating == rating)" @onchange="() => SetMinRating(rating)" />
+                        <span>
+                            <AcRating Value="@rating" ReadOnly="true" MaxRating="5" />
+                            وأعلى
+                        </span>
+                    </label>
+                }
+            </div>
+        </div>
+        </ChildContent>
+        <FooterContent>
+            <AcButton Text="مسح الكل" Variant="ButtonVariant.Secondary" OnClick="ClearAllFilters" />
+            <AcButton Text="تطبيق" Variant="ButtonVariant.Primary" OnClick="ApplyFilters" />
+        </FooterContent>
+    </AcModal>
+
+    @* Sort Modal *@
+    <AcModal @bind-IsOpen="ShowSortModal" Title="ترتيب حسب" Size="ModalSize.Small">
+        <div class="ac-sort-options">
+            @foreach (var option in SortOptions)
+            {
+                <label class="ac-sort-option @(CurrentSort == option.Value ? "selected" : "")"
+                       @onclick="() => SetSort(option.Value)">
+                    <i class="bi @(CurrentSort == option.Value ? "bi-check-circle-fill" : "bi-circle")"></i>
+                    <span>@option.Label</span>
+                </label>
+            }
+        </div>
+    </AcModal>
+</div>
+
+@code {
+    [Parameter] public string? SearchQuery { get; set; }
+    [Parameter] public EventCallback<string> SearchQueryChanged { get; set; }
+    [Parameter] public List<SearchProductItem>? Products { get; set; }
+    [Parameter] public int TotalResults { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool IsLoadingMore { get; set; }
+    [Parameter] public bool HasMoreProducts { get; set; }
+    [Parameter] public List<SearchSuggestion>? SearchSuggestions { get; set; }
+    [Parameter] public List<FilterCategoryItem>? FilterCategories { get; set; }
+    [Parameter] public List<AttributeFilterGroup>? AttributeFilters { get; set; }
+    [Parameter] public FilterCategoryItem? SelectedCategory { get; set; }
+    [Parameter] public decimal? MinPrice { get; set; }
+    [Parameter] public decimal? MaxPrice { get; set; }
+    [Parameter] public int? MinRating { get; set; }
+    [Parameter] public string CurrentSort { get; set; } = "relevance";
+    [Parameter] public int ActiveFilterCount { get; set; }
+
+    [Parameter] public EventCallback<string> OnSearch { get; set; }
+    [Parameter] public EventCallback<SearchSuggestion> OnSuggestionClick { get; set; }
+    [Parameter] public EventCallback<Guid> OnProductClick { get; set; }
+    [Parameter] public EventCallback<Guid> OnAddToCart { get; set; }
+    [Parameter] public EventCallback<Guid> OnAddToWishlist { get; set; }
+    [Parameter] public EventCallback OnLoadMore { get; set; }
+    [Parameter] public EventCallback OnApplyFilters { get; set; }
+    [Parameter] public EventCallback<string> OnSortChange { get; set; }
+    [Parameter] public EventCallback OnBrowseCategories { get; set; }
+
+    private bool ShowFiltersModal { get; set; }
+    private bool ShowSortModal { get; set; }
+    private string ViewMode { get; set; } = "grid";
+    private string? MinPriceString { get; set; }
+    private string? MaxPriceString { get; set; }
+
+    private List<SortOption> SortOptions = new()
+    {
+        new() { Label = "الأكثر صلة", Value = "relevance" },
+        new() { Label = "الأحدث", Value = "newest" },
+        new() { Label = "السعر: من الأقل للأعلى", Value = "price_asc" },
+        new() { Label = "السعر: من الأعلى للأقل", Value = "price_desc" },
+        new() { Label = "الأعلى تقييماً", Value = "rating" },
+        new() { Label = "الأكثر مبيعاً", Value = "bestseller" }
+    };
+
+    private string CurrentSortLabel => SortOptions.FirstOrDefault(s => s.Value == CurrentSort)?.Label ?? "ترتيب";
+
+    private void HandleSearchChange(string value) => SearchQuery = value;
+    private async Task HandleSearch(string query) => await OnSearch.InvokeAsync(query);
+    private async Task HandleSuggestionClick(SearchSuggestion suggestion) => await OnSuggestionClick.InvokeAsync(suggestion);
+    private async Task HandleProductClick(Guid id) => await OnProductClick.InvokeAsync(id);
+    private async Task HandleAddToCart(Guid id) => await OnAddToCart.InvokeAsync(id);
+    private async Task HandleAddToWishlist(Guid id) => await OnAddToWishlist.InvokeAsync(id);
+    private async Task HandleBrowseCategories() => await OnBrowseCategories.InvokeAsync();
+    private async Task LoadMoreProducts() => await OnLoadMore.InvokeAsync();
+
+    private void ToggleFilters() => ShowFiltersModal = !ShowFiltersModal;
+    private void ToggleSort() => ShowSortModal = !ShowSortModal;
+    private void SetViewMode(string mode) => ViewMode = mode;
+    private void SetViewModeGrid() => ViewMode = "grid";
+    private void SetViewModeList() => ViewMode = "list";
+
+    private void ToggleCategoryFilter(FilterCategoryItem category) => category.IsSelected = !category.IsSelected;
+    private void ToggleAttributeFilter(AttributeFilterGroup group, AttributeFilterValue value) => value.IsSelected = !value.IsSelected;
+    private void SetMinRating(int rating) => MinRating = rating;
+    private void ClearCategory() => SelectedCategory = null;
+
+    private async Task SetSort(string sort)
+    {
+        CurrentSort = sort;
+        ShowSortModal = false;
+        await OnSortChange.InvokeAsync(sort);
+    }
+
+    private async Task ApplyFilters()
+    {
+        if (decimal.TryParse(MinPriceString, out var min)) MinPrice = min;
+        if (decimal.TryParse(MaxPriceString, out var max)) MaxPrice = max;
+        ShowFiltersModal = false;
+        await OnApplyFilters.InvokeAsync();
+    }
+
+    private async Task ClearAllFilters()
+    {
+        MinPrice = null;
+        MaxPrice = null;
+        MinPriceString = null;
+        MaxPriceString = null;
+        MinRating = null;
+        FilterCategories?.ForEach(c => c.IsSelected = false);
+        AttributeFilters?.ForEach(g => g.Values.ForEach(v => v.IsSelected = false));
+        await OnApplyFilters.InvokeAsync();
+    }
+}

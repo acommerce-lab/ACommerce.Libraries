@@ -1,0 +1,97 @@
+@namespace ACommerce.Templates.Customer.Components
+
+<div class="ac-cart-item @Class">
+    <div class="ac-cart-item-image">
+        @if (!string.IsNullOrEmpty(ImageUrl))
+        {
+            <img src="@ImageUrl" alt="@Name" loading="lazy" />
+        }
+        else
+        {
+            <div class="ac-cart-item-no-image">
+                <i class="bi bi-image"></i>
+            </div>
+        }
+    </div>
+
+    <div class="ac-cart-item-details">
+        <h4 class="ac-cart-item-name">@Name</h4>
+
+        @if (!string.IsNullOrEmpty(Variant))
+        {
+            <span class="ac-cart-item-variant">@Variant</span>
+        }
+
+        @if (Attributes != null && Attributes.Any())
+        {
+            <div class="ac-cart-item-attributes">
+                @foreach (var attr in Attributes)
+                {
+                    <span class="ac-cart-item-attribute">@attr.Key: @attr.Value</span>
+                }
+            </div>
+        }
+
+        <div class="ac-cart-item-price-row">
+            <span class="ac-cart-item-price">@Price.ToString("N2") @Currency</span>
+            @if (OldPrice > 0 && OldPrice > Price)
+            {
+                <span class="ac-cart-item-old-price">@OldPrice.ToString("N2") @Currency</span>
+            }
+        </div>
+    </div>
+
+    <div class="ac-cart-item-actions">
+        @if (Editable)
+        {
+            <AcQuantitySelector Value="@Quantity"
+                                ValueChanged="HandleQuantityChange"
+                                Min="1"
+                                Max="@MaxQuantity"
+                                Size="QuantitySize.Small" />
+        }
+        else
+        {
+            <span class="ac-cart-item-quantity">الكمية: @Quantity</span>
+        }
+
+        <div class="ac-cart-item-subtotal">
+            @((Price * Quantity).ToString("N2")) @Currency
+        </div>
+
+        @if (Editable)
+        {
+            <button class="ac-cart-item-remove" @onclick="HandleRemove" title="حذف">
+                <i class="bi bi-trash"></i>
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    [Parameter] public string Name { get; set; } = string.Empty;
+    [Parameter] public string? ImageUrl { get; set; }
+    [Parameter] public string? Variant { get; set; }
+    [Parameter] public Dictionary<string, string>? Attributes { get; set; }
+    [Parameter] public decimal Price { get; set; }
+    [Parameter] public decimal OldPrice { get; set; }
+    [Parameter] public string Currency { get; set; } = "ر.س";
+    [Parameter] public int Quantity { get; set; } = 1;
+    [Parameter] public int MaxQuantity { get; set; } = 99;
+    [Parameter] public bool Editable { get; set; } = true;
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public EventCallback<int> OnQuantityChange { get; set; }
+    [Parameter] public EventCallback OnRemove { get; set; }
+
+    private async Task HandleQuantityChange(int newQuantity)
+    {
+        Quantity = newQuantity;
+        await OnQuantityChange.InvokeAsync(newQuantity);
+    }
+
+    private async Task HandleRemove()
+    {
+        await OnRemove.InvokeAsync();
+    }
+}

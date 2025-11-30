@@ -1,0 +1,181 @@
+@namespace ACommerce.Templates.Customer.Pages
+
+<div class="ac-page ac-profile-page">
+    @* Profile Header *@
+    <div class="ac-profile-header">
+        <div class="ac-profile-avatar" @onclick="HandleAvatarClick">
+            @if (!string.IsNullOrEmpty(User?.AvatarUrl))
+            {
+                <img src="@User.AvatarUrl" alt="@User.Name" />
+            }
+            else
+            {
+                <span>@User?.Name.FirstOrDefault()</span>
+            }
+            <div class="ac-avatar-edit">
+                <i class="bi bi-camera"></i>
+            </div>
+        </div>
+        <h1 class="ac-profile-name">@User?.Name</h1>
+        <p class="ac-profile-email">@User?.Email</p>
+    </div>
+
+    @* Quick Stats *@
+    <div class="ac-profile-stats">
+        <div class="ac-stat-item" @onclick="HandleOrdersClick">
+            <span class="ac-stat-value">@OrdersCount</span>
+            <span class="ac-stat-label">طلب</span>
+        </div>
+        <div class="ac-stat-item" @onclick="HandleWishlistClick">
+            <span class="ac-stat-value">@WishlistCount</span>
+            <span class="ac-stat-label">المفضلة</span>
+        </div>
+        <div class="ac-stat-item" @onclick="HandleReviewsClick">
+            <span class="ac-stat-value">@ReviewsCount</span>
+            <span class="ac-stat-label">تقييم</span>
+        </div>
+    </div>
+
+    @* Profile Menu *@
+    <div class="ac-profile-menu">
+        <div class="ac-menu-section">
+            <h3>الحساب</h3>
+
+            <a href="/profile/edit" class="ac-menu-item">
+                <i class="bi bi-person"></i>
+                <span>معلومات الحساب</span>
+                <i class="bi bi-chevron-left"></i>
+            </a>
+
+            <a href="/profile/addresses" class="ac-menu-item">
+                <i class="bi bi-geo-alt"></i>
+                <span>العناوين</span>
+                <AcBadge Count="@AddressesCount" Variant="BadgeVariant.Light" Size="BadgeSize.Small" />
+                <i class="bi bi-chevron-left"></i>
+            </a>
+
+            <a href="/profile/payment-methods" class="ac-menu-item">
+                <i class="bi bi-credit-card"></i>
+                <span>وسائل الدفع</span>
+                <i class="bi bi-chevron-left"></i>
+            </a>
+
+            <a href="/profile/change-password" class="ac-menu-item">
+                <i class="bi bi-lock"></i>
+                <span>تغيير كلمة المرور</span>
+                <i class="bi bi-chevron-left"></i>
+            </a>
+        </div>
+
+        <div class="ac-menu-section">
+            <h3>الطلبات والمشتريات</h3>
+
+            <a href="/orders" class="ac-menu-item">
+                <i class="bi bi-box-seam"></i>
+                <span>طلباتي</span>
+                @if (PendingOrdersCount > 0)
+                {
+                    <AcBadge Count="@PendingOrdersCount" Variant="BadgeVariant.Warning" Size="BadgeSize.Small" />
+                }
+                <i class="bi bi-chevron-left"></i>
+            </a>
+
+            <a href="/returns" class="ac-menu-item">
+                <i class="bi bi-arrow-return-left"></i>
+                <span>الإرجاع والاستبدال</span>
+                <i class="bi bi-chevron-left"></i>
+            </a>
+
+            <a href="/wishlist" class="ac-menu-item">
+                <i class="bi bi-heart"></i>
+                <span>قائمة الأمنيات</span>
+                <AcBadge Count="@WishlistCount" Variant="BadgeVariant.Danger" Size="BadgeSize.Small" />
+                <i class="bi bi-chevron-left"></i>
+            </a>
+
+            <a href="/reviews" class="ac-menu-item">
+                <i class="bi bi-star"></i>
+                <span>تقييماتي</span>
+                <i class="bi bi-chevron-left"></i>
+            </a>
+        </div>
+
+        <div class="ac-menu-section">
+            <h3>الإعدادات</h3>
+
+            <a href="/settings" class="ac-menu-item">
+                <i class="bi bi-gear"></i>
+                <span>الإعدادات</span>
+                <i class="bi bi-chevron-left"></i>
+            </a>
+
+            <a href="/notifications/settings" class="ac-menu-item">
+                <i class="bi bi-bell"></i>
+                <span>إعدادات الإشعارات</span>
+                <i class="bi bi-chevron-left"></i>
+            </a>
+
+            <a href="/language" class="ac-menu-item">
+                <i class="bi bi-globe"></i>
+                <span>اللغة</span>
+                <span class="ac-menu-value">العربية</span>
+                <i class="bi bi-chevron-left"></i>
+            </a>
+        </div>
+
+        <div class="ac-menu-section">
+            <h3>الدعم</h3>
+
+            <a href="/help" class="ac-menu-item">
+                <i class="bi bi-question-circle"></i>
+                <span>مركز المساعدة</span>
+                <i class="bi bi-chevron-left"></i>
+            </a>
+
+            <a href="/chat/support" class="ac-menu-item">
+                <i class="bi bi-chat-dots"></i>
+                <span>تواصل معنا</span>
+                <i class="bi bi-chevron-left"></i>
+            </a>
+
+            <a href="/about" class="ac-menu-item">
+                <i class="bi bi-info-circle"></i>
+                <span>عن التطبيق</span>
+                <span class="ac-menu-value">v@AppVersion</span>
+                <i class="bi bi-chevron-left"></i>
+            </a>
+        </div>
+    </div>
+
+    @* Logout Button *@
+    <div class="ac-profile-logout">
+        <AcButton Text="تسجيل الخروج"
+                  Icon="bi-box-arrow-right"
+                  Variant="ButtonVariant.Danger"
+                  Outline="true"
+                  Block="true"
+                  OnClick="HandleLogout" />
+    </div>
+</div>
+
+@code {
+    [Parameter] public UserProfileInfo? User { get; set; }
+    [Parameter] public int OrdersCount { get; set; }
+    [Parameter] public int WishlistCount { get; set; }
+    [Parameter] public int ReviewsCount { get; set; }
+    [Parameter] public int AddressesCount { get; set; }
+    [Parameter] public int PendingOrdersCount { get; set; }
+    [Parameter] public string AppVersion { get; set; } = "1.0.0";
+
+    [Parameter] public EventCallback OnAvatarClick { get; set; }
+    [Parameter] public EventCallback OnOrdersClick { get; set; }
+    [Parameter] public EventCallback OnWishlistClick { get; set; }
+    [Parameter] public EventCallback OnReviewsClick { get; set; }
+    [Parameter] public EventCallback OnLogout { get; set; }
+
+    private async Task HandleAvatarClick() => await OnAvatarClick.InvokeAsync();
+    private async Task HandleOrdersClick() => await OnOrdersClick.InvokeAsync();
+    private async Task HandleWishlistClick() => await OnWishlistClick.InvokeAsync();
+    private async Task HandleReviewsClick() => await OnReviewsClick.InvokeAsync();
+    private async Task HandleLogout() => await OnLogout.InvokeAsync();
+}
