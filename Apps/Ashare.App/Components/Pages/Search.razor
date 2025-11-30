@@ -1,5 +1,5 @@
 @page "/search"
-@inject SpaceDataService DataService
+@inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
 
 <div class="ac-page ashare-search-page">
@@ -175,9 +175,9 @@
     private bool _ratingFilter;
     private System.Timers.Timer? _debounceTimer;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        _categories = DataService.GetCategories();
+        _categories = await ApiService.GetCategoriesAsync();
     }
 
     private void GoBack()
@@ -193,9 +193,9 @@
         _debounceTimer = new System.Timers.Timer(300);
         _debounceTimer.Elapsed += async (s, e) =>
         {
-            await InvokeAsync(() =>
+            await InvokeAsync(async () =>
             {
-                PerformSearch();
+                await PerformSearchAsync();
                 StateHasChanged();
             });
         };
@@ -203,7 +203,7 @@
         _debounceTimer.Start();
     }
 
-    private void PerformSearch()
+    private async Task PerformSearchAsync()
     {
         if (string.IsNullOrWhiteSpace(_searchQuery))
         {
@@ -214,37 +214,44 @@
         _isSearching = true;
         StateHasChanged();
 
-        var query = DataService.GetAllSpaces()?.AsEnumerable() ?? [];
-
-        // Text search
-        query = query.Where(s =>
-            s.Name.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ||
-            s.Description.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ||
-            s.Location.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ||
-            (s.CategoryName != null && s.CategoryName.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase)));
-
-        // Apply filters
-        if (_priceFilter == "low")
+        try
         {
-            query = query.OrderBy(s => s.PricePerHour);
-        }
+            // Use API search
+            var results = await ApiService.SearchSpacesAsync(query: _searchQuery);
 
-        if (_ratingFilter)
-        {
-            query = query.OrderByDescending(s => s.Rating);
-        }
+            // Apply client-side filters
+            var query = results.AsEnumerable();
 
-        _searchResults = query.ToList();
-        _isSearching = false;
-
-        // Add to recent searches
-        if (!_recentSearches.Contains(_searchQuery) && _searchResults.Any())
-        {
-            _recentSearches.Insert(0, _searchQuery);
-            if (_recentSearches.Count > 5)
+            if (_priceFilter == "low")
             {
-                _recentSearches.RemoveAt(5);
+                query = query.OrderBy(s => s.PricePerHour);
             }
+
+            if (_ratingFilter)
+            {
+                query = query.OrderByDescending(s => s.Rating);
+            }
+
+            _searchResults = query.ToList();
+
+            // Add to recent searches
+            if (!_recentSearches.Contains(_searchQuery) && _searchResults.Any())
+            {
+                _recentSearches.Insert(0, _searchQuery);
+                if (_recentSearches.Count > 5)
+                {
+                    _recentSearches.RemoveAt(5);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error searching: {ex.Message}");
+            _searchResults = new List<SpaceItem>();
+        }
+        finally
+        {
+            _isSearching = false;
         }
     }
 
@@ -254,10 +261,15 @@
         _searchResults = null;
     }
 
-    private void UseRecentSearch(string search)
+    private async Task UseRecentSearchAsync(string search)
     {
         _searchQuery = search;
-        PerformSearch();
+        await PerformSearchAsync();
+    }
+
+    private void UseRecentSearch(string search)
+    {
+        _ = UseRecentSearchAsync(search);
     }
 
     private void RemoveRecentSearch(string search)
@@ -285,7 +297,7 @@
         _locationFilter = !_locationFilter;
         if (!string.IsNullOrEmpty(_searchQuery))
         {
-            PerformSearch();
+            _ = PerformSearchAsync();
         }
     }
 
@@ -294,7 +306,7 @@
         _priceFilter = _priceFilter == filter ? null : filter;
         if (!string.IsNullOrEmpty(_searchQuery))
         {
-            PerformSearch();
+            _ = PerformSearchAsync();
         }
     }
 
@@ -303,7 +315,7 @@
         _ratingFilter = !_ratingFilter;
         if (!string.IsNullOrEmpty(_searchQuery))
         {
-            PerformSearch();
+            _ = PerformSearchAsync();
         }
     }
 
