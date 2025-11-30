@@ -1,4 +1,5 @@
 using ACommerce.Shipping.Abstractions.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Shipping.Abstractions.Models;
 
@@ -28,7 +29,7 @@ public record ShipmentRequest
 	public required Address ToAddress { get; init; }
 	public required List<Package> Packages { get; init; }
 	public string? ServiceType { get; init; }
-	public Dictionary<string, string> Metadata { get; init; } = new();
+    [NotMapped] public Dictionary<string, string> Metadata { get; init; } = new();
 }
 
 /// <summary>

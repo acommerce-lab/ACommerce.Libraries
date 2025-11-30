@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Vendors.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
+using ACommerce.Vendors.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Vendors.Entities;
 

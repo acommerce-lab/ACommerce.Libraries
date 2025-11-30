@@ -1,4 +1,5 @@
 using ACommerce.Accounting.Core.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Accounting.Core.DTOs.Account;
 
@@ -20,7 +21,7 @@ public class AccountResponseDto
 	public bool RequiresCostCenter { get; set; }
 	public bool IsActive { get; set; }
 	public int SubAccountsCount { get; set; }
-	public Dictionary<string, string> Metadata { get; set; } = new();
+    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
 	public DateTime CreatedAt { get; set; }
 	public DateTime? UpdatedAt { get; set; }
 }

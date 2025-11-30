@@ -1,4 +1,5 @@
 using ACommerce.Client.Core.Http;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Client.Payments;
 
@@ -75,7 +76,7 @@ public sealed class CreatePaymentRequest
 	public decimal Amount { get; set; }
 	public string Currency { get; set; } = "SAR";
 	public string PaymentMethod { get; set; } = string.Empty; // "CreditCard", "PayPal", "Mada", etc.
-	public Dictionary<string, string> Metadata { get; set; } = new();
+	[NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
 }
 
 public sealed class PaymentResponse

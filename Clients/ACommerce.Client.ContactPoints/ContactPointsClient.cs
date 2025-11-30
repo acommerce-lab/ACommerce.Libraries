@@ -1,4 +1,5 @@
 using ACommerce.Client.Core.Http;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Client.ContactPoints;
 
@@ -124,7 +125,7 @@ public sealed class ContactPoint
 	public bool IsPrimary { get; set; }
 	public bool IsVerified { get; set; }
 	public string Label { get; set; } = string.Empty; // "Home", "Work", "Mobile"
-	public Dictionary<string, string> Metadata { get; set; } = new();
+    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
 	public DateTime CreatedAt { get; set; }
 }
 

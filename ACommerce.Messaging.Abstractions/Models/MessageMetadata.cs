@@ -1,4 +1,6 @@
-﻿namespace ACommerce.Messaging.Abstractions.Models;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace ACommerce.Messaging.Abstractions.Models;
 
 /// <summary>
 /// Message metadata (correlation, tracing, etc.)
@@ -12,5 +14,5 @@ public record MessageMetadata
     public string? SourceService { get; init; }
     public int Priority { get; init; } = 0;
     public TimeSpan? TimeToLive { get; init; }
-    public Dictionary<string, string> Headers { get; init; } = new();
+    [NotMapped] public Dictionary<string, string> Headers { get; init; } = new();
 }

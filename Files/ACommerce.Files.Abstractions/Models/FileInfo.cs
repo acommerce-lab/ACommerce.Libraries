@@ -1,5 +1,6 @@
 // Models/FileInfo.cs
 using ACommerce.Files.Abstractions.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Files.Abstractions.Models;
 
@@ -16,7 +17,7 @@ public record FileInfo
 	public int? Width { get; init; }
 	public int? Height { get; init; }
 	public string? OwnerId { get; init; }
-	public Dictionary<string, string> Metadata { get; init; } = new();
+    [NotMapped] public Dictionary<string, string> Metadata { get; init; } = new();
 	public DateTimeOffset UploadedAt { get; init; }
 }
 

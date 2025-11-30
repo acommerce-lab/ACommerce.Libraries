@@ -1,4 +1,5 @@
 using ACommerce.Client.Core.Http;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Client.Notifications;
 
@@ -138,7 +139,7 @@ public sealed class NotificationResponse
 	public string Type { get; set; } = string.Empty; // "Order", "Payment", "Shipping", etc.
 	public bool IsRead { get; set; }
 	public DateTime CreatedAt { get; set; }
-	public Dictionary<string, string> Data { get; set; } = new();
+    [NotMapped] public Dictionary<string, string> Data { get; set; } = new();
 }
 
 public sealed class UnreadCountResponse

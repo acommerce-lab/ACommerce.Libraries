@@ -1,4 +1,5 @@
 using ACommerce.Accounting.Core.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Accounting.Core.DTOs.Account;
 
@@ -15,6 +16,6 @@ public class CreateAccountDto
 	public bool AllowPosting { get; set; } = true;
 	public Guid? DefaultCostCenterId { get; set; }
 	public bool RequiresCostCenter { get; set; }
-	public Dictionary<string, string>? Metadata { get; set; }
+    [NotMapped] public Dictionary<string, string>? Metadata { get; set; }
 }
 

@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Catalog.Currencies.Entities;
 using ACommerce.Catalog.Units.Entities;
 using ACommerce.SharedKernel.Abstractions.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Accounting.Core.Entities;
 

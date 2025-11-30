@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Transactions.Core.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
+using ACommerce.Transactions.Core.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Transactions.Core.Entities;
 

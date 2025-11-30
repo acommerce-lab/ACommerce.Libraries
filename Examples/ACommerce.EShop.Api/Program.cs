@@ -35,6 +35,7 @@ try
 
     // Logging
     builder.Host.UseSerilog();
+    builder.Services.AddScoped<DbContext, ApplicationDbContext>();
 
     // CORS
     builder.Services.AddCors(options =>

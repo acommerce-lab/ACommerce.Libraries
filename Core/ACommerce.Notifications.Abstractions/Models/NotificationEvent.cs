@@ -1,4 +1,5 @@
 using ACommerce.Notifications.Abstractions.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Notifications.Abstractions.Models;
 
@@ -15,7 +16,7 @@ public record NotificationEvent
 	public NotificationPriority Priority { get; init; } = NotificationPriority.Normal;
 	public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
 	public DateTimeOffset? ScheduledAt { get; init; }
-	public Dictionary<string, string>? Data { get; init; }
+    [NotMapped] public Dictionary<string, string>? Data { get; init; }
 	public List<ChannelConfiguration> Channels { get; init; } = new();
 	public string? ActionUrl { get; init; }
 	public string? ImageUrl { get; init; }
