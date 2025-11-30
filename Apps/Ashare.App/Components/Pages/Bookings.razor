@@ -1,0 +1,310 @@
+@page "/bookings"
+@inject SpaceDataService DataService
+@inject IAppNavigationService Navigation
+
+<div class="ac-page ashare-bookings-page">
+    <div class="ac-page-header">
+        <h1>حجوزاتي</h1>
+    </div>
+
+    @* Tabs *@
+    <div class="ashare-tabs">
+        <button class="ashare-tab @(_activeTab == "upcoming" ? "active" : "")"
+                @onclick="() => _activeTab = \"upcoming\"">
+            القادمة
+            @if (_upcomingBookings?.Any() == true)
+            {
+                <span class="ashare-tab-badge">@_upcomingBookings.Count</span>
+            }
+        </button>
+        <button class="ashare-tab @(_activeTab == "past" ? "active" : "")"
+                @onclick="() => _activeTab = \"past\"">
+            السابقة
+        </button>
+        <button class="ashare-tab @(_activeTab == "cancelled" ? "active" : "")"
+                @onclick="() => _activeTab = \"cancelled\"">
+            الملغاة
+        </button>
+    </div>
+
+    @* Bookings List *@
+    <div class="ashare-bookings-list">
+        @{
+            var bookings = _activeTab switch
+            {
+                "upcoming" => _upcomingBookings,
+                "past" => _pastBookings,
+                "cancelled" => _cancelledBookings,
+                _ => _upcomingBookings
+            };
+        }
+
+        @if (bookings?.Any() == true)
+        {
+            @foreach (var booking in bookings)
+            {
+                <div class="ashare-booking-card" @onclick="() => ViewBooking(booking.Id)">
+                    <div class="ashare-booking-image">
+                        @if (!string.IsNullOrEmpty(booking.SpaceImage))
+                        {
+                            <img src="@booking.SpaceImage" alt="@booking.SpaceName" />
+                        }
+                        else
+                        {
+                            <div class="ashare-space-no-image">
+                                <i class="bi bi-building"></i>
+                            </div>
+                        }
+                        <span class="ashare-booking-status @GetStatusClass(booking.Status)">
+                            @GetStatusText(booking.Status)
+                        </span>
+                    </div>
+                    <div class="ashare-booking-content">
+                        <h3 class="ashare-booking-name">@booking.SpaceName</h3>
+                        <div class="ashare-booking-date">
+                            <i class="bi bi-calendar3"></i>
+                            @booking.Date.ToString("yyyy/MM/dd")
+                        </div>
+                        <div class="ashare-booking-time">
+                            <i class="bi bi-clock"></i>
+                            @booking.StartTime.ToString(@"hh\:mm") - @booking.EndTime.ToString(@"hh\:mm")
+                        </div>
+                        <div class="ashare-booking-footer">
+                            <span class="ashare-booking-guests">
+                                <i class="bi bi-people"></i>
+                                @booking.GuestsCount شخص
+                            </span>
+                            <span class="ashare-booking-price">@booking.TotalPrice ر.س</span>
+                        </div>
+                    </div>
+                    <div class="ashare-booking-actions">
+                        @if (booking.Status == BookingStatus.Pending)
+                        {
+                            <button class="ashare-action-btn danger" @onclick:stopPropagation="true" @onclick="() => CancelBooking(booking.Id)">
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+                        }
+                        @if (booking.Status == BookingStatus.Confirmed)
+                        {
+                            <button class="ashare-action-btn" @onclick:stopPropagation="true" @onclick="() => ContactSupport(booking.Id)">
+                                <i class="bi bi-chat"></i>
+                            </button>
+                        }
+                        @if (booking.Status == BookingStatus.Completed && !booking.IsReviewed)
+                        {
+                            <button class="ashare-action-btn primary" @onclick:stopPropagation="true" @onclick="() => WriteReview(booking)">
+                                <i class="bi bi-star"></i>
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="ashare-empty-state">
+                @switch (_activeTab)
+                {
+                    case "upcoming":
+                        <i class="bi bi-calendar-x"></i>
+                        <h3>لا توجد حجوزات قادمة</h3>
+                        <p>ابحث عن مساحة واحجزها الآن</p>
+                        <button class="ac-btn ac-btn-primary" @onclick="() => Navigation.NavigateTo(\"/explore\")">
+                            استكشف المساحات
+                        </button>
+                        break;
+                    case "past":
+                        <i class="bi bi-calendar-check"></i>
+                        <h3>لا توجد حجوزات سابقة</h3>
+                        <p>حجوزاتك المكتملة ستظهر هنا</p>
+                        break;
+                    case "cancelled":
+                        <i class="bi bi-calendar-minus"></i>
+                        <h3>لا توجد حجوزات ملغاة</h3>
+                        <p>الحجوزات الملغاة ستظهر هنا</p>
+                        break;
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@* Cancel Confirmation Modal *@
+@if (_showCancelModal)
+{
+    <div class="ac-modal-overlay" @onclick="() => _showCancelModal = false">
+        <div class="ac-modal" @onclick:stopPropagation="true">
+            <div class="ac-modal-header">
+                <h3>إلغاء الحجز</h3>
+                <button class="ac-modal-close" @onclick="() => _showCancelModal = false">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="ac-modal-body">
+                <p>هل أنت متأكد من إلغاء هذا الحجز؟</p>
+                <div class="ashare-cancel-info">
+                    <i class="bi bi-info-circle"></i>
+                    <span>سيتم استرداد المبلغ خلال 3-5 أيام عمل</span>
+                </div>
+            </div>
+            <div class="ac-modal-footer">
+                <button class="ac-btn ac-btn-secondary" @onclick="() => _showCancelModal = false">تراجع</button>
+                <button class="ac-btn ac-btn-danger" @onclick="ConfirmCancel">تأكيد الإلغاء</button>
+            </div>
+        </div>
+    </div>
+}
+
+@* Review Modal *@
+@if (_showReviewModal && _reviewBooking != null)
+{
+    <div class="ac-modal-overlay" @onclick="() => _showReviewModal = false">
+        <div class="ac-modal ashare-review-modal" @onclick:stopPropagation="true">
+            <div class="ac-modal-header">
+                <h3>قيّم تجربتك</h3>
+                <button class="ac-modal-close" @onclick="() => _showReviewModal = false">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="ac-modal-body">
+                <div class="ashare-review-space">
+                    <h4>@_reviewBooking.SpaceName</h4>
+                    <span>@_reviewBooking.Date.ToString("yyyy/MM/dd")</span>
+                </div>
+
+                <div class="ashare-rating-input">
+                    <label>التقييم</label>
+                    <div class="ashare-stars-input">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            var rating = i;
+                            <button class="ashare-star-btn @(_reviewRating >= rating ? "active" : "")"
+                                    @onclick="() => _reviewRating = rating">
+                                <i class="bi @(_reviewRating >= rating ? "bi-star-fill" : "bi-star")"></i>
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <div class="ac-form-group">
+                    <label>تعليقك</label>
+                    <textarea class="ac-input" rows="4" @bind="_reviewComment"
+                              placeholder="شارك تجربتك مع الآخرين..."></textarea>
+                </div>
+            </div>
+            <div class="ac-modal-footer">
+                <button class="ac-btn ac-btn-secondary" @onclick="() => _showReviewModal = false">إلغاء</button>
+                <button class="ac-btn ac-btn-primary" @onclick="SubmitReview" disabled="@(_reviewRating == 0)">
+                    إرسال التقييم
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [SupplyParameterFromQuery]
+    public bool? New { get; set; }
+
+    private string _activeTab = "upcoming";
+    private List<BookingItem>? _upcomingBookings;
+    private List<BookingItem>? _pastBookings;
+    private List<BookingItem>? _cancelledBookings;
+
+    private bool _showCancelModal;
+    private Guid _cancelBookingId;
+
+    private bool _showReviewModal;
+    private BookingItem? _reviewBooking;
+    private int _reviewRating;
+    private string _reviewComment = "";
+
+    protected override void OnInitialized()
+    {
+        LoadBookings();
+
+        if (New == true)
+        {
+            // Show success message for new booking
+        }
+    }
+
+    private void LoadBookings()
+    {
+        var allBookings = DataService.GetBookings();
+        var today = DateTime.Today;
+
+        _upcomingBookings = allBookings
+            .Where(b => b.Date >= today && b.Status != BookingStatus.Cancelled)
+            .OrderBy(b => b.Date)
+            .ToList();
+
+        _pastBookings = allBookings
+            .Where(b => b.Date < today && b.Status == BookingStatus.Completed)
+            .OrderByDescending(b => b.Date)
+            .ToList();
+
+        _cancelledBookings = allBookings
+            .Where(b => b.Status == BookingStatus.Cancelled)
+            .OrderByDescending(b => b.Date)
+            .ToList();
+    }
+
+    private void ViewBooking(Guid bookingId)
+    {
+        Navigation.NavigateTo($"/booking/{bookingId}");
+    }
+
+    private void CancelBooking(Guid bookingId)
+    {
+        _cancelBookingId = bookingId;
+        _showCancelModal = true;
+    }
+
+    private void ConfirmCancel()
+    {
+        DataService.CancelBooking(_cancelBookingId);
+        LoadBookings();
+        _showCancelModal = false;
+    }
+
+    private void ContactSupport(Guid bookingId)
+    {
+        Navigation.NavigateTo($"/support?booking={bookingId}");
+    }
+
+    private void WriteReview(BookingItem booking)
+    {
+        _reviewBooking = booking;
+        _reviewRating = 0;
+        _reviewComment = "";
+        _showReviewModal = true;
+    }
+
+    private void SubmitReview()
+    {
+        if (_reviewBooking == null || _reviewRating == 0) return;
+
+        DataService.AddReview(_reviewBooking.SpaceId, _reviewRating, _reviewComment);
+        _reviewBooking.IsReviewed = true;
+        _showReviewModal = false;
+    }
+
+    private string GetStatusClass(BookingStatus status) => status switch
+    {
+        BookingStatus.Pending => "pending",
+        BookingStatus.Confirmed => "confirmed",
+        BookingStatus.Completed => "completed",
+        BookingStatus.Cancelled => "cancelled",
+        _ => ""
+    };
+
+    private string GetStatusText(BookingStatus status) => status switch
+    {
+        BookingStatus.Pending => "قيد المراجعة",
+        BookingStatus.Confirmed => "مؤكد",
+        BookingStatus.Completed => "مكتمل",
+        BookingStatus.Cancelled => "ملغي",
+        _ => ""
+    };
+}

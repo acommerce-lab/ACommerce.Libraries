@@ -1,0 +1,106 @@
+@page "/favorites"
+@inject SpaceDataService DataService
+@inject IAppNavigationService Navigation
+
+<div class="ac-page ashare-favorites-page">
+    <div class="ac-page-header">
+        <h1>المفضلة</h1>
+        @if (_favoriteSpaces?.Any() == true)
+        {
+            <span class="ashare-count">@_favoriteSpaces.Count مساحة</span>
+        }
+    </div>
+
+    @if (_favoriteSpaces?.Any() == true)
+    {
+        <div class="ashare-favorites-list">
+            @foreach (var space in _favoriteSpaces)
+            {
+                <div class="ashare-favorite-card" @onclick="() => OpenSpace(space.Id)">
+                    <div class="ashare-favorite-image">
+                        @if (space.Images.Any())
+                        {
+                            <img src="@space.Images.First()" alt="@space.Name" />
+                        }
+                        else
+                        {
+                            <div class="ashare-space-no-image">
+                                <i class="bi bi-building"></i>
+                            </div>
+                        }
+                        <button class="ashare-remove-favorite" @onclick:stopPropagation="true" @onclick="() => RemoveFavorite(space.Id)">
+                            <i class="bi bi-heart-fill"></i>
+                        </button>
+                    </div>
+                    <div class="ashare-favorite-content">
+                        <span class="ashare-space-category">@space.CategoryName</span>
+                        <h3 class="ashare-favorite-name">@space.Name</h3>
+                        <div class="ashare-favorite-location">
+                            <i class="bi bi-geo-alt"></i>
+                            @space.Location
+                        </div>
+                        <div class="ashare-favorite-meta">
+                            <span class="ashare-favorite-capacity">
+                                <i class="bi bi-people"></i>
+                                @space.Capacity شخص
+                            </span>
+                            <span class="ashare-favorite-rating">
+                                <i class="bi bi-star-fill"></i>
+                                @space.Rating
+                            </span>
+                        </div>
+                        <div class="ashare-favorite-footer">
+                            <span class="ashare-favorite-price">@space.DisplayPrice</span>
+                            <button class="ac-btn ac-btn-primary ac-btn-sm" @onclick:stopPropagation="true" @onclick="() => BookSpace(space.Id)">
+                                احجز الآن
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="ashare-empty-state">
+            <i class="bi bi-heart"></i>
+            <h3>لا توجد مساحات مفضلة</h3>
+            <p>أضف المساحات التي تعجبك لتجدها بسهولة لاحقاً</p>
+            <button class="ac-btn ac-btn-primary" @onclick="() => Navigation.NavigateTo(\"/explore\")">
+                استكشف المساحات
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private List<SpaceItem>? _favoriteSpaces;
+
+    protected override void OnInitialized()
+    {
+        LoadFavorites();
+    }
+
+    private void LoadFavorites()
+    {
+        var favoriteIds = DataService.GetFavorites();
+        var allSpaces = DataService.GetAllSpaces();
+        _favoriteSpaces = allSpaces?.Where(s => favoriteIds.Contains(s.Id)).ToList();
+    }
+
+    private void OpenSpace(Guid spaceId)
+    {
+        Navigation.NavigateTo($"/space/{spaceId}");
+    }
+
+    private void BookSpace(Guid spaceId)
+    {
+        Navigation.NavigateTo($"/space/{spaceId}?book=true");
+    }
+
+    private void RemoveFavorite(Guid spaceId)
+    {
+        DataService.ToggleFavorite(spaceId);
+        LoadFavorites();
+    }
+}

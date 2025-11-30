@@ -1,0 +1,314 @@
+@page "/search"
+@inject SpaceDataService DataService
+@inject IAppNavigationService Navigation
+
+<div class="ac-page ashare-search-page">
+    @* Search Header *@
+    <div class="ashare-search-header">
+        <button class="ashare-back-btn" @onclick="GoBack">
+            <i class="bi bi-arrow-right"></i>
+        </button>
+        <div class="ashare-search-input-wrapper">
+            <i class="bi bi-search"></i>
+            <input type="text"
+                   class="ashare-search-input"
+                   placeholder="ابحث عن مساحة..."
+                   @bind="_searchQuery"
+                   @bind:event="oninput"
+                   @onkeyup="HandleSearch"
+                   autofocus />
+            @if (!string.IsNullOrEmpty(_searchQuery))
+            {
+                <button class="ashare-clear-btn" @onclick="ClearSearch">
+                    <i class="bi bi-x-circle"></i>
+                </button>
+            }
+        </div>
+    </div>
+
+    @* Quick Filters *@
+    <div class="ashare-quick-filters">
+        <button class="ashare-quick-filter @(_locationFilter ? "active" : "")" @onclick="ToggleLocationFilter">
+            <i class="bi bi-geo-alt"></i>
+            قريب مني
+        </button>
+        <button class="ashare-quick-filter @(_priceFilter == "low" ? "active" : "")" @onclick="() => SetPriceFilter(\"low\")">
+            <i class="bi bi-currency-dollar"></i>
+            الأقل سعراً
+        </button>
+        <button class="ashare-quick-filter @(_ratingFilter ? "active" : "")" @onclick="ToggleRatingFilter">
+            <i class="bi bi-star"></i>
+            الأعلى تقييماً
+        </button>
+    </div>
+
+    @* Search Results or Suggestions *@
+    @if (string.IsNullOrEmpty(_searchQuery))
+    {
+        @* Recent Searches *@
+        @if (_recentSearches.Any())
+        {
+            <div class="ashare-search-section">
+                <div class="ashare-section-header">
+                    <h3>عمليات البحث الأخيرة</h3>
+                    <button class="ashare-clear-all" @onclick="ClearRecentSearches">مسح الكل</button>
+                </div>
+                <div class="ashare-recent-list">
+                    @foreach (var search in _recentSearches)
+                    {
+                        <button class="ashare-recent-item" @onclick="() => UseRecentSearch(search)">
+                            <i class="bi bi-clock-history"></i>
+                            <span>@search</span>
+                            <button class="ashare-remove-recent" @onclick:stopPropagation="true" @onclick="() => RemoveRecentSearch(search)">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+
+        @* Popular Categories *@
+        <div class="ashare-search-section">
+            <h3>الفئات الشائعة</h3>
+            <div class="ashare-category-grid">
+                @foreach (var category in _categories ?? [])
+                {
+                    <button class="ashare-category-btn" @onclick="() => SearchByCategory(category)">
+                        <div class="ashare-category-icon" style="background-color: @(category.Color)20; color: @category.Color">
+                            <i class="bi @category.Icon"></i>
+                        </div>
+                        <span>@category.Name</span>
+                    </button>
+                }
+            </div>
+        </div>
+
+        @* Popular Searches *@
+        <div class="ashare-search-section">
+            <h3>عمليات بحث شائعة</h3>
+            <div class="ashare-popular-tags">
+                @foreach (var tag in _popularSearches)
+                {
+                    <button class="ashare-popular-tag" @onclick="() => UseRecentSearch(tag)">
+                        @tag
+                    </button>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        @* Search Results *@
+        <div class="ashare-search-results">
+            @if (_isSearching)
+            {
+                <div class="ashare-searching">
+                    <div class="ac-spinner"></div>
+                    <span>جاري البحث...</span>
+                </div>
+            }
+            else if (_searchResults?.Any() == true)
+            {
+                <div class="ashare-results-header">
+                    <span>@_searchResults.Count نتيجة</span>
+                </div>
+                <div class="ashare-results-list">
+                    @foreach (var space in _searchResults)
+                    {
+                        <div class="ashare-search-result-card" @onclick="() => OpenSpace(space.Id)">
+                            <div class="ashare-result-image">
+                                @if (space.Images.Any())
+                                {
+                                    <img src="@space.Images.First()" alt="@space.Name" />
+                                }
+                                else
+                                {
+                                    <div class="ashare-space-no-image">
+                                        <i class="bi bi-building"></i>
+                                    </div>
+                                }
+                            </div>
+                            <div class="ashare-result-content">
+                                <span class="ashare-result-category">@space.CategoryName</span>
+                                <h4 class="ashare-result-name">@space.Name</h4>
+                                <div class="ashare-result-location">
+                                    <i class="bi bi-geo-alt"></i>
+                                    @space.Location
+                                </div>
+                                <div class="ashare-result-meta">
+                                    <span class="ashare-result-price">@space.DisplayPrice</span>
+                                    <span class="ashare-result-rating">
+                                        <i class="bi bi-star-fill"></i>
+                                        @space.Rating
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="ashare-no-results">
+                    <i class="bi bi-search"></i>
+                    <h3>لا توجد نتائج</h3>
+                    <p>لم نجد أي مساحات تطابق "@_searchQuery"</p>
+                    <button class="ac-btn ac-btn-secondary" @onclick="ClearSearch">
+                        بحث جديد
+                    </button>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private string _searchQuery = "";
+    private List<SpaceItem>? _searchResults;
+    private List<SpaceCategory>? _categories;
+    private List<string> _recentSearches = new() { "قاعة اجتماعات", "مكتب مشترك", "استوديو تصوير" };
+    private List<string> _popularSearches = new() { "قاعة مؤتمرات", "مكتب خاص", "صالة رياضية", "مساحة فعاليات", "استوديو", "محل تجاري" };
+    private bool _isSearching;
+    private bool _locationFilter;
+    private string? _priceFilter;
+    private bool _ratingFilter;
+    private System.Timers.Timer? _debounceTimer;
+
+    protected override void OnInitialized()
+    {
+        _categories = DataService.GetCategories();
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateBack();
+    }
+
+    private void HandleSearch(KeyboardEventArgs e)
+    {
+        _debounceTimer?.Stop();
+        _debounceTimer?.Dispose();
+
+        _debounceTimer = new System.Timers.Timer(300);
+        _debounceTimer.Elapsed += async (s, e) =>
+        {
+            await InvokeAsync(() =>
+            {
+                PerformSearch();
+                StateHasChanged();
+            });
+        };
+        _debounceTimer.AutoReset = false;
+        _debounceTimer.Start();
+    }
+
+    private void PerformSearch()
+    {
+        if (string.IsNullOrWhiteSpace(_searchQuery))
+        {
+            _searchResults = null;
+            return;
+        }
+
+        _isSearching = true;
+        StateHasChanged();
+
+        var query = DataService.GetAllSpaces()?.AsEnumerable() ?? [];
+
+        // Text search
+        query = query.Where(s =>
+            s.Name.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ||
+            s.Description.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ||
+            s.Location.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ||
+            s.CategoryName.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase));
+
+        // Apply filters
+        if (_priceFilter == "low")
+        {
+            query = query.OrderBy(s => s.PricePerHour);
+        }
+
+        if (_ratingFilter)
+        {
+            query = query.OrderByDescending(s => s.Rating);
+        }
+
+        _searchResults = query.ToList();
+        _isSearching = false;
+
+        // Add to recent searches
+        if (!_recentSearches.Contains(_searchQuery) && _searchResults.Any())
+        {
+            _recentSearches.Insert(0, _searchQuery);
+            if (_recentSearches.Count > 5)
+            {
+                _recentSearches.RemoveAt(5);
+            }
+        }
+    }
+
+    private void ClearSearch()
+    {
+        _searchQuery = "";
+        _searchResults = null;
+    }
+
+    private void UseRecentSearch(string search)
+    {
+        _searchQuery = search;
+        PerformSearch();
+    }
+
+    private void RemoveRecentSearch(string search)
+    {
+        _recentSearches.Remove(search);
+    }
+
+    private void ClearRecentSearches()
+    {
+        _recentSearches.Clear();
+    }
+
+    private void SearchByCategory(SpaceCategory category)
+    {
+        Navigation.NavigateTo($"/explore?category={category.Id}");
+    }
+
+    private void OpenSpace(Guid spaceId)
+    {
+        Navigation.NavigateTo($"/space/{spaceId}");
+    }
+
+    private void ToggleLocationFilter()
+    {
+        _locationFilter = !_locationFilter;
+        if (!string.IsNullOrEmpty(_searchQuery))
+        {
+            PerformSearch();
+        }
+    }
+
+    private void SetPriceFilter(string filter)
+    {
+        _priceFilter = _priceFilter == filter ? null : filter;
+        if (!string.IsNullOrEmpty(_searchQuery))
+        {
+            PerformSearch();
+        }
+    }
+
+    private void ToggleRatingFilter()
+    {
+        _ratingFilter = !_ratingFilter;
+        if (!string.IsNullOrEmpty(_searchQuery))
+        {
+            PerformSearch();
+        }
+    }
+
+    public void Dispose()
+    {
+        _debounceTimer?.Dispose();
+    }
+}

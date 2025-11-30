@@ -1,0 +1,165 @@
+@page "/"
+@inject SpaceDataService DataService
+@inject IAppNavigationService Navigation
+
+<div class="ac-page ac-home-page">
+    @* Hero Section with Search *@
+    <section class="ashare-hero">
+        <h1 class="ashare-hero-title">ابحث عن مساحتك المثالية</h1>
+        <p class="ashare-hero-subtitle">قاعات اجتماعات، مكاتب مشتركة، مساحات تجارية وأكثر</p>
+
+        <div class="ac-search-box" @onclick="() => Navigation.NavigateTo("/search")">
+            <i class="bi bi-search ac-search-icon"></i>
+            <input type="text"
+                   class="ac-search-input"
+                   placeholder="ابحث عن مساحة..."
+                   readonly />
+        </div>
+    </section>
+
+    @* Categories *@
+    <section class="ac-section">
+        <div class="ac-section-header">
+            <h2 class="ac-section-title">الفئات</h2>
+        </div>
+        <div class="ac-categories-scroll">
+            @foreach (var category in _categories)
+            {
+                <div class="ashare-category-item" @onclick="() => HandleCategoryClick(category.Id)">
+                    <div class="ashare-category-icon" style="background-color: @(category.Color)20; color: @category.Color">
+                        <i class="bi @category.Icon"></i>
+                    </div>
+                    <span class="ac-category-name">@category.Name</span>
+                </div>
+            }
+        </div>
+    </section>
+
+    @* Featured Spaces *@
+    @if (_featuredSpaces?.Any() == true)
+    {
+        <section class="ac-section">
+            <div class="ac-section-header">
+                <h2 class="ac-section-title">مساحات مميزة</h2>
+                <a href="/explore?featured=true" class="ac-section-link">عرض الكل</a>
+            </div>
+            <div class="ac-products-scroll">
+                @foreach (var space in _featuredSpaces)
+                {
+                    <div class="ashare-space-card" @onclick="() => HandleSpaceClick(space.Id)">
+                        <div class="ashare-space-image">
+                            @if (space.Images.Any())
+                            {
+                                <img src="@space.Images.First()" alt="@space.Name" loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="ashare-space-no-image">
+                                    <i class="bi bi-building"></i>
+                                </div>
+                            }
+                            @if (space.IsFeatured)
+                            {
+                                <span class="ac-product-badge ac-product-badge-featured">مميز</span>
+                            }
+                        </div>
+                        <div class="ashare-space-content">
+                            <span class="ashare-space-category">@space.CategoryName</span>
+                            <h3 class="ashare-space-name">@space.Name</h3>
+                            <div class="ashare-space-location">
+                                <i class="bi bi-geo-alt"></i>
+                                @space.Location
+                            </div>
+                            <div class="ashare-space-meta">
+                                <span class="ashare-space-capacity">
+                                    <i class="bi bi-people"></i> @space.Capacity
+                                </span>
+                                <span class="ashare-space-rating">
+                                    <i class="bi bi-star-fill"></i> @space.Rating
+                                </span>
+                            </div>
+                            <div class="ashare-space-price">@space.DisplayPrice</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+
+    @* New Spaces *@
+    @if (_newSpaces?.Any() == true)
+    {
+        <section class="ac-section">
+            <div class="ac-section-header">
+                <h2 class="ac-section-title">أضيفت حديثاً</h2>
+                <a href="/explore?new=true" class="ac-section-link">عرض الكل</a>
+            </div>
+            <div class="ac-products-scroll">
+                @foreach (var space in _newSpaces)
+                {
+                    <div class="ashare-space-card" @onclick="() => HandleSpaceClick(space.Id)">
+                        <div class="ashare-space-image">
+                            @if (space.Images.Any())
+                            {
+                                <img src="@space.Images.First()" alt="@space.Name" loading="lazy" />
+                            }
+                            <span class="ac-product-badge ac-product-badge-new">جديد</span>
+                        </div>
+                        <div class="ashare-space-content">
+                            <span class="ashare-space-category">@space.CategoryName</span>
+                            <h3 class="ashare-space-name">@space.Name</h3>
+                            <div class="ashare-space-location">
+                                <i class="bi bi-geo-alt"></i>
+                                @space.Location
+                            </div>
+                            <div class="ashare-space-meta">
+                                <span class="ashare-space-capacity">
+                                    <i class="bi bi-people"></i> @space.Capacity
+                                </span>
+                                <span class="ashare-space-rating">
+                                    <i class="bi bi-star-fill"></i> @space.Rating
+                                </span>
+                            </div>
+                            <div class="ashare-space-price">@space.DisplayPrice</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+
+    @* Quick Actions *@
+    <section class="ac-section ashare-quick-actions">
+        <div class="ashare-action-card" @onclick="() => Navigation.NavigateTo("/explore")">
+            <i class="bi bi-compass"></i>
+            <span>استكشف المساحات</span>
+        </div>
+        <div class="ashare-action-card" @onclick="() => Navigation.NavigateTo("/bookings")">
+            <i class="bi bi-calendar-check"></i>
+            <span>حجوزاتي</span>
+        </div>
+    </section>
+</div>
+
+@code {
+    private List<SpaceCategory>? _categories;
+    private List<SpaceItem>? _featuredSpaces;
+    private List<SpaceItem>? _newSpaces;
+
+    protected override void OnInitialized()
+    {
+        _categories = DataService.GetCategories();
+        _featuredSpaces = DataService.GetFeaturedSpaces();
+        _newSpaces = DataService.GetNewSpaces();
+    }
+
+    private void HandleCategoryClick(Guid categoryId)
+    {
+        Navigation.NavigateTo($"/explore?category={categoryId}");
+    }
+
+    private void HandleSpaceClick(Guid spaceId)
+    {
+        Navigation.NavigateTo($"/space/{spaceId}");
+    }
+}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#0EA5E9" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <title>عشير - Ashare</title>
+
+    <base href="/" />
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+    <!-- App Styles -->
+    <link rel="stylesheet" href="css/ashare.css" />
+
+    <!-- iOS Splash Screens -->
+    <link rel="apple-touch-icon" href="images/icon-512.png" />
+</head>
+<body>
+    <div class="status-bar-spacer"></div>
+    <div id="app">
+        <div class="ashare-loading-screen">
+            <div class="ashare-loading-logo">
+                <span class="ashare-logo-text">عشير</span>
+            </div>
+            <div class="ashare-loading-spinner">
+                <div class="spinner"></div>
+            </div>
+            <p class="ashare-loading-text">جاري التحميل...</p>
+        </div>
+    </div>
+
+    <div id="blazor-error-ui">
+        <div class="blazor-error-content">
+            <i class="bi bi-exclamation-triangle"></i>
+            <p>حدث خطأ غير متوقع</p>
+            <a href="" class="reload">إعادة تحميل</a>
+            <a class="dismiss">تجاهل</a>
+        </div>
+    </div>
+
+    <script src="_framework/blazor.webview.js" autostart="false"></script>
+    <script>
+        Blazor.start();
+    </script>
+</body>
+</html>
