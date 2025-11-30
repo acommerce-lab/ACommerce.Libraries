@@ -1,11 +1,27 @@
 using Ashare.App.Services;
 using ACommerce.Client.Auth;
+using ACommerce.Client.Auth.Extensions;
+using ACommerce.Client.Cart;
+using ACommerce.Client.Cart.Extensions;
+using ACommerce.Client.Categories;
+using ACommerce.Client.Categories.Extensions;
 using ACommerce.Client.Chats;
+using ACommerce.Client.ContactPoints;
+using ACommerce.Client.ContactPoints.Extensions;
 using ACommerce.Client.Core;
+using ACommerce.Client.Core.Extensions;
+using ACommerce.Client.Files;
 using ACommerce.Client.Locations;
+using ACommerce.Client.Locations.Extensions;
 using ACommerce.Client.Notifications;
+using ACommerce.Client.Orders;
+using ACommerce.Client.Orders.Extensions;
+using ACommerce.Client.ProductListings;
+using ACommerce.Client.Products;
+using ACommerce.Client.Products.Extensions;
 using ACommerce.Client.Profiles;
 using ACommerce.Client.Realtime;
+using ACommerce.Client.Vendors;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Themes;
 using Microsoft.Extensions.Logging;
@@ -88,6 +104,40 @@ public static class MauiProgram
         // Locations Client
         builder.Services.AddLocationsClient(apiBaseUrl);
 
+        // ═══════════════════════════════════════════════════════════════════
+        // Catalog Clients (Spaces = Products with Dynamic Attributes)
+        // ═══════════════════════════════════════════════════════════════════
+
+        // Products Client (Spaces)
+        builder.Services.AddProductsClient(apiBaseUrl);
+
+        // Categories Client (Space Types)
+        builder.Services.AddCategoriesClient(apiBaseUrl);
+
+        // ProductListings Client (Owner Listings)
+        builder.Services.AddScoped<ProductListingsClient>();
+
+        // ═══════════════════════════════════════════════════════════════════
+        // Sales Clients (Bookings = Orders)
+        // ═══════════════════════════════════════════════════════════════════
+
+        // Orders Client (Bookings)
+        builder.Services.AddOrdersClient(apiBaseUrl);
+
+        // Cart Client
+        builder.Services.AddCartClient(apiBaseUrl);
+
+        // ═══════════════════════════════════════════════════════════════════
+        // Marketplace Clients (Hosts = Vendors)
+        // ═══════════════════════════════════════════════════════════════════
+
+        // Vendors Client (Hosts)
+        builder.Services.AddScoped<VendorsClient>();
+
+        // ═══════════════════════════════════════════════════════════════════
+        // Communication Clients
+        // ═══════════════════════════════════════════════════════════════════
+
         // Chats Client
         //builder.Services.AddChatsClient(options =>
         //{
@@ -100,12 +150,18 @@ public static class MauiProgram
         //    options.BaseUrl = apiBaseUrl;
         //});
 
+        // ContactPoints Client
+        builder.Services.AddContactPointsClient(apiBaseUrl);
+
         // Real-time Client (SignalR)
         //builder.Services.AddRealtimeClient(options =>
         //{
         //    options.HubUrl = $"{apiBaseUrl}/hubs/realtime";
         //    options.AutoReconnect = true;
         //});
+
+        // Files Client
+        builder.Services.AddScoped<FilesClient>();
 
         // ═══════════════════════════════════════════════════════════════════
         // App Services
