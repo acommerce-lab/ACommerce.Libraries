@@ -1,0 +1,326 @@
+@namespace ACommerce.Templates.Customer.Components
+@using ACommerce.Client.Locations
+
+<div class="ac-address-form @Class">
+    @* Address Label *@
+    <div class="ac-form-group">
+        <label class="ac-label">
+            @LabelFieldLabel
+            @if (Required) { <span class="ac-required">*</span> }
+        </label>
+        <input type="text"
+               class="ac-input"
+               placeholder="@LabelPlaceholder"
+               value="@Address.Label"
+               disabled="@Disabled"
+               @oninput="e => UpdateAddress(a => a.Label = e.Value?.ToString() ?? string.Empty)" />
+    </div>
+
+    @* Location Picker *@
+    <AcLocationPicker @bind-CountryId="Address.CountryId"
+                      @bind-RegionId="Address.RegionId"
+                      @bind-CityId="Address.CityId"
+                      @bind-NeighborhoodId="Address.NeighborhoodId"
+                      ShowCountry="ShowCountry"
+                      ShowRegion="ShowRegion"
+                      ShowCity="ShowCity"
+                      ShowNeighborhood="ShowNeighborhood"
+                      CountryLabel="@CountryLabel"
+                      RegionLabel="@RegionLabel"
+                      CityLabel="@CityLabel"
+                      NeighborhoodLabel="@NeighborhoodLabel"
+                      UseEnglish="@UseEnglish"
+                      Disabled="@Disabled"
+                      Required="@Required"
+                      DefaultCountryCode="@DefaultCountryCode"
+                      OnSelectionChanged="HandleLocationChanged" />
+
+    @* Street *@
+    @if (ShowStreet)
+    {
+        <div class="ac-form-group">
+            <label class="ac-label">@StreetLabel</label>
+            <input type="text"
+                   class="ac-input"
+                   placeholder="@StreetPlaceholder"
+                   value="@Address.Street"
+                   disabled="@Disabled"
+                   @oninput="e => UpdateAddress(a => a.Street = e.Value?.ToString())" />
+        </div>
+    }
+
+    @* Building & Floor Row *@
+    @if (ShowBuildingDetails)
+    {
+        <div class="ac-form-row">
+            <div class="ac-form-group ac-col-6">
+                <label class="ac-label">@BuildingNumberLabel</label>
+                <input type="text"
+                       class="ac-input"
+                       placeholder="@BuildingNumberPlaceholder"
+                       value="@Address.BuildingNumber"
+                       disabled="@Disabled"
+                       @oninput="e => UpdateAddress(a => a.BuildingNumber = e.Value?.ToString())" />
+            </div>
+            <div class="ac-form-group ac-col-6">
+                <label class="ac-label">@FloorLabel</label>
+                <input type="text"
+                       class="ac-input"
+                       placeholder="@FloorPlaceholder"
+                       value="@Address.Floor"
+                       disabled="@Disabled"
+                       @oninput="e => UpdateAddress(a => a.Floor = e.Value?.ToString())" />
+            </div>
+        </div>
+
+        <div class="ac-form-row">
+            <div class="ac-form-group ac-col-6">
+                <label class="ac-label">@ApartmentLabel</label>
+                <input type="text"
+                       class="ac-input"
+                       placeholder="@ApartmentPlaceholder"
+                       value="@Address.Apartment"
+                       disabled="@Disabled"
+                       @oninput="e => UpdateAddress(a => a.Apartment = e.Value?.ToString())" />
+            </div>
+            <div class="ac-form-group ac-col-6">
+                <label class="ac-label">@PostalCodeLabel</label>
+                <input type="text"
+                       class="ac-input"
+                       placeholder="@PostalCodePlaceholder"
+                       value="@Address.PostalCode"
+                       disabled="@Disabled"
+                       @oninput="e => UpdateAddress(a => a.PostalCode = e.Value?.ToString())" />
+            </div>
+        </div>
+    }
+
+    @* Additional Info *@
+    @if (ShowAdditionalInfo)
+    {
+        <div class="ac-form-group">
+            <label class="ac-label">@AdditionalInfoLabel</label>
+            <textarea class="ac-input ac-textarea"
+                      rows="3"
+                      placeholder="@AdditionalInfoPlaceholder"
+                      disabled="@Disabled"
+                      @oninput="e => UpdateAddress(a => a.AdditionalInfo = e.Value?.ToString())">@Address.AdditionalInfo</textarea>
+        </div>
+    }
+
+    @* GPS Coordinates *@
+    @if (ShowGpsCoordinates)
+    {
+        <div class="ac-form-row">
+            <div class="ac-form-group ac-col-6">
+                <label class="ac-label">@LatitudeLabel</label>
+                <input type="number"
+                       step="0.000001"
+                       class="ac-input"
+                       placeholder="24.7136"
+                       value="@Address.Latitude"
+                       disabled="@Disabled"
+                       @oninput="e => UpdateAddress(a => a.Latitude = double.TryParse(e.Value?.ToString(), out var lat) ? lat : null)" />
+            </div>
+            <div class="ac-form-group ac-col-6">
+                <label class="ac-label">@LongitudeLabel</label>
+                <input type="number"
+                       step="0.000001"
+                       class="ac-input"
+                       placeholder="46.6753"
+                       value="@Address.Longitude"
+                       disabled="@Disabled"
+                       @oninput="e => UpdateAddress(a => a.Longitude = double.TryParse(e.Value?.ToString(), out var lon) ? lon : null)" />
+            </div>
+        </div>
+
+        @if (ShowGetLocationButton)
+        {
+            <div class="ac-form-group">
+                <button type="button"
+                        class="ac-btn ac-btn-outline ac-btn-sm"
+                        disabled="@(Disabled || _gettingLocation)"
+                        @onclick="GetCurrentLocation">
+                    @if (_gettingLocation)
+                    {
+                        <span class="ac-spinner-sm"></span>
+                    }
+                    else
+                    {
+                        <i class="fas fa-map-marker-alt"></i>
+                    }
+                    @GetLocationButtonText
+                </button>
+            </div>
+        }
+    }
+
+    @* Default Address Checkbox *@
+    @if (ShowIsDefault)
+    {
+        <div class="ac-form-group ac-checkbox-group">
+            <label class="ac-checkbox">
+                <input type="checkbox"
+                       checked="@Address.IsDefault"
+                       disabled="@Disabled"
+                       @onchange="e => UpdateAddress(a => a.IsDefault = (bool)(e.Value ?? false))" />
+                <span class="ac-checkbox-label">@IsDefaultLabel</span>
+            </label>
+        </div>
+    }
+</div>
+
+@code {
+    [Inject] private IJSRuntime? JSRuntime { get; set; }
+
+    // ══════════════════════════════════════════════════════════════════
+    // Parameters
+    // ══════════════════════════════════════════════════════════════════
+
+    [Parameter] public AddressFormModel Address { get; set; } = new();
+    [Parameter] public EventCallback<AddressFormModel> AddressChanged { get; set; }
+
+    // Display options
+    [Parameter] public bool ShowCountry { get; set; } = true;
+    [Parameter] public bool ShowRegion { get; set; } = true;
+    [Parameter] public bool ShowCity { get; set; } = true;
+    [Parameter] public bool ShowNeighborhood { get; set; } = true;
+    [Parameter] public bool ShowStreet { get; set; } = true;
+    [Parameter] public bool ShowBuildingDetails { get; set; } = true;
+    [Parameter] public bool ShowAdditionalInfo { get; set; } = true;
+    [Parameter] public bool ShowGpsCoordinates { get; set; } = false;
+    [Parameter] public bool ShowGetLocationButton { get; set; } = true;
+    [Parameter] public bool ShowIsDefault { get; set; } = true;
+
+    // Labels (Arabic defaults)
+    [Parameter] public string LabelFieldLabel { get; set; } = "اسم العنوان";
+    [Parameter] public string LabelPlaceholder { get; set; } = "مثال: المنزل، العمل...";
+    [Parameter] public string CountryLabel { get; set; } = "الدولة";
+    [Parameter] public string RegionLabel { get; set; } = "المنطقة";
+    [Parameter] public string CityLabel { get; set; } = "المدينة";
+    [Parameter] public string NeighborhoodLabel { get; set; } = "الحي";
+    [Parameter] public string StreetLabel { get; set; } = "الشارع";
+    [Parameter] public string StreetPlaceholder { get; set; } = "اسم الشارع";
+    [Parameter] public string BuildingNumberLabel { get; set; } = "رقم المبنى";
+    [Parameter] public string BuildingNumberPlaceholder { get; set; } = "رقم المبنى";
+    [Parameter] public string FloorLabel { get; set; } = "الطابق";
+    [Parameter] public string FloorPlaceholder { get; set; } = "رقم الطابق";
+    [Parameter] public string ApartmentLabel { get; set; } = "الشقة";
+    [Parameter] public string ApartmentPlaceholder { get; set; } = "رقم الشقة";
+    [Parameter] public string PostalCodeLabel { get; set; } = "الرمز البريدي";
+    [Parameter] public string PostalCodePlaceholder { get; set; } = "الرمز البريدي";
+    [Parameter] public string AdditionalInfoLabel { get; set; } = "ملاحظات إضافية";
+    [Parameter] public string AdditionalInfoPlaceholder { get; set; } = "تفاصيل إضافية للتوصيل...";
+    [Parameter] public string LatitudeLabel { get; set; } = "خط العرض";
+    [Parameter] public string LongitudeLabel { get; set; } = "خط الطول";
+    [Parameter] public string GetLocationButtonText { get; set; } = "تحديد موقعي الحالي";
+    [Parameter] public string IsDefaultLabel { get; set; } = "تعيين كعنوان افتراضي";
+
+    // Other options
+    [Parameter] public bool UseEnglish { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool Required { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? DefaultCountryCode { get; set; } = "SA";
+
+    // Events
+    [Parameter] public EventCallback<LocationHierarchyDto> OnLocationChanged { get; set; }
+
+    // ══════════════════════════════════════════════════════════════════
+    // State
+    // ══════════════════════════════════════════════════════════════════
+
+    private bool _gettingLocation;
+
+    // ══════════════════════════════════════════════════════════════════
+    // Methods
+    // ══════════════════════════════════════════════════════════════════
+
+    private async Task UpdateAddress(Action<AddressFormModel> updateAction)
+    {
+        updateAction(Address);
+        await AddressChanged.InvokeAsync(Address);
+    }
+
+    private async Task HandleLocationChanged(LocationHierarchyDto hierarchy)
+    {
+        if (OnLocationChanged.HasDelegate)
+        {
+            await OnLocationChanged.InvokeAsync(hierarchy);
+        }
+        await AddressChanged.InvokeAsync(Address);
+    }
+
+    private async Task GetCurrentLocation()
+    {
+        if (JSRuntime == null) return;
+
+        _gettingLocation = true;
+        StateHasChanged();
+
+        try
+        {
+            var result = await JSRuntime.InvokeAsync<GeolocationResult?>("navigator.geolocation.getCurrentPosition",
+                new { enableHighAccuracy = true, timeout = 10000 });
+
+            if (result != null)
+            {
+                Address.Latitude = result.Latitude;
+                Address.Longitude = result.Longitude;
+                await AddressChanged.InvokeAsync(Address);
+            }
+        }
+        catch
+        {
+            // Geolocation not available or denied
+        }
+        finally
+        {
+            _gettingLocation = false;
+            StateHasChanged();
+        }
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// Models
+// ══════════════════════════════════════════════════════════════════
+
+/// <summary>
+/// نموذج بيانات العنوان للنموذج
+/// </summary>
+public class AddressFormModel
+{
+    public Guid Id { get; set; }
+    public string Label { get; set; } = string.Empty;
+
+    // Location IDs
+    public Guid CountryId { get; set; }
+    public Guid RegionId { get; set; }
+    public Guid CityId { get; set; }
+    public Guid NeighborhoodId { get; set; }
+
+    // Address details
+    public string? Street { get; set; }
+    public string? BuildingNumber { get; set; }
+    public string? Floor { get; set; }
+    public string? Apartment { get; set; }
+    public string? PostalCode { get; set; }
+    public string? AdditionalInfo { get; set; }
+
+    // GPS
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
+
+    // Status
+    public bool IsDefault { get; set; }
+}
+
+/// <summary>
+/// نتيجة تحديد الموقع الجغرافي
+/// </summary>
+public class GeolocationResult
+{
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
+}

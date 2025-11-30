@@ -1,0 +1,400 @@
+@namespace ACommerce.Templates.Customer.Components
+@using ACommerce.Client.Locations
+
+<div class="ac-location-picker @Class">
+    @* Country *@
+    @if (ShowCountry)
+    {
+        <div class="ac-form-group">
+            @if (!string.IsNullOrEmpty(CountryLabel))
+            {
+                <label class="ac-label">
+                    @CountryLabel
+                    @if (Required) { <span class="ac-required">*</span> }
+                </label>
+            }
+            <select class="ac-select @(IsLoading ? "ac-loading" : "")"
+                    value="@CountryId"
+                    disabled="@(Disabled || _loadingCountries)"
+                    @onchange="OnCountryChanged">
+                <option value="">@CountryPlaceholder</option>
+                @if (_countries != null)
+                {
+                    @foreach (var country in _countries)
+                    {
+                        <option value="@country.Id">
+                            @(UseEnglish && !string.IsNullOrEmpty(country.NameEn) ? country.NameEn : country.Name)
+                            @if (!string.IsNullOrEmpty(country.Flag)) { @(" " + country.Flag) }
+                        </option>
+                    }
+                }
+            </select>
+        </div>
+    }
+
+    @* Region *@
+    @if (ShowRegion)
+    {
+        <div class="ac-form-group">
+            @if (!string.IsNullOrEmpty(RegionLabel))
+            {
+                <label class="ac-label">
+                    @RegionLabel
+                    @if (Required) { <span class="ac-required">*</span> }
+                </label>
+            }
+            <select class="ac-select @(IsLoading ? "ac-loading" : "")"
+                    value="@RegionId"
+                    disabled="@(Disabled || CountryId == Guid.Empty || _loadingRegions)"
+                    @onchange="OnRegionChanged">
+                <option value="">@RegionPlaceholder</option>
+                @if (_regions != null)
+                {
+                    @foreach (var region in _regions)
+                    {
+                        <option value="@region.Id">
+                            @(UseEnglish && !string.IsNullOrEmpty(region.NameEn) ? region.NameEn : region.Name)
+                        </option>
+                    }
+                }
+            </select>
+        </div>
+    }
+
+    @* City *@
+    @if (ShowCity)
+    {
+        <div class="ac-form-group">
+            @if (!string.IsNullOrEmpty(CityLabel))
+            {
+                <label class="ac-label">
+                    @CityLabel
+                    @if (Required) { <span class="ac-required">*</span> }
+                </label>
+            }
+            <select class="ac-select @(IsLoading ? "ac-loading" : "")"
+                    value="@CityId"
+                    disabled="@(Disabled || RegionId == Guid.Empty || _loadingCities)"
+                    @onchange="OnCityChanged">
+                <option value="">@CityPlaceholder</option>
+                @if (_cities != null)
+                {
+                    @foreach (var city in _cities)
+                    {
+                        <option value="@city.Id">
+                            @(UseEnglish && !string.IsNullOrEmpty(city.NameEn) ? city.NameEn : city.Name)
+                            @if (city.IsCapital) { @(" *") }
+                        </option>
+                    }
+                }
+            </select>
+        </div>
+    }
+
+    @* Neighborhood *@
+    @if (ShowNeighborhood)
+    {
+        <div class="ac-form-group">
+            @if (!string.IsNullOrEmpty(NeighborhoodLabel))
+            {
+                <label class="ac-label">
+                    @NeighborhoodLabel
+                    @if (Required) { <span class="ac-required">*</span> }
+                </label>
+            }
+            <select class="ac-select @(IsLoading ? "ac-loading" : "")"
+                    value="@NeighborhoodId"
+                    disabled="@(Disabled || CityId == Guid.Empty || _loadingNeighborhoods)"
+                    @onchange="OnNeighborhoodChanged">
+                <option value="">@NeighborhoodPlaceholder</option>
+                @if (_neighborhoods != null)
+                {
+                    @foreach (var neighborhood in _neighborhoods)
+                    {
+                        <option value="@neighborhood.Id">
+                            @(UseEnglish && !string.IsNullOrEmpty(neighborhood.NameEn) ? neighborhood.NameEn : neighborhood.Name)
+                            @if (!string.IsNullOrEmpty(neighborhood.PostalCode)) { @($" ({neighborhood.PostalCode})") }
+                        </option>
+                    }
+                }
+            </select>
+        </div>
+    }
+</div>
+
+@code {
+    [Inject] private LocationsClient LocationsClient { get; set; } = default!;
+
+    // ══════════════════════════════════════════════════════════════════
+    // Parameters
+    // ══════════════════════════════════════════════════════════════════
+
+    [Parameter] public Guid CountryId { get; set; }
+    [Parameter] public EventCallback<Guid> CountryIdChanged { get; set; }
+
+    [Parameter] public Guid RegionId { get; set; }
+    [Parameter] public EventCallback<Guid> RegionIdChanged { get; set; }
+
+    [Parameter] public Guid CityId { get; set; }
+    [Parameter] public EventCallback<Guid> CityIdChanged { get; set; }
+
+    [Parameter] public Guid NeighborhoodId { get; set; }
+    [Parameter] public EventCallback<Guid> NeighborhoodIdChanged { get; set; }
+
+    // Display options
+    [Parameter] public bool ShowCountry { get; set; } = true;
+    [Parameter] public bool ShowRegion { get; set; } = true;
+    [Parameter] public bool ShowCity { get; set; } = true;
+    [Parameter] public bool ShowNeighborhood { get; set; } = true;
+
+    // Labels
+    [Parameter] public string CountryLabel { get; set; } = "الدولة";
+    [Parameter] public string RegionLabel { get; set; } = "المنطقة";
+    [Parameter] public string CityLabel { get; set; } = "المدينة";
+    [Parameter] public string NeighborhoodLabel { get; set; } = "الحي";
+
+    // Placeholders
+    [Parameter] public string CountryPlaceholder { get; set; } = "اختر الدولة...";
+    [Parameter] public string RegionPlaceholder { get; set; } = "اختر المنطقة...";
+    [Parameter] public string CityPlaceholder { get; set; } = "اختر المدينة...";
+    [Parameter] public string NeighborhoodPlaceholder { get; set; } = "اختر الحي...";
+
+    // Other options
+    [Parameter] public bool UseEnglish { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool Required { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? DefaultCountryCode { get; set; }
+
+    // Events
+    [Parameter] public EventCallback<LocationHierarchyDto> OnSelectionChanged { get; set; }
+
+    // ══════════════════════════════════════════════════════════════════
+    // State
+    // ══════════════════════════════════════════════════════════════════
+
+    private List<CountryDto>? _countries;
+    private List<RegionDto>? _regions;
+    private List<CityDto>? _cities;
+    private List<NeighborhoodDto>? _neighborhoods;
+
+    private bool _loadingCountries;
+    private bool _loadingRegions;
+    private bool _loadingCities;
+    private bool _loadingNeighborhoods;
+
+    private bool IsLoading => _loadingCountries || _loadingRegions || _loadingCities || _loadingNeighborhoods;
+
+    // ══════════════════════════════════════════════════════════════════
+    // Lifecycle
+    // ══════════════════════════════════════════════════════════════════
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCountriesAsync();
+
+        // Set default country if specified
+        if (!string.IsNullOrEmpty(DefaultCountryCode) && CountryId == Guid.Empty)
+        {
+            var defaultCountry = _countries?.FirstOrDefault(c =>
+                c.Code.Equals(DefaultCountryCode, StringComparison.OrdinalIgnoreCase));
+            if (defaultCountry != null)
+            {
+                CountryId = defaultCountry.Id;
+                await CountryIdChanged.InvokeAsync(CountryId);
+                await LoadRegionsAsync();
+            }
+        }
+        else if (CountryId != Guid.Empty)
+        {
+            await LoadRegionsAsync();
+            if (RegionId != Guid.Empty)
+            {
+                await LoadCitiesAsync();
+                if (CityId != Guid.Empty)
+                {
+                    await LoadNeighborhoodsAsync();
+                }
+            }
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // Data Loading
+    // ══════════════════════════════════════════════════════════════════
+
+    private async Task LoadCountriesAsync()
+    {
+        _loadingCountries = true;
+        StateHasChanged();
+
+        try
+        {
+            _countries = await LocationsClient.GetCountriesAsync();
+        }
+        finally
+        {
+            _loadingCountries = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadRegionsAsync()
+    {
+        if (CountryId == Guid.Empty)
+        {
+            _regions = null;
+            return;
+        }
+
+        _loadingRegions = true;
+        StateHasChanged();
+
+        try
+        {
+            _regions = await LocationsClient.GetRegionsByCountryAsync(CountryId);
+        }
+        finally
+        {
+            _loadingRegions = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadCitiesAsync()
+    {
+        if (RegionId == Guid.Empty)
+        {
+            _cities = null;
+            return;
+        }
+
+        _loadingCities = true;
+        StateHasChanged();
+
+        try
+        {
+            _cities = await LocationsClient.GetCitiesByRegionAsync(RegionId);
+        }
+        finally
+        {
+            _loadingCities = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadNeighborhoodsAsync()
+    {
+        if (CityId == Guid.Empty)
+        {
+            _neighborhoods = null;
+            return;
+        }
+
+        _loadingNeighborhoods = true;
+        StateHasChanged();
+
+        try
+        {
+            _neighborhoods = await LocationsClient.GetNeighborhoodsByCityAsync(CityId);
+        }
+        finally
+        {
+            _loadingNeighborhoods = false;
+            StateHasChanged();
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // Event Handlers
+    // ══════════════════════════════════════════════════════════════════
+
+    private async Task OnCountryChanged(ChangeEventArgs e)
+    {
+        CountryId = Guid.TryParse(e.Value?.ToString(), out var id) ? id : Guid.Empty;
+        await CountryIdChanged.InvokeAsync(CountryId);
+
+        // Reset dependent fields
+        RegionId = Guid.Empty;
+        CityId = Guid.Empty;
+        NeighborhoodId = Guid.Empty;
+        _regions = null;
+        _cities = null;
+        _neighborhoods = null;
+
+        await RegionIdChanged.InvokeAsync(RegionId);
+        await CityIdChanged.InvokeAsync(CityId);
+        await NeighborhoodIdChanged.InvokeAsync(NeighborhoodId);
+
+        if (CountryId != Guid.Empty)
+        {
+            await LoadRegionsAsync();
+        }
+
+        await NotifySelectionChanged();
+    }
+
+    private async Task OnRegionChanged(ChangeEventArgs e)
+    {
+        RegionId = Guid.TryParse(e.Value?.ToString(), out var id) ? id : Guid.Empty;
+        await RegionIdChanged.InvokeAsync(RegionId);
+
+        // Reset dependent fields
+        CityId = Guid.Empty;
+        NeighborhoodId = Guid.Empty;
+        _cities = null;
+        _neighborhoods = null;
+
+        await CityIdChanged.InvokeAsync(CityId);
+        await NeighborhoodIdChanged.InvokeAsync(NeighborhoodId);
+
+        if (RegionId != Guid.Empty)
+        {
+            await LoadCitiesAsync();
+        }
+
+        await NotifySelectionChanged();
+    }
+
+    private async Task OnCityChanged(ChangeEventArgs e)
+    {
+        CityId = Guid.TryParse(e.Value?.ToString(), out var id) ? id : Guid.Empty;
+        await CityIdChanged.InvokeAsync(CityId);
+
+        // Reset dependent fields
+        NeighborhoodId = Guid.Empty;
+        _neighborhoods = null;
+
+        await NeighborhoodIdChanged.InvokeAsync(NeighborhoodId);
+
+        if (CityId != Guid.Empty)
+        {
+            await LoadNeighborhoodsAsync();
+        }
+
+        await NotifySelectionChanged();
+    }
+
+    private async Task OnNeighborhoodChanged(ChangeEventArgs e)
+    {
+        NeighborhoodId = Guid.TryParse(e.Value?.ToString(), out var id) ? id : Guid.Empty;
+        await NeighborhoodIdChanged.InvokeAsync(NeighborhoodId);
+        await NotifySelectionChanged();
+    }
+
+    private async Task NotifySelectionChanged()
+    {
+        if (OnSelectionChanged.HasDelegate)
+        {
+            var hierarchy = new LocationHierarchyDto
+            {
+                Country = _countries?.FirstOrDefault(c => c.Id == CountryId),
+                Region = _regions?.FirstOrDefault(r => r.Id == RegionId),
+                City = _cities?.FirstOrDefault(c => c.Id == CityId),
+                Neighborhood = _neighborhoods?.FirstOrDefault(n => n.Id == NeighborhoodId)
+            };
+
+            await OnSelectionChanged.InvokeAsync(hierarchy);
+        }
+    }
+}
