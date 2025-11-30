@@ -1,0 +1,103 @@
+@inherits LayoutComponentBase
+@inject ThemeService ThemeService
+@inject IAppNavigationService Navigation
+@inject SpaceDataService DataService
+
+<div class="ashare-app @(ThemeService.IsDarkMode ? "ac-dark" : "")">
+    @* Navbar *@
+    @if (!IsAuthPage)
+    {
+        <nav class="ac-navbar ac-navbar-sticky">
+            <div class="ac-navbar-container">
+                <div class="ac-navbar-brand">
+                    <span class="ac-navbar-brand-text">عشير</span>
+                </div>
+
+                <div class="ac-navbar-actions">
+                    <button class="ac-navbar-action" @onclick="HandleSearchClick" title="البحث">
+                        <i class="bi bi-search"></i>
+                    </button>
+                    <button class="ac-navbar-action" @onclick="HandleNotificationsClick" title="الإشعارات">
+                        <i class="bi bi-bell"></i>
+                        @if (NotificationCount > 0)
+                        {
+                            <span class="ac-badge ac-badge-danger ac-badge-sm">@NotificationCount</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </nav>
+    }
+
+    @* Main Content *@
+    <main class="ac-main @(IsAuthPage ? "" : "ac-has-navbar ac-has-bottom-nav")">
+        @Body
+    </main>
+
+    @* Bottom Navigation *@
+    @if (!IsAuthPage)
+    {
+        <nav class="ac-bottom-nav">
+            <a href="/" class="ac-bottom-nav-item @(IsActive("/") ? "active" : "")">
+                <span class="ac-bottom-nav-icon"><i class="bi bi-house"></i></span>
+                <span class="ac-bottom-nav-label">الرئيسية</span>
+            </a>
+            <a href="/explore" class="ac-bottom-nav-item @(IsActive("/explore") ? "active" : "")">
+                <span class="ac-bottom-nav-icon"><i class="bi bi-compass"></i></span>
+                <span class="ac-bottom-nav-label">استكشف</span>
+            </a>
+            <a href="/bookings" class="ac-bottom-nav-item @(IsActive("/bookings") ? "active" : "")">
+                <span class="ac-bottom-nav-icon">
+                    <i class="bi bi-calendar-check"></i>
+                    @if (BookingsCount > 0)
+                    {
+                        <span class="ac-badge ac-badge-primary ac-badge-sm">@BookingsCount</span>
+                    }
+                </span>
+                <span class="ac-bottom-nav-label">حجوزاتي</span>
+            </a>
+            <a href="/favorites" class="ac-bottom-nav-item @(IsActive("/favorites") ? "active" : "")">
+                <span class="ac-bottom-nav-icon"><i class="bi bi-heart"></i></span>
+                <span class="ac-bottom-nav-label">المفضلة</span>
+            </a>
+            <a href="/profile" class="ac-bottom-nav-item @(IsActive("/profile") ? "active" : "")">
+                <span class="ac-bottom-nav-icon"><i class="bi bi-person"></i></span>
+                <span class="ac-bottom-nav-label">حسابي</span>
+            </a>
+        </nav>
+    }
+</div>
+
+@code {
+    [CascadingParameter]
+    private RouteData? RouteData { get; set; }
+
+    private int BookingsCount { get; set; }
+    private int NotificationCount { get; set; }
+
+    private bool IsAuthPage => RouteData?.PageType?.Name is "Login" or "Register";
+
+    protected override void OnInitialized()
+    {
+        BookingsCount = DataService.GetBookingsCount();
+        NotificationCount = DataService.GetNotificationsCount();
+    }
+
+    private bool IsActive(string path)
+    {
+        var currentPath = Navigation.CurrentUrl;
+        if (path == "/")
+            return currentPath.EndsWith("/") || currentPath.EndsWith("/index");
+        return currentPath.Contains(path);
+    }
+
+    private void HandleSearchClick()
+    {
+        Navigation.NavigateTo("/search");
+    }
+
+    private void HandleNotificationsClick()
+    {
+        Navigation.NavigateTo("/notifications");
+    }
+}

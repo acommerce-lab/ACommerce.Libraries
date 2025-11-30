@@ -1,0 +1,328 @@
+@page "/explore"
+@inject SpaceDataService DataService
+@inject IAppNavigationService Navigation
+
+<div class="ac-page ac-explore-page">
+    @* Filter Bar *@
+    <div class="ashare-filter-bar">
+        <div class="ashare-filter-chips">
+            <button class="ashare-filter-chip @(_selectedCategory == null ? "active" : "")"
+                    @onclick="() => FilterByCategory(null)">
+                الكل
+            </button>
+            @foreach (var category in _categories ?? [])
+            {
+                <button class="ashare-filter-chip @(_selectedCategory == category.Id ? "active" : "")"
+                        @onclick="() => FilterByCategory(category.Id)">
+                    <i class="bi @category.Icon"></i>
+                    @category.Name
+                </button>
+            }
+        </div>
+        <button class="ashare-filter-button" @onclick="ShowFilters">
+            <i class="bi bi-sliders"></i>
+        </button>
+    </div>
+
+    @* Sort Options *@
+    <div class="ashare-sort-bar">
+        <span class="ashare-results-count">@(_filteredSpaces?.Count ?? 0) نتيجة</span>
+        <select class="ashare-sort-select" @onchange="HandleSortChange">
+            <option value="newest">الأحدث</option>
+            <option value="price_low">السعر: الأقل</option>
+            <option value="price_high">السعر: الأعلى</option>
+            <option value="rating">التقييم</option>
+            <option value="capacity">السعة</option>
+        </select>
+    </div>
+
+    @* Spaces Grid *@
+    <div class="ashare-spaces-grid">
+        @if (_filteredSpaces?.Any() == true)
+        {
+            @foreach (var space in _filteredSpaces)
+            {
+                <div class="ashare-space-card ashare-space-card-grid" @onclick="() => HandleSpaceClick(space.Id)">
+                    <div class="ashare-space-image">
+                        @if (space.Images.Any())
+                        {
+                            <img src="@space.Images.First()" alt="@space.Name" loading="lazy" />
+                        }
+                        else
+                        {
+                            <div class="ashare-space-no-image">
+                                <i class="bi bi-building"></i>
+                            </div>
+                        }
+                        @if (space.IsFeatured)
+                        {
+                            <span class="ac-product-badge ac-product-badge-featured">مميز</span>
+                        }
+                        @if (space.IsNew)
+                        {
+                            <span class="ac-product-badge ac-product-badge-new">جديد</span>
+                        }
+                        <button class="ashare-favorite-btn" @onclick:stopPropagation="true" @onclick="() => ToggleFavorite(space.Id)">
+                            <i class="bi @(IsFavorite(space.Id) ? "bi-heart-fill" : "bi-heart")"></i>
+                        </button>
+                    </div>
+                    <div class="ashare-space-content">
+                        <span class="ashare-space-category">@space.CategoryName</span>
+                        <h3 class="ashare-space-name">@space.Name</h3>
+                        <div class="ashare-space-location">
+                            <i class="bi bi-geo-alt"></i>
+                            @space.Location
+                        </div>
+                        <div class="ashare-space-meta">
+                            <span class="ashare-space-capacity">
+                                <i class="bi bi-people"></i> @space.Capacity
+                            </span>
+                            <span class="ashare-space-rating">
+                                <i class="bi bi-star-fill"></i> @space.Rating
+                            </span>
+                        </div>
+                        <div class="ashare-space-price">@space.DisplayPrice</div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="ashare-empty-state">
+                <i class="bi bi-building"></i>
+                <h3>لا توجد مساحات</h3>
+                <p>جرب تغيير معايير البحث</p>
+            </div>
+        }
+    </div>
+</div>
+
+@* Filter Modal *@
+@if (_showFilters)
+{
+    <div class="ac-modal-overlay" @onclick="HideFilters">
+        <div class="ac-modal ashare-filter-modal" @onclick:stopPropagation="true">
+            <div class="ac-modal-header">
+                <h3>تصفية النتائج</h3>
+                <button class="ac-modal-close" @onclick="HideFilters">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="ac-modal-body">
+                @* Price Range *@
+                <div class="ashare-filter-section">
+                    <h4>نطاق السعر</h4>
+                    <div class="ashare-price-inputs">
+                        <input type="number" placeholder="من" @bind="_filterMinPrice" class="ac-input" />
+                        <span>-</span>
+                        <input type="number" placeholder="إلى" @bind="_filterMaxPrice" class="ac-input" />
+                    </div>
+                </div>
+
+                @* Capacity *@
+                <div class="ashare-filter-section">
+                    <h4>السعة</h4>
+                    <div class="ashare-capacity-options">
+                        <button class="ashare-capacity-btn @(_filterCapacity == 0 ? "active" : "")" @onclick="() => _filterCapacity = 0">الكل</button>
+                        <button class="ashare-capacity-btn @(_filterCapacity == 5 ? "active" : "")" @onclick="() => _filterCapacity = 5">1-5</button>
+                        <button class="ashare-capacity-btn @(_filterCapacity == 10 ? "active" : "")" @onclick="() => _filterCapacity = 10">6-10</button>
+                        <button class="ashare-capacity-btn @(_filterCapacity == 20 ? "active" : "")" @onclick="() => _filterCapacity = 20">11-20</button>
+                        <button class="ashare-capacity-btn @(_filterCapacity == 50 ? "active" : "")" @onclick="() => _filterCapacity = 50">20+</button>
+                    </div>
+                </div>
+
+                @* Amenities *@
+                <div class="ashare-filter-section">
+                    <h4>المرافق</h4>
+                    <div class="ashare-amenities-grid">
+                        @foreach (var amenity in _amenities)
+                        {
+                            <label class="ashare-amenity-check">
+                                <input type="checkbox" @bind="amenity.Selected" />
+                                <span>@amenity.Name</span>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                @* Rating *@
+                <div class="ashare-filter-section">
+                    <h4>الحد الأدنى للتقييم</h4>
+                    <div class="ashare-rating-options">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            var rating = i;
+                            <button class="ashare-rating-btn @(_filterMinRating == rating ? "active" : "")" @onclick="() => _filterMinRating = rating">
+                                @rating <i class="bi bi-star-fill"></i>
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="ac-modal-footer">
+                <button class="ac-btn ac-btn-secondary" @onclick="ResetFilters">إعادة تعيين</button>
+                <button class="ac-btn ac-btn-primary" @onclick="ApplyFilters">تطبيق</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? Category { get; set; }
+
+    [SupplyParameterFromQuery]
+    public bool? Featured { get; set; }
+
+    [SupplyParameterFromQuery]
+    public bool? New { get; set; }
+
+    private List<SpaceCategory>? _categories;
+    private List<SpaceItem>? _allSpaces;
+    private List<SpaceItem>? _filteredSpaces;
+    private HashSet<Guid> _favorites = new();
+    private Guid? _selectedCategory;
+    private bool _showFilters;
+    private string _sortBy = "newest";
+
+    // Filter values
+    private decimal? _filterMinPrice;
+    private decimal? _filterMaxPrice;
+    private int _filterCapacity;
+    private int _filterMinRating;
+
+    private List<AmenityFilter> _amenities = new()
+    {
+        new("واي فاي"),
+        new("موقف سيارات"),
+        new("مكيف"),
+        new("شاشة عرض"),
+        new("مطبخ"),
+        new("غرفة اجتماعات"),
+        new("طابعة"),
+        new("قهوة وشاي")
+    };
+
+    protected override void OnInitialized()
+    {
+        _categories = DataService.GetCategories();
+        _allSpaces = DataService.GetAllSpaces();
+        _favorites = DataService.GetFavorites();
+
+        if (Guid.TryParse(Category, out var categoryId))
+        {
+            _selectedCategory = categoryId;
+        }
+
+        ApplyFilters();
+    }
+
+    private void FilterByCategory(Guid? categoryId)
+    {
+        _selectedCategory = categoryId;
+        ApplyFilters();
+    }
+
+    private void HandleSortChange(ChangeEventArgs e)
+    {
+        _sortBy = e.Value?.ToString() ?? "newest";
+        ApplyFilters();
+    }
+
+    private void ShowFilters() => _showFilters = true;
+    private void HideFilters() => _showFilters = false;
+
+    private void ResetFilters()
+    {
+        _filterMinPrice = null;
+        _filterMaxPrice = null;
+        _filterCapacity = 0;
+        _filterMinRating = 0;
+        foreach (var a in _amenities) a.Selected = false;
+    }
+
+    private void ApplyFilters()
+    {
+        var query = _allSpaces?.AsEnumerable() ?? [];
+
+        // Category filter
+        if (_selectedCategory.HasValue)
+        {
+            query = query.Where(s => s.CategoryId == _selectedCategory.Value);
+        }
+
+        // Featured filter
+        if (Featured == true)
+        {
+            query = query.Where(s => s.IsFeatured);
+        }
+
+        // New filter
+        if (New == true)
+        {
+            query = query.Where(s => s.IsNew);
+        }
+
+        // Price filter
+        if (_filterMinPrice.HasValue)
+        {
+            query = query.Where(s => s.PricePerHour >= _filterMinPrice.Value);
+        }
+        if (_filterMaxPrice.HasValue)
+        {
+            query = query.Where(s => s.PricePerHour <= _filterMaxPrice.Value);
+        }
+
+        // Capacity filter
+        if (_filterCapacity > 0)
+        {
+            query = query.Where(s => s.Capacity >= _filterCapacity);
+        }
+
+        // Rating filter
+        if (_filterMinRating > 0)
+        {
+            query = query.Where(s => s.Rating >= _filterMinRating);
+        }
+
+        // Amenities filter
+        var selectedAmenities = _amenities.Where(a => a.Selected).Select(a => a.Name).ToList();
+        if (selectedAmenities.Any())
+        {
+            query = query.Where(s => selectedAmenities.All(a => s.Amenities.Contains(a)));
+        }
+
+        // Sort
+        query = _sortBy switch
+        {
+            "price_low" => query.OrderBy(s => s.PricePerHour),
+            "price_high" => query.OrderByDescending(s => s.PricePerHour),
+            "rating" => query.OrderByDescending(s => s.Rating),
+            "capacity" => query.OrderByDescending(s => s.Capacity),
+            _ => query.OrderByDescending(s => s.CreatedAt)
+        };
+
+        _filteredSpaces = query.ToList();
+        _showFilters = false;
+    }
+
+    private void HandleSpaceClick(Guid spaceId)
+    {
+        Navigation.NavigateTo($"/space/{spaceId}");
+    }
+
+    private bool IsFavorite(Guid spaceId) => _favorites.Contains(spaceId);
+
+    private void ToggleFavorite(Guid spaceId)
+    {
+        DataService.ToggleFavorite(spaceId);
+        _favorites = DataService.GetFavorites();
+    }
+
+    private class AmenityFilter
+    {
+        public string Name { get; }
+        public bool Selected { get; set; }
+        public AmenityFilter(string name) => Name = name;
+    }
+}

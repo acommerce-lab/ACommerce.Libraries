@@ -1,0 +1,223 @@
+@page "/profile"
+@inject SpaceDataService DataService
+@inject IAppNavigationService Navigation
+@inject ThemeService ThemeService
+
+<div class="ac-page ashare-profile-page">
+    @* Profile Header *@
+    <div class="ashare-profile-header">
+        <div class="ashare-profile-avatar">
+            <i class="bi bi-person-circle"></i>
+            <button class="ashare-edit-avatar">
+                <i class="bi bi-camera"></i>
+            </button>
+        </div>
+        <h1 class="ashare-profile-name">@_userName</h1>
+        <p class="ashare-profile-email">@_userEmail</p>
+        <div class="ashare-profile-stats">
+            <div class="ashare-stat-item">
+                <span class="ashare-stat-value">@_bookingsCount</span>
+                <span class="ashare-stat-label">حجز</span>
+            </div>
+            <div class="ashare-stat-item">
+                <span class="ashare-stat-value">@_favoritesCount</span>
+                <span class="ashare-stat-label">مفضلة</span>
+            </div>
+            <div class="ashare-stat-item">
+                <span class="ashare-stat-value">@_reviewsCount</span>
+                <span class="ashare-stat-label">تقييم</span>
+            </div>
+        </div>
+    </div>
+
+    @* Menu Sections *@
+    <div class="ashare-profile-menu">
+        @* Account Section *@
+        <div class="ashare-menu-section">
+            <h3 class="ashare-menu-title">الحساب</h3>
+            <div class="ashare-menu-items">
+                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/profile/edit\")">
+                    <div class="ashare-menu-icon">
+                        <i class="bi bi-person"></i>
+                    </div>
+                    <div class="ashare-menu-content">
+                        <span class="ashare-menu-label">تعديل الملف الشخصي</span>
+                    </div>
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/notifications\")">
+                    <div class="ashare-menu-icon">
+                        <i class="bi bi-bell"></i>
+                    </div>
+                    <div class="ashare-menu-content">
+                        <span class="ashare-menu-label">الإشعارات</span>
+                        @if (_notificationsCount > 0)
+                        {
+                            <span class="ashare-menu-badge">@_notificationsCount</span>
+                        }
+                    </div>
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/addresses\")">
+                    <div class="ashare-menu-icon">
+                        <i class="bi bi-geo-alt"></i>
+                    </div>
+                    <div class="ashare-menu-content">
+                        <span class="ashare-menu-label">عناويني</span>
+                    </div>
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/payments\")">
+                    <div class="ashare-menu-icon">
+                        <i class="bi bi-credit-card"></i>
+                    </div>
+                    <div class="ashare-menu-content">
+                        <span class="ashare-menu-label">طرق الدفع</span>
+                    </div>
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+            </div>
+        </div>
+
+        @* Settings Section *@
+        <div class="ashare-menu-section">
+            <h3 class="ashare-menu-title">الإعدادات</h3>
+            <div class="ashare-menu-items">
+                <div class="ashare-menu-item">
+                    <div class="ashare-menu-icon">
+                        <i class="bi bi-moon"></i>
+                    </div>
+                    <div class="ashare-menu-content">
+                        <span class="ashare-menu-label">الوضع الداكن</span>
+                    </div>
+                    <label class="ashare-toggle">
+                        <input type="checkbox" @bind="ThemeService.IsDarkMode" />
+                        <span class="ashare-toggle-slider"></span>
+                    </label>
+                </div>
+                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/language\")">
+                    <div class="ashare-menu-icon">
+                        <i class="bi bi-globe"></i>
+                    </div>
+                    <div class="ashare-menu-content">
+                        <span class="ashare-menu-label">اللغة</span>
+                        <span class="ashare-menu-value">العربية</span>
+                    </div>
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/privacy\")">
+                    <div class="ashare-menu-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div class="ashare-menu-content">
+                        <span class="ashare-menu-label">الخصوصية والأمان</span>
+                    </div>
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+            </div>
+        </div>
+
+        @* Host Section *@
+        <div class="ashare-menu-section">
+            <h3 class="ashare-menu-title">المضيف</h3>
+            <div class="ashare-menu-items">
+                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/host/spaces\")">
+                    <div class="ashare-menu-icon">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <div class="ashare-menu-content">
+                        <span class="ashare-menu-label">مساحاتي</span>
+                    </div>
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/host/add\")">
+                    <div class="ashare-menu-icon">
+                        <i class="bi bi-plus-circle"></i>
+                    </div>
+                    <div class="ashare-menu-content">
+                        <span class="ashare-menu-label">أضف مساحة جديدة</span>
+                    </div>
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/host/earnings\")">
+                    <div class="ashare-menu-icon">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <div class="ashare-menu-content">
+                        <span class="ashare-menu-label">أرباحي</span>
+                    </div>
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+            </div>
+        </div>
+
+        @* Support Section *@
+        <div class="ashare-menu-section">
+            <h3 class="ashare-menu-title">المساعدة</h3>
+            <div class="ashare-menu-items">
+                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/help\")">
+                    <div class="ashare-menu-icon">
+                        <i class="bi bi-question-circle"></i>
+                    </div>
+                    <div class="ashare-menu-content">
+                        <span class="ashare-menu-label">مركز المساعدة</span>
+                    </div>
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/support\")">
+                    <div class="ashare-menu-icon">
+                        <i class="bi bi-headset"></i>
+                    </div>
+                    <div class="ashare-menu-content">
+                        <span class="ashare-menu-label">تواصل معنا</span>
+                    </div>
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/about\")">
+                    <div class="ashare-menu-icon">
+                        <i class="bi bi-info-circle"></i>
+                    </div>
+                    <div class="ashare-menu-content">
+                        <span class="ashare-menu-label">عن عشير</span>
+                    </div>
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+            </div>
+        </div>
+
+        @* Logout *@
+        <div class="ashare-logout-section">
+            <button class="ashare-logout-btn" @onclick="Logout">
+                <i class="bi bi-box-arrow-right"></i>
+                تسجيل الخروج
+            </button>
+        </div>
+
+        @* App Version *@
+        <div class="ashare-app-version">
+            <span>عشير v1.0.0</span>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _userName = "أحمد محمد";
+    private string _userEmail = "ahmed@example.com";
+    private int _bookingsCount;
+    private int _favoritesCount;
+    private int _reviewsCount;
+    private int _notificationsCount;
+
+    protected override void OnInitialized()
+    {
+        _bookingsCount = DataService.GetBookingsCount();
+        _favoritesCount = DataService.GetFavorites().Count;
+        _reviewsCount = 5; // Mock
+        _notificationsCount = DataService.GetNotificationsCount();
+    }
+
+    private void Logout()
+    {
+        Navigation.NavigateTo("/login");
+    }
+}

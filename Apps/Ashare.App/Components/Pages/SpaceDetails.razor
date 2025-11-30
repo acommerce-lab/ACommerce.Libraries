@@ -1,0 +1,374 @@
+@page "/space/{SpaceId:guid}"
+@inject SpaceDataService DataService
+@inject IAppNavigationService Navigation
+
+<div class="ac-page ashare-space-details">
+    @if (_space != null)
+    {
+        @* Image Gallery *@
+        <div class="ashare-gallery">
+            <div class="ashare-gallery-main">
+                @if (_space.Images.Any())
+                {
+                    <img src="@_space.Images[_currentImageIndex]" alt="@_space.Name" />
+                }
+                else
+                {
+                    <div class="ashare-space-no-image large">
+                        <i class="bi bi-building"></i>
+                    </div>
+                }
+                <button class="ashare-back-btn" @onclick="GoBack">
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+                <button class="ashare-favorite-btn large" @onclick="ToggleFavorite">
+                    <i class="bi @(_isFavorite ? "bi-heart-fill" : "bi-heart")"></i>
+                </button>
+                <button class="ashare-share-btn" @onclick="ShareSpace">
+                    <i class="bi bi-share"></i>
+                </button>
+            </div>
+            @if (_space.Images.Count > 1)
+            {
+                <div class="ashare-gallery-thumbnails">
+                    @for (int i = 0; i < _space.Images.Count; i++)
+                    {
+                        var index = i;
+                        <button class="ashare-thumbnail @(index == _currentImageIndex ? "active" : "")"
+                                @onclick="() => _currentImageIndex = index">
+                            <img src="@_space.Images[index]" alt="" />
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+
+        @* Space Info *@
+        <div class="ashare-space-info">
+            <div class="ashare-space-header">
+                <span class="ashare-space-category">@_space.CategoryName</span>
+                <div class="ashare-space-rating-large">
+                    <i class="bi bi-star-fill"></i>
+                    <span>@_space.Rating</span>
+                    <span class="ashare-reviews-count">(@_space.ReviewsCount تقييم)</span>
+                </div>
+            </div>
+
+            <h1 class="ashare-space-title">@_space.Name</h1>
+
+            <div class="ashare-space-location-large">
+                <i class="bi bi-geo-alt"></i>
+                <span>@_space.Location، @_space.City</span>
+                <a href="#map" class="ashare-map-link">عرض الخريطة</a>
+            </div>
+
+            <div class="ashare-space-stats">
+                <div class="ashare-stat">
+                    <i class="bi bi-people"></i>
+                    <span>السعة: @_space.Capacity شخص</span>
+                </div>
+                <div class="ashare-stat">
+                    <i class="bi bi-rulers"></i>
+                    <span>المساحة: @_space.Area م²</span>
+                </div>
+            </div>
+
+            @* Description *@
+            <div class="ashare-section">
+                <h2 class="ashare-section-title">الوصف</h2>
+                <p class="ashare-description">@_space.Description</p>
+            </div>
+
+            @* Amenities *@
+            <div class="ashare-section">
+                <h2 class="ashare-section-title">المرافق والخدمات</h2>
+                <div class="ashare-amenities-list">
+                    @foreach (var amenity in _space.Amenities)
+                    {
+                        <div class="ashare-amenity-item">
+                            <i class="bi @GetAmenityIcon(amenity)"></i>
+                            <span>@amenity</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @* Pricing *@
+            <div class="ashare-section">
+                <h2 class="ashare-section-title">الأسعار</h2>
+                <div class="ashare-pricing-cards">
+                    <div class="ashare-pricing-card">
+                        <span class="ashare-pricing-period">بالساعة</span>
+                        <span class="ashare-pricing-amount">@_space.PricePerHour ر.س</span>
+                    </div>
+                    <div class="ashare-pricing-card">
+                        <span class="ashare-pricing-period">باليوم</span>
+                        <span class="ashare-pricing-amount">@_space.PricePerDay ر.س</span>
+                    </div>
+                    <div class="ashare-pricing-card featured">
+                        <span class="ashare-pricing-period">بالشهر</span>
+                        <span class="ashare-pricing-amount">@_space.PricePerMonth ر.س</span>
+                    </div>
+                </div>
+            </div>
+
+            @* Rules *@
+            @if (_space.Rules?.Any() == true)
+            {
+                <div class="ashare-section">
+                    <h2 class="ashare-section-title">القواعد والشروط</h2>
+                    <ul class="ashare-rules-list">
+                        @foreach (var rule in _space.Rules)
+                        {
+                            <li><i class="bi bi-check-circle"></i> @rule</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @* Owner Info *@
+            <div class="ashare-section ashare-owner-section">
+                <h2 class="ashare-section-title">مالك المساحة</h2>
+                <div class="ashare-owner-card">
+                    <div class="ashare-owner-avatar">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <div class="ashare-owner-info">
+                        <h3>@_space.OwnerName</h3>
+                        <span>عضو منذ @_space.OwnerJoinDate.ToString("yyyy")</span>
+                    </div>
+                    <button class="ac-btn ac-btn-secondary" @onclick="ContactOwner">
+                        <i class="bi bi-chat"></i>
+                        تواصل
+                    </button>
+                </div>
+            </div>
+
+            @* Reviews *@
+            <div class="ashare-section" id="reviews">
+                <div class="ashare-section-header">
+                    <h2 class="ashare-section-title">التقييمات</h2>
+                    <a href="/space/@SpaceId/reviews" class="ashare-view-all">عرض الكل</a>
+                </div>
+                @if (_reviews?.Any() == true)
+                {
+                    @foreach (var review in _reviews.Take(3))
+                    {
+                        <div class="ashare-review-card">
+                            <div class="ashare-review-header">
+                                <div class="ashare-review-avatar">
+                                    <i class="bi bi-person-circle"></i>
+                                </div>
+                                <div class="ashare-review-info">
+                                    <h4>@review.UserName</h4>
+                                    <span>@review.Date.ToString("yyyy/MM/dd")</span>
+                                </div>
+                                <div class="ashare-review-rating">
+                                    @for (int i = 0; i < 5; i++)
+                                    {
+                                        <i class="bi @(i < review.Rating ? "bi-star-fill" : "bi-star")"></i>
+                                    }
+                                </div>
+                            </div>
+                            <p class="ashare-review-text">@review.Comment</p>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="ashare-no-reviews">لا توجد تقييمات بعد</p>
+                }
+            </div>
+        </div>
+
+        @* Booking Bar *@
+        <div class="ashare-booking-bar">
+            <div class="ashare-booking-price">
+                <span class="ashare-booking-amount">@_space.PricePerHour ر.س</span>
+                <span class="ashare-booking-period">/ الساعة</span>
+            </div>
+            <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="StartBooking">
+                احجز الآن
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="ashare-loading">
+            <div class="ac-spinner"></div>
+            <span>جاري التحميل...</span>
+        </div>
+    }
+</div>
+
+@* Booking Modal *@
+@if (_showBookingModal)
+{
+    <div class="ac-modal-overlay" @onclick="CloseBookingModal">
+        <div class="ac-modal ashare-booking-modal" @onclick:stopPropagation="true">
+            <div class="ac-modal-header">
+                <h3>احجز المساحة</h3>
+                <button class="ac-modal-close" @onclick="CloseBookingModal">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="ac-modal-body">
+                <div class="ashare-booking-form">
+                    <div class="ac-form-group">
+                        <label>نوع الحجز</label>
+                        <select class="ac-input" @bind="_bookingType">
+                            <option value="hourly">بالساعة</option>
+                            <option value="daily">باليوم</option>
+                            <option value="monthly">بالشهر</option>
+                        </select>
+                    </div>
+
+                    <div class="ac-form-group">
+                        <label>التاريخ</label>
+                        <input type="date" class="ac-input" @bind="_bookingDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    </div>
+
+                    @if (_bookingType == "hourly")
+                    {
+                        <div class="ac-form-row">
+                            <div class="ac-form-group">
+                                <label>من الساعة</label>
+                                <input type="time" class="ac-input" @bind="_bookingStartTime" />
+                            </div>
+                            <div class="ac-form-group">
+                                <label>إلى الساعة</label>
+                                <input type="time" class="ac-input" @bind="_bookingEndTime" />
+                            </div>
+                        </div>
+                    }
+
+                    <div class="ac-form-group">
+                        <label>عدد الأشخاص</label>
+                        <input type="number" class="ac-input" @bind="_bookingGuests" min="1" max="@_space?.Capacity" />
+                    </div>
+
+                    <div class="ac-form-group">
+                        <label>ملاحظات (اختياري)</label>
+                        <textarea class="ac-input" rows="3" @bind="_bookingNotes" placeholder="أي متطلبات خاصة..."></textarea>
+                    </div>
+
+                    <div class="ashare-booking-summary">
+                        <div class="ashare-summary-row">
+                            <span>المجموع</span>
+                            <span class="ashare-summary-total">@CalculateTotal() ر.س</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ac-modal-footer">
+                <button class="ac-btn ac-btn-secondary" @onclick="CloseBookingModal">إلغاء</button>
+                <button class="ac-btn ac-btn-primary" @onclick="ConfirmBooking">تأكيد الحجز</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid SpaceId { get; set; }
+
+    private SpaceItem? _space;
+    private List<SpaceReview>? _reviews;
+    private bool _isFavorite;
+    private int _currentImageIndex;
+
+    // Booking
+    private bool _showBookingModal;
+    private string _bookingType = "hourly";
+    private DateTime _bookingDate = DateTime.Today;
+    private TimeSpan _bookingStartTime = new(9, 0, 0);
+    private TimeSpan _bookingEndTime = new(12, 0, 0);
+    private int _bookingGuests = 1;
+    private string? _bookingNotes;
+
+    protected override void OnInitialized()
+    {
+        _space = DataService.GetSpaceById(SpaceId);
+        _reviews = DataService.GetSpaceReviews(SpaceId);
+        _isFavorite = DataService.GetFavorites().Contains(SpaceId);
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateBack();
+    }
+
+    private void ToggleFavorite()
+    {
+        DataService.ToggleFavorite(SpaceId);
+        _isFavorite = !_isFavorite;
+    }
+
+    private void ShareSpace()
+    {
+        // Platform share functionality
+    }
+
+    private void ContactOwner()
+    {
+        Navigation.NavigateTo($"/chat/{_space?.OwnerId}");
+    }
+
+    private void StartBooking()
+    {
+        _showBookingModal = true;
+    }
+
+    private void CloseBookingModal()
+    {
+        _showBookingModal = false;
+    }
+
+    private decimal CalculateTotal()
+    {
+        if (_space == null) return 0;
+
+        return _bookingType switch
+        {
+            "hourly" => _space.PricePerHour * (decimal)(_bookingEndTime - _bookingStartTime).TotalHours,
+            "daily" => _space.PricePerDay,
+            "monthly" => _space.PricePerMonth,
+            _ => 0
+        };
+    }
+
+    private void ConfirmBooking()
+    {
+        DataService.CreateBooking(new BookingItem
+        {
+            SpaceId = SpaceId,
+            SpaceName = _space?.Name ?? "",
+            SpaceImage = _space?.Images.FirstOrDefault() ?? "",
+            Date = _bookingDate,
+            StartTime = _bookingStartTime,
+            EndTime = _bookingEndTime,
+            GuestsCount = _bookingGuests,
+            TotalPrice = CalculateTotal(),
+            Status = BookingStatus.Pending,
+            Notes = _bookingNotes
+        });
+
+        _showBookingModal = false;
+        Navigation.NavigateTo("/bookings?new=true");
+    }
+
+    private string GetAmenityIcon(string amenity) => amenity switch
+    {
+        "واي فاي" => "bi-wifi",
+        "موقف سيارات" => "bi-p-square",
+        "مكيف" => "bi-snow",
+        "شاشة عرض" => "bi-display",
+        "مطبخ" => "bi-cup-hot",
+        "غرفة اجتماعات" => "bi-people",
+        "طابعة" => "bi-printer",
+        "قهوة وشاي" => "bi-cup",
+        "إنترنت سريع" => "bi-router",
+        "حماية أمنية" => "bi-shield-check",
+        _ => "bi-check"
+    };
+}
