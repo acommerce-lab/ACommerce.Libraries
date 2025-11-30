@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.SharedKernel.Abstractions.Entities;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Localization.Entities;
 

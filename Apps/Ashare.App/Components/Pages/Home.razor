@@ -23,7 +23,7 @@
             <h2 class="ac-section-title">الفئات</h2>
         </div>
         <div class="ac-categories-scroll">
-            @foreach (var category in _categories)
+            @foreach (var category in _categories ?? [])
             {
                 <div class="ashare-category-item" @onclick="() => HandleCategoryClick(category.Id)">
                     <div class="ashare-category-icon" style="background-color: @(category.Color)20; color: @category.Color">
