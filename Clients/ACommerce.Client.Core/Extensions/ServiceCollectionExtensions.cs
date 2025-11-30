@@ -11,97 +11,106 @@ namespace ACommerce.Client.Core.Extensions;
 /// </summary>
 public static class ServiceCollectionExtensions
 {
-	/// <summary>
-	/// إضافة ACommerce Client Core مع Service Registry (للخدمات الموزعة)
-	/// </summary>
-	public static IServiceCollection AddACommerceClient(
-		this IServiceCollection services,
-		string registryUrl,
-		Action<ClientOptions>? configureOptions = null)
-	{
-		// Options
-		var options = new ClientOptions();
-		configureOptions?.Invoke(options);
+    /// <summary>
+    /// إضافة ACommerce Client Core مع Service Registry (للخدمات الموزعة)
+    /// </summary>
+    public static IServiceCollection AddACommerceClient(
+        this IServiceCollection services,
+        string registryUrl,
+        Action<ClientOptions>? configureOptions = null)
+    {
+        // إعدادات الخيارات
+        var options = new ClientOptions();
+        configureOptions?.Invoke(options);
 
-		// ✨ Service Registry Client (مع Cache تلقائي)
-		services.AddServiceRegistryClient(registryUrl);
+        // ✨ Service Registry Client
+        services.AddServiceRegistryClient(registryUrl);
 
-		// Localization Provider
-		if (options.LocalizationProvider != null)
-		{
-			services.AddSingleton(options.LocalizationProvider);
-		}
-		else if (options.EnableLocalization)
-		{
-			services.AddSingleton<ILocalizationProvider, DefaultLocalizationProvider>();
-		}
+        // تسجيل LocalizationProvider
+        if (options.LocalizationProvider != null)
+        {
+            services.AddSingleton(options.LocalizationProvider);
+        }
+        else if (options.EnableLocalization)
+        {
+            services.AddSingleton<ILocalizationProvider, DefaultLocalizationProvider>();
+        }
 
-		// HttpClient مع Interceptors
-		var httpClientBuilder = services.AddHttpClient<DynamicHttpClient>()
-			.ConfigureHttpClient(client =>
-			{
-				client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
-			});
+        // تسجيل Interceptors
+        if (options.EnableLocalization)
+        {
+            services.AddTransient<LocalizationInterceptor>();
+        }
+        if (options.EnableAuthentication && options.TokenProvider != null)
+        {
+            services.AddScoped<ITokenProvider>(options.TokenProvider);
+            services.AddTransient<AuthenticationInterceptor>();
+        }
+        if (options.EnableRetry)
+        {
+            services.AddTransient<RetryInterceptor>();
+        }
 
-		// Localization Interceptor
-		if (options.EnableLocalization)
-		{
-			httpClientBuilder.AddHttpMessageHandler<LocalizationInterceptor>();
-		}
+        // HttpClient مع Interceptors
+        var httpClientBuilder = services.AddHttpClient<DynamicHttpClient>()
+            .ConfigureHttpClient(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
+            });
 
-		// Authentication Interceptor
-		if (options.EnableAuthentication && options.TokenProvider != null)
-		{
-			services.AddScoped<ITokenProvider>(options.TokenProvider);
-			httpClientBuilder.AddHttpMessageHandler<AuthenticationInterceptor>();
-		}
+        // إضافة Interceptors إلى HttpClient
+        if (options.EnableLocalization)
+            httpClientBuilder.AddHttpMessageHandler<LocalizationInterceptor>();
 
-		// Retry Interceptor
-		if (options.EnableRetry)
-		{
-			httpClientBuilder.AddHttpMessageHandler(sp =>
-				new RetryInterceptor(
-					sp.GetRequiredService<ILogger<RetryInterceptor>>(),
-					options.MaxRetries));
-		}
+        if (options.EnableAuthentication && options.TokenProvider != null)
+            httpClientBuilder.AddHttpMessageHandler<AuthenticationInterceptor>();
 
-		// Register IApiClient as DynamicHttpClient
-		services.AddScoped<IApiClient>(sp => sp.GetRequiredService<DynamicHttpClient>());
+        if (options.EnableRetry)
+        {
+            httpClientBuilder.AddHttpMessageHandler(sp =>
+            {
+                var logger = sp.GetRequiredService<ILogger<RetryInterceptor>>();
+                return new RetryInterceptor(logger, options.MaxRetries);
+            });
+        }
 
-		return services;
-	}
+        // تسجيل IApiClient
+        services.AddScoped<IApiClient>(sp => sp.GetRequiredService<DynamicHttpClient>());
 
-	/// <summary>
-	/// إضافة ACommerce Client Core مع Static URL (للتطبيقات المستقلة مثل MAUI و Blazor WASM)
-	/// </summary>
-	public static IServiceCollection AddACommerceStaticClient(
-		this IServiceCollection services,
-		string baseUrl,
-		Action<StaticClientOptions>? configureOptions = null)
-	{
-		// Options
-		var options = new StaticClientOptions();
-		configureOptions?.Invoke(options);
+        return services;
+    }
 
-		// HttpClient
-		services.AddHttpClient("ACommerceApi", client =>
-		{
-			client.BaseAddress = new Uri(baseUrl);
-			client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
-		});
+    /// <summary>
+    /// إضافة ACommerce Client Core مع Static URL (للتطبيقات المستقلة مثل MAUI و Blazor WASM)
+    /// </summary>
+    public static IServiceCollection AddACommerceStaticClient(
+        this IServiceCollection services,
+        string baseUrl,
+        Action<StaticClientOptions>? configureOptions = null)
+    {
+        var options = new StaticClientOptions();
+        configureOptions?.Invoke(options);
 
-		// StaticHttpClient كـ IApiClient
-		services.AddScoped<IApiClient>(sp =>
-		{
-			var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
-			var httpClient = httpClientFactory.CreateClient("ACommerceApi");
-			var logger = sp.GetService<ILogger<StaticHttpClient>>();
-			return new StaticHttpClient(httpClient, baseUrl, logger);
-		});
+        // HttpClient باسم ثابت
+        services.AddHttpClient("ACommerceApi", client =>
+        {
+            client.BaseAddress = new Uri(baseUrl);
+            client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
+        });
 
-		return services;
-	}
+        // تسجيل StaticHttpClient كـ IApiClient
+        services.AddScoped<IApiClient>(sp =>
+        {
+            var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
+            var httpClient = httpClientFactory.CreateClient("ACommerceApi");
+            var logger = sp.GetService<ILogger<StaticHttpClient>>();
+            return new StaticHttpClient(httpClient, baseUrl, logger);
+        });
+
+        return services;
+    }
 }
+
 
 /// <summary>
 /// خيارات ACommerce Client

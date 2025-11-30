@@ -172,6 +172,45 @@ public static class MauiProgram
         // Space Data Service (mock data for development)
         builder.Services.AddSingleton<SpaceDataService>();
 
+        // ═══════════════════════════════════════════════════════════════════
+        // Ashare API Service (ربط التطبيق بالباك اند)
+        // ═══════════════════════════════════════════════════════════════════
+        builder.Services.AddScoped<AshareApiService>();
+
+        // ⬅️ إذا لم تُسجَّل بعد:
+        builder.Services.AddScoped<CategoriesClient>();          // من ACommerce SDK
+        builder.Services.AddScoped<ProductsClient>();            // من ACommerce SDK
+        builder.Services.AddScoped<ProductListingsClient>();     // من ACommerce SDK
+        builder.Services.AddScoped<OrdersClient>();              // من ACommerce SDK
+
+        // HttpClient Factory باسم "AshareApi" كما يستخدم AshareApiService
+        if (DeviceInfo.Platform == DevicePlatform.Android)
+        {
+            // Android Emulator لا يصل إلى localhost مباشرة
+            builder.Services.AddHttpClient("AshareApi", client =>
+            {
+                client.BaseAddress = new Uri("https://10.0.2.2:5001");
+            });
+        }
+        else if (DeviceInfo.Platform == DevicePlatform.WinUI)
+        {
+            // Windows يمكنه الوصول مباشرة
+            builder.Services.AddHttpClient("AshareApi", client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:5001");
+            });
+        }
+        else
+        {
+            // Production أو أي منصة أخرى
+            builder.Services.AddHttpClient("AshareApi", client =>
+            {
+                client.BaseAddress = new Uri("https://api.ashare.app");
+            });
+        }
+
+
+
         return builder.Build();
     }
 }
