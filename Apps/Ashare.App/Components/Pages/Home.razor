@@ -1,5 +1,5 @@
 @page "/"
-@inject SpaceDataService DataService
+@inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
 
 <div class="ac-page ac-home-page">
@@ -23,14 +23,21 @@
             <h2 class="ac-section-title">الفئات</h2>
         </div>
         <div class="ac-categories-scroll">
-            @foreach (var category in _categories ?? [])
+            @if (_isLoading)
             {
-                <div class="ashare-category-item" @onclick="() => HandleCategoryClick(category.Id)">
-                    <div class="ashare-category-icon" style="background-color: @(category.Color)20; color: @category.Color">
-                        <i class="bi @category.Icon"></i>
+                <div class="ac-spinner"></div>
+            }
+            else
+            {
+                @foreach (var category in _categories ?? [])
+                {
+                    <div class="ashare-category-item" @onclick="() => HandleCategoryClick(category.Id)">
+                        <div class="ashare-category-icon" style="background-color: @(category.Color)20; color: @category.Color">
+                            <i class="bi @category.Icon"></i>
+                        </div>
+                        <span class="ac-category-name">@category.Name</span>
                     </div>
-                    <span class="ac-category-name">@category.Name</span>
-                </div>
+                }
             }
         </div>
     </section>
@@ -145,12 +152,37 @@
     private List<SpaceCategory>? _categories;
     private List<SpaceItem>? _featuredSpaces;
     private List<SpaceItem>? _newSpaces;
+    private bool _isLoading = true;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        _categories = DataService.GetCategories();
-        _featuredSpaces = DataService.GetFeaturedSpaces();
-        _newSpaces = DataService.GetNewSpaces();
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            // Load all data in parallel
+            var categoriesTask = ApiService.GetCategoriesAsync();
+            var featuredTask = ApiService.GetFeaturedSpacesAsync();
+            var newTask = ApiService.GetNewSpacesAsync();
+
+            await Task.WhenAll(categoriesTask, featuredTask, newTask);
+
+            _categories = await categoriesTask;
+            _featuredSpaces = await featuredTask;
+            _newSpaces = await newTask;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading home data: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
     }
 
     private void HandleCategoryClick(Guid categoryId)

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Ashare Logo - عشير - Visual Identity 2025 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 180" fill="none">
+  <!-- House Roof - Left (Deep Olive Green) -->
+  <path d="M40 75 L70 40 L100 75" stroke="#345454" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- House Roof - Right (Soft Orange) -->
+  <path d="M100 75 L130 40 L160 75" stroke="#F4844C" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Roof Peak Connection -->
+  <path d="M100 75 L100 45" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Left Person (Deep Olive Green) -->
+  <g fill="#345454">
+    <!-- Head -->
+    <circle cx="70" cy="55" r="12"/>
+    <!-- Body/Arch -->
+    <path d="M50 105 Q70 70 90 105" stroke="#345454" stroke-width="8" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Right Person (Soft Orange/White) -->
+  <g fill="#FFFFFF">
+    <!-- Head -->
+    <circle cx="130" cy="55" r="12"/>
+    <!-- Body/Arch -->
+    <path d="M110 105 Q130 70 150 105" stroke="#FFFFFF" stroke-width="8" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Three Dots (Connection Symbol) -->
+  <g fill="#F4844C">
+    <circle cx="85" cy="115" r="5"/>
+    <circle cx="100" cy="115" r="5"/>
+    <circle cx="115" cy="115" r="5"/>
+  </g>
+
+  <!-- Text: ASHARE -->
+  <text x="100" y="150" text-anchor="middle" font-family="Arial Rounded MT Bold, Rubik, sans-serif" font-size="28" font-weight="700" fill="#345454">
+    <tspan fill="#345454">A</tspan><tspan fill="#F4844C">S</tspan><tspan fill="#345454">HARE</tspan>
+  </text>
+
+  <!-- Tagline -->
+  <text x="100" y="170" text-anchor="middle" font-family="Rubik, sans-serif" font-size="8" fill="#345454" letter-spacing="1">
+    THE FIRST SHARED HOUSING APP IN SAUDI ARABIA
+  </text>
+</svg>

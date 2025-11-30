@@ -1,5 +1,5 @@
 @page "/space/{SpaceId:guid}"
-@inject SpaceDataService DataService
+@inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
 
 <div class="ac-page ashare-space-details">
@@ -276,6 +276,7 @@
     private List<SpaceReview>? _reviews;
     private bool _isFavorite;
     private int _currentImageIndex;
+    private bool _isLoading = true;
 
     // Booking
     private bool _showBookingModal;
@@ -286,11 +287,33 @@
     private int _bookingGuests = 1;
     private string? _bookingNotes;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        _space = DataService.GetSpaceById(SpaceId);
-        _reviews = DataService.GetSpaceReviews(SpaceId);
-        _isFavorite = DataService.GetFavorites().Contains(SpaceId);
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            var spaceTask = ApiService.GetSpaceByIdAsync(SpaceId);
+            var reviewsTask = ApiService.GetSpaceReviewsAsync(SpaceId);
+
+            await Task.WhenAll(spaceTask, reviewsTask);
+
+            _space = await spaceTask;
+            _reviews = await reviewsTask;
+            _isFavorite = ApiService.GetFavorites().Contains(SpaceId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading space details: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
     }
 
     private void GoBack()
@@ -300,7 +323,7 @@
 
     private void ToggleFavorite()
     {
-        DataService.ToggleFavorite(SpaceId);
+        ApiService.ToggleFavorite(SpaceId);
         _isFavorite = !_isFavorite;
     }
 
@@ -337,24 +360,22 @@
         };
     }
 
-    private void ConfirmBooking()
+    private async Task ConfirmBookingAsync()
     {
-        DataService.CreateBooking(new BookingItem
-        {
-            SpaceId = SpaceId,
-            SpaceName = _space?.Name ?? "",
-            SpaceImage = _space?.Images.FirstOrDefault() ?? "",
-            Date = _bookingDate,
-            StartTime = _bookingStartTime,
-            EndTime = _bookingEndTime,
-            GuestsCount = _bookingGuests,
-            TotalPrice = CalculateTotal(),
-            Status = BookingStatus.Pending,
-            Notes = _bookingNotes
-        });
+        var booking = await ApiService.CreateBookingAsync(
+            SpaceId,
+            _bookingDate,
+            _bookingStartTime,
+            _bookingEndTime
+        );
 
         _showBookingModal = false;
         Navigation.NavigateTo("/bookings?new=true");
+    }
+
+    private void ConfirmBooking()
+    {
+        _ = ConfirmBookingAsync();
     }
 
     private string GetAmenityIcon(string amenity) => amenity switch

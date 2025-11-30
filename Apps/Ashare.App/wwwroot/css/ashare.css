@@ -2046,3 +2046,106 @@ h1, h2, h3, .ashare-logo-text {
         transform: translateX(-50%);
     }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Saudi Regional Patterns - Ashare Visual Identity 2025
+   زخارف المناطق السعودية
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Base Pattern Classes */
+.ashare-pattern {
+    position: relative;
+    overflow: hidden;
+}
+
+.ashare-pattern::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.1;
+    pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Logo Pattern - النمط الأساسي
+   Used in marketing and promotional materials
+   ───────────────────────────────────────────────────────────────── */
+.ashare-pattern-logo {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M15 25 L25 15 L35 25 M25 25 L25 18' stroke='%23345454' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M25 25 L35 15 L45 25' stroke='%23F4844C' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='25' cy='20' r='3' fill='%23345454'/%3E%3Ccircle cx='35' cy='20' r='3' fill='%23F4844C'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 60px 60px;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Sadu Pattern - زخارف السدو (شمال المملكة)
+   Traditional Bedouin woven designs - simplicity and authenticity
+   ───────────────────────────────────────────────────────────────── */
+.ashare-pattern-sadu {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M0 20h40M20 0v40M10 10l20 20M30 10L10 30' stroke='%23345454' stroke-width='1.5' stroke-linecap='square'/%3E%3Crect x='15' y='15' width='10' height='10' fill='%23F4844C' opacity='0.3'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 40px 40px;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Al-Qatt Al-Asiri Pattern - زخارف القط العسيري (جنوب المملكة)
+   Colorful geometric motifs - joy and feminine creativity
+   ───────────────────────────────────────────────────────────────── */
+.ashare-pattern-asiri {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Crect x='10' y='10' width='30' height='30' fill='none' stroke='%23345454' stroke-width='2'/%3E%3Cpath d='M10 25h30M25 10v30' stroke='%23F4844C' stroke-width='2'/%3E%3Ccircle cx='25' cy='25' r='8' fill='none' stroke='%23345454' stroke-width='1.5'/%3E%3Cpath d='M17 17l16 16M33 17L17 33' stroke='%23F4844C' stroke-width='1' opacity='0.5'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 50px 50px;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Najdi Door Pattern - زخارف الأبواب النجدية (وسط المملكة)
+   Classic carved wooden doors - heritage and elegance
+   ───────────────────────────────────────────────────────────────── */
+.ashare-pattern-najdi {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Crect x='5' y='5' width='50' height='50' rx='3' fill='none' stroke='%23345454' stroke-width='2'/%3E%3Crect x='15' y='15' width='30' height='30' rx='2' fill='none' stroke='%23345454' stroke-width='1.5'/%3E%3Ccircle cx='30' cy='30' r='10' fill='none' stroke='%23F4844C' stroke-width='1.5'/%3E%3Cpath d='M30 20v20M20 30h20' stroke='%23345454' stroke-width='1'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 60px 60px;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Roshan Pattern - زخارف الروشن (منطقة الحجاز)
+   Traditional lattice windows - openness and cultural depth
+   ───────────────────────────────────────────────────────────────── */
+.ashare-pattern-roshan {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3E%3Cpath d='M0 15h30M15 0v30M7.5 7.5l15 15M22.5 7.5l-15 15' stroke='%23345454' stroke-width='0.5'/%3E%3Ccircle cx='15' cy='15' r='5' fill='none' stroke='%23F4844C' stroke-width='1'/%3E%3Ccircle cx='15' cy='15' r='2' fill='%23345454'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 30px 30px;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Gypsum Pattern - الزخارف الجصية (المنطقة الشرقية - الأحساء)
+   Ornamental plasterwork - sophistication and craftsmanship
+   ───────────────────────────────────────────────────────────────── */
+.ashare-pattern-gypsum {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cellipse cx='20' cy='20' rx='15' ry='10' fill='none' stroke='%23345454' stroke-width='1'/%3E%3Cellipse cx='20' cy='20' rx='10' ry='15' fill='none' stroke='%23345454' stroke-width='1'/%3E%3Ccircle cx='20' cy='20' r='5' fill='%23F4844C' opacity='0.2'/%3E%3Cpath d='M5 20h30M20 5v30' stroke='%23345454' stroke-width='0.5' stroke-dasharray='2,2'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 40px 40px;
+}
+
+/* Pattern Utility Classes */
+.ashare-pattern-light::before {
+    opacity: 0.05;
+}
+
+.ashare-pattern-dark::before {
+    opacity: 0.15;
+}
+
+/* Hero section with pattern */
+.ashare-hero.ashare-pattern-logo::before {
+    background-image: inherit;
+    background-repeat: inherit;
+    background-size: inherit;
+    opacity: 0.08;
+}
+
+/* Category card patterns by region */
+.ashare-category-pattern-north { background: linear-gradient(135deg, var(--ashare-primary) 0%, var(--ashare-primary-light) 100%); }
+.ashare-category-pattern-south { background: linear-gradient(135deg, var(--ashare-secondary) 0%, var(--ashare-secondary-light) 100%); }
+.ashare-category-pattern-central { background: linear-gradient(135deg, var(--ashare-primary-dark) 0%, var(--ashare-primary) 100%); }
+.ashare-category-pattern-west { background: linear-gradient(135deg, var(--ashare-secondary-dark) 0%, var(--ashare-secondary) 100%); }
+.ashare-category-pattern-east { background: linear-gradient(135deg, var(--ashare-primary-light) 0%, var(--ashare-secondary-light) 100%); }
