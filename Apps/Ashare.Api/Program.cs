@@ -12,7 +12,6 @@ using ACommerce.Realtime.SignalR.Extensions;
 using ACommerce.Chats.Core.Hubs;
 using ACommerce.Chats.Core.Extensions;
 using ACommerce.Locations.Extensions;
-using Ashare.Api.Services;
 
 // Controllers from libraries
 using ACommerce.Profiles.Api.Controllers;
@@ -105,9 +104,6 @@ try
 
     // Chat Services
     builder.Services.AddChatsCore();
-
-    // Seed Data Service
-    builder.Services.AddScoped<AshareSeedDataService>();
 
     // Swagger Documentation
     builder.Services.AddSwaggerGen(options =>
@@ -227,17 +223,13 @@ Built using ACommerce libraries with configuration-first approach:
     app.MapHub<ChatHub>("/hubs/chat");
     app.MapHub<NotificationHub>("/hubs/notifications");
 
-    // Database initialization and seeding
+    // Database initialization
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Log.Information("Ensuring database is created...");
         await dbContext.Database.EnsureCreatedAsync();
-
-        Log.Information("Seeding initial data...");
-        var seedService = scope.ServiceProvider.GetRequiredService<AshareSeedDataService>();
-        await seedService.SeedAsync();
 
         Log.Information("Database ready!");
     }

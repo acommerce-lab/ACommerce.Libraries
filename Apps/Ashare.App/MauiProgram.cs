@@ -50,19 +50,28 @@ public static class MauiProgram
 #endif
 
         // ═══════════════════════════════════════════════════════════════════
-        // ACommerce Customer Template - Ashare Theme
+        // ACommerce Customer Template - Ashare Theme (Visual Identity 2025)
         // ═══════════════════════════════════════════════════════════════════
         builder.Services.AddACommerceCustomerTemplate(options =>
         {
-            // Ashare brand colors - Sky Blue theme
-            options.Colors.Primary = "#0EA5E9";      // Sky-500
-            options.Colors.PrimaryDark = "#0284C7";  // Sky-600
-            options.Colors.PrimaryLight = "#38BDF8"; // Sky-400
-            options.Colors.Secondary = "#8B5CF6";    // Violet-500
+            // Ashare brand colors from Visual Identity Guidelines
+            // Primary: Deep Olive Green - symbolizes sustainability, trust, stability
+            options.Colors.Primary = "#345454";      // Deep Olive Green
+            options.Colors.PrimaryDark = "#263F3F";  // Darker shade
+            options.Colors.PrimaryLight = "#4A6B6B"; // Lighter shade
+
+            // Secondary: Soft Orange - represents vitality, optimism, positive energy
+            options.Colors.Secondary = "#F4844C";    // Soft Orange
+
+            // Supporting colors
             options.Colors.Success = "#10B981";      // Emerald-500
             options.Colors.Error = "#EF4444";        // Red-500
             options.Colors.Warning = "#F59E0B";      // Amber-500
-            options.Colors.Info = "#06B6D4";         // Cyan-500
+            options.Colors.Info = "#345454";         // Use primary for info
+
+            // Background: Light peach/cream from brand guidelines
+            options.Colors.Background = "#FEE8D6";   // Light cream background
+            options.Colors.Surface = "#FFFFFF";      // White surface
 
             // Set text direction for Arabic
             options.Direction = TextDirection.RTL;
@@ -169,18 +178,7 @@ public static class MauiProgram
         // Navigation Service
         builder.Services.AddScoped<IAppNavigationService, AppNavigationService>();
 
-        // HttpClient for direct API calls
-        builder.Services.AddHttpClient("AshareApi", client =>
-        {
-            client.BaseAddress = new Uri(apiBaseUrl);
-            client.DefaultRequestHeaders.Add("Accept", "application/json");
-        });
-
-        // Ashare API Service (connects to real backend)
-        builder.Services.AddScoped<AshareApiService>();
-
-        // Space Data Service (legacy mock data - kept for backward compatibility)
-        // TODO: Remove after full migration to AshareApiService
+        // Space Data Service (mock data for development)
         builder.Services.AddSingleton<SpaceDataService>();
 
         return builder.Build();
