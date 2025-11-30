@@ -253,7 +253,7 @@ public sealed class LocationsClient
 /// <summary>
 /// بيانات الدولة
 /// </summary>
-public sealed class CountryDto
+public class CountryDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -284,7 +284,7 @@ public sealed class CountryDetailDto : CountryDto
 /// <summary>
 /// بيانات المنطقة
 /// </summary>
-public sealed class RegionDto
+public class RegionDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -321,7 +321,7 @@ public enum RegionType
 /// <summary>
 /// بيانات المدينة
 /// </summary>
-public sealed class CityDto
+public class CityDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -348,7 +348,7 @@ public sealed class CityDetailDto : CityDto
 /// <summary>
 /// بيانات الحي
 /// </summary>
-public sealed class NeighborhoodDto
+public class NeighborhoodDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;

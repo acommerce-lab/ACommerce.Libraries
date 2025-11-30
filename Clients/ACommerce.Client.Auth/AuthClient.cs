@@ -6,29 +6,23 @@ namespace ACommerce.Client.Auth;
 /// <summary>
 /// Client للتعامل مع Authentication
 /// </summary>
-public sealed class AuthClient
+public sealed class AuthClient(IApiClient httpClient)
 {
-	private readonly IApiClient _httpClient;
-	private const string ServiceName = "Marketplace"; // أو "Auth" إذا كانت خدمة منفصلة
+    private const string ServiceName = "Marketplace"; // أو "Auth" إذا كانت خدمة منفصلة
 
 	// Token storage for client-side apps
 	private string? _currentToken;
 
-	public AuthClient(IApiClient httpClient)
-	{
-		_httpClient = httpClient;
-	}
+    #region Basic Authentication
 
-	#region Basic Authentication
-
-	/// <summary>
-	/// تسجيل دخول
-	/// </summary>
-	public async Task<LoginResponse?> LoginAsync(
+    /// <summary>
+    /// تسجيل دخول
+    /// </summary>
+    public async Task<LoginResponse?> LoginAsync(
 		LoginRequest request,
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PostAsync<LoginRequest, LoginResponse>(
+		return await httpClient.PostAsync<LoginRequest, LoginResponse>(
 			ServiceName,
 			"/api/auth/login",
 			request,
@@ -42,7 +36,7 @@ public sealed class AuthClient
 		RegisterRequest request,
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PostAsync<RegisterRequest, LoginResponse>(
+		return await httpClient.PostAsync<RegisterRequest, LoginResponse>(
 			ServiceName,
 			"/api/auth/register",
 			request,
@@ -54,7 +48,7 @@ public sealed class AuthClient
 	/// </summary>
 	public async Task<UserInfo?> GetMeAsync(CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.GetAsync<UserInfo>(
+		return await httpClient.GetAsync<UserInfo>(
 			ServiceName,
 			"/api/auth/me",
 			cancellationToken);
@@ -66,7 +60,7 @@ public sealed class AuthClient
 	public async Task LogoutAsync(CancellationToken cancellationToken = default)
 	{
 		_currentToken = null;
-		await _httpClient.PostAsync<object>(
+		await httpClient.PostAsync<object>(
 			ServiceName,
 			"/api/auth/logout",
 			new { },
@@ -84,7 +78,7 @@ public sealed class AuthClient
 		bool enable,
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PostAsync<ToggleTwoFactorRequest, TwoFactorResponse>(
+		return await httpClient.PostAsync<ToggleTwoFactorRequest, TwoFactorResponse>(
 			ServiceName,
 			"/api/auth/two-factor",
 			new ToggleTwoFactorRequest { Enable = enable },
@@ -98,7 +92,7 @@ public sealed class AuthClient
 		string code,
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PostAsync<VerifyTwoFactorRequest, LoginResponse>(
+		return await httpClient.PostAsync<VerifyTwoFactorRequest, LoginResponse>(
 			ServiceName,
 			"/api/auth/two-factor/verify",
 			new VerifyTwoFactorRequest { Code = code },
@@ -112,7 +106,7 @@ public sealed class AuthClient
 		VerifyTwoFactorRequest request,
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PostAsync<VerifyTwoFactorRequest, LoginResponse>(
+		return await httpClient.PostAsync<VerifyTwoFactorRequest, LoginResponse>(
 			ServiceName,
 			"/api/auth/two-factor/verify",
 			request,
@@ -130,7 +124,7 @@ public sealed class AuthClient
 		RequestPhoneOtpRequest request,
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PostAsync<RequestPhoneOtpRequest, OtpResponse>(
+		return await httpClient.PostAsync<RequestPhoneOtpRequest, OtpResponse>(
 			ServiceName,
 			"/api/auth/otp/phone",
 			request,
@@ -144,7 +138,7 @@ public sealed class AuthClient
 		RequestEmailOtpRequest request,
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PostAsync<RequestEmailOtpRequest, OtpResponse>(
+		return await httpClient.PostAsync<RequestEmailOtpRequest, OtpResponse>(
 			ServiceName,
 			"/api/auth/otp/email",
 			request,
@@ -158,7 +152,7 @@ public sealed class AuthClient
 		VerifyOtpRequest request,
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PostAsync<VerifyOtpRequest, LoginResponse>(
+		return await httpClient.PostAsync<VerifyOtpRequest, LoginResponse>(
 			ServiceName,
 			"/api/auth/otp/verify",
 			request,
@@ -176,7 +170,7 @@ public sealed class AuthClient
 		NafathAuthRequest request,
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PostAsync<NafathAuthRequest, NafathAuthResponse>(
+		return await httpClient.PostAsync<NafathAuthRequest, NafathAuthResponse>(
 			ServiceName,
 			"/api/auth/nafath/initiate",
 			request,
@@ -190,7 +184,7 @@ public sealed class AuthClient
 		string sessionId,
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.GetAsync<NafathPhoneNumbersResponse>(
+		return await httpClient.GetAsync<NafathPhoneNumbersResponse>(
 			ServiceName,
 			$"/api/auth/nafath/phone-numbers?sessionId={sessionId}",
 			cancellationToken);
@@ -203,7 +197,7 @@ public sealed class AuthClient
 		SelectNafathNumberRequest request,
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PostAsync<SelectNafathNumberRequest, LoginResponse>(
+		return await httpClient.PostAsync<SelectNafathNumberRequest, LoginResponse>(
 			ServiceName,
 			"/api/auth/nafath/select-number",
 			request,
@@ -217,7 +211,7 @@ public sealed class AuthClient
 		CompleteNafathAuthRequest request,
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PostAsync<CompleteNafathAuthRequest, LoginResponse>(
+		return await httpClient.PostAsync<CompleteNafathAuthRequest, LoginResponse>(
 			ServiceName,
 			"/api/auth/nafath/complete",
 			request,

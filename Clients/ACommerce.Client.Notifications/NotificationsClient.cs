@@ -3,25 +3,19 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Client.Notifications;
 
-public sealed class NotificationsClient
+public sealed class NotificationsClient(IApiClient httpClient)
 {
-	private readonly IApiClient _httpClient;
-	private const string ServiceName = "Notifications"; // أو "Marketplace"
+    private const string ServiceName = "Notifications"; // أو "Marketplace"
 
-	public NotificationsClient(IApiClient httpClient)
-	{
-		_httpClient = httpClient;
-	}
-
-	/// <summary>
-	/// الحصول على الإشعارات
-	/// </summary>
-	public async Task<List<NotificationResponse>?> GetNotificationsAsync(
+    /// <summary>
+    /// الحصول على الإشعارات
+    /// </summary>
+    public async Task<List<NotificationResponse>?> GetNotificationsAsync(
 		int page = 1,
 		int pageSize = 20,
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.GetAsync<List<NotificationResponse>>(
+		return await httpClient.GetAsync<List<NotificationResponse>>(
 			ServiceName,
 			$"/api/notifications?page={page}&pageSize={pageSize}",
 			cancellationToken);
@@ -33,7 +27,7 @@ public sealed class NotificationsClient
 	public async Task<List<NotificationResponse>?> GetMyNotificationsAsync(
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.GetAsync<List<NotificationResponse>>(
+		return await httpClient.GetAsync<List<NotificationResponse>>(
 			ServiceName,
 			"/api/notifications/me",
 			cancellationToken);
@@ -45,7 +39,7 @@ public sealed class NotificationsClient
 	public async Task<UnreadCountResponse?> GetUnreadCountAsync(
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.GetAsync<UnreadCountResponse>(
+		return await httpClient.GetAsync<UnreadCountResponse>(
 			ServiceName,
 			"/api/notifications/unread-count",
 			cancellationToken);
@@ -58,7 +52,7 @@ public sealed class NotificationsClient
 		Guid notificationId,
 		CancellationToken cancellationToken = default)
 	{
-		await _httpClient.PostAsync<object>(
+		await httpClient.PostAsync<object>(
 			ServiceName,
 			$"/api/notifications/{notificationId}/read",
 			new { },
@@ -70,7 +64,7 @@ public sealed class NotificationsClient
 	/// </summary>
 	public async Task MarkAllAsReadAsync(CancellationToken cancellationToken = default)
 	{
-		await _httpClient.PostAsync<object>(
+		await httpClient.PostAsync<object>(
 			ServiceName,
 			"/api/notifications/mark-all-read",
 			new { },
@@ -84,7 +78,7 @@ public sealed class NotificationsClient
 		Guid notificationId,
 		CancellationToken cancellationToken = default)
 	{
-		await _httpClient.DeleteAsync(
+		await httpClient.DeleteAsync(
 			ServiceName,
 			$"/api/notifications/{notificationId}",
 			cancellationToken);
@@ -97,7 +91,7 @@ public sealed class NotificationsClient
 		RegisterDeviceTokenRequest request,
 		CancellationToken cancellationToken = default)
 	{
-		await _httpClient.PostAsync<RegisterDeviceTokenRequest>(
+		await httpClient.PostAsync<RegisterDeviceTokenRequest>(
 			ServiceName,
 			"/api/notifications/device-token",
 			request,
@@ -110,7 +104,7 @@ public sealed class NotificationsClient
 	public async Task<PushSettings?> GetPushSettingsAsync(
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.GetAsync<PushSettings>(
+		return await httpClient.GetAsync<PushSettings>(
 			ServiceName,
 			"/api/notifications/push-settings",
 			cancellationToken);
@@ -123,7 +117,7 @@ public sealed class NotificationsClient
 		PushSettings settings,
 		CancellationToken cancellationToken = default)
 	{
-		await _httpClient.PutAsync<PushSettings>(
+		await httpClient.PutAsync<PushSettings>(
 			ServiceName,
 			"/api/notifications/push-settings",
 			settings,

@@ -10,7 +10,7 @@
     @* Tabs *@
     <div class="ashare-tabs">
         <button class="ashare-tab @(_activeTab == "upcoming" ? "active" : "")"
-                @onclick="() => _activeTab = \"upcoming\"">
+                @onclick="@(() => _activeTab = "upcoming")">
             القادمة
             @if (_upcomingBookings?.Any() == true)
             {
@@ -18,11 +18,11 @@
             }
         </button>
         <button class="ashare-tab @(_activeTab == "past" ? "active" : "")"
-                @onclick="() => _activeTab = \"past\"">
+                @onclick="@(() => _activeTab = "past")">
             السابقة
         </button>
         <button class="ashare-tab @(_activeTab == "cancelled" ? "active" : "")"
-                @onclick="() => _activeTab = \"cancelled\"">
+                @onclick="@(() => _activeTab = "cancelled")">
             الملغاة
         </button>
     </div>
@@ -109,7 +109,7 @@
                         <i class="bi bi-calendar-x"></i>
                         <h3>لا توجد حجوزات قادمة</h3>
                         <p>ابحث عن مساحة واحجزها الآن</p>
-                        <button class="ac-btn ac-btn-primary" @onclick="() => Navigation.NavigateTo(\"/explore\")">
+                        <button class="ac-btn ac-btn-primary" @onclick="@(() => Navigation.NavigateTo("/explore"))">
                             استكشف المساحات
                         </button>
                         break;

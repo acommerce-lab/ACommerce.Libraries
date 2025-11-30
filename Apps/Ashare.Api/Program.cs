@@ -1,0 +1,257 @@
+using Serilog;
+using Microsoft.EntityFrameworkCore;
+using ACommerce.SharedKernel.Infrastructure.EFCores.Context;
+using ACommerce.SharedKernel.Infrastructure.EFCores.Extensions;
+using ACommerce.SharedKernel.CQRS.Extensions;
+using ACommerce.Authentication.JWT;
+using ACommerce.SharedKernel.Abstractions.Repositories;
+using ACommerce.SharedKernel.Infrastructure.EFCore.Repositories;
+using ACommerce.SharedKernel.Infrastructure.EFCore.Factories;
+using ACommerce.Realtime.SignalR.Hubs;
+using ACommerce.Realtime.SignalR.Extensions;
+using ACommerce.Chats.Core.Hubs;
+using ACommerce.Chats.Core.Extensions;
+using ACommerce.Locations.Extensions;
+
+// Controllers from libraries
+using ACommerce.Profiles.Api.Controllers;
+using ACommerce.Vendors.Api.Controllers;
+using ACommerce.Catalog.Products.Api.Controllers;
+using ACommerce.Catalog.Listings.Api.Controllers;
+using ACommerce.Catalog.Attributes.Api.Controllers;
+using ACommerce.Catalog.Units.Api.Controllers;
+using ACommerce.Catalog.Currencies.Api.Controllers;
+using ACommerce.Orders.Api.Controllers;
+using ACommerce.Transactions.Core.Api.Controllers;
+using ACommerce.Locations.Api.Controllers;
+using ACommerce.Chats.Api.Controllers;
+using ACommerce.Notifications.Recipients.Api.Controllers;
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("logs/ashare-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+try
+{
+    Log.Information("Starting Ashare API - Shared Spaces Platform...");
+
+    var builder = WebApplication.CreateBuilder(args);
+
+    // Logging
+    builder.Host.UseSerilog();
+
+    // CORS
+    builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(policy =>
+        {
+            policy.WithOrigins(
+                "https://localhost:5001",
+                "http://localhost:5000",
+                "https://localhost:7001",
+                "http://localhost:7000"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+        });
+    });
+
+    // Controllers - Auto-discover from all referenced API libraries
+    builder.Services.AddControllers()
+        .AddApplicationPart(typeof(ProfilesController).Assembly)
+        .AddApplicationPart(typeof(VendorsController).Assembly)
+        .AddApplicationPart(typeof(ProductsController).Assembly)
+        .AddApplicationPart(typeof(ProductListingsController).Assembly)
+        .AddApplicationPart(typeof(AttributeDefinitionsController).Assembly)
+        .AddApplicationPart(typeof(UnitsController).Assembly)
+        .AddApplicationPart(typeof(CurrenciesController).Assembly)
+        .AddApplicationPart(typeof(OrdersController).Assembly)
+        .AddApplicationPart(typeof(DocumentTypesController).Assembly)
+        .AddApplicationPart(typeof(LocationSearchController).Assembly)
+        .AddApplicationPart(typeof(ChatsController).Assembly)
+        .AddApplicationPart(typeof(ContactPointsController).Assembly);
+
+    builder.Services.AddEndpointsApiExplorer();
+
+    // Database (SQLite - entities auto-discovered from all ACommerce assemblies)
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    {
+        options.UseSqlite(
+            builder.Configuration.GetConnectionString("DefaultConnection")
+            ?? "Data Source=ashare.db");
+        options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
+    });
+
+    builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
+
+    // Repository & Unit of Work
+    builder.Services.AddScoped<IRepositoryFactory, RepositoryFactory>();
+    builder.Services.AddScoped(typeof(IBaseAsyncRepository<>), typeof(BaseAsyncRepository<>));
+
+    // Authentication & Authorization (JWT)
+    builder.Services.AddJwtAuthentication(builder.Configuration);
+
+    // CQRS (MediatR + AutoMapper + FluentValidation)
+    builder.Services.AddSharedKernelCQRS(AppDomain.CurrentDomain.GetAssemblies());
+
+    // SignalR for Real-time Communication
+    builder.Services.AddACommerceSignalR<ChatHub, IChatClient>();
+
+    // Location Services
+    builder.Services.AddACommerceLocations();
+
+    // Chat Services
+    builder.Services.AddChatsCore();
+
+    // Swagger Documentation
+    builder.Services.AddSwaggerGen(options =>
+    {
+        options.SwaggerDoc("v1", new()
+        {
+            Title = "Ashare API",
+            Version = "v1.0.0",
+            Description = @"
+# Ashare - Shared Spaces Platform API
+
+## About
+Ashare is a platform for booking shared spaces:
+- Meeting rooms
+- Co-working spaces
+- Event halls
+- Studios
+- Commercial spaces
+- Co-living spaces
+
+## Architecture
+Built using ACommerce libraries with configuration-first approach:
+
+### Spaces = Products + Dynamic Attributes
+- **ProductCategory**: Space types (residential, commercial, meeting, etc.)
+- **AttributeDefinition**: Space properties (capacity, area, amenities, etc.)
+- **Product**: Space details
+- **ProductListing**: Owner's space listing with price
+
+### Bookings = Orders with Time Attributes
+- **Order**: Booking record
+- **OrderItem**: Space + time slot
+- **DocumentType/DocumentOperation**: Booking workflow states
+
+### Reviews & Ratings
+- Reviews module for space ratings
+
+### Location
+- Geographic hierarchy for space locations
+
+### Communication
+- Chat: Host-guest messaging
+- Notifications: Booking alerts
+
+## Endpoints
+- `/api/profiles` - User profiles
+- `/api/vendors` - Space owners (hosts)
+- `/api/products` - Spaces catalog
+- `/api/productlistings` - Owner listings
+- `/api/attributedefinitions` - Space properties
+- `/api/productcategories` - Space types
+- `/api/orders` - Bookings
+- `/api/documenttypes` - Workflow configurations
+- `/api/locations` - Geographic locations
+- `/api/chats` - Messaging
+- `/api/contactpoints` - Notification settings
+",
+            Contact = new()
+            {
+                Name = "Ashare Team",
+                Email = "support@ashare.app"
+            }
+        });
+
+        // JWT Bearer Authentication in Swagger
+        options.AddSecurityDefinition("Bearer", new()
+        {
+            Name = "Authorization",
+            Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+            Scheme = "Bearer",
+            BearerFormat = "JWT",
+            In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+            Description = "JWT Authorization header using the Bearer scheme."
+        });
+
+        options.AddSecurityRequirement(new()
+        {
+            {
+                new()
+                {
+                    Reference = new()
+                    {
+                        Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                Array.Empty<string>()
+            }
+        });
+    });
+
+    var app = builder.Build();
+
+    // Middleware Pipeline
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI(options =>
+        {
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", "Ashare API v1.0");
+            options.RoutePrefix = string.Empty;
+            options.DocumentTitle = "Ashare API";
+            options.EnableDeepLinking();
+            options.DisplayRequestDuration();
+        });
+    }
+
+    app.UseHttpsRedirection();
+    app.UseCors();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    // SignalR Hubs
+    app.MapHub<ChatHub>("/hubs/chat");
+    app.MapHub<NotificationHub>("/hubs/notifications");
+
+    // Database initialization
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        Log.Information("Ensuring database is created...");
+        await dbContext.Database.EnsureCreatedAsync();
+
+        Log.Information("Database ready!");
+    }
+
+    // Health check endpoint
+    app.MapGet("/health", () => new
+    {
+        Service = "Ashare API",
+        Status = "Running",
+        Version = "1.0.0"
+    });
+
+    Log.Information("Ashare API started successfully!");
+    Log.Information("Swagger UI available at: https://localhost:5001");
+
+    await app.RunAsync();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

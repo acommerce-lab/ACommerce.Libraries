@@ -2,34 +2,28 @@ using ACommerce.Client.Core.Http;
 
 namespace ACommerce.Client.Profiles;
 
-public sealed class ProfilesClient
+public sealed class ProfilesClient(IApiClient httpClient)
 {
-	private readonly IApiClient _httpClient;
-	private const string ServiceName = "Marketplace";
+    private const string ServiceName = "Marketplace";
 
-	public ProfilesClient(IApiClient httpClient)
+    public async Task<ProfileDto?> GetMyProfileAsync(CancellationToken cancellationToken = default)
 	{
-		_httpClient = httpClient;
-	}
-
-	public async Task<ProfileDto?> GetMyProfileAsync(CancellationToken cancellationToken = default)
-	{
-		return await _httpClient.GetAsync<ProfileDto>(ServiceName, "/api/profiles/me", cancellationToken);
+		return await httpClient.GetAsync<ProfileDto>(ServiceName, "/api/profiles/me", cancellationToken);
 	}
 
 	public async Task<ProfileDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.GetAsync<ProfileDto>(ServiceName, $"/api/profiles/{id}", cancellationToken);
+		return await httpClient.GetAsync<ProfileDto>(ServiceName, $"/api/profiles/{id}", cancellationToken);
 	}
 
 	public async Task<ProfileDto?> CreateAsync(CreateProfileRequest request, CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PostAsync<CreateProfileRequest, ProfileDto>(ServiceName, "/api/profiles", request, cancellationToken);
+		return await httpClient.PostAsync<CreateProfileRequest, ProfileDto>(ServiceName, "/api/profiles", request, cancellationToken);
 	}
 
 	public async Task<ProfileDto?> UpdateAsync(Guid id, UpdateProfileRequest request, CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PutAsync<UpdateProfileRequest, ProfileDto>(ServiceName, $"/api/profiles/{id}", request, cancellationToken);
+		return await httpClient.PutAsync<UpdateProfileRequest, ProfileDto>(ServiceName, $"/api/profiles/{id}", request, cancellationToken);
 	}
 
 	/// <summary>
@@ -37,7 +31,7 @@ public sealed class ProfilesClient
 	/// </summary>
 	public async Task<ProfileDto?> UpdateMyProfileAsync(UpdateProfileRequest request, CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PutAsync<UpdateProfileRequest, ProfileDto>(ServiceName, "/api/profiles/me", request, cancellationToken);
+		return await httpClient.PutAsync<UpdateProfileRequest, ProfileDto>(ServiceName, "/api/profiles/me", request, cancellationToken);
 	}
 }
 

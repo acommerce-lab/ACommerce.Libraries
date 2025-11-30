@@ -9,6 +9,10 @@ using ACommerce.Client.Realtime;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Themes;
 using Microsoft.Extensions.Logging;
+using ACommerce.Client.Core.Extensions;
+using ACommerce.Client.Auth.Extensions;
+using ACommerce.Client.Locations.Extensions;
+using ThemeService = Ashare.App.Services.ThemeService;
 
 namespace Ashare.App;
 
@@ -67,49 +71,41 @@ public static class MauiProgram
         // ═══════════════════════════════════════════════════════════════════
 
         // Core HTTP Client with interceptors
-        builder.Services.AddACommerceClient(options =>
+        builder.Services.AddACommerceClient(apiBaseUrl, options =>
         {
-            options.BaseUrl = apiBaseUrl;
-            options.Timeout = TimeSpan.FromSeconds(30);
+            options.TimeoutSeconds = 30;
         });
 
         // Authentication Client (JWT + Nafath)
-        builder.Services.AddAuthClient(options =>
-        {
-            options.BaseUrl = apiBaseUrl;
-            options.EnableNafath = true;
-        });
+        builder.Services.AddAuthClient(apiBaseUrl);
 
         // Profiles Client
-        builder.Services.AddProfilesClient(options =>
-        {
-            options.BaseUrl = apiBaseUrl;
-        });
+        //builder.Services.AddProfilesClient(options =>
+        //{
+        //    options.BaseUrl = apiBaseUrl;
+        //});
 
         // Locations Client
-        builder.Services.AddLocationsClient(options =>
-        {
-            options.BaseUrl = apiBaseUrl;
-        });
+        builder.Services.AddLocationsClient(apiBaseUrl);
 
         // Chats Client
-        builder.Services.AddChatsClient(options =>
-        {
-            options.BaseUrl = apiBaseUrl;
-        });
+        //builder.Services.AddChatsClient(options =>
+        //{
+        //    options.BaseUrl = apiBaseUrl;
+        //});
 
         // Notifications Client
-        builder.Services.AddNotificationsClient(options =>
-        {
-            options.BaseUrl = apiBaseUrl;
-        });
+        //builder.Services.AddNotificationsClient(options =>
+        //{
+        //    options.BaseUrl = apiBaseUrl;
+        //});
 
         // Real-time Client (SignalR)
-        builder.Services.AddRealtimeClient(options =>
-        {
-            options.HubUrl = $"{apiBaseUrl}/hubs/realtime";
-            options.AutoReconnect = true;
-        });
+        //builder.Services.AddRealtimeClient(options =>
+        //{
+        //    options.HubUrl = $"{apiBaseUrl}/hubs/realtime";
+        //    options.AutoReconnect = true;
+        //});
 
         // ═══════════════════════════════════════════════════════════════════
         // App Services

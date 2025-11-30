@@ -205,8 +205,8 @@ public class SpaceDataService
             SpaceName = _spaces[0].Name,
             SpaceImage = _spaces[0].Images.FirstOrDefault(),
             Date = DateTime.Today.AddDays(3),
-            StartTime = new TimeSpan(9, 0, 0),
-            EndTime = new TimeSpan(12, 0, 0),
+            StartTime = new TimeOnly (9, 0, 0),
+            EndTime = new TimeOnly(12, 0, 0),
             GuestsCount = 8,
             TotalPrice = 450,
             Currency = "ر.س",
@@ -220,8 +220,8 @@ public class SpaceDataService
             SpaceName = _spaces[1].Name,
             SpaceImage = _spaces[1].Images.FirstOrDefault(),
             Date = DateTime.Today.AddDays(-10),
-            StartTime = new TimeSpan(8, 0, 0),
-            EndTime = new TimeSpan(18, 0, 0),
+            StartTime = new TimeOnly(8, 0, 0),
+            EndTime = new TimeOnly(18, 0, 0),
             GuestsCount = 1,
             TotalPrice = 300,
             Currency = "ر.س",
@@ -343,7 +343,7 @@ public class SpaceDataService
         _bookings.Add(booking);
     }
 
-    public BookingItem CreateBooking(Guid spaceId, DateTime date, TimeSpan startTime, TimeSpan endTime)
+    public BookingItem CreateBooking(Guid spaceId, DateTime date, TimeOnly startTime, TimeOnly endTime)
     {
         var space = GetSpaceById(spaceId);
         if (space == null) throw new Exception("Space not found");
@@ -438,8 +438,8 @@ public class BookingItem
     public string SpaceName { get; set; } = string.Empty;
     public string? SpaceImage { get; set; }
     public DateTime Date { get; set; }
-    public TimeSpan StartTime { get; set; }
-    public TimeSpan EndTime { get; set; }
+    public TimeOnly StartTime { get; set; }
+    public TimeOnly EndTime { get; set; }
     public int GuestsCount { get; set; }
     public decimal TotalPrice { get; set; }
     public string Currency { get; set; } = "ر.س";
