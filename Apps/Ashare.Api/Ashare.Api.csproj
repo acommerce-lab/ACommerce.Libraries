@@ -1,0 +1,86 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Ashare.Api</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Core Infrastructure -->
+    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
+    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.Infrastructure.EFCores\ACommerce.SharedKernel.Infrastructure.EFCores.csproj" />
+    <ProjectReference Include="..\..\AspNetCore\ACommerce.SharedKernel.AspNetCore\ACommerce.SharedKernel.AspNetCore.csproj" />
+
+    <!-- Authentication & Authorization -->
+    <ProjectReference Include="..\..\Authentication\ACommerce.Authentication.JWT\ACommerce.Authentication.JWT.csproj" />
+    <ProjectReference Include="..\..\AspNetCore\ACommerce.Authentication.AspNetCore\ACommerce.Authentication.AspNetCore.csproj" />
+
+    <!-- Identity & Profiles -->
+    <ProjectReference Include="..\..\Identity\ACommerce.Profiles\ACommerce.Profiles.csproj" />
+    <ProjectReference Include="..\..\Identity\ACommerce.Profiles.Api\ACommerce.Profiles.Api.csproj" />
+
+    <!-- Catalog System (Spaces = Products with Dynamic Attributes) -->
+    <ProjectReference Include="..\..\Other\ACommerce.Catalog.Attributes\ACommerce.Catalog.Attributes.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Catalog.Attributes.Api\ACommerce.Catalog.Attributes.Api.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Catalog.Products\ACommerce.Catalog.Products.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Catalog.Products.Api\ACommerce.Catalog.Products.Api.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Catalog.Units\ACommerce.Catalog.Units.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Catalog.Units.Api\ACommerce.Catalog.Units.Api.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Catalog.Currencies\ACommerce.Catalog.Currencies.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Catalog.Currencies.Api\ACommerce.Catalog.Currencies.Api.csproj" />
+
+    <!-- Listings (Owners listing their spaces - Multi-vendor pattern) -->
+    <ProjectReference Include="..\..\Catalog\ACommerce.Catalog.Listings\ACommerce.Catalog.Listings.csproj" />
+    <ProjectReference Include="..\..\Catalog\ACommerce.Catalog.Listings.Api\ACommerce.Catalog.Listings.Api.csproj" />
+
+    <!-- Marketplace (Vendors = Space Owners) -->
+    <ProjectReference Include="..\..\Marketplace\ACommerce.Vendors\ACommerce.Vendors.csproj" />
+    <ProjectReference Include="..\..\Marketplace\ACommerce.Vendors.Api\ACommerce.Vendors.Api.csproj" />
+
+    <!-- Orders & Cart (Bookings = Orders with time attributes) -->
+    <ProjectReference Include="..\..\Sales\ACommerce.Cart\ACommerce.Cart.csproj" />
+    <ProjectReference Include="..\..\Sales\ACommerce.Orders\ACommerce.Orders.csproj" />
+    <ProjectReference Include="..\..\Sales\ACommerce.Orders.Api\ACommerce.Orders.Api.csproj" />
+
+    <!-- Transactions & Workflows (Booking states and operations) -->
+    <ProjectReference Include="..\..\Other\ACommerce.Transactions.Core\ACommerce.Transactions.Core.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Transactions.Core.Api\ACommerce.Transactions.Core.Api.csproj" />
+
+    <!-- Locations (Geographic hierarchy for spaces) -->
+    <ProjectReference Include="..\..\Other\ACommerce.Locations\ACommerce.Locations.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Locations.Api\ACommerce.Locations.Api.csproj" />
+
+    <!-- Notifications & Recipients -->
+    <ProjectReference Include="..\..\Other\ACommerce.Notifications.Core\ACommerce.Notifications.Core.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Notifications.Recipients\ACommerce.Notifications.Recipients.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Notifications.Recipients.Api\ACommerce.Notifications.Recipients.Api.csproj" />
+
+    <!-- Chat & Real-time -->
+    <ProjectReference Include="..\..\Other\ACommerce.Chats.Core\ACommerce.Chats.Core.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Chats.Api\ACommerce.Chats.Api.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Realtime.SignalR\ACommerce.Realtime.SignalR.csproj" />
+
+    <!-- Reviews -->
+    <ProjectReference Include="..\..\Modules\ACommerce.Reviews\ACommerce.Reviews.csproj" />
+
+    <!-- Localization -->
+    <ProjectReference Include="..\..\Modules\ACommerce.Localization\ACommerce.Localization.csproj" />
+
+    <!-- Files -->
+    <ProjectReference Include="..\..\Files\ACommerce.Files.Storage.Local\ACommerce.Files.Storage.Local.csproj" />
+    <ProjectReference Include="..\..\AspNetCore\ACommerce.Files.AspNetCore\ACommerce.Files.AspNetCore.csproj" />
+
+    <!-- Payments -->
+    <ProjectReference Include="..\..\Payments\ACommerce.Payments.Abstractions\ACommerce.Payments.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+</Project>

@@ -62,11 +62,29 @@
 		<!-- Reference to Clients -->
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Auth\ACommerce.Client.Auth.csproj" />
-		<ProjectReference Include="..\..\Clients\ACommerce.Client.Locations\ACommerce.Client.Locations.csproj" />
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Profiles\ACommerce.Client.Profiles.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Locations\ACommerce.Client.Locations.csproj" />
+
+		<!-- Catalog Clients (Spaces = Products with Attributes) -->
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Products\ACommerce.Client.Products.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Categories\ACommerce.Client.Categories.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.ProductListings\ACommerce.Client.ProductListings.csproj" />
+
+		<!-- Sales Clients (Bookings = Orders) -->
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Orders\ACommerce.Client.Orders.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Cart\ACommerce.Client.Cart.csproj" />
+
+		<!-- Marketplace Clients (Hosts = Vendors) -->
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Vendors\ACommerce.Client.Vendors.csproj" />
+
+		<!-- Communication Clients -->
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Chats\ACommerce.Client.Chats.csproj" />
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Notifications\ACommerce.Client.Notifications.csproj" />
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Realtime\ACommerce.Client.Realtime.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.ContactPoints\ACommerce.Client.ContactPoints.csproj" />
+
+		<!-- Files Client -->
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Files\ACommerce.Client.Files.csproj" />
 
 		<!-- Reference to Localization -->
 		<ProjectReference Include="..\..\Modules\ACommerce.Localization\ACommerce.Localization.csproj" />

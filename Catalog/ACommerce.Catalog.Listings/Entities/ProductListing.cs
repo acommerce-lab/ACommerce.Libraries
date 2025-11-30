@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Catalog.Listings.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACommerce.Catalog.Listings.Entities;
 
