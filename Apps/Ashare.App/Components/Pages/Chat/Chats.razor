@@ -78,7 +78,7 @@
     {
         try
         {
-            _chats = (await ChatsClient.GetConversationsAsync())
+            _chats = (await ChatsClient.GetConversationsAsync())?
             .Select(chat =>
             new ChatListItem
                 {
@@ -91,7 +91,7 @@
                     IsTyping = false,
                     UnreadCount = chat.UnreadCount,
                 })
-            .ToList();
+            .ToList() ?? [];
         }
         catch
         {

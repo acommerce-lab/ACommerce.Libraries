@@ -221,7 +221,7 @@
             s.Name.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ||
             s.Description.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ||
             s.Location.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ||
-            s.CategoryName.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase));
+            (s.CategoryName != null && s.CategoryName.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase)));
 
         // Apply filters
         if (_priceFilter == "low")
