@@ -7,44 +7,36 @@ namespace ACommerce.Client.Realtime;
 /// <summary>
 /// Client للتواصل Realtime باستخدام SignalR
 /// </summary>
-public sealed class RealtimeClient : IAsyncDisposable
+public sealed class RealtimeClient(
+    ServiceRegistryClient registryClient,
+    ILogger<RealtimeClient> logger) : IAsyncDisposable
 {
-	private readonly ServiceRegistryClient _registryClient;
-	private readonly ILogger<RealtimeClient> _logger;
-	private HubConnection? _connection;
+    private HubConnection? _connection;
 	private bool _isConnected;
 
-	public RealtimeClient(
-		ServiceRegistryClient registryClient,
-		ILogger<RealtimeClient> logger)
-	{
-		_registryClient = registryClient;
-		_logger = logger;
-	}
-
-	/// <summary>
-	/// الاتصال بـ SignalR Hub
-	/// </summary>
-	public async Task ConnectAsync(
+    /// <summary>
+    /// الاتصال بـ SignalR Hub
+    /// </summary>
+    public async Task ConnectAsync(
 		string serviceName = "Marketplace",
 		string hubPath = "/hubs/notifications",
 		CancellationToken cancellationToken = default)
 	{
 		if (_isConnected)
 		{
-			_logger.LogWarning("Already connected to SignalR hub");
+			logger.LogWarning("Already connected to SignalR hub");
 			return;
 		}
 
 		// اكتشاف الخدمة
-		var endpoint = await _registryClient.DiscoverAsync(serviceName, cancellationToken);
+		var endpoint = await registryClient.DiscoverAsync(serviceName, cancellationToken);
 		if (endpoint == null)
 		{
 			throw new InvalidOperationException($"Service not found: {serviceName}");
 		}
 
 		var hubUrl = $"{endpoint.BaseUrl.TrimEnd('/')}{hubPath}";
-		_logger.LogInformation("Connecting to SignalR hub: {HubUrl}", hubUrl);
+		logger.LogInformation("Connecting to SignalR hub: {HubUrl}", hubUrl);
 
 		_connection = new HubConnectionBuilder()
 			.WithUrl(hubUrl)
@@ -58,7 +50,7 @@ public sealed class RealtimeClient : IAsyncDisposable
 		await _connection.StartAsync(cancellationToken);
 		_isConnected = true;
 
-		_logger.LogInformation("✅ Connected to SignalR hub");
+		logger.LogInformation("✅ Connected to SignalR hub");
 	}
 
 	/// <summary>
@@ -126,7 +118,7 @@ public sealed class RealtimeClient : IAsyncDisposable
 		{
 			await _connection.StopAsync(cancellationToken);
 			_isConnected = false;
-			_logger.LogInformation("❌ Disconnected from SignalR hub");
+			logger.LogInformation("❌ Disconnected from SignalR hub");
 		}
 	}
 
@@ -134,20 +126,20 @@ public sealed class RealtimeClient : IAsyncDisposable
 	private Task OnConnectionClosed(Exception? exception)
 	{
 		_isConnected = false;
-		_logger.LogWarning(exception, "SignalR connection closed");
+		logger.LogWarning(exception, "SignalR connection closed");
 		return Task.CompletedTask;
 	}
 
 	private Task OnReconnecting(Exception? exception)
 	{
-		_logger.LogWarning(exception, "SignalR reconnecting...");
+		logger.LogWarning(exception, "SignalR reconnecting...");
 		return Task.CompletedTask;
 	}
 
 	private Task OnReconnected(string? connectionId)
 	{
 		_isConnected = true;
-		_logger.LogInformation("✅ SignalR reconnected (ConnectionId: {ConnectionId})", connectionId);
+		logger.LogInformation("✅ SignalR reconnected (ConnectionId: {ConnectionId})", connectionId);
 		return Task.CompletedTask;
 	}
 

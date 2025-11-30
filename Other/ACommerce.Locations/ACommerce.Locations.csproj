@@ -10,10 +10,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\Core\ACommerce.Locations.Abstractions\ACommerce.Locations.Abstractions.csproj" />
-    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.Infrastructure.EFCore\ACommerce.SharedKernel.Infrastructure.EFCore.csproj" />
+    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.Infrastructure.EFCores\ACommerce.SharedKernel.Infrastructure.EFCores.csproj" />
   </ItemGroup>
 </Project>

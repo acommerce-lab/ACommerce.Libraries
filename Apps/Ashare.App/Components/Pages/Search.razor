@@ -32,7 +32,7 @@
             <i class="bi bi-geo-alt"></i>
             قريب مني
         </button>
-        <button class="ashare-quick-filter @(_priceFilter == "low" ? "active" : "")" @onclick="() => SetPriceFilter(\"low\")">
+        <button class="ashare-quick-filter @(_priceFilter == "low" ? "active" : "")" @onclick="@(() => SetPriceFilter("low"))">
             <i class="bi bi-currency-dollar"></i>
             الأقل سعراً
         </button>

@@ -281,8 +281,8 @@
     private bool _showBookingModal;
     private string _bookingType = "hourly";
     private DateTime _bookingDate = DateTime.Today;
-    private TimeSpan _bookingStartTime = new(9, 0, 0);
-    private TimeSpan _bookingEndTime = new(12, 0, 0);
+    private TimeOnly _bookingStartTime = new(9, 0, 0);
+    private TimeOnly _bookingEndTime = new(12, 0, 0);
     private int _bookingGuests = 1;
     private string? _bookingNotes;
 

@@ -1,9 +1,10 @@
 @page "/login"
 @using ACommerce.Client.Auth
-@inject IAuthClient AuthClient
+@using ACommerce.Client.Auth.Models
+@inject AuthClient AuthClient
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
-@inject ThemeService Theme
+@inject Ashare.App.Services.ThemeService Theme
 
 <div class="ac-page ashare-login-page @(Theme.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
     <div class="ashare-login-header">
@@ -51,7 +52,7 @@
                 else
                 {
                     <div class="ashare-nafath-waiting">
-                        <div class="ashare-nafath-number">@_nafathResult.Random</div>
+                        <div class="ashare-nafath-number">@_nafathResult.RandomNumber</div>
                         <p>@L["SelectNumberInNafathApp"]</p>
 
                         <div class="ashare-nafath-timer">
@@ -182,7 +183,7 @@
     private bool _isLoading;
     private string? _errorMessage;
 
-    private NafathStartResponse? _nafathResult;
+    private NafathAuthResponse? _nafathResult;
     private bool _nafathCompleted;
     private bool _nafathExpired;
     private int _countdown = 120;
@@ -196,7 +197,11 @@
 
         try
         {
-            _nafathResult = await AuthClient.StartNafathAsync(_nationalId);
+            _nafathResult = await AuthClient.InitiateNafathAuthAsync(
+            new()
+            {
+                NationalId = _nationalId,
+            });
             _countdown = 120;
             StartCountdown();
             StartPolling();
@@ -236,8 +241,12 @@
 
             try
             {
-                var result = await AuthClient.VerifyNafathAsync(_nafathResult.TransactionId);
-                if (result.IsCompleted)
+                var result = await AuthClient.CompleteNafathAuthAsync(
+                    new()
+                    {
+                        TransactionId = _nafathResult.TransactionId
+                    });
+                if (result?.Success ?? false)
                 {
                     _nafathCompleted = true;
                     _pollTimer?.Stop();
@@ -274,7 +283,7 @@
             {
                 Email = _email,
                 Password = _password,
-                RememberMe = _rememberMe
+                //RememberMe = _rememberMe
             });
 
             Navigation.NavigateTo("/");

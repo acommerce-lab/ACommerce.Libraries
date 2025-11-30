@@ -1,6 +1,6 @@
 @page "/notifications"
 @using ACommerce.Client.Notifications
-@inject INotificationsClient NotificationsClient
+@inject NotificationsClient NotificationsClient
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
 
@@ -62,7 +62,18 @@
     {
         try
         {
-            _notifications = await NotificationsClient.GetNotificationsAsync();
+            _notifications = (await NotificationsClient.GetMyNotificationsAsync())?
+            .Select(notification =>
+            new NotificationItem
+            {
+                CreatedAt = notification.CreatedAt,
+                Id = notification.Id,
+                IsRead = notification.IsRead,
+                Message = notification.Message,
+                Title = notification.Title,
+                Type = notification.Type
+            })
+            .ToList();
         }
         catch
         {

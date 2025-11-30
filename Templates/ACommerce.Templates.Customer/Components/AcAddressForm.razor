@@ -1,5 +1,6 @@
 @namespace ACommerce.Templates.Customer.Components
 @using ACommerce.Client.Locations
+@using Microsoft.JSInterop
 
 <div class="ac-address-form @Class">
     @* Address Label *@
@@ -280,47 +281,47 @@
             StateHasChanged();
         }
     }
-}
 
-// ══════════════════════════════════════════════════════════════════
-// Models
-// ══════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════════
+    // Models
+    // ══════════════════════════════════════════════════════════════════
 
-/// <summary>
-/// نموذج بيانات العنوان للنموذج
-/// </summary>
-public class AddressFormModel
-{
-    public Guid Id { get; set; }
-    public string Label { get; set; } = string.Empty;
+    /// <summary>
+    /// نموذج بيانات العنوان للنموذج
+    /// </summary>
+    public class AddressFormModel
+    {
+        public Guid Id { get; set; }
+        public string Label { get; set; } = string.Empty;
 
-    // Location IDs
-    public Guid CountryId { get; set; }
-    public Guid RegionId { get; set; }
-    public Guid CityId { get; set; }
-    public Guid NeighborhoodId { get; set; }
+        // Location IDs
+        public Guid CountryId { get; set; }
+        public Guid RegionId { get; set; }
+        public Guid CityId { get; set; }
+        public Guid NeighborhoodId { get; set; }
 
-    // Address details
-    public string? Street { get; set; }
-    public string? BuildingNumber { get; set; }
-    public string? Floor { get; set; }
-    public string? Apartment { get; set; }
-    public string? PostalCode { get; set; }
-    public string? AdditionalInfo { get; set; }
+        // Address details
+        public string? Street { get; set; }
+        public string? BuildingNumber { get; set; }
+        public string? Floor { get; set; }
+        public string? Apartment { get; set; }
+        public string? PostalCode { get; set; }
+        public string? AdditionalInfo { get; set; }
 
-    // GPS
-    public double? Latitude { get; set; }
-    public double? Longitude { get; set; }
+        // GPS
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
 
-    // Status
-    public bool IsDefault { get; set; }
-}
+        // Status
+        public bool IsDefault { get; set; }
+    }
 
-/// <summary>
-/// نتيجة تحديد الموقع الجغرافي
-/// </summary>
-public class GeolocationResult
-{
-    public double Latitude { get; set; }
-    public double Longitude { get; set; }
+    /// <summary>
+    /// نتيجة تحديد الموقع الجغرافي
+    /// </summary>
+    public class GeolocationResult
+    {
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+    }
 }

@@ -11,6 +11,7 @@ using ACommerce.Realtime.SignalR.Hubs;
 using ACommerce.Realtime.SignalR.Extensions;
 using ACommerce.Chats.Core.Hubs;
 using ACommerce.Chats.Core.Extensions;
+using ACommerce.Locations.Extensions;
 
 // Controllers from libraries
 using ACommerce.Profiles.Api.Controllers;
@@ -68,7 +69,7 @@ try
         .AddApplicationPart(typeof(CurrenciesController).Assembly)
         .AddApplicationPart(typeof(OrdersController).Assembly)
         .AddApplicationPart(typeof(DocumentTypesController).Assembly)
-        .AddApplicationPart(typeof(LocationsController).Assembly)
+        .AddApplicationPart(typeof(LocationSearchController).Assembly)
         .AddApplicationPart(typeof(ChatsController).Assembly)
         .AddApplicationPart(typeof(ContactPointsController).Assembly);
 
@@ -97,6 +98,9 @@ try
 
     // SignalR for Real-time Communication
     builder.Services.AddACommerceSignalR<ChatHub, IChatClient>();
+
+    // Location Services
+    builder.Services.AddACommerceLocations();
 
     // Chat Services
     builder.Services.AddChatsCore();

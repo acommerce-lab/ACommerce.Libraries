@@ -1,6 +1,6 @@
 @page "/chats"
 @using ACommerce.Client.Chats
-@inject IChatsClient ChatsClient
+@inject ChatsClient ChatsClient
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
 
@@ -78,7 +78,20 @@
     {
         try
         {
-            _chats = await ChatsClient.GetChatsAsync();
+            _chats = (await ChatsClient.GetConversationsAsync())
+            .Select(chat =>
+            new ChatListItem
+                {
+                    Avatar = chat.OtherPartyAvatar,
+                    IsOnline = chat.IsOnline,
+                    LastMessage = chat.LastMessage?.Content ?? "",
+                    LastMessageAt = chat.LastMessage?.SentAt ?? DateTime.Now,
+                    Name = chat.OtherPartyName,
+                    Id = chat.Id,
+                    IsTyping = false,
+                    UnreadCount = chat.UnreadCount,
+                })
+            .ToList();
         }
         catch
         {

@@ -8,7 +8,7 @@
         <h1 class="ashare-hero-title">ابحث عن مساحتك المثالية</h1>
         <p class="ashare-hero-subtitle">قاعات اجتماعات، مكاتب مشتركة، مساحات تجارية وأكثر</p>
 
-        <div class="ac-search-box" @onclick="() => Navigation.NavigateTo("/search")">
+        <div class="ac-search-box" @onclick="@(() => Navigation.NavigateTo("/search"))">
             <i class="bi bi-search ac-search-icon"></i>
             <input type="text"
                    class="ac-search-input"
@@ -130,11 +130,11 @@
 
     @* Quick Actions *@
     <section class="ac-section ashare-quick-actions">
-        <div class="ashare-action-card" @onclick="() => Navigation.NavigateTo("/explore")">
+        <div class="ashare-action-card" @onclick="@(() => Navigation.NavigateTo("/explore"))">
             <i class="bi bi-compass"></i>
             <span>استكشف المساحات</span>
         </div>
-        <div class="ashare-action-card" @onclick="() => Navigation.NavigateTo("/bookings")">
+        <div class="ashare-action-card" @onclick="@(() => Navigation.NavigateTo("/bookings"))">
             <i class="bi bi-calendar-check"></i>
             <span>حجوزاتي</span>
         </div>

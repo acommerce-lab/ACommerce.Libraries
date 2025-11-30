@@ -1,7 +1,7 @@
 @page "/profile"
 @inject SpaceDataService DataService
 @inject IAppNavigationService Navigation
-@inject ThemeService ThemeService
+@inject Ashare.App.Services.ThemeService ThemeService
 
 <div class="ac-page ashare-profile-page">
     @* Profile Header *@
@@ -36,7 +36,7 @@
         <div class="ashare-menu-section">
             <h3 class="ashare-menu-title">الحساب</h3>
             <div class="ashare-menu-items">
-                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/profile/edit\")">
+                <button class="ashare-menu-item" @onclick="@(() => Navigation.NavigateTo("/profile/edit"))">
                     <div class="ashare-menu-icon">
                         <i class="bi bi-person"></i>
                     </div>
@@ -45,7 +45,7 @@
                     </div>
                     <i class="bi bi-chevron-left"></i>
                 </button>
-                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/notifications\")">
+                <button class="ashare-menu-item" @onclick="@(() => Navigation.NavigateTo("/notifications"))">
                     <div class="ashare-menu-icon">
                         <i class="bi bi-bell"></i>
                     </div>
@@ -58,7 +58,7 @@
                     </div>
                     <i class="bi bi-chevron-left"></i>
                 </button>
-                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/addresses\")">
+                <button class="ashare-menu-item" @onclick="@(() => Navigation.NavigateTo("/addresses"))">
                     <div class="ashare-menu-icon">
                         <i class="bi bi-geo-alt"></i>
                     </div>
@@ -67,7 +67,7 @@
                     </div>
                     <i class="bi bi-chevron-left"></i>
                 </button>
-                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/payments\")">
+                <button class="ashare-menu-item" @onclick="@(() => Navigation.NavigateTo("/payments"))">
                     <div class="ashare-menu-icon">
                         <i class="bi bi-credit-card"></i>
                     </div>
@@ -95,7 +95,7 @@
                         <span class="ashare-toggle-slider"></span>
                     </label>
                 </div>
-                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/language\")">
+                <button class="ashare-menu-item" @onclick="@(() => Navigation.NavigateTo("/language"))">
                     <div class="ashare-menu-icon">
                         <i class="bi bi-globe"></i>
                     </div>
@@ -105,7 +105,7 @@
                     </div>
                     <i class="bi bi-chevron-left"></i>
                 </button>
-                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/privacy\")">
+                <button class="ashare-menu-item" @onclick="@(() => Navigation.NavigateTo("/privacy"))">
                     <div class="ashare-menu-icon">
                         <i class="bi bi-shield-check"></i>
                     </div>
@@ -121,7 +121,7 @@
         <div class="ashare-menu-section">
             <h3 class="ashare-menu-title">المضيف</h3>
             <div class="ashare-menu-items">
-                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/host/spaces\")">
+                <button class="ashare-menu-item" @onclick="@(() => Navigation.NavigateTo("/host/spaces"))">
                     <div class="ashare-menu-icon">
                         <i class="bi bi-building"></i>
                     </div>
@@ -130,7 +130,7 @@
                     </div>
                     <i class="bi bi-chevron-left"></i>
                 </button>
-                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/host/add\")">
+                <button class="ashare-menu-item" @onclick="@(() => Navigation.NavigateTo("/host/add"))">
                     <div class="ashare-menu-icon">
                         <i class="bi bi-plus-circle"></i>
                     </div>
@@ -139,7 +139,7 @@
                     </div>
                     <i class="bi bi-chevron-left"></i>
                 </button>
-                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/host/earnings\")">
+                <button class="ashare-menu-item" @onclick="@(() => Navigation.NavigateTo("/host/earnings"))">
                     <div class="ashare-menu-icon">
                         <i class="bi bi-wallet2"></i>
                     </div>
@@ -155,7 +155,7 @@
         <div class="ashare-menu-section">
             <h3 class="ashare-menu-title">المساعدة</h3>
             <div class="ashare-menu-items">
-                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/help\")">
+                <button class="ashare-menu-item" @onclick="@(() => Navigation.NavigateTo("/help"))">
                     <div class="ashare-menu-icon">
                         <i class="bi bi-question-circle"></i>
                     </div>
@@ -164,7 +164,7 @@
                     </div>
                     <i class="bi bi-chevron-left"></i>
                 </button>
-                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/support\")">
+                <button class="ashare-menu-item" @onclick="@(() => Navigation.NavigateTo("/support"))">
                     <div class="ashare-menu-icon">
                         <i class="bi bi-headset"></i>
                     </div>
@@ -173,7 +173,7 @@
                     </div>
                     <i class="bi bi-chevron-left"></i>
                 </button>
-                <button class="ashare-menu-item" @onclick="() => Navigation.NavigateTo(\"/about\")">
+                <button class="ashare-menu-item" @onclick="@(() => Navigation.NavigateTo("/about"))">
                     <div class="ashare-menu-icon">
                         <i class="bi bi-info-circle"></i>
                     </div>
