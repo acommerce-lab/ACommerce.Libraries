@@ -1,0 +1,120 @@
+@page "/chats"
+@using ACommerce.Client.Chats
+@inject IChatsClient ChatsClient
+@inject IAppNavigationService Navigation
+@inject ILocalizationService L
+
+<div class="ac-page ashare-chats-page">
+    <div class="ac-page-header">
+        <h1>@L["Messages"]</h1>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="ashare-loading">
+            <div class="ac-spinner"></div>
+            <span>@L["Loading"]</span>
+        </div>
+    }
+    else if (_chats?.Any() == true)
+    {
+        <div class="ashare-chats-list">
+            @foreach (var chat in _chats)
+            {
+                <div class="ashare-chat-item" @onclick="() => OpenChat(chat.Id)">
+                    <div class="ashare-chat-avatar">
+                        @if (!string.IsNullOrEmpty(chat.Avatar))
+                        {
+                            <img src="@chat.Avatar" alt="" />
+                        }
+                        else
+                        {
+                            <i class="bi bi-person-circle"></i>
+                        }
+                        @if (chat.IsOnline)
+                        {
+                            <span class="ashare-online-indicator"></span>
+                        }
+                    </div>
+                    <div class="ashare-chat-content">
+                        <div class="ashare-chat-header">
+                            <h4 class="ashare-chat-name">@chat.Name</h4>
+                            <span class="ashare-chat-time">@FormatTime(chat.LastMessageAt)</span>
+                        </div>
+                        <div class="ashare-chat-preview">
+                            @if (chat.IsTyping)
+                            {
+                                <span class="ashare-typing">@L["Typing"]</span>
+                            }
+                            else
+                            {
+                                <span class="@(chat.UnreadCount > 0 ? "unread" : "")">@chat.LastMessage</span>
+                            }
+                            @if (chat.UnreadCount > 0)
+                            {
+                                <span class="ashare-unread-badge">@chat.UnreadCount</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="ashare-empty-state">
+            <i class="bi bi-chat-dots"></i>
+            <h3>@L["NoChats"]</h3>
+            <p>@L["StartChatHint"]</p>
+        </div>
+    }
+</div>
+
+@code {
+    private List<ChatListItem>? _chats;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _chats = await ChatsClient.GetChatsAsync();
+        }
+        catch
+        {
+            _chats = [];
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void OpenChat(Guid chatId)
+    {
+        Navigation.NavigateTo($"/chat/{chatId}");
+    }
+
+    private string FormatTime(DateTime dateTime)
+    {
+        var diff = DateTime.Now - dateTime;
+        if (diff.TotalMinutes < 1) return L["Now"];
+        if (diff.TotalHours < 1) return $"{(int)diff.TotalMinutes}m";
+        if (diff.TotalDays < 1) return $"{(int)diff.TotalHours}h";
+        if (diff.TotalDays < 7) return $"{(int)diff.TotalDays}d";
+        return dateTime.ToString("MM/dd");
+    }
+
+    // Chat List Item DTO
+    public class ChatListItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
+        public string? Avatar { get; set; }
+        public string? LastMessage { get; set; }
+        public DateTime LastMessageAt { get; set; }
+        public int UnreadCount { get; set; }
+        public bool IsOnline { get; set; }
+        public bool IsTyping { get; set; }
+    }
+}

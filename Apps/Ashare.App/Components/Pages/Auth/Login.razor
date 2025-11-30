@@ -1,0 +1,295 @@
+@page "/login"
+@using ACommerce.Client.Auth
+@inject IAuthClient AuthClient
+@inject IAppNavigationService Navigation
+@inject ILocalizationService L
+@inject ThemeService Theme
+
+<div class="ac-page ashare-login-page @(Theme.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
+    <div class="ashare-login-header">
+        <div class="ashare-logo">
+            <span class="ashare-logo-text">@L["AppName"]</span>
+            <span class="ashare-logo-subtitle">@L["AppTagline"]</span>
+        </div>
+    </div>
+
+    <div class="ashare-login-content">
+        @if (_showNafath)
+        {
+            @* Nafath Login *@
+            <div class="ashare-nafath-container">
+                <div class="ashare-nafath-logo">
+                    <i class="bi bi-shield-check" style="font-size: 48px; color: var(--ashare-primary)"></i>
+                    <span>نفاذ</span>
+                </div>
+
+                @if (_nafathResult == null)
+                {
+                    <div class="ac-form-group">
+                        <label>@L["NationalId"]</label>
+                        <input type="text"
+                               class="ac-input"
+                               placeholder="@L["EnterNationalId"]"
+                               @bind="_nationalId"
+                               maxlength="10"
+                               inputmode="numeric" />
+                    </div>
+
+                    <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
+                            @onclick="StartNafathLogin"
+                            disabled="@(_isLoading || _nationalId.Length != 10)">
+                        @if (_isLoading)
+                        {
+                            <span class="ac-spinner"></span>
+                        }
+                        else
+                        {
+                            <span>@L["ContinueWithNafath"]</span>
+                        }
+                    </button>
+                }
+                else
+                {
+                    <div class="ashare-nafath-waiting">
+                        <div class="ashare-nafath-number">@_nafathResult.Random</div>
+                        <p>@L["SelectNumberInNafathApp"]</p>
+
+                        <div class="ashare-nafath-timer">
+                            <div class="ashare-timer-circle">
+                                <span>@_countdown</span>
+                            </div>
+                            <span>@L["SecondsRemaining"]</span>
+                        </div>
+
+                        @if (_nafathCompleted)
+                        {
+                            <div class="ashare-nafath-success">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>@L["LoginSuccessful"]</span>
+                            </div>
+                        }
+                        else if (_nafathExpired)
+                        {
+                            <div class="ashare-nafath-error">
+                                <i class="bi bi-clock-fill"></i>
+                                <span>@L["SessionExpired"]</span>
+                            </div>
+                            <button class="ac-btn ac-btn-secondary" @onclick="ResetNafath">
+                                @L["TryAgain"]
+                            </button>
+                        }
+                    </div>
+                }
+
+                <button class="ashare-alt-login" @onclick="() => _showNafath = false">
+                    @L["LoginWithEmail"]
+                </button>
+            </div>
+        }
+        else
+        {
+            @* Email Login *@
+            <div class="ashare-email-login">
+                <h2>@L["WelcomeBack"]</h2>
+                <p class="ashare-login-subtitle">@L["LoginToYourAccount"]</p>
+
+                @if (!string.IsNullOrEmpty(_errorMessage))
+                {
+                    <div class="ashare-error-alert">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span>@_errorMessage</span>
+                    </div>
+                }
+
+                <div class="ac-form-group">
+                    <label>@L["Email"]</label>
+                    <input type="email"
+                           class="ac-input"
+                           placeholder="@L["EnterEmail"]"
+                           @bind="_email" />
+                </div>
+
+                <div class="ac-form-group">
+                    <label>@L["Password"]</label>
+                    <div class="ashare-password-input">
+                        <input type="@(_showPassword ? "text" : "password")"
+                               class="ac-input"
+                               placeholder="@L["EnterPassword"]"
+                               @bind="_password" />
+                        <button type="button" class="ashare-toggle-password" @onclick="() => _showPassword = !_showPassword">
+                            <i class="bi @(_showPassword ? "bi-eye-slash" : "bi-eye")"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="ashare-login-options">
+                    <label class="ashare-remember-me">
+                        <input type="checkbox" @bind="_rememberMe" />
+                        <span>@L["RememberMe"]</span>
+                    </label>
+                    <a href="/forgot-password" class="ashare-forgot-link">@L["ForgotPassword"]</a>
+                </div>
+
+                <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
+                        @onclick="LoginWithEmail"
+                        disabled="@(_isLoading || string.IsNullOrEmpty(_email) || string.IsNullOrEmpty(_password))">
+                    @if (_isLoading)
+                    {
+                        <span class="ac-spinner"></span>
+                    }
+                    else
+                    {
+                        <span>@L["Login"]</span>
+                    }
+                </button>
+
+                <div class="ashare-divider">
+                    <span>@L["Or"]</span>
+                </div>
+
+                <button class="ac-btn ac-btn-nafath ac-btn-lg ac-btn-block" @onclick="() => _showNafath = true">
+                    <i class="bi bi-shield-check"></i>
+                    @L["LoginWithNafath"]
+                </button>
+
+                <p class="ashare-register-link">
+                    @L["DontHaveAccount"]
+                    <a href="/register">@L["CreateAccount"]</a>
+                </p>
+            </div>
+        }
+    </div>
+
+    @* Language Selector *@
+    <div class="ashare-language-selector">
+        @foreach (var lang in L.SupportedLanguages)
+        {
+            <button class="@(L.CurrentLanguage == lang.Code ? "active" : "")"
+                    @onclick="() => L.SetLanguageAsync(lang.Code)">
+                @lang.NativeName
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    private bool _showNafath = true;
+    private string _nationalId = "";
+    private string _email = "";
+    private string _password = "";
+    private bool _showPassword;
+    private bool _rememberMe;
+    private bool _isLoading;
+    private string? _errorMessage;
+
+    private NafathStartResponse? _nafathResult;
+    private bool _nafathCompleted;
+    private bool _nafathExpired;
+    private int _countdown = 120;
+    private System.Timers.Timer? _timer;
+    private System.Timers.Timer? _pollTimer;
+
+    private async Task StartNafathLogin()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+
+        try
+        {
+            _nafathResult = await AuthClient.StartNafathAsync(_nationalId);
+            _countdown = 120;
+            StartCountdown();
+            StartPolling();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+
+        _isLoading = false;
+    }
+
+    private void StartCountdown()
+    {
+        _timer?.Dispose();
+        _timer = new System.Timers.Timer(1000);
+        _timer.Elapsed += async (s, e) =>
+        {
+            _countdown--;
+            if (_countdown <= 0)
+            {
+                _timer?.Stop();
+                _nafathExpired = true;
+            }
+            await InvokeAsync(StateHasChanged);
+        };
+        _timer.Start();
+    }
+
+    private void StartPolling()
+    {
+        _pollTimer?.Dispose();
+        _pollTimer = new System.Timers.Timer(3000);
+        _pollTimer.Elapsed += async (s, e) =>
+        {
+            if (_nafathResult?.TransactionId == null) return;
+
+            try
+            {
+                var result = await AuthClient.VerifyNafathAsync(_nafathResult.TransactionId);
+                if (result.IsCompleted)
+                {
+                    _nafathCompleted = true;
+                    _pollTimer?.Stop();
+                    _timer?.Stop();
+                    await InvokeAsync(() => Navigation.NavigateTo("/"));
+                }
+            }
+            catch
+            {
+                // Continue polling
+            }
+
+            await InvokeAsync(StateHasChanged);
+        };
+        _pollTimer.Start();
+    }
+
+    private void ResetNafath()
+    {
+        _nafathResult = null;
+        _nafathCompleted = false;
+        _nafathExpired = false;
+        _countdown = 120;
+    }
+
+    private async Task LoginWithEmail()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+
+        try
+        {
+            var result = await AuthClient.LoginAsync(new LoginRequest
+            {
+                Email = _email,
+                Password = _password,
+                RememberMe = _rememberMe
+            });
+
+            Navigation.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+
+        _isLoading = false;
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+        _pollTimer?.Dispose();
+    }
+}

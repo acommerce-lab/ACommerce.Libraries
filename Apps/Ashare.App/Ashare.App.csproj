@@ -58,6 +58,7 @@
 	<ItemGroup>
 		<!-- Reference to Template Library -->
 		<ProjectReference Include="..\..\Templates\ACommerce.Templates.Customer\ACommerce.Templates.Customer.csproj" />
+
 		<!-- Reference to Clients -->
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Auth\ACommerce.Client.Auth.csproj" />
@@ -65,6 +66,10 @@
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Profiles\ACommerce.Client.Profiles.csproj" />
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Chats\ACommerce.Client.Chats.csproj" />
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Notifications\ACommerce.Client.Notifications.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Realtime\ACommerce.Client.Realtime.csproj" />
+
+		<!-- Reference to Localization -->
+		<ProjectReference Include="..\..\Modules\ACommerce.Localization\ACommerce.Localization.csproj" />
 	</ItemGroup>
 
 	<!-- Ensure wwwroot files are included -->
