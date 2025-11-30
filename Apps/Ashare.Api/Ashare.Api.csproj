@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Ashare.Api</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Core Infrastructure -->
+    <ProjectReference Include="..\..\Authentication\ACommerce.Authentication.JWT\ACommerce.Authentication.JWT.csproj" />
+    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.Infrastructure.EFCores\ACommerce.SharedKernel.Infrastructure.EFCores.csproj" />
+    <ProjectReference Include="..\..\AspNetCore\ACommerce.SharedKernel.AspNetCore\ACommerce.SharedKernel.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
+
+    <!-- Authentication & Authorization -->
+    <ProjectReference Include="..\..\AspNetCore\ACommerce.Authentication.AspNetCore\ACommerce.Authentication.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\AspNetCore\ACommerce.Authentication.AspNetCore.Swagger\ACommerce.Authentication.AspNetCore.Swagger.csproj" />
+    <ProjectReference Include="..\..\Authentication\ACommerce.Authentication.Nafath\ACommerce.Authentication.Nafath.csproj" />
+
+    <!-- Identity & Profiles -->
+    <ProjectReference Include="..\..\Identity\ACommerce.Profiles\ACommerce.Profiles.csproj" />
+    <ProjectReference Include="..\..\Identity\ACommerce.Profiles.Api\ACommerce.Profiles.Api.csproj" />
+
+    <!-- Spaces (Main Domain) -->
+    <ProjectReference Include="..\..\Other\ACommerce.Spaces\ACommerce.Spaces.csproj" />
+
+    <!-- Locations -->
+    <ProjectReference Include="..\..\Other\ACommerce.Locations\ACommerce.Locations.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Locations.Api\ACommerce.Locations.Api.csproj" />
+
+    <!-- Notifications & Chat -->
+    <ProjectReference Include="..\..\Other\ACommerce.Notifications.Core\ACommerce.Notifications.Core.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Notifications.Recipients\ACommerce.Notifications.Recipients.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Notifications.Recipients.Api\ACommerce.Notifications.Recipients.Api.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Chats.Core\ACommerce.Chats.Core.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Chats.Api\ACommerce.Chats.Api.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Realtime.SignalR\ACommerce.Realtime.SignalR.csproj" />
+
+    <!-- Files -->
+    <ProjectReference Include="..\..\Files\ACommerce.Files.Storage.Local\ACommerce.Files.Storage.Local.csproj" />
+    <ProjectReference Include="..\..\AspNetCore\ACommerce.Files.AspNetCore\ACommerce.Files.AspNetCore.csproj" />
+
+    <!-- Payments -->
+    <ProjectReference Include="..\..\Payments\ACommerce.Payments.Abstractions\ACommerce.Payments.Abstractions.csproj" />
+
+    <!-- Localization -->
+    <ProjectReference Include="..\..\Modules\ACommerce.Localization\ACommerce.Localization.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+  </ItemGroup>
+
+</Project>
