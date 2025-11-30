@@ -1,37 +1,50 @@
 /* ══════════════════════════════════════════════════════════════════
    Ashare - عشير
-   Shared Spaces App Styles
+   Visual Identity 2025 - The First Shared Housing App in Saudi Arabia
    ══════════════════════════════════════════════════════════════════ */
 
 /* ─────────────────────────────────────────────────────────────────
-   CSS Variables
+   Google Fonts Import (Rubik for English)
+   ───────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
+
+/* ─────────────────────────────────────────────────────────────────
+   CSS Variables - Ashare Visual Identity 2025
    ───────────────────────────────────────────────────────────────── */
 :root {
-    /* Brand Colors */
-    --ashare-primary: #0EA5E9;
-    --ashare-primary-light: #38BDF8;
-    --ashare-primary-dark: #0284C7;
-    --ashare-secondary: #8B5CF6;
-    --ashare-accent: #F59E0B;
+    /* Brand Colors from Visual Identity Guidelines */
+    /* Primary: Deep Olive Green - symbolizes sustainability, trust, stability */
+    --ashare-primary: #345454;
+    --ashare-primary-light: #4A6B6B;
+    --ashare-primary-dark: #263F3F;
 
-    /* Neutral Colors */
+    /* Secondary: Soft Orange - represents vitality, optimism, positive energy */
+    --ashare-secondary: #F4844C;
+    --ashare-secondary-light: #F69B6B;
+    --ashare-secondary-dark: #E06D34;
+
+    /* Accent uses secondary orange */
+    --ashare-accent: #F4844C;
+
+    /* Neutral Colors - Warm tones to complement brand */
     --ashare-white: #FFFFFF;
-    --ashare-gray-50: #F8FAFC;
-    --ashare-gray-100: #F1F5F9;
-    --ashare-gray-200: #E2E8F0;
-    --ashare-gray-300: #CBD5E1;
-    --ashare-gray-400: #94A3B8;
-    --ashare-gray-500: #64748B;
-    --ashare-gray-600: #475569;
-    --ashare-gray-700: #334155;
-    --ashare-gray-800: #1E293B;
-    --ashare-gray-900: #0F172A;
+    --ashare-cream: #FEE8D6;
+    --ashare-gray-50: #FEF7F0;
+    --ashare-gray-100: #F5EDE5;
+    --ashare-gray-200: #E8DDD3;
+    --ashare-gray-300: #D4C8BC;
+    --ashare-gray-400: #A89B8E;
+    --ashare-gray-500: #7D7268;
+    --ashare-gray-600: #5C5349;
+    --ashare-gray-700: #3D362E;
+    --ashare-gray-800: #2A241E;
+    --ashare-gray-900: #1A1612;
 
     /* Status Colors */
     --ashare-success: #10B981;
     --ashare-warning: #F59E0B;
     --ashare-danger: #EF4444;
-    --ashare-info: #3B82F6;
+    --ashare-info: #345454;
 
     /* Spacing */
     --ashare-spacing-xs: 4px;
@@ -63,19 +76,23 @@
     --bottom-nav-height: 64px;
 }
 
-/* Dark Mode */
+/* Dark Mode - Ashare Brand */
 .ac-dark {
-    --ashare-white: #0F172A;
-    --ashare-gray-50: #1E293B;
-    --ashare-gray-100: #334155;
-    --ashare-gray-200: #475569;
-    --ashare-gray-300: #64748B;
-    --ashare-gray-400: #94A3B8;
-    --ashare-gray-500: #CBD5E1;
-    --ashare-gray-600: #E2E8F0;
-    --ashare-gray-700: #F1F5F9;
-    --ashare-gray-800: #F8FAFC;
+    --ashare-white: #1A1612;
+    --ashare-cream: #2A241E;
+    --ashare-gray-50: #2A241E;
+    --ashare-gray-100: #3D362E;
+    --ashare-gray-200: #5C5349;
+    --ashare-gray-300: #7D7268;
+    --ashare-gray-400: #A89B8E;
+    --ashare-gray-500: #D4C8BC;
+    --ashare-gray-600: #E8DDD3;
+    --ashare-gray-700: #F5EDE5;
+    --ashare-gray-800: #FEF7F0;
     --ashare-gray-900: #FFFFFF;
+    /* Keep primary/secondary consistent in dark mode */
+    --ashare-primary: #4A6B6B;
+    --ashare-secondary: #F69B6B;
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -93,12 +110,26 @@ html {
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background-color: var(--ashare-gray-50);
+    /* Typography from Visual Identity Guidelines 2025 */
+    /* Arabic: Cairo (free alternative to Brando Arabic) */
+    /* English: Rubik for body, Arial Rounded for headlines */
+    font-family: 'Cairo', 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-color: var(--ashare-cream);
     color: var(--ashare-gray-900);
-    line-height: 1.5;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+/* Arabic text specific styling - Cairo has excellent Arabic support */
+:lang(ar), [dir="rtl"] {
+    font-family: 'Cairo', 'Rubik', sans-serif;
+    letter-spacing: 0;
+}
+
+/* Headlines styling */
+h1, h2, h3, .ashare-logo-text {
+    font-weight: 700;
 }
 
 .status-bar-spacer {
@@ -153,7 +184,7 @@ body {
    ───────────────────────────────────────────────────────────────── */
 .ashare-app {
     min-height: 100vh;
-    background-color: var(--ashare-gray-50);
+    background-color: var(--ashare-cream);
 }
 
 /* ─────────────────────────────────────────────────────────────────
