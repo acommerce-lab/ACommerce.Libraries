@@ -18,10 +18,10 @@ public class AshareApiService
 	private readonly ProductListingsClient _listingsClient;
 	private readonly OrdersClient _ordersClient;
 	private readonly HttpClient _httpClient;
-	private readonly string _baseUrl;
+	private readonly string _baseUrl = "https://api.ashare.app";
 
-	// Local cache for favorites (can be persisted to local storage)
-	private readonly HashSet<Guid> _favorites = new();
+    // Local cache for favorites (can be persisted to local storage)
+    private readonly HashSet<Guid> _favorites = [];
 
 	public AshareApiService(
 		CategoriesClient categoriesClient,
@@ -35,11 +35,10 @@ public class AshareApiService
 		_listingsClient = listingsClient;
 		_ordersClient = ordersClient;
 		_httpClient = httpClientFactory.CreateClient("AshareApi");
-#if DEBUG
-		_baseUrl = "https://localhost:5001";
-#else
-		_baseUrl = "https://api.ashare.app";
-#endif
+        if (DeviceInfo.Platform == DevicePlatform.Android)
+            _baseUrl = "https://10.0.2.2:5001";
+        else if (DeviceInfo.Platform == DevicePlatform.WinUI)
+            _baseUrl = "https://localhost:5001";
 	}
 
 	// ═══════════════════════════════════════════════════════════════════
