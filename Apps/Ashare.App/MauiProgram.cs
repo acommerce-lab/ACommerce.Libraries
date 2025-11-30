@@ -25,9 +25,6 @@ using ACommerce.Client.Vendors;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Themes;
 using Microsoft.Extensions.Logging;
-using ACommerce.Client.Core.Extensions;
-using ACommerce.Client.Auth.Extensions;
-using ACommerce.Client.Locations.Extensions;
 using ThemeService = Ashare.App.Services.ThemeService;
 
 namespace Ashare.App;
@@ -154,11 +151,7 @@ public static class MauiProgram
         builder.Services.AddContactPointsClient(apiBaseUrl);
 
         // Real-time Client (SignalR)
-        //builder.Services.AddRealtimeClient(options =>
-        //{
-        //    options.HubUrl = $"{apiBaseUrl}/hubs/realtime";
-        //    options.AutoReconnect = true;
-        //});
+        builder.Services.AddSingleton<RealtimeClient>();
 
         // Files Client
         builder.Services.AddScoped<FilesClient>();

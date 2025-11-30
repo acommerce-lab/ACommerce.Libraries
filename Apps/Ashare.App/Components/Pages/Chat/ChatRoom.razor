@@ -143,7 +143,7 @@
 
             // Subscribe to real-time updates
             await RealtimeClient.ConnectAsync();
-            _messageSubscription = RealtimeClient.OnMessage(HandleNewMessage);
+            _messageSubscription = RealtimeClient.On<object>("ReceiveMessage", HandleNewMessage);
 
             // Mark as read
             await ChatsClient.MarkAsReadAsync(ChatId);

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="456" height="456" viewBox="0 0 456 456" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Shared spaces / building icon -->
+    <path d="M128 360V140C128 128.954 136.954 120 148 120H228V360" stroke="white" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M228 160H308C319.046 160 328 168.954 328 180V360" stroke="white" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M168 176H188" stroke="white" stroke-width="16" stroke-linecap="round"/>
+    <path d="M168 220H188" stroke="white" stroke-width="16" stroke-linecap="round"/>
+    <path d="M168 264H188" stroke="white" stroke-width="16" stroke-linecap="round"/>
+    <path d="M268 200H288" stroke="white" stroke-width="16" stroke-linecap="round"/>
+    <path d="M268 244H288" stroke="white" stroke-width="16" stroke-linecap="round"/>
+    <path d="M268 288H288" stroke="white" stroke-width="16" stroke-linecap="round"/>
+    <path d="M196 360V320C196 314.477 200.477 310 206 310H250C255.523 310 260 314.477 260 320V360" stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
