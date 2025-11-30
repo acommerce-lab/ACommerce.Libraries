@@ -1,0 +1,494 @@
+@namespace ACommerce.Templates.Customer.Pages
+
+<div class="ac-page ac-create-listing-page">
+    @* Header *@
+    <div class="ac-page-header">
+        <h1 class="ac-page-title">
+            @if (CurrentStep == CreateListingStep.SelectCategory)
+            {
+                <span>إنشاء عرض جديد</span>
+            }
+            else if (SelectedCategory != null)
+            {
+                <span>@SelectedCategory.Name</span>
+            }
+        </h1>
+
+        @if (CurrentStep != CreateListingStep.SelectCategory && CurrentStep != CreateListingStep.Success)
+        {
+            <button class="ac-btn ac-btn-ghost" @onclick="GoBack">
+                <i class="bi bi-arrow-right"></i>
+                رجوع
+            </button>
+        }
+    </div>
+
+    @* Progress Steps *@
+    @if (CurrentStep != CreateListingStep.SelectCategory && CurrentStep != CreateListingStep.Success && CurrentStep != CreateListingStep.Error)
+    {
+        <div class="ac-progress-steps">
+            <div class="ac-step @(CurrentStep >= CreateListingStep.FillDetails ? "active" : "") @(CurrentStep > CreateListingStep.FillDetails ? "completed" : "")">
+                <span class="ac-step-number">1</span>
+                <span class="ac-step-label">التفاصيل</span>
+            </div>
+            <div class="ac-step @(CurrentStep >= CreateListingStep.AddImages ? "active" : "") @(CurrentStep > CreateListingStep.AddImages ? "completed" : "")">
+                <span class="ac-step-number">2</span>
+                <span class="ac-step-label">الصور</span>
+            </div>
+            <div class="ac-step @(CurrentStep >= CreateListingStep.SetLocation ? "active" : "") @(CurrentStep > CreateListingStep.SetLocation ? "completed" : "")">
+                <span class="ac-step-number">3</span>
+                <span class="ac-step-label">الموقع</span>
+            </div>
+            <div class="ac-step @(CurrentStep >= CreateListingStep.Review ? "active" : "")">
+                <span class="ac-step-number">4</span>
+                <span class="ac-step-label">مراجعة</span>
+            </div>
+        </div>
+    }
+
+    @* Content based on current step *@
+    <div class="ac-page-content">
+        @switch (CurrentStep)
+        {
+            case CreateListingStep.SelectCategory:
+                <div class="ac-category-selection">
+                    <p class="ac-section-subtitle">اختر نوع العرض</p>
+                    <div class="ac-category-grid">
+                        @if (Categories != null)
+                        {
+                            @foreach (var category in Categories)
+                            {
+                                <div class="ac-category-card" @onclick="() => SelectCategory(category)">
+                                    @if (!string.IsNullOrEmpty(category.Icon))
+                                    {
+                                        <div class="ac-category-icon">
+                                            <i class="bi @category.Icon"></i>
+                                        </div>
+                                    }
+                                    <h3 class="ac-category-name">@category.Name</h3>
+                                    @if (!string.IsNullOrEmpty(category.Description))
+                                    {
+                                        <p class="ac-category-desc">@category.Description</p>
+                                    }
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <AcSpinner Text="جاري تحميل الفئات..." />
+                        }
+                    </div>
+                </div>
+                break;
+
+            case CreateListingStep.FillDetails:
+                <div class="ac-details-form">
+                    @* Title field *@
+                    <AcInput Id="title"
+                             Label="عنوان العرض"
+                             Placeholder="أدخل عنواناً واضحاً ومختصراً"
+                             Value="@Model.Title"
+                             ValueChanged="(v) => Model.Title = v"
+                             Required="true" />
+
+                    @* Dynamic attributes based on category *@
+                    @if (IsLoadingAttributes)
+                    {
+                        <AcSpinner Text="جاري تحميل الخصائص..." />
+                    }
+                    else if (CategoryAttributes != null && CategoryAttributes.Any())
+                    {
+                        <AcDynamicForm Attributes="@CategoryAttributes"
+                                       Values="@Model.Attributes"
+                                       ValuesChanged="(v) => Model.Attributes = v" />
+                    }
+
+                    <div class="ac-form-actions">
+                        <AcButton Text="التالي"
+                                  OnClick="GoToImages"
+                                  FullWidth="true"
+                                  Disabled="@(!IsDetailsValid)" />
+                    </div>
+                </div>
+                break;
+
+            case CreateListingStep.AddImages:
+                <div class="ac-images-section">
+                    <p class="ac-section-subtitle">أضف صوراً للعرض (اختياري)</p>
+
+                    <div class="ac-image-upload">
+                        <label class="ac-upload-area" for="imageUpload">
+                            <i class="bi bi-cloud-upload"></i>
+                            <span>اضغط لإضافة صور</span>
+                            <input type="file"
+                                   id="imageUpload"
+                                   accept="image/*"
+                                   multiple
+                                   @onchange="HandleImageUpload"
+                                   style="display: none" />
+                        </label>
+                    </div>
+
+                    @if (Model.Images.Any())
+                    {
+                        <div class="ac-image-preview-grid">
+                            @foreach (var (image, index) in Model.Images.Select((img, i) => (img, i)))
+                            {
+                                <div class="ac-image-preview">
+                                    <img src="@image" alt="صورة @(index + 1)" />
+                                    <button class="ac-remove-image" @onclick="() => RemoveImage(index)">
+                                        <i class="bi bi-x-circle-fill"></i>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <div class="ac-form-actions">
+                        <AcButton Text="التالي"
+                                  OnClick="GoToLocation"
+                                  FullWidth="true" />
+                    </div>
+                </div>
+                break;
+
+            case CreateListingStep.SetLocation:
+                <div class="ac-location-section">
+                    <p class="ac-section-subtitle">حدد موقع العرض</p>
+
+                    <AcInput Id="address"
+                             Label="العنوان"
+                             Placeholder="أدخل العنوان أو اسم الحي"
+                             Value="@Model.Address"
+                             ValueChanged="(v) => Model.Address = v"
+                             IconStart="bi-geo-alt" />
+
+                    @* Map placeholder - يمكن استبدالها بمكون خرائط حقيقي *@
+                    <div class="ac-map-container">
+                        @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+                        {
+                            <div class="ac-map-placeholder ac-map-has-location">
+                                <i class="bi bi-geo-alt-fill"></i>
+                                <p>تم تحديد الموقع</p>
+                                <small>@Model.Latitude?.ToString("F6"), @Model.Longitude?.ToString("F6")</small>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="ac-map-placeholder" @onclick="RequestLocation">
+                                <i class="bi bi-geo-alt"></i>
+                                <p>اضغط لتحديد موقعك الحالي</p>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="ac-form-actions">
+                        <AcButton Text="التالي"
+                                  OnClick="GoToReview"
+                                  FullWidth="true" />
+                    </div>
+                </div>
+                break;
+
+            case CreateListingStep.Review:
+                <div class="ac-review-section">
+                    <p class="ac-section-subtitle">راجع بيانات العرض قبل النشر</p>
+
+                    <div class="ac-review-card">
+                        <div class="ac-review-item">
+                            <span class="ac-review-label">الفئة:</span>
+                            <span class="ac-review-value">@SelectedCategory?.Name</span>
+                        </div>
+
+                        <div class="ac-review-item">
+                            <span class="ac-review-label">العنوان:</span>
+                            <span class="ac-review-value">@Model.Title</span>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.Address))
+                        {
+                            <div class="ac-review-item">
+                                <span class="ac-review-label">الموقع:</span>
+                                <span class="ac-review-value">@Model.Address</span>
+                            </div>
+                        }
+
+                        @if (Model.Images.Any())
+                        {
+                            <div class="ac-review-item">
+                                <span class="ac-review-label">الصور:</span>
+                                <span class="ac-review-value">@Model.Images.Count صورة</span>
+                            </div>
+                        }
+
+                        @* Dynamic attributes review *@
+                        @foreach (var attrInput in Model.Attributes)
+                        {
+                            var attrDef = CategoryAttributes?.FirstOrDefault(a => a.Id == attrInput.AttributeId);
+                            if (attrDef != null)
+                            {
+                                <div class="ac-review-item">
+                                    <span class="ac-review-label">@attrDef.Name:</span>
+                                    <span class="ac-review-value">@GetAttributeDisplayValue(attrInput, attrDef)</span>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    <div class="ac-form-actions">
+                        <AcButton Text="نشر العرض"
+                                  OnClick="SubmitListing"
+                                  FullWidth="true"
+                                  Variant="ButtonVariant.Primary" />
+                    </div>
+                </div>
+                break;
+
+            case CreateListingStep.Submitting:
+                <div class="ac-submitting-section">
+                    <AcSpinner Size="SpinnerSize.Large" Text="جاري نشر العرض..." />
+                </div>
+                break;
+
+            case CreateListingStep.Success:
+                <div class="ac-success-section">
+                    <div class="ac-success-icon">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <h2>تم نشر العرض بنجاح!</h2>
+                    <p>سيظهر عرضك للمستخدمين الآن</p>
+
+                    <div class="ac-form-actions">
+                        <AcButton Text="عرض التفاصيل"
+                                  OnClick="ViewListing"
+                                  FullWidth="true"
+                                  Variant="ButtonVariant.Primary" />
+                        <AcButton Text="إنشاء عرض آخر"
+                                  OnClick="CreateAnother"
+                                  FullWidth="true"
+                                  Variant="ButtonVariant.Outline" />
+                    </div>
+                </div>
+                break;
+
+            case CreateListingStep.Error:
+                <div class="ac-error-section">
+                    <div class="ac-error-icon">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </div>
+                    <h2>حدث خطأ</h2>
+                    <p>@ErrorMessage</p>
+
+                    <div class="ac-form-actions">
+                        <AcButton Text="حاول مرة أخرى"
+                                  OnClick="RetrySubmit"
+                                  FullWidth="true" />
+                    </div>
+                </div>
+                break;
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public List<ListingCategory>? Categories { get; set; }
+    [Parameter] public EventCallback<Guid> OnLoadCategoryAttributes { get; set; }
+    [Parameter] public EventCallback<CreateListingModel> OnSubmit { get; set; }
+    [Parameter] public EventCallback<Guid> OnViewListing { get; set; }
+    [Parameter] public EventCallback OnRequestLocation { get; set; }
+    [Parameter] public EventCallback<InputFileChangeEventArgs> OnImageUpload { get; set; }
+
+    public CreateListingStep CurrentStep { get; set; } = CreateListingStep.SelectCategory;
+    public ListingCategory? SelectedCategory { get; set; }
+    public List<ListingAttributeDefinition>? CategoryAttributes { get; set; }
+    public CreateListingModel Model { get; set; } = new();
+    public bool IsLoadingAttributes { get; set; }
+    public string? ErrorMessage { get; set; }
+    public Guid? CreatedListingId { get; set; }
+
+    private bool IsDetailsValid =>
+        !string.IsNullOrWhiteSpace(Model.Title) &&
+        (CategoryAttributes?.Where(a => a.IsRequired).All(a =>
+            Model.Attributes.Any(v => v.AttributeId == a.Id && HasValue(v))) ?? true);
+
+    private bool HasValue(ListingAttributeInput input) =>
+        !string.IsNullOrEmpty(input.TextValue) ||
+        input.NumberValue.HasValue ||
+        input.BooleanValue.HasValue ||
+        input.DateValue.HasValue ||
+        (input.MultiSelectValues?.Any() ?? false);
+
+    public void SetCategories(List<ListingCategory> categories)
+    {
+        Categories = categories;
+        StateHasChanged();
+    }
+
+    public void SetCategoryAttributes(List<ListingAttributeDefinition> attributes)
+    {
+        CategoryAttributes = attributes;
+        IsLoadingAttributes = false;
+        StateHasChanged();
+    }
+
+    public void SetLocation(double latitude, double longitude, string? address = null)
+    {
+        Model.Latitude = latitude;
+        Model.Longitude = longitude;
+        if (!string.IsNullOrEmpty(address))
+        {
+            Model.Address = address;
+        }
+        StateHasChanged();
+    }
+
+    public void SetCreatedListingId(Guid id)
+    {
+        CreatedListingId = id;
+        CurrentStep = CreateListingStep.Success;
+        StateHasChanged();
+    }
+
+    public void SetError(string message)
+    {
+        ErrorMessage = message;
+        CurrentStep = CreateListingStep.Error;
+        StateHasChanged();
+    }
+
+    public void AddImage(string imageUrl)
+    {
+        Model.Images.Add(imageUrl);
+        StateHasChanged();
+    }
+
+    private async Task SelectCategory(ListingCategory category)
+    {
+        SelectedCategory = category;
+        Model.CategoryId = category.Id;
+        CurrentStep = CreateListingStep.FillDetails;
+        IsLoadingAttributes = true;
+        await OnLoadCategoryAttributes.InvokeAsync(category.Id);
+    }
+
+    private void GoBack()
+    {
+        CurrentStep = CurrentStep switch
+        {
+            CreateListingStep.FillDetails => CreateListingStep.SelectCategory,
+            CreateListingStep.AddImages => CreateListingStep.FillDetails,
+            CreateListingStep.SetLocation => CreateListingStep.AddImages,
+            CreateListingStep.Review => CreateListingStep.SetLocation,
+            CreateListingStep.Error => CreateListingStep.Review,
+            _ => CurrentStep
+        };
+
+        if (CurrentStep == CreateListingStep.SelectCategory)
+        {
+            ResetForm();
+        }
+    }
+
+    private void GoToImages()
+    {
+        CurrentStep = CreateListingStep.AddImages;
+    }
+
+    private void GoToLocation()
+    {
+        CurrentStep = CreateListingStep.SetLocation;
+    }
+
+    private void GoToReview()
+    {
+        CurrentStep = CreateListingStep.Review;
+    }
+
+    private async Task RequestLocation()
+    {
+        await OnRequestLocation.InvokeAsync();
+    }
+
+    private async Task HandleImageUpload(ChangeEventArgs e)
+    {
+        // يتم التعامل مع رفع الصور في التطبيق المضيف
+        // هذا placeholder فقط
+    }
+
+    private void RemoveImage(int index)
+    {
+        if (index >= 0 && index < Model.Images.Count)
+        {
+            Model.Images.RemoveAt(index);
+        }
+    }
+
+    private async Task SubmitListing()
+    {
+        CurrentStep = CreateListingStep.Submitting;
+        await OnSubmit.InvokeAsync(Model);
+    }
+
+    private async Task ViewListing()
+    {
+        if (CreatedListingId.HasValue)
+        {
+            await OnViewListing.InvokeAsync(CreatedListingId.Value);
+        }
+    }
+
+    private void CreateAnother()
+    {
+        ResetForm();
+        CurrentStep = CreateListingStep.SelectCategory;
+    }
+
+    private void RetrySubmit()
+    {
+        CurrentStep = CreateListingStep.Review;
+    }
+
+    private void ResetForm()
+    {
+        SelectedCategory = null;
+        CategoryAttributes = null;
+        Model = new CreateListingModel();
+        CreatedListingId = null;
+        ErrorMessage = null;
+    }
+
+    private string GetAttributeDisplayValue(ListingAttributeInput input, ListingAttributeDefinition def)
+    {
+        if (input.MultiSelectValues?.Any() == true)
+        {
+            var displayValues = input.MultiSelectValues
+                .Select(v => def.Values.FirstOrDefault(dv => dv.Value == v)?.DisplayName ?? v)
+                .ToList();
+            return string.Join("، ", displayValues);
+        }
+
+        if (input.BooleanValue.HasValue)
+        {
+            return input.BooleanValue.Value ? "نعم" : "لا";
+        }
+
+        if (input.DateValue.HasValue)
+        {
+            return input.DateValue.Value.ToString("yyyy/MM/dd");
+        }
+
+        if (input.NumberValue.HasValue)
+        {
+            return input.NumberValue.Value.ToString();
+        }
+
+        if (!string.IsNullOrEmpty(input.TextValue))
+        {
+            // البحث عن DisplayName للقيم المحددة
+            var displayName = def.Values.FirstOrDefault(v => v.Value == input.TextValue)?.DisplayName;
+            return displayName ?? input.TextValue;
+        }
+
+        return "-";
+    }
+}
