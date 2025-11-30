@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Catalog.Attributes.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -44,9 +45,10 @@ public class AttributeValueRelationship : IBaseEntity
 	/// </summary>
 	public string? ConversionFormula { get; set; }
 
-    /// <summary>
-    /// ??????? ??????
-    /// </summary>
-    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
+	/// <summary>
+	/// ??????? ??????
+	/// </summary>
+	[NotMapped]
+	public Dictionary<string, string> Metadata { get; set; } = new();
 }
 

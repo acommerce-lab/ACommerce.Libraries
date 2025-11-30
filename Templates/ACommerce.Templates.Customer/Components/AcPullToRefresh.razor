@@ -1,0 +1,48 @@
+@namespace ACommerce.Templates.Customer.Components
+
+<div class="ac-pull-refresh @Class" @ref="_container">
+    <div class="ac-pull-refresh-indicator @(_isPulling ? "ac-pulling" : "") @(_isRefreshing ? "ac-refreshing" : "")">
+        @if (_isRefreshing)
+        {
+            <AcSpinner Size="SpinnerSize.Small" />
+            <span>@RefreshingText</span>
+        }
+        else if (_isPulling)
+        {
+            <i class="bi bi-arrow-down"></i>
+            <span>@(_pullDistance > Threshold ? ReleaseText : PullText)</span>
+        }
+    </div>
+
+    <div class="ac-pull-refresh-content">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback OnRefresh { get; set; }
+    [Parameter] public int Threshold { get; set; } = 80;
+    [Parameter] public string PullText { get; set; } = "اسحب للتحديث";
+    [Parameter] public string ReleaseText { get; set; } = "اترك للتحديث";
+    [Parameter] public string RefreshingText { get; set; } = "جاري التحديث...";
+    [Parameter] public string? Class { get; set; }
+
+    private ElementReference _container;
+    private bool _isPulling;
+    private bool _isRefreshing;
+    private double _pullDistance;
+    private double _startY;
+
+    public async Task TriggerRefresh()
+    {
+        _isRefreshing = true;
+        StateHasChanged();
+
+        await OnRefresh.InvokeAsync();
+
+        _isRefreshing = false;
+        _pullDistance = 0;
+        StateHasChanged();
+    }
+}

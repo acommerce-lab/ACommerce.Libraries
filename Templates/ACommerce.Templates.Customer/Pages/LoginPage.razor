@@ -1,0 +1,142 @@
+@namespace ACommerce.Templates.Customer.Pages
+
+<div class="ac-page ac-auth-page ac-login-page">
+    <div class="ac-auth-card">
+        <div class="ac-auth-header">
+            <h1>تسجيل الدخول</h1>
+            <p>أهلاً بعودتك! سجل دخولك للمتابعة</p>
+        </div>
+
+        <form class="ac-auth-form" @onsubmit="HandleSubmit" @onsubmit:preventDefault>
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="ac-alert ac-alert-danger">
+                    <i class="bi bi-exclamation-circle"></i>
+                    @ErrorMessage
+                </div>
+            }
+
+            <AcInput Label="البريد الإلكتروني أو رقم الهاتف"
+                     Type="@(LoginMethod == "phone" ? "tel" : "email")"
+                     @bind-Value="Username"
+                     Placeholder="@(LoginMethod == "phone" ? "05xxxxxxxx" : "example@email.com")"
+                     IconStart="@(LoginMethod == "phone" ? "bi-phone" : "bi-envelope")"
+                     Required="true"
+                     HasError="@UsernameError" />
+
+            <AcInput Label="كلمة المرور"
+                     Type="@(ShowPassword ? "text" : "password")"
+                     @bind-Value="Password"
+                     Placeholder="أدخل كلمة المرور"
+                     IconStart="bi-lock"
+                     Required="true"
+                     HasError="@PasswordError" />
+
+            <div class="ac-form-options">
+                <label class="ac-checkbox">
+                    <input type="checkbox" @bind="RememberMe" />
+                    <span>تذكرني</span>
+                </label>
+                <a href="/forgot-password" class="ac-link">نسيت كلمة المرور؟</a>
+            </div>
+
+            <AcButton Text="تسجيل الدخول"
+                      Type="submit"
+                      Variant="ButtonVariant.Primary"
+                      Block="true"
+                      Size="ButtonSize.Large"
+                      Loading="IsLoading"
+                      Disabled="@(!IsFormValid)" />
+        </form>
+
+        <div class="ac-auth-divider">
+            <span>أو</span>
+        </div>
+
+        <div class="ac-social-login">
+            @if (ShowGoogleLogin)
+            {
+                <button class="ac-social-btn ac-google-btn" @onclick="HandleGoogleLogin">
+                    <i class="bi bi-google"></i>
+                    <span>Google</span>
+                </button>
+            }
+            @if (ShowAppleLogin)
+            {
+                <button class="ac-social-btn ac-apple-btn" @onclick="HandleAppleLogin">
+                    <i class="bi bi-apple"></i>
+                    <span>Apple</span>
+                </button>
+            }
+            @if (ShowTwitterLogin)
+            {
+                <button class="ac-social-btn ac-twitter-btn" @onclick="HandleTwitterLogin">
+                    <i class="bi bi-twitter-x"></i>
+                    <span>X</span>
+                </button>
+            }
+        </div>
+
+        <div class="ac-auth-footer">
+            <span>ليس لديك حساب؟</span>
+            <a href="/register" class="ac-link">إنشاء حساب جديد</a>
+        </div>
+
+        <div class="ac-auth-method-toggle">
+            <button @onclick="ToggleLoginMethod">
+                <i class="bi @(LoginMethod == "phone" ? "bi-envelope" : "bi-phone")"></i>
+                @(LoginMethod == "phone" ? "الدخول بالبريد الإلكتروني" : "الدخول برقم الهاتف")
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string? ErrorMessage { get; set; }
+    [Parameter] public bool ShowGoogleLogin { get; set; } = true;
+    [Parameter] public bool ShowAppleLogin { get; set; } = true;
+    [Parameter] public bool ShowTwitterLogin { get; set; }
+
+    [Parameter] public EventCallback<LoginEventArgs> OnLogin { get; set; }
+    [Parameter] public EventCallback OnGoogleLogin { get; set; }
+    [Parameter] public EventCallback OnAppleLogin { get; set; }
+    [Parameter] public EventCallback OnTwitterLogin { get; set; }
+
+    private string? Username { get; set; }
+    private string? Password { get; set; }
+    private bool RememberMe { get; set; }
+    private bool ShowPassword { get; set; }
+    private string LoginMethod { get; set; } = "email";
+    private bool UsernameError { get; set; }
+    private bool PasswordError { get; set; }
+
+    private bool IsFormValid => !string.IsNullOrWhiteSpace(Username) && !string.IsNullOrWhiteSpace(Password);
+
+    private void ToggleLoginMethod()
+    {
+        LoginMethod = LoginMethod == "email" ? "phone" : "email";
+        Username = string.Empty;
+    }
+
+    private async Task HandleSubmit()
+    {
+        UsernameError = string.IsNullOrWhiteSpace(Username);
+        PasswordError = string.IsNullOrWhiteSpace(Password);
+
+        if (IsFormValid)
+        {
+            await OnLogin.InvokeAsync(new LoginEventArgs
+            {
+                Username = Username!,
+                Password = Password!,
+                RememberMe = RememberMe,
+                LoginMethod = LoginMethod
+            });
+        }
+    }
+
+    private async Task HandleGoogleLogin() => await OnGoogleLogin.InvokeAsync();
+    private async Task HandleAppleLogin() => await OnAppleLogin.InvokeAsync();
+    private async Task HandleTwitterLogin() => await OnTwitterLogin.InvokeAsync();
+}

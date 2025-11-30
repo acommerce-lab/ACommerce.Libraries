@@ -1,0 +1,149 @@
+@page "/orders"
+@using ACommerce.Client.Orders
+@inject OrdersClient OrdersClient
+
+<PageTitle>طلباتي - ACommerce Shop</PageTitle>
+
+<h1>📋 طلباتي</h1>
+
+@if (isLoading)
+{
+    <div class="text-center p-3">
+        <p>جاري تحميل الطلبات...</p>
+    </div>
+}
+else if (orders.Count == 0)
+{
+    <div class="empty-orders text-center p-3">
+        <p class="empty-icon">📋</p>
+        <h3>لا توجد طلبات</h3>
+        <p>لم تقم بأي طلبات بعد</p>
+        <a href="/products" class="btn-primary">ابدأ التسوق</a>
+    </div>
+}
+else
+{
+    <div class="orders-list">
+        @foreach (var order in orders)
+        {
+            <div class="order-card">
+                <div class="order-header">
+                    <span class="order-number">طلب #@order.OrderNumber</span>
+                    <span class="order-status @GetStatusClass(order.Status)">@GetStatusText(order.Status)</span>
+                </div>
+                <div class="order-details">
+                    <p><strong>التاريخ:</strong> @order.CreatedAt.ToString("yyyy/MM/dd")</p>
+                    <p><strong>الإجمالي:</strong> @order.TotalAmount ر.س</p>
+                    <p><strong>عدد المنتجات:</strong> @order.ItemsCount</p>
+                </div>
+                <div class="order-actions">
+                    <SfButton CssClass="e-info e-small" @onclick="() => ViewOrder(order.Id)">عرض التفاصيل</SfButton>
+                    @if (order.Status == "Pending")
+                    {
+                        <SfButton CssClass="e-danger e-small" @onclick="() => CancelOrder(order.Id)">إلغاء</SfButton>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<OrderSummaryDto> orders = new();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrders();
+    }
+
+    private async Task LoadOrders()
+    {
+        isLoading = true;
+        try
+        {
+            // Mock data for demo
+            orders = new List<OrderSummaryDto>
+            {
+                new() { Id = Guid.NewGuid(), OrderNumber = "ORD-2024-001", Status = "Delivered", TotalAmount = 299.99m, ItemsCount = 3, CreatedAt = DateTime.Now.AddDays(-5) },
+                new() { Id = Guid.NewGuid(), OrderNumber = "ORD-2024-002", Status = "Shipped", TotalAmount = 149.99m, ItemsCount = 1, CreatedAt = DateTime.Now.AddDays(-2) },
+                new() { Id = Guid.NewGuid(), OrderNumber = "ORD-2024-003", Status = "Pending", TotalAmount = 599.99m, ItemsCount = 5, CreatedAt = DateTime.Now }
+            };
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ViewOrder(Guid orderId) { /* TODO */ }
+    private async Task CancelOrder(Guid orderId)
+    {
+        orders.RemoveAll(o => o.Id == orderId);
+    }
+
+    private string GetStatusClass(string status) => status switch
+    {
+        "Pending" => "status-pending",
+        "Shipped" => "status-shipped",
+        "Delivered" => "status-delivered",
+        _ => ""
+    };
+
+    private string GetStatusText(string status) => status switch
+    {
+        "Pending" => "قيد الانتظار",
+        "Shipped" => "تم الشحن",
+        "Delivered" => "تم التوصيل",
+        _ => status
+    };
+
+    private class OrderSummaryDto
+    {
+        public Guid Id { get; set; }
+        public string OrderNumber { get; set; } = "";
+        public string Status { get; set; } = "";
+        public decimal TotalAmount { get; set; }
+        public int ItemsCount { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
+}
+
+<style>
+    .empty-orders { padding: 2rem; }
+    .empty-icon { font-size: 4rem; }
+    .btn-primary {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: #6200ea;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+    .orders-list { margin: 1rem 0; }
+    .order-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    .order-number { font-weight: bold; font-size: 1.1rem; }
+    .order-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+    }
+    .status-pending { background: #fff3e0; color: #e65100; }
+    .status-shipped { background: #e3f2fd; color: #1565c0; }
+    .status-delivered { background: #e8f5e9; color: #2e7d32; }
+    .order-details { margin: 0.5rem 0; color: #666; }
+    .order-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+</style>

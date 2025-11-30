@@ -1,0 +1,81 @@
+/* App-specific styles */
+
+/*
+ * DEBUG: If you see a red background, CSS is loading correctly.
+ * Remove this debug style after confirming CSS loads.
+ */
+html, body {
+    font-family: var(--ac-font-family, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
+    /* DEBUG: Uncomment next line to test CSS loading */
+    /* background-color: red !important; */
+}
+
+/* Loading screen */
+.ac-loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    z-index: 9999;
+}
+
+.ac-loading-content {
+    text-align: center;
+}
+
+.ac-loading-logo {
+    animation: pulse 1.5s ease-in-out infinite;
+    margin-bottom: 1rem;
+}
+
+.ac-loading-logo svg {
+    color: white;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(0.95); }
+}
+
+/* Blazor error UI */
+#blazor-error-ui {
+    background: #ffdddd;
+    color: #cc0000;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    text-align: center;
+    display: none;
+    z-index: 10000;
+}
+
+#blazor-error-ui .reload {
+    color: #0000cc;
+    text-decoration: underline;
+}
+
+/* Safe area insets for notched devices */
+@supports (padding-top: env(safe-area-inset-top)) {
+    .ac-navbar {
+        padding-top: env(safe-area-inset-top);
+    }
+
+    .ac-bottom-nav {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}
+
+/* Platform-specific adjustments */
+@media (prefers-color-scheme: dark) {
+    .ac-loading-screen {
+        background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+    }
+}

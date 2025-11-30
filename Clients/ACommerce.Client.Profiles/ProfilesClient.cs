@@ -4,10 +4,10 @@ namespace ACommerce.Client.Profiles;
 
 public sealed class ProfilesClient
 {
-	private readonly DynamicHttpClient _httpClient;
+	private readonly IApiClient _httpClient;
 	private const string ServiceName = "Marketplace";
 
-	public ProfilesClient(DynamicHttpClient httpClient)
+	public ProfilesClient(IApiClient httpClient)
 	{
 		_httpClient = httpClient;
 	}

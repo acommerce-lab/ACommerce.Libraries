@@ -1,0 +1,35 @@
+@namespace ACommerce.Templates.Customer.Layouts
+@inherits LayoutComponentBase
+@inject ThemeService ThemeService
+
+<div class="ac-app ac-auth-layout @(ThemeService.IsDarkMode ? "ac-dark" : "ac-light")" style="@ThemeService.GenerateCssVariables()">
+    <div class="ac-auth-container">
+        <div class="ac-auth-header">
+            @if (!string.IsNullOrEmpty(LogoUrl))
+            {
+                <img src="@LogoUrl" alt="@BrandName" class="ac-auth-logo" />
+            }
+            else
+            {
+                <h1 class="ac-auth-brand">@BrandName</h1>
+            }
+        </div>
+
+        <div class="ac-auth-content">
+            @Body
+        </div>
+
+        @if (!string.IsNullOrEmpty(FooterText))
+        {
+            <div class="ac-auth-footer">
+                @FooterText
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string BrandName { get; set; } = "ACommerce";
+    [Parameter] public string? LogoUrl { get; set; }
+    [Parameter] public string? FooterText { get; set; }
+}

@@ -1,4 +1,5 @@
 // Entities/UserRole.cs
+using System.ComponentModel.DataAnnotations.Schema;
 using SharedKernel;
 
 namespace ACommerce.Authentication.Users.Abstractions.Entities;
@@ -33,6 +34,7 @@ public class UserRole : IBaseEntity
 	/// <summary>
 	/// ??????? ??????
 	/// </summary>
+	[NotMapped]
 	public Dictionary<string, string> Metadata { get; init; } = new();
 }
 

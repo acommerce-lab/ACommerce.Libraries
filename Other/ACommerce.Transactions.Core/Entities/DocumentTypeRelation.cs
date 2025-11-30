@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+using ACommerce.Transactions.Core.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
 using ACommerce.Transactions.Core.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -54,9 +56,10 @@ public class DocumentTypeRelation : IBaseEntity
 	/// </summary>
 	public int Priority { get; set; }
 
-    /// <summary>
-    /// ??????? ??????
-    /// </summary>
-    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
+	/// <summary>
+	/// ??????? ??????
+	/// </summary>
+	[NotMapped]
+	public Dictionary<string, string> Metadata { get; set; } = new();
 }
 

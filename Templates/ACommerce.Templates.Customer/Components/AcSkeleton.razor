@@ -1,0 +1,59 @@
+@namespace ACommerce.Templates.Customer.Components
+
+@if (Type == SkeletonType.ProductCard)
+{
+    <div class="ac-skeleton-product-card @Class">
+        <div class="ac-skeleton ac-skeleton-image"></div>
+        <div class="ac-skeleton-content">
+            <div class="ac-skeleton ac-skeleton-text ac-skeleton-text-sm"></div>
+            <div class="ac-skeleton ac-skeleton-text"></div>
+            <div class="ac-skeleton ac-skeleton-text ac-skeleton-text-lg"></div>
+        </div>
+    </div>
+}
+else if (Type == SkeletonType.ListItem)
+{
+    <div class="ac-skeleton-list-item @Class">
+        <div class="ac-skeleton ac-skeleton-avatar"></div>
+        <div class="ac-skeleton-content">
+            <div class="ac-skeleton ac-skeleton-text"></div>
+            <div class="ac-skeleton ac-skeleton-text ac-skeleton-text-sm"></div>
+        </div>
+    </div>
+}
+else if (Type == SkeletonType.Avatar)
+{
+    <div class="ac-skeleton ac-skeleton-avatar @SizeClass @Class"></div>
+}
+else if (Type == SkeletonType.Image)
+{
+    <div class="ac-skeleton ac-skeleton-image @Class" style="@(Width != null ? $"width:{Width};" : "") @(Height != null ? $"height:{Height};" : "")"></div>
+}
+else if (Type == SkeletonType.Text)
+{
+    @for (int i = 0; i < Lines; i++)
+    {
+        <div class="ac-skeleton ac-skeleton-text @(i == Lines - 1 ? "ac-skeleton-text-last" : "") @Class"></div>
+    }
+}
+else if (Type == SkeletonType.Custom)
+{
+    <div class="ac-skeleton @Class" style="width:@Width; height:@Height; border-radius:@BorderRadius;"></div>
+}
+
+@code {
+    [Parameter] public SkeletonType Type { get; set; } = SkeletonType.Text;
+    [Parameter] public SkeletonSize Size { get; set; } = SkeletonSize.Medium;
+    [Parameter] public int Lines { get; set; } = 3;
+    [Parameter] public string? Width { get; set; }
+    [Parameter] public string? Height { get; set; }
+    [Parameter] public string BorderRadius { get; set; } = "4px";
+    [Parameter] public string? Class { get; set; }
+
+    private string SizeClass => Size switch
+    {
+        SkeletonSize.Small => "ac-skeleton-sm",
+        SkeletonSize.Large => "ac-skeleton-lg",
+        _ => ""
+    };
+}

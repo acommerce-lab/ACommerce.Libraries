@@ -1,0 +1,108 @@
+@page "/cart"
+@inject MockDataService DataService
+@inject IAppNavigationService Navigation
+
+<CartPage Items="@_items"
+          IsLoading="@_isLoading"
+          Subtotal="@_subtotal"
+          Discount="@_discount"
+          ShippingCost="@_shippingCost"
+          Tax="@_tax"
+          Total="@_total"
+          FreeShippingThreshold="200"
+          AppliedCoupon="@_appliedCoupon"
+          OnQuantityChange="HandleQuantityChange"
+          OnRemoveItem="HandleRemoveItem"
+          OnApplyCoupon="HandleApplyCoupon"
+          OnRemoveCoupon="HandleRemoveCoupon"
+          OnCheckout="HandleCheckout"
+          OnStartShopping="HandleStartShopping" />
+
+@code {
+    private List<CartItemModel>? _items;
+    private bool _isLoading = true;
+    private decimal _subtotal;
+    private decimal _discount;
+    private decimal _shippingCost = 25;
+    private decimal _tax;
+    private decimal _total;
+    private CouponModel? _appliedCoupon;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCartAsync();
+    }
+
+    private async Task LoadCartAsync()
+    {
+        _isLoading = true;
+
+        await Task.Delay(300);
+
+        _items = DataService.GetCartItems();
+        CalculateTotals();
+
+        _isLoading = false;
+    }
+
+    private void CalculateTotals()
+    {
+        if (_items == null) return;
+
+        _subtotal = _items.Sum(i => i.Price * i.Quantity);
+        _discount = _appliedCoupon?.DiscountPercent > 0
+            ? _subtotal * (_appliedCoupon.DiscountPercent / 100)
+            : (_appliedCoupon?.DiscountAmount ?? 0);
+
+        if (_subtotal >= 200) _shippingCost = 0; // Free shipping
+
+        _tax = (_subtotal - _discount) * 0.15m; // 15% VAT
+        _total = _subtotal - _discount + _shippingCost + _tax;
+    }
+
+    private void HandleQuantityChange((Guid ItemId, int Quantity) args)
+    {
+        var item = _items?.FirstOrDefault(i => i.Id == args.ItemId);
+        if (item != null)
+        {
+            item.Quantity = args.Quantity;
+            CalculateTotals();
+        }
+    }
+
+    private void HandleRemoveItem(Guid itemId)
+    {
+        _items?.RemoveAll(i => i.Id == itemId);
+        CalculateTotals();
+    }
+
+    private void HandleApplyCoupon(string code)
+    {
+        if (code.ToUpper() == "SAVE10")
+        {
+            _appliedCoupon = new CouponModel { Code = code, DiscountPercent = 10 };
+            CalculateTotals();
+        }
+        else if (code.ToUpper() == "FLAT50")
+        {
+            _appliedCoupon = new CouponModel { Code = code, DiscountAmount = 50 };
+            CalculateTotals();
+        }
+    }
+
+    private void HandleRemoveCoupon()
+    {
+        _appliedCoupon = null;
+        CalculateTotals();
+    }
+
+    private void HandleCheckout()
+    {
+        Navigation.NavigateTo("/checkout");
+    }
+
+    private void HandleStartShopping()
+    {
+        Navigation.NavigateTo("/");
+    }
+}

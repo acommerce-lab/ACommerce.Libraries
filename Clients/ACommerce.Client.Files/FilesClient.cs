@@ -6,11 +6,11 @@ namespace ACommerce.Client.Files;
 
 public sealed class FilesClient
 {
-	private readonly DynamicHttpClient _httpClient;
+	private readonly IApiClient _httpClient;
 	private readonly HttpClient _rawHttpClient;
 	private const string ServiceName = "Files"; // أو "Marketplace"
 
-	public FilesClient(DynamicHttpClient httpClient, IHttpClientFactory httpClientFactory)
+	public FilesClient(IApiClient httpClient, IHttpClientFactory httpClientFactory)
 	{
 		_httpClient = httpClient;
 		_rawHttpClient = httpClientFactory.CreateClient();

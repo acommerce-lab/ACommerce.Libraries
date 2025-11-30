@@ -1,0 +1,126 @@
+@page "/search"
+@inject MockDataService DataService
+@inject IAppNavigationService Navigation
+
+<SearchPage SearchQuery="@_searchQuery"
+            Products="@_products"
+            TotalResults="@_totalResults"
+            IsLoading="@_isLoading"
+            IsLoadingMore="@_isLoadingMore"
+            HasMoreProducts="@_hasMore"
+            FilterCategories="@_filterCategories"
+            CurrentSort="@_currentSort"
+            ActiveFilterCount="@_activeFilterCount"
+            OnSearch="HandleSearch"
+            OnProductClick="HandleProductClick"
+            OnAddToCart="HandleAddToCart"
+            OnAddToWishlist="HandleAddToWishlist"
+            OnLoadMore="HandleLoadMore"
+            OnApplyFilters="HandleApplyFilters"
+            OnSortChange="HandleSortChange"
+            OnBrowseCategories="HandleBrowseCategories" />
+
+@code {
+    [SupplyParameterFromQuery(Name = "q")]
+    public string? Query { get; set; }
+
+    [SupplyParameterFromQuery(Name = "category")]
+    public string? CategoryId { get; set; }
+
+    private string? _searchQuery;
+    private List<SearchProductItem>? _products;
+    private int _totalResults;
+    private bool _isLoading = true;
+    private bool _isLoadingMore;
+    private bool _hasMore = true;
+    private List<FilterCategoryItem>? _filterCategories;
+    private string _currentSort = "relevance";
+    private int _activeFilterCount;
+    private int _page = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _searchQuery = Query;
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _isLoading = true;
+
+        await Task.Delay(500); // Simulate API delay
+
+        var allProducts = DataService.GetBestSellers()
+            .Concat(DataService.GetFeaturedProducts())
+            .Concat(DataService.GetNewProducts())
+            .ToList();
+
+        _products = allProducts.Select(p => new SearchProductItem
+        {
+            Id = p.Id,
+            Name = p.Name,
+            Image = p.Image,
+            Price = p.Price,
+            OldPrice = p.OldPrice,
+            Rating = p.Rating,
+            ReviewCount = p.ReviewCount,
+            Attributes = p.Attributes
+        }).ToList();
+
+        _totalResults = _products.Count;
+
+        _filterCategories = DataService.GetCategories()
+            .Select(c => new FilterCategoryItem { Id = c.Id, Name = c.Name, ProductCount = 10 })
+            .ToList();
+
+        _isLoading = false;
+    }
+
+    private async Task HandleSearch(string query)
+    {
+        _searchQuery = query;
+        _page = 1;
+        await LoadDataAsync();
+    }
+
+    private void HandleProductClick(Guid productId)
+    {
+        Navigation.NavigateTo($"/product/{productId}");
+    }
+
+    private void HandleAddToCart(Guid productId)
+    {
+        Console.WriteLine($"Added product {productId} to cart");
+    }
+
+    private void HandleAddToWishlist(Guid productId)
+    {
+        Console.WriteLine($"Added product {productId} to wishlist");
+    }
+
+    private async Task HandleLoadMore()
+    {
+        _isLoadingMore = true;
+        await Task.Delay(500);
+        _page++;
+        // In real app, load more products
+        _hasMore = _page < 3;
+        _isLoadingMore = false;
+    }
+
+    private async Task HandleApplyFilters()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task HandleSortChange(string sort)
+    {
+        _currentSort = sort;
+        await LoadDataAsync();
+    }
+
+    private void HandleBrowseCategories()
+    {
+        Navigation.NavigateTo("/categories");
+    }
+}

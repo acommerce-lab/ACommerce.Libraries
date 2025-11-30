@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Catalog.Attributes.Entities;
 using ACommerce.SharedKernel.Abstractions.Entities;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -49,9 +50,10 @@ public class ProductAttribute : IBaseEntity
 	/// </summary>
 	public int SortOrder { get; set; }
 
-    /// <summary>
-    /// ??????? ??????
-    /// </summary>
-    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
+	/// <summary>
+	/// ??????? ??????
+	/// </summary>
+	[NotMapped]
+	public Dictionary<string, string> Metadata { get; set; } = new();
 }
 

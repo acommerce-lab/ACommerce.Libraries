@@ -1,0 +1,74 @@
+@namespace ACommerce.Templates.Customer.Layouts
+@inject ThemeService ThemeService
+
+<div class="ac-app @(ThemeService.IsDarkMode ? "ac-dark" : "ac-light")" style="@ThemeService.GenerateInlineStyles()">
+    @if (ShowNavbar)
+    {
+        <AcNavbar BrandName="@BrandName"
+                  LogoUrl="@LogoUrl"
+                  ShowSearch="ShowNavbarSearch"
+                  ShowNotifications="ShowNotifications"
+                  ShowCart="ShowCart"
+                  NotificationCount="NotificationCount"
+                  CartItemCount="CartItemCount"
+                  OnSearchClick="HandleSearchClick"
+                  OnNotificationsClick="HandleNotificationsClick"
+                  OnCartClick="HandleCartClick" />
+    }
+
+    <main class="ac-main @(ShowNavbar ? "ac-has-navbar" : "") @(ShowBottomNav ? "ac-has-bottom-nav" : "")">
+        @ChildContent
+    </main>
+
+    @if (ShowBottomNav)
+    {
+        <AcBottomNav Items="BottomNavItems" OnItemClick="HandleBottomNavClick" />
+    }
+
+    <AcToast @ref="_toast" Position="ToastPosition.TopCenter" />
+</div>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string? BrandName { get; set; } = "ACommerce";
+    [Parameter] public string? LogoUrl { get; set; }
+    [Parameter] public bool ShowNavbar { get; set; } = true;
+    [Parameter] public bool ShowNavbarSearch { get; set; } = true;
+    [Parameter] public bool ShowNotifications { get; set; } = true;
+    [Parameter] public bool ShowCart { get; set; } = true;
+    [Parameter] public bool ShowBottomNav { get; set; } = true;
+    [Parameter] public int NotificationCount { get; set; }
+    [Parameter] public int CartItemCount { get; set; }
+    [Parameter] public List<BottomNavItem>? BottomNavItems { get; set; }
+
+    [Parameter] public EventCallback OnSearchClick { get; set; }
+    [Parameter] public EventCallback OnNotificationsClick { get; set; }
+    [Parameter] public EventCallback OnCartClick { get; set; }
+    [Parameter] public EventCallback<BottomNavItem> OnBottomNavClick { get; set; }
+
+    private AcToast? _toast;
+
+    protected override void OnInitialized()
+    {
+        BottomNavItems ??= GetDefaultBottomNavItems();
+    }
+
+    private List<BottomNavItem> GetDefaultBottomNavItems() => new()
+    {
+        new() { Id = "home", Label = "الرئيسية", Icon = "bi-house", ActiveIcon = "bi-house-fill", Href = "/", IsActive = true },
+        new() { Id = "categories", Label = "التصنيفات", Icon = "bi-grid", ActiveIcon = "bi-grid-fill", Href = "/categories" },
+        new() { Id = "cart", Label = "السلة", Icon = "bi-cart3", ActiveIcon = "bi-cart-fill", Href = "/cart", BadgeCount = CartItemCount },
+        new() { Id = "orders", Label = "طلباتي", Icon = "bi-box", ActiveIcon = "bi-box-fill", Href = "/orders" },
+        new() { Id = "profile", Label = "حسابي", Icon = "bi-person", ActiveIcon = "bi-person-fill", Href = "/profile" }
+    };
+
+    private async Task HandleSearchClick() => await OnSearchClick.InvokeAsync();
+    private async Task HandleNotificationsClick() => await OnNotificationsClick.InvokeAsync();
+    private async Task HandleCartClick() => await OnCartClick.InvokeAsync();
+    private async Task HandleBottomNavClick(BottomNavItem item) => await OnBottomNavClick.InvokeAsync(item);
+
+    public void ShowToast(string message, ToastType type = ToastType.Info, string? title = null)
+    {
+        _toast?.Show(message, type, title);
+    }
+}

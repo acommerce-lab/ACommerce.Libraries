@@ -1,0 +1,109 @@
+@namespace ACommerce.Templates.Customer.Pages
+
+<div class="ac-page ac-chat-list-page">
+    <div class="ac-page-header">
+        <h1>المحادثات</h1>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="ac-chat-list-loading">
+            @for (int i = 0; i < 5; i++)
+            {
+                <AcSkeleton Type="SkeletonType.ListItem" />
+            }
+        </div>
+    }
+    else if (Conversations?.Any() == true)
+    {
+        <div class="ac-chat-list">
+            @foreach (var conversation in Conversations)
+            {
+                <div class="ac-chat-list-item @(conversation.UnreadCount > 0 ? "ac-has-unread" : "")"
+                     @onclick="() => HandleConversationClick(conversation)">
+                    <div class="ac-chat-avatar">
+                        @if (!string.IsNullOrEmpty(conversation.AvatarUrl))
+                        {
+                            <img src="@conversation.AvatarUrl" alt="@conversation.Name" />
+                        }
+                        else
+                        {
+                            <span>@conversation.Name.FirstOrDefault()</span>
+                        }
+                        @if (conversation.IsOnline)
+                        {
+                            <span class="ac-online-indicator"></span>
+                        }
+                    </div>
+
+                    <div class="ac-chat-info">
+                        <div class="ac-chat-header-row">
+                            <span class="ac-chat-name">@conversation.Name</span>
+                            <span class="ac-chat-time">@GetRelativeTime(conversation.LastMessageTime)</span>
+                        </div>
+                        <div class="ac-chat-preview-row">
+                            <span class="ac-chat-preview">
+                                @if (conversation.LastMessageType == ChatMessageType.Image)
+                                {
+                                    <i class="bi bi-image"></i>
+                                    <text>صورة</text>
+                                }
+                                else if (conversation.LastMessageType == ChatMessageType.Product)
+                                {
+                                    <i class="bi bi-box"></i>
+                                    <text>منتج</text>
+                                }
+                                else
+                                {
+                                    @conversation.LastMessage
+                                }
+                            </span>
+                            @if (conversation.UnreadCount > 0)
+                            {
+                                <AcBadge Count="@conversation.UnreadCount"
+                                         Variant="BadgeVariant.Primary"
+                                         Size="BadgeSize.Small" />
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <AcEmptyState Icon="bi-chat-dots"
+                      Title="لا توجد محادثات"
+                      Description="ابدأ محادثة جديدة مع البائعين"
+                      ActionText="تصفح المتاجر"
+                      OnAction="HandleBrowseStores" />
+    }
+</div>
+
+@code {
+    [Parameter] public List<ConversationItem>? Conversations { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+
+    [Parameter] public EventCallback<ConversationItem> OnConversationClick { get; set; }
+    [Parameter] public EventCallback OnBrowseStores { get; set; }
+
+    private string GetRelativeTime(DateTime timestamp)
+    {
+        var diff = DateTime.Now - timestamp;
+        if (diff.TotalMinutes < 1) return "الآن";
+        if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes} د";
+        if (diff.TotalHours < 24) return $"{(int)diff.TotalHours} س";
+        if (diff.TotalDays < 7) return $"{(int)diff.TotalDays} ي";
+        return timestamp.ToString("dd/MM");
+    }
+
+    private async Task HandleConversationClick(ConversationItem conversation)
+    {
+        await OnConversationClick.InvokeAsync(conversation);
+    }
+
+    private async Task HandleBrowseStores()
+    {
+        await OnBrowseStores.InvokeAsync();
+    }
+}

@@ -1,0 +1,46 @@
+@inherits LayoutComponentBase
+@inject ThemeService ThemeService
+@inject IAppNavigationService Navigation
+@inject MockDataService DataService
+
+<ACommerce.Templates.Customer.Layouts.MainLayout BrandName="ACommerce"
+                                                   ShowNavbar="@(!IsAuthPage)"
+                                                   ShowBottomNav="@(!IsAuthPage)"
+                                                   CartItemCount="@CartItemCount"
+                                                   NotificationCount="@NotificationCount"
+                                                   OnSearchClick="HandleSearchClick"
+                                                   OnCartClick="HandleCartClick"
+                                                   OnNotificationsClick="HandleNotificationsClick">
+    @Body
+</ACommerce.Templates.Customer.Layouts.MainLayout>
+
+@code {
+    [CascadingParameter]
+    private RouteData? RouteData { get; set; }
+
+    private int CartItemCount { get; set; } = 3;
+    private int NotificationCount { get; set; } = 5;
+
+    private bool IsAuthPage => RouteData?.PageType?.Name is "Login" or "Register";
+
+    protected override void OnInitialized()
+    {
+        CartItemCount = DataService.GetCartItemCount();
+        NotificationCount = DataService.GetNotificationCount();
+    }
+
+    private void HandleSearchClick()
+    {
+        Navigation.NavigateTo("/search");
+    }
+
+    private void HandleCartClick()
+    {
+        Navigation.NavigateTo("/cart");
+    }
+
+    private void HandleNotificationsClick()
+    {
+        Navigation.NavigateTo("/notifications");
+    }
+}

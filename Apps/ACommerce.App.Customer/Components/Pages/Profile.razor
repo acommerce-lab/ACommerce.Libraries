@@ -1,0 +1,50 @@
+@page "/profile"
+@inject MockDataService DataService
+@inject IAppNavigationService Navigation
+
+<ProfilePage User="@_user"
+             OrdersCount="12"
+             WishlistCount="8"
+             ReviewsCount="5"
+             AddressesCount="2"
+             PendingOrdersCount="1"
+             AppVersion="1.0.0"
+             OnAvatarClick="HandleAvatarClick"
+             OnOrdersClick="HandleOrdersClick"
+             OnWishlistClick="HandleWishlistClick"
+             OnReviewsClick="HandleReviewsClick"
+             OnLogout="HandleLogout" />
+
+@code {
+    private UserProfileInfo? _user;
+
+    protected override void OnInitialized()
+    {
+        _user = DataService.GetUserProfile();
+    }
+
+    private void HandleAvatarClick()
+    {
+        Console.WriteLine("Change avatar");
+    }
+
+    private void HandleOrdersClick()
+    {
+        Navigation.NavigateTo("/orders");
+    }
+
+    private void HandleWishlistClick()
+    {
+        Navigation.NavigateTo("/wishlist");
+    }
+
+    private void HandleReviewsClick()
+    {
+        Navigation.NavigateTo("/reviews");
+    }
+
+    private void HandleLogout()
+    {
+        Navigation.NavigateTo("/login");
+    }
+}

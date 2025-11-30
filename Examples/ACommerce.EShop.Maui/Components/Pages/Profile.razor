@@ -1,0 +1,183 @@
+@page "/profile"
+@using ACommerce.Client.Profiles
+@inject ProfilesClient ProfilesClient
+
+<PageTitle>الملف الشخصي - ACommerce Shop</PageTitle>
+
+<h1>👤 الملف الشخصي</h1>
+
+@if (isLoading)
+{
+    <div class="text-center p-3">
+        <p>جاري التحميل...</p>
+    </div>
+}
+else
+{
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="avatar">
+                <img src="@(profile.AvatarUrl ?? "https://via.placeholder.com/120?text=👤")" alt="Avatar" />
+            </div>
+            <div class="profile-info">
+                <h2>@profile.DisplayName</h2>
+                <p>@profile.Email</p>
+            </div>
+        </div>
+
+        <div class="profile-form">
+            <div class="form-group">
+                <label>الاسم الأول</label>
+                <SfTextBox @bind-Value="@profile.FirstName" Placeholder="الاسم الأول" />
+            </div>
+
+            <div class="form-group">
+                <label>الاسم الأخير</label>
+                <SfTextBox @bind-Value="@profile.LastName" Placeholder="الاسم الأخير" />
+            </div>
+
+            <div class="form-group">
+                <label>البريد الإلكتروني</label>
+                <SfTextBox @bind-Value="@profile.Email" Placeholder="البريد الإلكتروني" Readonly="true" />
+            </div>
+
+            <div class="form-group">
+                <label>رقم الهاتف</label>
+                <SfTextBox @bind-Value="@profile.PhoneNumber" Placeholder="رقم الهاتف" />
+            </div>
+
+            <div class="form-group">
+                <label>العنوان</label>
+                <SfTextBox @bind-Value="@profile.Address" Placeholder="العنوان" Multiline="true" />
+            </div>
+
+            <div class="form-actions">
+                <SfButton CssClass="e-success" @onclick="SaveProfile">💾 حفظ التغييرات</SfButton>
+            </div>
+        </div>
+
+        <div class="profile-stats">
+            <div class="stat-item">
+                <span class="stat-value">@profile.OrdersCount</span>
+                <span class="stat-label">طلب</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">@profile.WishlistCount</span>
+                <span class="stat-label">مفضلة</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">@profile.ReviewsCount</span>
+                <span class="stat-label">تقييم</span>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private ProfileViewModel profile = new();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProfile();
+    }
+
+    private async Task LoadProfile()
+    {
+        isLoading = true;
+        try
+        {
+            // Mock data for demo
+            profile = new ProfileViewModel
+            {
+                FirstName = "أحمد",
+                LastName = "محمد",
+                DisplayName = "أحمد محمد",
+                Email = "ahmed@example.com",
+                PhoneNumber = "+966 50 123 4567",
+                Address = "الرياض، المملكة العربية السعودية",
+                OrdersCount = 12,
+                WishlistCount = 5,
+                ReviewsCount = 8
+            };
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task SaveProfile()
+    {
+        // TODO: Call API to save profile
+        Console.WriteLine("Profile saved!");
+    }
+
+    private class ProfileViewModel
+    {
+        public string FirstName { get; set; } = "";
+        public string LastName { get; set; } = "";
+        public string DisplayName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string PhoneNumber { get; set; } = "";
+        public string Address { get; set; } = "";
+        public string? AvatarUrl { get; set; }
+        public int OrdersCount { get; set; }
+        public int WishlistCount { get; set; }
+        public int ReviewsCount { get; set; }
+    }
+}
+
+<style>
+    .profile-container { max-width: 600px; margin: 0 auto; }
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #6200ea, #3700b3);
+        color: white;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+    }
+    .avatar img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 3px solid white;
+    }
+    .profile-info h2 { margin: 0; }
+    .profile-info p { margin: 0.25rem 0 0; opacity: 0.9; }
+
+    .profile-form {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    .form-actions { margin-top: 1.5rem; }
+
+    .profile-stats {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .stat-item { text-align: center; }
+    .stat-value {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #6200ea;
+    }
+    .stat-label { color: #666; font-size: 0.9rem; }
+</style>

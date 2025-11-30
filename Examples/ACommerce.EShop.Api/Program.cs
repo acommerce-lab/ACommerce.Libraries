@@ -9,9 +9,10 @@ using ACommerce.SharedKernel.Abstractions.Repositories;
 using ACommerce.SharedKernel.Infrastructure.EFCore.Repositories;
 using ACommerce.SharedKernel.Infrastructure.EFCore.Factories;
 using ACommerce.Realtime.SignalR.Hubs;
-using ACommerce.Chats.Core.Hubs;
 using ACommerce.Realtime.SignalR.Extensions;
+using ACommerce.Chats.Core.Hubs;
 using ACommerce.Chats.Core.Extensions;
+using ACommerce.Catalog.Products.Services;
 
 // ════════════════════════════════════════════════════════════════
 // 🎯 ACommerce E-Shop API - Complete E-Commerce Backend
@@ -63,23 +64,22 @@ try
         options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
     });
 
+    // Register DbContext base type for repositories that depend on it
+    builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
+
     // Repository & Unit of Work
     builder.Services.AddScoped<IRepositoryFactory, RepositoryFactory>();
     builder.Services.AddScoped(typeof(IBaseAsyncRepository<>), typeof(BaseAsyncRepository<>));
 
     // ════════════════════════════════════════════════════════════════
+    // 📦 Domain Services
+    // ════════════════════════════════════════════════════════════════
+    builder.Services.AddScoped<IProductService, ProductService>();
+
+    // ════════════════════════════════════════════════════════════════
     // 🔐 Authentication & Authorization (OpenIddict)
     // ════════════════════════════════════════════════════════════════
-    builder.Services.AddOptions<JwtOptions>()
-    .Bind(builder.Configuration.GetSection(JwtOptions.SectionName))
-    .ValidateDataAnnotations()
-    .ValidateOnStart();
-
-    builder.Services.AddJwtAuthentication(options =>
-    {
-        options.Issuer = builder.Configuration["Authentication:Issuer"]
-            ?? "https://localhost:5001";
-    });
+    builder.Services.AddJwtAuthentication(builder.Configuration);
 
     // ════════════════════════════════════════════════════════════════
     // 🗺️ AutoMapper & CQRS
@@ -90,13 +90,12 @@ try
     // ════════════════════════════════════════════════════════════════
     // 📡 SignalR for Real-time Communication
     // ════════════════════════════════════════════════════════════════
-    builder.Services.AddSignalR();
     builder.Services.AddACommerceSignalR<ChatHub, IChatClient>();
 
     // ════════════════════════════════════════════════════════════════
     // 💬 Chat Services
     // ════════════════════════════════════════════════════════════════
-    builder.Services.AddChatServices();
+    builder.Services.AddChatsCore();
 
     // ════════════════════════════════════════════════════════════════
     // 📝 Swagger Documentation

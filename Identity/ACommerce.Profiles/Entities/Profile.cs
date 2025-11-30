@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Profiles.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -89,8 +90,9 @@ public class Profile : IBaseEntity
 	/// </summary>
 	public DateTime? VerifiedAt { get; set; }
 
-    /// <summary>
-    /// بيانات إضافية مرنة (JSON)
-    /// </summary>
-    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
+	/// <summary>
+	/// بيانات إضافية مرنة (JSON)
+	/// </summary>
+	[NotMapped]
+	public Dictionary<string, string> Metadata { get; set; } = new();
 }

@@ -5,10 +5,10 @@ namespace ACommerce.Client.Notifications;
 
 public sealed class NotificationsClient
 {
-	private readonly DynamicHttpClient _httpClient;
+	private readonly IApiClient _httpClient;
 	private const string ServiceName = "Notifications"; // أو "Marketplace"
 
-	public NotificationsClient(DynamicHttpClient httpClient)
+	public NotificationsClient(IApiClient httpClient)
 	{
 		_httpClient = httpClient;
 	}

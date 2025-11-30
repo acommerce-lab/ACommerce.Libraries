@@ -1,0 +1,101 @@
+@page "/product/{ProductId:guid}"
+@inject MockDataService DataService
+@inject IAppNavigationService Navigation
+
+<ProductDetailsPage Product="@_product"
+                    Reviews="@_reviews"
+                    RelatedProducts="@_relatedProducts"
+                    IsLoading="@_isLoading"
+                    IsAddingToCart="@_isAddingToCart"
+                    IsInWishlist="@_isInWishlist"
+                    OnAddToCart="HandleAddToCart"
+                    OnToggleWishlist="HandleToggleWishlist"
+                    OnShare="HandleShare"
+                    OnAttributeSelected="HandleAttributeSelected"
+                    OnViewAllReviews="HandleViewAllReviews"
+                    OnAddReview="HandleAddReview"
+                    OnRelatedProductClick="HandleRelatedProductClick"
+                    OnAddRelatedToCart="HandleAddRelatedToCart"
+                    OnGoBack="HandleGoBack" />
+
+@code {
+    [Parameter]
+    public Guid ProductId { get; set; }
+
+    private ProductDetailsItem? _product;
+    private List<ProductReviewItem>? _reviews;
+    private List<HomeProductItem>? _relatedProducts;
+    private bool _isLoading = true;
+    private bool _isAddingToCart;
+    private bool _isInWishlist;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProductAsync();
+    }
+
+    private async Task LoadProductAsync()
+    {
+        _isLoading = true;
+
+        await Task.Delay(500); // Simulate API delay
+
+        _product = DataService.GetProductDetails(ProductId);
+        _reviews = new List<ProductReviewItem>
+        {
+            new() { Id = Guid.NewGuid(), AuthorName = "محمد أحمد", Rating = 5, Title = "منتج ممتاز", Text = "جودة عالية وسعر مناسب، أنصح به بشدة", Date = DateTime.Now.AddDays(-5), IsVerifiedPurchase = true },
+            new() { Id = Guid.NewGuid(), AuthorName = "سارة علي", Rating = 4, Title = "جيد جداً", Text = "المنتج جيد لكن التوصيل تأخر قليلاً", Date = DateTime.Now.AddDays(-12), IsVerifiedPurchase = true }
+        };
+        _relatedProducts = DataService.GetFeaturedProducts().Take(4).ToList();
+
+        _isLoading = false;
+    }
+
+    private async Task HandleAddToCart(AddToCartEventArgs args)
+    {
+        _isAddingToCart = true;
+        await Task.Delay(500);
+        Console.WriteLine($"Added {args.Quantity} of product {args.ProductId} to cart");
+        _isAddingToCart = false;
+    }
+
+    private void HandleToggleWishlist()
+    {
+        _isInWishlist = !_isInWishlist;
+    }
+
+    private void HandleShare()
+    {
+        Console.WriteLine("Share product");
+    }
+
+    private void HandleAttributeSelected((DynamicAttribute Attribute, string Value) args)
+    {
+        Console.WriteLine($"Selected {args.Value} for {args.Attribute.Label}");
+    }
+
+    private void HandleViewAllReviews()
+    {
+        Navigation.NavigateTo($"/product/{ProductId}/reviews");
+    }
+
+    private void HandleAddReview()
+    {
+        Navigation.NavigateTo($"/product/{ProductId}/review/new");
+    }
+
+    private void HandleRelatedProductClick(Guid productId)
+    {
+        Navigation.NavigateTo($"/product/{productId}");
+    }
+
+    private void HandleAddRelatedToCart(Guid productId)
+    {
+        Console.WriteLine($"Added related product {productId} to cart");
+    }
+
+    private void HandleGoBack()
+    {
+        Navigation.NavigateBack();
+    }
+}

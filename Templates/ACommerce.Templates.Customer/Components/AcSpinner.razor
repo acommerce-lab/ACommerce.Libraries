@@ -1,0 +1,49 @@
+@namespace ACommerce.Templates.Customer.Components
+
+<div class="ac-spinner-container @(Overlay ? "ac-spinner-overlay" : "") @(FullPage ? "ac-spinner-fullpage" : "") @Class">
+    @if (Type == SpinnerType.Circle)
+    {
+        <div class="ac-spinner @SizeClass @ColorClass"></div>
+    }
+    else if (Type == SpinnerType.Dots)
+    {
+        <div class="ac-spinner-dots @SizeClass @ColorClass">
+            <div class="ac-dot"></div>
+            <div class="ac-dot"></div>
+            <div class="ac-dot"></div>
+        </div>
+    }
+    else if (Type == SpinnerType.Pulse)
+    {
+        <div class="ac-spinner-pulse @SizeClass @ColorClass"></div>
+    }
+
+    @if (!string.IsNullOrEmpty(Text))
+    {
+        <span class="ac-spinner-text">@Text</span>
+    }
+</div>
+
+@code {
+    [Parameter] public SpinnerType Type { get; set; } = SpinnerType.Circle;
+    [Parameter] public SpinnerSize Size { get; set; } = SpinnerSize.Medium;
+    [Parameter] public SpinnerColor Color { get; set; } = SpinnerColor.Primary;
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public bool Overlay { get; set; }
+    [Parameter] public bool FullPage { get; set; }
+    [Parameter] public string? Class { get; set; }
+
+    private string SizeClass => Size switch
+    {
+        SpinnerSize.Small => "ac-spinner-sm",
+        SpinnerSize.Large => "ac-spinner-lg",
+        _ => ""
+    };
+
+    private string ColorClass => Color switch
+    {
+        SpinnerColor.White => "ac-spinner-white",
+        SpinnerColor.Secondary => "ac-spinner-secondary",
+        _ => ""
+    };
+}

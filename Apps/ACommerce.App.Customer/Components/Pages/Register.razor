@@ -1,0 +1,43 @@
+@page "/register"
+@layout ACommerce.Templates.Customer.Layouts.AuthLayout
+@inject IAppNavigationService Navigation
+
+<RegisterPage IsLoading="@_isLoading"
+              ErrorMessage="@_errorMessage"
+              OnRegister="HandleRegister"
+              OnGoogleRegister="HandleGoogleRegister"
+              OnAppleRegister="HandleAppleRegister" />
+
+@code {
+    private bool _isLoading;
+    private string? _errorMessage;
+
+    private async Task HandleRegister(RegisterEventArgs args)
+    {
+        _isLoading = true;
+        _errorMessage = null;
+
+        await Task.Delay(1000); // Simulate API call
+
+        // Demo: registration success
+        Navigation.NavigateTo("/");
+
+        _isLoading = false;
+    }
+
+    private async Task HandleGoogleRegister()
+    {
+        _isLoading = true;
+        await Task.Delay(500);
+        Navigation.NavigateTo("/");
+        _isLoading = false;
+    }
+
+    private async Task HandleAppleRegister()
+    {
+        _isLoading = true;
+        await Task.Delay(500);
+        Navigation.NavigateTo("/");
+        _isLoading = false;
+    }
+}

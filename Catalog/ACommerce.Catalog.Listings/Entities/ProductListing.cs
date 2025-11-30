@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Catalog.Listings.Enums;
 using ACommerce.SharedKernel.Abstractions.Entities;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -115,8 +116,9 @@ public class ProductListing : IBaseEntity
 	/// </summary>
 	public int ReviewCount { get; set; }
 
-    /// <summary>
-    /// بيانات إضافية
-    /// </summary>
-    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
+	/// <summary>
+	/// بيانات إضافية
+	/// </summary>
+	[NotMapped]
+	public Dictionary<string, string> Metadata { get; set; } = new();
 }

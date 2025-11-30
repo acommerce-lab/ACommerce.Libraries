@@ -5,10 +5,10 @@ namespace ACommerce.Client.Payments;
 
 public sealed class PaymentsClient
 {
-	private readonly DynamicHttpClient _httpClient;
+	private readonly IApiClient _httpClient;
 	private const string ServiceName = "Payments"; // أو "Marketplace"
 
-	public PaymentsClient(DynamicHttpClient httpClient)
+	public PaymentsClient(IApiClient httpClient)
 	{
 		_httpClient = httpClient;
 	}

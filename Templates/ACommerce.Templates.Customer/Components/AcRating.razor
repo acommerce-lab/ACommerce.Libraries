@@ -1,0 +1,72 @@
+@namespace ACommerce.Templates.Customer.Components
+
+<div class="ac-rating @(ReadOnly ? "ac-rating-readonly" : "") @Class">
+    @for (int i = 1; i <= MaxRating; i++)
+    {
+        var index = i;
+        <button class="ac-rating-star @(i <= (HoverValue ?? Value) ? "ac-star-filled" : "")"
+                disabled="@ReadOnly"
+                @onclick="() => SetRating(index)"
+                @onmouseenter="() => HandleHover(index)"
+                @onmouseleave="HandleLeave">
+            @if (i <= (HoverValue ?? Value))
+            {
+                <i class="bi bi-star-fill"></i>
+            }
+            else if (i - 0.5 <= (HoverValue ?? Value))
+            {
+                <i class="bi bi-star-half"></i>
+            }
+            else
+            {
+                <i class="bi bi-star"></i>
+            }
+        </button>
+    }
+
+    @if (ShowValue)
+    {
+        <span class="ac-rating-value">@Value.ToString("0.0")</span>
+    }
+
+    @if (ShowCount && Count > 0)
+    {
+        <span class="ac-rating-count">(@Count تقييم)</span>
+    }
+</div>
+
+@code {
+    [Parameter] public double Value { get; set; }
+    [Parameter] public EventCallback<double> ValueChanged { get; set; }
+    [Parameter] public int MaxRating { get; set; } = 5;
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public bool AllowHalf { get; set; }
+    [Parameter] public bool ShowValue { get; set; }
+    [Parameter] public bool ShowCount { get; set; }
+    [Parameter] public int Count { get; set; }
+    [Parameter] public string? Class { get; set; }
+
+    private double? HoverValue { get; set; }
+
+    private async Task SetRating(int rating)
+    {
+        if (!ReadOnly)
+        {
+            Value = rating;
+            await ValueChanged.InvokeAsync(Value);
+        }
+    }
+
+    private void HandleHover(int rating)
+    {
+        if (!ReadOnly)
+        {
+            HoverValue = rating;
+        }
+    }
+
+    private void HandleLeave()
+    {
+        HoverValue = null;
+    }
+}

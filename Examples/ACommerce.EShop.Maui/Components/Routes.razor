@@ -3,4 +3,29 @@
         <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
+    <NotFound>
+        <LayoutView Layout="typeof(Layout.MainLayout)">
+            <div class="not-found-page">
+                <h1>🔍 404 - الصفحة غير موجودة</h1>
+                <p>عذراً، الصفحة التي تبحث عنها غير متوفرة حالياً.</p>
+                <a href="/" class="back-home">🏠 العودة للرئيسية</a>
+            </div>
+        </LayoutView>
+    </NotFound>
 </Router>
+
+<style>
+    .not-found-page {
+        text-align: center;
+        padding: 3rem;
+    }
+    .back-home {
+        display: inline-block;
+        margin-top: 1rem;
+        padding: 0.75rem 1.5rem;
+        background: #6200ea;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+    }
+</style>

@@ -1,0 +1,74 @@
+@page "/"
+@inject MockDataService DataService
+@inject IAppNavigationService Navigation
+
+<HomePage Categories="@_categories"
+          Banners="@_banners"
+          FeaturedProducts="@_featuredProducts"
+          NewProducts="@_newProducts"
+          BestSellers="@_bestSellers"
+          IsLoading="@_isLoading"
+          OnCategoryClick="HandleCategoryClick"
+          OnBannerClick="HandleBannerClick"
+          OnProductClick="HandleProductClick"
+          OnAddToCart="HandleAddToCart"
+          OnSearch="HandleSearch" />
+
+@code {
+    private List<HomeCategoryItem>? _categories;
+    private List<BannerItem>? _banners;
+    private List<HomeProductItem>? _featuredProducts;
+    private List<HomeProductItem>? _newProducts;
+    private List<HomeProductItem>? _bestSellers;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _isLoading = true;
+
+        // Simulate API delay
+        await Task.Delay(500);
+
+        _categories = DataService.GetCategories();
+        _banners = DataService.GetBanners();
+        _featuredProducts = DataService.GetFeaturedProducts();
+        _newProducts = DataService.GetNewProducts();
+        _bestSellers = DataService.GetBestSellers();
+
+        _isLoading = false;
+    }
+
+    private void HandleCategoryClick(Guid categoryId)
+    {
+        Navigation.NavigateTo($"/search?category={categoryId}");
+    }
+
+    private void HandleBannerClick(BannerItem banner)
+    {
+        if (!string.IsNullOrEmpty(banner.LinkUrl))
+        {
+            Navigation.NavigateTo(banner.LinkUrl);
+        }
+    }
+
+    private void HandleProductClick(Guid productId)
+    {
+        Navigation.NavigateTo($"/product/{productId}");
+    }
+
+    private void HandleAddToCart(Guid productId)
+    {
+        // TODO: Add to cart via service
+        Console.WriteLine($"Added product {productId} to cart");
+    }
+
+    private void HandleSearch(string query)
+    {
+        Navigation.NavigateTo($"/search?q={Uri.EscapeDataString(query)}");
+    }
+}

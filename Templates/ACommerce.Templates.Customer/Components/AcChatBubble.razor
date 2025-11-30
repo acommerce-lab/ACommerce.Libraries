@@ -1,0 +1,97 @@
+@namespace ACommerce.Templates.Customer.Components
+
+<div class="ac-chat-bubble @(IsSent ? "ac-chat-sent" : "ac-chat-received") @Class">
+    @if (!IsSent && ShowAvatar)
+    {
+        <div class="ac-chat-avatar">
+            @if (!string.IsNullOrEmpty(AvatarUrl))
+            {
+                <img src="@AvatarUrl" alt="@SenderName" />
+            }
+            else
+            {
+                <span>@(SenderName?.FirstOrDefault())</span>
+            }
+        </div>
+    }
+
+    <div class="ac-chat-content">
+        @if (!IsSent && !string.IsNullOrEmpty(SenderName))
+        {
+            <span class="ac-chat-sender">@SenderName</span>
+        }
+
+        @if (Type == ChatMessageType.Text)
+        {
+            <div class="ac-chat-text">@Message</div>
+        }
+        else if (Type == ChatMessageType.Image)
+        {
+            <div class="ac-chat-image" @onclick="OnImageClick">
+                <img src="@MediaUrl" alt="" />
+            </div>
+        }
+        else if (Type == ChatMessageType.Product)
+        {
+            <div class="ac-chat-product" @onclick="OnProductClick">
+                @if (!string.IsNullOrEmpty(ProductImage))
+                {
+                    <img src="@ProductImage" alt="@ProductName" class="ac-chat-product-image" />
+                }
+                <div class="ac-chat-product-info">
+                    <span class="ac-chat-product-name">@ProductName</span>
+                    <span class="ac-chat-product-price">@ProductPrice?.ToString("N2") ر.س</span>
+                </div>
+            </div>
+        }
+        else if (Type == ChatMessageType.Order)
+        {
+            <div class="ac-chat-order">
+                <i class="bi bi-box-seam"></i>
+                <span>طلب رقم #@OrderNumber</span>
+            </div>
+        }
+
+        <div class="ac-chat-meta">
+            <span class="ac-chat-time">@Timestamp.ToString("HH:mm")</span>
+            @if (IsSent)
+            {
+                <span class="ac-chat-status">
+                    @if (IsRead)
+                    {
+                        <i class="bi bi-check2-all ac-read"></i>
+                    }
+                    else if (IsDelivered)
+                    {
+                        <i class="bi bi-check2-all"></i>
+                    }
+                    else
+                    {
+                        <i class="bi bi-check2"></i>
+                    }
+                </span>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Message { get; set; }
+    [Parameter] public ChatMessageType Type { get; set; } = ChatMessageType.Text;
+    [Parameter] public bool IsSent { get; set; }
+    [Parameter] public DateTime Timestamp { get; set; } = DateTime.Now;
+    [Parameter] public bool IsDelivered { get; set; }
+    [Parameter] public bool IsRead { get; set; }
+    [Parameter] public bool ShowAvatar { get; set; } = true;
+    [Parameter] public string? SenderName { get; set; }
+    [Parameter] public string? AvatarUrl { get; set; }
+    [Parameter] public string? MediaUrl { get; set; }
+    [Parameter] public string? ProductName { get; set; }
+    [Parameter] public string? ProductImage { get; set; }
+    [Parameter] public decimal? ProductPrice { get; set; }
+    [Parameter] public Guid? ProductId { get; set; }
+    [Parameter] public string? OrderNumber { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public EventCallback OnImageClick { get; set; }
+    [Parameter] public EventCallback OnProductClick { get; set; }
+}

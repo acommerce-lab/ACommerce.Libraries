@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.Catalog.Currencies.Entities;
 using ACommerce.SharedKernel.Abstractions.Entities;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -89,9 +90,10 @@ public class ProductPrice : IBaseEntity
 	/// </summary>
 	public bool IsActive { get; set; } = true;
 
-    /// <summary>
-    /// ??????? ??????
-    /// </summary>
-    [NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
+	/// <summary>
+	/// ??????? ??????
+	/// </summary>
+	[NotMapped]
+	public Dictionary<string, string> Metadata { get; set; } = new();
 }
 
