@@ -169,7 +169,18 @@ public static class MauiProgram
         // Navigation Service
         builder.Services.AddScoped<IAppNavigationService, AppNavigationService>();
 
-        // Space Data Service (mock data for development)
+        // HttpClient for direct API calls
+        builder.Services.AddHttpClient("AshareApi", client =>
+        {
+            client.BaseAddress = new Uri(apiBaseUrl);
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+        });
+
+        // Ashare API Service (connects to real backend)
+        builder.Services.AddScoped<AshareApiService>();
+
+        // Space Data Service (legacy mock data - kept for backward compatibility)
+        // TODO: Remove after full migration to AshareApiService
         builder.Services.AddSingleton<SpaceDataService>();
 
         return builder.Build();
