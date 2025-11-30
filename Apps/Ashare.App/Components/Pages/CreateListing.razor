@@ -1,0 +1,137 @@
+@page "/host/add"
+@page "/create-listing"
+@inject AshareApiService ApiService
+@inject IAppNavigationService Navigation
+@using ACommerce.Templates.Customer.Pages
+
+<CreateListingPage @ref="_createListingPage"
+                   Categories="@_categories"
+                   OnLoadCategoryAttributes="LoadCategoryAttributes"
+                   OnSubmit="SubmitListing"
+                   OnViewListing="ViewListing"
+                   OnRequestLocation="RequestLocation" />
+
+@code {
+    private CreateListingPage? _createListingPage;
+    private List<ListingCategory>? _categories;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategories();
+    }
+
+    private async Task LoadCategories()
+    {
+        try
+        {
+            var apiCategories = await ApiService.GetCategoriesAsync();
+            _categories = apiCategories.Select(c => new ListingCategory
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Slug = c.Name.ToLower().Replace(" ", "-"),
+                Description = null,
+                Icon = c.Icon,
+                Image = c.Image
+            }).ToList();
+
+            _createListingPage?.SetCategories(_categories);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading categories: {ex.Message}");
+        }
+    }
+
+    private async Task LoadCategoryAttributes(Guid categoryId)
+    {
+        try
+        {
+            var apiAttributes = await ApiService.GetAttributesForCategoryAsync(categoryId);
+            var attributes = apiAttributes.Select(a => new ListingAttributeDefinition
+            {
+                Id = a.Id,
+                Name = a.Name,
+                Code = a.Code,
+                Type = a.Type,
+                Description = a.Description,
+                IsRequired = a.IsRequired,
+                IsFilterable = a.IsFilterable,
+                IsVisibleInList = a.IsVisibleInList,
+                IsVisibleInDetail = a.IsVisibleInDetail,
+                SortOrder = a.SortOrder,
+                ValidationRules = a.ValidationRules,
+                DefaultValue = a.DefaultValue,
+                Values = a.Values.Select(v => new ListingAttributeValue
+                {
+                    Id = v.Id,
+                    Value = v.Value,
+                    DisplayName = v.DisplayName,
+                    Code = v.Code,
+                    Description = v.Description,
+                    ColorHex = v.ColorHex,
+                    ImageUrl = v.ImageUrl,
+                    SortOrder = v.SortOrder,
+                    IsActive = v.IsActive
+                }).ToList()
+            }).ToList();
+
+            _createListingPage?.SetCategoryAttributes(attributes);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading attributes: {ex.Message}");
+            _createListingPage?.SetError("حدث خطأ أثناء تحميل الخصائص");
+        }
+    }
+
+    private async Task SubmitListing(CreateListingModel model)
+    {
+        try
+        {
+            var request = new CreateSpaceRequest
+            {
+                CategoryId = model.CategoryId,
+                Title = model.Title,
+                Description = model.Description,
+                PricePerMonth = model.Attributes
+                    .FirstOrDefault(a => a.Code == "price")?.NumberValue ?? 0,
+                Images = model.Images,
+                Latitude = model.Latitude,
+                Longitude = model.Longitude,
+                Address = model.Address,
+                Attributes = model.Attributes.ToDictionary(
+                    a => a.Code,
+                    a => (object)(a.TextValue ?? a.NumberValue?.ToString() ?? string.Empty))
+            };
+
+            var result = await ApiService.CreateSpaceAsync(request);
+
+            if (result != null)
+            {
+                _createListingPage?.SetCreatedListingId(result.Id);
+            }
+            else
+            {
+                _createListingPage?.SetError("حدث خطأ أثناء إنشاء العرض. حاول مرة أخرى.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating listing: {ex.Message}");
+            _createListingPage?.SetError("حدث خطأ أثناء إنشاء العرض. حاول مرة أخرى.");
+        }
+    }
+
+    private void ViewListing(Guid listingId)
+    {
+        Navigation.NavigateTo($"/space/{listingId}");
+    }
+
+    private async Task RequestLocation()
+    {
+        // TODO: Implement geolocation request
+        // For now, set a default location (Riyadh)
+        _createListingPage?.SetLocation(24.7136, 46.6753, "الرياض، المملكة العربية السعودية");
+    }
+}
