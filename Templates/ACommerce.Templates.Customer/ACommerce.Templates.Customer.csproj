@@ -24,6 +24,7 @@
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Chats\ACommerce.Client.Chats.csproj" />
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Profiles\ACommerce.Client.Profiles.csproj" />
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Notifications\ACommerce.Client.Notifications.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Locations\ACommerce.Client.Locations.csproj" />
 	</ItemGroup>
 
 </Project>
