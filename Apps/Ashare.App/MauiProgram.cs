@@ -21,6 +21,7 @@ using ACommerce.Client.Products;
 using ACommerce.Client.Products.Extensions;
 using ACommerce.Client.Profiles;
 using ACommerce.Client.Realtime;
+using ACommerce.Client.Realtime.Extensions;
 using ACommerce.Client.Vendors;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Themes;

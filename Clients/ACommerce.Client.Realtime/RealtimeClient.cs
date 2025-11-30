@@ -5,11 +5,24 @@ using Microsoft.Extensions.Logging;
 namespace ACommerce.Client.Realtime;
 
 /// <summary>
+/// Interface للتواصل Realtime باستخدام SignalR
+/// </summary>
+public interface IRealtimeClient : IAsyncDisposable
+{
+	Task ConnectAsync(string serviceName = "Marketplace", string hubPath = "/hubs/notifications", CancellationToken cancellationToken = default);
+	Task DisconnectAsync(CancellationToken cancellationToken = default);
+	IDisposable On<T>(string eventName, Action<T> handler);
+	IDisposable OnMessage(Action<object> handler);
+	Task SendAsync(string methodName, object? arg1 = null, CancellationToken cancellationToken = default);
+	Task<TResult?> InvokeAsync<TResult>(string methodName, object? arg1 = null, CancellationToken cancellationToken = default);
+}
+
+/// <summary>
 /// Client للتواصل Realtime باستخدام SignalR
 /// </summary>
 public sealed class RealtimeClient(
     ServiceRegistryClient registryClient,
-    ILogger<RealtimeClient> logger) : IAsyncDisposable
+    ILogger<RealtimeClient> logger) : IRealtimeClient
 {
     private HubConnection? _connection;
 	private bool _isConnected;
@@ -64,6 +77,14 @@ public sealed class RealtimeClient(
 		}
 
 		return _connection.On(eventName, handler);
+	}
+
+	/// <summary>
+	/// الاستماع لرسائل الـ Chat
+	/// </summary>
+	public IDisposable OnMessage(Action<object> handler)
+	{
+		return On<object>("ReceiveMessage", handler);
 	}
 
 	/// <summary>
