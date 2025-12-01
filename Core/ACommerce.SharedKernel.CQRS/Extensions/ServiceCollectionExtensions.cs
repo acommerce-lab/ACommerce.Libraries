@@ -158,7 +158,7 @@ public static class ServiceCollectionExtensions
 			if (registeredPairs.Contains(pairKey))
 				continue;
 
-			// Try to find matching DTO
+			// Try to find matching Response DTO
 			Type? responseDtoType = null;
 
 			// Try exact match first: EntityNameResponseDto
@@ -172,11 +172,46 @@ public static class ServiceCollectionExtensions
 				responseDtoType = dtoMatch;
 			}
 
+			// Try to find Create DTO with various naming patterns
+			Type? createDtoType = null;
+
+			// Pattern 1: Create{EntityName}Dto (e.g., CreateProductListingDto)
+			if (allDtoTypes.TryGetValue($"Create{entityName}Dto", out var createMatch1))
+			{
+				createDtoType = createMatch1;
+			}
+			// Pattern 2: {EntityName without prefix}CreateDto (e.g., ListingCreateDto for ProductListing)
+			else
+			{
+				// Try removing common prefixes like "Product"
+				var shortName = entityName.Replace("Product", "");
+				if (!string.IsNullOrEmpty(shortName) && allDtoTypes.TryGetValue($"Create{shortName}Dto", out var createMatch2))
+				{
+					createDtoType = createMatch2;
+				}
+			}
+
+			// Try to find Update DTO
+			Type? updateDtoType = null;
+
+			if (allDtoTypes.TryGetValue($"Update{entityName}Dto", out var updateMatch1))
+			{
+				updateDtoType = updateMatch1;
+			}
+			else
+			{
+				var shortName = entityName.Replace("Product", "");
+				if (!string.IsNullOrEmpty(shortName) && allDtoTypes.TryGetValue($"Update{shortName}Dto", out var updateMatch2))
+				{
+					updateDtoType = updateMatch2;
+				}
+			}
+
 			if (responseDtoType != null)
 			{
 				try
 				{
-					RegisterHandlersForEntity(services, entityType, responseDtoType);
+					RegisterHandlersForEntity(services, entityType, responseDtoType, createDtoType, updateDtoType);
 					registeredPairs.Add(pairKey);
 				}
 				catch
@@ -203,9 +238,14 @@ public static class ServiceCollectionExtensions
 	}
 
 	/// <summary>
-	/// Register SmartSearchQuery and GetByIdQuery handlers for an entity
+	/// Register query and command handlers for an entity
 	/// </summary>
-	private static void RegisterHandlersForEntity(IServiceCollection services, Type entityType, Type responseDtoType)
+	private static void RegisterHandlersForEntity(
+		IServiceCollection services,
+		Type entityType,
+		Type responseDtoType,
+		Type? createDtoType = null,
+		Type? updateDtoType = null)
 	{
 		// SmartSearchQuery handler
 		var smartSearchQueryType = typeof(SmartSearchQuery<,>).MakeGenericType(entityType, responseDtoType);
@@ -222,6 +262,40 @@ public static class ServiceCollectionExtensions
 		var getByIdRequestHandlerType = typeof(IRequestHandler<,>).MakeGenericType(getByIdQueryType, nullableResponseDtoType);
 
 		services.AddScoped(getByIdRequestHandlerType, getByIdHandlerType);
+
+		// CreateCommand handler
+		if (createDtoType != null)
+		{
+			var createCommandType = typeof(CreateCommand<,>).MakeGenericType(entityType, createDtoType);
+			var createHandlerType = typeof(CreateCommandHandler<,>).MakeGenericType(entityType, createDtoType);
+			var createRequestHandlerType = typeof(IRequestHandler<,>).MakeGenericType(createCommandType, entityType);
+
+			services.AddScoped(createRequestHandlerType, createHandlerType);
+		}
+
+		// UpdateCommand handler
+		if (updateDtoType != null)
+		{
+			var updateCommandType = typeof(UpdateCommand<,>).MakeGenericType(entityType, updateDtoType);
+			var updateHandlerType = typeof(UpdateCommandHandler<,>).MakeGenericType(entityType, updateDtoType);
+			var updateRequestHandlerType = typeof(IRequestHandler<,>).MakeGenericType(updateCommandType, typeof(Unit));
+
+			services.AddScoped(updateRequestHandlerType, updateHandlerType);
+		}
+
+		// DeleteCommand handler - always register
+		var deleteCommandType = typeof(DeleteCommand<>).MakeGenericType(entityType);
+		var deleteHandlerType = typeof(DeleteCommandHandler<>).MakeGenericType(entityType);
+		var deleteRequestHandlerType = typeof(IRequestHandler<,>).MakeGenericType(deleteCommandType, typeof(Unit));
+
+		services.AddScoped(deleteRequestHandlerType, deleteHandlerType);
+
+		// RestoreCommand handler - always register
+		var restoreCommandType = typeof(RestoreCommand<>).MakeGenericType(entityType);
+		var restoreHandlerType = typeof(RestoreCommandHandler<>).MakeGenericType(entityType);
+		var restoreRequestHandlerType = typeof(IRequestHandler<,>).MakeGenericType(restoreCommandType, typeof(Unit));
+
+		services.AddScoped(restoreRequestHandlerType, restoreHandlerType);
 	}
 
 	/// <summary>
