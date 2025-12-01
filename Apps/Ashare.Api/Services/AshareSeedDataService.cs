@@ -915,27 +915,54 @@ public class AshareSeedDataService
 
 	private async Task SeedProductPricesAsync()
 	{
-		var repo = _repositoryFactory.CreateRepository<ProductPrice>();
+		var priceRepo = _repositoryFactory.CreateRepository<ProductPrice>();
 
-		var existing = await repo.GetAllWithPredicateAsync();
+		var existing = await priceRepo.GetAllWithPredicateAsync();
 		if (existing.Any()) return;
 
-		// إضافة الأسعار بعد إضافة المنتجات والعملات
-		var prices = new List<ProductPrice>
+		// جلب المنتجات المحفوظة فعلياً للحصول على معرّفاتها الحقيقية
+		var productRepo = _repositoryFactory.CreateRepository<Product>();
+		var products = await productRepo.GetAllWithPredicateAsync();
+		var productBySku = products.ToDictionary(p => p.Sku, p => p.Id);
+
+		// جلب العملات المحفوظة فعلياً
+		var currencyRepo = _repositoryFactory.CreateRepository<Currency>();
+		var currencies = await currencyRepo.GetAllWithPredicateAsync();
+		var sarCurrency = currencies.FirstOrDefault(c => c.Code == "SAR");
+
+		if (sarCurrency == null || !productBySku.Any())
 		{
-			new() { Id = Guid.NewGuid(), ProductId = ProductIds.Apartment1, CurrencyId = CurrencyIds.SAR, BasePrice = 3500, IsActive = true, CreatedAt = DateTime.UtcNow },
-			new() { Id = Guid.NewGuid(), ProductId = ProductIds.Apartment2, CurrencyId = CurrencyIds.SAR, BasePrice = 2500, IsActive = true, CreatedAt = DateTime.UtcNow },
-			new() { Id = Guid.NewGuid(), ProductId = ProductIds.Villa1, CurrencyId = CurrencyIds.SAR, BasePrice = 15000, IsActive = true, CreatedAt = DateTime.UtcNow },
-			new() { Id = Guid.NewGuid(), ProductId = ProductIds.Office1, CurrencyId = CurrencyIds.SAR, BasePrice = 8000, IsActive = true, CreatedAt = DateTime.UtcNow },
-			new() { Id = Guid.NewGuid(), ProductId = ProductIds.Coworking1, CurrencyId = CurrencyIds.SAR, BasePrice = 1500, IsActive = true, CreatedAt = DateTime.UtcNow },
-			new() { Id = Guid.NewGuid(), ProductId = ProductIds.MeetingRoom1, CurrencyId = CurrencyIds.SAR, BasePrice = 500, IsActive = true, CreatedAt = DateTime.UtcNow },
-			new() { Id = Guid.NewGuid(), ProductId = ProductIds.AdminOffice1, CurrencyId = CurrencyIds.SAR, BasePrice = 12000, IsActive = true, CreatedAt = DateTime.UtcNow },
-			new() { Id = Guid.NewGuid(), ProductId = ProductIds.AdminOffice2, CurrencyId = CurrencyIds.SAR, BasePrice = 50000, IsActive = true, CreatedAt = DateTime.UtcNow }
+			return; // لا يمكن إضافة الأسعار بدون عملات أو منتجات
+		}
+
+		// تعريف الأسعار مع SKU للمنتج
+		var priceDefinitions = new Dictionary<string, decimal>
+		{
+			{ "RES-APT-001", 3500 },  // شقة مفروشة
+			{ "RES-STD-001", 2500 },  // استوديو
+			{ "RES-VIL-001", 15000 }, // فيلا
+			{ "COM-OFF-001", 8000 },  // مكتب
+			{ "COM-COW-001", 1500 },  // مساحة عمل مشتركة
+			{ "COM-MTG-001", 500 },   // قاعة اجتماعات
+			{ "ADM-OFF-001", 12000 }, // مكتب إداري
+			{ "ADM-FLR-001", 50000 }  // طابق إداري
 		};
 
-		foreach (var price in prices)
+		// إضافة الأسعار باستخدام معرّفات المنتجات الفعلية
+		foreach (var priceDef in priceDefinitions)
 		{
-			await repo.AddAsync(price);
+			if (productBySku.TryGetValue(priceDef.Key, out var productId))
+			{
+				await priceRepo.AddAsync(new ProductPrice
+				{
+					Id = Guid.NewGuid(),
+					ProductId = productId,
+					CurrencyId = sarCurrency.Id,
+					BasePrice = priceDef.Value,
+					IsActive = true,
+					CreatedAt = DateTime.UtcNow
+				});
+			}
 		}
 	}
 }
