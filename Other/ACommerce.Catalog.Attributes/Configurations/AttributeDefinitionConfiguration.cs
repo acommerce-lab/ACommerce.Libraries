@@ -12,6 +12,9 @@ public class AttributeDefinitionConfiguration : IEntityTypeConfiguration<Attribu
 
 		builder.HasKey(e => e.Id);
 
+		// منع EF Core من توليد ID تلقائياً - استخدم ID المحدد
+		builder.Property(e => e.Id).ValueGeneratedNever();
+
 		builder.Property(e => e.Name)
 			.IsRequired()
 			.HasMaxLength(200);
