@@ -3,6 +3,7 @@ using ACommerce.Catalog.Products.Entities;
 using ACommerce.Catalog.Products.Enums;
 using ACommerce.Catalog.Attributes.Entities;
 using ACommerce.Catalog.Attributes.Enums;
+using ACommerce.Catalog.Currencies.Entities;
 
 namespace Ashare.Api.Services;
 
@@ -22,6 +23,12 @@ public class AshareSeedDataService
 		public static readonly Guid LookingForPartner = Guid.Parse("10000000-0000-0000-0001-000000000003");
 		public static readonly Guid Administrative = Guid.Parse("10000000-0000-0000-0001-000000000004");
 		public static readonly Guid Commercial = Guid.Parse("10000000-0000-0000-0001-000000000005");
+	}
+
+	public static class CurrencyIds
+	{
+		public static readonly Guid SAR = Guid.Parse("40000000-0000-0000-0001-000000000001");
+		public static readonly Guid USD = Guid.Parse("40000000-0000-0000-0001-000000000002");
 	}
 
 	public static class ProductIds
@@ -158,9 +165,57 @@ public class AshareSeedDataService
 
 	public async Task SeedAsync()
 	{
+		await SeedCurrenciesAsync();
 		await SeedCategoriesAsync();
 		await SeedAttributeDefinitionsAsync();
 		await SeedProductsAsync();
+	}
+
+	private async Task SeedCurrenciesAsync()
+	{
+		var repo = _repositoryFactory.CreateRepository<Currency>();
+
+		var existing = await repo.GetAllWithPredicateAsync();
+		if (existing.Any()) return;
+
+		var currencies = new List<Currency>
+		{
+			new()
+			{
+				Id = CurrencyIds.SAR,
+				Code = "SAR",
+				Name = "الريال السعودي",
+				Symbol = "ر.س",
+				DecimalPlaces = 2,
+				SymbolBeforeAmount = false,
+				ThousandsSeparator = ",",
+				DecimalSeparator = ".",
+				IsBaseCurrency = true,
+				IsActive = true,
+				SortOrder = 1,
+				CreatedAt = DateTime.UtcNow
+			},
+			new()
+			{
+				Id = CurrencyIds.USD,
+				Code = "USD",
+				Name = "الدولار الأمريكي",
+				Symbol = "$",
+				DecimalPlaces = 2,
+				SymbolBeforeAmount = true,
+				ThousandsSeparator = ",",
+				DecimalSeparator = ".",
+				IsBaseCurrency = false,
+				IsActive = true,
+				SortOrder = 2,
+				CreatedAt = DateTime.UtcNow
+			}
+		};
+
+		foreach (var currency in currencies)
+		{
+			await repo.AddAsync(currency);
+		}
 	}
 
 	private async Task SeedCategoriesAsync()
@@ -735,9 +790,10 @@ public class AshareSeedDataService
 					new()
 					{
 						Id = Guid.NewGuid(),
-						Price = 3500,
-						Currency = "ر.س",
-						IsDefault = true,
+						ProductId = ProductIds.Apartment1,
+						CurrencyId = CurrencyIds.SAR,
+						BasePrice = 3500,
+						IsActive = true,
 						CreatedAt = DateTime.UtcNow
 					}
 				}
@@ -762,9 +818,10 @@ public class AshareSeedDataService
 					new()
 					{
 						Id = Guid.NewGuid(),
-						Price = 2500,
-						Currency = "ر.س",
-						IsDefault = true,
+						ProductId = ProductIds.Apartment2,
+						CurrencyId = CurrencyIds.SAR,
+						BasePrice = 2500,
+						IsActive = true,
 						CreatedAt = DateTime.UtcNow
 					}
 				}
@@ -788,9 +845,10 @@ public class AshareSeedDataService
 					new()
 					{
 						Id = Guid.NewGuid(),
-						Price = 15000,
-						Currency = "ر.س",
-						IsDefault = true,
+						ProductId = ProductIds.Villa1,
+						CurrencyId = CurrencyIds.SAR,
+						BasePrice = 15000,
+						IsActive = true,
 						CreatedAt = DateTime.UtcNow
 					}
 				}
@@ -819,9 +877,10 @@ public class AshareSeedDataService
 					new()
 					{
 						Id = Guid.NewGuid(),
-						Price = 8000,
-						Currency = "ر.س",
-						IsDefault = true,
+						ProductId = ProductIds.Office1,
+						CurrencyId = CurrencyIds.SAR,
+						BasePrice = 8000,
+						IsActive = true,
 						CreatedAt = DateTime.UtcNow
 					}
 				}
@@ -846,9 +905,10 @@ public class AshareSeedDataService
 					new()
 					{
 						Id = Guid.NewGuid(),
-						Price = 1500,
-						Currency = "ر.س",
-						IsDefault = true,
+						ProductId = ProductIds.Coworking1,
+						CurrencyId = CurrencyIds.SAR,
+						BasePrice = 1500,
+						IsActive = true,
 						CreatedAt = DateTime.UtcNow
 					}
 				}
@@ -872,9 +932,10 @@ public class AshareSeedDataService
 					new()
 					{
 						Id = Guid.NewGuid(),
-						Price = 500,
-						Currency = "ر.س",
-						IsDefault = true,
+						ProductId = ProductIds.MeetingRoom1,
+						CurrencyId = CurrencyIds.SAR,
+						BasePrice = 500,
+						IsActive = true,
 						CreatedAt = DateTime.UtcNow
 					}
 				}
@@ -903,9 +964,10 @@ public class AshareSeedDataService
 					new()
 					{
 						Id = Guid.NewGuid(),
-						Price = 12000,
-						Currency = "ر.س",
-						IsDefault = true,
+						ProductId = ProductIds.AdminOffice1,
+						CurrencyId = CurrencyIds.SAR,
+						BasePrice = 12000,
+						IsActive = true,
 						CreatedAt = DateTime.UtcNow
 					}
 				}
@@ -929,9 +991,10 @@ public class AshareSeedDataService
 					new()
 					{
 						Id = Guid.NewGuid(),
-						Price = 50000,
-						Currency = "ر.س",
-						IsDefault = true,
+						ProductId = ProductIds.AdminOffice2,
+						CurrencyId = CurrencyIds.SAR,
+						BasePrice = 50000,
+						IsActive = true,
 						CreatedAt = DateTime.UtcNow
 					}
 				}
