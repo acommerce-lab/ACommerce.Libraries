@@ -399,21 +399,113 @@ public class AshareSeedDataService
 
 	/// <summary>
 	/// إضافة ربطات الفئات بالخصائص في قاعدة البيانات
+	/// يستخدم الأكواد بدلاً من المعرّفات الثابتة للعمل ديناميكياً
 	/// </summary>
 	private async Task SeedCategoryAttributeMappingsAsync()
 	{
-		var repo = _repositoryFactory.CreateRepository<CategoryAttributeMapping>();
+		var mappingRepo = _repositoryFactory.CreateRepository<CategoryAttributeMapping>();
+		var categoryRepo = _repositoryFactory.CreateRepository<ProductCategory>();
+		var attributeRepo = _repositoryFactory.CreateRepository<AttributeDefinition>();
 
-		var existing = await repo.GetAllWithPredicateAsync();
+		// جلب الفئات والخصائص من قاعدة البيانات
+		var categories = await categoryRepo.GetAllWithPredicateAsync();
+		var attributes = await attributeRepo.GetAllWithPredicateAsync();
+
+		// إنشاء قواميس للبحث بالـ Slug والـ Code
+		var categoryBySlug = categories.ToDictionary(c => c.Slug, c => c.Id);
+		var attributeByCode = attributes.ToDictionary(a => a.Code, a => a.Id);
+
+		// جلب الربطات الموجودة
+		var existing = await mappingRepo.GetAllWithPredicateAsync();
 		var existingPairs = existing.Select(m => (m.CategoryId, m.AttributeDefinitionId)).ToHashSet();
+
+		// تعريف الربطات بالأكواد (ديناميكي)
+		var categoryAttributeCodes = new Dictionary<string, List<string>>
+		{
+			// ═══════════════════════════════════════════════════════════════════
+			// سكني (عرض سكن) - Residential Offer
+			// ═══════════════════════════════════════════════════════════════════
+			["residential"] = new List<string>
+			{
+				"title", "description", "price", "duration", "time_unit",
+				"property_type", "unit_type", "floor", "bill_type", "rental_type",
+				"area", "rooms", "bathrooms", "furnished", "amenities",
+				"city", "location",
+				"is_phone_allowed", "is_whatsapp_allowed", "is_messaging_allowed",
+				"images"
+			},
+
+			// ═══════════════════════════════════════════════════════════════════
+			// طلب سكن - Looking for Housing
+			// ═══════════════════════════════════════════════════════════════════
+			["looking-for-housing"] = new List<string>
+			{
+				"title", "description", "min_price", "max_price",
+				"property_type", "unit_type", "rooms", "furnished",
+				"city", "location",
+				"is_phone_allowed", "is_whatsapp_allowed", "is_messaging_allowed"
+			},
+
+			// ═══════════════════════════════════════════════════════════════════
+			// طلب شريك سكن - Looking for Roommate/Partner
+			// ═══════════════════════════════════════════════════════════════════
+			["looking-for-partner"] = new List<string>
+			{
+				"personal_name", "age", "gender", "nationality", "job",
+				"city", "min_price", "max_price", "furnished", "smoking",
+				"description",
+				"is_phone_allowed", "is_whatsapp_allowed", "is_messaging_allowed",
+				"images"
+			},
+
+			// ═══════════════════════════════════════════════════════════════════
+			// مساحة إدارية - Administrative Space
+			// ═══════════════════════════════════════════════════════════════════
+			["administrative"] = new List<string>
+			{
+				"title", "description", "price", "duration", "time_unit",
+				"property_type", "floor", "area", "capacity", "parking",
+				"working_hours", "facilities",
+				"city", "location",
+				"is_phone_allowed", "is_whatsapp_allowed", "is_messaging_allowed",
+				"images"
+			},
+
+			// ═══════════════════════════════════════════════════════════════════
+			// مساحة تجارية - Commercial Space
+			// ═══════════════════════════════════════════════════════════════════
+			["commercial"] = new List<string>
+			{
+				"title", "description", "price", "duration", "time_unit",
+				"commercial_property_type", "floor", "area", "capacity", "parking",
+				"facilities",
+				"city", "location",
+				"is_phone_allowed", "is_whatsapp_allowed", "is_messaging_allowed",
+				"images"
+			}
+		};
 
 		var mappingsToAdd = new List<CategoryAttributeMapping>();
 
-		foreach (var (categoryId, attributeIds) in CategoryAttributeMappings)
+		foreach (var (categorySlug, attributeCodes) in categoryAttributeCodes)
 		{
-			for (int i = 0; i < attributeIds.Count; i++)
+			// البحث عن الفئة بالـ Slug
+			if (!categoryBySlug.TryGetValue(categorySlug, out var categoryId))
 			{
-				var attributeId = attributeIds[i];
+				Console.WriteLine($"[Seed] Warning: Category '{categorySlug}' not found in database");
+				continue;
+			}
+
+			for (int i = 0; i < attributeCodes.Count; i++)
+			{
+				var code = attributeCodes[i];
+
+				// البحث عن الخاصية بالـ Code
+				if (!attributeByCode.TryGetValue(code, out var attributeId))
+				{
+					Console.WriteLine($"[Seed] Warning: Attribute '{code}' not found in database");
+					continue;
+				}
 
 				// تجنب الإضافة المكررة
 				if (!existingPairs.Contains((categoryId, attributeId)))
@@ -433,7 +525,7 @@ public class AshareSeedDataService
 
 		foreach (var mapping in mappingsToAdd)
 		{
-			await repo.AddAsync(mapping);
+			await mappingRepo.AddAsync(mapping);
 		}
 
 		Console.WriteLine($"[Seed] Added {mappingsToAdd.Count} category-attribute mappings");
