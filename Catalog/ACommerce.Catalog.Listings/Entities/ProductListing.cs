@@ -26,6 +26,21 @@ public class ProductListing : IBaseEntity
 	public Guid ProductId { get; set; }
 
 	/// <summary>
+	/// معرف الفئة
+	/// </summary>
+	public Guid? CategoryId { get; set; }
+
+	/// <summary>
+	/// عنوان العرض
+	/// </summary>
+	public string Title { get; set; } = string.Empty;
+
+	/// <summary>
+	/// وصف العرض
+	/// </summary>
+	public string? Description { get; set; }
+
+	/// <summary>
 	/// SKU خاص بالبائع (اختياري)
 	/// </summary>
 	public string? VendorSku { get; set; }
@@ -120,4 +135,44 @@ public class ProductListing : IBaseEntity
 	/// </summary>
 	[NotMapped]
 	public Dictionary<string, string> Metadata { get; set; } = new();
+
+	/// <summary>
+	/// الصور (JSON array of URLs)
+	/// </summary>
+	public string? ImagesJson { get; set; }
+
+	/// <summary>
+	/// الصورة المميزة
+	/// </summary>
+	public string? FeaturedImage { get; set; }
+
+	/// <summary>
+	/// خط العرض
+	/// </summary>
+	public double? Latitude { get; set; }
+
+	/// <summary>
+	/// خط الطول
+	/// </summary>
+	public double? Longitude { get; set; }
+
+	/// <summary>
+	/// العنوان
+	/// </summary>
+	public string? Address { get; set; }
+
+	/// <summary>
+	/// حالة المنتج (جديد، مستعمل، إلخ)
+	/// </summary>
+	public string? Condition { get; set; }
+
+	/// <summary>
+	/// رمز العملة
+	/// </summary>
+	public string? Currency { get; set; }
+
+	/// <summary>
+	/// الخصائص الديناميكية (JSON)
+	/// </summary>
+	public string? AttributesJson { get; set; }
 }
