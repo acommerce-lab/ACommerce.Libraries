@@ -41,9 +41,12 @@ public class CategoryAttributesController : ControllerBase
 			return NotFound(new { message = "الفئة غير موجودة أو لا تحتوي على خصائص" });
 		}
 
-		// جلب تفاصيل الخصائص من قاعدة البيانات
+		// جلب تفاصيل الخصائص من قاعدة البيانات مع تحميل القيم
 		var repo = _repositoryFactory.CreateRepository<AttributeDefinition>();
-		var allAttributes = await repo.GetAllWithPredicateAsync();
+		var allAttributes = await repo.GetAllWithPredicateAsync(
+			predicate: null,
+			includeDeleted: false,
+			includeProperties: "Values");
 
 		var categoryAttributes = allAttributes
 			.Where(a => attributeIds.Contains(a.Id))
