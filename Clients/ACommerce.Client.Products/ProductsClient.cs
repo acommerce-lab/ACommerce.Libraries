@@ -201,16 +201,26 @@ public sealed class ProductDto
 	public Guid Id { get; set; }
 	public string Name { get; set; } = string.Empty;
 	public string Sku { get; set; } = string.Empty;
+	public string Type { get; set; } = "Simple";
+	public string Status { get; set; } = "Active";
 	public string? ShortDescription { get; set; }
 	public string? LongDescription { get; set; }
-	public string? FeaturedImage { get; set; }
+	public string? Barcode { get; set; }
+	public decimal? Weight { get; set; }
+	public decimal? Length { get; set; }
+	public decimal? Width { get; set; }
+	public decimal? Height { get; set; }
 	public List<string> Images { get; set; } = new();
-	public decimal? Price { get; set; }
-	public string? Currency { get; set; }
-	public int? StockQuantity { get; set; }
+	public string? FeaturedImage { get; set; }
+	public List<string> Tags { get; set; } = new();
 	public bool IsFeatured { get; set; }
 	public bool IsNew { get; set; }
-	public string? Status { get; set; }
+	public DateTime? NewUntil { get; set; }
+	public Guid? ParentProductId { get; set; }
+	public int VariantsCount { get; set; }
+	public int CategoriesCount { get; set; }
+	public int AttributesCount { get; set; }
+	public Dictionary<string, string> Metadata { get; set; } = new();
 	public DateTime CreatedAt { get; set; }
 	public DateTime? UpdatedAt { get; set; }
 }
