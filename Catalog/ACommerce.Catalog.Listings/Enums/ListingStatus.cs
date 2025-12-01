@@ -1,8 +1,11 @@
+using System.Text.Json.Serialization;
+
 namespace ACommerce.Catalog.Listings.Enums;
 
 /// <summary>
 /// حالة العرض
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ListingStatus
 {
 	/// <summary>
