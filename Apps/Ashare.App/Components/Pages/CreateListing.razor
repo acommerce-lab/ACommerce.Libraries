@@ -47,7 +47,18 @@
     {
         try
         {
+            Console.WriteLine($"[CreateListing] Loading attributes for category: {categoryId}");
             var apiAttributes = await ApiService.GetAttributesForCategoryAsync(categoryId);
+            Console.WriteLine($"[CreateListing] Received {apiAttributes?.Count ?? 0} attributes from API");
+
+            if (apiAttributes != null)
+            {
+                foreach (var attr in apiAttributes)
+                {
+                    Console.WriteLine($"[CreateListing] Attribute: {attr.Name} ({attr.Code}) - Type: {attr.Type}");
+                }
+            }
+
             var attributes = apiAttributes.Select(a => new ListingAttributeDefinition
             {
                 Id = a.Id,
@@ -76,11 +87,13 @@
                 }).ToList()
             }).ToList();
 
+            Console.WriteLine($"[CreateListing] Setting {attributes.Count} attributes to page");
             _createListingPage?.SetCategoryAttributes(attributes);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading attributes: {ex.Message}");
+            Console.WriteLine($"[CreateListing] Error loading attributes: {ex.Message}");
+            Console.WriteLine($"[CreateListing] Stack trace: {ex.StackTrace}");
             _createListingPage?.SetError("حدث خطأ أثناء تحميل الخصائص");
         }
     }
