@@ -89,8 +89,9 @@ public static class MauiProgram
         // Client SDKs
         // ═══════════════════════════════════════════════════════════════════
 
-        // Core HTTP Client with interceptors
-        builder.Services.AddACommerceClient(apiBaseUrl, options =>
+        // Core HTTP Client with Static URL (for standalone apps like MAUI)
+        // Note: AddACommerceStaticClient ignores ServiceName and uses fixed base URL
+        builder.Services.AddACommerceStaticClient(apiBaseUrl, options =>
         {
             options.TimeoutSeconds = 30;
         });
