@@ -12,6 +12,7 @@ using ACommerce.Realtime.SignalR.Extensions;
 using ACommerce.Chats.Core.Hubs;
 using ACommerce.Chats.Core.Extensions;
 using ACommerce.Locations.Extensions;
+using ACommerce.Catalog.Products.Services;
 using Ashare.Api.Services;
 
 // Controllers from libraries
@@ -105,6 +106,9 @@ try
 
     // Chat Services
     builder.Services.AddChatsCore();
+
+    // Product Services
+    builder.Services.AddScoped<IProductService, ProductService>();
 
     // Ashare Seed Service
     builder.Services.AddScoped<AshareSeedDataService>();

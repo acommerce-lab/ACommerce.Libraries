@@ -2,7 +2,7 @@ using ACommerce.Catalog.Listings.Enums;
 
 namespace ACommerce.Catalog.Listings.DTOs;
 
-public class ListingResponseDto
+public class ProductListingResponseDto
 {
 	public Guid Id { get; set; }
 	public Guid VendorId { get; set; }
