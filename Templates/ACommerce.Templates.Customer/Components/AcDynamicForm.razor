@@ -182,7 +182,36 @@
     [Parameter] public List<ListingAttributeDefinition>? Attributes { get; set; }
     [Parameter] public List<ListingAttributeInput> Values { get; set; } = new();
     [Parameter] public EventCallback<List<ListingAttributeInput>> ValuesChanged { get; set; }
+    [Parameter] public EventCallback<bool> OnValidationChanged { get; set; }
     [Parameter] public string? Class { get; set; }
+
+    private bool ValidateForm()
+    {
+        if (Attributes == null) return true;
+
+        foreach (var attr in Attributes.Where(a => a.IsRequired))
+        {
+            var input = Values.FirstOrDefault(v => v.AttributeId == attr.Id);
+            if (input == null || !HasValue(input))
+                return false;
+        }
+        return true;
+    }
+
+    private bool HasValue(ListingAttributeInput input) =>
+        !string.IsNullOrEmpty(input.TextValue) ||
+        input.NumberValue.HasValue ||
+        input.BooleanValue.HasValue ||
+        input.DateValue.HasValue ||
+        (input.MultiSelectValues?.Any() ?? false);
+
+    private async Task NotifyValidationChanged()
+    {
+        if (OnValidationChanged.HasDelegate)
+        {
+            await OnValidationChanged.InvokeAsync(ValidateForm());
+        }
+    }
 
     private string? GetTextValue(Guid attributeId)
     {
@@ -232,6 +261,7 @@
         }
 
         await ValuesChanged.InvokeAsync(Values);
+        await NotifyValidationChanged();
     }
 
     private async Task SetBoolValue(Guid attributeId, string code, bool value)
@@ -244,6 +274,7 @@
         }
         input.BooleanValue = value;
         await ValuesChanged.InvokeAsync(Values);
+        await NotifyValidationChanged();
     }
 
     private async Task SetDateValue(Guid attributeId, string code, string? value)
@@ -256,6 +287,7 @@
         }
         input.DateValue = DateTime.TryParse(value, out var date) ? date : null;
         await ValuesChanged.InvokeAsync(Values);
+        await NotifyValidationChanged();
     }
 
     private async Task ToggleMultiSelect(Guid attributeId, string code, string value, bool isChecked)
@@ -284,5 +316,6 @@
         }
 
         await ValuesChanged.InvokeAsync(Values);
+        await NotifyValidationChanged();
     }
 }
