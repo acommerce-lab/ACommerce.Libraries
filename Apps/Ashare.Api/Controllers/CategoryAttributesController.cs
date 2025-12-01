@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Ashare.Api.Services;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using ACommerce.Catalog.Attributes.Entities;
+using ACommerce.Catalog.Products.Entities;
 
 namespace Ashare.Api.Controllers;
 
@@ -20,69 +21,81 @@ public class CategoryAttributesController : ControllerBase
 	}
 
 	/// <summary>
-	/// الحصول على جميع ربطات الفئات بالخصائص
+	/// الحصول على جميع ربطات الفئات بالخصائص من قاعدة البيانات
 	/// </summary>
 	[HttpGet("mappings")]
-	public ActionResult<Dictionary<Guid, List<Guid>>> GetAllMappings()
+	public async Task<ActionResult<Dictionary<Guid, List<Guid>>>> GetAllMappings()
 	{
-		return Ok(AshareSeedDataService.CategoryAttributeMappings);
+		var mappingRepo = _repositoryFactory.CreateRepository<CategoryAttributeMapping>();
+		var allMappings = await mappingRepo.GetAllWithPredicateAsync(
+			predicate: m => m.IsActive,
+			includeDeleted: false);
+
+		var result = allMappings
+			.GroupBy(m => m.CategoryId)
+			.ToDictionary(
+				g => g.Key,
+				g => g.OrderBy(m => m.SortOrder).Select(m => m.AttributeDefinitionId).ToList()
+			);
+
+		return Ok(result);
 	}
 
 	/// <summary>
-	/// الحصول على الخصائص لفئة معينة
+	/// الحصول على الخصائص لفئة معينة من قاعدة البيانات
 	/// </summary>
 	[HttpGet("category/{categoryId}")]
 	public async Task<ActionResult> GetAttributesForCategory(Guid categoryId)
 	{
 		Console.WriteLine($"[CategoryAttributes] Getting attributes for category: {categoryId}");
 
-		var attributeIds = AshareSeedDataService.GetAttributeIdsForCategory(categoryId);
-		Console.WriteLine($"[CategoryAttributes] Found {attributeIds.Count} attribute IDs for category");
+		// جلب الربطات من قاعدة البيانات مع تحميل الخصائص والقيم
+		var mappingRepo = _repositoryFactory.CreateRepository<CategoryAttributeMapping>();
+		var mappings = await mappingRepo.GetAllWithPredicateAsync(
+			predicate: m => m.CategoryId == categoryId && m.IsActive,
+			includeDeleted: false,
+			includeProperties: "AttributeDefinition,AttributeDefinition.Values");
 
-		if (attributeIds.Count == 0)
+		Console.WriteLine($"[CategoryAttributes] Found {mappings.Count} mappings for category");
+
+		if (mappings.Count == 0)
 		{
 			Console.WriteLine($"[CategoryAttributes] No attributes found for category {categoryId}");
 			return NotFound(new { message = "الفئة غير موجودة أو لا تحتوي على خصائص" });
 		}
 
-		// جلب تفاصيل الخصائص من قاعدة البيانات مع تحميل القيم
-		var repo = _repositoryFactory.CreateRepository<AttributeDefinition>();
-		var allAttributes = await repo.GetAllWithPredicateAsync(
-			predicate: null,
-			includeDeleted: false,
-			includeProperties: "Values");
-
-		Console.WriteLine($"[CategoryAttributes] Total attributes in database: {allAttributes.Count}");
-
-		var categoryAttributes = allAttributes
-			.Where(a => attributeIds.Contains(a.Id))
-			.OrderBy(a => attributeIds.IndexOf(a.Id))
-			.Select(a => new
+		var categoryAttributes = mappings
+			.OrderBy(m => m.SortOrder)
+			.Select(m => new
 			{
-				a.Id,
-				a.Name,
-				a.Code,
-				Type = a.Type.ToString(),
-				a.Description,
-				a.IsRequired,
-				a.IsFilterable,
-				a.IsVisibleInList,
-				a.IsVisibleInDetail,
-				a.SortOrder,
-				a.ValidationRules,
-				a.DefaultValue,
-				Values = a.Values.OrderBy(v => v.SortOrder).Select(v => new
-				{
-					v.Id,
-					v.Value,
-					v.DisplayName,
-					v.Code,
-					v.Description,
-					v.ColorHex,
-					v.ImageUrl,
-					v.SortOrder,
-					v.IsActive
-				}).ToList()
+				m.AttributeDefinition.Id,
+				m.AttributeDefinition.Name,
+				m.AttributeDefinition.Code,
+				Type = m.AttributeDefinition.Type.ToString(),
+				m.AttributeDefinition.Description,
+				// استخدام القيمة المتجاوزة إن وجدت
+				IsRequired = m.IsRequiredOverride ?? m.AttributeDefinition.IsRequired,
+				m.AttributeDefinition.IsFilterable,
+				m.AttributeDefinition.IsVisibleInList,
+				m.AttributeDefinition.IsVisibleInDetail,
+				SortOrder = m.SortOrder,
+				m.AttributeDefinition.ValidationRules,
+				m.AttributeDefinition.DefaultValue,
+				Values = m.AttributeDefinition.Values
+					.Where(v => !v.IsDeleted && v.IsActive)
+					.OrderBy(v => v.SortOrder)
+					.Select(v => new
+					{
+						v.Id,
+						v.Value,
+						v.DisplayName,
+						v.Code,
+						v.Description,
+						v.ColorHex,
+						v.ImageUrl,
+						v.SortOrder,
+						v.IsActive
+					}).ToList()
 			})
 			.ToList();
 
@@ -92,21 +105,30 @@ public class CategoryAttributesController : ControllerBase
 	}
 
 	/// <summary>
-	/// الحصول على معرفات الفئات المتاحة
+	/// الحصول على معرفات الفئات المتاحة من قاعدة البيانات
 	/// </summary>
 	[HttpGet("categories")]
-	public ActionResult GetAvailableCategories()
+	public async Task<ActionResult> GetAvailableCategories()
 	{
-		var categories = new[]
-		{
-			new { Id = AshareSeedDataService.CategoryIds.Residential, Name = "سكني", Slug = "residential", Icon = "bi-house-door", Image = (string?)null, Description = "عرض سكن للإيجار أو المشاركة" },
-			new { Id = AshareSeedDataService.CategoryIds.LookingForHousing, Name = "طلب سكن", Slug = "looking-for-housing", Icon = "bi-search", Image = (string?)null, Description = "أبحث عن سكن للإيجار أو المشاركة" },
-			new { Id = AshareSeedDataService.CategoryIds.LookingForPartner, Name = "طلب شريك سكن", Slug = "looking-for-partner", Icon = "bi-people", Image = (string?)null, Description = "أبحث عن شريك سكن" },
-			new { Id = AshareSeedDataService.CategoryIds.Administrative, Name = "مساحة إدارية", Slug = "administrative", Icon = "bi-building", Image = (string?)null, Description = "مكاتب ومساحات عمل مشتركة" },
-			new { Id = AshareSeedDataService.CategoryIds.Commercial, Name = "مساحة تجارية", Slug = "commercial", Icon = "bi-shop", Image = (string?)null, Description = "محلات ومستودعات ومساحات تجارية" }
-		};
+		var categoryRepo = _repositoryFactory.CreateRepository<ProductCategory>();
+		var categories = await categoryRepo.GetAllWithPredicateAsync(
+			predicate: c => c.IsActive,
+			includeDeleted: false);
 
-		return Ok(categories);
+		var result = categories
+			.OrderBy(c => c.SortOrder)
+			.Select(c => new
+			{
+				c.Id,
+				c.Name,
+				c.Slug,
+				c.Icon,
+				c.Image,
+				c.Description
+			})
+			.ToList();
+
+		return Ok(result);
 	}
 
 	/// <summary>

@@ -252,6 +252,7 @@ public class AshareSeedDataService
 		await SeedCurrenciesAsync();
 		await SeedCategoriesAsync();
 		await SeedAttributeDefinitionsAsync();
+		await SeedCategoryAttributeMappingsAsync();
 		await SeedProductsAsync();
 		await SeedProductPricesAsync();
 	}
@@ -394,6 +395,48 @@ public class AshareSeedDataService
 				await repo.AddAsync(attr);
 			}
 		}
+	}
+
+	/// <summary>
+	/// إضافة ربطات الفئات بالخصائص في قاعدة البيانات
+	/// </summary>
+	private async Task SeedCategoryAttributeMappingsAsync()
+	{
+		var repo = _repositoryFactory.CreateRepository<CategoryAttributeMapping>();
+
+		var existing = await repo.GetAllWithPredicateAsync();
+		var existingPairs = existing.Select(m => (m.CategoryId, m.AttributeDefinitionId)).ToHashSet();
+
+		var mappingsToAdd = new List<CategoryAttributeMapping>();
+
+		foreach (var (categoryId, attributeIds) in CategoryAttributeMappings)
+		{
+			for (int i = 0; i < attributeIds.Count; i++)
+			{
+				var attributeId = attributeIds[i];
+
+				// تجنب الإضافة المكررة
+				if (!existingPairs.Contains((categoryId, attributeId)))
+				{
+					mappingsToAdd.Add(new CategoryAttributeMapping
+					{
+						Id = Guid.NewGuid(),
+						CategoryId = categoryId,
+						AttributeDefinitionId = attributeId,
+						SortOrder = i + 1,
+						IsActive = true,
+						CreatedAt = DateTime.UtcNow
+					});
+				}
+			}
+		}
+
+		foreach (var mapping in mappingsToAdd)
+		{
+			await repo.AddAsync(mapping);
+		}
+
+		Console.WriteLine($"[Seed] Added {mappingsToAdd.Count} category-attribute mappings");
 	}
 
 	private List<AttributeDefinition> GetAllAttributeDefinitions()
