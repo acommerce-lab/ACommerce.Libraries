@@ -141,12 +141,13 @@ public sealed class CategoryDto
 	public string? Description { get; set; }
 	public string? Image { get; set; }
 	public string? Icon { get; set; }
-	public int ProductCount { get; set; }
+	public int ProductsCount { get; set; }
+	public int SubCategoriesCount { get; set; }
 	public Guid? ParentCategoryId { get; set; }
 	public string? ParentCategoryName { get; set; }
 	public int SortOrder { get; set; }
 	public bool IsActive { get; set; }
-	public List<CategoryDto> SubCategories { get; set; } = new();
+	public Dictionary<string, string> Metadata { get; set; } = new();
 	public DateTime CreatedAt { get; set; }
 	public DateTime? UpdatedAt { get; set; }
 }

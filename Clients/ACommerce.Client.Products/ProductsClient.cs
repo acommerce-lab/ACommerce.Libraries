@@ -221,10 +221,19 @@ public sealed class ProductDto
 public sealed class CreateProductRequest
 {
 	public string Name { get; set; } = string.Empty;
-	public string Description { get; set; } = string.Empty;
-	public decimal Price { get; set; }
 	public string Sku { get; set; } = string.Empty;
-	public int StockQuantity { get; set; }
+	public string Type { get; set; } = "Simple";
+	public string Status { get; set; } = "Active";
+	public string? ShortDescription { get; set; }
+	public string? LongDescription { get; set; }
+	public string? Barcode { get; set; }
+	public List<string>? Images { get; set; }
+	public string? FeaturedImage { get; set; }
+	public List<string>? Tags { get; set; }
+	public bool IsFeatured { get; set; }
+	public bool IsNew { get; set; } = true;
+	public DateTime? NewUntil { get; set; }
+	public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
