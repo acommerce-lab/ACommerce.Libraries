@@ -197,11 +197,30 @@ public class AshareApiService
 			var productRequest = new CreateProductRequest
 			{
 				Name = request.Title,
-				Description = request.Description ?? string.Empty,
-				Price = request.PricePerMonth,
 				Sku = $"SPACE-{DateTime.UtcNow.Ticks}",
-				StockQuantity = 1
+				ShortDescription = request.Description?.Length > 200
+					? request.Description.Substring(0, 200) + "..."
+					: request.Description,
+				LongDescription = request.Description,
+				Images = request.Images,
+				FeaturedImage = request.Images?.FirstOrDefault(),
+				IsNew = true,
+				NewUntil = DateTime.UtcNow.AddDays(30),
+				Status = "Active",
+				Metadata = new Dictionary<string, string>
+				{
+					["categoryId"] = request.CategoryId.ToString(),
+					["latitude"] = request.Latitude?.ToString() ?? "",
+					["longitude"] = request.Longitude?.ToString() ?? "",
+					["address"] = request.Address ?? ""
+				}
 			};
+
+			// Add dynamic attributes to metadata
+			foreach (var attr in request.Attributes)
+			{
+				productRequest.Metadata[attr.Key] = attr.Value?.ToString() ?? "";
+			}
 
 			var product = await _productsClient.CreateAsync(productRequest);
 			return product != null ? MapToSpaceItem(product) : null;
