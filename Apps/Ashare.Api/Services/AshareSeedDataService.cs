@@ -169,6 +169,7 @@ public class AshareSeedDataService
 		await SeedCategoriesAsync();
 		await SeedAttributeDefinitionsAsync();
 		await SeedProductsAsync();
+		await SeedProductPricesAsync();
 	}
 
 	private async Task SeedCurrenciesAsync()
@@ -765,6 +766,7 @@ public class AshareSeedDataService
 		var existing = await repo.GetAllWithPredicateAsync();
 		if (existing.Any()) return;
 
+		// إضافة المنتجات بدون الأسعار أولاً
 		var products = new List<Product>
 		{
 			// ═══════════════════════════════════════════════════════════════════
@@ -784,19 +786,7 @@ public class AshareSeedDataService
 				IsNew = true,
 				NewUntil = DateTime.UtcNow.AddDays(30),
 				SortOrder = 1,
-				CreatedAt = DateTime.UtcNow,
-				Prices = new List<ProductPrice>
-				{
-					new()
-					{
-						Id = Guid.NewGuid(),
-						ProductId = ProductIds.Apartment1,
-						CurrencyId = CurrencyIds.SAR,
-						BasePrice = 3500,
-						IsActive = true,
-						CreatedAt = DateTime.UtcNow
-					}
-				}
+				CreatedAt = DateTime.UtcNow
 			},
 			new()
 			{
@@ -812,19 +802,7 @@ public class AshareSeedDataService
 				IsNew = true,
 				NewUntil = DateTime.UtcNow.AddDays(30),
 				SortOrder = 2,
-				CreatedAt = DateTime.UtcNow,
-				Prices = new List<ProductPrice>
-				{
-					new()
-					{
-						Id = Guid.NewGuid(),
-						ProductId = ProductIds.Apartment2,
-						CurrencyId = CurrencyIds.SAR,
-						BasePrice = 2500,
-						IsActive = true,
-						CreatedAt = DateTime.UtcNow
-					}
-				}
+				CreatedAt = DateTime.UtcNow
 			},
 			new()
 			{
@@ -839,19 +817,7 @@ public class AshareSeedDataService
 				IsFeatured = true,
 				IsNew = false,
 				SortOrder = 3,
-				CreatedAt = DateTime.UtcNow.AddDays(-10),
-				Prices = new List<ProductPrice>
-				{
-					new()
-					{
-						Id = Guid.NewGuid(),
-						ProductId = ProductIds.Villa1,
-						CurrencyId = CurrencyIds.SAR,
-						BasePrice = 15000,
-						IsActive = true,
-						CreatedAt = DateTime.UtcNow
-					}
-				}
+				CreatedAt = DateTime.UtcNow.AddDays(-10)
 			},
 
 			// ═══════════════════════════════════════════════════════════════════
@@ -871,19 +837,7 @@ public class AshareSeedDataService
 				IsNew = true,
 				NewUntil = DateTime.UtcNow.AddDays(14),
 				SortOrder = 4,
-				CreatedAt = DateTime.UtcNow,
-				Prices = new List<ProductPrice>
-				{
-					new()
-					{
-						Id = Guid.NewGuid(),
-						ProductId = ProductIds.Office1,
-						CurrencyId = CurrencyIds.SAR,
-						BasePrice = 8000,
-						IsActive = true,
-						CreatedAt = DateTime.UtcNow
-					}
-				}
+				CreatedAt = DateTime.UtcNow
 			},
 			new()
 			{
@@ -899,19 +853,7 @@ public class AshareSeedDataService
 				IsNew = true,
 				NewUntil = DateTime.UtcNow.AddDays(7),
 				SortOrder = 5,
-				CreatedAt = DateTime.UtcNow,
-				Prices = new List<ProductPrice>
-				{
-					new()
-					{
-						Id = Guid.NewGuid(),
-						ProductId = ProductIds.Coworking1,
-						CurrencyId = CurrencyIds.SAR,
-						BasePrice = 1500,
-						IsActive = true,
-						CreatedAt = DateTime.UtcNow
-					}
-				}
+				CreatedAt = DateTime.UtcNow
 			},
 			new()
 			{
@@ -926,19 +868,7 @@ public class AshareSeedDataService
 				IsFeatured = false,
 				IsNew = false,
 				SortOrder = 6,
-				CreatedAt = DateTime.UtcNow.AddDays(-5),
-				Prices = new List<ProductPrice>
-				{
-					new()
-					{
-						Id = Guid.NewGuid(),
-						ProductId = ProductIds.MeetingRoom1,
-						CurrencyId = CurrencyIds.SAR,
-						BasePrice = 500,
-						IsActive = true,
-						CreatedAt = DateTime.UtcNow
-					}
-				}
+				CreatedAt = DateTime.UtcNow.AddDays(-5)
 			},
 
 			// ═══════════════════════════════════════════════════════════════════
@@ -958,19 +888,7 @@ public class AshareSeedDataService
 				IsNew = true,
 				NewUntil = DateTime.UtcNow.AddDays(21),
 				SortOrder = 7,
-				CreatedAt = DateTime.UtcNow,
-				Prices = new List<ProductPrice>
-				{
-					new()
-					{
-						Id = Guid.NewGuid(),
-						ProductId = ProductIds.AdminOffice1,
-						CurrencyId = CurrencyIds.SAR,
-						BasePrice = 12000,
-						IsActive = true,
-						CreatedAt = DateTime.UtcNow
-					}
-				}
+				CreatedAt = DateTime.UtcNow
 			},
 			new()
 			{
@@ -985,25 +903,39 @@ public class AshareSeedDataService
 				IsFeatured = true,
 				IsNew = false,
 				SortOrder = 8,
-				CreatedAt = DateTime.UtcNow.AddDays(-15),
-				Prices = new List<ProductPrice>
-				{
-					new()
-					{
-						Id = Guid.NewGuid(),
-						ProductId = ProductIds.AdminOffice2,
-						CurrencyId = CurrencyIds.SAR,
-						BasePrice = 50000,
-						IsActive = true,
-						CreatedAt = DateTime.UtcNow
-					}
-				}
+				CreatedAt = DateTime.UtcNow.AddDays(-15)
 			}
 		};
 
 		foreach (var product in products)
 		{
 			await repo.AddAsync(product);
+		}
+	}
+
+	private async Task SeedProductPricesAsync()
+	{
+		var repo = _repositoryFactory.CreateRepository<ProductPrice>();
+
+		var existing = await repo.GetAllWithPredicateAsync();
+		if (existing.Any()) return;
+
+		// إضافة الأسعار بعد إضافة المنتجات والعملات
+		var prices = new List<ProductPrice>
+		{
+			new() { Id = Guid.NewGuid(), ProductId = ProductIds.Apartment1, CurrencyId = CurrencyIds.SAR, BasePrice = 3500, IsActive = true, CreatedAt = DateTime.UtcNow },
+			new() { Id = Guid.NewGuid(), ProductId = ProductIds.Apartment2, CurrencyId = CurrencyIds.SAR, BasePrice = 2500, IsActive = true, CreatedAt = DateTime.UtcNow },
+			new() { Id = Guid.NewGuid(), ProductId = ProductIds.Villa1, CurrencyId = CurrencyIds.SAR, BasePrice = 15000, IsActive = true, CreatedAt = DateTime.UtcNow },
+			new() { Id = Guid.NewGuid(), ProductId = ProductIds.Office1, CurrencyId = CurrencyIds.SAR, BasePrice = 8000, IsActive = true, CreatedAt = DateTime.UtcNow },
+			new() { Id = Guid.NewGuid(), ProductId = ProductIds.Coworking1, CurrencyId = CurrencyIds.SAR, BasePrice = 1500, IsActive = true, CreatedAt = DateTime.UtcNow },
+			new() { Id = Guid.NewGuid(), ProductId = ProductIds.MeetingRoom1, CurrencyId = CurrencyIds.SAR, BasePrice = 500, IsActive = true, CreatedAt = DateTime.UtcNow },
+			new() { Id = Guid.NewGuid(), ProductId = ProductIds.AdminOffice1, CurrencyId = CurrencyIds.SAR, BasePrice = 12000, IsActive = true, CreatedAt = DateTime.UtcNow },
+			new() { Id = Guid.NewGuid(), ProductId = ProductIds.AdminOffice2, CurrencyId = CurrencyIds.SAR, BasePrice = 50000, IsActive = true, CreatedAt = DateTime.UtcNow }
+		};
+
+		foreach (var price in prices)
+		{
+			await repo.AddAsync(price);
 		}
 	}
 }
