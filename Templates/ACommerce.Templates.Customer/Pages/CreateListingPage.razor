@@ -3,45 +3,80 @@
 <div class="ac-page ac-create-listing-page">
     @* Header *@
     <div class="ac-page-header">
-        <h1 class="ac-page-title">
-            @if (CurrentStep == CreateListingStep.SelectCategory)
+        <div class="ac-header-content">
+            @if (CurrentStep != CreateListingStep.SelectCategory && CurrentStep != CreateListingStep.Success)
             {
-                <span>إنشاء عرض جديد</span>
+                <button class="ac-back-btn" @onclick="GoBack">
+                    <i class="bi bi-arrow-right"></i>
+                </button>
             }
-            else if (SelectedCategory != null)
-            {
-                <span>@SelectedCategory.Name</span>
-            }
-        </h1>
-
-        @if (CurrentStep != CreateListingStep.SelectCategory && CurrentStep != CreateListingStep.Success)
-        {
-            <button class="ac-btn ac-btn-ghost" @onclick="GoBack">
-                <i class="bi bi-arrow-right"></i>
-                رجوع
-            </button>
-        }
+            <h1 class="ac-page-title">
+                @if (CurrentStep == CreateListingStep.SelectCategory)
+                {
+                    <span>إنشاء عرض جديد</span>
+                }
+                else if (SelectedCategory != null)
+                {
+                    <i class="bi @SelectedCategory.Icon"></i>
+                    <span>@SelectedCategory.Name</span>
+                }
+            </h1>
+        </div>
     </div>
 
     @* Progress Steps *@
     @if (CurrentStep != CreateListingStep.SelectCategory && CurrentStep != CreateListingStep.Success && CurrentStep != CreateListingStep.Error)
     {
-        <div class="ac-progress-steps">
-            <div class="ac-step @(CurrentStep >= CreateListingStep.FillDetails ? "active" : "") @(CurrentStep > CreateListingStep.FillDetails ? "completed" : "")">
-                <span class="ac-step-number">1</span>
-                <span class="ac-step-label">التفاصيل</span>
+        <div class="ac-progress-container">
+            <div class="ac-progress-bar">
+                <div class="ac-progress-fill" style="width: @GetProgressPercentage()%"></div>
             </div>
-            <div class="ac-step @(CurrentStep >= CreateListingStep.AddImages ? "active" : "") @(CurrentStep > CreateListingStep.AddImages ? "completed" : "")">
-                <span class="ac-step-number">2</span>
-                <span class="ac-step-label">الصور</span>
-            </div>
-            <div class="ac-step @(CurrentStep >= CreateListingStep.SetLocation ? "active" : "") @(CurrentStep > CreateListingStep.SetLocation ? "completed" : "")">
-                <span class="ac-step-number">3</span>
-                <span class="ac-step-label">الموقع</span>
-            </div>
-            <div class="ac-step @(CurrentStep >= CreateListingStep.Review ? "active" : "")">
-                <span class="ac-step-number">4</span>
-                <span class="ac-step-label">مراجعة</span>
+            <div class="ac-progress-steps">
+                <div class="ac-step @(CurrentStep >= CreateListingStep.FillDetails ? "active" : "") @(CurrentStep > CreateListingStep.FillDetails ? "completed" : "")">
+                    <div class="ac-step-icon">
+                        @if (CurrentStep > CreateListingStep.FillDetails)
+                        {
+                            <i class="bi bi-check"></i>
+                        }
+                        else
+                        {
+                            <span>1</span>
+                        }
+                    </div>
+                    <span class="ac-step-label">التفاصيل</span>
+                </div>
+                <div class="ac-step @(CurrentStep >= CreateListingStep.AddImages ? "active" : "") @(CurrentStep > CreateListingStep.AddImages ? "completed" : "")">
+                    <div class="ac-step-icon">
+                        @if (CurrentStep > CreateListingStep.AddImages)
+                        {
+                            <i class="bi bi-check"></i>
+                        }
+                        else
+                        {
+                            <span>2</span>
+                        }
+                    </div>
+                    <span class="ac-step-label">الصور</span>
+                </div>
+                <div class="ac-step @(CurrentStep >= CreateListingStep.SetLocation ? "active" : "") @(CurrentStep > CreateListingStep.SetLocation ? "completed" : "")">
+                    <div class="ac-step-icon">
+                        @if (CurrentStep > CreateListingStep.SetLocation)
+                        {
+                            <i class="bi bi-check"></i>
+                        }
+                        else
+                        {
+                            <span>3</span>
+                        }
+                    </div>
+                    <span class="ac-step-label">الموقع</span>
+                </div>
+                <div class="ac-step @(CurrentStep >= CreateListingStep.Review ? "active" : "")">
+                    <div class="ac-step-icon">
+                        <span>4</span>
+                    </div>
+                    <span class="ac-step-label">مراجعة</span>
+                </div>
             </div>
         </div>
     }
@@ -52,30 +87,44 @@
         {
             case CreateListingStep.SelectCategory:
                 <div class="ac-category-selection">
-                    <p class="ac-section-subtitle">اختر نوع العرض</p>
+                    <div class="ac-section-header">
+                        <i class="bi bi-grid-3x3-gap"></i>
+                        <h2>اختر نوع العرض</h2>
+                    </div>
+                    <p class="ac-section-desc">حدد الفئة المناسبة لعرضك للوصول لأكبر شريحة من المهتمين</p>
+
                     <div class="ac-category-grid">
                         @if (Categories != null)
                         {
                             @foreach (var category in Categories)
                             {
                                 <div class="ac-category-card" @onclick="() => SelectCategory(category)">
-                                    @if (!string.IsNullOrEmpty(category.Icon))
-                                    {
-                                        <div class="ac-category-icon">
+                                    <div class="ac-category-icon-wrapper">
+                                        @if (!string.IsNullOrEmpty(category.Icon))
+                                        {
                                             <i class="bi @category.Icon"></i>
-                                        </div>
-                                    }
-                                    <h3 class="ac-category-name">@category.Name</h3>
-                                    @if (!string.IsNullOrEmpty(category.Description))
-                                    {
-                                        <p class="ac-category-desc">@category.Description</p>
-                                    }
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-folder"></i>
+                                        }
+                                    </div>
+                                    <div class="ac-category-info">
+                                        <h3 class="ac-category-name">@category.Name</h3>
+                                        @if (!string.IsNullOrEmpty(category.Description))
+                                        {
+                                            <p class="ac-category-desc">@category.Description</p>
+                                        }
+                                    </div>
+                                    <i class="bi bi-chevron-left ac-category-arrow"></i>
                                 </div>
                             }
                         }
                         else
                         {
-                            <AcSpinner Text="جاري تحميل الفئات..." />
+                            <div class="ac-loading-card">
+                                <AcSpinner Text="جاري تحميل الفئات..." />
+                            </div>
                         }
                     </div>
                 </div>
@@ -83,28 +132,41 @@
 
             case CreateListingStep.FillDetails:
                 <div class="ac-details-form">
-                    @* Title field *@
-                    <AcInput Id="title"
-                             Label="عنوان العرض"
-                             Placeholder="أدخل عنواناً واضحاً ومختصراً"
-                             Value="@Model.Title"
-                             ValueChanged="(v) => Model.Title = v"
-                             Required="true" />
+                    <div class="ac-form-section">
+                        <div class="ac-section-header">
+                            <i class="bi bi-card-text"></i>
+                            <h2>تفاصيل العرض</h2>
+                        </div>
+                        <p class="ac-section-desc">أدخل المعلومات الأساسية لعرضك</p>
+                    </div>
 
-                    @* Dynamic attributes based on category *@
+                    @* Dynamic attributes based on category - including title *@
                     @if (IsLoadingAttributes)
                     {
-                        <AcSpinner Text="جاري تحميل الخصائص..." />
+                        <div class="ac-loading-section">
+                            <AcSpinner Text="جاري تحميل الخصائص..." />
+                        </div>
                     }
-                    else if (CategoryAttributes != null && CategoryAttributes.Any())
+                    else if (FilteredAttributes != null && FilteredAttributes.Any())
                     {
-                        <AcDynamicForm Attributes="@CategoryAttributes"
-                                       Values="@Model.Attributes"
-                                       ValuesChanged="(v) => Model.Attributes = v" />
+                        <div class="ac-attributes-container">
+                            <AcDynamicForm Attributes="@FilteredAttributes"
+                                           Values="@Model.Attributes"
+                                           ValuesChanged="OnAttributesChanged"
+                                           OnValidationChanged="OnValidationChanged" />
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="ac-empty-section">
+                            <i class="bi bi-inbox"></i>
+                            <p>لا توجد خصائص محددة لهذه الفئة</p>
+                        </div>
                     }
 
                     <div class="ac-form-actions">
                         <AcButton Text="التالي"
+                                  IconEnd="bi-arrow-left"
                                   OnClick="GoToImages"
                                   FullWidth="true"
                                   Disabled="@(!IsDetailsValid)" />
@@ -114,12 +176,25 @@
 
             case CreateListingStep.AddImages:
                 <div class="ac-images-section">
-                    <p class="ac-section-subtitle">أضف صوراً للعرض (اختياري)</p>
+                    <div class="ac-form-section">
+                        <div class="ac-section-header">
+                            <i class="bi bi-images"></i>
+                            <h2>صور العرض</h2>
+                        </div>
+                        <p class="ac-section-desc">أضف صوراً واضحة وجذابة لعرضك (حتى 10 صور)</p>
+                    </div>
 
-                    <div class="ac-image-upload">
-                        <label class="ac-upload-area" for="imageUpload">
-                            <i class="bi bi-cloud-upload"></i>
-                            <span>اضغط لإضافة صور</span>
+                    <div class="ac-upload-container">
+                        <label class="ac-upload-area @(Model.Images.Any() ? "has-images" : "")" for="imageUpload">
+                            <div class="ac-upload-content">
+                                <div class="ac-upload-icon">
+                                    <i class="bi bi-cloud-arrow-up"></i>
+                                </div>
+                                <div class="ac-upload-text">
+                                    <span class="ac-upload-title">اضغط لإضافة صور</span>
+                                    <span class="ac-upload-hint">PNG, JPG حتى 5MB</span>
+                                </div>
+                            </div>
                             <input type="file"
                                    id="imageUpload"
                                    accept="image/*"
@@ -131,21 +206,54 @@
 
                     @if (Model.Images.Any())
                     {
-                        <div class="ac-image-preview-grid">
-                            @foreach (var (image, index) in Model.Images.Select((img, i) => (img, i)))
-                            {
-                                <div class="ac-image-preview">
-                                    <img src="@image" alt="صورة @(index + 1)" />
-                                    <button class="ac-remove-image" @onclick="() => RemoveImage(index)">
-                                        <i class="bi bi-x-circle-fill"></i>
+                        <div class="ac-images-preview">
+                            <div class="ac-preview-header">
+                                <span class="ac-preview-count">
+                                    <i class="bi bi-image"></i>
+                                    @Model.Images.Count من 10 صور
+                                </span>
+                                @if (Model.Images.Count > 0)
+                                {
+                                    <button class="ac-clear-all" @onclick="ClearAllImages">
+                                        <i class="bi bi-trash"></i>
+                                        حذف الكل
                                     </button>
-                                </div>
-                            }
+                                }
+                            </div>
+                            <div class="ac-image-grid">
+                                @foreach (var (image, index) in Model.Images.Select((img, i) => (img, i)))
+                                {
+                                    <div class="ac-image-item @(index == 0 ? "main-image" : "")">
+                                        @if (index == 0)
+                                        {
+                                            <span class="ac-main-badge">الصورة الرئيسية</span>
+                                        }
+                                        <img src="@image" alt="صورة @(index + 1)" />
+                                        <div class="ac-image-overlay">
+                                            <button class="ac-image-action" @onclick="() => SetMainImage(index)" title="تعيين كصورة رئيسية">
+                                                <i class="bi bi-star"></i>
+                                            </button>
+                                            <button class="ac-image-action delete" @onclick="() => RemoveImage(index)" title="حذف">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="ac-no-images">
+                            <i class="bi bi-image"></i>
+                            <p>لم تقم بإضافة أي صور بعد</p>
+                            <small>الصور تساعد في جذب المزيد من المهتمين</small>
                         </div>
                     }
 
                     <div class="ac-form-actions">
                         <AcButton Text="التالي"
+                                  IconEnd="bi-arrow-left"
                                   OnClick="GoToLocation"
                                   FullWidth="true" />
                     </div>
@@ -154,36 +262,65 @@
 
             case CreateListingStep.SetLocation:
                 <div class="ac-location-section">
-                    <p class="ac-section-subtitle">حدد موقع العرض</p>
+                    <div class="ac-form-section">
+                        <div class="ac-section-header">
+                            <i class="bi bi-geo-alt"></i>
+                            <h2>موقع العرض</h2>
+                        </div>
+                        <p class="ac-section-desc">حدد الموقع الدقيق لعرضك على الخريطة</p>
+                    </div>
 
-                    <AcInput Id="address"
-                             Label="العنوان"
-                             Placeholder="أدخل العنوان أو اسم الحي"
-                             Value="@Model.Address"
-                             ValueChanged="(v) => Model.Address = v"
-                             IconStart="bi-geo-alt" />
+                    <div class="ac-location-card">
+                        <AcInput Id="address"
+                                 Label="العنوان التفصيلي"
+                                 Placeholder="مثال: حي النرجس، شارع الأمير سلطان"
+                                 Value="@Model.Address"
+                                 ValueChanged="(v) => Model.Address = v"
+                                 IconStart="bi-signpost" />
 
-                    @* Map placeholder - يمكن استبدالها بمكون خرائط حقيقي *@
-                    <div class="ac-map-container">
-                        @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
-                        {
-                            <div class="ac-map-placeholder ac-map-has-location">
-                                <i class="bi bi-geo-alt-fill"></i>
-                                <p>تم تحديد الموقع</p>
-                                <small>@Model.Latitude?.ToString("F6"), @Model.Longitude?.ToString("F6")</small>
+                        @* Interactive Map *@
+                        <div class="ac-map-wrapper">
+                            <div class="ac-map-header">
+                                <span><i class="bi bi-pin-map"></i> حدد الموقع على الخريطة</span>
+                                @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+                                {
+                                    <span class="ac-coords">
+                                        <i class="bi bi-crosshair"></i>
+                                        @Model.Latitude?.ToString("F4"), @Model.Longitude?.ToString("F4")
+                                    </span>
+                                }
                             </div>
-                        }
-                        else
-                        {
-                            <div class="ac-map-placeholder" @onclick="RequestLocation">
-                                <i class="bi bi-geo-alt"></i>
-                                <p>اضغط لتحديد موقعك الحالي</p>
+                            <div class="ac-map-container" @onclick="OnMapClick">
+                                @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+                                {
+                                    <div class="ac-map-pin">
+                                        <i class="bi bi-geo-alt-fill"></i>
+                                    </div>
+                                    <div class="ac-map-actions">
+                                        <button class="ac-map-btn" @onclick="RequestLocation" @onclick:stopPropagation="true">
+                                            <i class="bi bi-crosshair2"></i>
+                                            موقعي الحالي
+                                        </button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="ac-map-empty">
+                                        <i class="bi bi-geo-alt"></i>
+                                        <p>اضغط لتحديد الموقع</p>
+                                        <button class="ac-btn ac-btn-outline" @onclick="RequestLocation" @onclick:stopPropagation="true">
+                                            <i class="bi bi-crosshair2"></i>
+                                            استخدم موقعي الحالي
+                                        </button>
+                                    </div>
+                                }
                             </div>
-                        }
+                        </div>
                     </div>
 
                     <div class="ac-form-actions">
                         <AcButton Text="التالي"
+                                  IconEnd="bi-arrow-left"
                                   OnClick="GoToReview"
                                   FullWidth="true" />
                     </div>
@@ -192,51 +329,104 @@
 
             case CreateListingStep.Review:
                 <div class="ac-review-section">
-                    <p class="ac-section-subtitle">راجع بيانات العرض قبل النشر</p>
-
-                    <div class="ac-review-card">
-                        <div class="ac-review-item">
-                            <span class="ac-review-label">الفئة:</span>
-                            <span class="ac-review-value">@SelectedCategory?.Name</span>
+                    <div class="ac-form-section">
+                        <div class="ac-section-header">
+                            <i class="bi bi-eye"></i>
+                            <h2>معاينة العرض</h2>
                         </div>
+                        <p class="ac-section-desc">راجع عرضك كما سيظهر للآخرين</p>
+                    </div>
 
-                        <div class="ac-review-item">
-                            <span class="ac-review-label">العنوان:</span>
-                            <span class="ac-review-value">@Model.Title</span>
-                        </div>
-
-                        @if (!string.IsNullOrEmpty(Model.Address))
-                        {
-                            <div class="ac-review-item">
-                                <span class="ac-review-label">الموقع:</span>
-                                <span class="ac-review-value">@Model.Address</span>
-                            </div>
-                        }
-
-                        @if (Model.Images.Any())
-                        {
-                            <div class="ac-review-item">
-                                <span class="ac-review-label">الصور:</span>
-                                <span class="ac-review-value">@Model.Images.Count صورة</span>
-                            </div>
-                        }
-
-                        @* Dynamic attributes review *@
-                        @foreach (var attrInput in Model.Attributes)
-                        {
-                            var attrDef = CategoryAttributes?.FirstOrDefault(a => a.Id == attrInput.AttributeId);
-                            if (attrDef != null)
+                    @* Preview Card - Similar to SpaceDetails *@
+                    <div class="ac-listing-preview">
+                        @* Image Gallery Preview *@
+                        <div class="ac-preview-gallery">
+                            @if (Model.Images.Any())
                             {
-                                <div class="ac-review-item">
-                                    <span class="ac-review-label">@attrDef.Name:</span>
-                                    <span class="ac-review-value">@GetAttributeDisplayValue(attrInput, attrDef)</span>
+                                <img src="@Model.Images.First()" alt="صورة العرض" class="ac-preview-main-image" />
+                                @if (Model.Images.Count > 1)
+                                {
+                                    <div class="ac-preview-thumbnails">
+                                        @foreach (var img in Model.Images.Skip(1).Take(3))
+                                        {
+                                            <img src="@img" alt="" />
+                                        }
+                                        @if (Model.Images.Count > 4)
+                                        {
+                                            <div class="ac-more-images">+@(Model.Images.Count - 4)</div>
+                                        }
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="ac-preview-no-image">
+                                    <i class="bi bi-image"></i>
+                                    <span>لا توجد صور</span>
                                 </div>
                             }
-                        }
+                            <div class="ac-preview-category">
+                                <i class="bi @SelectedCategory?.Icon"></i>
+                                @SelectedCategory?.Name
+                            </div>
+                        </div>
+
+                        @* Listing Info *@
+                        <div class="ac-preview-info">
+                            <h2 class="ac-preview-title">@GetTitleFromAttributes()</h2>
+
+                            @if (!string.IsNullOrEmpty(Model.Address))
+                            {
+                                <div class="ac-preview-location">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span>@Model.Address</span>
+                                </div>
+                            }
+
+                            @* Price if available *@
+                            @{
+                                var priceAttr = Model.Attributes.FirstOrDefault(a => a.Code == "price");
+                                if (priceAttr?.NumberValue.HasValue == true)
+                                {
+                                    <div class="ac-preview-price">
+                                        <span class="ac-price-amount">@priceAttr.NumberValue?.ToString("N0") ر.س</span>
+                                        <span class="ac-price-period">/ شهرياً</span>
+                                    </div>
+                                }
+                            }
+
+                            @* Key Attributes *@
+                            <div class="ac-preview-attributes">
+                                @foreach (var attrInput in Model.Attributes.Where(a => a.Code != "title" && a.Code != "description" && a.Code != "price"))
+                                {
+                                    var attrDef = CategoryAttributes?.FirstOrDefault(a => a.Id == attrInput.AttributeId);
+                                    if (attrDef != null && HasDisplayValue(attrInput))
+                                    {
+                                        <div class="ac-preview-attr">
+                                            <span class="ac-attr-label">@attrDef.Name</span>
+                                            <span class="ac-attr-value">@GetAttributeDisplayValue(attrInput, attrDef)</span>
+                                        </div>
+                                    }
+                                }
+                            </div>
+
+                            @* Description *@
+                            @{
+                                var descAttr = Model.Attributes.FirstOrDefault(a => a.Code == "description");
+                                if (!string.IsNullOrEmpty(descAttr?.TextValue))
+                                {
+                                    <div class="ac-preview-description">
+                                        <h4>الوصف</h4>
+                                        <p>@descAttr.TextValue</p>
+                                    </div>
+                                }
+                            }
+                        </div>
                     </div>
 
                     <div class="ac-form-actions">
                         <AcButton Text="نشر العرض"
+                                  IconStart="bi-send"
                                   OnClick="SubmitListing"
                                   FullWidth="true"
                                   Variant="ButtonVariant.Primary" />
@@ -305,11 +495,30 @@
     public bool IsLoadingAttributes { get; set; }
     public string? ErrorMessage { get; set; }
     public Guid? CreatedListingId { get; set; }
+    private bool _isFormValid = true;
+    private Dictionary<string, string> _validationErrors = new();
 
-    private bool IsDetailsValid =>
-        !string.IsNullOrWhiteSpace(Model.Title) &&
-        (CategoryAttributes?.Where(a => a.IsRequired).All(a =>
-            Model.Attributes.Any(v => v.AttributeId == a.Id && HasValue(v))) ?? true);
+    // Filter out images attribute - it's handled separately
+    private List<ListingAttributeDefinition>? FilteredAttributes =>
+        CategoryAttributes?.Where(a => a.Code != "images").ToList();
+
+    // Validation: check required fields including title from dynamic attributes
+    private bool IsDetailsValid
+    {
+        get
+        {
+            if (FilteredAttributes == null) return false;
+
+            var requiredAttributes = FilteredAttributes.Where(a => a.IsRequired).ToList();
+            foreach (var attr in requiredAttributes)
+            {
+                var input = Model.Attributes.FirstOrDefault(v => v.AttributeId == attr.Id);
+                if (input == null || !HasValue(input))
+                    return false;
+            }
+            return _isFormValid;
+        }
+    }
 
     private bool HasValue(ListingAttributeInput input) =>
         !string.IsNullOrEmpty(input.TextValue) ||
@@ -317,6 +526,25 @@
         input.BooleanValue.HasValue ||
         input.DateValue.HasValue ||
         (input.MultiSelectValues?.Any() ?? false);
+
+    private bool HasDisplayValue(ListingAttributeInput input) =>
+        HasValue(input) &&
+        !(input.BooleanValue == false && !input.NumberValue.HasValue && string.IsNullOrEmpty(input.TextValue));
+
+    private int GetProgressPercentage() => CurrentStep switch
+    {
+        CreateListingStep.FillDetails => 25,
+        CreateListingStep.AddImages => 50,
+        CreateListingStep.SetLocation => 75,
+        CreateListingStep.Review => 100,
+        _ => 0
+    };
+
+    private string GetTitleFromAttributes()
+    {
+        var titleAttr = Model.Attributes.FirstOrDefault(a => a.Code == "title");
+        return titleAttr?.TextValue ?? "عرض جديد";
+    }
 
     public void SetCategories(List<ListingCategory> categories)
     {
@@ -328,6 +556,23 @@
     {
         CategoryAttributes = attributes;
         IsLoadingAttributes = false;
+
+        // Set title in Model.Title from attributes for backwards compatibility
+        var titleAttr = attributes.FirstOrDefault(a => a.Code == "title");
+        if (titleAttr != null)
+        {
+            var existingInput = Model.Attributes.FirstOrDefault(a => a.Code == "title");
+            if (existingInput == null)
+            {
+                Model.Attributes.Add(new ListingAttributeInput
+                {
+                    AttributeId = titleAttr.Id,
+                    Code = "title",
+                    TextValue = Model.Title
+                });
+            }
+        }
+
         StateHasChanged();
     }
 
@@ -358,8 +603,11 @@
 
     public void AddImage(string imageUrl)
     {
-        Model.Images.Add(imageUrl);
-        StateHasChanged();
+        if (Model.Images.Count < 10)
+        {
+            Model.Images.Add(imageUrl);
+            StateHasChanged();
+        }
     }
 
     private async Task SelectCategory(ListingCategory category)
@@ -391,6 +639,12 @@
 
     private void GoToImages()
     {
+        // Sync title from attributes to Model.Title for backwards compatibility
+        var titleInput = Model.Attributes.FirstOrDefault(a => a.Code == "title");
+        if (titleInput != null)
+        {
+            Model.Title = titleInput.TextValue ?? "";
+        }
         CurrentStep = CreateListingStep.AddImages;
     }
 
@@ -409,6 +663,11 @@
         await OnRequestLocation.InvokeAsync();
     }
 
+    private void OnMapClick()
+    {
+        // Placeholder for map click - could open a map picker
+    }
+
     private async Task HandleImageUpload(ChangeEventArgs e)
     {
         // يتم التعامل مع رفع الصور في التطبيق المضيف
@@ -420,7 +679,45 @@
         if (index >= 0 && index < Model.Images.Count)
         {
             Model.Images.RemoveAt(index);
+            StateHasChanged();
         }
+    }
+
+    private void SetMainImage(int index)
+    {
+        if (index > 0 && index < Model.Images.Count)
+        {
+            var image = Model.Images[index];
+            Model.Images.RemoveAt(index);
+            Model.Images.Insert(0, image);
+            StateHasChanged();
+        }
+    }
+
+    private void ClearAllImages()
+    {
+        Model.Images.Clear();
+        StateHasChanged();
+    }
+
+    private void OnAttributesChanged(List<ListingAttributeInput> values)
+    {
+        Model.Attributes = values;
+
+        // Sync title
+        var titleInput = values.FirstOrDefault(a => a.Code == "title");
+        if (titleInput != null)
+        {
+            Model.Title = titleInput.TextValue ?? "";
+        }
+
+        StateHasChanged();
+    }
+
+    private void OnValidationChanged(bool isValid)
+    {
+        _isFormValid = isValid;
+        StateHasChanged();
     }
 
     private async Task SubmitListing()
@@ -455,6 +752,7 @@
         Model = new CreateListingModel();
         CreatedListingId = null;
         ErrorMessage = null;
+        _validationErrors.Clear();
     }
 
     private string GetAttributeDisplayValue(ListingAttributeInput input, ListingAttributeDefinition def)
@@ -479,7 +777,7 @@
 
         if (input.NumberValue.HasValue)
         {
-            return input.NumberValue.Value.ToString();
+            return input.NumberValue.Value.ToString("N0");
         }
 
         if (!string.IsNullOrEmpty(input.TextValue))
