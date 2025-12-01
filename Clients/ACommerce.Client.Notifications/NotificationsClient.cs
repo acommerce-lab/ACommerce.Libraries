@@ -5,7 +5,7 @@ namespace ACommerce.Client.Notifications;
 
 public sealed class NotificationsClient(IApiClient httpClient)
 {
-    private const string ServiceName = "Notifications"; // أو "Marketplace"
+    private const string ServiceName = "Marketplace";
 
     /// <summary>
     /// الحصول على الإشعارات

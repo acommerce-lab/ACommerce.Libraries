@@ -8,7 +8,7 @@ namespace ACommerce.Client.Locations;
 public sealed class LocationsClient
 {
     private readonly IApiClient _httpClient;
-    private const string ServiceName = "Locations";
+    private const string ServiceName = "Marketplace";
     private const string BasePath = "/api/locations";
 
     public LocationsClient(IApiClient httpClient)
@@ -217,6 +217,7 @@ public sealed class LocationsClient
 
     /// <summary>
     /// البحث عن المدن القريبة
+    /// GET /api/locations/nearby/cities
     /// </summary>
     public async Task<List<GeoSearchResult<CityDto>>?> FindNearbyCitiesAsync(
         double latitude,
@@ -227,12 +228,30 @@ public sealed class LocationsClient
     {
         return await _httpClient.GetAsync<List<GeoSearchResult<CityDto>>>(
             ServiceName,
-            $"{BasePath}/nearby?lat={latitude}&lon={longitude}&radius={radiusKm}&limit={limit}",
+            $"{BasePath}/nearby/cities?lat={latitude}&lng={longitude}&radiusKm={radiusKm}&limit={limit}",
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// البحث عن الأحياء القريبة
+    /// GET /api/locations/nearby/neighborhoods
+    /// </summary>
+    public async Task<List<GeoSearchResult<NeighborhoodDto>>?> FindNearbyNeighborhoodsAsync(
+        double latitude,
+        double longitude,
+        double radiusKm = 10,
+        int limit = 50,
+        CancellationToken cancellationToken = default)
+    {
+        return await _httpClient.GetAsync<List<GeoSearchResult<NeighborhoodDto>>>(
+            ServiceName,
+            $"{BasePath}/nearby/neighborhoods?lat={latitude}&lng={longitude}&radiusKm={radiusKm}&limit={limit}",
             cancellationToken);
     }
 
     /// <summary>
     /// تحديد الموقع العكسي من الإحداثيات
+    /// GET /api/locations/reverse-geocode
     /// </summary>
     public async Task<LocationHierarchyDto?> ReverseGeocodeAsync(
         double latitude,

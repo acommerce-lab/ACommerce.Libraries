@@ -1,5 +1,5 @@
 @page "/favorites"
-@inject SpaceDataService DataService
+@inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
 
 <div class="ac-page ashare-favorites-page">
@@ -76,15 +76,15 @@
 @code {
     private List<SpaceItem>? _favoriteSpaces;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        LoadFavorites();
+        await LoadFavoritesAsync();
     }
 
-    private void LoadFavorites()
+    private async Task LoadFavoritesAsync()
     {
-        var favoriteIds = DataService.GetFavorites();
-        var allSpaces = DataService.GetAllSpaces();
+        var favoriteIds = ApiService.GetFavorites();
+        var allSpaces = await ApiService.GetAllSpacesAsync();
         _favoriteSpaces = allSpaces?.Where(s => favoriteIds.Contains(s.Id)).ToList();
     }
 
@@ -100,7 +100,7 @@
 
     private void RemoveFavorite(Guid spaceId)
     {
-        DataService.ToggleFavorite(spaceId);
-        LoadFavorites();
+        ApiService.ToggleFavorite(spaceId);
+        _ = LoadFavoritesAsync();
     }
 }

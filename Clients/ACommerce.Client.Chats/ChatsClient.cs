@@ -5,7 +5,8 @@ namespace ACommerce.Client.Chats;
 public sealed class ChatsClient
 {
 	private readonly IApiClient _httpClient;
-	private const string ServiceName = "Chats"; // أو "Marketplace"
+	private const string ServiceName = "Marketplace";
+	private const string BasePath = "/api/chats";
 
 	public ChatsClient(IApiClient httpClient)
 	{
@@ -13,15 +14,28 @@ public sealed class ChatsClient
 	}
 
 	/// <summary>
-	/// الحصول على المحادثات
+	/// الحصول على محادثاتي
+	/// GET /api/chats/my-chats
+	/// </summary>
+	public async Task<PagedChatsResult?> GetMyChatsAsync(
+		int pageNumber = 1,
+		int pageSize = 20,
+		CancellationToken cancellationToken = default)
+	{
+		return await _httpClient.GetAsync<PagedChatsResult>(
+			ServiceName,
+			$"{BasePath}/my-chats?pageNumber={pageNumber}&pageSize={pageSize}",
+			cancellationToken);
+	}
+
+	/// <summary>
+	/// الحصول على المحادثات (للتوافق مع الكود القديم)
 	/// </summary>
 	public async Task<List<ConversationResponse>?> GetConversationsAsync(
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.GetAsync<List<ConversationResponse>>(
-			ServiceName,
-			"/api/chats/conversations",
-			cancellationToken);
+		var result = await GetMyChatsAsync(1, 100, cancellationToken);
+		return result?.Items;
 	}
 
 	/// <summary>
@@ -35,43 +49,59 @@ public sealed class ChatsClient
 
 	/// <summary>
 	/// الحصول على محادثة محددة
+	/// GET /api/chats/{id}
 	/// </summary>
 	public async Task<ConversationResponse?> GetConversationAsync(
-		Guid conversationId,
+		Guid chatId,
 		CancellationToken cancellationToken = default)
 	{
 		return await _httpClient.GetAsync<ConversationResponse>(
 			ServiceName,
-			$"/api/chats/conversations/{conversationId}",
+			$"{BasePath}/{chatId}",
 			cancellationToken);
 	}
 
 	/// <summary>
 	/// الحصول على الرسائل
+	/// GET /api/chats/{chatId}/messages
 	/// </summary>
-	public async Task<List<MessageResponse>?> GetMessagesAsync(
-		Guid conversationId,
-		int page = 1,
+	public async Task<PagedMessagesResult?> GetMessagesPagedAsync(
+		Guid chatId,
+		int pageNumber = 1,
 		int pageSize = 50,
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.GetAsync<List<MessageResponse>>(
+		return await _httpClient.GetAsync<PagedMessagesResult>(
 			ServiceName,
-			$"/api/chats/conversations/{conversationId}/messages?page={page}&pageSize={pageSize}",
+			$"{BasePath}/{chatId}/messages?pageNumber={pageNumber}&pageSize={pageSize}",
 			cancellationToken);
 	}
 
 	/// <summary>
+	/// الحصول على الرسائل (للتوافق مع الكود القديم)
+	/// </summary>
+	public async Task<List<MessageResponse>?> GetMessagesAsync(
+		Guid chatId,
+		int page = 1,
+		int pageSize = 50,
+		CancellationToken cancellationToken = default)
+	{
+		var result = await GetMessagesPagedAsync(chatId, page, pageSize, cancellationToken);
+		return result?.Items;
+	}
+
+	/// <summary>
 	/// إرسال رسالة
+	/// POST /api/chats/{chatId}/messages
 	/// </summary>
 	public async Task<MessageResponse?> SendMessageAsync(
-		Guid conversationId,
+		Guid chatId,
 		SendMessageRequest request,
 		CancellationToken cancellationToken = default)
 	{
 		return await _httpClient.PostAsync<SendMessageRequest, MessageResponse>(
 			ServiceName,
-			$"/api/chats/conversations/{conversationId}/messages",
+			$"{BasePath}/{chatId}/messages",
 			request,
 			cancellationToken);
 	}
@@ -80,25 +110,41 @@ public sealed class ChatsClient
 	/// إرسال رسالة نصية بسيطة
 	/// </summary>
 	public Task<MessageResponse?> SendMessageAsync(
-		Guid conversationId,
+		Guid chatId,
 		string content,
 		CancellationToken cancellationToken = default)
 	{
-		return SendMessageAsync(conversationId, new SendMessageRequest { Content = content }, cancellationToken);
+		return SendMessageAsync(chatId, new SendMessageRequest { Content = content }, cancellationToken);
 	}
 
 	/// <summary>
-	/// بدء محادثة جديدة
+	/// إنشاء محادثة جديدة
+	/// POST /api/chats
+	/// </summary>
+	public async Task<ConversationResponse?> CreateChatAsync(
+		CreateChatRequest request,
+		CancellationToken cancellationToken = default)
+	{
+		return await _httpClient.PostAsync<CreateChatRequest, ConversationResponse>(
+			ServiceName,
+			BasePath,
+			request,
+			cancellationToken);
+	}
+
+	/// <summary>
+	/// بدء محادثة جديدة (للتوافق مع الكود القديم)
 	/// </summary>
 	public async Task<ConversationResponse?> StartConversationAsync(
 		StartConversationRequest request,
 		CancellationToken cancellationToken = default)
 	{
-		return await _httpClient.PostAsync<StartConversationRequest, ConversationResponse>(
-			ServiceName,
-			"/api/chats/conversations",
-			request,
-			cancellationToken);
+		var createRequest = new CreateChatRequest
+		{
+			Title = request.Title ?? "محادثة جديدة",
+			ParticipantIds = request.ParticipantIds
+		};
+		return await CreateChatAsync(createRequest, cancellationToken);
 	}
 
 	/// <summary>
@@ -123,15 +169,82 @@ public sealed class ChatsClient
 
 	/// <summary>
 	/// تعليم الرسائل كمقروءة
+	/// POST /api/chats/{chatId}/mark-as-read
 	/// </summary>
 	public async Task MarkAsReadAsync(
-		Guid conversationId,
+		Guid chatId,
+		Guid? lastMessageId = null,
 		CancellationToken cancellationToken = default)
 	{
+		var request = lastMessageId.HasValue
+			? new { LastMessageId = lastMessageId.Value }
+			: new { LastMessageId = (Guid?)null };
 		await _httpClient.PostAsync<object>(
 			ServiceName,
-			$"/api/chats/conversations/{conversationId}/mark-read",
-			new { },
+			$"{BasePath}/{chatId}/mark-as-read",
+			request,
+			cancellationToken);
+	}
+
+	/// <summary>
+	/// البحث في الرسائل
+	/// GET /api/chats/{chatId}/messages/search
+	/// </summary>
+	public async Task<PagedMessagesResult?> SearchMessagesAsync(
+		Guid chatId,
+		string query,
+		int pageNumber = 1,
+		int pageSize = 20,
+		CancellationToken cancellationToken = default)
+	{
+		return await _httpClient.GetAsync<PagedMessagesResult>(
+			ServiceName,
+			$"{BasePath}/{chatId}/messages/search?query={Uri.EscapeDataString(query)}&pageNumber={pageNumber}&pageSize={pageSize}",
+			cancellationToken);
+	}
+
+	/// <summary>
+	/// الحصول على المشاركين في المحادثة
+	/// GET /api/chats/{chatId}/participants
+	/// </summary>
+	public async Task<List<ParticipantResponse>?> GetParticipantsAsync(
+		Guid chatId,
+		CancellationToken cancellationToken = default)
+	{
+		return await _httpClient.GetAsync<List<ParticipantResponse>>(
+			ServiceName,
+			$"{BasePath}/{chatId}/participants",
+			cancellationToken);
+	}
+
+	/// <summary>
+	/// إضافة مشارك للمحادثة
+	/// POST /api/chats/{chatId}/participants
+	/// </summary>
+	public async Task<ParticipantResponse?> AddParticipantAsync(
+		Guid chatId,
+		AddParticipantRequest request,
+		CancellationToken cancellationToken = default)
+	{
+		return await _httpClient.PostAsync<AddParticipantRequest, ParticipantResponse>(
+			ServiceName,
+			$"{BasePath}/{chatId}/participants",
+			request,
+			cancellationToken);
+	}
+
+	/// <summary>
+	/// إزالة مشارك من المحادثة
+	/// DELETE /api/chats/{chatId}/participants/{userId}
+	/// </summary>
+	public async Task RemoveParticipantAsync(
+		Guid chatId,
+		string userId,
+		CancellationToken cancellationToken = default)
+	{
+		await _httpClient.DeleteAsync(
+			ServiceName,
+			$"{BasePath}/{chatId}/participants/{userId}",
 			cancellationToken);
 	}
 }
@@ -199,4 +312,65 @@ public sealed class CreateConversationRequest
 	public string? RecipientIdentifier { get; set; }
 	public string? Title { get; set; }
 	public string? InitialMessage { get; set; }
+}
+
+/// <summary>
+/// نتيجة المحادثات المقسمة لصفحات
+/// </summary>
+public sealed class PagedChatsResult
+{
+	public List<ConversationResponse> Items { get; set; } = new();
+	public int TotalCount { get; set; }
+	public int PageNumber { get; set; }
+	public int PageSize { get; set; }
+	public int TotalPages { get; set; }
+}
+
+/// <summary>
+/// نتيجة الرسائل المقسمة لصفحات
+/// </summary>
+public sealed class PagedMessagesResult
+{
+	public List<MessageResponse> Items { get; set; } = new();
+	public int TotalCount { get; set; }
+	public int PageNumber { get; set; }
+	public int PageSize { get; set; }
+	public int TotalPages { get; set; }
+}
+
+/// <summary>
+/// طلب إنشاء محادثة جديدة
+/// </summary>
+public sealed class CreateChatRequest
+{
+	public string Title { get; set; } = string.Empty;
+	public string? Description { get; set; }
+	public string? ImageUrl { get; set; }
+	public string Type { get; set; } = "Direct"; // Direct, Group, Channel, Support
+	public List<string> ParticipantIds { get; set; } = new();
+}
+
+/// <summary>
+/// بيانات المشارك
+/// </summary>
+public sealed class ParticipantResponse
+{
+	public Guid Id { get; set; }
+	public Guid ChatId { get; set; }
+	public string UserId { get; set; } = string.Empty;
+	public string Role { get; set; } = "Member"; // Owner, Admin, Member, Guest
+	public DateTime? LastSeenMessageAt { get; set; }
+	public Guid? LastSeenMessageId { get; set; }
+	public bool IsMuted { get; set; }
+	public bool IsPinned { get; set; }
+	public DateTime CreatedAt { get; set; }
+}
+
+/// <summary>
+/// طلب إضافة مشارك
+/// </summary>
+public sealed class AddParticipantRequest
+{
+	public string UserId { get; set; } = string.Empty;
+	public string Role { get; set; } = "Member";
 }
