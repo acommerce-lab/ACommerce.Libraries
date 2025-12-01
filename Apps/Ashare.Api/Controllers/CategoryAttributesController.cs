@@ -34,10 +34,14 @@ public class CategoryAttributesController : ControllerBase
 	[HttpGet("category/{categoryId}")]
 	public async Task<ActionResult> GetAttributesForCategory(Guid categoryId)
 	{
+		Console.WriteLine($"[CategoryAttributes] Getting attributes for category: {categoryId}");
+
 		var attributeIds = AshareSeedDataService.GetAttributeIdsForCategory(categoryId);
+		Console.WriteLine($"[CategoryAttributes] Found {attributeIds.Count} attribute IDs for category");
 
 		if (attributeIds.Count == 0)
 		{
+			Console.WriteLine($"[CategoryAttributes] No attributes found for category {categoryId}");
 			return NotFound(new { message = "الفئة غير موجودة أو لا تحتوي على خصائص" });
 		}
 
@@ -47,6 +51,8 @@ public class CategoryAttributesController : ControllerBase
 			predicate: null,
 			includeDeleted: false,
 			includeProperties: "Values");
+
+		Console.WriteLine($"[CategoryAttributes] Total attributes in database: {allAttributes.Count}");
 
 		var categoryAttributes = allAttributes
 			.Where(a => attributeIds.Contains(a.Id))
@@ -80,6 +86,8 @@ public class CategoryAttributesController : ControllerBase
 			})
 			.ToList();
 
+		Console.WriteLine($"[CategoryAttributes] Returning {categoryAttributes.Count} attributes for category {categoryId}");
+
 		return Ok(categoryAttributes);
 	}
 
@@ -91,11 +99,11 @@ public class CategoryAttributesController : ControllerBase
 	{
 		var categories = new[]
 		{
-			new { Id = AshareSeedDataService.CategoryIds.Residential, Name = "سكني", Slug = "residential" },
-			new { Id = AshareSeedDataService.CategoryIds.LookingForHousing, Name = "طلب سكن", Slug = "looking-for-housing" },
-			new { Id = AshareSeedDataService.CategoryIds.LookingForPartner, Name = "طلب شريك سكن", Slug = "looking-for-partner" },
-			new { Id = AshareSeedDataService.CategoryIds.Administrative, Name = "مساحة إدارية", Slug = "administrative" },
-			new { Id = AshareSeedDataService.CategoryIds.Commercial, Name = "مساحة تجارية", Slug = "commercial" }
+			new { Id = AshareSeedDataService.CategoryIds.Residential, Name = "سكني", Slug = "residential", Icon = "bi-house-door", Image = (string?)null, Description = "عرض سكن للإيجار أو المشاركة" },
+			new { Id = AshareSeedDataService.CategoryIds.LookingForHousing, Name = "طلب سكن", Slug = "looking-for-housing", Icon = "bi-search", Image = (string?)null, Description = "أبحث عن سكن للإيجار أو المشاركة" },
+			new { Id = AshareSeedDataService.CategoryIds.LookingForPartner, Name = "طلب شريك سكن", Slug = "looking-for-partner", Icon = "bi-people", Image = (string?)null, Description = "أبحث عن شريك سكن" },
+			new { Id = AshareSeedDataService.CategoryIds.Administrative, Name = "مساحة إدارية", Slug = "administrative", Icon = "bi-building", Image = (string?)null, Description = "مكاتب ومساحات عمل مشتركة" },
+			new { Id = AshareSeedDataService.CategoryIds.Commercial, Name = "مساحة تجارية", Slug = "commercial", Icon = "bi-shop", Image = (string?)null, Description = "محلات ومستودعات ومساحات تجارية" }
 		};
 
 		return Ok(categories);
