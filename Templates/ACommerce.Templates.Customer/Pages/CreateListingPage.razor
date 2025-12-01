@@ -761,7 +761,7 @@
     {
         if (Model.Latitude.HasValue && Model.Longitude.HasValue && JS != null)
         {
-            var label = GetListingTitle() ?? "الموقع";
+            var label = GetTitleFromAttributes() ?? "الموقع";
             await JS.InvokeVoidAsync("AcMap.openNativeMaps", Model.Latitude.Value, Model.Longitude.Value, label);
         }
     }
