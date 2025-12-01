@@ -85,6 +85,51 @@
 
     @* Content based on current step *@
     <div class="ac-page-content">
+        @* IMPORTANT: Map component placed OUTSIDE switch to prevent DOM conflicts in MAUI WebView *@
+        @* When Blazor removes switch case content, Leaflet-modified DOM causes crashes *@
+        @* Using CSS visibility ensures the map container stays in DOM at all times *@
+        <div class="ac-persistent-map-container" style="display: @(CurrentStep == CreateListingStep.SetLocation ? "block" : "none");">
+            <div class="ac-location-section">
+                <div class="ac-form-section">
+                    <div class="ac-section-header">
+                        <i class="bi bi-geo-alt"></i>
+                        <h2>موقع العرض</h2>
+                    </div>
+                    <p class="ac-section-desc">حرّك الخريطة واضغط لتحديد موقع عرضك بدقة</p>
+                </div>
+
+                <div class="ac-location-card">
+                    @* Interactive Map Component - kept in stable DOM location *@
+                    <AcInteractiveMap @ref="_mapComponent"
+                                      Latitude="@Model.Latitude"
+                                      LatitudeChanged="(lat) => Model.Latitude = lat"
+                                      Longitude="@Model.Longitude"
+                                      LongitudeChanged="(lng) => Model.Longitude = lng"
+                                      OnLocationSelected="OnLocationSelectedFromMap"
+                                      OnRequestCurrentLocation="RequestLocation"
+                                      Height="280"
+                                      ShowControls="true"
+                                      Interactive="true" />
+
+                    <div style="margin-top: 16px;">
+                        <AcInput Id="address"
+                                 Label="العنوان التفصيلي (اختياري)"
+                                 Placeholder="مثال: حي النرجس، شارع الأمير سلطان"
+                                 Value="@Model.Address"
+                                 ValueChanged="(v) => Model.Address = v"
+                                 IconStart="bi-signpost" />
+                    </div>
+                </div>
+
+                <div class="ac-form-actions">
+                    <AcButton Text="التالي"
+                              IconEnd="bi-arrow-left"
+                              OnClick="GoToReview"
+                              FullWidth="true" />
+                </div>
+            </div>
+        </div>
+
         @switch (CurrentStep)
         {
             case CreateListingStep.SelectCategory:
@@ -277,45 +322,8 @@
                 break;
 
             case CreateListingStep.SetLocation:
-                <div class="ac-location-section">
-                    <div class="ac-form-section">
-                        <div class="ac-section-header">
-                            <i class="bi bi-geo-alt"></i>
-                            <h2>موقع العرض</h2>
-                        </div>
-                        <p class="ac-section-desc">حرّك الخريطة واضغط لتحديد موقع عرضك بدقة</p>
-                    </div>
-
-                    <div class="ac-location-card">
-                        @* Interactive Map Component *@
-                        <AcInteractiveMap @ref="_mapComponent"
-                                          Latitude="@Model.Latitude"
-                                          LatitudeChanged="(lat) => Model.Latitude = lat"
-                                          Longitude="@Model.Longitude"
-                                          LongitudeChanged="(lng) => Model.Longitude = lng"
-                                          OnLocationSelected="OnLocationSelectedFromMap"
-                                          OnRequestCurrentLocation="RequestLocation"
-                                          Height="280"
-                                          ShowControls="true"
-                                          Interactive="true" />
-
-                        <div style="margin-top: 16px;">
-                            <AcInput Id="address"
-                                     Label="العنوان التفصيلي (اختياري)"
-                                     Placeholder="مثال: حي النرجس، شارع الأمير سلطان"
-                                     Value="@Model.Address"
-                                     ValueChanged="(v) => Model.Address = v"
-                                     IconStart="bi-signpost" />
-                        </div>
-                    </div>
-
-                    <div class="ac-form-actions">
-                        <AcButton Text="التالي"
-                                  IconEnd="bi-arrow-left"
-                                  OnClick="GoToReview"
-                                  FullWidth="true" />
-                    </div>
-                </div>
+                @* Content moved outside switch to prevent DOM conflicts with Leaflet in MAUI WebView *@
+                @* See ac-persistent-map-container above *@
                 break;
 
             case CreateListingStep.Review:
