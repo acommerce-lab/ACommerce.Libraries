@@ -160,6 +160,15 @@ public static class ServiceCollectionExtensions
                 client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
             });
 
+        // تجاوز التحقق من SSL في التطوير (للشهادات الذاتية)
+        if (options.BypassSslValidation)
+        {
+            httpClientBuilder.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+            });
+        }
+
         // إضافة Interceptors إلى HttpClient
         if (options.EnableLocalization)
             httpClientBuilder.AddHttpMessageHandler<LocalizationInterceptor>();
@@ -223,6 +232,12 @@ public class ClientOptions
 	/// Localization Provider مخصص (اختياري)
 	/// </summary>
 	public Func<IServiceProvider, ILocalizationProvider>? LocalizationProvider { get; set; }
+
+	/// <summary>
+	/// تجاوز التحقق من شهادة SSL (للتطوير فقط!)
+	/// يسمح بالاتصال بخوادم تستخدم شهادات ذاتية
+	/// </summary>
+	public bool BypassSslValidation { get; set; } = false;
 }
 
 /// <summary>

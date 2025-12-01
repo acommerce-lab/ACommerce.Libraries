@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- للتطوير: السماح بالاتصال بـ localhost و Android Emulator -->
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- Android Emulator localhost -->
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <!-- Windows localhost -->
+        <domain includeSubdomains="true">localhost</domain>
+        <!-- Local network -->
+        <domain includeSubdomains="true">127.0.0.1</domain>
+    </domain-config>
+
+    <!-- للتطوير: الثقة بشهادات المستخدم (self-signed certificates) -->
+    <debug-overrides>
+        <trust-anchors>
+            <!-- ثقة بشهادات النظام -->
+            <certificates src="system" />
+            <!-- ثقة بشهادات المستخدم (للتطوير فقط) -->
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>
