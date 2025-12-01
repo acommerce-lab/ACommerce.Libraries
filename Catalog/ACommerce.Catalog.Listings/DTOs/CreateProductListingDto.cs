@@ -1,6 +1,6 @@
 namespace ACommerce.Catalog.Listings.DTOs;
 
-public class CreateListingDto
+public class CreateProductListingDto
 {
 	public Guid VendorId { get; set; }
 	public Guid ProductId { get; set; }

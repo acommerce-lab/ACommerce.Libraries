@@ -18,7 +18,7 @@ namespace ACommerce.Catalog.Listings.Api.Controllers;
 [Produces("application/json")]
 public class ProductListingsController(
     IMediator mediator,
-    ILogger<ProductListingsController> logger) : BaseCrudController<ProductListing, CreateListingDto, CreateListingDto, ProductListingResponseDto, CreateListingDto>(mediator, logger)
+    ILogger<ProductListingsController> logger) : BaseCrudController<ProductListing, CreateProductListingDto, CreateProductListingDto, ProductListingResponseDto, CreateProductListingDto>(mediator, logger)
 {
 	/// <summary>
 	/// الحصول على العروض المميزة
