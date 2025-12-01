@@ -308,7 +308,7 @@ public class AshareSeedDataService
 		var repo = _repositoryFactory.CreateRepository<ProductCategory>();
 
 		var existing = await repo.GetAllWithPredicateAsync();
-		if (existing.Any()) return;
+		var existingIds = existing.Select(c => c.Id).ToHashSet();
 
 		var categories = new List<ProductCategory>
 		{
@@ -371,7 +371,10 @@ public class AshareSeedDataService
 
 		foreach (var category in categories)
 		{
-			await repo.AddAsync(category);
+			if (!existingIds.Contains(category.Id))
+			{
+				await repo.AddAsync(category);
+			}
 		}
 	}
 
