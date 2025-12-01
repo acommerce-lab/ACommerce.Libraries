@@ -105,6 +105,10 @@ public static class MauiProgram
             options =>
             {
                 options.TimeoutSeconds = 30;
+#if DEBUG
+                // تجاوز التحقق من SSL في التطوير (للشهادات الذاتية)
+                options.BypassSslValidation = true;
+#endif
             });
 
         // Authentication Client (JWT + Nafath)
@@ -199,7 +203,15 @@ public static class MauiProgram
         builder.Services.AddHttpClient("AshareApi", client =>
         {
             client.BaseAddress = ApiSettings.BaseUri;
-        });
+        })
+#if DEBUG
+        // في التطوير: تجاوز التحقق من شهادة SSL الذاتية
+        .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+        })
+#endif
+        ;
 
         var app = builder.Build();
 
