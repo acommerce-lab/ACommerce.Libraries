@@ -375,16 +375,23 @@ public class AshareApiService
 
 	private static SpaceItem MapToSpaceItem(ProductDto dto)
 	{
+		// Try to get price from metadata if available
+		decimal price = 0;
+		if (dto.Metadata?.TryGetValue("pricePerHour", out var priceStr) == true)
+		{
+			decimal.TryParse(priceStr, out price);
+		}
+
 		return new SpaceItem
 		{
 			Id = dto.Id,
 			Name = dto.Name,
 			NameEn = dto.Name,
 			Description = dto.LongDescription ?? dto.ShortDescription ?? string.Empty,
-			PricePerHour = dto.Price ?? 0,
-			PricePerDay = (dto.Price ?? 0) * 8, // Estimated
-			PricePerMonth = (dto.Price ?? 0) * 30 * 8, // Estimated
-			Currency = dto.Currency ?? "ر.س",
+			PricePerHour = price,
+			PricePerDay = price * 8, // Estimated
+			PricePerMonth = price * 30 * 8, // Estimated
+			Currency = dto.Metadata?.GetValueOrDefault("currency", "ر.س") ?? "ر.س",
 			Images = dto.Images?.Any() == true ? dto.Images : (dto.FeaturedImage != null ? new List<string> { dto.FeaturedImage } : new List<string>()),
 			IsNew = dto.IsNew,
 			IsFeatured = dto.IsFeatured,
