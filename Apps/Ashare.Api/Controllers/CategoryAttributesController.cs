@@ -108,4 +108,30 @@ public class CategoryAttributesController : ControllerBase
 
 		return Ok(categories);
 	}
+
+	/// <summary>
+	/// Debug: الحصول على جميع الخصائص من قاعدة البيانات
+	/// </summary>
+	[HttpGet("debug/all-attributes")]
+	public async Task<ActionResult> GetAllAttributesDebug()
+	{
+		var repo = _repositoryFactory.CreateRepository<AttributeDefinition>();
+		var allAttributes = await repo.GetAllWithPredicateAsync(
+			predicate: null,
+			includeDeleted: false,
+			includeProperties: "Values");
+
+		return Ok(new
+		{
+			TotalCount = allAttributes.Count,
+			Attributes = allAttributes.Select(a => new
+			{
+				a.Id,
+				a.Name,
+				a.Code,
+				Type = a.Type.ToString(),
+				ValuesCount = a.Values?.Count ?? 0
+			}).ToList()
+		});
+	}
 }
