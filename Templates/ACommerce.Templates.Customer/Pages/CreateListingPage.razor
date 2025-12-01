@@ -1,4 +1,6 @@
 @namespace ACommerce.Templates.Customer.Pages
+@using ACommerce.Templates.Customer.Components
+@using Microsoft.JSInterop
 
 <div class="ac-page ac-create-listing-page">
     @* Header *@
@@ -140,6 +142,20 @@
                         <p class="ac-section-desc">أدخل المعلومات الأساسية لعرضك</p>
                     </div>
 
+                    @* Validation Alert *@
+                    @if (!IsLoadingAttributes && ValidationErrorCount > 0)
+                    {
+                        <div class="ac-validation-alert">
+                            <div class="ac-alert-icon">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                            </div>
+                            <div class="ac-alert-content">
+                                <span class="ac-alert-title">يوجد @ValidationErrorCount @(ValidationErrorCount == 1 ? "حقل مطلوب" : "حقول مطلوبة") غير مكتمل</span>
+                                <span class="ac-alert-desc">أكمل الحقول المحددة بـ (*) للمتابعة</span>
+                            </div>
+                        </div>
+                    }
+
                     @* Dynamic attributes based on category - including title *@
                     @if (IsLoadingAttributes)
                     {
@@ -267,54 +283,29 @@
                             <i class="bi bi-geo-alt"></i>
                             <h2>موقع العرض</h2>
                         </div>
-                        <p class="ac-section-desc">حدد الموقع الدقيق لعرضك على الخريطة</p>
+                        <p class="ac-section-desc">حرّك الخريطة واضغط لتحديد موقع عرضك بدقة</p>
                     </div>
 
                     <div class="ac-location-card">
-                        <AcInput Id="address"
-                                 Label="العنوان التفصيلي"
-                                 Placeholder="مثال: حي النرجس، شارع الأمير سلطان"
-                                 Value="@Model.Address"
-                                 ValueChanged="(v) => Model.Address = v"
-                                 IconStart="bi-signpost" />
+                        @* Interactive Map Component *@
+                        <AcInteractiveMap @ref="_mapComponent"
+                                          Latitude="@Model.Latitude"
+                                          LatitudeChanged="(lat) => Model.Latitude = lat"
+                                          Longitude="@Model.Longitude"
+                                          LongitudeChanged="(lng) => Model.Longitude = lng"
+                                          OnLocationSelected="OnLocationSelectedFromMap"
+                                          OnRequestCurrentLocation="RequestLocation"
+                                          Height="280"
+                                          ShowControls="true"
+                                          Interactive="true" />
 
-                        @* Interactive Map *@
-                        <div class="ac-map-wrapper">
-                            <div class="ac-map-header">
-                                <span><i class="bi bi-pin-map"></i> حدد الموقع على الخريطة</span>
-                                @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
-                                {
-                                    <span class="ac-coords">
-                                        <i class="bi bi-crosshair"></i>
-                                        @Model.Latitude?.ToString("F4"), @Model.Longitude?.ToString("F4")
-                                    </span>
-                                }
-                            </div>
-                            <div class="ac-map-container" @onclick="OnMapClick">
-                                @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
-                                {
-                                    <div class="ac-map-pin">
-                                        <i class="bi bi-geo-alt-fill"></i>
-                                    </div>
-                                    <div class="ac-map-actions">
-                                        <button class="ac-map-btn" @onclick="RequestLocation" @onclick:stopPropagation="true">
-                                            <i class="bi bi-crosshair2"></i>
-                                            موقعي الحالي
-                                        </button>
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="ac-map-empty">
-                                        <i class="bi bi-geo-alt"></i>
-                                        <p>اضغط لتحديد الموقع</p>
-                                        <button class="ac-btn ac-btn-outline" @onclick="RequestLocation" @onclick:stopPropagation="true">
-                                            <i class="bi bi-crosshair2"></i>
-                                            استخدم موقعي الحالي
-                                        </button>
-                                    </div>
-                                }
-                            </div>
+                        <div style="margin-top: 16px;">
+                            <AcInput Id="address"
+                                     Label="العنوان التفصيلي (اختياري)"
+                                     Placeholder="مثال: حي النرجس، شارع الأمير سلطان"
+                                     Value="@Model.Address"
+                                     ValueChanged="(v) => Model.Address = v"
+                                     IconStart="bi-signpost" />
                         </div>
                     </div>
 
@@ -460,15 +451,28 @@
                                     <i class="bi bi-pin-map"></i>
                                     الموقع
                                 </h3>
-                                <div class="ac-map-preview">
-                                    <div class="ac-map-pin-marker">
-                                        <i class="bi bi-geo-alt-fill"></i>
+
+                                @* Static Map Preview *@
+                                <AcInteractiveMap Latitude="@Model.Latitude"
+                                                  Longitude="@Model.Longitude"
+                                                  Height="150"
+                                                  ShowControls="false"
+                                                  Interactive="false"
+                                                  DefaultZoom="15" />
+
+                                @if (!string.IsNullOrEmpty(Model.Address))
+                                {
+                                    <div class="ac-preview-address">
+                                        <i class="bi bi-geo-alt"></i>
+                                        <span>@Model.Address</span>
                                     </div>
-                                    <div class="ac-map-coords">
-                                        <i class="bi bi-crosshair"></i>
-                                        @Model.Latitude?.ToString("F4"), @Model.Longitude?.ToString("F4")
-                                    </div>
-                                </div>
+                                }
+
+                                @* Open in Native Maps Button *@
+                                <button type="button" class="ac-open-maps-btn" @onclick="OpenInNativeMaps">
+                                    <i class="bi bi-map"></i>
+                                    <span>فتح في الخرائط</span>
+                                </button>
                             </div>
                         }
                     </div>
@@ -546,10 +550,30 @@
     public Guid? CreatedListingId { get; set; }
     private bool _isFormValid = true;
     private Dictionary<string, string> _validationErrors = new();
+    private AcInteractiveMap? _mapComponent;
 
     // Filter out images attribute - it's handled separately
     private List<ListingAttributeDefinition>? FilteredAttributes =>
         CategoryAttributes?.Where(a => a.Code != "images").ToList();
+
+    // Count of validation errors (required fields not filled)
+    private int ValidationErrorCount
+    {
+        get
+        {
+            if (FilteredAttributes == null) return 0;
+
+            var count = 0;
+            var requiredAttributes = FilteredAttributes.Where(a => a.IsRequired).ToList();
+            foreach (var attr in requiredAttributes)
+            {
+                var input = Model.Attributes.FirstOrDefault(v => v.AttributeId == attr.Id);
+                if (input == null || !HasValue(input))
+                    count++;
+            }
+            return count;
+        }
+    }
 
     // Validation: check required fields including title from dynamic attributes
     private bool IsDetailsValid
@@ -625,7 +649,7 @@
         StateHasChanged();
     }
 
-    public void SetLocation(double latitude, double longitude, string? address = null)
+    public async Task SetLocation(double latitude, double longitude, string? address = null)
     {
         Model.Latitude = latitude;
         Model.Longitude = longitude;
@@ -633,6 +657,13 @@
         {
             Model.Address = address;
         }
+
+        // Update the map component if it exists
+        if (_mapComponent != null)
+        {
+            await _mapComponent.SetLocation(latitude, longitude);
+        }
+
         StateHasChanged();
     }
 
@@ -714,7 +745,25 @@
 
     private void OnMapClick()
     {
-        // Placeholder for map click - could open a map picker
+        // No longer needed - handled by AcInteractiveMap component
+    }
+
+    private void OnLocationSelectedFromMap((double Lat, double Lng) location)
+    {
+        Model.Latitude = location.Lat;
+        Model.Longitude = location.Lng;
+        StateHasChanged();
+    }
+
+    [Inject] private IJSRuntime? JS { get; set; }
+
+    private async Task OpenInNativeMaps()
+    {
+        if (Model.Latitude.HasValue && Model.Longitude.HasValue && JS != null)
+        {
+            var label = GetListingTitle() ?? "الموقع";
+            await JS.InvokeVoidAsync("AcMap.openNativeMaps", Model.Latitude.Value, Model.Longitude.Value, label);
+        }
     }
 
     private async Task HandleImageUpload(ChangeEventArgs e)

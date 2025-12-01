@@ -1,0 +1,192 @@
+@namespace ACommerce.Templates.Customer.Components
+@inject IJSRuntime JS
+
+<div class="ac-interactive-map @Class">
+    <div class="ac-map-frame" id="@_mapContainerId" @onclick="OnMapClicked">
+        @* Map will be rendered by JS *@
+        @if (_isLoading)
+        {
+            <div class="ac-map-loading">
+                <AcSpinner Text="جاري تحميل الخريطة..." />
+            </div>
+        }
+        else if (!_mapInitialized)
+        {
+            <div class="ac-map-placeholder-inner">
+                <i class="bi bi-geo-alt"></i>
+                <span>اضغط لتحديد الموقع</span>
+            </div>
+        }
+    </div>
+
+    @if (ShowControls)
+    {
+        <div class="ac-map-controls">
+            <button type="button" class="ac-map-control-btn" @onclick="GetCurrentLocation" disabled="@_isGettingLocation">
+                @if (_isGettingLocation)
+                {
+                    <i class="bi bi-arrow-clockwise spinning"></i>
+                }
+                else
+                {
+                    <i class="bi bi-crosshair2"></i>
+                }
+                <span>موقعي الحالي</span>
+            </button>
+
+            @if (Latitude.HasValue && Longitude.HasValue)
+            {
+                <div class="ac-map-coords-display">
+                    <i class="bi bi-pin-map"></i>
+                    <span>@Latitude?.ToString("F4"), @Longitude?.ToString("F4")</span>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public double? Latitude { get; set; }
+    [Parameter] public EventCallback<double?> LatitudeChanged { get; set; }
+
+    [Parameter] public double? Longitude { get; set; }
+    [Parameter] public EventCallback<double?> LongitudeChanged { get; set; }
+
+    [Parameter] public EventCallback<(double Lat, double Lng)> OnLocationSelected { get; set; }
+    [Parameter] public EventCallback OnRequestCurrentLocation { get; set; }
+
+    [Parameter] public double DefaultLatitude { get; set; } = 24.7136; // Riyadh
+    [Parameter] public double DefaultLongitude { get; set; } = 46.6753;
+    [Parameter] public int DefaultZoom { get; set; } = 12;
+    [Parameter] public int Height { get; set; } = 250;
+    [Parameter] public bool ShowControls { get; set; } = true;
+    [Parameter] public bool Interactive { get; set; } = true;
+    [Parameter] public string? Class { get; set; }
+
+    private string _mapContainerId = $"map_{Guid.NewGuid():N}";
+    private bool _mapInitialized;
+    private bool _isLoading;
+    private bool _isGettingLocation;
+    private DotNetObjectReference<AcInteractiveMap>? _dotNetRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await InitializeMapAsync();
+        }
+    }
+
+    private async Task InitializeMapAsync()
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            var initialLat = Latitude ?? DefaultLatitude;
+            var initialLng = Longitude ?? DefaultLongitude;
+
+            await JS.InvokeVoidAsync("AcMap.initialize", _mapContainerId, _dotNetRef, new
+            {
+                latitude = initialLat,
+                longitude = initialLng,
+                zoom = DefaultZoom,
+                height = Height,
+                interactive = Interactive,
+                hasMarker = Latitude.HasValue && Longitude.HasValue
+            });
+
+            _mapInitialized = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Map initialization error: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnMapClicked()
+    {
+        if (!_mapInitialized && !_isLoading)
+        {
+            await InitializeMapAsync();
+        }
+    }
+
+    private async Task GetCurrentLocation()
+    {
+        _isGettingLocation = true;
+        StateHasChanged();
+
+        try
+        {
+            await OnRequestCurrentLocation.InvokeAsync();
+        }
+        finally
+        {
+            _isGettingLocation = false;
+            StateHasChanged();
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnMapLocationSelected(double lat, double lng)
+    {
+        Latitude = lat;
+        Longitude = lng;
+
+        await LatitudeChanged.InvokeAsync(lat);
+        await LongitudeChanged.InvokeAsync(lng);
+        await OnLocationSelected.InvokeAsync((lat, lng));
+
+        StateHasChanged();
+    }
+
+    public async Task SetLocation(double lat, double lng)
+    {
+        Latitude = lat;
+        Longitude = lng;
+
+        await LatitudeChanged.InvokeAsync(lat);
+        await LongitudeChanged.InvokeAsync(lng);
+
+        if (_mapInitialized)
+        {
+            await JS.InvokeVoidAsync("AcMap.setMarker", _mapContainerId, lat, lng);
+        }
+        else
+        {
+            await InitializeMapAsync();
+        }
+
+        StateHasChanged();
+    }
+
+    public async Task CenterOnLocation(double lat, double lng, int? zoom = null)
+    {
+        if (_mapInitialized)
+        {
+            await JS.InvokeVoidAsync("AcMap.centerOn", _mapContainerId, lat, lng, zoom ?? DefaultZoom);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_mapInitialized)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("AcMap.destroy", _mapContainerId);
+            }
+            catch { }
+        }
+
+        _dotNetRef?.Dispose();
+    }
+}
