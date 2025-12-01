@@ -42,13 +42,24 @@ public class AshareApiService
 
 	/// <summary>
 	/// الحصول على جميع فئات المساحات
+	/// يستخدم CategoryAttributesClient للحصول على الفئات بالـ IDs الصحيحة
 	/// </summary>
 	public async Task<List<SpaceCategory>> GetCategoriesAsync()
 	{
 		try
 		{
-			var categories = await _categoriesClient.GetAllAsync();
-			return categories?.Select(MapToSpaceCategory).ToList() ?? new List<SpaceCategory>();
+			// استخدام CategoryAttributesClient بدلاً من CategoriesClient
+			// لضمان تطابق الـ IDs مع CategoryAttributeMappings
+			var categories = await _categoryAttributesClient.GetAvailableCategoriesAsync();
+			return categories?.Select(c => new SpaceCategory
+			{
+				Id = c.Id,
+				Name = c.Name,
+				NameEn = c.Name,
+				Icon = c.Icon,
+				Image = c.Image,
+				Color = "#6366F1"
+			}).ToList() ?? new List<SpaceCategory>();
 		}
 		catch (Exception ex)
 		{
