@@ -22,6 +22,7 @@ using ACommerce.Client.Products.Extensions;
 using ACommerce.Client.Profiles;
 using ACommerce.Client.Realtime;
 using ACommerce.Client.Vendors;
+using ACommerce.ServiceRegistry.Client.Extensions;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Themes;
 using Microsoft.Extensions.Logging;
@@ -86,15 +87,25 @@ public static class MauiProgram
         var apiBaseUrl = ApiSettings.BaseUrl;
 
         // ═══════════════════════════════════════════════════════════════════
-        // Client SDKs
+        // Client SDKs with Service Discovery (Predefined Services)
         // ═══════════════════════════════════════════════════════════════════
 
-        // Core HTTP Client with Static URL (for standalone apps like MAUI)
-        // Note: AddACommerceStaticClient ignores ServiceName and uses fixed base URL
-        builder.Services.AddACommerceStaticClient(apiBaseUrl, options =>
-        {
-            options.TimeoutSeconds = 30;
-        });
+        // ACommerce Client مع خدمات محددة مسبقاً
+        // يسجل الخدمات في Cache محلي لاستخدامها من قبل DynamicHttpClient
+        builder.Services.AddACommerceClientWithServices(
+            services =>
+            {
+                // تسجيل خدمة Marketplace - تستخدمها معظم الـ Clients
+                services.AddService("Marketplace", apiBaseUrl);
+
+                // يمكن إضافة خدمات أخرى إذا كانت على URLs مختلفة
+                // services.AddService("Files", "https://files.ashare.app");
+                // services.AddService("Payments", "https://payments.ashare.app");
+            },
+            options =>
+            {
+                options.TimeoutSeconds = 30;
+            });
 
         // Authentication Client (JWT + Nafath)
         builder.Services.AddAuthClient(apiBaseUrl);
@@ -190,8 +201,11 @@ public static class MauiProgram
             client.BaseAddress = ApiSettings.BaseUri;
         });
 
+        var app = builder.Build();
 
+        // تهيئة Service Cache بالخدمات المحددة مسبقاً
+        app.Services.InitializeServiceCache();
 
-        return builder.Build();
+        return app;
     }
 }

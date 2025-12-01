@@ -109,6 +109,78 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
+
+    /// <summary>
+    /// إضافة ACommerce Client مع خدمات محددة مسبقاً (للتطبيقات المستقلة مثل MAUI)
+    /// يستخدم DynamicHttpClient مع Service Cache محلي بدون الحاجة لـ Registry Server
+    /// </summary>
+    /// <param name="services">DI Container</param>
+    /// <param name="configureServices">تهيئة الخدمات (مثل: Marketplace, Files, etc.)</param>
+    /// <param name="configureOptions">خيارات إضافية</param>
+    public static IServiceCollection AddACommerceClientWithServices(
+        this IServiceCollection services,
+        Action<PredefinedServicesOptions> configureServices,
+        Action<ClientOptions>? configureOptions = null)
+    {
+        var options = new ClientOptions();
+        configureOptions?.Invoke(options);
+
+        // ✨ Service Registry مع خدمات محددة مسبقاً
+        services.AddServiceRegistryWithPredefinedServices(configureServices);
+
+        // تسجيل LocalizationProvider
+        if (options.LocalizationProvider != null)
+        {
+            services.AddSingleton(options.LocalizationProvider);
+        }
+        else if (options.EnableLocalization)
+        {
+            services.AddSingleton<ILocalizationProvider, DefaultLocalizationProvider>();
+        }
+
+        // تسجيل Interceptors
+        if (options.EnableLocalization)
+        {
+            services.AddTransient<LocalizationInterceptor>();
+        }
+        if (options.EnableAuthentication && options.TokenProvider != null)
+        {
+            services.AddScoped<ITokenProvider>(options.TokenProvider);
+            services.AddTransient<AuthenticationInterceptor>();
+        }
+        if (options.EnableRetry)
+        {
+            services.AddTransient<RetryInterceptor>();
+        }
+
+        // HttpClient مع Interceptors
+        var httpClientBuilder = services.AddHttpClient<DynamicHttpClient>()
+            .ConfigureHttpClient(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
+            });
+
+        // إضافة Interceptors إلى HttpClient
+        if (options.EnableLocalization)
+            httpClientBuilder.AddHttpMessageHandler<LocalizationInterceptor>();
+
+        if (options.EnableAuthentication && options.TokenProvider != null)
+            httpClientBuilder.AddHttpMessageHandler<AuthenticationInterceptor>();
+
+        if (options.EnableRetry)
+        {
+            httpClientBuilder.AddHttpMessageHandler(sp =>
+            {
+                var logger = sp.GetRequiredService<ILogger<RetryInterceptor>>();
+                return new RetryInterceptor(logger, options.MaxRetries);
+            });
+        }
+
+        // تسجيل IApiClient
+        services.AddScoped<IApiClient>(sp => sp.GetRequiredService<DynamicHttpClient>());
+
+        return services;
+    }
 }
 
 
