@@ -3425,3 +3425,171 @@ h1, h2, h3, .ashare-logo-text {
     font-size: 12px;
     color: #A16207;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Interactive Map Component
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ac-interactive-map {
+    width: 100%;
+}
+
+.ac-map-frame {
+    width: 100%;
+    min-height: 200px;
+    background-color: var(--ashare-gray-100);
+    border-radius: var(--ashare-radius-md);
+    overflow: hidden;
+    position: relative;
+}
+
+.ac-map-loading,
+.ac-map-placeholder-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--ashare-gray-100);
+}
+
+.ac-map-placeholder-inner i {
+    font-size: 48px;
+    color: var(--ashare-gray-400);
+}
+
+.ac-map-placeholder-inner span {
+    font-size: 14px;
+    color: var(--ashare-gray-500);
+}
+
+.ac-map-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.ac-map-control-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: var(--ashare-white);
+    border: 1px solid var(--ashare-gray-200);
+    border-radius: var(--ashare-radius-md);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ashare-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ac-map-control-btn:active {
+    background: var(--ashare-gray-50);
+    transform: scale(0.98);
+}
+
+.ac-map-control-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.ac-map-control-btn i {
+    font-size: 16px;
+}
+
+.ac-map-control-btn .spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.ac-map-coords-display {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: var(--ashare-gray-50);
+    border-radius: var(--ashare-radius-sm);
+    font-family: 'Rubik', monospace;
+    font-size: 12px;
+    color: var(--ashare-gray-600);
+}
+
+.ac-map-coords-display i {
+    color: var(--ashare-secondary);
+}
+
+/* Leaflet Custom Marker */
+.ac-leaflet-marker {
+    background: none;
+    border: none;
+}
+
+.ac-leaflet-marker i {
+    font-size: 40px;
+    color: var(--ashare-secondary);
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,0.3));
+}
+
+/* Map Error State */
+.ac-map-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--ashare-danger);
+    font-size: 14px;
+}
+
+/* Override Leaflet default styles for RTL */
+.leaflet-container {
+    font-family: 'Cairo', 'Rubik', sans-serif;
+}
+
+.leaflet-control-zoom {
+    border-radius: var(--ashare-radius-md) !important;
+    overflow: hidden;
+}
+
+.leaflet-control-zoom a {
+    width: 36px !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    font-size: 18px !important;
+}
+
+/* ═══ Open in Native Maps Button ═══ */
+.ac-open-maps-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--ashare-white);
+    border: 1px solid var(--ashare-primary);
+    border-radius: var(--ashare-radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ashare-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 10px;
+}
+
+.ac-open-maps-btn:active {
+    background: var(--ashare-primary);
+    color: white;
+}
+
+.ac-open-maps-btn i {
+    font-size: 18px;
+}

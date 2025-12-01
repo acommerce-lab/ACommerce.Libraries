@@ -1,4 +1,5 @@
 @namespace ACommerce.Templates.Customer.Pages
+@using ACommerce.Templates.Customer.Components
 
 <div class="ac-page ac-create-listing-page">
     @* Header *@
@@ -281,54 +282,29 @@
                             <i class="bi bi-geo-alt"></i>
                             <h2>موقع العرض</h2>
                         </div>
-                        <p class="ac-section-desc">حدد الموقع الدقيق لعرضك على الخريطة</p>
+                        <p class="ac-section-desc">حرّك الخريطة واضغط لتحديد موقع عرضك بدقة</p>
                     </div>
 
                     <div class="ac-location-card">
-                        <AcInput Id="address"
-                                 Label="العنوان التفصيلي"
-                                 Placeholder="مثال: حي النرجس، شارع الأمير سلطان"
-                                 Value="@Model.Address"
-                                 ValueChanged="(v) => Model.Address = v"
-                                 IconStart="bi-signpost" />
+                        @* Interactive Map Component *@
+                        <AcInteractiveMap @ref="_mapComponent"
+                                          Latitude="@Model.Latitude"
+                                          LatitudeChanged="(lat) => Model.Latitude = lat"
+                                          Longitude="@Model.Longitude"
+                                          LongitudeChanged="(lng) => Model.Longitude = lng"
+                                          OnLocationSelected="OnLocationSelectedFromMap"
+                                          OnRequestCurrentLocation="RequestLocation"
+                                          Height="280"
+                                          ShowControls="true"
+                                          Interactive="true" />
 
-                        @* Interactive Map *@
-                        <div class="ac-map-wrapper">
-                            <div class="ac-map-header">
-                                <span><i class="bi bi-pin-map"></i> حدد الموقع على الخريطة</span>
-                                @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
-                                {
-                                    <span class="ac-coords">
-                                        <i class="bi bi-crosshair"></i>
-                                        @Model.Latitude?.ToString("F4"), @Model.Longitude?.ToString("F4")
-                                    </span>
-                                }
-                            </div>
-                            <div class="ac-map-container" @onclick="OnMapClick">
-                                @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
-                                {
-                                    <div class="ac-map-pin">
-                                        <i class="bi bi-geo-alt-fill"></i>
-                                    </div>
-                                    <div class="ac-map-actions">
-                                        <button class="ac-map-btn" @onclick="RequestLocation" @onclick:stopPropagation="true">
-                                            <i class="bi bi-crosshair2"></i>
-                                            موقعي الحالي
-                                        </button>
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="ac-map-empty">
-                                        <i class="bi bi-geo-alt"></i>
-                                        <p>اضغط لتحديد الموقع</p>
-                                        <button class="ac-btn ac-btn-outline" @onclick="RequestLocation" @onclick:stopPropagation="true">
-                                            <i class="bi bi-crosshair2"></i>
-                                            استخدم موقعي الحالي
-                                        </button>
-                                    </div>
-                                }
-                            </div>
+                        <div style="margin-top: 16px;">
+                            <AcInput Id="address"
+                                     Label="العنوان التفصيلي (اختياري)"
+                                     Placeholder="مثال: حي النرجس، شارع الأمير سلطان"
+                                     Value="@Model.Address"
+                                     ValueChanged="(v) => Model.Address = v"
+                                     IconStart="bi-signpost" />
                         </div>
                     </div>
 
@@ -560,6 +536,7 @@
     public Guid? CreatedListingId { get; set; }
     private bool _isFormValid = true;
     private Dictionary<string, string> _validationErrors = new();
+    private AcInteractiveMap? _mapComponent;
 
     // Filter out images attribute - it's handled separately
     private List<ListingAttributeDefinition>? FilteredAttributes =>
@@ -658,7 +635,7 @@
         StateHasChanged();
     }
 
-    public void SetLocation(double latitude, double longitude, string? address = null)
+    public async Task SetLocation(double latitude, double longitude, string? address = null)
     {
         Model.Latitude = latitude;
         Model.Longitude = longitude;
@@ -666,6 +643,13 @@
         {
             Model.Address = address;
         }
+
+        // Update the map component if it exists
+        if (_mapComponent != null)
+        {
+            await _mapComponent.SetLocation(latitude, longitude);
+        }
+
         StateHasChanged();
     }
 
@@ -747,7 +731,14 @@
 
     private void OnMapClick()
     {
-        // Placeholder for map click - could open a map picker
+        // No longer needed - handled by AcInteractiveMap component
+    }
+
+    private void OnLocationSelectedFromMap((double Lat, double Lng) location)
+    {
+        Model.Latitude = location.Lat;
+        Model.Longitude = location.Lng;
+        StateHasChanged();
     }
 
     private async Task HandleImageUpload(ChangeEventArgs e)
