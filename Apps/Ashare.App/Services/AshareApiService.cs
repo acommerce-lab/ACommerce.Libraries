@@ -14,26 +14,26 @@ namespace Ashare.App.Services;
 public class AshareApiService
 {
 	private readonly CategoriesClient _categoriesClient;
+	private readonly CategoryAttributesClient _categoryAttributesClient;
 	private readonly ProductsClient _productsClient;
 	private readonly ProductListingsClient _listingsClient;
 	private readonly OrdersClient _ordersClient;
-	private readonly HttpClient _httpClient;
 
     // Local cache for favorites (can be persisted to local storage)
     private readonly HashSet<Guid> _favorites = [];
 
 	public AshareApiService(
 		CategoriesClient categoriesClient,
+		CategoryAttributesClient categoryAttributesClient,
 		ProductsClient productsClient,
 		ProductListingsClient listingsClient,
-		OrdersClient ordersClient,
-		IHttpClientFactory httpClientFactory)
+		OrdersClient ordersClient)
 	{
 		_categoriesClient = categoriesClient;
+		_categoryAttributesClient = categoryAttributesClient;
 		_productsClient = productsClient;
 		_listingsClient = listingsClient;
 		_ordersClient = ordersClient;
-		_httpClient = httpClientFactory.CreateClient("AshareApi");
 	}
 
 	// ═══════════════════════════════════════════════════════════════════
@@ -64,13 +64,34 @@ public class AshareApiService
 	{
 		try
 		{
-			var response = await _httpClient.GetAsync($"{ApiSettings.BaseUrl}/api/categoryattributes/category/{categoryId}");
-			if (response.IsSuccessStatusCode)
+			var attributes = await _categoryAttributesClient.GetAttributesForCategoryAsync(categoryId);
+			return attributes?.Select(a => new AttributeDefinitionDto
 			{
-				var attributes = await response.Content.ReadFromJsonAsync<List<AttributeDefinitionDto>>();
-				return attributes ?? new List<AttributeDefinitionDto>();
-			}
-			return new List<AttributeDefinitionDto>();
+				Id = a.Id,
+				Name = a.Name,
+				Code = a.Code,
+				Type = a.Type,
+				Description = a.Description,
+				IsRequired = a.IsRequired,
+				IsFilterable = a.IsFilterable,
+				IsVisibleInList = a.IsVisibleInList,
+				IsVisibleInDetail = a.IsVisibleInDetail,
+				SortOrder = a.SortOrder,
+				ValidationRules = a.ValidationRules,
+				DefaultValue = a.DefaultValue,
+				Values = a.Values.Select(v => new AttributeValueDto
+				{
+					Id = v.Id,
+					Value = v.Value,
+					DisplayName = v.DisplayName,
+					Code = v.Code,
+					Description = v.Description,
+					ColorHex = v.ColorHex,
+					ImageUrl = v.ImageUrl,
+					SortOrder = v.SortOrder,
+					IsActive = v.IsActive
+				}).ToList()
+			}).ToList() ?? new List<AttributeDefinitionDto>();
 		}
 		catch (Exception ex)
 		{
