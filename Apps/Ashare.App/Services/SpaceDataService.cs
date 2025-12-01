@@ -401,18 +401,21 @@ public class SpaceItem
     public string Name { get; set; } = string.Empty;
     public string? NameEn { get; set; }
     public string Description { get; set; } = string.Empty;
-    public Guid CategoryId { get; set; }
+    public Guid? CategoryId { get; set; }
     public string? CategoryName { get; set; }
-    public string Location { get; set; } = string.Empty;
-    public string City { get; set; } = string.Empty;
+    public string? Location { get; set; }
+    public string? City { get; set; }
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
     public decimal PricePerHour { get; set; }
     public decimal PricePerDay { get; set; }
     public decimal PricePerMonth { get; set; }
-    public string Currency { get; set; } = "ر.س";
+    public string Currency { get; set; } = "SAR";
     public int Capacity { get; set; }
     public int Area { get; set; }
     public decimal Rating { get; set; }
     public int ReviewsCount { get; set; }
+    public int ViewCount { get; set; }
     public List<string> Images { get; set; } = [];
     public List<string> Amenities { get; set; } = [];
     public List<string>? Rules { get; set; }
@@ -423,6 +426,11 @@ public class SpaceItem
     public bool IsFeatured { get; set; }
     public bool IsAvailable { get; set; } = true;
     public DateTime CreatedAt { get; set; }
+
+    /// <summary>
+    /// الخصائص الديناميكية من الفئة
+    /// </summary>
+    public Dictionary<string, object> Attributes { get; set; } = new();
 
     public string DisplayPrice => PricePerHour > 0
         ? $"{PricePerHour:N0} {Currency}/ساعة"
