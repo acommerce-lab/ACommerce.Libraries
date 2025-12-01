@@ -85,7 +85,10 @@ public static class MauiProgram
         // ═══════════════════════════════════════════════════════════════════
         var apiBaseUrl = "https://api.ashare.app";
 #if DEBUG
-        apiBaseUrl = "https://localhost:5001";
+        if (DeviceInfo.Platform == DevicePlatform.Android)
+            apiBaseUrl = "https://10.0.2.2:5001";
+        else if (DeviceInfo.Platform == DevicePlatform.WinUI)
+            apiBaseUrl = "https://localhost:5001";
 #endif
 
         // ═══════════════════════════════════════════════════════════════════
