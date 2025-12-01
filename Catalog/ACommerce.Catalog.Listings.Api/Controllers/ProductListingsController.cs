@@ -12,7 +12,7 @@ namespace ACommerce.Catalog.Listings.Api.Controllers;
 /// </summary>
 public class ProductListingsController(
     IMediator mediator,
-    ILogger<ProductListingsController> logger) : BaseCrudController<ProductListing, CreateListingDto, CreateListingDto, ListingResponseDto, CreateListingDto>(mediator, logger)
+    ILogger<ProductListingsController> logger) : BaseCrudController<ProductListing, CreateListingDto, CreateListingDto, ProductListingResponseDto, CreateListingDto>(mediator, logger)
 {
 
     /// <summary>
@@ -38,7 +38,7 @@ public class ProductListingsController(
 				searchRequest.Filters.Add(new() { PropertyName = "IsActive", Value = "true", Operator = SharedKernel.Abstractions.Queries.FilterOperator.Equals });
 			}
 
-			var query = new SharedKernel.CQRS.Queries.SmartSearchQuery<ProductListing, ListingResponseDto> { Request = searchRequest };
+			var query = new SharedKernel.CQRS.Queries.SmartSearchQuery<ProductListing, ProductListingResponseDto> { Request = searchRequest };
 			var result = await _mediator.Send(query);
 
 			return Ok(result);
@@ -68,7 +68,7 @@ public class ProductListingsController(
 				}
 			};
 
-			var query = new SharedKernel.CQRS.Queries.SmartSearchQuery<ProductListing, ListingResponseDto> { Request = searchRequest };
+			var query = new SharedKernel.CQRS.Queries.SmartSearchQuery<ProductListing, ProductListingResponseDto> { Request = searchRequest };
 			var result = await _mediator.Send(query);
 
 			return Ok(result);
