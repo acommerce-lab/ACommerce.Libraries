@@ -380,13 +380,16 @@ public class AshareSeedDataService
 		var repo = _repositoryFactory.CreateRepository<AttributeDefinition>();
 
 		var existing = await repo.GetAllWithPredicateAsync();
-		if (existing.Any()) return;
+		var existingIds = existing.Select(a => a.Id).ToHashSet();
 
 		var attributes = GetAllAttributeDefinitions();
 
 		foreach (var attr in attributes)
 		{
-			await repo.AddAsync(attr);
+			if (!existingIds.Contains(attr.Id))
+			{
+				await repo.AddAsync(attr);
+			}
 		}
 	}
 
