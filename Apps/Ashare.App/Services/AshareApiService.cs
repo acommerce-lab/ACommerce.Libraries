@@ -18,7 +18,6 @@ public class AshareApiService
 	private readonly ProductListingsClient _listingsClient;
 	private readonly OrdersClient _ordersClient;
 	private readonly HttpClient _httpClient;
-	private readonly string _baseUrl = "https://api.ashare.app";
 
     // Local cache for favorites (can be persisted to local storage)
     private readonly HashSet<Guid> _favorites = [];
@@ -35,10 +34,6 @@ public class AshareApiService
 		_listingsClient = listingsClient;
 		_ordersClient = ordersClient;
 		_httpClient = httpClientFactory.CreateClient("AshareApi");
-        if (DeviceInfo.Platform == DevicePlatform.Android)
-            _baseUrl = "https://10.0.2.2:5001";
-        else if (DeviceInfo.Platform == DevicePlatform.WinUI)
-            _baseUrl = "https://localhost:5001";
 	}
 
 	// ═══════════════════════════════════════════════════════════════════
@@ -69,7 +64,7 @@ public class AshareApiService
 	{
 		try
 		{
-			var response = await _httpClient.GetAsync($"{_baseUrl}/api/categoryattributes/category/{categoryId}");
+			var response = await _httpClient.GetAsync($"{ApiSettings.BaseUrl}/api/categoryattributes/category/{categoryId}");
 			if (response.IsSuccessStatusCode)
 			{
 				var attributes = await response.Content.ReadFromJsonAsync<List<AttributeDefinitionDto>>();
