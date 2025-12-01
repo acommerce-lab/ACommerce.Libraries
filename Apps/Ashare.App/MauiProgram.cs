@@ -145,16 +145,10 @@ public static class MauiProgram
         // ═══════════════════════════════════════════════════════════════════
 
         // Chats Client
-        //builder.Services.AddChatsClient(options =>
-        //{
-        //    options.BaseUrl = apiBaseUrl;
-        //});
+        builder.Services.AddScoped<ChatsClient>();
 
         // Notifications Client
-        //builder.Services.AddNotificationsClient(options =>
-        //{
-        //    options.BaseUrl = apiBaseUrl;
-        //});
+        builder.Services.AddScoped<NotificationsClient>();
 
         // ContactPoints Client
         builder.Services.AddContactPointsClient(apiBaseUrl);
