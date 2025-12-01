@@ -337,91 +337,140 @@
                         <p class="ac-section-desc">راجع عرضك كما سيظهر للآخرين</p>
                     </div>
 
-                    @* Preview Card - Similar to SpaceDetails *@
-                    <div class="ac-listing-preview">
+                    @* Preview Card - Professional Design *@
+                    <div class="ac-listing-preview-card">
                         @* Image Gallery Preview *@
                         <div class="ac-preview-gallery">
                             @if (Model.Images.Any())
                             {
-                                <img src="@Model.Images.First()" alt="صورة العرض" class="ac-preview-main-image" />
+                                <div class="ac-gallery-main">
+                                    <img src="@Model.Images.First()" alt="صورة العرض" />
+                                    <div class="ac-gallery-badge">
+                                        <i class="bi bi-images"></i>
+                                        <span>@Model.Images.Count</span>
+                                    </div>
+                                </div>
                                 @if (Model.Images.Count > 1)
                                 {
-                                    <div class="ac-preview-thumbnails">
-                                        @foreach (var img in Model.Images.Skip(1).Take(3))
+                                    <div class="ac-gallery-thumbs">
+                                        @foreach (var img in Model.Images.Skip(1).Take(4))
                                         {
-                                            <img src="@img" alt="" />
+                                            <div class="ac-thumb-item">
+                                                <img src="@img" alt="" />
+                                            </div>
                                         }
-                                        @if (Model.Images.Count > 4)
+                                        @if (Model.Images.Count > 5)
                                         {
-                                            <div class="ac-more-images">+@(Model.Images.Count - 4)</div>
+                                            <div class="ac-thumb-more">
+                                                <span>+@(Model.Images.Count - 5)</span>
+                                            </div>
                                         }
                                     </div>
                                 }
                             }
                             else
                             {
-                                <div class="ac-preview-no-image">
+                                <div class="ac-gallery-empty">
                                     <i class="bi bi-image"></i>
                                     <span>لا توجد صور</span>
                                 </div>
                             }
-                            <div class="ac-preview-category">
-                                <i class="bi @SelectedCategory?.Icon"></i>
-                                @SelectedCategory?.Name
-                            </div>
                         </div>
 
-                        @* Listing Info *@
-                        <div class="ac-preview-info">
+                        @* Category & Type Badge *@
+                        <div class="ac-preview-badges">
+                            <span class="ac-type-badge">
+                                <i class="bi @SelectedCategory?.Icon"></i>
+                                @SelectedCategory?.Name
+                            </span>
+                        </div>
+
+                        @* Main Info Section *@
+                        <div class="ac-preview-main-info">
                             <h2 class="ac-preview-title">@GetTitleFromAttributes()</h2>
 
                             @if (!string.IsNullOrEmpty(Model.Address))
                             {
                                 <div class="ac-preview-location">
-                                    <i class="bi bi-geo-alt"></i>
+                                    <i class="bi bi-geo-alt-fill"></i>
                                     <span>@Model.Address</span>
                                 </div>
                             }
-
-                            @* Price if available *@
-                            @{
-                                var priceAttr = Model.Attributes.FirstOrDefault(a => a.Code == "price");
-                                if (priceAttr?.NumberValue.HasValue == true)
-                                {
-                                    <div class="ac-preview-price">
-                                        <span class="ac-price-amount">@priceAttr.NumberValue?.ToString("N0") ر.س</span>
-                                        <span class="ac-price-period">/ شهرياً</span>
-                                    </div>
-                                }
-                            }
-
-                            @* Key Attributes *@
-                            <div class="ac-preview-attributes">
-                                @foreach (var attrInput in Model.Attributes.Where(a => a.Code != "title" && a.Code != "description" && a.Code != "price"))
-                                {
-                                    var attrDef = CategoryAttributes?.FirstOrDefault(a => a.Id == attrInput.AttributeId);
-                                    if (attrDef != null && HasDisplayValue(attrInput))
-                                    {
-                                        <div class="ac-preview-attr">
-                                            <span class="ac-attr-label">@attrDef.Name</span>
-                                            <span class="ac-attr-value">@GetAttributeDisplayValue(attrInput, attrDef)</span>
-                                        </div>
-                                    }
-                                }
-                            </div>
-
-                            @* Description *@
-                            @{
-                                var descAttr = Model.Attributes.FirstOrDefault(a => a.Code == "description");
-                                if (!string.IsNullOrEmpty(descAttr?.TextValue))
-                                {
-                                    <div class="ac-preview-description">
-                                        <h4>الوصف</h4>
-                                        <p>@descAttr.TextValue</p>
-                                    </div>
-                                }
+                            else if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+                            {
+                                <div class="ac-preview-location">
+                                    <i class="bi bi-geo-alt-fill"></i>
+                                    <span>موقع محدد على الخريطة</span>
+                                </div>
                             }
                         </div>
+
+                        @* Attributes Grid *@
+                        @{
+                            var displayAttributes = Model.Attributes
+                                .Where(a => a.Code != "title" && a.Code != "description" && HasDisplayValue(a))
+                                .Select(a => new { Input = a, Def = CategoryAttributes?.FirstOrDefault(d => d.Id == a.AttributeId) })
+                                .Where(x => x.Def != null)
+                                .ToList();
+                        }
+                        @if (displayAttributes.Any())
+                        {
+                            <div class="ac-preview-attrs-section">
+                                <h3 class="ac-attrs-title">
+                                    <i class="bi bi-list-check"></i>
+                                    تفاصيل العرض
+                                </h3>
+                                <div class="ac-attrs-grid">
+                                    @foreach (var attr in displayAttributes)
+                                    {
+                                        <div class="ac-attr-card">
+                                            <div class="ac-attr-icon">
+                                                <i class="bi @GetAttributeIcon(attr.Def!.Code)"></i>
+                                            </div>
+                                            <div class="ac-attr-content">
+                                                <span class="ac-attr-label">@attr.Def!.Name</span>
+                                                <span class="ac-attr-value">@GetAttributeDisplayValue(attr.Input, attr.Def!)</span>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        @* Description Section *@
+                        @{
+                            var descAttr = Model.Attributes.FirstOrDefault(a => a.Code == "description");
+                            if (!string.IsNullOrEmpty(descAttr?.TextValue))
+                            {
+                                <div class="ac-preview-desc-section">
+                                    <h3 class="ac-desc-title">
+                                        <i class="bi bi-text-paragraph"></i>
+                                        الوصف
+                                    </h3>
+                                    <p class="ac-desc-text">@descAttr.TextValue</p>
+                                </div>
+                            }
+                        }
+
+                        @* Location Map Preview *@
+                        @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+                        {
+                            <div class="ac-preview-map-section">
+                                <h3 class="ac-map-title">
+                                    <i class="bi bi-pin-map"></i>
+                                    الموقع
+                                </h3>
+                                <div class="ac-map-preview">
+                                    <div class="ac-map-pin-marker">
+                                        <i class="bi bi-geo-alt-fill"></i>
+                                    </div>
+                                    <div class="ac-map-coords">
+                                        <i class="bi bi-crosshair"></i>
+                                        @Model.Latitude?.ToString("F4"), @Model.Longitude?.ToString("F4")
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     </div>
 
                     <div class="ac-form-actions">
@@ -788,5 +837,42 @@
         }
 
         return "-";
+    }
+
+    private string GetAttributeIcon(string code)
+    {
+        return code.ToLower() switch
+        {
+            "price" or "min_budget" or "max_budget" => "bi-currency-dollar",
+            "rooms" or "bedrooms" => "bi-door-open",
+            "bathrooms" => "bi-droplet",
+            "area" or "size" => "bi-aspect-ratio",
+            "floor" => "bi-layers",
+            "age" or "year" => "bi-calendar",
+            "furnished" => "bi-lamp",
+            "parking" => "bi-car-front",
+            "elevator" => "bi-arrow-up-square",
+            "pool" => "bi-water",
+            "garden" => "bi-tree",
+            "security" => "bi-shield-check",
+            "ac" or "air_conditioning" => "bi-snow",
+            "heating" => "bi-thermometer-sun",
+            "internet" or "wifi" => "bi-wifi",
+            "gym" => "bi-heart-pulse",
+            "balcony" => "bi-grid-1x2",
+            "city" or "location" => "bi-geo-alt",
+            "neighborhood" or "district" => "bi-pin-map",
+            "type" or "category" => "bi-tag",
+            "gender" or "sex" => "bi-person",
+            "nationality" => "bi-flag",
+            "occupation" or "job" => "bi-briefcase",
+            "smoking" => "bi-slash-circle",
+            "pets" => "bi-heart",
+            "phone" or "call" => "bi-telephone",
+            "whatsapp" => "bi-whatsapp",
+            "email" => "bi-envelope",
+            "amenities" => "bi-stars",
+            _ => "bi-info-circle"
+        };
     }
 }

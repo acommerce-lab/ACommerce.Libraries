@@ -28,11 +28,10 @@
                       disabled="@Disabled"
                       readonly="@ReadOnly"
                       rows="@Rows"
-                      @bind="Value"
-                      @bind:event="oninput"
+                      @oninput="HandleInput"
                       @onfocus="HandleFocus"
                       @onblur="HandleBlur"
-                      @attributes="AdditionalAttributes"></textarea>
+                      @attributes="AdditionalAttributes">@Value</textarea>
         }
         else
         {
