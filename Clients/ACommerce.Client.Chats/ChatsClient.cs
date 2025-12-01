@@ -177,7 +177,7 @@ public sealed class ChatsClient
 		CancellationToken cancellationToken = default)
 	{
 		var request = lastMessageId.HasValue
-			? new { LastMessageId = lastMessageId.Value }
+			? new { LastMessageId = lastMessageId }
 			: new { LastMessageId = (Guid?)null };
 		await _httpClient.PostAsync<object>(
 			ServiceName,
