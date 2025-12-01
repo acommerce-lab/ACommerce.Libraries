@@ -176,11 +176,12 @@ public class AshareSeedDataService
 		var repo = _repositoryFactory.CreateRepository<Currency>();
 
 		var existing = await repo.GetAllWithPredicateAsync();
-		if (existing.Any()) return;
+		var existingIds = existing.Select(c => c.Id).ToHashSet();
 
-		var currencies = new List<Currency>
+		// تأكد من وجود العملات المطلوبة بالمعرّفات الصحيحة
+		if (!existingIds.Contains(CurrencyIds.SAR))
 		{
-			new()
+			await repo.AddAsync(new Currency
 			{
 				Id = CurrencyIds.SAR,
 				Code = "SAR",
@@ -194,8 +195,12 @@ public class AshareSeedDataService
 				IsActive = true,
 				SortOrder = 1,
 				CreatedAt = DateTime.UtcNow
-			},
-			new()
+			});
+		}
+
+		if (!existingIds.Contains(CurrencyIds.USD))
+		{
+			await repo.AddAsync(new Currency
 			{
 				Id = CurrencyIds.USD,
 				Code = "USD",
@@ -209,12 +214,7 @@ public class AshareSeedDataService
 				IsActive = true,
 				SortOrder = 2,
 				CreatedAt = DateTime.UtcNow
-			}
-		};
-
-		foreach (var currency in currencies)
-		{
-			await repo.AddAsync(currency);
+			});
 		}
 	}
 
