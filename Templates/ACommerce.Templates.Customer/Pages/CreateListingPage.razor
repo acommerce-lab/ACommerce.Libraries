@@ -140,6 +140,20 @@
                         <p class="ac-section-desc">أدخل المعلومات الأساسية لعرضك</p>
                     </div>
 
+                    @* Validation Alert *@
+                    @if (!IsLoadingAttributes && ValidationErrorCount > 0)
+                    {
+                        <div class="ac-validation-alert">
+                            <div class="ac-alert-icon">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                            </div>
+                            <div class="ac-alert-content">
+                                <span class="ac-alert-title">يوجد @ValidationErrorCount @(ValidationErrorCount == 1 ? "حقل مطلوب" : "حقول مطلوبة") غير مكتمل</span>
+                                <span class="ac-alert-desc">أكمل الحقول المحددة بـ (*) للمتابعة</span>
+                            </div>
+                        </div>
+                    }
+
                     @* Dynamic attributes based on category - including title *@
                     @if (IsLoadingAttributes)
                     {
@@ -550,6 +564,25 @@
     // Filter out images attribute - it's handled separately
     private List<ListingAttributeDefinition>? FilteredAttributes =>
         CategoryAttributes?.Where(a => a.Code != "images").ToList();
+
+    // Count of validation errors (required fields not filled)
+    private int ValidationErrorCount
+    {
+        get
+        {
+            if (FilteredAttributes == null) return 0;
+
+            var count = 0;
+            var requiredAttributes = FilteredAttributes.Where(a => a.IsRequired).ToList();
+            foreach (var attr in requiredAttributes)
+            {
+                var input = Model.Attributes.FirstOrDefault(v => v.AttributeId == attr.Id);
+                if (input == null || !HasValue(input))
+                    count++;
+            }
+            return count;
+        }
+    }
 
     // Validation: check required fields including title from dynamic attributes
     private bool IsDetailsValid

@@ -3382,3 +3382,46 @@ h1, h2, h3, .ashare-logo-text {
     justify-content: center;
     padding: var(--ashare-spacing-xl);
 }
+
+/* ═══ Validation Alert ═══ */
+.ac-validation-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #FEF3C7;
+    border: 1px solid #F59E0B;
+    border-radius: var(--ashare-radius-md);
+    margin-bottom: var(--ashare-spacing-md);
+}
+
+.ac-validation-alert .ac-alert-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ac-validation-alert .ac-alert-icon i {
+    font-size: 18px;
+    color: #D97706;
+}
+
+.ac-validation-alert .ac-alert-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ac-validation-alert .ac-alert-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #92400E;
+}
+
+.ac-validation-alert .ac-alert-desc {
+    font-size: 12px;
+    color: #A16207;
+}
