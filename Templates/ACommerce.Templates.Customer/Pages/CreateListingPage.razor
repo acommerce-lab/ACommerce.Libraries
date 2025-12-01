@@ -1,5 +1,6 @@
 @namespace ACommerce.Templates.Customer.Pages
 @using ACommerce.Templates.Customer.Components
+@using Microsoft.JSInterop
 
 <div class="ac-page ac-create-listing-page">
     @* Header *@
@@ -450,15 +451,28 @@
                                     <i class="bi bi-pin-map"></i>
                                     الموقع
                                 </h3>
-                                <div class="ac-map-preview">
-                                    <div class="ac-map-pin-marker">
-                                        <i class="bi bi-geo-alt-fill"></i>
+
+                                @* Static Map Preview *@
+                                <AcInteractiveMap Latitude="@Model.Latitude"
+                                                  Longitude="@Model.Longitude"
+                                                  Height="150"
+                                                  ShowControls="false"
+                                                  Interactive="false"
+                                                  DefaultZoom="15" />
+
+                                @if (!string.IsNullOrEmpty(Model.Address))
+                                {
+                                    <div class="ac-preview-address">
+                                        <i class="bi bi-geo-alt"></i>
+                                        <span>@Model.Address</span>
                                     </div>
-                                    <div class="ac-map-coords">
-                                        <i class="bi bi-crosshair"></i>
-                                        @Model.Latitude?.ToString("F4"), @Model.Longitude?.ToString("F4")
-                                    </div>
-                                </div>
+                                }
+
+                                @* Open in Native Maps Button *@
+                                <button type="button" class="ac-open-maps-btn" @onclick="OpenInNativeMaps">
+                                    <i class="bi bi-map"></i>
+                                    <span>فتح في الخرائط</span>
+                                </button>
                             </div>
                         }
                     </div>
@@ -739,6 +753,17 @@
         Model.Latitude = location.Lat;
         Model.Longitude = location.Lng;
         StateHasChanged();
+    }
+
+    [Inject] private IJSRuntime? JS { get; set; }
+
+    private async Task OpenInNativeMaps()
+    {
+        if (Model.Latitude.HasValue && Model.Longitude.HasValue && JS != null)
+        {
+            var label = GetListingTitle() ?? "الموقع";
+            await JS.InvokeVoidAsync("AcMap.openNativeMaps", Model.Latitude.Value, Model.Longitude.Value, label);
+        }
     }
 
     private async Task HandleImageUpload(ChangeEventArgs e)
