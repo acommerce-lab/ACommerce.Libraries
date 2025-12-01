@@ -141,8 +141,8 @@
             })
             .ToList() ?? [];
 
-            // Subscribe to real-time updates
-            await RealtimeClient.ConnectAsync();
+            // Subscribe to real-time updates (connect to chat hub)
+            await RealtimeClient.ConnectAsync("Marketplace", "/hubs/chat");
             _messageSubscription = RealtimeClient.On<object>("ReceiveMessage", HandleNewMessage);
 
             // Mark as read

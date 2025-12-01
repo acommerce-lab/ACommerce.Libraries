@@ -1,5 +1,5 @@
 @page "/explore"
-@inject SpaceDataService DataService
+@inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
 
 <div class="ac-page ac-explore-page">
@@ -203,11 +203,11 @@
         new("قهوة وشاي")
     };
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        _categories = DataService.GetCategories();
-        _allSpaces = DataService.GetAllSpaces();
-        _favorites = DataService.GetFavorites();
+        _categories = await ApiService.GetCategoriesAsync();
+        _allSpaces = await ApiService.GetAllSpacesAsync();
+        _favorites = ApiService.GetFavorites();
 
         if (Guid.TryParse(Category, out var categoryId))
         {
@@ -315,8 +315,8 @@
 
     private void ToggleFavorite(Guid spaceId)
     {
-        DataService.ToggleFavorite(spaceId);
-        _favorites = DataService.GetFavorites();
+        ApiService.ToggleFavorite(spaceId);
+        _favorites = ApiService.GetFavorites();
     }
 
     private class AmenityFilter

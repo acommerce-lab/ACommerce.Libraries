@@ -1,5 +1,5 @@
 @page "/profile"
-@inject SpaceDataService DataService
+@inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
 @inject Ashare.App.Services.ThemeService ThemeService
 
@@ -208,12 +208,12 @@
     private int _reviewsCount;
     private int _notificationsCount;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        _bookingsCount = DataService.GetBookingsCount();
-        _favoritesCount = DataService.GetFavorites().Count;
-        _reviewsCount = 5; // Mock
-        _notificationsCount = DataService.GetNotificationsCount();
+        _bookingsCount = await ApiService.GetBookingsCountAsync();
+        _favoritesCount = ApiService.GetFavorites().Count;
+        _reviewsCount = 5; // TODO: Get from Reviews API
+        _notificationsCount = ApiService.GetNotificationsCount();
     }
 
     private void Logout()

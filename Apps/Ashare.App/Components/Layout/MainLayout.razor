@@ -1,7 +1,7 @@
 @inherits LayoutComponentBase
 @inject Ashare.App.Services.ThemeService ThemeService
 @inject IAppNavigationService Navigation
-@inject SpaceDataService DataService
+@inject AshareApiService ApiService
 
 <div class="ashare-app @(ThemeService.IsDarkMode ? "ac-dark" : "")">
     @* Navbar *@
@@ -77,10 +77,10 @@
 
     private bool IsAuthPage => RouteData?.PageType?.Name is "Login" or "Register";
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        BookingsCount = DataService.GetBookingsCount();
-        NotificationCount = DataService.GetNotificationsCount();
+        BookingsCount = await ApiService.GetBookingsCountAsync();
+        NotificationCount = ApiService.GetNotificationsCount();
     }
 
     private bool IsActive(string path)

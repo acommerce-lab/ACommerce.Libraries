@@ -1,5 +1,5 @@
 @page "/bookings"
-@inject SpaceDataService DataService
+@inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
 
 <div class="ac-page ashare-bookings-page">
@@ -219,9 +219,9 @@
     private int _reviewRating;
     private string _reviewComment = "";
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        LoadBookings();
+        await LoadBookingsAsync();
 
         if (New == true)
         {
@@ -229,9 +229,9 @@
         }
     }
 
-    private void LoadBookings()
+    private async Task LoadBookingsAsync()
     {
-        var allBookings = DataService.GetBookings();
+        var allBookings = await ApiService.GetBookingsAsync();
         var today = DateTime.Today;
 
         _upcomingBookings = allBookings
@@ -261,11 +261,16 @@
         _showCancelModal = true;
     }
 
+    private async Task ConfirmCancelAsync()
+    {
+        await ApiService.CancelBookingAsync(_cancelBookingId);
+        await LoadBookingsAsync();
+        _showCancelModal = false;
+    }
+
     private void ConfirmCancel()
     {
-        DataService.CancelBooking(_cancelBookingId);
-        LoadBookings();
-        _showCancelModal = false;
+        _ = ConfirmCancelAsync();
     }
 
     private void ContactSupport(Guid bookingId)
@@ -281,13 +286,18 @@
         _showReviewModal = true;
     }
 
-    private void SubmitReview()
+    private async Task SubmitReviewAsync()
     {
         if (_reviewBooking == null || _reviewRating == 0) return;
 
-        DataService.AddReview(_reviewBooking.SpaceId, _reviewRating, _reviewComment);
+        await ApiService.AddReviewAsync(_reviewBooking.SpaceId, _reviewRating, _reviewComment);
         _reviewBooking.IsReviewed = true;
         _showReviewModal = false;
+    }
+
+    private void SubmitReview()
+    {
+        _ = SubmitReviewAsync();
     }
 
     private string GetStatusClass(BookingStatus status) => status switch
