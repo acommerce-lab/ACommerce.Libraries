@@ -1,5 +1,6 @@
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using ACommerce.Catalog.Products.Entities;
+using ACommerce.Catalog.Products.Enums;
 using ACommerce.Catalog.Attributes.Entities;
 using ACommerce.Catalog.Attributes.Enums;
 
@@ -21,6 +22,23 @@ public class AshareSeedDataService
 		public static readonly Guid LookingForPartner = Guid.Parse("10000000-0000-0000-0001-000000000003");
 		public static readonly Guid Administrative = Guid.Parse("10000000-0000-0000-0001-000000000004");
 		public static readonly Guid Commercial = Guid.Parse("10000000-0000-0000-0001-000000000005");
+	}
+
+	public static class ProductIds
+	{
+		// Residential spaces
+		public static readonly Guid Apartment1 = Guid.Parse("30000000-0000-0000-0001-000000000001");
+		public static readonly Guid Apartment2 = Guid.Parse("30000000-0000-0000-0001-000000000002");
+		public static readonly Guid Villa1 = Guid.Parse("30000000-0000-0000-0001-000000000003");
+
+		// Commercial spaces
+		public static readonly Guid Office1 = Guid.Parse("30000000-0000-0000-0002-000000000001");
+		public static readonly Guid Coworking1 = Guid.Parse("30000000-0000-0000-0002-000000000002");
+		public static readonly Guid MeetingRoom1 = Guid.Parse("30000000-0000-0000-0002-000000000003");
+
+		// Administrative spaces
+		public static readonly Guid AdminOffice1 = Guid.Parse("30000000-0000-0000-0003-000000000001");
+		public static readonly Guid AdminOffice2 = Guid.Parse("30000000-0000-0000-0003-000000000002");
 	}
 
 	public static class AttributeIds
@@ -142,6 +160,7 @@ public class AshareSeedDataService
 	{
 		await SeedCategoriesAsync();
 		await SeedAttributeDefinitionsAsync();
+		await SeedProductsAsync();
 	}
 
 	private async Task SeedCategoriesAsync()
@@ -682,5 +701,246 @@ public class AshareSeedDataService
 				}
 			}
 		};
+	}
+
+	private async Task SeedProductsAsync()
+	{
+		var repo = _repositoryFactory.CreateRepository<Product>();
+
+		var existing = await repo.GetAllWithPredicateAsync();
+		if (existing.Any()) return;
+
+		var products = new List<Product>
+		{
+			// ═══════════════════════════════════════════════════════════════════
+			// مساحات سكنية
+			// ═══════════════════════════════════════════════════════════════════
+			new()
+			{
+				Id = ProductIds.Apartment1,
+				Name = "شقة مفروشة في حي النرجس",
+				Sku = "RES-APT-001",
+				Type = ProductType.Simple,
+				Status = ProductStatus.Active,
+				ShortDescription = "شقة مفروشة بالكامل، 3 غرف، موقع مميز",
+				LongDescription = "شقة مفروشة بالكامل في حي النرجس بالرياض. تتكون من 3 غرف نوم، صالة واسعة، مطبخ مجهز، وحمامين. الشقة في الدور الثاني مع مصعد. قريبة من المدارس والمستشفيات والمراكز التجارية.",
+				FeaturedImage = "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800",
+				IsFeatured = true,
+				IsNew = true,
+				NewUntil = DateTime.UtcNow.AddDays(30),
+				SortOrder = 1,
+				CreatedAt = DateTime.UtcNow,
+				Prices = new List<ProductPrice>
+				{
+					new()
+					{
+						Id = Guid.NewGuid(),
+						Price = 3500,
+						Currency = "ر.س",
+						IsDefault = true,
+						CreatedAt = DateTime.UtcNow
+					}
+				}
+			},
+			new()
+			{
+				Id = ProductIds.Apartment2,
+				Name = "استوديو فاخر في حي الملقا",
+				Sku = "RES-STD-001",
+				Type = ProductType.Simple,
+				Status = ProductStatus.Active,
+				ShortDescription = "استوديو حديث، مناسب للأفراد",
+				LongDescription = "استوديو فاخر في برج سكني راقٍ بحي الملقا. يتميز بإطلالة رائعة على المدينة، مفروش بالكامل بأثاث عصري، مع مطبخ أمريكي وحمام حديث. يشمل الإيجار الكهرباء والماء والإنترنت.",
+				FeaturedImage = "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800",
+				IsFeatured = true,
+				IsNew = true,
+				NewUntil = DateTime.UtcNow.AddDays(30),
+				SortOrder = 2,
+				CreatedAt = DateTime.UtcNow,
+				Prices = new List<ProductPrice>
+				{
+					new()
+					{
+						Id = Guid.NewGuid(),
+						Price = 2500,
+						Currency = "ر.س",
+						IsDefault = true,
+						CreatedAt = DateTime.UtcNow
+					}
+				}
+			},
+			new()
+			{
+				Id = ProductIds.Villa1,
+				Name = "فيلا واسعة للإيجار في حي الياسمين",
+				Sku = "RES-VIL-001",
+				Type = ProductType.Simple,
+				Status = ProductStatus.Active,
+				ShortDescription = "فيلا 5 غرف مع حديقة ومسبح خاص",
+				LongDescription = "فيلا فاخرة في حي الياسمين، تتكون من 5 غرف نوم، 3 صالات، مطبخ واسع، 4 حمامات، غرفة خادمة، موقف لسيارتين، حديقة خارجية مع مسبح خاص. الفيلا مؤثثة جزئياً.",
+				FeaturedImage = "https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800",
+				IsFeatured = true,
+				IsNew = false,
+				SortOrder = 3,
+				CreatedAt = DateTime.UtcNow.AddDays(-10),
+				Prices = new List<ProductPrice>
+				{
+					new()
+					{
+						Id = Guid.NewGuid(),
+						Price = 15000,
+						Currency = "ر.س",
+						IsDefault = true,
+						CreatedAt = DateTime.UtcNow
+					}
+				}
+			},
+
+			// ═══════════════════════════════════════════════════════════════════
+			// مساحات تجارية
+			// ═══════════════════════════════════════════════════════════════════
+			new()
+			{
+				Id = ProductIds.Office1,
+				Name = "مكتب مجهز في برج المملكة",
+				Sku = "COM-OFF-001",
+				Type = ProductType.Simple,
+				Status = ProductStatus.Active,
+				ShortDescription = "مكتب فاخر 80 متر في برج المملكة",
+				LongDescription = "مكتب مجهز بالكامل في برج المملكة الشهير. المساحة 80 متر مربع، يتسع لـ 6-8 أشخاص. يشمل أثاث مكتبي فاخر، إنترنت عالي السرعة، غرفة اجتماعات صغيرة، ومنطقة استراحة. موقف سيارة مجاني.",
+				FeaturedImage = "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800",
+				IsFeatured = true,
+				IsNew = true,
+				NewUntil = DateTime.UtcNow.AddDays(14),
+				SortOrder = 4,
+				CreatedAt = DateTime.UtcNow,
+				Prices = new List<ProductPrice>
+				{
+					new()
+					{
+						Id = Guid.NewGuid(),
+						Price = 8000,
+						Currency = "ر.س",
+						IsDefault = true,
+						CreatedAt = DateTime.UtcNow
+					}
+				}
+			},
+			new()
+			{
+				Id = ProductIds.Coworking1,
+				Name = "مكتب مشترك - مساحة عمل مرنة",
+				Sku = "COM-COW-001",
+				Type = ProductType.Simple,
+				Status = ProductStatus.Active,
+				ShortDescription = "مقعد في مساحة عمل مشتركة حديثة",
+				LongDescription = "انضم إلى مجتمع العمل المشترك في قلب الرياض! احصل على مكتب خاص في بيئة عمل ديناميكية. يشمل الاشتراك: مكتب وكرسي، إنترنت فائق السرعة، قهوة ومشروبات مجانية، استخدام غرف الاجتماعات، طابعة وماسح ضوئي.",
+				FeaturedImage = "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?w=800",
+				IsFeatured = true,
+				IsNew = true,
+				NewUntil = DateTime.UtcNow.AddDays(7),
+				SortOrder = 5,
+				CreatedAt = DateTime.UtcNow,
+				Prices = new List<ProductPrice>
+				{
+					new()
+					{
+						Id = Guid.NewGuid(),
+						Price = 1500,
+						Currency = "ر.س",
+						IsDefault = true,
+						CreatedAt = DateTime.UtcNow
+					}
+				}
+			},
+			new()
+			{
+				Id = ProductIds.MeetingRoom1,
+				Name = "قاعة اجتماعات VIP",
+				Sku = "COM-MTG-001",
+				Type = ProductType.Simple,
+				Status = ProductStatus.Active,
+				ShortDescription = "قاعة اجتماعات فاخرة تتسع لـ 12 شخص",
+				LongDescription = "قاعة اجتماعات VIP مجهزة بأحدث التقنيات. تتسع لـ 12 شخصاً حول طاولة اجتماعات فاخرة. تشمل: شاشة عرض 75 بوصة، نظام مؤتمرات فيديو، سبورة ذكية، نظام صوت احترافي، خدمة ضيافة. مثالية لاجتماعات العمل الهامة.",
+				FeaturedImage = "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=800",
+				IsFeatured = false,
+				IsNew = false,
+				SortOrder = 6,
+				CreatedAt = DateTime.UtcNow.AddDays(-5),
+				Prices = new List<ProductPrice>
+				{
+					new()
+					{
+						Id = Guid.NewGuid(),
+						Price = 500,
+						Currency = "ر.س",
+						IsDefault = true,
+						CreatedAt = DateTime.UtcNow
+					}
+				}
+			},
+
+			// ═══════════════════════════════════════════════════════════════════
+			// مساحات إدارية
+			// ═══════════════════════════════════════════════════════════════════
+			new()
+			{
+				Id = ProductIds.AdminOffice1,
+				Name = "مكتب إداري في مجمع الأعمال",
+				Sku = "ADM-OFF-001",
+				Type = ProductType.Simple,
+				Status = ProductStatus.Active,
+				ShortDescription = "مكتب إداري 120 متر مع استقبال",
+				LongDescription = "مكتب إداري فسيح في مجمع الأعمال بحي العليا. المساحة الكلية 120 متر مربع، تشمل: منطقة استقبال، 3 مكاتب خاصة، قاعة اجتماعات صغيرة، مخزن، ومطبخ صغير. الموقع استراتيجي مع سهولة الوصول.",
+				FeaturedImage = "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800",
+				IsFeatured = false,
+				IsNew = true,
+				NewUntil = DateTime.UtcNow.AddDays(21),
+				SortOrder = 7,
+				CreatedAt = DateTime.UtcNow,
+				Prices = new List<ProductPrice>
+				{
+					new()
+					{
+						Id = Guid.NewGuid(),
+						Price = 12000,
+						Currency = "ر.س",
+						IsDefault = true,
+						CreatedAt = DateTime.UtcNow
+					}
+				}
+			},
+			new()
+			{
+				Id = ProductIds.AdminOffice2,
+				Name = "طابق إداري كامل",
+				Sku = "ADM-FLR-001",
+				Type = ProductType.Simple,
+				Status = ProductStatus.Active,
+				ShortDescription = "طابق كامل 500 متر في برج تجاري",
+				LongDescription = "فرصة استثنائية! طابق إداري كامل في برج تجاري راقٍ. المساحة 500 متر مربع قابلة للتقسيم حسب الحاجة. يشمل: 8 مواقف سيارات، مصعد خاص، نظام أمان متكامل، تكييف مركزي. مناسب للشركات الكبرى.",
+				FeaturedImage = "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800",
+				IsFeatured = true,
+				IsNew = false,
+				SortOrder = 8,
+				CreatedAt = DateTime.UtcNow.AddDays(-15),
+				Prices = new List<ProductPrice>
+				{
+					new()
+					{
+						Id = Guid.NewGuid(),
+						Price = 50000,
+						Currency = "ر.س",
+						IsDefault = true,
+						CreatedAt = DateTime.UtcNow
+					}
+				}
+			}
+		};
+
+		foreach (var product in products)
+		{
+			await repo.AddAsync(product);
+		}
 	}
 }
