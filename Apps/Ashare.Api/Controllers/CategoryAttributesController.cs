@@ -49,59 +49,83 @@ public class CategoryAttributesController : ControllerBase
 	{
 		Console.WriteLine($"[CategoryAttributes] Getting attributes for category: {categoryId}");
 
-		// جلب الربطات من قاعدة البيانات مع تحميل الخصائص والقيم
-		var mappingRepo = _repositoryFactory.CreateRepository<CategoryAttributeMapping>();
-		var mappings = await mappingRepo.GetAllWithPredicateAsync(
-			predicate: m => m.CategoryId == categoryId && m.IsActive,
-			includeDeleted: false,
-			includeProperties: "AttributeDefinition,AttributeDefinition.Values");
-
-		Console.WriteLine($"[CategoryAttributes] Found {mappings.Count} mappings for category");
-
-		if (mappings.Count == 0)
+		try
 		{
-			Console.WriteLine($"[CategoryAttributes] No attributes found for category {categoryId}");
-			return NotFound(new { message = "الفئة غير موجودة أو لا تحتوي على خصائص" });
-		}
+			// الخطوة 1: جلب الربطات للفئة
+			var mappingRepo = _repositoryFactory.CreateRepository<CategoryAttributeMapping>();
+			var mappings = await mappingRepo.GetAllWithPredicateAsync(
+				predicate: m => m.CategoryId == categoryId && m.IsActive,
+				includeDeleted: false);
 
-		var categoryAttributes = mappings
-			.OrderBy(m => m.SortOrder)
-			.Select(m => new
+			Console.WriteLine($"[CategoryAttributes] Found {mappings.Count} mappings for category");
+
+			if (mappings.Count == 0)
 			{
-				m.AttributeDefinition.Id,
-				m.AttributeDefinition.Name,
-				m.AttributeDefinition.Code,
-				Type = m.AttributeDefinition.Type.ToString(),
-				m.AttributeDefinition.Description,
-				// استخدام القيمة المتجاوزة إن وجدت
-				IsRequired = m.IsRequiredOverride ?? m.AttributeDefinition.IsRequired,
-				m.AttributeDefinition.IsFilterable,
-				m.AttributeDefinition.IsVisibleInList,
-				m.AttributeDefinition.IsVisibleInDetail,
-				SortOrder = m.SortOrder,
-				m.AttributeDefinition.ValidationRules,
-				m.AttributeDefinition.DefaultValue,
-				Values = m.AttributeDefinition.Values
-					.Where(v => !v.IsDeleted && v.IsActive)
-					.OrderBy(v => v.SortOrder)
-					.Select(v => new
+				Console.WriteLine($"[CategoryAttributes] No attributes found for category {categoryId}");
+				return NotFound(new { message = "الفئة غير موجودة أو لا تحتوي على خصائص" });
+			}
+
+			// الخطوة 2: جلب الخصائص مع قيمها
+			var attributeIds = mappings.Select(m => m.AttributeDefinitionId).ToList();
+			var attributeRepo = _repositoryFactory.CreateRepository<AttributeDefinition>();
+			var attributes = await attributeRepo.GetAllWithPredicateAsync(
+				predicate: a => attributeIds.Contains(a.Id),
+				includeDeleted: false,
+				includeProperties: "Values");
+
+			// إنشاء قاموس للوصول السريع
+			var attributeDict = attributes.ToDictionary(a => a.Id);
+
+			// الخطوة 3: بناء النتيجة مع الترتيب الصحيح
+			var categoryAttributes = mappings
+				.Where(m => attributeDict.ContainsKey(m.AttributeDefinitionId))
+				.OrderBy(m => m.SortOrder)
+				.Select(m =>
+				{
+					var attr = attributeDict[m.AttributeDefinitionId];
+					return new
 					{
-						v.Id,
-						v.Value,
-						v.DisplayName,
-						v.Code,
-						v.Description,
-						v.ColorHex,
-						v.ImageUrl,
-						v.SortOrder,
-						v.IsActive
-					}).ToList()
-			})
-			.ToList();
+						attr.Id,
+						attr.Name,
+						attr.Code,
+						Type = attr.Type.ToString(),
+						attr.Description,
+						IsRequired = m.IsRequiredOverride ?? attr.IsRequired,
+						attr.IsFilterable,
+						attr.IsVisibleInList,
+						attr.IsVisibleInDetail,
+						SortOrder = m.SortOrder,
+						attr.ValidationRules,
+						attr.DefaultValue,
+						Values = (attr.Values ?? new List<AttributeValue>())
+							.Where(v => !v.IsDeleted && v.IsActive)
+							.OrderBy(v => v.SortOrder)
+							.Select(v => new
+							{
+								v.Id,
+								v.Value,
+								v.DisplayName,
+								v.Code,
+								v.Description,
+								v.ColorHex,
+								v.ImageUrl,
+								v.SortOrder,
+								v.IsActive
+							}).ToList()
+					};
+				})
+				.ToList();
 
-		Console.WriteLine($"[CategoryAttributes] Returning {categoryAttributes.Count} attributes for category {categoryId}");
+			Console.WriteLine($"[CategoryAttributes] Returning {categoryAttributes.Count} attributes for category {categoryId}");
 
-		return Ok(categoryAttributes);
+			return Ok(categoryAttributes);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"[CategoryAttributes] Error: {ex.Message}");
+			Console.WriteLine($"[CategoryAttributes] Stack: {ex.StackTrace}");
+			return StatusCode(500, new { message = "حدث خطأ أثناء جلب الخصائص", error = ex.Message });
+		}
 	}
 
 	/// <summary>
