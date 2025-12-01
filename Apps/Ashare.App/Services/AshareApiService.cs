@@ -80,7 +80,7 @@ public class AshareApiService
 	}
 
 	// ═══════════════════════════════════════════════════════════════════
-	// Spaces (Products + Listings)
+	// Spaces (ProductListings) - العروض الفعلية من المعلنين
 	// ═══════════════════════════════════════════════════════════════════
 
 	/// <summary>
@@ -90,8 +90,8 @@ public class AshareApiService
 	{
 		try
 		{
-			var products = await _productsClient.GetFeaturedAsync(10);
-			return products?.Select(MapToSpaceItem).ToList() ?? new List<SpaceItem>();
+			var listings = await _listingsClient.GetFeaturedAsync(10);
+			return listings?.Select(MapListingToSpaceItem).ToList() ?? new List<SpaceItem>();
 		}
 		catch (Exception ex)
 		{
@@ -107,8 +107,8 @@ public class AshareApiService
 	{
 		try
 		{
-			var products = await _productsClient.GetNewAsync(10);
-			return products?.Select(MapToSpaceItem).ToList() ?? new List<SpaceItem>();
+			var listings = await _listingsClient.GetNewAsync(10);
+			return listings?.Select(MapListingToSpaceItem).ToList() ?? new List<SpaceItem>();
 		}
 		catch (Exception ex)
 		{
@@ -124,8 +124,8 @@ public class AshareApiService
 	{
 		try
 		{
-			var products = await _productsClient.GetAllAsync();
-			return products?.Select(MapToSpaceItem).ToList() ?? new List<SpaceItem>();
+			var listings = await _listingsClient.GetAllAsync();
+			return listings?.Select(MapListingToSpaceItem).ToList() ?? new List<SpaceItem>();
 		}
 		catch (Exception ex)
 		{
@@ -141,13 +141,30 @@ public class AshareApiService
 	{
 		try
 		{
-			var product = await _productsClient.GetByIdAsync(id);
-			return product != null ? MapToSpaceItem(product) : null;
+			var listing = await _listingsClient.GetByIdAsync(id);
+			return listing != null ? MapListingToSpaceItem(listing) : null;
 		}
 		catch (Exception ex)
 		{
 			Console.WriteLine($"Error fetching space by id: {ex.Message}");
 			return null;
+		}
+	}
+
+	/// <summary>
+	/// الحصول على المساحات حسب الفئة
+	/// </summary>
+	public async Task<List<SpaceItem>> GetSpacesByCategoryAsync(Guid categoryId)
+	{
+		try
+		{
+			var listings = await _listingsClient.GetByCategoryAsync(categoryId);
+			return listings?.Select(MapListingToSpaceItem).ToList() ?? new List<SpaceItem>();
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error fetching spaces by category: {ex.Message}");
+			return new List<SpaceItem>();
 		}
 	}
 
@@ -162,23 +179,16 @@ public class AshareApiService
 	{
 		try
 		{
-			var searchRequest = new ProductSearchRequest
+			var searchRequest = new SearchListingsRequest
 			{
-				SearchTerm = query,
+				Query = query,
+				CategoryId = categoryId,
+				MaxPrice = maxPrice,
 				PageSize = 50
 			};
 
-			// Add filters if provided
-			if (categoryId.HasValue || !string.IsNullOrEmpty(city) || maxPrice.HasValue)
-			{
-				searchRequest.Filters = new List<FilterItem>();
-
-				// Note: Filter implementation depends on backend SmartSearch configuration
-				// These are placeholder filters that need to match the backend's filter names
-			}
-
-			var result = await _productsClient.SearchAsync(searchRequest);
-			return result?.Items?.Select(MapToSpaceItem).ToList() ?? new List<SpaceItem>();
+			var result = await _listingsClient.SearchAsync(searchRequest);
+			return result?.Items?.Select(MapListingToSpaceItem).ToList() ?? new List<SpaceItem>();
 		}
 		catch (Exception ex)
 		{
@@ -194,36 +204,27 @@ public class AshareApiService
 	{
 		try
 		{
-			var productRequest = new CreateProductRequest
+			// إنشاء عرض ProductListing (وليس Product)
+			var listingRequest = new CreateListingRequest
 			{
-				Name = request.Title,
-				Sku = $"SPACE-{DateTime.UtcNow.Ticks}",
-				ShortDescription = request.Description?.Length > 200
-					? request.Description.Substring(0, 200) + "..."
-					: request.Description,
-				LongDescription = request.Description,
+				VendorId = Guid.Empty, // TODO: Get from current user
+				ProductId = Guid.Empty, // TODO: Get product template based on category
+				CategoryId = request.CategoryId,
+				Title = request.Title,
+				Description = request.Description,
+				Price = request.PricePerMonth,
+				Currency = "SAR",
+				StockQuantity = 1,
 				Images = request.Images,
 				FeaturedImage = request.Images?.FirstOrDefault(),
-				IsNew = true,
-				NewUntil = DateTime.UtcNow.AddDays(30),
-				Status = "Active",
-				Metadata = new Dictionary<string, string>
-				{
-					["categoryId"] = request.CategoryId.ToString(),
-					["latitude"] = request.Latitude?.ToString() ?? "",
-					["longitude"] = request.Longitude?.ToString() ?? "",
-					["address"] = request.Address ?? ""
-				}
+				Latitude = request.Latitude,
+				Longitude = request.Longitude,
+				Address = request.Address,
+				Attributes = request.Attributes
 			};
 
-			// Add dynamic attributes to metadata
-			foreach (var attr in request.Attributes)
-			{
-				productRequest.Metadata[attr.Key] = attr.Value?.ToString() ?? "";
-			}
-
-			var product = await _productsClient.CreateAsync(productRequest);
-			return product != null ? MapToSpaceItem(product) : null;
+			var listing = await _listingsClient.CreateAsync(listingRequest);
+			return listing != null ? MapListingToSpaceItem(listing) : null;
 		}
 		catch (Exception ex)
 		{
@@ -373,31 +374,35 @@ public class AshareApiService
 		};
 	}
 
-	private static SpaceItem MapToSpaceItem(ProductDto dto)
+	/// <summary>
+	/// تحويل ProductListingDto إلى SpaceItem
+	/// </summary>
+	private static SpaceItem MapListingToSpaceItem(ProductListingDto dto)
 	{
-		// Try to get price from metadata if available
-		decimal price = 0;
-		if (dto.Metadata?.TryGetValue("pricePerHour", out var priceStr) == true)
-		{
-			decimal.TryParse(priceStr, out price);
-		}
-
 		return new SpaceItem
 		{
 			Id = dto.Id,
-			Name = dto.Name,
-			NameEn = dto.Name,
-			Description = dto.LongDescription ?? dto.ShortDescription ?? string.Empty,
-			PricePerHour = price,
-			PricePerDay = price * 8, // Estimated
-			PricePerMonth = price * 30 * 8, // Estimated
-			Currency = dto.Metadata?.GetValueOrDefault("currency", "ر.س") ?? "ر.س",
-			Images = dto.Images?.Any() == true ? dto.Images : (dto.FeaturedImage != null ? new List<string> { dto.FeaturedImage } : new List<string>()),
+			Name = dto.Title,
+			NameEn = dto.Title,
+			Description = dto.Description ?? string.Empty,
+			CategoryId = dto.CategoryId,
+			CategoryName = dto.CategoryName,
+			PricePerHour = dto.Price,
+			PricePerDay = dto.Price * 8,
+			PricePerMonth = dto.Price * 30,
+			Currency = dto.Currency,
+			Images = dto.Images.Any() ? dto.Images : (dto.FeaturedImage != null ? new List<string> { dto.FeaturedImage } : new List<string>()),
+			Location = dto.Address,
+			City = dto.City,
+			Latitude = dto.Latitude,
+			Longitude = dto.Longitude,
 			IsNew = dto.IsNew,
 			IsFeatured = dto.IsFeatured,
-			CreatedAt = dto.CreatedAt,
-			Rating = 0, // TODO: Get from reviews
-			ReviewsCount = 0
+			Rating = dto.AverageRating,
+			ReviewsCount = dto.RatingsCount,
+			ViewCount = dto.ViewCount,
+			Attributes = dto.Attributes,
+			CreatedAt = dto.CreatedAt
 		};
 	}
 
