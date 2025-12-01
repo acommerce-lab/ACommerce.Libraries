@@ -1,9 +1,10 @@
 @namespace ACommerce.Templates.Customer.Components
 @using Microsoft.JSInterop
+@implements IAsyncDisposable
 @inject IJSRuntime JS
 
-<div class="ac-interactive-map @Class">
-    <div class="ac-map-frame" id="@_mapContainerId" @onclick="OnMapClicked">
+<div class="ac-interactive-map @Class" @key="_componentKey">
+    <div class="ac-map-frame" id="@_mapContainerId" style="height: @(Height)px; width: 100%;" @onclick="OnMapClicked">
         @* Map will be rendered by JS *@
         @if (_isLoading)
         {
@@ -64,15 +65,18 @@
     [Parameter] public bool Interactive { get; set; } = true;
     [Parameter] public string? Class { get; set; }
 
-    private string _mapContainerId = $"map_{Guid.NewGuid():N}";
+    // Use unique key to prevent DOM recycling issues in MAUI WebView
+    private readonly string _componentKey = Guid.NewGuid().ToString("N");
+    private readonly string _mapContainerId = $"map_{Guid.NewGuid():N}";
     private bool _mapInitialized;
     private bool _isLoading;
     private bool _isGettingLocation;
+    private bool _isDisposed;
     private DotNetObjectReference<AcInteractiveMap>? _dotNetRef;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (firstRender && !_isDisposed)
         {
             _dotNetRef = DotNetObjectReference.Create(this);
             await InitializeMapAsync();
@@ -81,13 +85,27 @@
 
     private async Task InitializeMapAsync()
     {
+        if (_isDisposed) return;
+
         _isLoading = true;
         StateHasChanged();
 
         try
         {
+            // Important: Add delay for MAUI WebView DOM readiness
+            await Task.Delay(150);
+
+            if (_isDisposed) return;
+
             var initialLat = Latitude ?? DefaultLatitude;
             var initialLng = Longitude ?? DefaultLongitude;
+
+            // Destroy any existing map first
+            try
+            {
+                await JS.InvokeVoidAsync("AcMap.destroy", _mapContainerId);
+            }
+            catch { /* Ignore if map doesn't exist */ }
 
             await JS.InvokeVoidAsync("AcMap.initialize", _mapContainerId, _dotNetRef, new
             {
@@ -104,17 +122,21 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Map initialization error: {ex.Message}");
+            _mapInitialized = false;
         }
         finally
         {
             _isLoading = false;
-            StateHasChanged();
+            if (!_isDisposed)
+            {
+                StateHasChanged();
+            }
         }
     }
 
     private async Task OnMapClicked()
     {
-        if (!_mapInitialized && !_isLoading)
+        if (!_mapInitialized && !_isLoading && !_isDisposed)
         {
             await InitializeMapAsync();
         }
@@ -132,13 +154,18 @@
         finally
         {
             _isGettingLocation = false;
-            StateHasChanged();
+            if (!_isDisposed)
+            {
+                StateHasChanged();
+            }
         }
     }
 
     [JSInvokable]
     public async Task OnMapLocationSelected(double lat, double lng)
     {
+        if (_isDisposed) return;
+
         Latitude = lat;
         Longitude = lng;
 
@@ -151,6 +178,8 @@
 
     public async Task SetLocation(double lat, double lng)
     {
+        if (_isDisposed) return;
+
         Latitude = lat;
         Longitude = lng;
 
@@ -159,7 +188,11 @@
 
         if (_mapInitialized)
         {
-            await JS.InvokeVoidAsync("AcMap.setMarker", _mapContainerId, lat, lng);
+            try
+            {
+                await JS.InvokeVoidAsync("AcMap.setMarker", _mapContainerId, lat, lng);
+            }
+            catch { /* Ignore JS errors during disposal */ }
         }
         else
         {
@@ -171,21 +204,28 @@
 
     public async Task CenterOnLocation(double lat, double lng, int? zoom = null)
     {
-        if (_mapInitialized)
+        if (_mapInitialized && !_isDisposed)
         {
-            await JS.InvokeVoidAsync("AcMap.centerOn", _mapContainerId, lat, lng, zoom ?? DefaultZoom);
+            try
+            {
+                await JS.InvokeVoidAsync("AcMap.centerOn", _mapContainerId, lat, lng, zoom ?? DefaultZoom);
+            }
+            catch { /* Ignore JS errors during disposal */ }
         }
     }
 
     public async ValueTask DisposeAsync()
     {
+        if (_isDisposed) return;
+        _isDisposed = true;
+
         if (_mapInitialized)
         {
             try
             {
                 await JS.InvokeVoidAsync("AcMap.destroy", _mapContainerId);
             }
-            catch { }
+            catch { /* Ignore errors during disposal */ }
         }
 
         _dotNetRef?.Dispose();
