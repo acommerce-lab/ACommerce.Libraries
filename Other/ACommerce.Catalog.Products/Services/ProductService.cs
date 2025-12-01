@@ -287,22 +287,61 @@ public class ProductService : IProductService
 		int limit = 10,
 		CancellationToken cancellationToken = default)
 	{
-		_logger.LogDebug("Getting featured products");
+		_logger.LogDebug("Getting featured products, limit: {Limit}", limit);
 
-		// TODO: ????? ???? ??? ???????? ???????
+		var products = await _productRepository.GetAllWithPredicateAsync(
+			p => p.IsFeatured && p.Status == Enums.ProductStatus.Active && !p.IsDeleted,
+			orderBy: q => q.OrderByDescending(p => p.CreatedAt),
+			take: limit);
 
-		throw new NotImplementedException("GetFeaturedProductsAsync implementation pending");
+		return products.Select(MapToResponseDto).ToList();
 	}
 
 	public async Task<List<ProductResponseDto>> GetNewProductsAsync(
 		int limit = 10,
 		CancellationToken cancellationToken = default)
 	{
-		_logger.LogDebug("Getting new products");
+		_logger.LogDebug("Getting new products, limit: {Limit}", limit);
 
-		// TODO: ????? ???? ??? ???????? ???????
+		var now = DateTime.UtcNow;
+		var products = await _productRepository.GetAllWithPredicateAsync(
+			p => p.IsNew && p.Status == Enums.ProductStatus.Active && !p.IsDeleted
+				&& (p.NewUntil == null || p.NewUntil > now),
+			orderBy: q => q.OrderByDescending(p => p.CreatedAt),
+			take: limit);
 
-		throw new NotImplementedException("GetNewProductsAsync implementation pending");
+		return products.Select(MapToResponseDto).ToList();
+	}
+
+	private static ProductResponseDto MapToResponseDto(Product product)
+	{
+		return new ProductResponseDto
+		{
+			Id = product.Id,
+			Name = product.Name,
+			Sku = product.Sku,
+			Type = product.Type,
+			Status = product.Status,
+			ShortDescription = product.ShortDescription,
+			LongDescription = product.LongDescription,
+			Barcode = product.Barcode,
+			Weight = product.Weight,
+			WeightUnitId = product.WeightUnitId,
+			Length = product.Length,
+			Width = product.Width,
+			Height = product.Height,
+			DimensionUnitId = product.DimensionUnitId,
+			Images = product.Images ?? new List<string>(),
+			FeaturedImage = product.FeaturedImage,
+			Tags = product.Tags ?? new List<string>(),
+			IsFeatured = product.IsFeatured,
+			IsNew = product.IsNew,
+			NewUntil = product.NewUntil,
+			ParentProductId = product.ParentProductId,
+			Metadata = product.Metadata ?? new Dictionary<string, string>(),
+			CreatedAt = product.CreatedAt,
+			UpdatedAt = product.UpdatedAt
+		};
 	}
 }
 

@@ -2531,13 +2531,18 @@ h1, h2, h3, .ashare-logo-text {
     gap: var(--ashare-spacing-sm);
     margin-top: var(--ashare-spacing-lg);
     padding: var(--ashare-spacing-md);
+    background-color: var(--ashare-surface);
+}
+
+/* Fixed bottom actions for create listing page */
+.ac-create-listing-page .ac-form-actions {
     position: fixed;
-    bottom: 0;
+    bottom: 70px; /* Above the bottom navigation */
     left: 0;
     right: 0;
-    background-color: var(--ashare-surface);
     border-top: 1px solid var(--ashare-gray-100);
     z-index: 100;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
 }
 
 /* Images Section */
