@@ -2163,3 +2163,189 @@ h1, h2, h3, .ashare-logo-text {
 .ashare-category-pattern-central { background: linear-gradient(135deg, var(--ashare-primary-dark) 0%, var(--ashare-primary) 100%); }
 .ashare-category-pattern-west { background: linear-gradient(135deg, var(--ashare-secondary-dark) 0%, var(--ashare-secondary) 100%); }
 .ashare-category-pattern-east { background: linear-gradient(135deg, var(--ashare-primary-light) 0%, var(--ashare-secondary-light) 100%); }
+
+/* ─────────────────────────────────────────────────────────────────
+   Notifications Page - صفحة الإشعارات
+   ───────────────────────────────────────────────────────────────── */
+.ashare-notifications-page {
+    padding-bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom) + var(--ashare-spacing-lg));
+}
+
+.ashare-notifications-page .ac-page-header {
+    margin-bottom: var(--ashare-spacing-md);
+}
+
+.ashare-mark-all-btn {
+    padding: var(--ashare-spacing-xs) var(--ashare-spacing-md);
+    background-color: transparent;
+    border: 1px solid var(--ashare-primary);
+    border-radius: var(--ashare-radius-full);
+    color: var(--ashare-primary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ashare-mark-all-btn:active {
+    background-color: var(--ashare-primary);
+    color: white;
+}
+
+.ashare-notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ashare-spacing-sm);
+}
+
+.ashare-notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ashare-spacing-md);
+    padding: var(--ashare-spacing-md);
+    background-color: var(--ashare-white);
+    border-radius: var(--ashare-radius-md);
+    box-shadow: var(--ashare-shadow-sm);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    border-right: 4px solid transparent;
+}
+
+.ashare-notification-item:active {
+    transform: scale(0.99);
+}
+
+.ashare-notification-item.unread {
+    background-color: var(--ashare-gray-50);
+    border-right-color: var(--ashare-primary);
+}
+
+.ashare-notification-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--ashare-radius-md);
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+/* Icon colors by type */
+.ashare-notification-icon.booking {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: var(--ashare-success);
+}
+
+.ashare-notification-icon.message {
+    background-color: rgba(52, 84, 84, 0.15);
+    color: var(--ashare-primary);
+}
+
+.ashare-notification-icon.review {
+    background-color: rgba(244, 132, 76, 0.15);
+    color: var(--ashare-secondary);
+}
+
+.ashare-notification-icon.payment {
+    background-color: rgba(139, 92, 246, 0.15);
+    color: #8B5CF6;
+}
+
+.ashare-notification-icon.system {
+    background-color: rgba(52, 84, 84, 0.15);
+    color: var(--ashare-primary);
+}
+
+.ashare-notification-icon.promo {
+    background-color: rgba(244, 132, 76, 0.15);
+    color: var(--ashare-secondary);
+}
+
+.ashare-notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.ashare-notification-content h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ashare-gray-900);
+    margin-bottom: var(--ashare-spacing-xs);
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.ashare-notification-item.unread .ashare-notification-content h4 {
+    font-weight: 700;
+}
+
+.ashare-notification-content p {
+    font-size: 13px;
+    color: var(--ashare-gray-600);
+    margin-bottom: var(--ashare-spacing-xs);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.5;
+}
+
+.ashare-notification-time {
+    font-size: 11px;
+    color: var(--ashare-gray-400);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ashare-notification-time::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: var(--ashare-gray-300);
+}
+
+.ashare-unread-dot {
+    position: absolute;
+    top: var(--ashare-spacing-md);
+    left: var(--ashare-spacing-md);
+    width: 8px;
+    height: 8px;
+    background-color: var(--ashare-primary);
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--ashare-gray-50);
+}
+
+/* Loading state */
+.ashare-notifications-page .ashare-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--ashare-spacing-xl) 0;
+    gap: var(--ashare-spacing-md);
+}
+
+.ashare-notifications-page .ashare-loading span {
+    font-size: 14px;
+    color: var(--ashare-gray-500);
+}
+
+/* Empty state */
+.ashare-notifications-page .ashare-empty-state {
+    padding: var(--ashare-spacing-xl) var(--ashare-spacing-md);
+}
+
+.ashare-notifications-page .ashare-empty-state i {
+    font-size: 64px;
+    color: var(--ashare-gray-200);
+}
+
+.ashare-notifications-page .ashare-empty-state h3 {
+    color: var(--ashare-gray-600);
+}
