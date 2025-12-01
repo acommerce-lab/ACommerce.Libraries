@@ -289,10 +289,13 @@ public class ProductService : IProductService
 	{
 		_logger.LogDebug("Getting featured products, limit: {Limit}", limit);
 
-		var products = await _productRepository.GetAllWithPredicateAsync(
-			p => p.IsFeatured && p.Status == Enums.ProductStatus.Active && !p.IsDeleted,
-			orderBy: q => q.OrderByDescending(p => p.CreatedAt),
-			take: limit);
+		var allProducts = await _productRepository.GetAllWithPredicateAsync(
+			p => p.IsFeatured && p.Status == Enums.ProductStatus.Active && !p.IsDeleted);
+
+		var products = allProducts
+			.OrderByDescending(p => p.CreatedAt)
+			.Take(limit)
+			.ToList();
 
 		return products.Select(MapToResponseDto).ToList();
 	}
@@ -304,11 +307,14 @@ public class ProductService : IProductService
 		_logger.LogDebug("Getting new products, limit: {Limit}", limit);
 
 		var now = DateTime.UtcNow;
-		var products = await _productRepository.GetAllWithPredicateAsync(
+		var allProducts = await _productRepository.GetAllWithPredicateAsync(
 			p => p.IsNew && p.Status == Enums.ProductStatus.Active && !p.IsDeleted
-				&& (p.NewUntil == null || p.NewUntil > now),
-			orderBy: q => q.OrderByDescending(p => p.CreatedAt),
-			take: limit);
+				&& (p.NewUntil == null || p.NewUntil > now));
+
+		var products = allProducts
+			.OrderByDescending(p => p.CreatedAt)
+			.Take(limit)
+			.ToList();
 
 		return products.Select(MapToResponseDto).ToList();
 	}
