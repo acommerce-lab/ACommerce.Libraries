@@ -3359,6 +3359,54 @@ h1, h2, h3, .ashare-logo-text {
     color: var(--ashare-primary);
 }
 
+/* Static Map Preview (used in review section to avoid Leaflet conflicts) */
+.ac-static-map-preview {
+    position: relative;
+    height: 150px;
+    background: var(--ashare-gray-100);
+    border-radius: var(--ashare-radius-md);
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.ac-static-map-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ac-static-map-marker {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    font-size: 36px;
+    color: var(--ashare-secondary);
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,0.3));
+    z-index: 2;
+}
+
+.ac-static-map-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.ac-static-map-overlay i {
+    font-size: 24px;
+    color: white;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.ac-static-map-preview:active .ac-static-map-overlay {
+    opacity: 1;
+}
+
 /* Empty States */
 .ac-empty-section {
     display: flex;
