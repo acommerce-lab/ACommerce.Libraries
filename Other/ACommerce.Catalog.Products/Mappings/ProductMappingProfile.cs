@@ -1,4 +1,5 @@
 using ACommerce.Catalog.Products.DTOs.Product;
+using ACommerce.Catalog.Products.DTOs.ProductCategory;
 using ACommerce.Catalog.Products.Entities;
 using AutoMapper;
 
@@ -8,6 +9,24 @@ public class ProductMappingProfile : Profile
 {
 	public ProductMappingProfile()
 	{
+		// ProductCategory mappings
+		CreateMap<ProductCategory, ProductCategoryResponseDto>()
+			.ForMember(dest => dest.ParentCategoryName,
+				opt => opt.MapFrom(src => src.ParentCategory != null ? src.ParentCategory.Name : null))
+			.ForMember(dest => dest.SubCategoriesCount,
+				opt => opt.MapFrom(src => src.SubCategories != null ? src.SubCategories.Count : 0))
+			.ForMember(dest => dest.ProductsCount,
+				opt => opt.MapFrom(src => src.Products != null ? src.Products.Count : 0));
+
+		CreateMap<CreateProductCategoryDto, ProductCategory>()
+			.ForMember(dest => dest.Id, opt => opt.Ignore())
+			.ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+			.ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+			.ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+			.ForMember(dest => dest.ParentCategory, opt => opt.Ignore())
+			.ForMember(dest => dest.SubCategories, opt => opt.Ignore())
+			.ForMember(dest => dest.Products, opt => opt.Ignore());
+
 		// Product mappings
 		CreateMap<CreateProductDto, Product>()
 			.ForMember(dest => dest.Id, opt => opt.Ignore())
