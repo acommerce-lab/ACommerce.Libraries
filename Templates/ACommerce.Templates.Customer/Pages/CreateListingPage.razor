@@ -452,13 +452,18 @@
                                     الموقع
                                 </h3>
 
-                                @* Static Map Preview *@
-                                <AcInteractiveMap Latitude="@Model.Latitude"
-                                                  Longitude="@Model.Longitude"
-                                                  Height="150"
-                                                  ShowControls="false"
-                                                  Interactive="false"
-                                                  DefaultZoom="15" />
+                                @* Static Map Preview (using static image to avoid Leaflet conflicts) *@
+                                <div class="ac-static-map-preview" @onclick="OpenInNativeMaps">
+                                    <img src="@GetStaticMapUrl(Model.Latitude.Value, Model.Longitude.Value, 15)"
+                                         alt="موقع العقار"
+                                         loading="lazy" />
+                                    <div class="ac-static-map-marker">
+                                        <i class="bi bi-geo-alt-fill"></i>
+                                    </div>
+                                    <div class="ac-static-map-overlay">
+                                        <i class="bi bi-arrows-fullscreen"></i>
+                                    </div>
+                                </div>
 
                                 @if (!string.IsNullOrEmpty(Model.Address))
                                 {
@@ -764,6 +769,19 @@
             var label = GetTitleFromAttributes() ?? "الموقع";
             await JS.InvokeVoidAsync("AcMap.openNativeMaps", Model.Latitude.Value, Model.Longitude.Value, label);
         }
+    }
+
+    private string GetStaticMapUrl(double lat, double lng, int zoom)
+    {
+        // Use OpenStreetMap static tile approach
+        // Calculate tile coordinates from lat/lng
+        var n = Math.Pow(2, zoom);
+        var x = (int)((lng + 180.0) / 360.0 * n);
+        var latRad = lat * Math.PI / 180.0;
+        var y = (int)((1.0 - Math.Log(Math.Tan(latRad) + 1.0 / Math.Cos(latRad)) / Math.PI) / 2.0 * n);
+
+        // Return OpenStreetMap tile URL
+        return $"https://tile.openstreetmap.org/{zoom}/{x}/{y}.png";
     }
 
     private async Task HandleImageUpload(ChangeEventArgs e)
