@@ -153,6 +153,10 @@ h1, h2, h3, .ashare-logo-text {
     margin-bottom: 32px;
 }
 
+.ashare-loading-logo img {
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+}
+
 .ashare-logo-text {
     font-size: 48px;
     font-weight: 700;
@@ -207,6 +211,16 @@ h1, h2, h3, .ashare-logo-text {
     justify-content: space-between;
     height: 100%;
     padding: 0 var(--ashare-spacing-md);
+}
+
+.ac-navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--ashare-spacing-sm);
+}
+
+.ac-navbar-logo {
+    border-radius: var(--ashare-radius-sm);
 }
 
 .ac-navbar-brand-text {

@@ -1,0 +1,62 @@
+2025-12-01 14:56:18.253 +03:00 [INF] Starting Ashare API - Shared Spaces Platform...
+2025-12-01 14:56:21.641 +03:00 [INF] Ensuring database is created...
+2025-12-01 14:56:22.581 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.Infrastructure.EFCores, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.583 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Profiles.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.584 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.585 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Profiles, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.586 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.587 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Vendors.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.588 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Vendors, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.589 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Products.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.624 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Listings.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.625 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.626 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Attributes.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.636 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Units.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.648 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Currencies.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.656 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Orders.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.658 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Orders, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.659 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Transactions.Core.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.659 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Transactions.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.660 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Locations.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.661 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Chats.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.662 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Chats.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.663 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Chats.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.664 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Recipients.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.665 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Recipients, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.666 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.JWT, Version=1.0.4.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.668 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.CQRS, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.669 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Realtime.SignalR, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.695 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Realtime.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.717 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.718 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.AspNetCore.Swagger, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.719 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Cart, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.721 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.722 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.724 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Users.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.725 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.726 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.Storage.Local, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.727 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Localization, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.728 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Locations.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.729 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Messaging.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.730 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.732 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.733 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Payments.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.734 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Reviews, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-01 14:56:22.851 +03:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-12-01 14:56:23.157 +03:00 [INF] Executed DbCommand (25ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "type" = 'table' AND "rootpage" IS NOT NULL;
+2025-12-01 14:56:23.164 +03:00 [INF] Database ready!
+2025-12-01 14:56:23.167 +03:00 [INF] Ashare API started successfully!
+2025-12-01 14:56:23.168 +03:00 [INF] Swagger UI available at: https://localhost:5001
+2025-12-01 14:56:23.197 +03:00 [INF] User profile is available. Using 'C:\Users\i\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-12-01 14:56:23.703 +03:00 [INF] Now listening on: https://localhost:5001
+2025-12-01 14:56:23.704 +03:00 [INF] Now listening on: http://localhost:5000
+2025-12-01 14:56:23.764 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-12-01 14:56:23.765 +03:00 [INF] Hosting environment: Development
+2025-12-01 14:56:23.766 +03:00 [INF] Content root path: C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Api
+2025-12-01 14:56:24.354 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/_framework/aspnetcore-browser-refresh.js - null null
+2025-12-01 14:56:24.354 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/_vs/browserLink - null null
+2025-12-01 14:56:24.565 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/_framework/aspnetcore-browser-refresh.js - 200 16505 application/javascript; charset=utf-8 218.5491ms
+2025-12-01 14:56:24.670 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/_vs/browserLink - 200 null text/javascript; charset=UTF-8 325.7181ms
+2025-12-01 14:56:24.711 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/swagger/v1/swagger.json - null null
+2025-12-01 14:56:25.071 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 359.6647ms
