@@ -195,6 +195,7 @@ public static class MauiProgram
 
         // ⬅️ إذا لم تُسجَّل بعد:
         builder.Services.AddScoped<CategoriesClient>();          // من ACommerce SDK
+        builder.Services.AddScoped<CategoryAttributesClient>(); // للخصائص الديناميكية
         builder.Services.AddScoped<ProductsClient>();            // من ACommerce SDK
         builder.Services.AddScoped<ProductListingsClient>();     // من ACommerce SDK
         builder.Services.AddScoped<OrdersClient>();              // من ACommerce SDK
