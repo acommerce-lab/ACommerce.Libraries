@@ -1,5 +1,5 @@
-﻿using ACommerce.Authentication.Messaging.Commands;
-using ACommerce.Authentication.Messaging.Options;
+﻿using ACommerce.Authentication.Messaging.Options;
+using ACommerce.Notifications.Messaging.Commands;
 using ACommerce.Authentication.TwoFactor.Abstractions.Events;
 using ACommerce.Messaging.Abstractions.Contracts;
 using ACommerce.Messaging.Abstractions.Models;
