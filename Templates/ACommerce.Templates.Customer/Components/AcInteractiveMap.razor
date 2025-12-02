@@ -3,20 +3,25 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 
-<div class="ac-interactive-map @Class" @key="_componentKey">
-    <div class="ac-map-frame" id="@_mapContainerId" style="height: @(Height)px; width: 100%;" @onclick="OnMapClicked">
-        @* Map will be rendered by JS *@
+@*
+    IMPORTANT: The map container (ac-map-frame) must be COMPLETELY EMPTY.
+    Blazor should not render any children inside it.
+    This prevents DOM conflicts between Blazor and Leaflet.
+    See: https://stackoverflow.com/questions/71461417/blazor-doubts-regarding-modifying-dom-from-javascript
+*@
+<div class="ac-interactive-map @Class">
+    <div class="ac-map-wrapper" style="position: relative; height: @(Height)px;">
+        @* Map container - MUST BE EMPTY - controlled entirely by JavaScript *@
+        <div class="ac-map-frame"
+             id="@_mapContainerId"
+             style="height: 100%; width: 100%; position: absolute; top: 0; left: 0; z-index: 1;">
+        </div>
+
+        @* Loading overlay - positioned OUTSIDE map container to avoid DOM conflicts *@
         @if (_isLoading)
         {
-            <div class="ac-map-loading">
+            <div class="ac-map-overlay-loading" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 10; display: flex; align-items: center; justify-content: center; background: var(--ashare-gray-100);">
                 <AcSpinner Text="جاري تحميل الخريطة..." />
-            </div>
-        }
-        else if (!_mapInitialized)
-        {
-            <div class="ac-map-placeholder-inner">
-                <i class="bi bi-geo-alt"></i>
-                <span>اضغط لتحديد الموقع</span>
             </div>
         }
     </div>
@@ -65,8 +70,6 @@
     [Parameter] public bool Interactive { get; set; } = true;
     [Parameter] public string? Class { get; set; }
 
-    // Use unique key to prevent DOM recycling issues in MAUI WebView
-    private readonly string _componentKey = Guid.NewGuid().ToString("N");
     private readonly string _mapContainerId = $"map_{Guid.NewGuid():N}";
     private bool _mapInitialized;
     private bool _isLoading;
@@ -92,20 +95,13 @@
 
         try
         {
-            // Important: Add delay for MAUI WebView DOM readiness
-            await Task.Delay(150);
+            // Wait for DOM to be ready
+            await Task.Delay(100);
 
             if (_isDisposed) return;
 
             var initialLat = Latitude ?? DefaultLatitude;
             var initialLng = Longitude ?? DefaultLongitude;
-
-            // Destroy any existing map first
-            try
-            {
-                await JS.InvokeVoidAsync("AcMap.destroy", _mapContainerId);
-            }
-            catch { /* Ignore if map doesn't exist */ }
 
             await JS.InvokeVoidAsync("AcMap.initialize", _mapContainerId, _dotNetRef, new
             {
@@ -131,14 +127,6 @@
             {
                 StateHasChanged();
             }
-        }
-    }
-
-    private async Task OnMapClicked()
-    {
-        if (!_mapInitialized && !_isLoading && !_isDisposed)
-        {
-            await InitializeMapAsync();
         }
     }
 
@@ -193,10 +181,6 @@
                 await JS.InvokeVoidAsync("AcMap.setMarker", _mapContainerId, lat, lng);
             }
             catch { /* Ignore JS errors during disposal */ }
-        }
-        else
-        {
-            await InitializeMapAsync();
         }
 
         StateHasChanged();
