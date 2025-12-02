@@ -4,6 +4,7 @@ using ACommerce.SharedKernel.Infrastructure.EFCores.Context;
 using ACommerce.SharedKernel.Infrastructure.EFCores.Extensions;
 using ACommerce.SharedKernel.CQRS.Extensions;
 using ACommerce.Authentication.JWT;
+using ACommerce.Authentication.Users.Abstractions;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using ACommerce.SharedKernel.Infrastructure.EFCore.Repositories;
 using ACommerce.SharedKernel.Infrastructure.EFCore.Factories;
@@ -95,6 +96,9 @@ try
     // Authentication & Authorization (JWT)
     builder.Services.AddJwtAuthentication(builder.Configuration);
 
+    // User Provider (In-Memory for development - replace with DB implementation for production)
+    builder.Services.AddSingleton<IUserProvider, InMemoryUserProvider>();
+
     // CQRS (MediatR + AutoMapper + FluentValidation)
     builder.Services.AddSharedKernelCQRS(AppDomain.CurrentDomain.GetAssemblies());
 
@@ -157,6 +161,15 @@ Built using ACommerce libraries with configuration-first approach:
 - Notifications: Booking alerts
 
 ## Endpoints
+
+### Authentication
+- `/api/auth/register` - User registration
+- `/api/auth/login` - User login
+- `/api/auth/me` - Get current user
+- `/api/auth/logout` - Logout
+- `/api/auth/refresh` - Refresh token
+
+### Resources
 - `/api/profiles` - User profiles
 - `/api/vendors` - Space owners (hosts)
 - `/api/products` - Spaces catalog
