@@ -313,7 +313,7 @@ Built using ACommerce libraries with configuration-first approach:
         // Seed data
         Log.Information("Seeding initial data...");
         var seedService = scope.ServiceProvider.GetRequiredService<AshareSeedDataService>();
-        //await seedService.SeedAsync();
+        await seedService.SeedAsync();
 
         Log.Information("Database ready with seed data!");
     }
