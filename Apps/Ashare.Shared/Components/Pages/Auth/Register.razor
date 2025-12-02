@@ -146,9 +146,9 @@
                         <span class="ashare-checkbox-mark"></span>
                         <span class="ashare-checkbox-text">
                             @L["IAgreeToThe"]
-                            <a href="/terms" @onclick:preventDefault @onclick="() => Navigation.NavigateTo("/terms")">@L["TermsOfService"]</a>
+                            <a href="/terms" @onclick:preventDefault @onclick="GoToTerms">@L["TermsOfService"]</a>
                             @L["And"]
-                            <a href="/privacy" @onclick:preventDefault @onclick="() => Navigation.NavigateTo("/privacy")">@L["PrivacyPolicy"]</a>
+                            <a href="/privacy" @onclick:preventDefault @onclick="GoToPrivacy">@L["PrivacyPolicy"]</a>
                         </span>
                     </label>
                 </div>
@@ -367,5 +367,15 @@
             "weak" => L["PasswordWeak"],
             _ => ""
         };
+    }
+
+    private void GoToTerms()
+    {
+        Navigation.NavigateTo("/terms");
+    }
+
+    private void GoToPrivacy()
+    {
+        Navigation.NavigateTo("/privacy");
     }
 }

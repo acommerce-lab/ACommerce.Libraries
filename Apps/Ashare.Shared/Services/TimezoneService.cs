@@ -106,29 +106,29 @@ public class BrowserTimezoneService : ITimezoneService
         if (diff.TotalMinutes < 1)
             return L["Now"];
 
-        // Minutes ago
+        // Minutes ago - use short format "5m"
         if (diff.TotalHours < 1)
         {
             var minutes = (int)diff.TotalMinutes;
-            return L["MinutesAgo", minutes];
+            return $"{minutes}m";
         }
 
-        // Hours ago
+        // Hours ago - use short format "2h"
         if (diff.TotalDays < 1)
         {
             var hours = (int)diff.TotalHours;
-            return L["HoursAgo", hours];
+            return $"{hours}h";
         }
 
         // Yesterday
         if (diff.TotalDays < 2 && localTime.Date == now.AddDays(-1).Date)
             return L["Yesterday"];
 
-        // Days ago (up to a week)
+        // Days ago (up to a week) - use short format "3d"
         if (diff.TotalDays < 7)
         {
             var days = (int)diff.TotalDays;
-            return L["DaysAgo", days];
+            return $"{days}d";
         }
 
         // This year - show month and day
@@ -210,25 +210,28 @@ public class DeviceTimezoneService : ITimezoneService
         if (diff.TotalMinutes < 1)
             return L["Now"];
 
+        // Minutes ago - use short format "5m"
         if (diff.TotalHours < 1)
         {
             var minutes = (int)diff.TotalMinutes;
-            return L["MinutesAgo", minutes];
+            return $"{minutes}m";
         }
 
+        // Hours ago - use short format "2h"
         if (diff.TotalDays < 1)
         {
             var hours = (int)diff.TotalHours;
-            return L["HoursAgo", hours];
+            return $"{hours}h";
         }
 
         if (diff.TotalDays < 2 && localTime.Date == now.AddDays(-1).Date)
             return L["Yesterday"];
 
+        // Days ago - use short format "3d"
         if (diff.TotalDays < 7)
         {
             var days = (int)diff.TotalDays;
-            return L["DaysAgo", days];
+            return $"{days}d";
         }
 
         if (localTime.Year == now.Year)
