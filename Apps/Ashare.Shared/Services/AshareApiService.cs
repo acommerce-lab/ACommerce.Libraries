@@ -5,7 +5,7 @@ using ACommerce.Client.ProductListings;
 using ACommerce.Client.Orders;
 using ACommerce.Client.Core.Http;
 
-namespace Ashare.App.Services;
+namespace Ashare.Shared.Services;
 
 /// <summary>
 /// خدمة API لمنصة عشير - تربط التطبيق بالباك اند

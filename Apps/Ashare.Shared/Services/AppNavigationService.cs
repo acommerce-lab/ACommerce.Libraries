@@ -1,10 +1,9 @@
 using Microsoft.AspNetCore.Components;
-using Ashare.Shared.Services;
 
-namespace Ashare.App.Services;
+namespace Ashare.Shared.Services;
 
 /// <summary>
-/// MAUI implementation of navigation service
+/// تنفيذ خدمة التنقل مع دعم السجل
 /// </summary>
 public class AppNavigationService : IAppNavigationService
 {
@@ -16,20 +15,20 @@ public class AppNavigationService : IAppNavigationService
         _navigationManager = navigationManager;
     }
 
-    public string CurrentUri => _navigationManager.Uri;
+    public string CurrentUrl => _navigationManager.Uri;
 
-    public void NavigateTo(string uri, bool forceLoad = false)
+    public void NavigateTo(string url)
     {
         _history.Push(_navigationManager.Uri);
-        _navigationManager.NavigateTo(uri, forceLoad);
+        _navigationManager.NavigateTo(url);
     }
 
     public void NavigateBack()
     {
         if (_history.Count > 0)
         {
-            var previousUri = _history.Pop();
-            _navigationManager.NavigateTo(previousUri);
+            var previousUrl = _history.Pop();
+            _navigationManager.NavigateTo(previousUrl);
         }
         else
         {

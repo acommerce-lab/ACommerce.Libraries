@@ -1,22 +1,20 @@
-using Microsoft.AspNetCore.Components;
 using Ashare.Shared.Services;
+using Microsoft.AspNetCore.Components;
 
-namespace Ashare.App.Services;
+namespace Ashare.Web;
 
 /// <summary>
-/// MAUI implementation of navigation service
+/// Web implementation of navigation service
 /// </summary>
-public class AppNavigationService : IAppNavigationService
+public class WebNavigationService : IAppNavigationService
 {
     private readonly NavigationManager _navigationManager;
     private readonly Stack<string> _history = new();
 
-    public AppNavigationService(NavigationManager navigationManager)
+    public WebNavigationService(NavigationManager navigationManager)
     {
         _navigationManager = navigationManager;
     }
-
-    public string CurrentUri => _navigationManager.Uri;
 
     public void NavigateTo(string uri, bool forceLoad = false)
     {
@@ -36,4 +34,6 @@ public class AppNavigationService : IAppNavigationService
             _navigationManager.NavigateTo("/");
         }
     }
+
+    public string CurrentUri => _navigationManager.Uri;
 }
