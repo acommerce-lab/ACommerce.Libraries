@@ -1,9 +1,13 @@
 @page "/login"
 @using ACommerce.Client.Nafath
+@using ACommerce.Client.Realtime
+@using System.Text.Json
 @inject NafathClient NafathClient
+@inject RealtimeClient RealtimeClient
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
 @inject Ashare.Shared.Services.ThemeService Theme
+@implements IAsyncDisposable
 
 <div class="ac-page ashare-login-page @(Theme.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
     <div class="ashare-login-header">
@@ -78,6 +82,20 @@
                             <span>@L["LoginSuccessful"]</span>
                         </div>
                     }
+                    else if (_nafathFailed)
+                    {
+                        <div class="ashare-nafath-error">
+                            <i class="bi bi-x-circle-fill"></i>
+                            <span>@L["AuthenticationFailed"]</span>
+                            @if (!string.IsNullOrEmpty(_nafathFailReason))
+                            {
+                                <small>@_nafathFailReason</small>
+                            }
+                        </div>
+                        <button class="ac-btn ac-btn-secondary" @onclick="ResetNafath">
+                            @L["TryAgain"]
+                        </button>
+                    }
                     else if (_nafathExpired)
                     {
                         <div class="ashare-nafath-error">
@@ -121,14 +139,104 @@
     private NafathInitiateResponse? _nafathResult;
     private bool _nafathCompleted;
     private bool _nafathExpired;
+    private bool _nafathFailed;
+    private string? _nafathFailReason;
     private int _countdown = 120;
     private System.Timers.Timer? _timer;
-    private System.Timers.Timer? _pollTimer;
+    private IDisposable? _notificationSubscription;
+    private bool _isConnectedToSignalR;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ConnectToNotifications();
+    }
+
+    private async Task ConnectToNotifications()
+    {
+        try
+        {
+            await RealtimeClient.ConnectAsync(serviceName: "Ashare", hubPath: "/hubs/notifications");
+            _isConnectedToSignalR = true;
+
+            // الاستماع لإشعارات نفاذ
+            _notificationSubscription = RealtimeClient.On<JsonElement>("ReceiveNotification", HandleNotification);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Login] Failed to connect to SignalR: {ex.Message}");
+            // نستمر بدون SignalR - سنستخدم polling كبديل
+        }
+    }
+
+    private void HandleNotification(JsonElement notification)
+    {
+        try
+        {
+            // استخراج البيانات من الإشعار
+            var type = notification.GetProperty("type").GetString();
+            var data = notification.GetProperty("data");
+
+            // التحقق من أن الإشعار متعلق بنفاذ
+            if (type != "SecurityAlert") return;
+
+            // التحقق من transactionId
+            if (!data.TryGetProperty("transactionId", out var transactionIdElement)) return;
+            var transactionId = transactionIdElement.GetString();
+
+            if (transactionId != _nafathResult?.TransactionId) return;
+
+            // التحقق من حالة المصادقة
+            if (data.TryGetProperty("provider", out var providerElement) &&
+                providerElement.GetString() == "Nafath")
+            {
+                // التحقق من النجاح أو الفشل عبر العنوان
+                var title = notification.GetProperty("title").GetString();
+
+                if (title?.Contains("بنجاح") == true || title?.Contains("success") == true)
+                {
+                    // نجاح المصادقة
+                    InvokeAsync(async () =>
+                    {
+                        _nafathCompleted = true;
+                        _timer?.Stop();
+                        StateHasChanged();
+
+                        // إكمال المصادقة والحصول على التوكن
+                        var result = await NafathClient.CompleteAsync(_nafathResult!.TransactionId!);
+                        if (result?.Success == true)
+                        {
+                            Navigation.NavigateTo("/");
+                        }
+                    });
+                }
+                else
+                {
+                    // فشل المصادقة
+                    InvokeAsync(() =>
+                    {
+                        _nafathFailed = true;
+                        if (data.TryGetProperty("reason", out var reasonElement))
+                        {
+                            _nafathFailReason = reasonElement.GetString();
+                        }
+                        _timer?.Stop();
+                        StateHasChanged();
+                    });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Login] Error handling notification: {ex.Message}");
+        }
+    }
 
     private async Task StartNafathLogin()
     {
         _isLoading = true;
         _errorMessage = null;
+        _nafathFailed = false;
+        _nafathFailReason = null;
 
         try
         {
@@ -143,7 +251,12 @@
             {
                 _countdown = _nafathResult.ExpiresInSeconds > 0 ? _nafathResult.ExpiresInSeconds : 120;
                 StartCountdown();
-                StartPolling();
+
+                // إذا لم يتصل بـ SignalR، نستخدم polling كبديل
+                if (!_isConnectedToSignalR)
+                {
+                    StartPolling();
+                }
             }
         }
         catch (Exception ex)
@@ -164,13 +277,15 @@
             if (_countdown <= 0)
             {
                 _timer?.Stop();
-                _pollTimer?.Stop();
                 _nafathExpired = true;
             }
             await InvokeAsync(StateHasChanged);
         };
         _timer.Start();
     }
+
+    // Fallback polling إذا لم يعمل SignalR
+    private System.Timers.Timer? _pollTimer;
 
     private void StartPolling()
     {
@@ -206,6 +321,8 @@
         _nafathResult = null;
         _nafathCompleted = false;
         _nafathExpired = false;
+        _nafathFailed = false;
+        _nafathFailReason = null;
         _countdown = 120;
         _errorMessage = null;
     }
@@ -219,9 +336,15 @@
         ResetNafath();
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         _timer?.Dispose();
         _pollTimer?.Dispose();
+        _notificationSubscription?.Dispose();
+
+        if (_isConnectedToSignalR)
+        {
+            await RealtimeClient.DisconnectAsync();
+        }
     }
 }

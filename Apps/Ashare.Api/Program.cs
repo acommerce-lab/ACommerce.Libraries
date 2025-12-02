@@ -18,6 +18,15 @@ using ACommerce.Locations.Extensions;
 using ACommerce.Catalog.Products.Services;
 using Ashare.Api.Services;
 
+// Service Registry & Messaging (for development - self-hosting)
+using ACommerce.ServiceRegistry.Core.Extensions;
+using ACommerce.ServiceRegistry.Server.Controllers;
+using ACommerce.Messaging.InMemory.Extensions;
+using ACommerce.Messaging.SignalR.Hub.Extensions;
+using ACommerce.Messaging.SignalR.Hub.Hubs;
+using ACommerce.Notifications.Core.Extensions;
+using ACommerce.Notifications.Channels.InApp.Extensions;
+
 // Controllers from libraries
 using ACommerce.Profiles.Api.Controllers;
 using ACommerce.Vendors.Api.Controllers;
@@ -76,7 +85,8 @@ try
         .AddApplicationPart(typeof(DocumentTypesController).Assembly)
         .AddApplicationPart(typeof(LocationSearchController).Assembly)
         .AddApplicationPart(typeof(ChatsController).Assembly)
-        .AddApplicationPart(typeof(ContactPointsController).Assembly);
+        .AddApplicationPart(typeof(ContactPointsController).Assembly)
+        .AddApplicationPart(typeof(RegistryController).Assembly); // Service Registry & Discovery
 
     builder.Services.AddEndpointsApiExplorer();
 
@@ -122,6 +132,21 @@ try
 
     // Ashare Seed Service
     builder.Services.AddScoped<AshareSeedDataService>();
+
+    // ===== Service Registry & Messaging (Self-Hosting for Development) =====
+    // Service Registry (allows other services to register and discover endpoints)
+    builder.Services.AddServiceRegistryCore();
+
+    // In-Memory Messaging (pub/sub within same process)
+    builder.Services.AddInMemoryMessaging("Ashare");
+
+    // SignalR Messaging Hub (inter-service communication)
+    builder.Services.AddMessagingHub();
+
+    // Notifications (InApp via SignalR)
+    builder.Services.AddNotificationCore(builder.Configuration);
+    builder.Services.AddInAppNotifications();
+    builder.Services.AddInMemoryNotificationPublisher();
 
     // Swagger Documentation
     builder.Services.AddSwaggerGen(options =>
@@ -253,6 +278,7 @@ Built using ACommerce libraries with configuration-first approach:
     // SignalR Hubs
     app.MapHub<ChatHub>("/hubs/chat");
     app.MapHub<NotificationHub>("/hubs/notifications");
+    app.MapMessagingHub(); // /hubs/messaging - Inter-service messaging
 
     // Database initialization and seeding
     using (var scope = app.Services.CreateScope())
