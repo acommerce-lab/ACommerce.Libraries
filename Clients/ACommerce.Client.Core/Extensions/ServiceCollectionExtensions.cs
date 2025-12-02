@@ -43,7 +43,8 @@ public static class ServiceCollectionExtensions
         }
         if (options.EnableAuthentication && options.TokenProvider != null)
         {
-            services.AddScoped<ITokenProvider>(options.TokenProvider);
+            // ITokenProvider must be Singleton to share token across IHttpClientFactory scopes
+            services.AddSingleton<ITokenProvider>(options.TokenProvider);
             services.AddTransient<AuthenticationInterceptor>();
         }
         if (options.EnableRetry)
@@ -145,7 +146,8 @@ public static class ServiceCollectionExtensions
         }
         if (options.EnableAuthentication && options.TokenProvider != null)
         {
-            services.AddScoped<ITokenProvider>(options.TokenProvider);
+            // ITokenProvider must be Singleton to share token across IHttpClientFactory scopes
+            services.AddSingleton<ITokenProvider>(options.TokenProvider);
             services.AddTransient<AuthenticationInterceptor>();
         }
         if (options.EnableRetry)
