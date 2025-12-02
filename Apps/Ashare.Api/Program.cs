@@ -154,7 +154,9 @@ try
     builder.Services.AddSharedKernelCQRS(AppDomain.CurrentDomain.GetAssemblies());
 
     // SignalR for Real-time Communication
-    builder.Services.AddACommerceSignalR<ChatHub, IChatClient>();
+    // NOTE: IRealtimeHub is bound to NotificationHub for InApp notifications to work
+    // ChatHub is still mapped but doesn't use IRealtimeHub service directly
+    builder.Services.AddACommerceSignalR<NotificationHub, INotificationClient>();
 
     // Location Services
     builder.Services.AddACommerceLocations();
