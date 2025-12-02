@@ -111,6 +111,16 @@ public class ProductListing : IBaseEntity
 	public bool IsActive { get; set; } = true;
 
 	/// <summary>
+	/// عرض مميز
+	/// </summary>
+	public bool IsFeatured { get; set; }
+
+	/// <summary>
+	/// عرض جديد (يُحسب تلقائياً أو يُعين يدوياً)
+	/// </summary>
+	public bool IsNew { get; set; }
+
+	/// <summary>
 	/// عدد المبيعات
 	/// </summary>
 	public int TotalSales { get; set; }
@@ -160,6 +170,11 @@ public class ProductListing : IBaseEntity
 	/// العنوان
 	/// </summary>
 	public string? Address { get; set; }
+
+	/// <summary>
+	/// المدينة
+	/// </summary>
+	public string? City { get; set; }
 
 	/// <summary>
 	/// حالة المنتج (جديد، مستعمل، إلخ)
