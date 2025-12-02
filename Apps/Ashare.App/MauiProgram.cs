@@ -177,6 +177,9 @@ public static class MauiProgram
         // App Services
         // ═══════════════════════════════════════════════════════════════════
 
+        // Storage Service (MAUI implementation using SecureStorage)
+        builder.Services.AddSingleton<IStorageService, Ashare.App.Services.MauiStorageService>();
+
         // Localization (AR, EN, UR)
         builder.Services.AddSingleton<ILocalizationService, LocalizationService>();
 

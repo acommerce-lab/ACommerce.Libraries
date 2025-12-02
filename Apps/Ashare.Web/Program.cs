@@ -1,11 +1,11 @@
 using Ashare.Shared.Services;
+using Ashare.Web;
 using Ashare.Web.Components;
-using ACommerce.Client.Core.Http;
+using Ashare.Web.Services;
 using ACommerce.Client.Categories;
 using ACommerce.Client.Products;
 using ACommerce.Client.ProductListings;
 using ACommerce.Client.Orders;
-using Ashare.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,10 +27,12 @@ builder.Services.AddScoped<ProductListingsClient>();
 builder.Services.AddScoped<OrdersClient>();
 
 // Register App Services
-builder.Services.AddScoped<AshareApiService>();
-builder.Services.AddScoped<IAppNavigationService, WebNavigationService>();
+builder.Services.AddScoped<IStorageService, BrowserStorageService>();
+builder.Services.AddScoped<ILocalizationService, LocalizationService>();
 builder.Services.AddScoped<ThemeService>();
-builder.Services.AddScoped<LocalizationService>();
+builder.Services.AddScoped<AshareApiService>();
+builder.Services.AddScoped<SpaceDataService>();
+builder.Services.AddScoped<IAppNavigationService, WebNavigationService>();
 
 var app = builder.Build();
 
