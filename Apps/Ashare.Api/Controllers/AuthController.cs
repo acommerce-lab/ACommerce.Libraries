@@ -64,7 +64,7 @@ public class AuthController : AuthenticationControllerBase
             {
                 Success = true,
                 TransactionId = result.TransactionId,
-                RandomNumber = result.VerificationCode,
+                RandomNumber = result.Data?.GetValueOrDefault("verificationCode") ?? result.VerificationCode,
                 ExpiresInSeconds = (int?)result.ExpiresIn?.TotalSeconds ?? 120,
                 Message = "افتح تطبيق نفاذ واختر الرقم المعروض"
             });
