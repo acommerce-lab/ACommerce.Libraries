@@ -76,7 +76,8 @@ public class NafathAuthenticationProvider(
                     {
                         TransactionId = session.TransactionId,
                         NationalId = nafathResponse.Identifier ?? request.Identifier,
-                        Status = "COMPLETED"
+                        Status = "COMPLETED",
+                        Password = string.Empty,
                     });
                 });
             }
