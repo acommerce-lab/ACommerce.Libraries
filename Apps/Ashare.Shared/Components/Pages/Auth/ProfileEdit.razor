@@ -1,0 +1,317 @@
+@page "/profile/edit"
+@using ACommerce.Client.Auth
+@using ACommerce.Client.Profiles
+@using Microsoft.AspNetCore.Components.Forms
+@inject AuthClient AuthClient
+@inject ProfilesClient ProfilesClient
+@inject IAppNavigationService Navigation
+@inject ILocalizationService L
+@inject Ashare.Shared.Services.ThemeService Theme
+
+<div class="ac-page ashare-profile-edit-page @(Theme.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
+    @* Header *@
+    <div class="ashare-profile-edit-header">
+        <button class="ashare-back-btn" @onclick="() => Navigation.NavigateBack()">
+            <i class="bi bi-arrow-right"></i>
+        </button>
+        <h1>@L["EditProfile"]</h1>
+        <div style="width: 40px"></div>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="ashare-loading">
+            <div class="ac-spinner"></div>
+            <span>@L["Loading"]</span>
+        </div>
+    }
+    else
+    {
+        @* Avatar Section *@
+        <div class="ashare-avatar-section">
+            <div class="ashare-avatar-edit">
+                @if (!string.IsNullOrEmpty(_avatarUrl))
+                {
+                    <img src="@_avatarUrl" alt="@_displayName" />
+                }
+                else
+                {
+                    <div class="ashare-avatar-placeholder">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                }
+                <label class="ashare-avatar-edit-btn">
+                    <i class="bi bi-camera"></i>
+                    <InputFile OnChange="HandleAvatarChange" accept="image/*" style="display: none" />
+                </label>
+            </div>
+            <span class="ashare-change-avatar-text">@L["ChangePhoto"]</span>
+        </div>
+
+        @* Error/Success Messages *@
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="ashare-error-alert" style="margin: 0 16px 16px">
+                <i class="bi bi-exclamation-triangle"></i>
+                <span>@_errorMessage</span>
+            </div>
+        }
+
+        @if (_showSuccess)
+        {
+            <div class="ashare-success-alert" style="margin: 0 16px 16px; flex-direction: row;">
+                <i class="bi bi-check-circle" style="font-size: 20px; margin: 0"></i>
+                <span>@L["ProfileUpdated"]</span>
+            </div>
+        }
+
+        @* Form *@
+        <div class="ashare-profile-form">
+            @* Personal Info *@
+            <div class="ashare-form-section">
+                <h3 class="ashare-form-section-title">@L["PersonalInfo"]</h3>
+
+                <div class="ac-form-group">
+                    <label>@L["FirstName"]</label>
+                    <input type="text"
+                           class="ac-input"
+                           placeholder="@L["EnterFirstName"]"
+                           @bind="_firstName" />
+                </div>
+
+                <div class="ac-form-group">
+                    <label>@L["LastName"]</label>
+                    <input type="text"
+                           class="ac-input"
+                           placeholder="@L["EnterLastName"]"
+                           @bind="_lastName" />
+                </div>
+
+                <div class="ac-form-group">
+                    <label>@L["DisplayName"]</label>
+                    <input type="text"
+                           class="ac-input"
+                           placeholder="@L["EnterDisplayName"]"
+                           @bind="_displayName" />
+                    <small class="ashare-form-hint">@L["DisplayNameHint"]</small>
+                </div>
+            </div>
+
+            @* Contact Info *@
+            <div class="ashare-form-section">
+                <h3 class="ashare-form-section-title">@L["ContactInfo"]</h3>
+
+                <div class="ac-form-group">
+                    <label>@L["Email"]</label>
+                    <div class="ashare-input-wrapper">
+                        <i class="bi bi-envelope"></i>
+                        <input type="email"
+                               class="ac-input"
+                               placeholder="@L["EnterEmail"]"
+                               @bind="_email"
+                               readonly="@_emailVerified" />
+                    </div>
+                    @if (_emailVerified)
+                    {
+                        <small class="ashare-verified-badge">
+                            <i class="bi bi-check-circle-fill"></i> @L["Verified"]
+                        </small>
+                    }
+                </div>
+
+                <div class="ac-form-group">
+                    <label>@L["PhoneNumber"]</label>
+                    <div class="ashare-input-wrapper ashare-phone-input">
+                        <span class="ashare-phone-prefix">+966</span>
+                        <input type="tel"
+                               class="ac-input"
+                               placeholder="5XXXXXXXX"
+                               @bind="_phoneNumber"
+                               maxlength="9"
+                               inputmode="numeric" />
+                    </div>
+                    @if (_phoneVerified)
+                    {
+                        <small class="ashare-verified-badge">
+                            <i class="bi bi-check-circle-fill"></i> @L["Verified"]
+                        </small>
+                    }
+                    else if (!string.IsNullOrEmpty(_phoneNumber))
+                    {
+                        <button class="ashare-verify-btn" @onclick="VerifyPhone">
+                            @L["VerifyNow"]
+                        </button>
+                    }
+                </div>
+            </div>
+
+            @* Address Info *@
+            <div class="ashare-form-section">
+                <h3 class="ashare-form-section-title">@L["AddressInfo"]</h3>
+
+                <div class="ac-form-group">
+                    <label>@L["Address"]</label>
+                    <textarea class="ac-input"
+                              rows="2"
+                              placeholder="@L["EnterAddress"]"
+                              @bind="_address"></textarea>
+                </div>
+            </div>
+
+            @* Account Settings *@
+            <div class="ashare-form-section">
+                <h3 class="ashare-form-section-title">@L["AccountSettings"]</h3>
+
+                <button class="ashare-menu-item" @onclick="ChangePassword">
+                    <div class="ashare-menu-icon">
+                        <i class="bi bi-key"></i>
+                    </div>
+                    <div class="ashare-menu-content">
+                        <span class="ashare-menu-label">@L["ChangePassword"]</span>
+                    </div>
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+            </div>
+        </div>
+
+        @* Save Button *@
+        <div class="ashare-save-btn-container">
+            <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
+                    @onclick="SaveProfile"
+                    disabled="@_isSaving">
+                @if (_isSaving)
+                {
+                    <span class="ac-spinner"></span>
+                }
+                else
+                {
+                    <span>@L["SaveChanges"]</span>
+                }
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private bool _isLoading = true;
+    private bool _isSaving;
+    private bool _showSuccess;
+    private string? _errorMessage;
+
+    // Profile fields
+    private string? _avatarUrl;
+    private string _firstName = "";
+    private string _lastName = "";
+    private string _displayName = "";
+    private string _email = "";
+    private string _phoneNumber = "";
+    private string _address = "";
+    private bool _emailVerified;
+    private bool _phoneVerified;
+
+    private Guid _profileId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProfile();
+    }
+
+    private async Task LoadProfile()
+    {
+        _isLoading = true;
+
+        try
+        {
+            var profile = await ProfilesClient.GetMyProfileAsync();
+            if (profile != null)
+            {
+                _profileId = profile.Id;
+                _firstName = profile.FirstName ?? "";
+                _lastName = profile.LastName ?? "";
+                _displayName = profile.DisplayName ?? "";
+                _email = profile.Email ?? "";
+                _avatarUrl = profile.AvatarUrl;
+                _address = profile.Address ?? "";
+
+                // Extract phone number without +966 prefix
+                if (!string.IsNullOrEmpty(profile.PhoneNumber))
+                {
+                    _phoneNumber = profile.PhoneNumber.Replace("+966", "").TrimStart('0');
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+
+        _isLoading = false;
+    }
+
+    private async Task HandleAvatarChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            try
+            {
+                // Convert to base64 for preview
+                var buffer = new byte[file.Size];
+                await file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024).ReadAsync(buffer);
+                _avatarUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+                StateHasChanged();
+
+                // TODO: Upload to server
+            }
+            catch (Exception ex)
+            {
+                _errorMessage = L["AvatarUploadFailed"] + ": " + ex.Message;
+            }
+        }
+    }
+
+    private async Task SaveProfile()
+    {
+        _isSaving = true;
+        _errorMessage = null;
+        _showSuccess = false;
+
+        try
+        {
+            var request = new UpdateProfileRequest
+            {
+                FirstName = _firstName,
+                LastName = _lastName,
+                PhoneNumber = string.IsNullOrEmpty(_phoneNumber) ? null : $"+966{_phoneNumber}",
+                Address = _address
+            };
+
+            await ProfilesClient.UpdateMyProfileAsync(request);
+            _showSuccess = true;
+
+            // Auto-hide success message after 3 seconds
+            _ = Task.Delay(3000).ContinueWith(_ =>
+            {
+                _showSuccess = false;
+                InvokeAsync(StateHasChanged);
+            });
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+
+        _isSaving = false;
+    }
+
+    private void VerifyPhone()
+    {
+        // Navigate to phone verification flow
+        Navigation.NavigateTo($"/verify-phone?number={_phoneNumber}");
+    }
+
+    private void ChangePassword()
+    {
+        Navigation.NavigateTo("/change-password");
+    }
+}
