@@ -22,6 +22,7 @@ using ACommerce.Client.Products;
 using ACommerce.Client.Products.Extensions;
 using ACommerce.Client.Realtime;
 using ACommerce.Client.Vendors;
+using ACommerce.Client.Profiles;
 using ACommerce.ServiceRegistry.Client.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -87,6 +88,9 @@ builder.Services.AddCartClient(apiBaseUrl);
 
 // Vendors Client (Hosts)
 builder.Services.AddScoped<VendorsClient>();
+
+// Profiles Client (User Profiles)
+builder.Services.AddScoped<ProfilesClient>();
 
 // ═══════════════════════════════════════════════════════════════════
 // Communication Clients
