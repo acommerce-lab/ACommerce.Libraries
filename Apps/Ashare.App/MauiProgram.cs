@@ -1,6 +1,7 @@
 using Ashare.Shared.Services;
 using ACommerce.Client.Auth;
 using ACommerce.Client.Auth.Extensions;
+using ACommerce.Client.Nafath;
 using ACommerce.Client.Cart;
 using ACommerce.Client.Cart.Extensions;
 using ACommerce.Client.Categories;
@@ -114,6 +115,9 @@ public static class MauiProgram
 
         // Authentication Client (JWT + Nafath)
         builder.Services.AddAuthClient(apiBaseUrl);
+
+        // Nafath Client (مصادقة نفاذ)
+        builder.Services.AddNafathClient();
 
         // Profiles Client
         //builder.Services.AddProfilesClient(options =>
