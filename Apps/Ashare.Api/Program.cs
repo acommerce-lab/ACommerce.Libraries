@@ -31,7 +31,6 @@ using ACommerce.Transactions.Core.Api.Controllers;
 using ACommerce.Locations.Api.Controllers;
 using ACommerce.Chats.Api.Controllers;
 using ACommerce.Notifications.Recipients.Api.Controllers;
-using ACommerce.Authentication.AspNetCore.NafathWH.Controllers;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -77,8 +76,7 @@ try
         .AddApplicationPart(typeof(DocumentTypesController).Assembly)
         .AddApplicationPart(typeof(LocationSearchController).Assembly)
         .AddApplicationPart(typeof(ChatsController).Assembly)
-        .AddApplicationPart(typeof(ContactPointsController).Assembly)
-        .AddApplicationPart(typeof(NafathWebhookController).Assembly);
+        .AddApplicationPart(typeof(ContactPointsController).Assembly);
 
     builder.Services.AddEndpointsApiExplorer();
 
