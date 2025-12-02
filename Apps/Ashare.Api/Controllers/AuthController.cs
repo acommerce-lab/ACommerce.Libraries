@@ -203,15 +203,15 @@ public class AuthController : AuthenticationControllerBase
 
     //        Logger.LogInformation("[Test Webhook] Simulating Nafath callback for {TransactionId}", request.TransactionId);
 
-    //        // الحصول على provider ومعالجة الـ webhook
-    //        if (TwoFactorProvider is ACommerce.Authentication.TwoFactor.Nafath.NafathAuthenticationProvider nafathProvider)
-    //        {
-    //            var webhookRequest = new ACommerce.Authentication.TwoFactor.Nafath.NafathWebhookRequest
-    //            {
-    //                TransactionId = request.TransactionId,
-    //                NationalId = request.NationalId ?? "test_national_id",
-    //                Status = request.Status ?? "COMPLETED"
-    //            };
+            // الحصول على provider ومعالجة الـ webhook
+            if (TwoFactorProvider is ACommerce.Authentication.TwoFactor.Nafath.NafathAuthenticationProvider nafathProvider)
+            {
+                var webhookRequest = new ACommerce.Authentication.TwoFactor.Nafath.NafathWebhookRequest
+                {
+                    TransactionId = request.TransactionId,
+                    NationalId = request.NationalId ?? "test_national_id",
+                    Status = request.Status ?? "COMPLETED"
+                };
 
     //            var result = await nafathProvider.HandleWebhookAsync(webhookRequest);
 
