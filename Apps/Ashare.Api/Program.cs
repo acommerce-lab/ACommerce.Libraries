@@ -30,6 +30,7 @@ using ACommerce.Notifications.Core.Extensions;
 using ACommerce.Notifications.Channels.InApp.Extensions;
 using ACommerce.Authentication.Abstractions.Contracts;
 using ACommerce.Authentication.AspNetCore.Services;
+using ACommerce.Authentication.Messaging.Extensions;
 
 // Controllers from libraries
 using ACommerce.Profiles.Api.Controllers;
@@ -132,6 +133,9 @@ try
 
     // ✅ Authentication Event Publisher (يجب أن يكون قبل AddNafathTwoFactor)
     builder.Services.AddScoped<IAuthenticationEventPublisher, MessagingAuthenticationEventPublisher>();
+
+    // ✅ Authentication Messaging Handler (subscribes to auth events and sends notifications)
+    builder.Services.AddAuthenticationMessaging();
 
     // Two-Factor Authentication (Nafath for Saudi Arabia)
     builder.Services.AddInMemoryTwoFactorSessionStore(); // Session store for 2FA

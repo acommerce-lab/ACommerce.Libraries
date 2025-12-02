@@ -22,6 +22,7 @@
     <ProjectReference Include="..\..\Authentication\ACommerce.Authentication.TwoFactor.Nafath\ACommerce.Authentication.TwoFactor.Nafath.csproj" />
     <ProjectReference Include="..\..\ACommerce.Authentication.TwoFactor.SessionStore.InMemory\ACommerce.Authentication.TwoFactor.SessionStore.InMemory.csproj" />
     <ProjectReference Include="..\..\AspNetCore\ACommerce.Authentication.AspNetCore.NafathWH\ACommerce.Authentication.AspNetCore.NafathWH.csproj" />
+    <ProjectReference Include="..\..\ACommerce.Authentication.Messaging\ACommerce.Authentication.Messaging.csproj" />
 
     <!-- Identity & Profiles -->
     <ProjectReference Include="..\..\Identity\ACommerce.Profiles\ACommerce.Profiles.csproj" />
