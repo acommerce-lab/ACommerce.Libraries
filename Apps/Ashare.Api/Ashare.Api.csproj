@@ -80,6 +80,17 @@
 
     <!-- Payments -->
     <ProjectReference Include="..\..\Payments\ACommerce.Payments.Abstractions\ACommerce.Payments.Abstractions.csproj" />
+
+    <!-- Service Registry (for development - self-hosting) -->
+    <ProjectReference Include="..\..\Infrastructure\ACommerce.ServiceRegistry.Core\ACommerce.ServiceRegistry.Core.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\ACommerce.ServiceRegistry.Server\ACommerce.ServiceRegistry.Server.csproj" />
+
+    <!-- Messaging Hub (for development - self-hosting) -->
+    <ProjectReference Include="..\..\ACommerce.Messaging.InMemory\ACommerce.Messaging.InMemory.csproj" />
+    <ProjectReference Include="..\..\ACommerce.Messaging.SignalR.Hub\ACommerce.Messaging.SignalR.Hub.csproj" />
+
+    <!-- InApp Notifications (SignalR) -->
+    <ProjectReference Include="..\..\Other\ACommerce.Notifications.Channels.InApp\ACommerce.Notifications.Channels.InApp.csproj" />
   </ItemGroup>
 
   <ItemGroup>
