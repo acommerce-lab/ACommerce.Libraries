@@ -24,8 +24,8 @@ public class NafathApiClient : INafathApiClient
         _configuration = configuration;
         _logger = logger;
 
-        // Set base URL from configuration
-        var baseUrl = _configuration["Nafath:BaseUrl"];
+        // Set base URL from configuration (using correct section path)
+        var baseUrl = _configuration[$"{NafathOptions.SectionName}:BaseUrl"];
         if (!string.IsNullOrEmpty(baseUrl))
         {
             _httpClient.BaseAddress = new Uri(baseUrl);
@@ -36,7 +36,7 @@ public class NafathApiClient : INafathApiClient
         string nationalId,
         CancellationToken cancellationToken = default)
     {
-        var mode = _configuration["Nafath:Mode"]?.ToLower();
+        var mode = _configuration[$"{NafathOptions.SectionName}:Mode"]?.ToLower();
         var isTestMode = mode == "test";
 
         // ✅ Test Mode
@@ -53,7 +53,7 @@ public class NafathApiClient : INafathApiClient
         string transactionId,
         CancellationToken cancellationToken = default)
     {
-        var mode = _configuration["Nafath:Mode"]?.ToLower();
+        var mode = _configuration[$"{NafathOptions.SectionName}:Mode"]?.ToLower();
         var isTestMode = mode == "test";
 
         // ✅ Test Mode
@@ -80,7 +80,7 @@ public class NafathApiClient : INafathApiClient
                 transactionId);
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"check-status/{transactionId}");
-            request.Headers.Add("X-Authorization", _configuration["Nafath:WebhookSecret"]);
+            request.Headers.Add("X-Authorization", _configuration[$"{NafathOptions.SectionName}:WebhookSecret"]);
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
 
@@ -157,7 +157,7 @@ public class NafathApiClient : INafathApiClient
                 Content = JsonContent.Create(new { national_id = nationalId })
             };
 
-            request.Headers.Add("X-Authorization", _configuration["Nafath:WebhookSecret"]);
+            request.Headers.Add("X-Authorization", _configuration[$"{NafathOptions.SectionName}:WebhookSecret"]);
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
 
