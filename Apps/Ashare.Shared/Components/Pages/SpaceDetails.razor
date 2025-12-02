@@ -1,6 +1,7 @@
 @page "/space/{SpaceId:guid}"
 @inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
+@inject IJSRuntime JS
 
 <div class="ac-page ashare-space-details">
     @if (_space != null)
@@ -222,6 +223,41 @@
                 </div>
             }
 
+            @* Location Map *@
+            @if (_space.Latitude.HasValue && _space.Longitude.HasValue)
+            {
+                <div class="ashare-section" id="map">
+                    <h2 class="ashare-section-title">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        الموقع
+                    </h2>
+                    <div class="ashare-location-card">
+                        @* Mini Map *@
+                        <div class="ashare-mini-map" id="detailsMap">
+                            <div class="ashare-map-loading">
+                                <i class="bi bi-map"></i>
+                                <span>جاري تحميل الخريطة...</span>
+                            </div>
+                        </div>
+
+                        @* Address *@
+                        @if (!string.IsNullOrEmpty(GetLocationDisplay()))
+                        {
+                            <div class="ashare-location-address">
+                                <i class="bi bi-signpost"></i>
+                                <span>@GetLocationDisplay()</span>
+                            </div>
+                        }
+
+                        @* Open in Maps Button *@
+                        <button class="ashare-open-maps-btn" @onclick="OpenInNativeMaps">
+                            <i class="bi bi-box-arrow-up-right"></i>
+                            <span>فتح في تطبيق الخرائط</span>
+                        </button>
+                    </div>
+                </div>
+            }
+
             @* Owner Info *@
             <div class="ashare-section ashare-owner-section">
                 <h2 class="ashare-section-title">مالك المساحة</h2>
@@ -394,9 +430,51 @@
     private int _bookingGuests = 1;
     private string? _bookingNotes;
 
+    private bool _mapInitialized;
+
     protected override async Task OnInitializedAsync()
     {
         await LoadDataAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Initialize mini map after data is loaded
+        if (!_mapInitialized && _space?.Latitude != null && _space?.Longitude != null)
+        {
+            _mapInitialized = true;
+            try
+            {
+                await JS.InvokeVoidAsync("AcMap.initializeDetailsMap",
+                    "detailsMap",
+                    _space.Latitude.Value,
+                    _space.Longitude.Value,
+                    _space.Name ?? "الموقع");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error initializing map: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task OpenInNativeMaps()
+    {
+        if (_space?.Latitude == null || _space?.Longitude == null) return;
+
+        try
+        {
+            // Open in native maps using JavaScript (works on both web and MAUI)
+            var label = _space.Name ?? "الموقع";
+            await JS.InvokeVoidAsync("AcMap.openNativeMaps",
+                _space.Latitude.Value,
+                _space.Longitude.Value,
+                label);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error opening native maps: {ex.Message}");
+        }
     }
 
     private async Task LoadDataAsync()

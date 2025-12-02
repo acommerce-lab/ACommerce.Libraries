@@ -229,6 +229,107 @@ window.AcMap = window.AcMap || {};
     };
 
     /**
+     * Initialize a read-only mini map for details page
+     */
+    AcMap.initializeDetailsMap = function (containerId, lat, lng, label) {
+        // Destroy existing instance
+        if (maps[containerId]) {
+            try {
+                AcMap.destroy(containerId);
+            } catch (e) {
+                console.warn('Error destroying existing details map:', e);
+            }
+        }
+
+        const container = document.getElementById(containerId);
+        if (!container) {
+            console.error('Details map container not found:', containerId);
+            return false;
+        }
+
+        // Set container dimensions
+        container.style.height = '200px';
+        container.style.width = '100%';
+        container.innerHTML = '';
+
+        if (typeof L === 'undefined') {
+            console.error('Leaflet.js is not loaded');
+            container.innerHTML = '<div class="ac-map-error">خطأ في تحميل الخريطة</div>';
+            return false;
+        }
+
+        try {
+            const map = L.map(containerId, {
+                center: [lat, lng],
+                zoom: 15,
+                zoomControl: false,
+                attributionControl: false,
+                dragging: false,
+                touchZoom: false,
+                doubleClickZoom: false,
+                scrollWheelZoom: false,
+                boxZoom: false,
+                keyboard: false
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19
+            }).addTo(map);
+
+            // Add marker
+            const markerIcon = L.divIcon({
+                className: 'ac-leaflet-marker details',
+                html: '<i class="bi bi-geo-alt-fill"></i>',
+                iconSize: [40, 40],
+                iconAnchor: [20, 40]
+            });
+
+            const marker = L.marker([lat, lng], {
+                icon: markerIcon,
+                draggable: false
+            }).addTo(map);
+
+            if (label) {
+                marker.bindPopup(label).openPopup();
+            }
+
+            // Store instance
+            maps[containerId] = {
+                map: map,
+                marker: marker,
+                dotNetRef: null,
+                resizeObserver: null
+            };
+
+            // Setup ResizeObserver
+            if (typeof ResizeObserver !== 'undefined') {
+                const resizeObserver = new ResizeObserver(function() {
+                    if (maps[containerId] && maps[containerId].map) {
+                        try {
+                            maps[containerId].map.invalidateSize();
+                        } catch (e) { }
+                    }
+                });
+                resizeObserver.observe(container);
+                maps[containerId].resizeObserver = resizeObserver;
+            }
+
+            // Fix size after render
+            setTimeout(function () {
+                if (maps[containerId] && maps[containerId].map) {
+                    maps[containerId].map.invalidateSize();
+                }
+            }, 100);
+
+            return true;
+        } catch (e) {
+            console.error('Error initializing details map:', e);
+            container.innerHTML = '<div class="ac-map-error">خطأ في تحميل الخريطة</div>';
+            return false;
+        }
+    };
+
+    /**
      * Open native maps app with coordinates
      */
     AcMap.openNativeMaps = function (lat, lng, label) {

@@ -1809,6 +1809,88 @@ h1, h2, h3, .ashare-logo-text {
     color: var(--ashare-primary);
 }
 
+/* Location Card */
+.ashare-location-card {
+    background-color: var(--ashare-gray-50);
+    border-radius: var(--ashare-radius-lg);
+    overflow: hidden;
+}
+
+.ashare-mini-map {
+    width: 100%;
+    height: 200px;
+    background-color: var(--ashare-gray-100);
+    position: relative;
+}
+
+.ashare-map-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ashare-spacing-sm);
+    color: var(--ashare-gray-400);
+}
+
+.ashare-map-loading i {
+    font-size: 32px;
+}
+
+.ashare-map-loading span {
+    font-size: 12px;
+}
+
+.ashare-location-address {
+    display: flex;
+    align-items: center;
+    gap: var(--ashare-spacing-sm);
+    padding: var(--ashare-spacing-md);
+    border-bottom: 1px solid var(--ashare-gray-200);
+    font-size: 14px;
+    color: var(--ashare-gray-700);
+}
+
+.ashare-location-address i {
+    color: var(--ashare-primary);
+    font-size: 16px;
+}
+
+.ashare-open-maps-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ashare-spacing-sm);
+    width: 100%;
+    padding: var(--ashare-spacing-md);
+    background: linear-gradient(135deg, var(--ashare-primary), var(--ashare-primary-dark));
+    border: none;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ashare-open-maps-btn:hover {
+    background: linear-gradient(135deg, var(--ashare-primary-dark), var(--ashare-primary));
+}
+
+.ashare-open-maps-btn i {
+    font-size: 16px;
+}
+
+/* Map marker for details page */
+.ac-leaflet-marker.details {
+    font-size: 32px;
+    color: var(--ashare-secondary);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
 /* Owner Card */
 .ashare-owner-card {
     display: flex;
