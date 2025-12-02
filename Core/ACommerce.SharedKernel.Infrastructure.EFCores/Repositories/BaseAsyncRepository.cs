@@ -439,7 +439,9 @@ public class BaseAsyncRepository<T> : IBaseAsyncRepository<T>
 	{
 		_logger.LogDebug("Adding new {EntityName}", typeof(T).Name);
 
-		entity.Id = Guid.NewGuid();
+		// Only generate Id if not already set
+		if (entity.Id == Guid.Empty)
+			entity.Id = Guid.NewGuid();
 		entity.CreatedAt = DateTime.UtcNow;
 		entity.IsDeleted = false;
 
@@ -461,7 +463,9 @@ public class BaseAsyncRepository<T> : IBaseAsyncRepository<T>
 
 		foreach (var entity in entityList)
 		{
-			entity.Id = Guid.NewGuid();
+			// Only generate Id if not already set
+			if (entity.Id == Guid.Empty)
+				entity.Id = Guid.NewGuid();
 			entity.CreatedAt = DateTime.UtcNow;
 			entity.IsDeleted = false;
 		}
