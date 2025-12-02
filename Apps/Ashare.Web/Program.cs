@@ -40,6 +40,9 @@ var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localh
 // Client SDKs with Service Discovery (Predefined Services)
 // ═══════════════════════════════════════════════════════════════════
 
+// Token Manager (singleton) - يجب تسجيله قبل AddACommerceClientWithServices
+builder.Services.AddSingleton<TokenManager>();
+
 // ACommerce Client مع خدمات محددة مسبقاً
 // يسجل الخدمات في Cache محلي لاستخدامها من قبل DynamicHttpClient
 builder.Services.AddACommerceClientWithServices(
@@ -51,10 +54,13 @@ builder.Services.AddACommerceClientWithServices(
     options =>
     {
         options.TimeoutSeconds = 30;
+        // تفعيل Authentication لإرسال التوكن مع كل طلب
+        options.EnableAuthentication = true;
+        options.TokenProvider = sp => sp.GetRequiredService<TokenManager>();
     });
 
-// Authentication Client (JWT + Nafath)
-builder.Services.AddAuthClient(apiBaseUrl);
+// Authentication Client (يستخدم TokenManager المسجل أعلاه)
+builder.Services.AddScoped<AuthClient>();
 
 // Locations Client
 builder.Services.AddLocationsClient(apiBaseUrl);
