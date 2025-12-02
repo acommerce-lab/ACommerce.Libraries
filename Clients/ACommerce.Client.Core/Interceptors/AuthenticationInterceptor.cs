@@ -12,6 +12,7 @@ public sealed class AuthenticationInterceptor : DelegatingHandler
 	public AuthenticationInterceptor(ITokenProvider tokenProvider)
 	{
 		_tokenProvider = tokenProvider;
+		Console.WriteLine($"[AuthInterceptor] Created with TokenProvider: {tokenProvider.GetType().Name} (HashCode: {tokenProvider.GetHashCode()})");
 	}
 
 	protected override async Task<HttpResponseMessage> SendAsync(
@@ -21,10 +22,17 @@ public sealed class AuthenticationInterceptor : DelegatingHandler
 		// الحصول على Token
 		var token = await _tokenProvider.GetTokenAsync();
 
+		Console.WriteLine($"[AuthInterceptor] Request to {request.RequestUri?.AbsolutePath} - Token: {(string.IsNullOrEmpty(token) ? "NULL" : token.Substring(0, Math.Min(20, token.Length)) + "...")}");
+
 		if (!string.IsNullOrEmpty(token))
 		{
 			// إضافة Authorization Header
 			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+			Console.WriteLine($"[AuthInterceptor] ✅ Authorization header added");
+		}
+		else
+		{
+			Console.WriteLine($"[AuthInterceptor] ⚠️ No token available - request will be unauthorized");
 		}
 
 		return await base.SendAsync(request, cancellationToken);
