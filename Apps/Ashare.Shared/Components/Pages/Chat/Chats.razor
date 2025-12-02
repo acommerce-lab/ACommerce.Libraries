@@ -1,8 +1,10 @@
 @page "/chats"
 @using ACommerce.Client.Chats
+@using Ashare.Shared.Services
 @inject ChatsClient ChatsClient
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
+@inject ITimezoneService Timezone
 
 <div class="ac-page ashare-chats-page">
     <div class="ac-page-header">
@@ -39,7 +41,7 @@
                     <div class="ashare-chat-content">
                         <div class="ashare-chat-header">
                             <h4 class="ashare-chat-name">@chat.Name</h4>
-                            <span class="ashare-chat-time">@FormatTime(chat.LastMessageAt)</span>
+                            <span class="ashare-chat-time">@GetFormattedTime(chat.Id)</span>
                         </div>
                         <div class="ashare-chat-preview">
                             @if (chat.IsTyping)
@@ -73,6 +75,7 @@
 @code {
     private List<ChatListItem>? _chats;
     private bool _isLoading = true;
+    private Dictionary<Guid, string> _formattedTimes = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -85,7 +88,7 @@
                     Avatar = chat.OtherPartyAvatar,
                     IsOnline = chat.IsOnline,
                     LastMessage = chat.LastMessage?.Content ?? "",
-                    LastMessageAt = chat.LastMessage?.SentAt ?? DateTime.Now,
+                    LastMessageAt = chat.LastMessage?.SentAt ?? DateTime.UtcNow, // Use UTC
                     Name = chat.OtherPartyName,
                     Id = chat.Id,
                     IsTyping = false,
@@ -103,19 +106,46 @@
         }
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_chats != null && _chats.Any(c => !_formattedTimes.ContainsKey(c.Id)))
+        {
+            // Format all chat times using timezone service
+            foreach (var chat in _chats.Where(c => !_formattedTimes.ContainsKey(c.Id)))
+            {
+                var formattedTime = await Timezone.FormatRelativeTimeAsync(chat.LastMessageAt, L);
+                _formattedTimes[chat.Id] = formattedTime;
+            }
+            StateHasChanged();
+        }
+    }
+
     private void OpenChat(Guid chatId)
     {
         Navigation.NavigateTo($"/chat/{chatId}");
     }
 
-    private string FormatTime(DateTime dateTime)
+    private string GetFormattedTime(Guid chatId)
     {
-        var diff = DateTime.Now - dateTime;
+        if (_formattedTimes.TryGetValue(chatId, out var formatted))
+            return formatted;
+
+        // Fallback: find the chat and show raw time
+        var chat = _chats?.FirstOrDefault(c => c.Id == chatId);
+        if (chat != null)
+            return FormatTimeQuick(chat.LastMessageAt);
+        return "";
+    }
+
+    // Quick synchronous fallback for initial render
+    private string FormatTimeQuick(DateTime utcTime)
+    {
+        var diff = DateTime.UtcNow - utcTime;
         if (diff.TotalMinutes < 1) return L["Now"];
         if (diff.TotalHours < 1) return $"{(int)diff.TotalMinutes}m";
         if (diff.TotalDays < 1) return $"{(int)diff.TotalHours}h";
         if (diff.TotalDays < 7) return $"{(int)diff.TotalDays}d";
-        return dateTime.ToString("MM/dd");
+        return utcTime.ToString("MM/dd");
     }
 
     // Chat List Item DTO
@@ -125,7 +155,7 @@
         public string Name { get; set; } = "";
         public string? Avatar { get; set; }
         public string? LastMessage { get; set; }
-        public DateTime LastMessageAt { get; set; }
+        public DateTime LastMessageAt { get; set; } // Stored in UTC
         public int UnreadCount { get; set; }
         public bool IsOnline { get; set; }
         public bool IsTyping { get; set; }

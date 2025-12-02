@@ -127,6 +127,9 @@ builder.Services.AddScoped<IAppNavigationService, WebNavigationService>();
 // Space Data Service (mock data for development)
 builder.Services.AddScoped<SpaceDataService>();
 
+// Timezone Service (Browser implementation using JS interop)
+builder.Services.AddScoped<ITimezoneService, BrowserTimezoneService>();
+
 // ═══════════════════════════════════════════════════════════════════
 // Ashare API Service (ربط التطبيق بالباك اند)
 // ═══════════════════════════════════════════════════════════════════

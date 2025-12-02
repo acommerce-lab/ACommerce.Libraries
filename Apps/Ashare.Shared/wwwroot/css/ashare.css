@@ -4342,3 +4342,727 @@ h1, h2, h3, .ashare-logo-text {
     color: rgba(255, 255, 255, 0.7);
     flex-shrink: 0;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Registration Page - صفحة التسجيل
+   ═══════════════════════════════════════════════════════════════════ */
+.ashare-register-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, var(--ashare-gray-50) 0%, var(--ashare-white) 100%);
+}
+
+.ashare-register-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--ashare-spacing-lg) var(--ashare-spacing-md);
+    padding-top: calc(var(--safe-area-top) + var(--ashare-spacing-lg));
+    position: relative;
+}
+
+.ashare-register-header .ashare-back-btn {
+    position: absolute;
+    top: calc(var(--safe-area-top) + var(--ashare-spacing-md));
+    right: var(--ashare-spacing-md);
+}
+
+.ashare-register-header .ashare-logo {
+    text-align: center;
+}
+
+.ashare-register-header .ashare-logo-text {
+    font-size: 36px;
+    color: var(--ashare-primary);
+}
+
+.ashare-register-header .ashare-logo-subtitle {
+    display: block;
+    font-size: 16px;
+    color: var(--ashare-gray-600);
+    margin-top: var(--ashare-spacing-xs);
+}
+
+.ashare-register-content {
+    flex: 1;
+    padding: var(--ashare-spacing-md);
+    padding-bottom: calc(var(--safe-area-bottom) + var(--ashare-spacing-xl));
+}
+
+.ashare-register-form {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* Input wrapper with icon */
+.ashare-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.ashare-input-wrapper i {
+    position: absolute;
+    right: var(--ashare-spacing-md);
+    color: var(--ashare-gray-400);
+    font-size: 18px;
+    pointer-events: none;
+}
+
+.ashare-input-wrapper .ac-input {
+    padding-right: 44px;
+}
+
+.ashare-input-wrapper .ashare-toggle-password {
+    position: absolute;
+    left: var(--ashare-spacing-sm);
+    background: none;
+    border: none;
+    color: var(--ashare-gray-400);
+    cursor: pointer;
+    padding: var(--ashare-spacing-sm);
+}
+
+/* Phone input with prefix */
+.ashare-phone-input .ashare-phone-prefix {
+    position: absolute;
+    right: var(--ashare-spacing-md);
+    color: var(--ashare-gray-600);
+    font-size: 14px;
+    font-weight: 500;
+    pointer-events: none;
+}
+
+.ashare-phone-input .ac-input {
+    padding-right: 60px;
+    direction: ltr;
+    text-align: right;
+}
+
+/* Input error state */
+.ac-input.error {
+    border-color: var(--ashare-danger);
+}
+
+.ashare-field-error {
+    display: block;
+    color: var(--ashare-danger);
+    font-size: 12px;
+    margin-top: var(--ashare-spacing-xs);
+}
+
+/* Password strength indicator */
+.ashare-password-strength {
+    display: flex;
+    align-items: center;
+    gap: var(--ashare-spacing-sm);
+    margin-top: var(--ashare-spacing-sm);
+}
+
+.ashare-strength-bar {
+    flex: 1;
+    height: 4px;
+    background-color: var(--ashare-gray-200);
+    border-radius: var(--ashare-radius-full);
+    position: relative;
+    overflow: hidden;
+}
+
+.ashare-strength-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    transition: width 0.3s, background-color 0.3s;
+}
+
+.ashare-strength-bar.weak::before {
+    width: 25%;
+    background-color: var(--ashare-danger);
+}
+
+.ashare-strength-bar.fair::before {
+    width: 50%;
+    background-color: var(--ashare-warning);
+}
+
+.ashare-strength-bar.good::before {
+    width: 75%;
+    background-color: var(--ashare-info);
+}
+
+.ashare-strength-bar.strong::before {
+    width: 100%;
+    background-color: var(--ashare-success);
+}
+
+.ashare-password-strength > span {
+    font-size: 11px;
+    color: var(--ashare-gray-500);
+    min-width: 60px;
+}
+
+/* Checkbox styles */
+.ashare-terms-checkbox {
+    margin: var(--ashare-spacing-lg) 0;
+}
+
+.ashare-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ashare-spacing-sm);
+    cursor: pointer;
+}
+
+.ashare-checkbox input {
+    display: none;
+}
+
+.ashare-checkbox-mark {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    border: 2px solid var(--ashare-gray-300);
+    border-radius: var(--ashare-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.ashare-checkbox input:checked + .ashare-checkbox-mark {
+    background-color: var(--ashare-primary);
+    border-color: var(--ashare-primary);
+}
+
+.ashare-checkbox input:checked + .ashare-checkbox-mark::after {
+    content: '✓';
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.ashare-checkbox-text {
+    font-size: 13px;
+    color: var(--ashare-gray-600);
+    line-height: 1.5;
+}
+
+.ashare-checkbox-text a {
+    color: var(--ashare-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* Alerts */
+.ashare-error-alert,
+.ashare-success-alert {
+    display: flex;
+    align-items: center;
+    gap: var(--ashare-spacing-sm);
+    padding: var(--ashare-spacing-md);
+    border-radius: var(--ashare-radius-md);
+    margin-bottom: var(--ashare-spacing-md);
+}
+
+.ashare-error-alert {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--ashare-danger);
+}
+
+.ashare-success-alert {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--ashare-success);
+    flex-direction: column;
+    text-align: center;
+}
+
+.ashare-success-alert i {
+    font-size: 48px;
+    margin-bottom: var(--ashare-spacing-sm);
+}
+
+.ashare-success-alert p {
+    font-size: 14px;
+    opacity: 0.8;
+    margin-top: var(--ashare-spacing-xs);
+}
+
+/* Divider */
+.ashare-divider {
+    display: flex;
+    align-items: center;
+    gap: var(--ashare-spacing-md);
+    margin: var(--ashare-spacing-lg) 0;
+}
+
+.ashare-divider::before,
+.ashare-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: var(--ashare-gray-200);
+}
+
+.ashare-divider span {
+    color: var(--ashare-gray-400);
+    font-size: 13px;
+}
+
+/* Nafath button */
+.ac-btn-nafath {
+    background-color: var(--ashare-white);
+    border: 1px solid var(--ashare-gray-200);
+    color: var(--ashare-gray-700);
+}
+
+.ac-btn-nafath:hover,
+.ac-btn-nafath:active {
+    background-color: var(--ashare-gray-50);
+}
+
+.ac-btn-nafath i {
+    color: var(--ashare-primary);
+}
+
+/* Button states */
+.ac-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.ac-btn-block {
+    width: 100%;
+}
+
+/* Login/Register links */
+.ashare-login-link,
+.ashare-register-link {
+    text-align: center;
+    margin-top: var(--ashare-spacing-lg);
+    font-size: 14px;
+    color: var(--ashare-gray-600);
+}
+
+.ashare-login-link a,
+.ashare-register-link a {
+    color: var(--ashare-primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* Language selector */
+.ashare-language-selector {
+    display: flex;
+    justify-content: center;
+    gap: var(--ashare-spacing-sm);
+    padding: var(--ashare-spacing-md);
+    padding-bottom: calc(var(--safe-area-bottom) + var(--ashare-spacing-md));
+}
+
+.ashare-language-selector button {
+    padding: var(--ashare-spacing-xs) var(--ashare-spacing-md);
+    background: transparent;
+    border: 1px solid var(--ashare-gray-200);
+    border-radius: var(--ashare-radius-full);
+    font-size: 12px;
+    color: var(--ashare-gray-500);
+    cursor: pointer;
+}
+
+.ashare-language-selector button.active {
+    background-color: var(--ashare-primary);
+    border-color: var(--ashare-primary);
+    color: white;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Profile Edit Page - تعديل الملف الشخصي
+   ═══════════════════════════════════════════════════════════════════ */
+.ashare-profile-edit-page {
+    padding-bottom: calc(var(--safe-area-bottom) + var(--ashare-spacing-xl));
+}
+
+.ashare-profile-edit-header {
+    display: flex;
+    align-items: center;
+    gap: var(--ashare-spacing-md);
+    padding: var(--ashare-spacing-md);
+    border-bottom: 1px solid var(--ashare-gray-200);
+}
+
+.ashare-profile-edit-header h1 {
+    flex: 1;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ashare-gray-900);
+}
+
+.ashare-avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--ashare-spacing-xl) 0;
+}
+
+.ashare-avatar-edit {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin-bottom: var(--ashare-spacing-md);
+}
+
+.ashare-avatar-edit img,
+.ashare-avatar-edit .ashare-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--ashare-radius-full);
+    object-fit: cover;
+}
+
+.ashare-avatar-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--ashare-gray-200);
+    color: var(--ashare-gray-400);
+    font-size: 48px;
+}
+
+.ashare-avatar-edit-btn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--ashare-primary);
+    border: 3px solid var(--ashare-white);
+    border-radius: var(--ashare-radius-full);
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.ashare-change-avatar-text {
+    color: var(--ashare-primary);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.ashare-profile-form {
+    padding: 0 var(--ashare-spacing-md);
+}
+
+.ashare-form-section {
+    margin-bottom: var(--ashare-spacing-xl);
+}
+
+.ashare-form-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ashare-gray-500);
+    text-transform: uppercase;
+    margin-bottom: var(--ashare-spacing-md);
+}
+
+.ashare-save-btn-container {
+    padding: var(--ashare-spacing-md);
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(to top, var(--ashare-white) 80%, transparent);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Login Page Enhancements - تحسينات صفحة الدخول
+   ═══════════════════════════════════════════════════════════════════ */
+.ashare-login-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, var(--ashare-gray-50) 0%, var(--ashare-white) 100%);
+}
+
+.ashare-login-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--ashare-spacing-xl) var(--ashare-spacing-md);
+    padding-top: calc(var(--safe-area-top) + var(--ashare-spacing-xl));
+}
+
+.ashare-login-header .ashare-logo {
+    text-align: center;
+}
+
+.ashare-login-header .ashare-logo-text {
+    font-size: 42px;
+    color: var(--ashare-primary);
+}
+
+.ashare-login-header .ashare-logo-subtitle {
+    display: block;
+    font-size: 14px;
+    color: var(--ashare-gray-500);
+    margin-top: var(--ashare-spacing-xs);
+}
+
+.ashare-login-content {
+    flex: 1;
+    padding: var(--ashare-spacing-md);
+}
+
+/* Nafath container */
+.ashare-nafath-container {
+    max-width: 400px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.ashare-nafath-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--ashare-spacing-sm);
+    margin-bottom: var(--ashare-spacing-xl);
+}
+
+.ashare-nafath-logo span {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ashare-primary);
+}
+
+.ashare-nafath-waiting {
+    padding: var(--ashare-spacing-xl) 0;
+}
+
+.ashare-nafath-number {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--ashare-primary);
+    margin-bottom: var(--ashare-spacing-md);
+}
+
+.ashare-nafath-waiting p {
+    color: var(--ashare-gray-600);
+    margin-bottom: var(--ashare-spacing-lg);
+}
+
+.ashare-nafath-timer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--ashare-spacing-sm);
+}
+
+.ashare-timer-circle {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 4px solid var(--ashare-primary);
+    border-radius: var(--ashare-radius-full);
+}
+
+.ashare-timer-circle span {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--ashare-primary);
+}
+
+.ashare-nafath-timer > span {
+    font-size: 12px;
+    color: var(--ashare-gray-500);
+}
+
+.ashare-nafath-success,
+.ashare-nafath-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ashare-spacing-sm);
+    padding: var(--ashare-spacing-md);
+    border-radius: var(--ashare-radius-md);
+    margin-bottom: var(--ashare-spacing-md);
+}
+
+.ashare-nafath-success {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--ashare-success);
+}
+
+.ashare-nafath-error {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--ashare-danger);
+}
+
+.ashare-alt-login {
+    display: block;
+    margin-top: var(--ashare-spacing-xl);
+    padding: var(--ashare-spacing-md);
+    background: transparent;
+    border: none;
+    color: var(--ashare-primary);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* Email login */
+.ashare-email-login {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.ashare-email-login h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ashare-gray-900);
+    margin-bottom: var(--ashare-spacing-xs);
+}
+
+.ashare-login-subtitle {
+    color: var(--ashare-gray-500);
+    margin-bottom: var(--ashare-spacing-xl);
+}
+
+.ashare-password-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.ashare-password-input .ac-input {
+    padding-left: 44px;
+}
+
+.ashare-toggle-password {
+    position: absolute;
+    left: var(--ashare-spacing-sm);
+    background: none;
+    border: none;
+    color: var(--ashare-gray-400);
+    cursor: pointer;
+    padding: var(--ashare-spacing-sm);
+}
+
+.ashare-login-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--ashare-spacing-lg);
+}
+
+.ashare-remember-me {
+    display: flex;
+    align-items: center;
+    gap: var(--ashare-spacing-sm);
+    font-size: 13px;
+    color: var(--ashare-gray-600);
+    cursor: pointer;
+}
+
+.ashare-remember-me input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--ashare-primary);
+}
+
+.ashare-forgot-link {
+    font-size: 13px;
+    color: var(--ashare-primary);
+    text-decoration: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Login Prompt (For unauthenticated profile view)
+   ═══════════════════════════════════════════════════════════════════ */
+.ashare-login-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--ashare-spacing-xl);
+    min-height: 60vh;
+    gap: var(--ashare-spacing-md);
+}
+
+.ashare-login-prompt-icon {
+    font-size: 80px;
+    color: var(--ashare-gray-300);
+    margin-bottom: var(--ashare-spacing-md);
+}
+
+.ashare-login-prompt h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ashare-gray-900);
+    margin-bottom: var(--ashare-spacing-xs);
+}
+
+.ashare-login-prompt p {
+    font-size: 14px;
+    color: var(--ashare-gray-500);
+    margin-bottom: var(--ashare-spacing-lg);
+    max-width: 280px;
+}
+
+.ashare-login-prompt .ac-btn {
+    min-width: 200px;
+}
+
+/* Profile phone number */
+.ashare-profile-phone {
+    font-size: 13px;
+    color: var(--ashare-gray-400);
+    direction: ltr;
+}
+
+/* Profile avatar image */
+.ashare-profile-avatar img {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--ashare-radius-full);
+    object-fit: cover;
+}
+
+/* Form hint */
+.ashare-form-hint {
+    display: block;
+    font-size: 12px;
+    color: var(--ashare-gray-400);
+    margin-top: var(--ashare-spacing-xs);
+}
+
+/* Verified badge */
+.ashare-verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--ashare-success);
+    margin-top: var(--ashare-spacing-xs);
+}
+
+/* Verify button */
+.ashare-verify-btn {
+    display: inline-block;
+    margin-top: var(--ashare-spacing-xs);
+    padding: var(--ashare-spacing-xs) var(--ashare-spacing-md);
+    background-color: transparent;
+    border: 1px solid var(--ashare-primary);
+    border-radius: var(--ashare-radius-full);
+    color: var(--ashare-primary);
+    font-size: 12px;
+    cursor: pointer;
+}

@@ -1,10 +1,12 @@
 @page "/chat/{ChatId:guid}"
 @using ACommerce.Client.Chats
 @using ACommerce.Client.Realtime
+@using Ashare.Shared.Services
 @inject ChatsClient ChatsClient
 @inject RealtimeClient RealtimeClient
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
+@inject ITimezoneService Timezone
 @implements IAsyncDisposable
 
 <div class="ac-page ashare-chatroom-page">
@@ -59,7 +61,7 @@
                             <p>@message.Content</p>
                         }
                         <span class="ashare-message-time">
-                            @message.SentAt.ToString("HH:mm")
+                            @GetFormattedTime(message.Id, message.SentAt)
                             @if (message.IsMine)
                             {
                                 <i class="bi @(message.IsRead ? "bi-check-all" : "bi-check")"></i>
@@ -182,7 +184,7 @@
             Content = _newMessage,
             Type = "text",
             IsMine = true,
-            SentAt = DateTime.Now
+            SentAt = DateTime.UtcNow // Use UTC for storage/transmission
         };
 
         _messages.Add(message);
@@ -212,6 +214,30 @@
         await RealtimeClient.DisconnectAsync();
     }
 
+    // Cache for formatted times to avoid blocking renders
+    private Dictionary<Guid, string> _formattedTimes = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender || _messages.Any(m => !_formattedTimes.ContainsKey(m.Id)))
+        {
+            // Format all message times using timezone service
+            foreach (var message in _messages.Where(m => !_formattedTimes.ContainsKey(m.Id)))
+            {
+                var formattedTime = await Timezone.FormatTimeAsync(message.SentAt, "HH:mm");
+                _formattedTimes[message.Id] = formattedTime;
+            }
+            StateHasChanged();
+        }
+    }
+
+    private string GetFormattedTime(Guid messageId, DateTime sentAt)
+    {
+        if (_formattedTimes.TryGetValue(messageId, out var formatted))
+            return formatted;
+        return sentAt.ToString("HH:mm"); // Fallback to raw time
+    }
+
     // DTOs
     public class ChatInfo
     {
@@ -228,6 +254,6 @@
         public bool IsMine { get; set; }
         public bool IsRead { get; set; }
         public bool IsFailed { get; set; }
-        public DateTime SentAt { get; set; }
+        public DateTime SentAt { get; set; } // Stored in UTC
     }
 }
