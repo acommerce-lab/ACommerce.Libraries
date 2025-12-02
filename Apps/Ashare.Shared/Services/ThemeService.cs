@@ -7,9 +7,11 @@ public class ThemeService
 {
     private bool _isDarkMode;
     private const string ThemeKey = "app_theme";
+    private readonly IStorageService _storageService;
 
-    public ThemeService()
+    public ThemeService(IStorageService storageService)
     {
+        _storageService = storageService;
         _ = LoadThemeAsync();
     }
 
@@ -45,7 +47,7 @@ public class ThemeService
     {
         try
         {
-            var saved = await SecureStorage.Default.GetAsync(ThemeKey);
+            var saved = await _storageService.GetAsync(ThemeKey);
             if (!string.IsNullOrEmpty(saved))
             {
                 _isDarkMode = saved == "dark";
@@ -61,7 +63,7 @@ public class ThemeService
     {
         try
         {
-            await SecureStorage.Default.SetAsync(ThemeKey, _isDarkMode ? "dark" : "light");
+            await _storageService.SetAsync(ThemeKey, _isDarkMode ? "dark" : "light");
         }
         catch
         {

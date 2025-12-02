@@ -61,9 +61,11 @@ public class LocalizationService : ILocalizationService
 {
     private string _currentLanguage = "ar";
     private readonly Dictionary<string, Dictionary<string, string>> _translations;
+    private readonly IStorageService _storageService;
 
-    public LocalizationService()
+    public LocalizationService(IStorageService storageService)
     {
+        _storageService = storageService;
         _translations = new Dictionary<string, Dictionary<string, string>>
         {
             ["ar"] = GetArabicStrings(),
@@ -119,7 +121,7 @@ public class LocalizationService : ILocalizationService
         // Save preference
         try
         {
-            await SecureStorage.Default.SetAsync("app_language", languageCode);
+            await _storageService.SetAsync("app_language", languageCode);
         }
         catch { }
 
@@ -130,7 +132,7 @@ public class LocalizationService : ILocalizationService
     {
         try
         {
-            var saved = await SecureStorage.Default.GetAsync("app_language");
+            var saved = await _storageService.GetAsync("app_language");
             if (!string.IsNullOrEmpty(saved) && _translations.ContainsKey(saved))
             {
                 _currentLanguage = saved;
