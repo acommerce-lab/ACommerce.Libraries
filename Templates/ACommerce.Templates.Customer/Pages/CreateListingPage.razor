@@ -1,6 +1,7 @@
 @namespace ACommerce.Templates.Customer.Pages
 @using ACommerce.Templates.Customer.Components
 @using Microsoft.JSInterop
+@using Microsoft.AspNetCore.Components.Forms
 
 <div class="ac-page ac-create-listing-page">
     @* Header *@
@@ -248,22 +249,34 @@
                     </div>
 
                     <div class="ac-upload-container">
-                        <label class="ac-upload-area @(Model.Images.Any() ? "has-images" : "")" for="imageUpload">
+                        <label class="ac-upload-area @(Model.Images.Any() ? "has-images" : "") @(_isUploadingImages ? "uploading" : "")">
                             <div class="ac-upload-content">
-                                <div class="ac-upload-icon">
-                                    <i class="bi bi-cloud-arrow-up"></i>
-                                </div>
-                                <div class="ac-upload-text">
-                                    <span class="ac-upload-title">اضغط لإضافة صور</span>
-                                    <span class="ac-upload-hint">PNG, JPG حتى 5MB</span>
-                                </div>
+                                @if (_isUploadingImages)
+                                {
+                                    <div class="ac-upload-icon uploading">
+                                        <div class="ac-upload-spinner"></div>
+                                    </div>
+                                    <div class="ac-upload-text">
+                                        <span class="ac-upload-title">جاري رفع الصور...</span>
+                                        <span class="ac-upload-hint">@_uploadProgress</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="ac-upload-icon">
+                                        <i class="bi bi-cloud-arrow-up"></i>
+                                    </div>
+                                    <div class="ac-upload-text">
+                                        <span class="ac-upload-title">اضغط لإضافة صور</span>
+                                        <span class="ac-upload-hint">PNG, JPG حتى 5MB</span>
+                                    </div>
+                                }
                             </div>
-                            <input type="file"
-                                   id="imageUpload"
-                                   accept="image/*"
-                                   multiple
-                                   @onchange="HandleImageUpload"
-                                   style="display: none" />
+                            <InputFile OnChange="HandleImageUpload"
+                                       accept="image/*"
+                                       multiple
+                                       disabled="@_isUploadingImages"
+                                       style="position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer;" />
                         </label>
                     </div>
 
@@ -567,6 +580,9 @@
     private Dictionary<string, string> _validationErrors = new();
     private AcInteractiveMap? _mapComponent;
     private bool _hasReachedLocationStep;
+    private bool _isUploadingImages;
+    private string _uploadProgress = "";
+    private const long MaxFileSize = 5 * 1024 * 1024; // 5MB
 
     // Filter out images attribute - it's handled separately
     private List<ListingAttributeDefinition>? FilteredAttributes =>
@@ -796,10 +812,70 @@
         return $"https://tile.openstreetmap.org/{zoom}/{x}/{y}.png";
     }
 
-    private async Task HandleImageUpload(ChangeEventArgs e)
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
     {
-        // يتم التعامل مع رفع الصور في التطبيق المضيف
-        // هذا placeholder فقط
+        if (_isUploadingImages) return;
+
+        var files = e.GetMultipleFiles(10 - Model.Images.Count);
+        if (!files.Any()) return;
+
+        _isUploadingImages = true;
+        var totalFiles = files.Count;
+        var processedFiles = 0;
+
+        try
+        {
+            foreach (var file in files)
+            {
+                // تحقق من الحد الأقصى للصور
+                if (Model.Images.Count >= 10)
+                {
+                    break;
+                }
+
+                // تحقق من حجم الملف
+                if (file.Size > MaxFileSize)
+                {
+                    Console.WriteLine($"File {file.Name} exceeds 5MB limit");
+                    continue;
+                }
+
+                // تحقق من نوع الملف
+                if (!file.ContentType.StartsWith("image/"))
+                {
+                    Console.WriteLine($"File {file.Name} is not an image");
+                    continue;
+                }
+
+                processedFiles++;
+                _uploadProgress = $"جاري معالجة {processedFiles} من {totalFiles}...";
+                StateHasChanged();
+
+                try
+                {
+                    // قراءة الصورة وتحويلها لـ Base64
+                    using var stream = file.OpenReadStream(MaxFileSize);
+                    using var memoryStream = new MemoryStream();
+                    await stream.CopyToAsync(memoryStream);
+                    var bytes = memoryStream.ToArray();
+                    var base64 = Convert.ToBase64String(bytes);
+                    var dataUrl = $"data:{file.ContentType};base64,{base64}";
+
+                    Model.Images.Add(dataUrl);
+                    StateHasChanged();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error processing file {file.Name}: {ex.Message}");
+                }
+            }
+        }
+        finally
+        {
+            _isUploadingImages = false;
+            _uploadProgress = "";
+            StateHasChanged();
+        }
     }
 
     private void RemoveImage(int index)

@@ -2656,6 +2656,76 @@ h1, h2, h3, .ashare-logo-text {
     color: var(--ashare-gray-600);
 }
 
+.ac-upload-area.uploading {
+    pointer-events: none;
+    border-color: var(--ashare-primary);
+    background-color: rgba(52, 84, 84, 0.05);
+}
+
+.ac-upload-area.has-images {
+    padding: var(--ashare-spacing-lg);
+}
+
+.ac-upload-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--ashare-spacing-sm);
+}
+
+.ac-upload-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--ashare-gray-100);
+    border-radius: var(--ashare-radius-full);
+}
+
+.ac-upload-icon i {
+    font-size: 28px;
+    color: var(--ashare-gray-500);
+}
+
+.ac-upload-icon.uploading {
+    background-color: var(--ashare-primary);
+}
+
+.ac-upload-text {
+    text-align: center;
+}
+
+.ac-upload-title {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ashare-gray-700);
+    margin-bottom: 4px;
+}
+
+.ac-upload-hint {
+    display: block;
+    font-size: 12px;
+    color: var(--ashare-gray-500);
+}
+
+/* Upload Spinner */
+.ac-upload-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: ac-spin 0.8s linear infinite;
+}
+
+@keyframes ac-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .ac-image-preview-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
