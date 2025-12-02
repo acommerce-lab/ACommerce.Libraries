@@ -6,10 +6,9 @@ namespace ACommerce.Client.Auth;
 /// <summary>
 /// Client للمصادقة عبر نفاذ
 /// </summary>
-public sealed class AuthClient(IApiClient httpClient)
+public sealed class AuthClient(IApiClient httpClient, TokenManager tokenManager)
 {
     private const string ServiceName = "Marketplace";
-    private string? _currentToken;
 
     #region Nafath Authentication
 
@@ -55,7 +54,7 @@ public sealed class AuthClient(IApiClient httpClient)
 
         if (response?.Success == true && !string.IsNullOrEmpty(response.Token))
         {
-            _currentToken = response.Token;
+            tokenManager.SetToken(response.Token, response.ExpiresAt);
         }
 
         return response;
@@ -81,7 +80,7 @@ public sealed class AuthClient(IApiClient httpClient)
     /// </summary>
     public async Task LogoutAsync(CancellationToken cancellationToken = default)
     {
-        _currentToken = null;
+        tokenManager.ClearToken();
         await httpClient.PostAsync<object>(
             ServiceName,
             "/api/auth/logout",
@@ -96,22 +95,22 @@ public sealed class AuthClient(IApiClient httpClient)
     /// <summary>
     /// تخزين الـ Token
     /// </summary>
-    public void SetToken(string token) => _currentToken = token;
+    public void SetToken(string token, DateTime? expiresAt = null) => tokenManager.SetToken(token, expiresAt);
 
     /// <summary>
     /// الحصول على الـ Token الحالي
     /// </summary>
-    public string? GetToken() => _currentToken;
+    public async Task<string?> GetTokenAsync() => await tokenManager.GetTokenAsync();
 
     /// <summary>
     /// التحقق من وجود token
     /// </summary>
-    public bool HasToken => !string.IsNullOrEmpty(_currentToken);
+    public bool HasToken => tokenManager.HasToken;
 
     /// <summary>
     /// مسح الـ Token
     /// </summary>
-    public void ClearToken() => _currentToken = null;
+    public void ClearToken() => tokenManager.ClearToken();
 
     #endregion
 }
