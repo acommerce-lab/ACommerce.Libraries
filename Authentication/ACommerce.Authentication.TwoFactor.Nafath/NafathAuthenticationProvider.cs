@@ -124,7 +124,10 @@ public class NafathAuthenticationProvider(
 
             if (session.Status == TwoFactorSessionStatus.Verified)
             {
-                return TwoFactorVerificationResult.Ok(request.TransactionId);
+                return TwoFactorVerificationResult.Ok(request.TransactionId, new Dictionary<string, string>
+                {
+                    ["national_id"] = session.Identifier
+                });
             }
 
             if (session.ExpiresAt < DateTimeOffset.UtcNow)
@@ -145,7 +148,10 @@ public class NafathAuthenticationProvider(
             {
                 session = session with { Status = TwoFactorSessionStatus.Verified };
                 await sessionStore.UpdateSessionAsync(session, cancellationToken);
-                return TwoFactorVerificationResult.Ok(request.TransactionId);
+                return TwoFactorVerificationResult.Ok(request.TransactionId, new Dictionary<string, string>
+                {
+                    ["national_id"] = session.Identifier
+                });
             }
 
             return TwoFactorVerificationResult.Fail(new()
