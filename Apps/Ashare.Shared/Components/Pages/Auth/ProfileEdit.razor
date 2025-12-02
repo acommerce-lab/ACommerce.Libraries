@@ -2,7 +2,6 @@
 @using ACommerce.Client.Auth
 @using ACommerce.Client.Profiles
 @using Microsoft.AspNetCore.Components.Forms
-@using Microsoft.AspNetCore.WebUtilities
 @inject AuthClient AuthClient
 @inject ProfilesClient ProfilesClient
 @inject IAppNavigationService Navigation
@@ -213,11 +212,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // التحقق من معامل new في الرابط
-        var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
-        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("new", out var newValue))
+        // التحقق من معامل new في الرابط (بدون استخدام WebUtilities للتوافق مع MAUI)
+        try
         {
-            _isNewUser = newValue == "true";
+            var uri = new Uri(NavManager.Uri);
+            var query = uri.Query.TrimStart('?');
+            _isNewUser = query.Contains("new=true", StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            _isNewUser = false;
         }
 
         await LoadProfile();
