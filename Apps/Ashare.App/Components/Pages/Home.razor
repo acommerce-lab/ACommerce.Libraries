@@ -42,6 +42,20 @@
         </div>
     </section>
 
+    @* CTA - Create Listing *@
+    <section class="ashare-cta-section" @onclick="@(() => Navigation.NavigateTo("/create-listing"))">
+        <div class="ashare-cta-content">
+            <div class="ashare-cta-icon">
+                <i class="bi bi-plus-circle"></i>
+            </div>
+            <div class="ashare-cta-text">
+                <h3>لديك مساحة للمشاركة؟</h3>
+                <p>أضف مساحتك الآن وابدأ بالكسب من تأجيرها</p>
+            </div>
+            <i class="bi bi-chevron-left ashare-cta-arrow"></i>
+        </div>
+    </section>
+
     @* Featured Spaces *@
     @if (_featuredSpaces?.Any() == true)
     {
