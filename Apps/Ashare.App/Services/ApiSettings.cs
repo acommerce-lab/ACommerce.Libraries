@@ -9,7 +9,7 @@ public class ApiSettings
     /// <summary>
     /// Production API URL
     /// </summary>
-    public const string ProductionUrl = "https://api.ashare.app";
+    public const string ProductionUrl = "http://safqatasheer-001-site1.qtempurl.com";
 
     /// <summary>
     /// Development URL for Android Emulator (10.0.2.2 maps to host's localhost)
