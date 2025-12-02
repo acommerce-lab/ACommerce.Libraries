@@ -92,6 +92,9 @@
 
     <!-- InApp Notifications (SignalR) -->
     <ProjectReference Include="..\..\Other\ACommerce.Notifications.Channels.InApp\ACommerce.Notifications.Channels.InApp.csproj" />
+
+    <!-- Notifications Messaging (handles SendNotificationCommand) -->
+    <ProjectReference Include="..\..\ACommerce.Notifications.Messaging\ACommerce.Notifications.Messaging.csproj" />
   </ItemGroup>
 
   <ItemGroup>
