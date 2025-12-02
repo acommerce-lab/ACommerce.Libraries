@@ -58,14 +58,17 @@
             {
                 @* عرض الرقم العشوائي وانتظار التحقق *@
                 <div class="ashare-nafath-waiting">
-                    <div class="ashare-nafath-number">@_nafathResult.RandomNumber</div>
-                    <p>@L["SelectNumberInNafathApp"]</p>
+                    <p class="ashare-nafath-instruction">@L["SelectNumberInNafathApp"]</p>
 
+                    @* الرقم الذي يجب اختياره في تطبيق نفاذ *@
+                    <div class="ashare-nafath-code-container">
+                        <div class="ashare-nafath-number">@(_nafathResult.RandomNumber ?? "00")</div>
+                    </div>
+
+                    @* العداد التنازلي *@
                     <div class="ashare-nafath-timer">
-                        <div class="ashare-timer-circle">
-                            <span>@_countdown</span>
-                        </div>
-                        <span>@L["SecondsRemaining"]</span>
+                        <i class="bi bi-clock"></i>
+                        <span>@_countdown @L["SecondsRemaining"]</span>
                     </div>
 
                     @if (_nafathCompleted)
@@ -83,6 +86,14 @@
                         </div>
                         <button class="ac-btn ac-btn-secondary" @onclick="ResetNafath">
                             @L["TryAgain"]
+                        </button>
+                    }
+                    else
+                    {
+                        @* زر الإلغاء *@
+                        <button class="ac-btn ac-btn-outline ac-btn-block" style="margin-top: 20px;" @onclick="CancelNafath">
+                            <i class="bi bi-x-circle"></i>
+                            <span>@L["Cancel"]</span>
                         </button>
                     }
                 </div>
@@ -197,6 +208,15 @@
         _nafathExpired = false;
         _countdown = 120;
         _errorMessage = null;
+    }
+
+    private void CancelNafath()
+    {
+        _timer?.Stop();
+        _timer?.Dispose();
+        _pollTimer?.Stop();
+        _pollTimer?.Dispose();
+        ResetNafath();
     }
 
     public void Dispose()
