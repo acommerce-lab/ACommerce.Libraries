@@ -21,7 +21,7 @@
 
 		<!-- Reference to Clients -->
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
-		<ProjectReference Include="..\..\Clients\ACommerce.Client.Auth\ACommerce.Client.Auth.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Nafath\ACommerce.Client.Nafath.csproj" />
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Profiles\ACommerce.Client.Profiles.csproj" />
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Locations\ACommerce.Client.Locations.csproj" />
 
