@@ -5,6 +5,8 @@ using ACommerce.SharedKernel.Infrastructure.EFCores.Extensions;
 using ACommerce.SharedKernel.CQRS.Extensions;
 using ACommerce.Authentication.JWT;
 using ACommerce.Authentication.Users.Abstractions;
+using ACommerce.Authentication.TwoFactor.Nafath;
+using ACommerce.Authentication.TwoFactor.SessionStore.InMemory;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using ACommerce.SharedKernel.Infrastructure.EFCore.Repositories;
 using ACommerce.SharedKernel.Infrastructure.EFCore.Factories;
@@ -29,6 +31,7 @@ using ACommerce.Transactions.Core.Api.Controllers;
 using ACommerce.Locations.Api.Controllers;
 using ACommerce.Chats.Api.Controllers;
 using ACommerce.Notifications.Recipients.Api.Controllers;
+using ACommerce.Authentication.AspNetCore.NafathWH.Controllers;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -74,7 +77,8 @@ try
         .AddApplicationPart(typeof(DocumentTypesController).Assembly)
         .AddApplicationPart(typeof(LocationSearchController).Assembly)
         .AddApplicationPart(typeof(ChatsController).Assembly)
-        .AddApplicationPart(typeof(ContactPointsController).Assembly);
+        .AddApplicationPart(typeof(ContactPointsController).Assembly)
+        .AddApplicationPart(typeof(NafathWebhookController).Assembly);
 
     builder.Services.AddEndpointsApiExplorer();
 
@@ -98,6 +102,10 @@ try
 
     // User Provider (In-Memory for development - replace with DB implementation for production)
     builder.Services.AddSingleton<IUserProvider, InMemoryUserProvider>();
+
+    // Two-Factor Authentication (Nafath for Saudi Arabia)
+    builder.Services.AddInMemoryTwoFactorSessionStore(); // Session store for 2FA
+    builder.Services.AddNafathTwoFactor(builder.Configuration); // Nafath provider
 
     // CQRS (MediatR + AutoMapper + FluentValidation)
     builder.Services.AddSharedKernelCQRS(AppDomain.CurrentDomain.GetAssemblies());
@@ -168,6 +176,10 @@ Built using ACommerce libraries with configuration-first approach:
 - `/api/auth/me` - Get current user
 - `/api/auth/logout` - Logout
 - `/api/auth/refresh` - Refresh token
+- `/api/auth/2fa/initiate` - Start 2FA (Nafath/SMS/Email)
+- `/api/auth/2fa/verify` - Verify 2FA code
+- `/api/auth/2fa/cancel` - Cancel 2FA session
+- `/api/nafath/webhook` - Nafath callback webhook
 
 ### Resources
 - `/api/profiles` - User profiles
