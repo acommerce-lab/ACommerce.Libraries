@@ -79,7 +79,8 @@ public sealed class ServiceDiscovery : IServiceDiscovery
 
 	public async Task<ServiceEndpoint?> GetServiceAsync(string serviceName, CancellationToken cancellationToken = default)
 	{
-		return await DiscoverAsync(new ServiceQuery { ServiceName = serviceName }, cancellationToken);
+		// لا نفلتر بالصحة هنا - نريد أي خدمة متاحة
+		return await DiscoverAsync(new ServiceQuery { ServiceName = serviceName, OnlyHealthy = false }, cancellationToken);
 	}
 
 	public async Task<IEnumerable<ServiceEndpoint>> GetAllInstancesAsync(string serviceName, CancellationToken cancellationToken = default)

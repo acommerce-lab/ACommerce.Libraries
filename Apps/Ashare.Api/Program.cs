@@ -28,6 +28,8 @@ using ACommerce.Messaging.SignalR.Hub.Extensions;
 using ACommerce.Messaging.SignalR.Hub.Hubs;
 using ACommerce.Notifications.Core.Extensions;
 using ACommerce.Notifications.Channels.InApp.Extensions;
+using ACommerce.Authentication.Abstractions.Contracts;
+using ACommerce.Authentication.AspNetCore.Services;
 
 // Controllers from libraries
 using ACommerce.Profiles.Api.Controllers;
@@ -113,6 +115,24 @@ try
     // User Provider (In-Memory for development - replace with DB implementation for production)
     builder.Services.AddSingleton<IUserProvider, InMemoryUserProvider>();
 
+    // ===== Service Registry & Messaging (Self-Hosting for Development) =====
+    // Service Registry (allows other services to register and discover endpoints)
+    builder.Services.AddServiceRegistryCore();
+
+    // In-Memory Messaging (pub/sub within same process)
+    builder.Services.AddInMemoryMessaging("Ashare");
+
+    // SignalR Messaging Hub (inter-service communication)
+    builder.Services.AddMessagingHub();
+
+    // Notifications (InApp via SignalR)
+    builder.Services.AddNotificationCore(builder.Configuration);
+    builder.Services.AddInAppNotifications();
+    builder.Services.AddInMemoryNotificationPublisher();
+
+    // ✅ Authentication Event Publisher (يجب أن يكون قبل AddNafathTwoFactor)
+    builder.Services.AddScoped<IAuthenticationEventPublisher, MessagingAuthenticationEventPublisher>();
+
     // Two-Factor Authentication (Nafath for Saudi Arabia)
     builder.Services.AddInMemoryTwoFactorSessionStore(); // Session store for 2FA
     builder.Services.AddNafathTwoFactor(builder.Configuration); // Nafath provider
@@ -134,21 +154,6 @@ try
 
     // Ashare Seed Service
     builder.Services.AddScoped<AshareSeedDataService>();
-
-    // ===== Service Registry & Messaging (Self-Hosting for Development) =====
-    // Service Registry (allows other services to register and discover endpoints)
-    builder.Services.AddServiceRegistryCore();
-
-    // In-Memory Messaging (pub/sub within same process)
-    builder.Services.AddInMemoryMessaging("Ashare");
-
-    // SignalR Messaging Hub (inter-service communication)
-    builder.Services.AddMessagingHub();
-
-    // Notifications (InApp via SignalR)
-    builder.Services.AddNotificationCore(builder.Configuration);
-    builder.Services.AddInAppNotifications();
-    builder.Services.AddInMemoryNotificationPublisher();
 
     // Swagger Documentation
     builder.Services.AddSwaggerGen(options =>
