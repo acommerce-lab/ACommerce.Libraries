@@ -190,6 +190,7 @@ public class LocalizationService : ILocalizationService
         ["LoginWithNafath"] = "الدخول بنفاذ",
         ["LoginWithEmail"] = "الدخول بالبريد الإلكتروني",
         ["ContinueWithNafath"] = "المتابعة بنفاذ",
+        ["ContinueAsGuest"] = "المتابعة كضيف",
         ["NationalId"] = "رقم الهوية الوطنية",
         ["EnterNationalId"] = "أدخل رقم الهوية",
         ["SelectNumberInNafathApp"] = "اختر هذا الرقم في تطبيق نفاذ",
@@ -446,6 +447,7 @@ public class LocalizationService : ILocalizationService
         ["LoginWithNafath"] = "Login with Nafath",
         ["LoginWithEmail"] = "Login with Email",
         ["ContinueWithNafath"] = "Continue with Nafath",
+        ["ContinueAsGuest"] = "Continue as Guest",
         ["NationalId"] = "National ID",
         ["EnterNationalId"] = "Enter your National ID",
         ["SelectNumberInNafathApp"] = "Select this number in Nafath app",
@@ -698,6 +700,7 @@ public class LocalizationService : ILocalizationService
         ["LoginWithNafath"] = "نفاذ سے لاگ ان",
         ["LoginWithEmail"] = "ای میل سے لاگ ان",
         ["ContinueWithNafath"] = "نفاذ کے ساتھ جاری رکھیں",
+        ["ContinueAsGuest"] = "مہمان کے طور پر جاری رکھیں",
         ["NationalId"] = "قومی شناختی نمبر",
         ["EnterNationalId"] = "اپنا قومی شناختی نمبر درج کریں",
 

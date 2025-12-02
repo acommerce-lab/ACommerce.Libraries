@@ -4917,6 +4917,28 @@ h1, h2, h3, .ashare-logo-text {
     text-decoration: underline;
 }
 
+/* Login divider (Or) */
+.ashare-login-divider {
+    display: flex;
+    align-items: center;
+    margin: var(--ashare-spacing-lg) 0;
+    gap: var(--ashare-spacing-md);
+}
+
+.ashare-login-divider::before,
+.ashare-login-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--ashare-gray-300);
+}
+
+.ashare-login-divider span {
+    color: var(--ashare-gray-500);
+    font-size: 14px;
+    font-weight: 500;
+}
+
 /* Email login */
 .ashare-email-login {
     max-width: 400px;

@@ -2,6 +2,8 @@
 @inject Ashare.Shared.Services.ThemeService ThemeService
 @inject IAppNavigationService Navigation
 @inject AshareApiService ApiService
+@inject ACommerce.Client.Auth.TokenManager TokenManager
+@inject Ashare.Shared.Services.GuestModeService GuestMode
 
 <div class="ashare-app @(ThemeService.IsDarkMode ? "ac-dark" : "")">
     @* Navbar *@
@@ -75,13 +77,32 @@
 
     private int BookingsCount { get; set; }
     private int NotificationCount { get; set; }
+    private bool _authChecked;
 
-    private bool IsAuthPage => RouteData?.PageType?.Name is "Login" or "Register";
+    private bool IsAuthPage => RouteData?.PageType?.Name is "Login" or "Register" or "ProfileEdit";
 
     protected override async Task OnInitializedAsync()
     {
+        // تحميل عدد الحجوزات والإشعارات
         BookingsCount = await ApiService.GetBookingsCountAsync();
         NotificationCount = ApiService.GetNotificationsCount();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_authChecked)
+        {
+            _authChecked = true;
+
+            // التحقق من المصادقة - إذا لم يكن مسجلاً دخوله وليس في وضع الضيف وليس في صفحة تسجيل الدخول
+            var hasToken = await TokenManager.GetTokenAsync() != null;
+            var isGuest = GuestMode.IsGuestMode;
+
+            if (!hasToken && !isGuest && !IsAuthPage)
+            {
+                Navigation.NavigateTo("/login");
+            }
+        }
     }
 
     private bool IsActive(string path)

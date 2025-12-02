@@ -193,6 +193,9 @@ public static class MauiProgram
         // Theme Service (Dark/Light Mode)
         builder.Services.AddSingleton<ThemeService>();
 
+        // Guest Mode Service (allows browsing without login)
+        builder.Services.AddSingleton<GuestModeService>();
+
         // Navigation Service (MAUI implementation)
         builder.Services.AddScoped<IAppNavigationService, Ashare.App.Services.AppNavigationService>();
 

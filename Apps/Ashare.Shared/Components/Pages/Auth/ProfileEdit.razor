@@ -296,7 +296,8 @@
                 FullName = _fullName,
                 Email = string.IsNullOrWhiteSpace(_email) ? null : _email,
                 PhoneNumber = string.IsNullOrEmpty(_phoneNumber) ? null : $"+966{_phoneNumber}",
-                Address = _address
+                Address = _address,
+                Avatar = _avatarUrl // إرسال الصورة (base64 أو URL)
             };
 
             await ProfilesClient.UpdateMyProfileAsync(request);

@@ -9,6 +9,7 @@
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
 @inject Ashare.Shared.Services.ThemeService Theme
+@inject Ashare.Shared.Services.GuestModeService GuestMode
 @implements IAsyncDisposable
 
 <div class="ac-page ashare-login-page @(Theme.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
@@ -58,6 +59,16 @@
                     {
                         <span>@L["ContinueWithNafath"]</span>
                     }
+                </button>
+
+                <div class="ashare-login-divider">
+                    <span>@L["Or"]</span>
+                </div>
+
+                <button class="ac-btn ac-btn-outline ac-btn-lg ac-btn-block"
+                        @onclick="ContinueAsGuest">
+                    <i class="bi bi-person"></i>
+                    <span>@L["ContinueAsGuest"]</span>
                 </button>
             }
             else
@@ -376,6 +387,12 @@
         _nafathFailReason = null;
         _countdown = 120;
         _errorMessage = null;
+    }
+
+    private void ContinueAsGuest()
+    {
+        GuestMode.EnableGuestMode();
+        Navigation.NavigateTo("/");
     }
 
     private async Task CancelNafath()

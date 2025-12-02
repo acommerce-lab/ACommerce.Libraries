@@ -135,6 +135,9 @@ builder.Services.AddScoped<ILocalizationService, LocalizationService>();
 // Theme Service (Dark/Light Mode)
 builder.Services.AddScoped<ThemeService>();
 
+// Guest Mode Service (allows browsing without login)
+builder.Services.AddSingleton<GuestModeService>();
+
 // Navigation Service (Web implementation)
 builder.Services.AddScoped<IAppNavigationService, WebNavigationService>();
 
