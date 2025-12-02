@@ -124,6 +124,27 @@ public class NafathApiClient : INafathApiClient
         string nationalId,
         CancellationToken cancellationToken)
     {
+        // التحقق من رقم الهوية في وضع الاختبار - فقط الرقم المسجل يعمل
+        var testNationalId = _configuration[$"{NafathOptions.SectionName}:TestNationalId"] ?? "2507643761";
+
+        if (nationalId != testNationalId)
+        {
+            _logger.LogWarning(
+                "[Nafath] Test mode: Invalid national ID {NationalId}. Only {TestNationalId} is allowed",
+                nationalId, testNationalId);
+
+            return new NafathInitiationResponse
+            {
+                Success = false,
+                Error = new TwoFactorError
+                {
+                    Code = "INVALID_NATIONAL_ID",
+                    Message = "رقم الهوية غير صالح في وضع الاختبار",
+                    Details = $"في وضع الاختبار، استخدم رقم الهوية: {testNationalId}"
+                }
+            };
+        }
+
         _logger.LogInformation(
             "[Nafath] Test mode: Creating fake transaction for {NationalId}",
             nationalId);
