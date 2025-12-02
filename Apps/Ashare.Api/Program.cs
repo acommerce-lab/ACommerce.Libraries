@@ -28,9 +28,11 @@ using ACommerce.Messaging.SignalR.Hub.Extensions;
 using ACommerce.Messaging.SignalR.Hub.Hubs;
 using ACommerce.Notifications.Core.Extensions;
 using ACommerce.Notifications.Channels.InApp.Extensions;
+using ACommerce.Notifications.Messaging.Extensions;
 using ACommerce.Authentication.Abstractions.Contracts;
 using ACommerce.Authentication.AspNetCore.Services;
 using ACommerce.Authentication.Messaging.Extensions;
+using ACommerce.Notifications.Abstractions.Enums;
 
 // Controllers from libraries
 using ACommerce.Profiles.Api.Controllers;
@@ -131,11 +133,18 @@ try
     builder.Services.AddInAppNotifications();
     builder.Services.AddInMemoryNotificationPublisher();
 
+    // ✅ Notification Messaging Handler (subscribes to notify.commands.send and sends notifications)
+    builder.Services.AddNotificationMessaging();
+
     // ✅ Authentication Event Publisher (يجب أن يكون قبل AddNafathTwoFactor)
     builder.Services.AddScoped<IAuthenticationEventPublisher, MessagingAuthenticationEventPublisher>();
 
     // ✅ Authentication Messaging Handler (subscribes to auth events and sends notifications)
-    builder.Services.AddAuthenticationMessaging();
+    builder.Services.AddAuthenticationMessaging(options =>
+    {
+        options.NotificationChannels = [NotificationChannel.InApp]; // SignalR بدلاً من Email
+        options.NotifyOnInitiation = false; // لا نرسل إشعار عند بدء التحقق
+    });
 
     // Two-Factor Authentication (Nafath for Saudi Arabia)
     builder.Services.AddInMemoryTwoFactorSessionStore(); // Session store for 2FA

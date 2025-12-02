@@ -1,6 +1,7 @@
 ﻿using ACommerce.Messaging.Abstractions.Contracts;
 using ACommerce.Messaging.Abstractions.Models;
 using ACommerce.Notifications.Abstractions.Contracts;
+using ACommerce.Notifications.Abstractions.Enums;
 using ACommerce.Notifications.Abstractions.Models;
 using ACommerce.Notifications.Messaging.Commands;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,24 +49,29 @@ public class NotificationMessagingHandler(
             var notificationService = scope.ServiceProvider
                 .GetRequiredService<INotificationService>();
 
-            // Extract email from UserId or Data
+            // Check if email is required (only for Email channel)
+            var requiresEmail = command.Channels.Contains(NotificationChannel.Email);
             string? recipientEmail = null;
 
-            if (command.UserId.Contains("@"))
+            if (requiresEmail)
             {
-                recipientEmail = command.UserId;
-            }
-            else if (command.Data?.TryGetValue("email", out var emailObj) == true)
-            {
-                recipientEmail = emailObj?.ToString();
-            }
+                // Extract email from UserId or Data
+                if (command.UserId.Contains("@"))
+                {
+                    recipientEmail = command.UserId;
+                }
+                else if (command.Data?.TryGetValue("email", out var emailObj) == true)
+                {
+                    recipientEmail = emailObj?.ToString();
+                }
 
-            if (string.IsNullOrWhiteSpace(recipientEmail))
-            {
-                logger.LogWarning(
-                    "[Notify Messaging] ⚠️ No email found for user {UserId}",
-                    command.UserId);
-                return false;
+                if (string.IsNullOrWhiteSpace(recipientEmail))
+                {
+                    logger.LogWarning(
+                        "[Notify Messaging] ⚠️ No email found for user {UserId}",
+                        command.UserId);
+                    return false;
+                }
             }
 
             // Build notification
@@ -87,12 +93,16 @@ public class NotificationMessagingHandler(
                     ?? new Dictionary<string, string>()
             };
 
-            // Ensure email is in Data
-            notification.Data["email"] = recipientEmail;
+            // Ensure email is in Data (only if we have one)
+            if (!string.IsNullOrWhiteSpace(recipientEmail))
+            {
+                notification.Data["email"] = recipientEmail;
+            }
 
             logger.LogDebug(
-                "[Notify Messaging] 📧 Sending notification to email: {Email}",
-                recipientEmail);
+                "[Notify Messaging] 📤 Sending notification to user: {UserId}, Channels: {Channels}",
+                command.UserId,
+                string.Join(", ", command.Channels));
 
             // Send notification
             var result = await notificationService.SendAsync(
