@@ -39,20 +39,29 @@ public class InAppNotificationChannel : INotificationChannel
 				notification.Id,
 				notification.UserId);
 
-			// ???? payload ???????
 			var payload = BuildNotificationPayload(notification);
 
-			// ????? ??? SignalR
+			// Send to authenticated user (for logged-in users)
 			await _realtimeHub.SendToUserAsync(
 				notification.UserId,
 				_options.MethodName,
 				payload,
 				cancellationToken);
 
+			// Also send to auth group (for anonymous clients waiting for authentication)
+			// This allows clients who called SubscribeToAuth(identifier) to receive notifications
+			var authGroupName = $"auth_{notification.UserId}";
+			await _realtimeHub.SendToGroupAsync(
+				authGroupName,
+				_options.MethodName,
+				payload,
+				cancellationToken);
+
 			_logger.LogInformation(
-				"InApp notification {NotificationId} sent successfully to user {UserId}",
+				"InApp notification {NotificationId} sent successfully to user {UserId} and group {GroupName}",
 				notification.Id,
-				notification.UserId);
+				notification.UserId,
+				authGroupName);
 
 			return new NotificationResult
 			{
@@ -62,6 +71,7 @@ public class InAppNotificationChannel : INotificationChannel
 				{
 					["method"] = _options.MethodName,
 					["userId"] = notification.UserId,
+					["authGroup"] = authGroupName,
 					["sentVia"] = "SignalR"
 				}
 			};

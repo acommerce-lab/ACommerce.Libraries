@@ -29,6 +29,55 @@ public class NotificationHub : BaseRealtimeHub<INotificationClient>
 	}
 
 	/// <summary>
+	/// Subscribe to authentication notifications for a specific identifier (NationalId)
+	/// This allows anonymous clients to receive auth success/failure notifications
+	/// </summary>
+	public async Task SubscribeToAuth(string identifier)
+	{
+		if (string.IsNullOrEmpty(identifier))
+		{
+			Logger.LogWarning("SubscribeToAuth called with empty identifier");
+			return;
+		}
+
+		// Add connection to a group based on the identifier
+		// This allows the client to receive notifications when auth succeeds/fails
+		var groupName = $"auth_{identifier}";
+		await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+
+		Logger.LogInformation(
+			"Connection {ConnectionId} subscribed to auth notifications for {Identifier}",
+			Context.ConnectionId,
+			identifier);
+
+		// Confirm subscription to client
+		await Clients.Caller.ReceiveMessage("AuthSubscribed", new
+		{
+			Identifier = identifier,
+			GroupName = groupName
+		});
+	}
+
+	/// <summary>
+	/// Unsubscribe from authentication notifications
+	/// </summary>
+	public async Task UnsubscribeFromAuth(string identifier)
+	{
+		if (string.IsNullOrEmpty(identifier))
+		{
+			return;
+		}
+
+		var groupName = $"auth_{identifier}";
+		await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
+
+		Logger.LogInformation(
+			"Connection {ConnectionId} unsubscribed from auth notifications for {Identifier}",
+			Context.ConnectionId,
+			identifier);
+	}
+
+	/// <summary>
 	/// Unsubscribe from a specific notification topic
 	/// </summary>
 	public async Task UnsubscribeFromTopic(string topic)
