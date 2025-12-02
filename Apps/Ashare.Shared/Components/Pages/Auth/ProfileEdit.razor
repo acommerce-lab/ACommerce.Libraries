@@ -2,21 +2,39 @@
 @using ACommerce.Client.Auth
 @using ACommerce.Client.Profiles
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.WebUtilities
 @inject AuthClient AuthClient
 @inject ProfilesClient ProfilesClient
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
 @inject Ashare.Shared.Services.ThemeService Theme
+@inject NavigationManager NavManager
 
 <div class="ac-page ashare-profile-edit-page @(Theme.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
     @* Header *@
     <div class="ashare-profile-edit-header">
-        <button class="ashare-back-btn" @onclick="() => Navigation.NavigateBack()">
-            <i class="bi bi-arrow-right"></i>
-        </button>
-        <h1>@L["EditProfile"]</h1>
+        @if (!_isNewUser)
+        {
+            <button class="ashare-back-btn" @onclick="() => Navigation.NavigateBack()">
+                <i class="bi bi-arrow-right"></i>
+            </button>
+        }
+        else
+        {
+            <div style="width: 40px"></div>
+        }
+        <h1>@(_isNewUser ? L["CompleteYourProfile"] : L["EditProfile"])</h1>
         <div style="width: 40px"></div>
     </div>
+
+    @if (_isNewUser)
+    {
+        <div class="ashare-welcome-message" style="padding: 16px; text-align: center; background: var(--ashare-primary-light); margin: 0 16px 16px; border-radius: 12px;">
+            <i class="bi bi-hand-wave" style="font-size: 32px; color: var(--ashare-primary);"></i>
+            <h3 style="margin: 8px 0 4px; color: var(--ashare-text);">@L["WelcomeToAshare"]</h3>
+            <p style="margin: 0; color: var(--ashare-text-secondary); font-size: 14px;">@L["PleaseCompleteYourProfile"]</p>
+        </div>
+    }
 
     @if (_isLoading)
     {
@@ -185,7 +203,7 @@
                 }
                 else
                 {
-                    <span>@L["SaveChanges"]</span>
+                    <span>@(_isNewUser ? L["Continue"] : L["SaveChanges"])</span>
                 }
             </button>
         </div>
@@ -197,6 +215,7 @@
     private bool _isSaving;
     private bool _showSuccess;
     private string? _errorMessage;
+    private bool _isNewUser;
 
     // Profile fields
     private string? _avatarUrl;
@@ -213,6 +232,13 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // التحقق من معامل new في الرابط
+        var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("new", out var newValue))
+        {
+            _isNewUser = newValue == "true";
+        }
+
         await LoadProfile();
     }
 
@@ -276,6 +302,14 @@
         _errorMessage = null;
         _showSuccess = false;
 
+        // التحقق من الحقول المطلوبة للمستخدمين الجدد
+        if (_isNewUser && string.IsNullOrWhiteSpace(_firstName))
+        {
+            _errorMessage = L["FirstNameRequired"];
+            _isSaving = false;
+            return;
+        }
+
         try
         {
             var request = new UpdateProfileRequest
@@ -287,14 +321,22 @@
             };
 
             await ProfilesClient.UpdateMyProfileAsync(request);
-            _showSuccess = true;
 
-            // Auto-hide success message after 3 seconds
-            _ = Task.Delay(3000).ContinueWith(_ =>
+            if (_isNewUser)
             {
-                _showSuccess = false;
-                InvokeAsync(StateHasChanged);
-            });
+                // للمستخدمين الجدد - التوجيه للصفحة الرئيسية بعد الحفظ
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                _showSuccess = true;
+                // Auto-hide success message after 3 seconds
+                _ = Task.Delay(3000).ContinueWith(_ =>
+                {
+                    _showSuccess = false;
+                    InvokeAsync(StateHasChanged);
+                });
+            }
         }
         catch (Exception ex)
         {
