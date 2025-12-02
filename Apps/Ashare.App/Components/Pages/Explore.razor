@@ -1,6 +1,9 @@
 @page "/explore"
+@using ACommerce.Templates.Customer.Components
+@using Microsoft.JSInterop
 @inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
+@inject IJSRuntime JS
 
 <div class="ac-page ac-explore-page">
     @* Filter Bar *@
@@ -24,29 +27,114 @@
         </button>
     </div>
 
-    @* Sort Options *@
+    @* Sort Options & View Toggle *@
     <div class="ashare-sort-bar">
         <span class="ashare-results-count">@(_filteredSpaces?.Count ?? 0) نتيجة</span>
-        <select class="ashare-sort-select" @onchange="HandleSortChange">
-            <option value="newest">الأحدث</option>
-            <option value="price_low">السعر: الأقل</option>
-            <option value="price_high">السعر: الأعلى</option>
-            <option value="rating">التقييم</option>
-            <option value="capacity">السعة</option>
-        </select>
+        <div class="ashare-view-controls">
+            <select class="ashare-sort-select" @onchange="HandleSortChange">
+                <option value="newest">الأحدث</option>
+                <option value="price_low">السعر: الأقل</option>
+                <option value="price_high">السعر: الأعلى</option>
+                <option value="rating">التقييم</option>
+                <option value="capacity">السعة</option>
+            </select>
+            <div class="ashare-view-toggle">
+                <button class="ashare-view-btn @(_viewMode == "list" ? "active" : "")" @onclick="() => SetViewMode("list")">
+                    <i class="bi bi-list-ul"></i>
+                </button>
+                <button class="ashare-view-btn @(_viewMode == "map" ? "active" : "")" @onclick="() => SetViewMode("map")">
+                    <i class="bi bi-map"></i>
+                </button>
+            </div>
+        </div>
     </div>
 
-    @* Spaces Grid *@
-    <div class="ashare-spaces-grid">
-        @if (_filteredSpaces?.Any() == true)
-        {
-            @foreach (var space in _filteredSpaces)
+    @if (_viewMode == "list")
+    {
+        @* List View - Spaces Grid *@
+        <div class="ashare-spaces-grid">
+            @if (_filteredSpaces?.Any() == true)
             {
-                <div class="ashare-space-card ashare-space-card-grid" @onclick="() => HandleSpaceClick(space.Id)">
-                    <div class="ashare-space-image">
-                        @if (space.Images.Any())
+                @foreach (var space in _filteredSpaces)
+                {
+                    <div class="ashare-space-card ashare-space-card-grid" @onclick="() => HandleSpaceClick(space.Id)">
+                        <div class="ashare-space-image">
+                            @if (space.Images.Any())
+                            {
+                                <img src="@space.Images.First()" alt="@space.Name" loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="ashare-space-no-image">
+                                    <i class="bi bi-building"></i>
+                                </div>
+                            }
+                            @if (space.IsFeatured)
+                            {
+                                <span class="ac-product-badge ac-product-badge-featured">مميز</span>
+                            }
+                            @if (space.IsNew)
+                            {
+                                <span class="ac-product-badge ac-product-badge-new">جديد</span>
+                            }
+                            <button class="ashare-favorite-btn" @onclick:stopPropagation="true" @onclick="() => ToggleFavorite(space.Id)">
+                                <i class="bi @(IsFavorite(space.Id) ? "bi-heart-fill" : "bi-heart")"></i>
+                            </button>
+                        </div>
+                        <div class="ashare-space-content">
+                            <span class="ashare-space-category">@space.CategoryName</span>
+                            <h3 class="ashare-space-name">@space.Name</h3>
+                            <div class="ashare-space-location">
+                                <i class="bi bi-geo-alt"></i>
+                                @space.Location
+                            </div>
+                            <div class="ashare-space-meta">
+                                <span class="ashare-space-capacity">
+                                    <i class="bi bi-people"></i> @space.Capacity
+                                </span>
+                                <span class="ashare-space-rating">
+                                    <i class="bi bi-star-fill"></i> @space.Rating
+                                </span>
+                            </div>
+                            <div class="ashare-space-price">@space.DisplayPrice</div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="ashare-empty-state">
+                    <i class="bi bi-building"></i>
+                    <h3>لا توجد مساحات</h3>
+                    <p>جرب تغيير معايير البحث</p>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        @* Map View *@
+        <div class="ashare-map-view">
+            @if (_hasRenderedMap)
+            {
+                <div class="ashare-explore-map-wrapper">
+                    <div id="explore-map-container" class="ashare-explore-map"></div>
+                </div>
+            }
+        </div>
+
+        @* Bottom Sheet Preview *@
+        @if (_selectedSpace != null)
+        {
+            <div class="ashare-map-preview-sheet @(_selectedSpace != null ? "visible" : "")">
+                <div class="ashare-preview-handle" @onclick="ClosePreview">
+                    <div class="ashare-handle-bar"></div>
+                </div>
+                <div class="ashare-preview-card" @onclick="() => HandleSpaceClick(_selectedSpace.Id)">
+                    <div class="ashare-preview-image">
+                        @if (_selectedSpace.Images.Any())
                         {
-                            <img src="@space.Images.First()" alt="@space.Name" loading="lazy" />
+                            <img src="@_selectedSpace.Images.First()" alt="@_selectedSpace.Name" />
                         }
                         else
                         {
@@ -54,47 +142,25 @@
                                 <i class="bi bi-building"></i>
                             </div>
                         }
-                        @if (space.IsFeatured)
-                        {
-                            <span class="ac-product-badge ac-product-badge-featured">مميز</span>
-                        }
-                        @if (space.IsNew)
-                        {
-                            <span class="ac-product-badge ac-product-badge-new">جديد</span>
-                        }
-                        <button class="ashare-favorite-btn" @onclick:stopPropagation="true" @onclick="() => ToggleFavorite(space.Id)">
-                            <i class="bi @(IsFavorite(space.Id) ? "bi-heart-fill" : "bi-heart")"></i>
-                        </button>
                     </div>
-                    <div class="ashare-space-content">
-                        <span class="ashare-space-category">@space.CategoryName</span>
-                        <h3 class="ashare-space-name">@space.Name</h3>
-                        <div class="ashare-space-location">
+                    <div class="ashare-preview-content">
+                        <span class="ashare-space-category">@_selectedSpace.CategoryName</span>
+                        <h3 class="ashare-preview-name">@_selectedSpace.Name</h3>
+                        <div class="ashare-preview-location">
                             <i class="bi bi-geo-alt"></i>
-                            @space.Location
+                            @_selectedSpace.Location
                         </div>
-                        <div class="ashare-space-meta">
-                            <span class="ashare-space-capacity">
-                                <i class="bi bi-people"></i> @space.Capacity
-                            </span>
-                            <span class="ashare-space-rating">
-                                <i class="bi bi-star-fill"></i> @space.Rating
+                        <div class="ashare-preview-footer">
+                            <span class="ashare-preview-price">@_selectedSpace.DisplayPrice</span>
+                            <span class="ashare-preview-rating">
+                                <i class="bi bi-star-fill"></i> @_selectedSpace.Rating
                             </span>
                         </div>
-                        <div class="ashare-space-price">@space.DisplayPrice</div>
                     </div>
                 </div>
-            }
-        }
-        else
-        {
-            <div class="ashare-empty-state">
-                <i class="bi bi-building"></i>
-                <h3>لا توجد مساحات</h3>
-                <p>جرب تغيير معايير البحث</p>
             </div>
         }
-    </div>
+    }
 </div>
 
 @* Filter Modal *@
@@ -184,6 +250,10 @@
     private Guid? _selectedCategory;
     private bool _showFilters;
     private string _sortBy = "newest";
+    private string _viewMode = "list";
+    private SpaceItem? _selectedSpace;
+    private bool _hasRenderedMap;
+    private DotNetObjectReference<Explore>? _dotNetRef;
 
     // Filter values
     private decimal? _filterMinPrice;
@@ -217,10 +287,64 @@
         ApplyFilters();
     }
 
+    private void SetViewMode(string mode)
+    {
+        _viewMode = mode;
+        _selectedSpace = null;
+
+        if (mode == "map")
+        {
+            _hasRenderedMap = true;
+            StateHasChanged();
+            _ = InitializeMapAsync();
+        }
+    }
+
+    private async Task InitializeMapAsync()
+    {
+        await Task.Delay(150); // Wait for DOM
+
+        _dotNetRef = DotNetObjectReference.Create(this);
+
+        var markers = _filteredSpaces?
+            .Where(s => s.Latitude.HasValue && s.Longitude.HasValue)
+            .Select(s => new
+            {
+                id = s.Id.ToString(),
+                lat = s.Latitude!.Value,
+                lng = s.Longitude!.Value,
+                title = s.Name,
+                price = s.DisplayPrice
+            })
+            .ToList() ?? [];
+
+        await JS.InvokeVoidAsync("AcMap.initializeExploreMap", "explore-map-container", _dotNetRef, markers);
+    }
+
+    [JSInvokable]
+    public void OnMarkerClicked(string spaceId)
+    {
+        if (Guid.TryParse(spaceId, out var id))
+        {
+            _selectedSpace = _filteredSpaces?.FirstOrDefault(s => s.Id == id);
+            StateHasChanged();
+        }
+    }
+
+    private void ClosePreview()
+    {
+        _selectedSpace = null;
+    }
+
     private void FilterByCategory(Guid? categoryId)
     {
         _selectedCategory = categoryId;
         ApplyFilters();
+
+        if (_viewMode == "map")
+        {
+            _ = InitializeMapAsync();
+        }
     }
 
     private void HandleSortChange(ChangeEventArgs e)
@@ -304,6 +428,11 @@
 
         _filteredSpaces = query.ToList();
         _showFilters = false;
+
+        if (_viewMode == "map")
+        {
+            _ = InitializeMapAsync();
+        }
     }
 
     private void HandleSpaceClick(Guid spaceId)

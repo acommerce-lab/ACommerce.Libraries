@@ -21,6 +21,40 @@ public class ProductListingsController(
     ILogger<ProductListingsController> logger) : BaseCrudController<ProductListing, CreateProductListingDto, CreateProductListingDto, ProductListingResponseDto, CreateProductListingDto>(mediator, logger)
 {
 	/// <summary>
+	/// الحصول على جميع العروض النشطة
+	/// </summary>
+	[HttpGet]
+	[ProducesResponseType(typeof(List<ProductListingResponseDto>), 200)]
+	public async Task<ActionResult<List<ProductListingResponseDto>>> GetAll([FromQuery] int limit = 50)
+	{
+		try
+		{
+			var searchRequest = new SmartSearchRequest
+			{
+				PageSize = limit,
+				PageNumber = 1,
+				Filters = new List<FilterItem>
+				{
+					new() { PropertyName = "IsActive", Value = true, Operator = FilterOperator.Equals },
+					new() { PropertyName = "Status", Value = ListingStatus.Active, Operator = FilterOperator.Equals }
+				},
+				OrderBy = "CreatedAt",
+				Ascending = false
+			};
+
+			var query = new SmartSearchQuery<ProductListing, ProductListingResponseDto> { Request = searchRequest };
+			var result = await _mediator.Send(query);
+
+			return Ok(result.Items);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error getting all listings");
+			return StatusCode(500, new { message = "An error occurred", detail = ex.Message });
+		}
+	}
+
+	/// <summary>
 	/// الحصول على العروض المميزة
 	/// </summary>
 	[HttpGet("featured")]
@@ -97,7 +131,6 @@ public class ProductListingsController(
 	{
 		try
 		{
-			// TODO: Add CategoryId filter when ProductListing supports it
 			var searchRequest = new SmartSearchRequest
 			{
 				PageSize = limit,
@@ -105,7 +138,8 @@ public class ProductListingsController(
 				Filters = new List<FilterItem>
 				{
 					new() { PropertyName = "IsActive", Value = true, Operator = FilterOperator.Equals },
-					new() { PropertyName = "Status", Value = ListingStatus.Active, Operator = FilterOperator.Equals }
+					new() { PropertyName = "Status", Value = ListingStatus.Active, Operator = FilterOperator.Equals },
+					new() { PropertyName = "CategoryId", Value = categoryId, Operator = FilterOperator.Equals }
 				},
 				OrderBy = "CreatedAt",
 				Ascending = false

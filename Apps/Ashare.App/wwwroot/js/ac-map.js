@@ -265,4 +265,140 @@ window.AcMap = window.AcMap || {};
         return maps[containerId] != null;
     };
 
+    /**
+     * Initialize explore map with multiple markers
+     */
+    AcMap.initializeExploreMap = function (containerId, dotNetRef, markers) {
+        // Destroy existing instance
+        if (maps[containerId]) {
+            try {
+                AcMap.destroy(containerId);
+            } catch (e) {
+                console.warn('Error destroying existing explore map:', e);
+            }
+        }
+
+        const container = document.getElementById(containerId);
+        if (!container) {
+            console.error('Explore map container not found:', containerId);
+            return false;
+        }
+
+        // Ensure container has dimensions
+        container.style.height = '100%';
+        container.style.width = '100%';
+        container.innerHTML = '';
+
+        if (typeof L === 'undefined') {
+            console.error('Leaflet.js is not loaded');
+            return false;
+        }
+
+        try {
+            // Default center (Riyadh)
+            let center = [24.7136, 46.6753];
+            let zoom = 10;
+
+            // If we have markers, center on them
+            if (markers && markers.length > 0) {
+                const lats = markers.map(m => m.lat);
+                const lngs = markers.map(m => m.lng);
+                center = [
+                    (Math.min(...lats) + Math.max(...lats)) / 2,
+                    (Math.min(...lngs) + Math.max(...lngs)) / 2
+                ];
+
+                // Adjust zoom based on spread
+                const latSpread = Math.max(...lats) - Math.min(...lats);
+                const lngSpread = Math.max(...lngs) - Math.min(...lngs);
+                const spread = Math.max(latSpread, lngSpread);
+                if (spread < 0.01) zoom = 15;
+                else if (spread < 0.1) zoom = 13;
+                else if (spread < 0.5) zoom = 11;
+                else zoom = 10;
+            }
+
+            const map = L.map(containerId, {
+                center: center,
+                zoom: zoom,
+                zoomControl: true,
+                attributionControl: false
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19
+            }).addTo(map);
+
+            // Store instance
+            maps[containerId] = {
+                map: map,
+                markers: [],
+                dotNetRef: dotNetRef,
+                resizeObserver: null
+            };
+
+            // Add markers
+            if (markers && markers.length > 0) {
+                markers.forEach(function (m) {
+                    const markerIcon = L.divIcon({
+                        className: 'ac-leaflet-price-marker',
+                        html: '<div class="ac-price-tag">' + m.price + '</div>',
+                        iconSize: [80, 32],
+                        iconAnchor: [40, 32]
+                    });
+
+                    const marker = L.marker([m.lat, m.lng], {
+                        icon: markerIcon
+                    }).addTo(map);
+
+                    marker.on('click', function () {
+                        if (dotNetRef) {
+                            try {
+                                dotNetRef.invokeMethodAsync('OnMarkerClicked', m.id)
+                                    .catch(function(err) {
+                                        console.warn('Error notifying Blazor on marker click:', err);
+                                    });
+                            } catch (e) {
+                                console.warn('Error invoking Blazor method:', e);
+                            }
+                        }
+                    });
+
+                    maps[containerId].markers.push(marker);
+                });
+            }
+
+            // Setup ResizeObserver
+            if (typeof ResizeObserver !== 'undefined') {
+                const resizeObserver = new ResizeObserver(function() {
+                    if (maps[containerId] && maps[containerId].map) {
+                        try {
+                            maps[containerId].map.invalidateSize();
+                        } catch (e) { }
+                    }
+                });
+                resizeObserver.observe(container);
+                maps[containerId].resizeObserver = resizeObserver;
+            }
+
+            // Fix size after render
+            setTimeout(function () {
+                if (maps[containerId] && maps[containerId].map) {
+                    maps[containerId].map.invalidateSize();
+                }
+            }, 100);
+
+            setTimeout(function () {
+                if (maps[containerId] && maps[containerId].map) {
+                    maps[containerId].map.invalidateSize();
+                }
+            }, 300);
+
+            return true;
+        } catch (e) {
+            console.error('Error initializing explore map:', e);
+            return false;
+        }
+    };
+
 })(window.AcMap);
