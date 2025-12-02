@@ -53,7 +53,6 @@
                 </button>
             </div>
             <h1 class="ashare-profile-name">@_userName</h1>
-            <p class="ashare-profile-email">@_userEmail</p>
             @if (!string.IsNullOrEmpty(_phoneNumber))
             {
                 <p class="ashare-profile-phone">@_phoneNumber</p>
@@ -249,7 +248,6 @@
     private bool _isLoading = true;
     private bool _isLoggedIn;
     private string _userName = "";
-    private string _userEmail = "";
     private string? _phoneNumber;
     private string? _avatarUrl;
     private int _bookingsCount;
@@ -273,32 +271,29 @@
 
             if (_isLoggedIn)
             {
-                // Get user info from auth
+                // Get user info from auth (نفاذ)
                 var userInfo = await AuthClient.GetMeAsync();
                 if (userInfo != null)
                 {
-                    _userEmail = userInfo.Email ?? "";
+                    _userName = userInfo.FullName ?? L["Guest"];
+                    _phoneNumber = userInfo.PhoneNumber;
+                    _avatarUrl = userInfo.ProfilePictureUrl;
                 }
 
-                // Get profile data
+                // Try to get additional profile data
                 try
                 {
                     var profile = await ProfilesClient.GetMyProfileAsync();
                     if (profile != null)
                     {
                         _userName = profile.DisplayName ?? $"{profile.FirstName} {profile.LastName}".Trim();
-                        _phoneNumber = profile.PhoneNumber;
-                        _avatarUrl = profile.AvatarUrl;
-
-                        // Use profile email if not set from auth
-                        if (string.IsNullOrEmpty(_userEmail))
-                            _userEmail = profile.Email ?? "";
+                        _phoneNumber = profile.PhoneNumber ?? _phoneNumber;
+                        _avatarUrl = profile.AvatarUrl ?? _avatarUrl;
                     }
                 }
                 catch
                 {
-                    // Profile might not exist yet
-                    _userName = userInfo?.Username ?? L["Guest"];
+                    // Profile data already loaded from auth
                 }
 
                 // Get stats
