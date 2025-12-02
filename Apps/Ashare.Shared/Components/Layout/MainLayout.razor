@@ -86,7 +86,7 @@
 
     private bool IsActive(string path)
     {
-        var currentPath = Navigation.CurrentUrl;
+        var currentPath = Navigation.CurrentUri;
         if (path == "/")
             return currentPath.EndsWith("/") || currentPath.EndsWith("/index");
         return currentPath.Contains(path);

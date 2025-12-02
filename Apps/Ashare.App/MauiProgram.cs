@@ -27,6 +27,7 @@ using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Themes;
 using Microsoft.Extensions.Logging;
 using ThemeService = Ashare.Shared.Services.ThemeService;
+using Ashare.App.Services;
 
 namespace Ashare.App;
 

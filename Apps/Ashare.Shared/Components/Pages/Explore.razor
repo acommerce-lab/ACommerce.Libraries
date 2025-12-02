@@ -39,10 +39,10 @@
                 <option value="capacity">السعة</option>
             </select>
             <div class="ashare-view-toggle">
-                <button class="ashare-view-btn @(_viewMode == "list" ? "active" : "")" @onclick="() => SetViewMode("list")">
+                <button class="ashare-view-btn @(_viewMode == "list" ? "active" : "")" @onclick="@(() => SetViewMode("list"))">
                     <i class="bi bi-list-ul"></i>
                 </button>
-                <button class="ashare-view-btn @(_viewMode == "map" ? "active" : "")" @onclick="() => SetViewMode("map")">
+                <button class="ashare-view-btn @(_viewMode == "map" ? "active" : "")" @onclick="@(() => SetViewMode("map"))">
                     <i class="bi bi-map"></i>
                 </button>
             </div>

@@ -16,8 +16,9 @@ public class AppNavigationService : IAppNavigationService
     }
 
     public string CurrentUrl => _navigationManager.Uri;
+    public string CurrentUri => _navigationManager.Uri;
 
-    public void NavigateTo(string url)
+    public void NavigateTo(string url, bool forceLoad)
     {
         _history.Push(_navigationManager.Uri);
         _navigationManager.NavigateTo(url);

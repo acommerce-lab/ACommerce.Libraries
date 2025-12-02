@@ -8,10 +8,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.*" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<!-- Reference to Shared Library -->
 		<ProjectReference Include="..\Ashare.Shared\Ashare.Shared.csproj" />
 	</ItemGroup>
