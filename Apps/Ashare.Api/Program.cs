@@ -67,15 +67,26 @@ try
     {
         options.AddDefaultPolicy(policy =>
         {
-            policy.WithOrigins(
-                "https://localhost:5001",
-                "http://localhost:5000",
-                "https://localhost:7001",
-                "http://localhost:7000"
-            )
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
+            if (builder.Environment.IsDevelopment())
+            {
+                // Development: localhost only
+                policy.WithOrigins(
+                    "https://localhost:5001",
+                    "http://localhost:5000",
+                    "https://localhost:7001",
+                    "http://localhost:7000"
+                )
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+            }
+            else
+            {
+                // Production: allow any origin (MAUI app + web)
+                policy.AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+            }
         });
     });
 
@@ -275,21 +286,22 @@ Built using ACommerce libraries with configuration-first approach:
 
     var app = builder.Build();
 
-    // Middleware Pipeline
+    // Middleware Pipeline - Swagger always enabled for testing
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Ashare API v1.0");
+        options.RoutePrefix = string.Empty;
+        options.DocumentTitle = "Ashare API";
+        options.EnableDeepLinking();
+        options.DisplayRequestDuration();
+    });
+
+    // HTTPS redirection only in development (production uses HTTP)
     if (app.Environment.IsDevelopment())
     {
-        app.UseSwagger();
-        app.UseSwaggerUI(options =>
-        {
-            options.SwaggerEndpoint("/swagger/v1/swagger.json", "Ashare API v1.0");
-            options.RoutePrefix = string.Empty;
-            options.DocumentTitle = "Ashare API";
-            options.EnableDeepLinking();
-            options.DisplayRequestDuration();
-        });
+        app.UseHttpsRedirection();
     }
-
-    app.UseHttpsRedirection();
     app.UseCors();
 
     app.UseAuthentication();
@@ -326,7 +338,11 @@ Built using ACommerce libraries with configuration-first approach:
         Version = "1.0.0"
     });
 
-    // ✅ تسجيل الخدمة في Service Registry (للتنمية - self-hosting)
+    // ✅ تسجيل الخدمة في Service Registry
+    var serviceBaseUrl = app.Environment.IsDevelopment()
+        ? "https://localhost:5001"
+        : "http://safqatasheer-001-site1.qtempurl.com";
+
     using (var scope = app.Services.CreateScope())
     {
         var registry = scope.ServiceProvider.GetRequiredService<IServiceRegistry>();
@@ -334,8 +350,8 @@ Built using ACommerce libraries with configuration-first approach:
         {
             ServiceName = "Ashare",
             Version = "v1",
-            BaseUrl = "https://localhost:5001",
-            Environment = "Development",
+            BaseUrl = serviceBaseUrl,
+            Environment = app.Environment.EnvironmentName,
             EnableHealthCheck = true,
             HealthCheckPath = "/health",
             Tags = new Dictionary<string, string>
@@ -343,11 +359,11 @@ Built using ACommerce libraries with configuration-first approach:
                 ["hubs"] = "/hubs/notifications,/hubs/chat,/hubs/messaging"
             }
         });
-        Log.Information("Ashare service registered in Service Registry");
+        Log.Information("Ashare service registered in Service Registry at {BaseUrl}", serviceBaseUrl);
     }
 
     Log.Information("Ashare API started successfully!");
-    Log.Information("Swagger UI available at: https://localhost:5001");
+    Log.Information("Swagger UI available at: {BaseUrl}", serviceBaseUrl);
 
     await app.RunAsync();
 }
