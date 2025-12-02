@@ -251,12 +251,7 @@
             {
                 _countdown = _nafathResult.ExpiresInSeconds > 0 ? _nafathResult.ExpiresInSeconds : 120;
                 StartCountdown();
-
-                // إذا لم يتصل بـ SignalR، نستخدم polling كبديل
-                if (!_isConnectedToSignalR)
-                {
-                    StartPolling();
-                }
+                // لا نستخدم Polling - نعتمد على SignalR فقط
             }
         }
         catch (Exception ex)
@@ -284,37 +279,6 @@
         _timer.Start();
     }
 
-    // Fallback polling إذا لم يعمل SignalR
-    private System.Timers.Timer? _pollTimer;
-
-    private void StartPolling()
-    {
-        _pollTimer?.Dispose();
-        _pollTimer = new System.Timers.Timer(3000);
-        _pollTimer.Elapsed += async (s, e) =>
-        {
-            if (_nafathResult?.TransactionId == null) return;
-
-            try
-            {
-                var result = await NafathClient.CompleteAsync(_nafathResult.TransactionId);
-                if (result?.Success == true)
-                {
-                    _nafathCompleted = true;
-                    _pollTimer?.Stop();
-                    _timer?.Stop();
-                    await InvokeAsync(() => Navigation.NavigateTo("/"));
-                }
-            }
-            catch
-            {
-                // Continue polling
-            }
-
-            await InvokeAsync(StateHasChanged);
-        };
-        _pollTimer.Start();
-    }
 
     private void ResetNafath()
     {
@@ -331,15 +295,12 @@
     {
         _timer?.Stop();
         _timer?.Dispose();
-        _pollTimer?.Stop();
-        _pollTimer?.Dispose();
         ResetNafath();
     }
 
     public async ValueTask DisposeAsync()
     {
         _timer?.Dispose();
-        _pollTimer?.Dispose();
         _notificationSubscription?.Dispose();
 
         if (_isConnectedToSignalR)

@@ -182,6 +182,54 @@ public class AuthController : AuthenticationControllerBase
         }
     }
 
+    /// <summary>
+    /// محاكاة webhook نفاذ (للاختبار فقط)
+    /// POST /api/auth/nafath/test-webhook
+    /// </summary>
+    [HttpPost("nafath/test-webhook")]
+    public async Task<IActionResult> SimulateNafathWebhook([FromBody] TestWebhookRequest request)
+    {
+        try
+        {
+            // التحقق من أننا في وضع الاختبار
+            var configuration = HttpContext.RequestServices.GetRequiredService<IConfiguration>();
+            var mode = configuration["Authentication:TwoFactor:Nafath:Mode"]?.ToLower();
+
+            if (mode != "test")
+            {
+                return BadRequest(new { success = false, message = "هذا الـ endpoint متاح فقط في وضع الاختبار" });
+            }
+
+            Logger.LogInformation("[Test Webhook] Simulating Nafath callback for {TransactionId}", request.TransactionId);
+
+            // الحصول على provider ومعالجة الـ webhook
+            if (TwoFactorProvider is ACommerce.Authentication.TwoFactor.Nafath.NafathAuthenticationProvider nafathProvider)
+            {
+                var webhookRequest = new ACommerce.Authentication.TwoFactor.Nafath.NafathWebhookRequest
+                {
+                    TransactionId = request.TransactionId,
+                    NationalId = request.NationalId ?? "test_national_id",
+                    Status = request.Status ?? "COMPLETED"
+                };
+
+                var result = await nafathProvider.HandleWebhookAsync(webhookRequest);
+
+                if (result)
+                {
+                    Logger.LogInformation("[Test Webhook] Successfully simulated webhook for {TransactionId}", request.TransactionId);
+                    return Ok(new { success = true, message = "تم محاكاة التحقق بنجاح" });
+                }
+            }
+
+            return BadRequest(new { success = false, message = "فشل محاكاة التحقق" });
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "[Test Webhook] Error simulating webhook");
+            return BadRequest(new { success = false, message = ex.Message });
+        }
+    }
+
     #endregion
 
     #region User Info
@@ -311,6 +359,16 @@ public class NafathStatusResponse
 public class CompleteNafathRequest
 {
     public string TransactionId { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// طلب محاكاة webhook (للاختبار فقط)
+/// </summary>
+public class TestWebhookRequest
+{
+    public string TransactionId { get; set; } = string.Empty;
+    public string? NationalId { get; set; }
+    public string? Status { get; set; }
 }
 
 /// <summary>

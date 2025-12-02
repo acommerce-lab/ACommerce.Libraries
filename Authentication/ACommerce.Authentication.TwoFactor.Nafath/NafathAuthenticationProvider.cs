@@ -52,10 +52,34 @@ public class NafathAuthenticationProvider(
                 ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(5),
                 Status = TwoFactorSessionStatus.Pending,
                 Metadata = request.Metadata,
-                VerificationCode = nafathResponse.VerificationCode, // ✅ حفظ الكود
+                VerificationCode = nafathResponse.VerificationCode,
             };
 
             await sessionStore.CreateSessionAsync(session, cancellationToken);
+
+            // ✅ في وضع الاختبار: محاكاة استجابة نفاذ بعد 10 ثوانٍ
+            if (nafathResponse.IsTestSession)
+            {
+                logger.LogInformation(
+                    "[Nafath] Test session - scheduling auto-webhook in 10 seconds for {TransactionId}",
+                    session.TransactionId);
+
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(10));
+
+                    logger.LogInformation(
+                        "[Nafath] Auto-triggering webhook for test session {TransactionId}",
+                        session.TransactionId);
+
+                    await HandleWebhookAsync(new NafathWebhookRequest
+                    {
+                        TransactionId = session.TransactionId,
+                        NationalId = nafathResponse.Identifier ?? request.Identifier,
+                        Status = "COMPLETED"
+                    });
+                });
+            }
 
             return TwoFactorInitiationResult.Ok(
                 session.TransactionId,
