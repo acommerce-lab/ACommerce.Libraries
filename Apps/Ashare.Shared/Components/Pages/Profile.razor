@@ -286,9 +286,9 @@
                     var profile = await ProfilesClient.GetMyProfileAsync();
                     if (profile != null)
                     {
-                        _userName = profile.DisplayName ?? $"{profile.FirstName} {profile.LastName}".Trim();
+                        _userName = profile.FullName ?? _userName;
                         _phoneNumber = profile.PhoneNumber ?? _phoneNumber;
-                        _avatarUrl = profile.AvatarUrl ?? _avatarUrl;
+                        _avatarUrl = profile.Avatar ?? _avatarUrl;
                     }
                 }
                 catch
