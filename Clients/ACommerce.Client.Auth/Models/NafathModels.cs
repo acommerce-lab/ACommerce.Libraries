@@ -5,15 +5,10 @@ namespace ACommerce.Client.Auth.Models;
 /// </summary>
 public sealed class NafathAuthRequest
 {
-	/// <summary>
-	/// رقم الهوية الوطنية
-	/// </summary>
-	public string NationalId { get; set; } = string.Empty;
-
-	/// <summary>
-	/// رابط إعادة التوجيه بعد المصادقة
-	/// </summary>
-	public string? RedirectUrl { get; set; }
+    /// <summary>
+    /// رقم الهوية الوطنية
+    /// </summary>
+    public string NationalId { get; set; } = string.Empty;
 }
 
 /// <summary>
@@ -21,40 +16,58 @@ public sealed class NafathAuthRequest
 /// </summary>
 public sealed class NafathAuthResponse
 {
-	public bool Success { get; set; }
-	public string? SessionId { get; set; }
-	public string? TransactionId { get; set; }
-	public string? RandomNumber { get; set; }
-	public int? ExpiresInSeconds { get; set; }
-	public string? Message { get; set; }
-	public string? AuthUrl { get; set; }
+    public bool Success { get; set; }
+    public string? TransactionId { get; set; }
+    /// <summary>
+    /// الرقم العشوائي الذي يجب اختياره في تطبيق نفاذ
+    /// </summary>
+    public string? RandomNumber { get; set; }
+    public int ExpiresInSeconds { get; set; }
+    public string? Message { get; set; }
 }
 
 /// <summary>
-/// استجابة أرقام الجوال من نفاذ
+/// استجابة حالة مصادقة نفاذ
 /// </summary>
-public sealed class NafathPhoneNumbersResponse
+public sealed class NafathStatusResponse
 {
-	public List<string> PhoneNumbers { get; set; } = new();
-	public string? SessionId { get; set; }
-}
-
-/// <summary>
-/// طلب اختيار رقم الجوال من نفاذ
-/// </summary>
-public sealed class SelectNafathNumberRequest
-{
-	public string SessionId { get; set; } = string.Empty;
-	public string PhoneNumber { get; set; } = string.Empty;
+    public string? TransactionId { get; set; }
+    /// <summary>
+    /// pending, completed, expired, rejected
+    /// </summary>
+    public string Status { get; set; } = "pending";
+    public string? Message { get; set; }
 }
 
 /// <summary>
 /// طلب إكمال مصادقة نفاذ
 /// </summary>
-public sealed class CompleteNafathAuthRequest
+public sealed class CompleteNafathRequest
 {
-	public string SessionId { get; set; } = string.Empty;
-	public string TransactionId { get; set; } = string.Empty;
-	public string? Code { get; set; }
-	public string? State { get; set; }
+    public string TransactionId { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// استجابة تسجيل الدخول
+/// </summary>
+public sealed class LoginResponse
+{
+    public bool Success { get; set; }
+    public string? Token { get; set; }
+    public string? ProfileId { get; set; }
+    public string? FullName { get; set; }
+    public DateTime? ExpiresAt { get; set; }
+    public string? Message { get; set; }
+}
+
+/// <summary>
+/// معلومات البروفايل
+/// </summary>
+public sealed class ProfileResponse
+{
+    public string? Id { get; set; }
+    public string? FullName { get; set; }
+    public string? PhoneNumber { get; set; }
+    public string? ProfilePictureUrl { get; set; }
+    public bool IsVerified { get; set; }
 }

@@ -18,7 +18,12 @@ public class Profile : IBaseEntity
 	/// <summary>
 	/// معرف المستخدم (من Authentication.Users)
 	/// </summary>
-	public required string UserId { get; set; }
+	public string? UserId { get; set; }
+
+	/// <summary>
+	/// رقم الهوية الوطنية (للمصادقة عبر نفاذ)
+	/// </summary>
+	public string? NationalId { get; set; }
 
 	/// <summary>
 	/// نوع البروفايل

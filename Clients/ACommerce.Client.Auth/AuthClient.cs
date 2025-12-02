@@ -4,245 +4,114 @@ using ACommerce.Client.Core.Http;
 namespace ACommerce.Client.Auth;
 
 /// <summary>
-/// Client للتعامل مع Authentication
+/// Client للمصادقة عبر نفاذ
 /// </summary>
 public sealed class AuthClient(IApiClient httpClient)
 {
-    private const string ServiceName = "Marketplace"; // أو "Auth" إذا كانت خدمة منفصلة
+    private const string ServiceName = "Marketplace";
+    private string? _currentToken;
 
-	// Token storage for client-side apps
-	private string? _currentToken;
-
-    #region Basic Authentication
+    #region Nafath Authentication
 
     /// <summary>
-    /// تسجيل دخول
+    /// بدء مصادقة نفاذ - يرسل رقم الهوية ويستلم الكود العشوائي
     /// </summary>
-    public async Task<LoginResponse?> LoginAsync(
-		LoginRequest request,
-		CancellationToken cancellationToken = default)
-	{
-		return await httpClient.PostAsync<LoginRequest, LoginResponse>(
-			ServiceName,
-			"/api/auth/login",
-			request,
-			cancellationToken);
-	}
+    public async Task<NafathAuthResponse?> InitiateNafathAsync(
+        string nationalId,
+        CancellationToken cancellationToken = default)
+    {
+        return await httpClient.PostAsync<NafathAuthRequest, NafathAuthResponse>(
+            ServiceName,
+            "/api/auth/nafath/initiate",
+            new NafathAuthRequest { NationalId = nationalId },
+            cancellationToken);
+    }
 
-	/// <summary>
-	/// إنشاء حساب جديد
-	/// </summary>
-	public async Task<LoginResponse?> RegisterAsync(
-		RegisterRequest request,
-		CancellationToken cancellationToken = default)
-	{
-		return await httpClient.PostAsync<RegisterRequest, LoginResponse>(
-			ServiceName,
-			"/api/auth/register",
-			request,
-			cancellationToken);
-	}
+    /// <summary>
+    /// التحقق من حالة مصادقة نفاذ (polling)
+    /// </summary>
+    public async Task<NafathStatusResponse?> CheckNafathStatusAsync(
+        string transactionId,
+        CancellationToken cancellationToken = default)
+    {
+        return await httpClient.GetAsync<NafathStatusResponse>(
+            ServiceName,
+            $"/api/auth/nafath/status?transactionId={transactionId}",
+            cancellationToken);
+    }
 
-	/// <summary>
-	/// الحصول على معلومات المستخدم الحالي
-	/// </summary>
-	public async Task<UserInfo?> GetMeAsync(CancellationToken cancellationToken = default)
-	{
-		return await httpClient.GetAsync<UserInfo>(
-			ServiceName,
-			"/api/auth/me",
-			cancellationToken);
-	}
+    /// <summary>
+    /// إكمال مصادقة نفاذ بعد نجاح التحقق
+    /// </summary>
+    public async Task<LoginResponse?> CompleteNafathAsync(
+        string transactionId,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsync<CompleteNafathRequest, LoginResponse>(
+            ServiceName,
+            "/api/auth/nafath/complete",
+            new CompleteNafathRequest { TransactionId = transactionId },
+            cancellationToken);
 
-	/// <summary>
-	/// تسجيل خروج
-	/// </summary>
-	public async Task LogoutAsync(CancellationToken cancellationToken = default)
-	{
-		_currentToken = null;
-		await httpClient.PostAsync<object>(
-			ServiceName,
-			"/api/auth/logout",
-			new { },
-			cancellationToken);
-	}
+        if (response?.Success == true && !string.IsNullOrEmpty(response.Token))
+        {
+            _currentToken = response.Token;
+        }
 
-	#endregion
+        return response;
+    }
 
-	#region Two-Factor Authentication
+    #endregion
 
-	/// <summary>
-	/// تفعيل/إلغاء المصادقة الثنائية
-	/// </summary>
-	public async Task<TwoFactorResponse?> ToggleTwoFactorAsync(
-		bool enable,
-		CancellationToken cancellationToken = default)
-	{
-		return await httpClient.PostAsync<ToggleTwoFactorRequest, TwoFactorResponse>(
-			ServiceName,
-			"/api/auth/two-factor",
-			new ToggleTwoFactorRequest { Enable = enable },
-			cancellationToken);
-	}
+    #region User Info
 
-	/// <summary>
-	/// التحقق من كود المصادقة الثنائية
-	/// </summary>
-	public async Task<LoginResponse?> VerifyTwoFactorAsync(
-		string code,
-		CancellationToken cancellationToken = default)
-	{
-		return await httpClient.PostAsync<VerifyTwoFactorRequest, LoginResponse>(
-			ServiceName,
-			"/api/auth/two-factor/verify",
-			new VerifyTwoFactorRequest { Code = code },
-			cancellationToken);
-	}
+    /// <summary>
+    /// الحصول على معلومات البروفايل الحالي
+    /// </summary>
+    public async Task<ProfileResponse?> GetMeAsync(CancellationToken cancellationToken = default)
+    {
+        return await httpClient.GetAsync<ProfileResponse>(
+            ServiceName,
+            "/api/auth/me",
+            cancellationToken);
+    }
 
-	/// <summary>
-	/// التحقق من كود المصادقة الثنائية (مع طلب كامل)
-	/// </summary>
-	public async Task<LoginResponse?> VerifyTwoFactorAsync(
-		VerifyTwoFactorRequest request,
-		CancellationToken cancellationToken = default)
-	{
-		return await httpClient.PostAsync<VerifyTwoFactorRequest, LoginResponse>(
-			ServiceName,
-			"/api/auth/two-factor/verify",
-			request,
-			cancellationToken);
-	}
+    /// <summary>
+    /// تسجيل الخروج
+    /// </summary>
+    public async Task LogoutAsync(CancellationToken cancellationToken = default)
+    {
+        _currentToken = null;
+        await httpClient.PostAsync<object>(
+            ServiceName,
+            "/api/auth/logout",
+            new { },
+            cancellationToken);
+    }
 
-	#endregion
+    #endregion
 
-	#region OTP Authentication
+    #region Token Management
 
-	/// <summary>
-	/// طلب رمز OTP عبر الهاتف
-	/// </summary>
-	public async Task<OtpResponse?> RequestPhoneOtpAsync(
-		RequestPhoneOtpRequest request,
-		CancellationToken cancellationToken = default)
-	{
-		return await httpClient.PostAsync<RequestPhoneOtpRequest, OtpResponse>(
-			ServiceName,
-			"/api/auth/otp/phone",
-			request,
-			cancellationToken);
-	}
+    /// <summary>
+    /// تخزين الـ Token
+    /// </summary>
+    public void SetToken(string token) => _currentToken = token;
 
-	/// <summary>
-	/// طلب رمز OTP عبر البريد الإلكتروني
-	/// </summary>
-	public async Task<OtpResponse?> RequestEmailOtpAsync(
-		RequestEmailOtpRequest request,
-		CancellationToken cancellationToken = default)
-	{
-		return await httpClient.PostAsync<RequestEmailOtpRequest, OtpResponse>(
-			ServiceName,
-			"/api/auth/otp/email",
-			request,
-			cancellationToken);
-	}
+    /// <summary>
+    /// الحصول على الـ Token الحالي
+    /// </summary>
+    public string? GetToken() => _currentToken;
 
-	/// <summary>
-	/// التحقق من رمز OTP
-	/// </summary>
-	public async Task<LoginResponse?> VerifyOtpAsync(
-		VerifyOtpRequest request,
-		CancellationToken cancellationToken = default)
-	{
-		return await httpClient.PostAsync<VerifyOtpRequest, LoginResponse>(
-			ServiceName,
-			"/api/auth/otp/verify",
-			request,
-			cancellationToken);
-	}
+    /// <summary>
+    /// التحقق من وجود token
+    /// </summary>
+    public bool HasToken => !string.IsNullOrEmpty(_currentToken);
 
-	#endregion
+    /// <summary>
+    /// مسح الـ Token
+    /// </summary>
+    public void ClearToken() => _currentToken = null;
 
-	#region Nafath Authentication (Saudi Arabia)
-
-	/// <summary>
-	/// بدء مصادقة نفاذ
-	/// </summary>
-	public async Task<NafathAuthResponse?> InitiateNafathAuthAsync(
-		NafathAuthRequest request,
-		CancellationToken cancellationToken = default)
-	{
-		return await httpClient.PostAsync<NafathAuthRequest, NafathAuthResponse>(
-			ServiceName,
-			"/api/auth/nafath/initiate",
-			request,
-			cancellationToken);
-	}
-
-	/// <summary>
-	/// الحصول على أرقام الجوال المسجلة في نفاذ
-	/// </summary>
-	public async Task<NafathPhoneNumbersResponse?> GetNafathPhoneNumbersAsync(
-		string sessionId,
-		CancellationToken cancellationToken = default)
-	{
-		return await httpClient.GetAsync<NafathPhoneNumbersResponse>(
-			ServiceName,
-			$"/api/auth/nafath/phone-numbers?sessionId={sessionId}",
-			cancellationToken);
-	}
-
-	/// <summary>
-	/// اختيار رقم الجوال من نفاذ
-	/// </summary>
-	public async Task<LoginResponse?> SelectNafathNumberAsync(
-		SelectNafathNumberRequest request,
-		CancellationToken cancellationToken = default)
-	{
-		return await httpClient.PostAsync<SelectNafathNumberRequest, LoginResponse>(
-			ServiceName,
-			"/api/auth/nafath/select-number",
-			request,
-			cancellationToken);
-	}
-
-	/// <summary>
-	/// إكمال مصادقة نفاذ
-	/// </summary>
-	public async Task<LoginResponse?> CompleteNafathAuthAsync(
-		CompleteNafathAuthRequest request,
-		CancellationToken cancellationToken = default)
-	{
-		return await httpClient.PostAsync<CompleteNafathAuthRequest, LoginResponse>(
-			ServiceName,
-			"/api/auth/nafath/complete",
-			request,
-			cancellationToken);
-	}
-
-	#endregion
-
-	#region Token Management
-
-	/// <summary>
-	/// تخزين الـ Token (للتطبيقات client-side)
-	/// </summary>
-	public Task SetTokenAsync(string token)
-	{
-		_currentToken = token;
-		return Task.CompletedTask;
-	}
-
-	/// <summary>
-	/// الحصول على الـ Token الحالي
-	/// </summary>
-	public Task<string?> GetTokenAsync()
-	{
-		return Task.FromResult(_currentToken);
-	}
-
-	/// <summary>
-	/// التحقق من وجود token
-	/// </summary>
-	public bool HasToken => !string.IsNullOrEmpty(_currentToken);
-
-	#endregion
+    #endregion
 }
