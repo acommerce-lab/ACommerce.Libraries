@@ -21,6 +21,8 @@ using Ashare.Api.Services;
 // Service Registry & Messaging (for development - self-hosting)
 using ACommerce.ServiceRegistry.Core.Extensions;
 using ACommerce.ServiceRegistry.Server.Controllers;
+using ACommerce.ServiceRegistry.Abstractions.Interfaces;
+using ACommerce.ServiceRegistry.Abstractions.Models;
 using ACommerce.Messaging.InMemory.Extensions;
 using ACommerce.Messaging.SignalR.Hub.Extensions;
 using ACommerce.Messaging.SignalR.Hub.Hubs;
@@ -303,6 +305,26 @@ Built using ACommerce libraries with configuration-first approach:
         Status = "Running",
         Version = "1.0.0"
     });
+
+    // ✅ تسجيل الخدمة في Service Registry (للتنمية - self-hosting)
+    using (var scope = app.Services.CreateScope())
+    {
+        var registry = scope.ServiceProvider.GetRequiredService<IServiceRegistry>();
+        await registry.RegisterAsync(new ServiceRegistration
+        {
+            ServiceName = "Ashare",
+            Version = "v1",
+            BaseUrl = "https://localhost:5001",
+            Environment = "Development",
+            EnableHealthCheck = true,
+            HealthCheckPath = "/health",
+            Tags = new Dictionary<string, string>
+            {
+                ["hubs"] = "/hubs/notifications,/hubs/chat,/hubs/messaging"
+            }
+        });
+        Log.Information("Ashare service registered in Service Registry");
+    }
 
     Log.Information("Ashare API started successfully!");
     Log.Information("Swagger UI available at: https://localhost:5001");
