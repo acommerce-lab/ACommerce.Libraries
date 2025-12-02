@@ -287,6 +287,13 @@ public class AuthController : AuthenticationControllerBase
 
         if (existingProfile != null)
         {
+            // ✅ تحديث UserId إذا كان فارغاً (للتوافق مع البروفايلات القديمة)
+            if (string.IsNullOrEmpty(existingProfile.UserId))
+            {
+                existingProfile.UserId = existingProfile.Id.ToString();
+                await _dbContext.SaveChangesAsync();
+                Logger.LogInformation("تم تحديث UserId للبروفايل: {ProfileId}", existingProfile.Id);
+            }
             return (existingProfile, false);
         }
 
@@ -302,6 +309,9 @@ public class AuthController : AuthenticationControllerBase
             IsVerified = true, // تم التحقق عبر نفاذ
             CreatedAt = DateTime.UtcNow
         };
+
+        // ✅ ضبط UserId ليتطابق مع profile.Id (يستخدم في JWT claim)
+        profile.UserId = profile.Id.ToString();
 
         await _profileRepository.AddAsync(profile);
         await _dbContext.SaveChangesAsync();
