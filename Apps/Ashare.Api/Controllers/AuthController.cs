@@ -298,9 +298,11 @@ public class AuthController : AuthenticationControllerBase
         }
 
         // إنشاء بروفايل جديد
+        var profileId = Guid.NewGuid();
         var profile = new Profile
         {
-            Id = Guid.NewGuid(),
+            Id = profileId,
+            UserId = profileId.ToString(), // ✅ ضبط UserId مباشرة في الـ initializer
             NationalId = nationalId,
             FullName = nafathData?.GetValueOrDefault("full_name") ?? "",
             PhoneNumber = nafathData?.GetValueOrDefault("phone_number") ?? "",
@@ -309,9 +311,6 @@ public class AuthController : AuthenticationControllerBase
             IsVerified = true, // تم التحقق عبر نفاذ
             CreatedAt = DateTime.UtcNow
         };
-
-        // ✅ ضبط UserId ليتطابق مع profile.Id (يستخدم في JWT claim)
-        profile.UserId = profile.Id.ToString();
 
         await _profileRepository.AddAsync(profile);
         await _dbContext.SaveChangesAsync();
