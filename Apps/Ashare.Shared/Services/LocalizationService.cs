@@ -352,6 +352,7 @@ public class LocalizationService : ILocalizationService
         ["ProfileUpdated"] = "تم تحديث البيانات بنجاح",
         ["AvatarUploadFailed"] = "فشل رفع الصورة",
         ["FirstNameRequired"] = "الاسم الأول مطلوب",
+        ["FullNameRequired"] = "الاسم الكامل مطلوب",
         ["AuthenticationFailed"] = "فشلت المصادقة",
 
         // Host
@@ -607,6 +608,7 @@ public class LocalizationService : ILocalizationService
         ["ProfileUpdated"] = "Profile updated successfully",
         ["AvatarUploadFailed"] = "Failed to upload avatar",
         ["FirstNameRequired"] = "First name is required",
+        ["FullNameRequired"] = "Full name is required",
         ["AuthenticationFailed"] = "Authentication failed",
 
         // Host

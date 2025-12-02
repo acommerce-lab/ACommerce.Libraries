@@ -50,7 +50,7 @@
             <div class="ashare-avatar-edit">
                 @if (!string.IsNullOrEmpty(_avatarUrl))
                 {
-                    <img src="@_avatarUrl" alt="@_displayName" />
+                    <img src="@_avatarUrl" alt="@_fullName" />
                 }
                 else
                 {
@@ -90,28 +90,11 @@
                 <h3 class="ashare-form-section-title">@L["PersonalInfo"]</h3>
 
                 <div class="ac-form-group">
-                    <label>@L["FirstName"]</label>
+                    <label>@L["FullName"]</label>
                     <input type="text"
                            class="ac-input"
-                           placeholder="@L["EnterFirstName"]"
-                           @bind="_firstName" />
-                </div>
-
-                <div class="ac-form-group">
-                    <label>@L["LastName"]</label>
-                    <input type="text"
-                           class="ac-input"
-                           placeholder="@L["EnterLastName"]"
-                           @bind="_lastName" />
-                </div>
-
-                <div class="ac-form-group">
-                    <label>@L["DisplayName"]</label>
-                    <input type="text"
-                           class="ac-input"
-                           placeholder="@L["EnterDisplayName"]"
-                           @bind="_displayName" />
-                    <small class="ashare-form-hint">@L["DisplayNameHint"]</small>
+                           placeholder="@L["EnterFullName"]"
+                           @bind="_fullName" />
                 </div>
             </div>
 
@@ -219,9 +202,7 @@
 
     // Profile fields
     private string? _avatarUrl;
-    private string _firstName = "";
-    private string _lastName = "";
-    private string _displayName = "";
+    private string _fullName = "";
     private string _email = "";
     private string _phoneNumber = "";
     private string _address = "";
@@ -252,11 +233,9 @@
             if (profile != null)
             {
                 _profileId = profile.Id;
-                _firstName = profile.FirstName ?? "";
-                _lastName = profile.LastName ?? "";
-                _displayName = profile.DisplayName ?? "";
+                _fullName = profile.FullName ?? "";
                 _email = profile.Email ?? "";
-                _avatarUrl = profile.AvatarUrl;
+                _avatarUrl = profile.Avatar;
                 _address = profile.Address ?? "";
 
                 // Extract phone number without +966 prefix
@@ -303,9 +282,9 @@
         _showSuccess = false;
 
         // التحقق من الحقول المطلوبة للمستخدمين الجدد
-        if (_isNewUser && string.IsNullOrWhiteSpace(_firstName))
+        if (_isNewUser && string.IsNullOrWhiteSpace(_fullName))
         {
-            _errorMessage = L["FirstNameRequired"];
+            _errorMessage = L["FullNameRequired"];
             _isSaving = false;
             return;
         }
@@ -314,8 +293,8 @@
         {
             var request = new UpdateProfileRequest
             {
-                FirstName = _firstName,
-                LastName = _lastName,
+                FullName = _fullName,
+                Email = string.IsNullOrWhiteSpace(_email) ? null : _email,
                 PhoneNumber = string.IsNullOrEmpty(_phoneNumber) ? null : $"+966{_phoneNumber}",
                 Address = _address
             };
