@@ -253,8 +253,16 @@
                         var result = await NafathClient.CompleteAsync(_nafathResult!.TransactionId!);
                         if (result?.Success == true)
                         {
-                            Console.WriteLine("[Login] ✅ Token received - navigating to home");
-                            Navigation.NavigateTo("/");
+                            if (result.IsNewUser)
+                            {
+                                Console.WriteLine("[Login] ✅ Token received - NEW USER - navigating to profile");
+                                Navigation.NavigateTo("/profile");
+                            }
+                            else
+                            {
+                                Console.WriteLine("[Login] ✅ Token received - navigating to home");
+                                Navigation.NavigateTo("/");
+                            }
                         }
                         else
                         {

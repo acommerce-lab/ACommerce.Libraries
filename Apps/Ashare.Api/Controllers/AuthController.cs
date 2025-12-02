@@ -138,7 +138,7 @@ public class AuthController : AuthenticationControllerBase
 
             // البحث عن البروفايل أو إنشاء جديد
             var nationalId = result.Data?["national_id"] ?? request.TransactionId;
-            var profile = await GetOrCreateProfile(nationalId, result.Data);
+            var (profile, isNewUser) = await GetOrCreateProfile(nationalId, result.Data);
 
             // إنشاء التوكن
             var authResult = await AuthProvider.AuthenticateAsync(new AuthenticationRequest
@@ -168,7 +168,8 @@ public class AuthController : AuthenticationControllerBase
                 ProfileId = profile.Id.ToString(),
                 FullName = profile.FullName,
                 ExpiresAt = authResult.ExpiresAt?.DateTime ?? DateTime.UtcNow.AddDays(7),
-                Message = "تم تسجيل الدخول بنجاح"
+                Message = isNewUser ? "مرحباً بك! أكمل بياناتك" : "تم تسجيل الدخول بنجاح",
+                IsNewUser = isNewUser
             });
         }
         catch (Exception ex)
@@ -278,7 +279,7 @@ public class AuthController : AuthenticationControllerBase
 
     #region Private Methods
 
-    private async Task<Profile> GetOrCreateProfile(string nationalId, Dictionary<string, string>? nafathData)
+    private async Task<(Profile Profile, bool IsNewUser)> GetOrCreateProfile(string nationalId, Dictionary<string, string>? nafathData)
     {
         // البحث عن بروفايل موجود بنفس الهوية
         var existingProfile = await _dbContext.Set<Profile>()
@@ -286,7 +287,7 @@ public class AuthController : AuthenticationControllerBase
 
         if (existingProfile != null)
         {
-            return existingProfile;
+            return (existingProfile, false);
         }
 
         // إنشاء بروفايل جديد
@@ -306,7 +307,7 @@ public class AuthController : AuthenticationControllerBase
         await _dbContext.SaveChangesAsync();
 
         Logger.LogInformation("تم إنشاء بروفايل جديد: {ProfileId}", profile.Id);
-        return profile;
+        return (profile, true);
     }
 
     #endregion
@@ -382,6 +383,11 @@ public class LoginResponse
     public string? FullName { get; set; }
     public DateTime? ExpiresAt { get; set; }
     public string? Message { get; set; }
+
+    /// <summary>
+    /// هل هذا مستخدم جديد (يحتاج إكمال البروفايل)
+    /// </summary>
+    public bool IsNewUser { get; set; }
 }
 
 /// <summary>

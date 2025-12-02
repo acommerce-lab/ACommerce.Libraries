@@ -93,6 +93,11 @@ public sealed class NafathCompleteResponse
     public DateTime? ExpiresAt { get; set; }
 
     public string? Message { get; set; }
+
+    /// <summary>
+    /// هل هذا مستخدم جديد (يحتاج إكمال البروفايل)
+    /// </summary>
+    public bool IsNewUser { get; set; }
 }
 
 #endregion
