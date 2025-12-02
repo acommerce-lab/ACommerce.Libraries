@@ -52,6 +52,9 @@ builder.Services.AddACommerceClientWithServices(
     {
         // تسجيل خدمة Marketplace - تستخدمها معظم الـ Clients
         services.AddService("Marketplace", apiBaseUrl);
+
+        // تسجيل خدمة Ashare - للـ SignalR و الإشعارات
+        services.AddService("Ashare", apiBaseUrl);
     },
     options =>
     {

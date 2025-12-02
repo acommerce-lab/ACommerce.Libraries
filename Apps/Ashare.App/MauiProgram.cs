@@ -103,6 +103,9 @@ public static class MauiProgram
                 // تسجيل خدمة Marketplace - تستخدمها معظم الـ Clients
                 services.AddService("Marketplace", apiBaseUrl);
 
+                // تسجيل خدمة Ashare - للـ SignalR و الإشعارات
+                services.AddService("Ashare", apiBaseUrl);
+
                 // يمكن إضافة خدمات أخرى إذا كانت على URLs مختلفة
                 // services.AddService("Files", "https://files.ashare.app");
                 // services.AddService("Payments", "https://payments.ashare.app");
@@ -175,6 +178,13 @@ public static class MauiProgram
         builder.Services.AddContactPointsClient(apiBaseUrl);
 
         // Real-time Client (SignalR)
+#if DEBUG
+        // تجاوز SSL في التطوير للشهادات الذاتية
+        builder.Services.Configure<RealtimeClientOptions>(options =>
+        {
+            options.BypassSslValidation = true;
+        });
+#endif
         builder.Services.AddSingleton<RealtimeClient>();
 
         // Files Client
