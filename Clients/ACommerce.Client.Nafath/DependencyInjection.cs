@@ -11,11 +11,7 @@ public static class DependencyInjection
         this IServiceCollection services,
         string serviceName = "Marketplace")
     {
-        services.AddSingleton(sp =>
-        {
-            var httpClient = sp.GetRequiredService<ACommerce.Client.Core.Http.IApiClient>();
-            return new NafathClient(httpClient, serviceName);
-        });
+        services.AddScoped<NafathClient>();
 
         return services;
     }

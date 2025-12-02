@@ -3,6 +3,7 @@ using Ashare.Web.Components;
 using Ashare.Web.Services;
 using ACommerce.Client.Auth;
 using ACommerce.Client.Auth.Extensions;
+using ACommerce.Client.Nafath;
 using ACommerce.Client.Cart;
 using ACommerce.Client.Cart.Extensions;
 using ACommerce.Client.Categories;
@@ -55,6 +56,9 @@ builder.Services.AddACommerceClientWithServices(
 
 // Authentication Client (JWT + Nafath)
 builder.Services.AddAuthClient(apiBaseUrl);
+
+// Nafath Client (مصادقة نفاذ)
+builder.Services.AddNafathClient();
 
 // Locations Client
 builder.Services.AddLocationsClient(apiBaseUrl);
