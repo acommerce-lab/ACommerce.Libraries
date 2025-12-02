@@ -2726,6 +2726,185 @@ h1, h2, h3, .ashare-logo-text {
     }
 }
 
+/* Images Preview Section */
+.ac-images-preview {
+    margin-top: var(--ashare-spacing-md);
+}
+
+.ac-preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--ashare-spacing-sm);
+}
+
+.ac-preview-count {
+    display: flex;
+    align-items: center;
+    gap: var(--ashare-spacing-xs);
+    font-size: 13px;
+    color: var(--ashare-gray-600);
+}
+
+.ac-preview-count i {
+    color: var(--ashare-primary);
+}
+
+.ac-clear-all {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: none;
+    border: 1px solid var(--ashare-danger);
+    border-radius: var(--ashare-radius-sm);
+    color: var(--ashare-danger);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ac-clear-all:hover {
+    background-color: var(--ashare-danger);
+    color: white;
+}
+
+/* Image Grid - Small Squares */
+.ac-image-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--ashare-spacing-sm);
+}
+
+@media (max-width: 400px) {
+    .ac-image-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.ac-image-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: var(--ashare-radius-md);
+    overflow: hidden;
+    background-color: var(--ashare-gray-100);
+}
+
+.ac-image-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.ac-image-item:hover img {
+    transform: scale(1.05);
+}
+
+/* Main Image Badge */
+.ac-image-item.main-image {
+    grid-column: span 2;
+    grid-row: span 2;
+}
+
+.ac-main-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    background: linear-gradient(135deg, var(--ashare-secondary), var(--ashare-secondary-dark));
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: var(--ashare-radius-sm);
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(244, 132, 76, 0.4);
+}
+
+/* Image Overlay */
+.ac-image-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: var(--ashare-spacing-xs);
+    padding: var(--ashare-spacing-sm);
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.ac-image-item:hover .ac-image-overlay {
+    opacity: 1;
+}
+
+/* Action Buttons */
+.ac-image-action {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--ashare-radius-full);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+}
+
+/* Star Button - Gold */
+.ac-image-action:not(.delete) {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: white;
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+}
+
+.ac-image-action:not(.delete):hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.6);
+}
+
+/* Delete Button - Red */
+.ac-image-action.delete {
+    background: linear-gradient(135deg, var(--ashare-danger), #DC2626);
+    color: white;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+}
+
+.ac-image-action.delete:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.6);
+}
+
+/* No Images State */
+.ac-no-images {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--ashare-spacing-sm);
+    padding: var(--ashare-spacing-xl);
+    text-align: center;
+    color: var(--ashare-gray-400);
+}
+
+.ac-no-images i {
+    font-size: 48px;
+}
+
+.ac-no-images p {
+    font-size: 14px;
+    color: var(--ashare-gray-600);
+    margin: 0;
+}
+
+.ac-no-images small {
+    font-size: 12px;
+    color: var(--ashare-gray-400);
+}
+
 .ac-image-preview-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
