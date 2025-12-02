@@ -23,6 +23,7 @@ using ACommerce.Client.Products.Extensions;
 using ACommerce.Client.Realtime;
 using ACommerce.Client.Vendors;
 using ACommerce.ServiceRegistry.Client.Extensions;
+using Ashare.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 

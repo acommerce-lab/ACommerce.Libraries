@@ -14804,3 +14804,543 @@ ORDER BY "a"."Id"
 2025-12-02 04:39:24.187 +03:00 [INF] Executed action Ashare.Api.Controllers.CategoryAttributesController.GetAttributesForCategory (Ashare.Api) in 176.048ms
 2025-12-02 04:39:24.189 +03:00 [INF] Executed endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAttributesForCategory (Ashare.Api)'
 2025-12-02 04:39:24.190 +03:00 [INF] Request finished HTTP/1.1 GET https://10.0.2.2:5001/api/CategoryAttributes/category/45fb45c1-91b8-4343-82c7-cc47bd58617d - 200 null application/json; charset=utf-8 186.5093ms
+2025-12-02 06:29:23.095 +03:00 [INF] Starting Ashare API - Shared Spaces Platform...
+2025-12-02 06:29:33.051 +03:00 [INF] Ensuring database is created...
+2025-12-02 06:29:33.483 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.Infrastructure.EFCores, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.485 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Profiles.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.486 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.487 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Profiles, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.488 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.488 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Vendors.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.489 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Vendors, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.490 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Products.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.513 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Listings.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.514 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.515 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Attributes.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.524 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Units.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.533 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Currencies.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.539 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Orders.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.540 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Orders, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.540 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Transactions.Core.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.541 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Transactions.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.542 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Locations.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.543 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Chats.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.544 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Chats.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.545 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Chats.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.545 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Recipients.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.546 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Recipients, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.547 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.JWT, Version=1.0.4.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.547 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.CQRS, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.548 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Realtime.SignalR, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.549 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Realtime.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.560 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.561 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.AspNetCore.Swagger, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.562 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Cart, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.563 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.564 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.564 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Users.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.565 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.566 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.Storage.Local, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.567 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Localization, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.568 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Locations.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.568 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Messaging.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.569 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.570 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.571 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Payments.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.572 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Reviews, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:29:33.678 +03:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-12-02 06:29:33.885 +03:00 [INF] Executed DbCommand (21ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "type" = 'table' AND "rootpage" IS NOT NULL;
+2025-12-02 06:29:33.892 +03:00 [INF] Seeding initial data...
+2025-12-02 06:29:33.893 +03:00 [INF] Database ready with seed data!
+2025-12-02 06:29:33.895 +03:00 [INF] Ashare API started successfully!
+2025-12-02 06:29:33.896 +03:00 [INF] Swagger UI available at: https://localhost:5001
+2025-12-02 06:29:33.906 +03:00 [INF] User profile is available. Using 'C:\Users\i\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-12-02 06:29:34.099 +03:00 [INF] Now listening on: https://localhost:5001
+2025-12-02 06:29:34.099 +03:00 [INF] Now listening on: http://localhost:5000
+2025-12-02 06:29:34.130 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5000/api/orders/search - application/json; charset=utf-8 null
+2025-12-02 06:29:34.151 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/CategoryAttributes/categories - null null
+2025-12-02 06:29:34.151 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/listings/new?limit=10 - null null
+2025-12-02 06:29:34.151 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/listings/featured?limit=10 - null null
+2025-12-02 06:29:34.482 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-12-02 06:29:34.483 +03:00 [INF] Hosting environment: Development
+2025-12-02 06:29:34.484 +03:00 [INF] Content root path: C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Api
+2025-12-02 06:29:34.594 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/listings/featured?limit=10 - 307 0 null 443.0244ms
+2025-12-02 06:29:34.594 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5000/api/orders/search - 307 0 null 470.9885ms
+2025-12-02 06:29:34.594 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/CategoryAttributes/categories - 307 0 null 443.039ms
+2025-12-02 06:29:34.594 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/listings/new?limit=10 - 307 0 null 443.0951ms
+2025-12-02 06:29:34.637 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/_vs/browserLink - null null
+2025-12-02 06:29:34.637 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/_framework/aspnetcore-browser-refresh.js - null null
+2025-12-02 06:29:34.660 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/_framework/aspnetcore-browser-refresh.js - 200 16505 application/javascript; charset=utf-8 23.6702ms
+2025-12-02 06:29:34.703 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:5001/api/listings/featured?limit=10 - null null
+2025-12-02 06:29:34.703 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:5001/api/orders/search - application/json; charset=utf-8 null
+2025-12-02 06:29:34.703 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:5001/api/CategoryAttributes/categories - null null
+2025-12-02 06:29:34.703 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:5001/api/listings/new?limit=10 - null null
+2025-12-02 06:29:34.767 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/_vs/browserLink - 200 null text/javascript; charset=UTF-8 130.4992ms
+2025-12-02 06:29:34.799 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/swagger/v1/swagger.json - null null
+2025-12-02 06:29:34.812 +03:00 [INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:29:34.812 +03:00 [INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:29:34.812 +03:00 [INF] Executing endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+2025-12-02 06:29:34.812 +03:00 [INF] Executing endpoint 'ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api)'
+2025-12-02 06:29:34.826 +03:00 [INF] Route matched with {action = "GetAvailableCategories", controller = "CategoryAttributes"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult] GetAvailableCategories() on controller Ashare.Api.Controllers.CategoryAttributesController (Ashare.Api).
+2025-12-02 06:29:34.826 +03:00 [INF] Route matched with {action = "GetNew", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetNew(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+2025-12-02 06:29:34.826 +03:00 [INF] Route matched with {action = "GetFeatured", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetFeatured(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+2025-12-02 06:29:34.826 +03:00 [INF] Route matched with {action = "Search", controller = "Orders"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[ACommerce.SharedKernel.Abstractions.Queries.PagedResult`1[ACommerce.Orders.DTOs.OrderResponseDto]]] Search(ACommerce.SharedKernel.Abstractions.Queries.SmartSearchRequest) on controller ACommerce.Orders.Api.Controllers.OrdersController (ACommerce.Orders.Api).
+2025-12-02 06:29:34.837 +03:00 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2025-12-02 06:29:34.837 +03:00 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2025-12-02 06:29:34.837 +03:00 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2025-12-02 06:29:34.893 +03:00 [INF] [START] SmartSearchQuery`2 (3059cd04-8aea-4a7a-a9f6-c7dc26efde00)
+2025-12-02 06:29:34.893 +03:00 [INF] [START] SmartSearchQuery`2 (be950ab2-90bd-42a8-87a7-3880a3651b63)
+2025-12-02 06:29:34.924 +03:00 [INF] [START] SmartSearchQuery`2 (00a835e2-1b46-4a75-b3c0-f534ea26204a)
+2025-12-02 06:29:35.240 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."CreatedAt", "p"."Description", "p"."Icon", "p"."Image", "p"."IsActive", "p"."IsDeleted", "p"."Name", "p"."ParentCategoryId", "p"."ProductId", "p"."Slug", "p"."SortOrder", "p"."UpdatedAt"
+FROM "ProductCategory" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive"
+2025-12-02 06:29:35.315 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[<>f__AnonymousType4`6[[System.Guid, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], Ashare.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:29:35.326 +03:00 [INF] Executed action Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api) in 495.8405ms
+2025-12-02 06:29:35.328 +03:00 [INF] Executed endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+2025-12-02 06:29:35.331 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:5001/api/CategoryAttributes/categories - 200 null application/json; charset=utf-8 627.9534ms
+2025-12-02 06:29:35.359 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 559.7441ms
+2025-12-02 06:29:35.425 +03:00 [WRN] You do not have a valid license key for the Lucky Penny software AutoMapper. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2025-12-02 06:29:35.451 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Order" AS "o"
+WHERE NOT ("o"."IsDeleted")
+2025-12-02 06:29:35.453 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+2025-12-02 06:29:35.455 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+2025-12-02 06:29:35.473 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__p_1='20', @__p_0='0'], CommandType='"Text"', CommandTimeout='30']
+SELECT "o"."Id", "o"."BillingAddress", "o"."CancelledAt", "o"."ConfirmedAt", "o"."CouponCode", "o"."CreatedAt", "o"."Currency", "o"."CustomerId", "o"."CustomerNotes", "o"."DeliveredAt", "o"."DiscountAmount", "o"."InternalNotes", "o"."IsDeleted", "o"."OrderNumber", "o"."PaymentId", "o"."PaymentMethod", "o"."ShipmentId", "o"."ShippedAt", "o"."ShippingAddress", "o"."ShippingCost", "o"."Status", "o"."Subtotal", "o"."TaxAmount", "o"."Total", "o"."TrackingNumber", "o"."UpdatedAt", "o"."VendorId"
+FROM "Order" AS "o"
+WHERE NOT ("o"."IsDeleted")
+ORDER BY "o"."CreatedAt" DESC
+LIMIT @__p_1 OFFSET @__p_0
+2025-12-02 06:29:35.474 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[@__p_1='10', @__p_0='0'], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."Address", "p"."AttributesJson", "p"."CategoryId", "p"."City", "p"."CompareAtPrice", "p"."Condition", "p"."Cost", "p"."CreatedAt", "p"."Currency", "p"."CurrencyId", "p"."Description", "p"."EndsAt", "p"."FeaturedImage", "p"."ImagesJson", "p"."IsActive", "p"."IsDeleted", "p"."IsFeatured", "p"."IsNew", "p"."Latitude", "p"."Longitude", "p"."LowStockThreshold", "p"."Price", "p"."ProcessingTime", "p"."ProductId", "p"."QuantityAvailable", "p"."QuantityReserved", "p"."Rating", "p"."ReviewCount", "p"."StartsAt", "p"."Status", "p"."Title", "p"."TotalSales", "p"."UpdatedAt", "p"."VendorId", "p"."VendorNotes", "p"."VendorSku", "p"."ViewCount"
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+ORDER BY "p"."CreatedAt" DESC
+LIMIT @__p_1 OFFSET @__p_0
+2025-12-02 06:29:35.475 +03:00 [INF] Executed DbCommand (6ms) [Parameters=[@__p_1='10', @__p_0='0'], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."Address", "p"."AttributesJson", "p"."CategoryId", "p"."City", "p"."CompareAtPrice", "p"."Condition", "p"."Cost", "p"."CreatedAt", "p"."Currency", "p"."CurrencyId", "p"."Description", "p"."EndsAt", "p"."FeaturedImage", "p"."ImagesJson", "p"."IsActive", "p"."IsDeleted", "p"."IsFeatured", "p"."IsNew", "p"."Latitude", "p"."Longitude", "p"."LowStockThreshold", "p"."Price", "p"."ProcessingTime", "p"."ProductId", "p"."QuantityAvailable", "p"."QuantityReserved", "p"."Rating", "p"."ReviewCount", "p"."StartsAt", "p"."Status", "p"."Title", "p"."TotalSales", "p"."UpdatedAt", "p"."VendorId", "p"."VendorNotes", "p"."VendorSku", "p"."ViewCount"
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+ORDER BY "p"."ViewCount" DESC
+LIMIT @__p_1 OFFSET @__p_0
+2025-12-02 06:29:35.487 +03:00 [INF] Found 0 Order items, returned page 1 with 0 items
+2025-12-02 06:29:35.489 +03:00 [WRN] [PERFORMANCE] Long running request detected: SmartSearchQuery`2 took 563ms (threshold: 500ms)
+2025-12-02 06:29:35.493 +03:00 [INF] [END] SmartSearchQuery`2 (00a835e2-1b46-4a75-b3c0-f534ea26204a) completed in 567ms
+2025-12-02 06:29:35.495 +03:00 [INF] Executing OkObjectResult, writing value of type 'ACommerce.SharedKernel.Abstractions.Queries.PagedResult`1[[ACommerce.Orders.DTOs.OrderResponseDto, ACommerce.Orders, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:29:35.516 +03:00 [INF] Executed action ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api) in 679.6904ms
+2025-12-02 06:29:35.517 +03:00 [INF] Executed endpoint 'ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api)'
+2025-12-02 06:29:35.518 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:5001/api/orders/search - 200 null application/json; charset=utf-8 815.196ms
+2025-12-02 06:29:35.551 +03:00 [INF] Found 1 ProductListing items, returned page 1 with 1 items
+2025-12-02 06:29:35.551 +03:00 [INF] Found 1 ProductListing items, returned page 1 with 1 items
+2025-12-02 06:29:35.552 +03:00 [WRN] [PERFORMANCE] Long running request detected: SmartSearchQuery`2 took 654ms (threshold: 500ms)
+2025-12-02 06:29:35.554 +03:00 [WRN] [PERFORMANCE] Long running request detected: SmartSearchQuery`2 took 656ms (threshold: 500ms)
+2025-12-02 06:29:35.554 +03:00 [INF] [END] SmartSearchQuery`2 (3059cd04-8aea-4a7a-a9f6-c7dc26efde00) completed in 660ms
+2025-12-02 06:29:35.555 +03:00 [INF] [END] SmartSearchQuery`2 (be950ab2-90bd-42a8-87a7-3880a3651b63) completed in 660ms
+2025-12-02 06:29:35.557 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto, ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:29:35.558 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto, ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:29:35.624 +03:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api) in 792.3748ms
+2025-12-02 06:29:35.624 +03:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api) in 793.7392ms
+2025-12-02 06:29:35.625 +03:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:29:35.626 +03:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:29:35.627 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:5001/api/listings/featured?limit=10 - 200 null application/json; charset=utf-8 924.0706ms
+2025-12-02 06:29:35.627 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:5001/api/listings/new?limit=10 - 200 null application/json; charset=utf-8 924.0697ms
+2025-12-02 06:29:35.994 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5000/api/orders/search - application/json; charset=utf-8 null
+2025-12-02 06:29:35.996 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5000/api/orders/search - 307 0 null 2.4301ms
+2025-12-02 06:29:36.000 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/CategoryAttributes/categories - null null
+2025-12-02 06:29:36.000 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:5001/api/orders/search - application/json; charset=utf-8 null
+2025-12-02 06:29:36.002 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/CategoryAttributes/categories - 307 0 null 2.5347ms
+2025-12-02 06:29:36.003 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/listings/featured?limit=10 - null null
+2025-12-02 06:29:36.003 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:5001/api/CategoryAttributes/categories - null null
+2025-12-02 06:29:36.005 +03:00 [INF] Executing endpoint 'ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api)'
+2025-12-02 06:29:36.008 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/listings/new?limit=10 - null null
+2025-12-02 06:29:36.009 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/listings/featured?limit=10 - 307 0 null 5.6192ms
+2025-12-02 06:29:36.010 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:5001/api/listings/featured?limit=10 - null null
+2025-12-02 06:29:36.011 +03:00 [INF] Executing endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+2025-12-02 06:29:36.012 +03:00 [INF] Route matched with {action = "Search", controller = "Orders"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[ACommerce.SharedKernel.Abstractions.Queries.PagedResult`1[ACommerce.Orders.DTOs.OrderResponseDto]]] Search(ACommerce.SharedKernel.Abstractions.Queries.SmartSearchRequest) on controller ACommerce.Orders.Api.Controllers.OrdersController (ACommerce.Orders.Api).
+2025-12-02 06:29:36.014 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/listings/new?limit=10 - 307 0 null 6.0248ms
+2025-12-02 06:29:36.015 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:5001/api/listings/new?limit=10 - null null
+2025-12-02 06:29:36.019 +03:00 [INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:29:36.020 +03:00 [INF] Route matched with {action = "GetAvailableCategories", controller = "CategoryAttributes"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult] GetAvailableCategories() on controller Ashare.Api.Controllers.CategoryAttributesController (Ashare.Api).
+2025-12-02 06:29:36.023 +03:00 [INF] [START] SmartSearchQuery`2 (55185857-cc09-43b8-b781-f9b364eba679)
+2025-12-02 06:29:36.027 +03:00 [INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:29:36.027 +03:00 [INF] Route matched with {action = "GetFeatured", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetFeatured(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+2025-12-02 06:29:36.030 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."CreatedAt", "p"."Description", "p"."Icon", "p"."Image", "p"."IsActive", "p"."IsDeleted", "p"."Name", "p"."ParentCategoryId", "p"."ProductId", "p"."Slug", "p"."SortOrder", "p"."UpdatedAt"
+FROM "ProductCategory" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive"
+2025-12-02 06:29:36.031 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Order" AS "o"
+WHERE NOT ("o"."IsDeleted")
+2025-12-02 06:29:36.031 +03:00 [INF] Route matched with {action = "GetNew", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetNew(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+2025-12-02 06:29:36.033 +03:00 [INF] [START] SmartSearchQuery`2 (fa38ab73-e5eb-41f3-9581-225077d89c50)
+2025-12-02 06:29:36.034 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[<>f__AnonymousType4`6[[System.Guid, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], Ashare.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:29:36.035 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__p_1='20', @__p_0='0'], CommandType='"Text"', CommandTimeout='30']
+SELECT "o"."Id", "o"."BillingAddress", "o"."CancelledAt", "o"."ConfirmedAt", "o"."CouponCode", "o"."CreatedAt", "o"."Currency", "o"."CustomerId", "o"."CustomerNotes", "o"."DeliveredAt", "o"."DiscountAmount", "o"."InternalNotes", "o"."IsDeleted", "o"."OrderNumber", "o"."PaymentId", "o"."PaymentMethod", "o"."ShipmentId", "o"."ShippedAt", "o"."ShippingAddress", "o"."ShippingCost", "o"."Status", "o"."Subtotal", "o"."TaxAmount", "o"."Total", "o"."TrackingNumber", "o"."UpdatedAt", "o"."VendorId"
+FROM "Order" AS "o"
+WHERE NOT ("o"."IsDeleted")
+ORDER BY "o"."CreatedAt" DESC
+LIMIT @__p_1 OFFSET @__p_0
+2025-12-02 06:29:36.036 +03:00 [INF] [START] SmartSearchQuery`2 (39268437-8e84-4d87-b2ae-8f771d0bd647)
+2025-12-02 06:29:36.038 +03:00 [INF] Executed action Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api) in 9.5931ms
+2025-12-02 06:29:36.040 +03:00 [INF] Found 0 Order items, returned page 1 with 0 items
+2025-12-02 06:29:36.040 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+2025-12-02 06:29:36.042 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+2025-12-02 06:29:36.046 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__p_1='10', @__p_0='0'], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."Address", "p"."AttributesJson", "p"."CategoryId", "p"."City", "p"."CompareAtPrice", "p"."Condition", "p"."Cost", "p"."CreatedAt", "p"."Currency", "p"."CurrencyId", "p"."Description", "p"."EndsAt", "p"."FeaturedImage", "p"."ImagesJson", "p"."IsActive", "p"."IsDeleted", "p"."IsFeatured", "p"."IsNew", "p"."Latitude", "p"."Longitude", "p"."LowStockThreshold", "p"."Price", "p"."ProcessingTime", "p"."ProductId", "p"."QuantityAvailable", "p"."QuantityReserved", "p"."Rating", "p"."ReviewCount", "p"."StartsAt", "p"."Status", "p"."Title", "p"."TotalSales", "p"."UpdatedAt", "p"."VendorId", "p"."VendorNotes", "p"."VendorSku", "p"."ViewCount"
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+ORDER BY "p"."ViewCount" DESC
+LIMIT @__p_1 OFFSET @__p_0
+2025-12-02 06:29:36.042 +03:00 [INF] Executed endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+2025-12-02 06:29:36.044 +03:00 [INF] [END] SmartSearchQuery`2 (55185857-cc09-43b8-b781-f9b364eba679) completed in 14ms
+2025-12-02 06:29:36.048 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__p_1='10', @__p_0='0'], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."Address", "p"."AttributesJson", "p"."CategoryId", "p"."City", "p"."CompareAtPrice", "p"."Condition", "p"."Cost", "p"."CreatedAt", "p"."Currency", "p"."CurrencyId", "p"."Description", "p"."EndsAt", "p"."FeaturedImage", "p"."ImagesJson", "p"."IsActive", "p"."IsDeleted", "p"."IsFeatured", "p"."IsNew", "p"."Latitude", "p"."Longitude", "p"."LowStockThreshold", "p"."Price", "p"."ProcessingTime", "p"."ProductId", "p"."QuantityAvailable", "p"."QuantityReserved", "p"."Rating", "p"."ReviewCount", "p"."StartsAt", "p"."Status", "p"."Title", "p"."TotalSales", "p"."UpdatedAt", "p"."VendorId", "p"."VendorNotes", "p"."VendorSku", "p"."ViewCount"
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+ORDER BY "p"."CreatedAt" DESC
+LIMIT @__p_1 OFFSET @__p_0
+2025-12-02 06:29:36.049 +03:00 [INF] Found 1 ProductListing items, returned page 1 with 1 items
+2025-12-02 06:29:36.049 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:5001/api/CategoryAttributes/categories - 200 null application/json; charset=utf-8 45.649ms
+2025-12-02 06:29:36.050 +03:00 [INF] Executing OkObjectResult, writing value of type 'ACommerce.SharedKernel.Abstractions.Queries.PagedResult`1[[ACommerce.Orders.DTOs.OrderResponseDto, ACommerce.Orders, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:29:36.052 +03:00 [INF] Found 1 ProductListing items, returned page 1 with 1 items
+2025-12-02 06:29:36.053 +03:00 [INF] [END] SmartSearchQuery`2 (fa38ab73-e5eb-41f3-9581-225077d89c50) completed in 15ms
+2025-12-02 06:29:36.056 +03:00 [INF] Executed action ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api) in 34.7983ms
+2025-12-02 06:29:36.058 +03:00 [INF] [END] SmartSearchQuery`2 (39268437-8e84-4d87-b2ae-8f771d0bd647) completed in 16ms
+2025-12-02 06:29:36.059 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto, ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:29:36.060 +03:00 [INF] Executed endpoint 'ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api)'
+2025-12-02 06:29:36.061 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto, ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:29:36.063 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:5001/api/orders/search - 200 null application/json; charset=utf-8 63.0373ms
+2025-12-02 06:29:36.154 +03:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api) in 118.2199ms
+2025-12-02 06:29:36.154 +03:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api) in 122.2685ms
+2025-12-02 06:29:36.156 +03:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:29:36.157 +03:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:29:36.158 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:5001/api/listings/new?limit=10 - 200 null application/json; charset=utf-8 143.769ms
+2025-12-02 06:29:36.159 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:5001/api/listings/featured?limit=10 - 200 null application/json; charset=utf-8 149.6117ms
+2025-12-02 06:29:43.677 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/CategoryAttributes/categories - null null
+2025-12-02 06:29:43.680 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/CategoryAttributes/categories - 307 0 null 2.5067ms
+2025-12-02 06:29:43.680 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:5001/api/CategoryAttributes/categories - null null
+2025-12-02 06:29:43.683 +03:00 [INF] Executing endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+2025-12-02 06:29:43.684 +03:00 [INF] Route matched with {action = "GetAvailableCategories", controller = "CategoryAttributes"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult] GetAvailableCategories() on controller Ashare.Api.Controllers.CategoryAttributesController (Ashare.Api).
+2025-12-02 06:29:43.687 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."CreatedAt", "p"."Description", "p"."Icon", "p"."Image", "p"."IsActive", "p"."IsDeleted", "p"."Name", "p"."ParentCategoryId", "p"."ProductId", "p"."Slug", "p"."SortOrder", "p"."UpdatedAt"
+FROM "ProductCategory" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive"
+2025-12-02 06:29:43.689 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[<>f__AnonymousType4`6[[System.Guid, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], Ashare.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:29:43.690 +03:00 [INF] Executed action Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api) in 5.2973ms
+2025-12-02 06:29:43.691 +03:00 [INF] Executed endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+2025-12-02 06:29:43.693 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:5001/api/CategoryAttributes/categories - 200 null application/json; charset=utf-8 12.4822ms
+2025-12-02 06:30:39.777 +03:00 [INF] Starting Ashare API - Shared Spaces Platform...
+2025-12-02 06:30:42.248 +03:00 [INF] Ensuring database is created...
+2025-12-02 06:30:42.780 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.Infrastructure.EFCores, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.783 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Profiles.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.784 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.785 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Profiles, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.785 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.786 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Vendors.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.787 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Vendors, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.788 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Products.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.814 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Listings.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.815 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.816 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Attributes.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.827 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Units.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.842 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Currencies.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.848 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Orders.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.849 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Orders, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.850 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Transactions.Core.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.851 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Transactions.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.852 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Locations.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.852 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Chats.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.853 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Chats.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.854 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Chats.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.855 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Recipients.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.855 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Recipients, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.856 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.JWT, Version=1.0.4.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.857 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.CQRS, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.858 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Realtime.SignalR, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.859 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Realtime.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.871 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.872 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.AspNetCore.Swagger, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.873 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Cart, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.874 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.875 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.876 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Users.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.876 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.877 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.Storage.Local, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.878 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Localization, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.879 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Locations.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.880 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Messaging.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.880 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.881 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.882 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Payments.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.883 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Reviews, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-02 06:30:42.996 +03:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-12-02 06:30:43.190 +03:00 [INF] Executed DbCommand (20ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "type" = 'table' AND "rootpage" IS NOT NULL;
+2025-12-02 06:30:43.197 +03:00 [INF] Seeding initial data...
+2025-12-02 06:30:43.198 +03:00 [INF] Database ready with seed data!
+2025-12-02 06:30:43.201 +03:00 [INF] Ashare API started successfully!
+2025-12-02 06:30:43.202 +03:00 [INF] Swagger UI available at: https://localhost:5001
+2025-12-02 06:30:43.214 +03:00 [INF] User profile is available. Using 'C:\Users\i\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-12-02 06:30:43.451 +03:00 [INF] Now listening on: https://localhost:5001
+2025-12-02 06:30:43.452 +03:00 [INF] Now listening on: http://localhost:5000
+2025-12-02 06:30:43.479 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5000/api/orders/search - application/json; charset=utf-8 null
+2025-12-02 06:30:43.494 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/CategoryAttributes/categories - null null
+2025-12-02 06:30:43.561 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/listings/featured?limit=10 - null null
+2025-12-02 06:30:43.561 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/listings/new?limit=10 - null null
+2025-12-02 06:30:43.779 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-12-02 06:30:43.781 +03:00 [INF] Hosting environment: Development
+2025-12-02 06:30:43.782 +03:00 [INF] Content root path: C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Api
+2025-12-02 06:30:43.828 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/CategoryAttributes/categories - 307 0 null 334.2272ms
+2025-12-02 06:30:43.828 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/listings/new?limit=10 - 307 0 null 266.9449ms
+2025-12-02 06:30:43.828 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/listings/featured?limit=10 - 307 0 null 266.9574ms
+2025-12-02 06:30:43.828 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5000/api/orders/search - 307 0 null 359.0831ms
+2025-12-02 06:30:43.913 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:5001/api/listings/featured?limit=10 - null null
+2025-12-02 06:30:43.913 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:5001/api/CategoryAttributes/categories - null null
+2025-12-02 06:30:43.913 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:5001/api/listings/new?limit=10 - null null
+2025-12-02 06:30:43.913 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:5001/api/orders/search - application/json; charset=utf-8 null
+2025-12-02 06:30:44.020 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/_framework/aspnetcore-browser-refresh.js - null null
+2025-12-02 06:30:44.020 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/_vs/browserLink - null null
+2025-12-02 06:30:44.039 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/_framework/aspnetcore-browser-refresh.js - 200 16505 application/javascript; charset=utf-8 19.7722ms
+2025-12-02 06:30:44.052 +03:00 [INF] Executing endpoint 'ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api)'
+2025-12-02 06:30:44.052 +03:00 [INF] Executing endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+2025-12-02 06:30:44.052 +03:00 [INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:30:44.052 +03:00 [INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:30:44.067 +03:00 [INF] Route matched with {action = "GetAvailableCategories", controller = "CategoryAttributes"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult] GetAvailableCategories() on controller Ashare.Api.Controllers.CategoryAttributesController (Ashare.Api).
+2025-12-02 06:30:44.067 +03:00 [INF] Route matched with {action = "GetNew", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetNew(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+2025-12-02 06:30:44.067 +03:00 [INF] Route matched with {action = "Search", controller = "Orders"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[ACommerce.SharedKernel.Abstractions.Queries.PagedResult`1[ACommerce.Orders.DTOs.OrderResponseDto]]] Search(ACommerce.SharedKernel.Abstractions.Queries.SmartSearchRequest) on controller ACommerce.Orders.Api.Controllers.OrdersController (ACommerce.Orders.Api).
+2025-12-02 06:30:44.067 +03:00 [INF] Route matched with {action = "GetFeatured", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetFeatured(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+2025-12-02 06:30:44.075 +03:00 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2025-12-02 06:30:44.075 +03:00 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2025-12-02 06:30:44.075 +03:00 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2025-12-02 06:30:44.173 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/_vs/browserLink - 200 null text/javascript; charset=UTF-8 154.0814ms
+2025-12-02 06:30:44.214 +03:00 [INF] Request starting HTTP/2 GET https://localhost:5001/swagger/v1/swagger.json - null null
+2025-12-02 06:30:44.231 +03:00 [INF] [START] SmartSearchQuery`2 (5c92cfc5-35fa-46b3-96ee-0c86b6195646)
+2025-12-02 06:30:44.231 +03:00 [INF] [START] SmartSearchQuery`2 (47aa17b8-b1fb-4397-937f-c789bec3a651)
+2025-12-02 06:30:44.249 +03:00 [INF] [START] SmartSearchQuery`2 (29ac088e-b039-4f43-866a-136aa0b1714e)
+2025-12-02 06:30:44.681 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."CreatedAt", "p"."Description", "p"."Icon", "p"."Image", "p"."IsActive", "p"."IsDeleted", "p"."Name", "p"."ParentCategoryId", "p"."ProductId", "p"."Slug", "p"."SortOrder", "p"."UpdatedAt"
+FROM "ProductCategory" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive"
+2025-12-02 06:30:44.775 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[<>f__AnonymousType4`6[[System.Guid, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], Ashare.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:30:44.787 +03:00 [INF] Executed action Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api) in 715.5147ms
+2025-12-02 06:30:44.788 +03:00 [INF] Executed endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+2025-12-02 06:30:44.792 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:5001/api/CategoryAttributes/categories - 200 null application/json; charset=utf-8 879.544ms
+2025-12-02 06:30:44.818 +03:00 [INF] Request finished HTTP/2 GET https://localhost:5001/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 603.8731ms
+2025-12-02 06:30:44.995 +03:00 [WRN] You do not have a valid license key for the Lucky Penny software AutoMapper. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2025-12-02 06:30:45.032 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Order" AS "o"
+WHERE NOT ("o"."IsDeleted")
+2025-12-02 06:30:45.037 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+2025-12-02 06:30:45.042 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+2025-12-02 06:30:45.068 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[@__p_1='20', @__p_0='0'], CommandType='"Text"', CommandTimeout='30']
+SELECT "o"."Id", "o"."BillingAddress", "o"."CancelledAt", "o"."ConfirmedAt", "o"."CouponCode", "o"."CreatedAt", "o"."Currency", "o"."CustomerId", "o"."CustomerNotes", "o"."DeliveredAt", "o"."DiscountAmount", "o"."InternalNotes", "o"."IsDeleted", "o"."OrderNumber", "o"."PaymentId", "o"."PaymentMethod", "o"."ShipmentId", "o"."ShippedAt", "o"."ShippingAddress", "o"."ShippingCost", "o"."Status", "o"."Subtotal", "o"."TaxAmount", "o"."Total", "o"."TrackingNumber", "o"."UpdatedAt", "o"."VendorId"
+FROM "Order" AS "o"
+WHERE NOT ("o"."IsDeleted")
+ORDER BY "o"."CreatedAt" DESC
+LIMIT @__p_1 OFFSET @__p_0
+2025-12-02 06:30:45.068 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[@__p_1='10', @__p_0='0'], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."Address", "p"."AttributesJson", "p"."CategoryId", "p"."City", "p"."CompareAtPrice", "p"."Condition", "p"."Cost", "p"."CreatedAt", "p"."Currency", "p"."CurrencyId", "p"."Description", "p"."EndsAt", "p"."FeaturedImage", "p"."ImagesJson", "p"."IsActive", "p"."IsDeleted", "p"."IsFeatured", "p"."IsNew", "p"."Latitude", "p"."Longitude", "p"."LowStockThreshold", "p"."Price", "p"."ProcessingTime", "p"."ProductId", "p"."QuantityAvailable", "p"."QuantityReserved", "p"."Rating", "p"."ReviewCount", "p"."StartsAt", "p"."Status", "p"."Title", "p"."TotalSales", "p"."UpdatedAt", "p"."VendorId", "p"."VendorNotes", "p"."VendorSku", "p"."ViewCount"
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+ORDER BY "p"."ViewCount" DESC
+LIMIT @__p_1 OFFSET @__p_0
+2025-12-02 06:30:45.068 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[@__p_1='10', @__p_0='0'], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."Address", "p"."AttributesJson", "p"."CategoryId", "p"."City", "p"."CompareAtPrice", "p"."Condition", "p"."Cost", "p"."CreatedAt", "p"."Currency", "p"."CurrencyId", "p"."Description", "p"."EndsAt", "p"."FeaturedImage", "p"."ImagesJson", "p"."IsActive", "p"."IsDeleted", "p"."IsFeatured", "p"."IsNew", "p"."Latitude", "p"."Longitude", "p"."LowStockThreshold", "p"."Price", "p"."ProcessingTime", "p"."ProductId", "p"."QuantityAvailable", "p"."QuantityReserved", "p"."Rating", "p"."ReviewCount", "p"."StartsAt", "p"."Status", "p"."Title", "p"."TotalSales", "p"."UpdatedAt", "p"."VendorId", "p"."VendorNotes", "p"."VendorSku", "p"."ViewCount"
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+ORDER BY "p"."CreatedAt" DESC
+LIMIT @__p_1 OFFSET @__p_0
+2025-12-02 06:30:45.086 +03:00 [INF] Found 0 Order items, returned page 1 with 0 items
+2025-12-02 06:30:45.089 +03:00 [WRN] [PERFORMANCE] Long running request detected: SmartSearchQuery`2 took 838ms (threshold: 500ms)
+2025-12-02 06:30:45.094 +03:00 [INF] [END] SmartSearchQuery`2 (29ac088e-b039-4f43-866a-136aa0b1714e) completed in 843ms
+2025-12-02 06:30:45.096 +03:00 [INF] Executing OkObjectResult, writing value of type 'ACommerce.SharedKernel.Abstractions.Queries.PagedResult`1[[ACommerce.Orders.DTOs.OrderResponseDto, ACommerce.Orders, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:30:45.121 +03:00 [INF] Executed action ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api) in 1047.9633ms
+2025-12-02 06:30:45.123 +03:00 [INF] Executed endpoint 'ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api)'
+2025-12-02 06:30:45.125 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:5001/api/orders/search - 200 null application/json; charset=utf-8 1212.218ms
+2025-12-02 06:30:45.159 +03:00 [INF] Found 1 ProductListing items, returned page 1 with 1 items
+2025-12-02 06:30:45.159 +03:00 [INF] Found 1 ProductListing items, returned page 1 with 1 items
+2025-12-02 06:30:45.161 +03:00 [WRN] [PERFORMANCE] Long running request detected: SmartSearchQuery`2 took 923ms (threshold: 500ms)
+2025-12-02 06:30:45.162 +03:00 [WRN] [PERFORMANCE] Long running request detected: SmartSearchQuery`2 took 925ms (threshold: 500ms)
+2025-12-02 06:30:45.163 +03:00 [INF] [END] SmartSearchQuery`2 (47aa17b8-b1fb-4397-937f-c789bec3a651) completed in 926ms
+2025-12-02 06:30:45.165 +03:00 [INF] [END] SmartSearchQuery`2 (5c92cfc5-35fa-46b3-96ee-0c86b6195646) completed in 932ms
+2025-12-02 06:30:45.166 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto, ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:30:45.167 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto, ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:30:45.218 +03:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api) in 1143.8845ms
+2025-12-02 06:30:45.218 +03:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api) in 1147.493ms
+2025-12-02 06:30:45.220 +03:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:30:45.220 +03:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:30:45.223 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:5001/api/listings/featured?limit=10 - 200 null application/json; charset=utf-8 1310.0018ms
+2025-12-02 06:30:45.223 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:5001/api/listings/new?limit=10 - 200 null application/json; charset=utf-8 1310.4215ms
+2025-12-02 06:30:45.746 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5000/api/orders/search - application/json; charset=utf-8 null
+2025-12-02 06:30:45.750 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5000/api/orders/search - 307 0 null 3.9899ms
+2025-12-02 06:30:45.751 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/CategoryAttributes/categories - null null
+2025-12-02 06:30:45.751 +03:00 [INF] Request starting HTTP/1.1 POST https://localhost:5001/api/orders/search - application/json; charset=utf-8 null
+2025-12-02 06:30:45.754 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/listings/featured?limit=10 - null null
+2025-12-02 06:30:45.756 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/CategoryAttributes/categories - 307 0 null 4.9751ms
+2025-12-02 06:30:45.759 +03:00 [INF] Executing endpoint 'ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api)'
+2025-12-02 06:30:45.760 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/listings/featured?limit=10 - 307 0 null 6.0591ms
+2025-12-02 06:30:45.764 +03:00 [INF] Route matched with {action = "Search", controller = "Orders"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[ACommerce.SharedKernel.Abstractions.Queries.PagedResult`1[ACommerce.Orders.DTOs.OrderResponseDto]]] Search(ACommerce.SharedKernel.Abstractions.Queries.SmartSearchRequest) on controller ACommerce.Orders.Api.Controllers.OrdersController (ACommerce.Orders.Api).
+2025-12-02 06:30:45.769 +03:00 [INF] [START] SmartSearchQuery`2 (195a7d36-3519-4313-83d5-0c415ef956d2)
+2025-12-02 06:30:45.772 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Order" AS "o"
+WHERE NOT ("o"."IsDeleted")
+2025-12-02 06:30:45.775 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__p_1='20', @__p_0='0'], CommandType='"Text"', CommandTimeout='30']
+SELECT "o"."Id", "o"."BillingAddress", "o"."CancelledAt", "o"."ConfirmedAt", "o"."CouponCode", "o"."CreatedAt", "o"."Currency", "o"."CustomerId", "o"."CustomerNotes", "o"."DeliveredAt", "o"."DiscountAmount", "o"."InternalNotes", "o"."IsDeleted", "o"."OrderNumber", "o"."PaymentId", "o"."PaymentMethod", "o"."ShipmentId", "o"."ShippedAt", "o"."ShippingAddress", "o"."ShippingCost", "o"."Status", "o"."Subtotal", "o"."TaxAmount", "o"."Total", "o"."TrackingNumber", "o"."UpdatedAt", "o"."VendorId"
+FROM "Order" AS "o"
+WHERE NOT ("o"."IsDeleted")
+ORDER BY "o"."CreatedAt" DESC
+LIMIT @__p_1 OFFSET @__p_0
+2025-12-02 06:30:45.777 +03:00 [INF] Found 0 Order items, returned page 1 with 0 items
+2025-12-02 06:30:45.779 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/listings/new?limit=10 - null null
+2025-12-02 06:30:45.779 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:5001/api/listings/featured?limit=10 - null null
+2025-12-02 06:30:45.779 +03:00 [INF] [END] SmartSearchQuery`2 (195a7d36-3519-4313-83d5-0c415ef956d2) completed in 9ms
+2025-12-02 06:30:45.787 +03:00 [INF] Executing OkObjectResult, writing value of type 'ACommerce.SharedKernel.Abstractions.Queries.PagedResult`1[[ACommerce.Orders.DTOs.OrderResponseDto, ACommerce.Orders, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:30:45.782 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/listings/new?limit=10 - 307 0 null 3.276ms
+2025-12-02 06:30:45.784 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:5001/api/listings/new?limit=10 - null null
+2025-12-02 06:30:45.785 +03:00 [INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:30:45.779 +03:00 [INF] Request starting HTTP/1.1 GET https://localhost:5001/api/CategoryAttributes/categories - null null
+2025-12-02 06:30:45.790 +03:00 [INF] Executed action ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api) in 22.9967ms
+2025-12-02 06:30:45.813 +03:00 [INF] Executed endpoint 'ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api)'
+2025-12-02 06:30:45.799 +03:00 [INF] Route matched with {action = "GetFeatured", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetFeatured(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+2025-12-02 06:30:45.810 +03:00 [INF] Executing endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+2025-12-02 06:30:45.798 +03:00 [INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:30:45.816 +03:00 [INF] Request finished HTTP/1.1 POST https://localhost:5001/api/orders/search - 200 null application/json; charset=utf-8 64.8264ms
+2025-12-02 06:30:45.828 +03:00 [INF] Route matched with {action = "GetAvailableCategories", controller = "CategoryAttributes"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult] GetAvailableCategories() on controller Ashare.Api.Controllers.CategoryAttributesController (Ashare.Api).
+2025-12-02 06:30:45.833 +03:00 [INF] [START] SmartSearchQuery`2 (2f2e3711-9d7c-44a4-a6bd-6ccf0c9b2495)
+2025-12-02 06:30:45.836 +03:00 [INF] Route matched with {action = "GetNew", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetNew(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+2025-12-02 06:30:45.848 +03:00 [INF] [START] SmartSearchQuery`2 (9741b8e5-6b78-43ce-a41c-19419f44e4dd)
+2025-12-02 06:30:45.846 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."CreatedAt", "p"."Description", "p"."Icon", "p"."Image", "p"."IsActive", "p"."IsDeleted", "p"."Name", "p"."ParentCategoryId", "p"."ProductId", "p"."Slug", "p"."SortOrder", "p"."UpdatedAt"
+FROM "ProductCategory" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive"
+2025-12-02 06:30:45.849 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+2025-12-02 06:30:45.850 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+2025-12-02 06:30:45.855 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__p_1='10', @__p_0='0'], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."Address", "p"."AttributesJson", "p"."CategoryId", "p"."City", "p"."CompareAtPrice", "p"."Condition", "p"."Cost", "p"."CreatedAt", "p"."Currency", "p"."CurrencyId", "p"."Description", "p"."EndsAt", "p"."FeaturedImage", "p"."ImagesJson", "p"."IsActive", "p"."IsDeleted", "p"."IsFeatured", "p"."IsNew", "p"."Latitude", "p"."Longitude", "p"."LowStockThreshold", "p"."Price", "p"."ProcessingTime", "p"."ProductId", "p"."QuantityAvailable", "p"."QuantityReserved", "p"."Rating", "p"."ReviewCount", "p"."StartsAt", "p"."Status", "p"."Title", "p"."TotalSales", "p"."UpdatedAt", "p"."VendorId", "p"."VendorNotes", "p"."VendorSku", "p"."ViewCount"
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+ORDER BY "p"."ViewCount" DESC
+LIMIT @__p_1 OFFSET @__p_0
+2025-12-02 06:30:45.852 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[<>f__AnonymousType4`6[[System.Guid, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], Ashare.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:30:45.858 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[@__p_1='10', @__p_0='0'], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."Address", "p"."AttributesJson", "p"."CategoryId", "p"."City", "p"."CompareAtPrice", "p"."Condition", "p"."Cost", "p"."CreatedAt", "p"."Currency", "p"."CurrencyId", "p"."Description", "p"."EndsAt", "p"."FeaturedImage", "p"."ImagesJson", "p"."IsActive", "p"."IsDeleted", "p"."IsFeatured", "p"."IsNew", "p"."Latitude", "p"."Longitude", "p"."LowStockThreshold", "p"."Price", "p"."ProcessingTime", "p"."ProductId", "p"."QuantityAvailable", "p"."QuantityReserved", "p"."Rating", "p"."ReviewCount", "p"."StartsAt", "p"."Status", "p"."Title", "p"."TotalSales", "p"."UpdatedAt", "p"."VendorId", "p"."VendorNotes", "p"."VendorSku", "p"."ViewCount"
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+ORDER BY "p"."CreatedAt" DESC
+LIMIT @__p_1 OFFSET @__p_0
+2025-12-02 06:30:45.860 +03:00 [INF] Found 1 ProductListing items, returned page 1 with 1 items
+2025-12-02 06:30:45.861 +03:00 [INF] Executed action Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api) in 16.9702ms
+2025-12-02 06:30:45.866 +03:00 [INF] Executed endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+2025-12-02 06:30:45.865 +03:00 [INF] [END] SmartSearchQuery`2 (2f2e3711-9d7c-44a4-a6bd-6ccf0c9b2495) completed in 19ms
+2025-12-02 06:30:45.865 +03:00 [INF] Found 1 ProductListing items, returned page 1 with 1 items
+2025-12-02 06:30:45.867 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:5001/api/CategoryAttributes/categories - 200 null application/json; charset=utf-8 87.8193ms
+2025-12-02 06:30:45.868 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto, ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:30:45.870 +03:00 [INF] [END] SmartSearchQuery`2 (9741b8e5-6b78-43ce-a41c-19419f44e4dd) completed in 20ms
+2025-12-02 06:30:45.877 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto, ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:30:45.881 +03:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api) in 54.0626ms
+2025-12-02 06:30:45.883 +03:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:30:45.884 +03:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api) in 36.744ms
+2025-12-02 06:30:45.884 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:5001/api/listings/featured?limit=10 - 200 null application/json; charset=utf-8 104.9129ms
+2025-12-02 06:30:45.886 +03:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:30:45.894 +03:00 [INF] Request finished HTTP/1.1 GET https://localhost:5001/api/listings/new?limit=10 - 200 null application/json; charset=utf-8 110.5126ms
+2025-12-02 06:30:47.592 +03:00 [INF] Request starting HTTP/1.1 GET https://10.0.2.2:5001/api/CategoryAttributes/categories - null null
+2025-12-02 06:30:47.593 +03:00 [INF] Request starting HTTP/1.1 GET https://10.0.2.2:5001/api/listings/new?limit=10 - null null
+2025-12-02 06:30:47.595 +03:00 [INF] Request starting HTTP/1.1 GET https://10.0.2.2:5001/api/listings/featured?limit=10 - null null
+2025-12-02 06:30:47.596 +03:00 [INF] Executing endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+2025-12-02 06:30:47.597 +03:00 [INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:30:47.599 +03:00 [INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:30:47.600 +03:00 [INF] Route matched with {action = "GetAvailableCategories", controller = "CategoryAttributes"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult] GetAvailableCategories() on controller Ashare.Api.Controllers.CategoryAttributesController (Ashare.Api).
+2025-12-02 06:30:47.601 +03:00 [INF] Route matched with {action = "GetNew", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetNew(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+2025-12-02 06:30:47.601 +03:00 [INF] Route matched with {action = "GetFeatured", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetFeatured(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+2025-12-02 06:30:47.605 +03:00 [INF] [START] SmartSearchQuery`2 (c321bf3c-75fd-4d74-b579-82874e29a8a8)
+2025-12-02 06:30:47.606 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."CreatedAt", "p"."Description", "p"."Icon", "p"."Image", "p"."IsActive", "p"."IsDeleted", "p"."Name", "p"."ParentCategoryId", "p"."ProductId", "p"."Slug", "p"."SortOrder", "p"."UpdatedAt"
+FROM "ProductCategory" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive"
+2025-12-02 06:30:47.606 +03:00 [INF] [START] SmartSearchQuery`2 (a348fd1b-4679-4e37-8179-42f82b7ec945)
+2025-12-02 06:30:47.609 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+2025-12-02 06:30:47.609 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[<>f__AnonymousType4`6[[System.Guid, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], Ashare.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:30:47.611 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+2025-12-02 06:30:47.612 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__p_1='10', @__p_0='0'], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."Address", "p"."AttributesJson", "p"."CategoryId", "p"."City", "p"."CompareAtPrice", "p"."Condition", "p"."Cost", "p"."CreatedAt", "p"."Currency", "p"."CurrencyId", "p"."Description", "p"."EndsAt", "p"."FeaturedImage", "p"."ImagesJson", "p"."IsActive", "p"."IsDeleted", "p"."IsFeatured", "p"."IsNew", "p"."Latitude", "p"."Longitude", "p"."LowStockThreshold", "p"."Price", "p"."ProcessingTime", "p"."ProductId", "p"."QuantityAvailable", "p"."QuantityReserved", "p"."Rating", "p"."ReviewCount", "p"."StartsAt", "p"."Status", "p"."Title", "p"."TotalSales", "p"."UpdatedAt", "p"."VendorId", "p"."VendorNotes", "p"."VendorSku", "p"."ViewCount"
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+ORDER BY "p"."CreatedAt" DESC
+LIMIT @__p_1 OFFSET @__p_0
+2025-12-02 06:30:47.613 +03:00 [INF] Executed action Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api) in 9.8233ms
+2025-12-02 06:30:47.615 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__p_1='10', @__p_0='0'], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."Address", "p"."AttributesJson", "p"."CategoryId", "p"."City", "p"."CompareAtPrice", "p"."Condition", "p"."Cost", "p"."CreatedAt", "p"."Currency", "p"."CurrencyId", "p"."Description", "p"."EndsAt", "p"."FeaturedImage", "p"."ImagesJson", "p"."IsActive", "p"."IsDeleted", "p"."IsFeatured", "p"."IsNew", "p"."Latitude", "p"."Longitude", "p"."LowStockThreshold", "p"."Price", "p"."ProcessingTime", "p"."ProductId", "p"."QuantityAvailable", "p"."QuantityReserved", "p"."Rating", "p"."ReviewCount", "p"."StartsAt", "p"."Status", "p"."Title", "p"."TotalSales", "p"."UpdatedAt", "p"."VendorId", "p"."VendorNotes", "p"."VendorSku", "p"."ViewCount"
+FROM "ProductListing" AS "p"
+WHERE NOT ("p"."IsDeleted") AND "p"."IsActive" AND "p"."Status" = 3
+ORDER BY "p"."ViewCount" DESC
+LIMIT @__p_1 OFFSET @__p_0
+2025-12-02 06:30:47.616 +03:00 [INF] Found 1 ProductListing items, returned page 1 with 1 items
+2025-12-02 06:30:47.617 +03:00 [INF] Executed endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+2025-12-02 06:30:47.619 +03:00 [INF] Found 1 ProductListing items, returned page 1 with 1 items
+2025-12-02 06:30:47.620 +03:00 [INF] [END] SmartSearchQuery`2 (c321bf3c-75fd-4d74-b579-82874e29a8a8) completed in 12ms
+2025-12-02 06:30:47.621 +03:00 [INF] Request finished HTTP/1.1 GET https://10.0.2.2:5001/api/CategoryAttributes/categories - 200 null application/json; charset=utf-8 28.4165ms
+2025-12-02 06:30:47.622 +03:00 [INF] [END] SmartSearchQuery`2 (a348fd1b-4679-4e37-8179-42f82b7ec945) completed in 12ms
+2025-12-02 06:30:47.623 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto, ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:30:47.627 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto, ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:30:47.643 +03:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api) in 39.0341ms
+2025-12-02 06:30:47.644 +03:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api) in 38.1936ms
+2025-12-02 06:30:47.644 +03:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:30:47.645 +03:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+2025-12-02 06:30:47.646 +03:00 [INF] Request finished HTTP/1.1 GET https://10.0.2.2:5001/api/listings/new?limit=10 - 200 null application/json; charset=utf-8 53.2775ms
+2025-12-02 06:30:47.647 +03:00 [INF] Request finished HTTP/1.1 GET https://10.0.2.2:5001/api/listings/featured?limit=10 - 200 null application/json; charset=utf-8 52.5821ms
+2025-12-02 06:30:47.758 +03:00 [INF] Request starting HTTP/1.1 POST https://10.0.2.2:5001/api/orders/search - application/json; charset=utf-8 null
+2025-12-02 06:30:47.760 +03:00 [INF] Executing endpoint 'ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api)'
+2025-12-02 06:30:47.761 +03:00 [INF] Route matched with {action = "Search", controller = "Orders"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[ACommerce.SharedKernel.Abstractions.Queries.PagedResult`1[ACommerce.Orders.DTOs.OrderResponseDto]]] Search(ACommerce.SharedKernel.Abstractions.Queries.SmartSearchRequest) on controller ACommerce.Orders.Api.Controllers.OrdersController (ACommerce.Orders.Api).
+2025-12-02 06:30:47.763 +03:00 [INF] [START] SmartSearchQuery`2 (3597d5df-b3a2-4eea-a059-f942c59a1cd6)
+2025-12-02 06:30:47.766 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Order" AS "o"
+WHERE NOT ("o"."IsDeleted")
+2025-12-02 06:30:47.768 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__p_1='20', @__p_0='0'], CommandType='"Text"', CommandTimeout='30']
+SELECT "o"."Id", "o"."BillingAddress", "o"."CancelledAt", "o"."ConfirmedAt", "o"."CouponCode", "o"."CreatedAt", "o"."Currency", "o"."CustomerId", "o"."CustomerNotes", "o"."DeliveredAt", "o"."DiscountAmount", "o"."InternalNotes", "o"."IsDeleted", "o"."OrderNumber", "o"."PaymentId", "o"."PaymentMethod", "o"."ShipmentId", "o"."ShippedAt", "o"."ShippingAddress", "o"."ShippingCost", "o"."Status", "o"."Subtotal", "o"."TaxAmount", "o"."Total", "o"."TrackingNumber", "o"."UpdatedAt", "o"."VendorId"
+FROM "Order" AS "o"
+WHERE NOT ("o"."IsDeleted")
+ORDER BY "o"."CreatedAt" DESC
+LIMIT @__p_1 OFFSET @__p_0
+2025-12-02 06:30:47.770 +03:00 [INF] Found 0 Order items, returned page 1 with 0 items
+2025-12-02 06:30:47.771 +03:00 [INF] [END] SmartSearchQuery`2 (3597d5df-b3a2-4eea-a059-f942c59a1cd6) completed in 7ms
+2025-12-02 06:30:47.772 +03:00 [INF] Executing OkObjectResult, writing value of type 'ACommerce.SharedKernel.Abstractions.Queries.PagedResult`1[[ACommerce.Orders.DTOs.OrderResponseDto, ACommerce.Orders, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-02 06:30:47.774 +03:00 [INF] Executed action ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api) in 11.5511ms
+2025-12-02 06:30:47.775 +03:00 [INF] Executed endpoint 'ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api)'
+2025-12-02 06:30:47.776 +03:00 [INF] Request finished HTTP/1.1 POST https://10.0.2.2:5001/api/orders/search - 200 null application/json; charset=utf-8 18.3086ms
