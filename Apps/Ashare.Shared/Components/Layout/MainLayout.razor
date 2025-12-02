@@ -79,7 +79,22 @@
     private int NotificationCount { get; set; }
     private bool _authChecked;
 
-    private bool IsAuthPage => RouteData?.PageType?.Name is "Login" or "Register" or "ProfileEdit";
+    private bool IsAuthPage
+    {
+        get
+        {
+            // التحقق من اسم الصفحة
+            var pageName = RouteData?.PageType?.Name;
+            if (pageName is "Login" or "Register" or "ProfileEdit")
+                return true;
+
+            // التحقق من المسار (للتوافق مع MAUI)
+            var currentPath = Navigation.CurrentUri?.ToLowerInvariant() ?? "";
+            return currentPath.Contains("/login") ||
+                   currentPath.Contains("/register") ||
+                   currentPath.Contains("/profile/edit");
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
