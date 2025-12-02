@@ -1,10 +1,11 @@
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Logging;
-using ACommerce.Profiles.Entities;
 using ACommerce.Profiles.DTOs;
+using ACommerce.Profiles.Entities;
 using ACommerce.SharedKernel.AspNetCore.Controllers;
+using ACommerce.SharedKernel.CQRS.Commands;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 
 namespace ACommerce.Profiles.Api.Controllers;
@@ -101,10 +102,10 @@ public class ProfilesController(
             var profileId = result.Items.First().Id;
 
             // تحديث البروفايل
-            var updateCommand = new SharedKernel.CQRS.Commands.UpdateCommand<Profile, UpdateProfileDto, ProfileResponseDto>
+            UpdateCommand<Profile, UpdateProfileDto> updateCommand = new()
             {
                 Id = profileId,
-                Dto = dto
+                Data = dto
             };
 
             var updated = await _mediator.Send(updateCommand);
