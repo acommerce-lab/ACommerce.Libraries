@@ -251,7 +251,21 @@
             {
                 _countdown = _nafathResult.ExpiresInSeconds > 0 ? _nafathResult.ExpiresInSeconds : 120;
                 StartCountdown();
-                // لا نستخدم Polling - نعتمد على SignalR فقط
+
+                // الاشتراك في إشعارات المصادقة لهذا المعرف
+                // هذا يسمح للعميل المجهول باستلام الإشعار عند نجاح المصادقة
+                if (_isConnectedToSignalR)
+                {
+                    try
+                    {
+                        await RealtimeClient.SendAsync("SubscribeToAuth", _nationalId);
+                        Console.WriteLine($"[Login] Subscribed to auth notifications for {_nationalId}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[Login] Failed to subscribe to auth: {ex.Message}");
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -291,10 +305,21 @@
         _errorMessage = null;
     }
 
-    private void CancelNafath()
+    private async Task CancelNafath()
     {
         _timer?.Stop();
         _timer?.Dispose();
+
+        // إلغاء الاشتراك من إشعارات المصادقة
+        if (_isConnectedToSignalR && !string.IsNullOrEmpty(_nationalId))
+        {
+            try
+            {
+                await RealtimeClient.SendAsync("UnsubscribeFromAuth", _nationalId);
+            }
+            catch { /* تجاهل الأخطاء */ }
+        }
+
         ResetNafath();
     }
 
