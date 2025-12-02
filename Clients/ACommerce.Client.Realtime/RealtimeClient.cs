@@ -54,9 +54,22 @@ public sealed class RealtimeClient(
 	}
 
 	/// <summary>
-	/// الاستماع لحدث معين
+	/// الاستماع لحدث معين مع معامل واحد
 	/// </summary>
 	public IDisposable On<T>(string eventName, Action<T> handler)
+	{
+		if (_connection == null)
+		{
+			throw new InvalidOperationException("Not connected. Call ConnectAsync first.");
+		}
+
+		return _connection.On(eventName, handler);
+	}
+
+	/// <summary>
+	/// الاستماع لحدث معين مع معاملين (مثل ReceiveMessage)
+	/// </summary>
+	public IDisposable On<T1, T2>(string eventName, Action<T1, T2> handler)
 	{
 		if (_connection == null)
 		{

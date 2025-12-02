@@ -158,13 +158,28 @@
             await RealtimeClient.ConnectAsync(serviceName: "Ashare", hubPath: "/hubs/notifications");
             _isConnectedToSignalR = true;
 
-            // الاستماع لإشعارات نفاذ
-            _notificationSubscription = RealtimeClient.On<JsonElement>("ReceiveNotification", HandleNotification);
+            // الاستماع لـ ReceiveMessage (الـ Hub يرسل ReceiveMessage(method, data))
+            _notificationSubscription = RealtimeClient.On<string, JsonElement>("ReceiveMessage", HandleReceiveMessage);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[Login] Failed to connect to SignalR: {ex.Message}");
             // نستمر بدون SignalR - سنستخدم polling كبديل
+        }
+    }
+
+    private void HandleReceiveMessage(string method, JsonElement data)
+    {
+        Console.WriteLine($"[Login] 📨 ReceiveMessage: method={method}");
+
+        // تصفية الإشعارات فقط
+        if (method == "ReceiveNotification")
+        {
+            HandleNotification(data);
+        }
+        else if (method == "AuthSubscribed")
+        {
+            Console.WriteLine($"[Login] ✅ AuthSubscribed confirmed: {data.GetRawText()}");
         }
     }
 
