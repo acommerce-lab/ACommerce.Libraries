@@ -1,4 +1,4 @@
-using Ashare.App.Services;
+using Ashare.Shared.Services;
 using ACommerce.Client.Auth;
 using ACommerce.Client.Auth.Extensions;
 using ACommerce.Client.Cart;
@@ -26,7 +26,8 @@ using ACommerce.ServiceRegistry.Client.Extensions;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Themes;
 using Microsoft.Extensions.Logging;
-using ThemeService = Ashare.App.Services.ThemeService;
+using ThemeService = Ashare.Shared.Services.ThemeService;
+using Ashare.App.Services;
 
 namespace Ashare.App;
 
@@ -182,8 +183,8 @@ public static class MauiProgram
         // Theme Service (Dark/Light Mode)
         builder.Services.AddSingleton<ThemeService>();
 
-        // Navigation Service
-        builder.Services.AddScoped<IAppNavigationService, AppNavigationService>();
+        // Navigation Service (MAUI implementation)
+        builder.Services.AddScoped<IAppNavigationService, Ashare.App.Services.AppNavigationService>();
 
         // Space Data Service (mock data for development)
         builder.Services.AddSingleton<SpaceDataService>();

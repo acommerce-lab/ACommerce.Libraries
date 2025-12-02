@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Ashare.App.Services;
+namespace Ashare.Shared.Services;
 
 /// <summary>
 /// واجهة خدمة الترجمة

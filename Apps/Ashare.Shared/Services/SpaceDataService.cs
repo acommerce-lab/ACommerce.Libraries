@@ -1,4 +1,4 @@
-namespace Ashare.App.Services;
+namespace Ashare.Shared.Services;
 
 /// <summary>
 /// خدمة البيانات للمساحات المشتركة (Mock Data)

@@ -1,5 +1,5 @@
 @inherits LayoutComponentBase
-@inject Ashare.App.Services.ThemeService ThemeService
+@inject Ashare.Shared.Services.ThemeService ThemeService
 @inject IAppNavigationService Navigation
 @inject AshareApiService ApiService
 
@@ -86,7 +86,7 @@
 
     private bool IsActive(string path)
     {
-        var currentPath = Navigation.CurrentUrl;
+        var currentPath = Navigation.CurrentUri;
         if (path == "/")
             return currentPath.EndsWith("/") || currentPath.EndsWith("/index");
         return currentPath.Contains(path);

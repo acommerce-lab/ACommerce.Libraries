@@ -1,4 +1,4 @@
-namespace Ashare.App.Services;
+namespace Ashare.Shared.Services;
 
 /// <summary>
 /// خدمة إدارة المظهر (الوضع الفاتح/الداكن)
