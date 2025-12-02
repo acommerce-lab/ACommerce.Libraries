@@ -14,22 +14,29 @@ public class ProductListingResponseDto
 
 	public Guid Id { get; set; }
 	public Guid VendorId { get; set; }
+	public string? VendorName { get; set; }
 	public Guid ProductId { get; set; }
+	public string? ProductName { get; set; }
 	public Guid? CategoryId { get; set; }
+	public string? CategoryName { get; set; }
 	public string Title { get; set; } = string.Empty;
 	public string? Description { get; set; }
 	public string? VendorSku { get; set; }
 	public ListingStatus Status { get; set; }
 	public decimal Price { get; set; }
 	public decimal? CompareAtPrice { get; set; }
-	public string? Currency { get; set; }
+	public string Currency { get; set; } = "SAR";
 	public int QuantityAvailable { get; set; }
 	public int QuantityReserved { get; set; }
 	public bool IsActive { get; set; }
+	public bool IsFeatured { get; set; }
+	public bool IsNew { get; set; }
 	public int TotalSales { get; set; }
-	public decimal? Rating { get; set; }
-	public int ReviewCount { get; set; }
+	public decimal AverageRating { get; set; }
+	public int RatingsCount { get; set; }
+	public int ViewCount { get; set; }
 	public DateTime CreatedAt { get; set; }
+	public DateTime? UpdatedAt { get; set; }
 
 	/// <summary>
 	/// الصورة المميزة
@@ -42,6 +49,7 @@ public class ProductListingResponseDto
 	public double? Latitude { get; set; }
 	public double? Longitude { get; set; }
 	public string? Address { get; set; }
+	public string? City { get; set; }
 
 	/// <summary>
 	/// حالة المنتج
@@ -99,5 +107,20 @@ public class ProductListingResponseDto
 			}
 		}
 		set => AttributesJson = value != null ? JsonSerializer.Serialize(value, JsonOptions) : null;
+	}
+
+	/// <summary>
+	/// نسبة الخصم محسوبة
+	/// </summary>
+	public int? DiscountPercentage
+	{
+		get
+		{
+			if (CompareAtPrice.HasValue && CompareAtPrice > Price && CompareAtPrice > 0)
+			{
+				return (int)Math.Round((1 - (Price / CompareAtPrice.Value)) * 100);
+			}
+			return null;
+		}
 	}
 }

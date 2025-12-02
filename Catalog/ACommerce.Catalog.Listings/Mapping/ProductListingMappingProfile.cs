@@ -30,6 +30,8 @@ public class ProductListingMappingProfile : Profile
 			.ForMember(dest => dest.StartsAt, opt => opt.Ignore())
 			.ForMember(dest => dest.EndsAt, opt => opt.Ignore())
 			.ForMember(dest => dest.IsActive, opt => opt.Ignore())
+			.ForMember(dest => dest.IsFeatured, opt => opt.Ignore())
+			.ForMember(dest => dest.IsNew, opt => opt.Ignore())
 			.ForMember(dest => dest.TotalSales, opt => opt.Ignore())
 			.ForMember(dest => dest.ViewCount, opt => opt.Ignore())
 			.ForMember(dest => dest.Rating, opt => opt.Ignore())
@@ -41,6 +43,14 @@ public class ProductListingMappingProfile : Profile
 				src.Attributes != null ? JsonSerializer.Serialize(src.Attributes, JsonOptions) : null));
 
 		// ProductListing -> ProductListingResponseDto
-		CreateMap<ProductListing, ProductListingResponseDto>();
+		CreateMap<ProductListing, ProductListingResponseDto>()
+			.ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.Rating ?? 0))
+			.ForMember(dest => dest.RatingsCount, opt => opt.MapFrom(src => src.ReviewCount))
+			.ForMember(dest => dest.Currency, opt => opt.MapFrom(src => src.Currency ?? "SAR"))
+			// Note: VendorName, ProductName, CategoryName need to be populated separately
+			// as they require joins with other tables
+			.ForMember(dest => dest.VendorName, opt => opt.Ignore())
+			.ForMember(dest => dest.ProductName, opt => opt.Ignore())
+			.ForMember(dest => dest.CategoryName, opt => opt.Ignore());
 	}
 }
