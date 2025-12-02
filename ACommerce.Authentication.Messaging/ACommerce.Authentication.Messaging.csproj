@@ -23,6 +23,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\ACommerce.Messaging.Abstractions\ACommerce.Messaging.Abstractions.csproj" />
+		<ProjectReference Include="..\ACommerce.Notifications.Messaging\ACommerce.Notifications.Messaging.csproj" />
 		<ProjectReference Include="..\Authentication\ACommerce.Authentication.TwoFactor.Abstractions\ACommerce.Authentication.TwoFactor.Abstractions.csproj" />
 		<ProjectReference Include="..\Core\ACommerce.Notifications.Abstractions\ACommerce.Notifications.Abstractions.csproj" />
 	</ItemGroup>
