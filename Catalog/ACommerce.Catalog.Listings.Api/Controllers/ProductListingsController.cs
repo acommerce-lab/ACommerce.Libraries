@@ -382,7 +382,7 @@ public class ProductListingsController(
 	[ProducesResponseType(401)]
 	[ProducesResponseType(403)]
 	[ProducesResponseType(404)]
-	public override async Task<IActionResult> Delete(Guid id)
+	public override async Task<IActionResult> Delete(Guid id, [FromQuery] bool softDelete = true)
 	{
 		try
 		{
@@ -408,7 +408,7 @@ public class ProductListingsController(
 				return Forbid();
 			}
 
-			var command = new DeleteCommand<ProductListing> { Id = id };
+			var command = new DeleteCommand<ProductListing> { Id = id, SoftDelete = softDelete };
 			await _mediator.Send(command);
 
 			_logger.LogInformation("Deleted listing {ListingId} by vendor {VendorId}", id, vendorId);

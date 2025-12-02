@@ -38,7 +38,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         // التحقق من المصادقة أولاً
-        _isAuthenticated = TokenManager.IsAuthenticated;
+        _isAuthenticated = TokenManager.HasToken;
 
         if (_isAuthenticated)
         {
