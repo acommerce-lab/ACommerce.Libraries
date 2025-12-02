@@ -200,6 +200,10 @@ public class LocalizationService : ILocalizationService
         ["SessionExpired"] = "انتهت صلاحية الجلسة",
         ["TryAgain"] = "حاول مرة أخرى",
 
+        // Authentication Required
+        ["LoginRequired"] = "يجب تسجيل الدخول",
+        ["LoginToCreateListing"] = "يجب تسجيل الدخول لإنشاء عرض جديد",
+
         // Spaces
         ["Spaces"] = "المساحات",
         ["AllSpaces"] = "كل المساحات",
@@ -456,6 +460,10 @@ public class LocalizationService : ILocalizationService
         ["LoginRejected"] = "Login rejected",
         ["SessionExpired"] = "Session expired",
         ["TryAgain"] = "Try Again",
+
+        // Authentication Required
+        ["LoginRequired"] = "Login Required",
+        ["LoginToCreateListing"] = "Please login to create a listing",
 
         // Spaces
         ["Spaces"] = "Spaces",

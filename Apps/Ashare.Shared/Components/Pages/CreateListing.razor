@@ -2,22 +2,53 @@
 @page "/create-listing"
 @inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
+@inject ACommerce.Client.Auth.TokenManager TokenManager
+@inject ILocalizationService L
 @using ACommerce.Templates.Customer.Pages
 
-<CreateListingPage @ref="_createListingPage"
+@if (!_isAuthenticated)
+{
+    <div class="ac-page" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; padding: 20px;">
+        <i class="bi bi-lock" style="font-size: 48px; color: var(--ashare-primary); margin-bottom: 16px;"></i>
+        <h2 style="margin-bottom: 8px;">@L["LoginRequired"]</h2>
+        <p style="color: var(--ashare-text-secondary); margin-bottom: 24px; text-align: center;">
+            @L["LoginToCreateListing"]
+        </p>
+        <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="NavigateToLogin">
+            <i class="bi bi-box-arrow-in-right"></i>
+            @L["LoginWithNafath"]
+        </button>
+    </div>
+}
+else
+{
+    <CreateListingPage @ref="_createListingPage"
                    Categories="@_categories"
                    OnLoadCategoryAttributes="LoadCategoryAttributes"
                    OnSubmit="SubmitListing"
                    OnViewListing="ViewListing"
                    OnRequestLocation="RequestLocation" />
+}
 
 @code {
+    private bool _isAuthenticated;
     private CreateListingPage? _createListingPage;
     private List<ListingCategory>? _categories;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadCategories();
+        // التحقق من المصادقة أولاً
+        _isAuthenticated = TokenManager.IsAuthenticated;
+
+        if (_isAuthenticated)
+        {
+            await LoadCategories();
+        }
+    }
+
+    private void NavigateToLogin()
+    {
+        Navigation.NavigateTo("/login");
     }
 
     private async Task LoadCategories()

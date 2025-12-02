@@ -231,15 +231,17 @@ public class AshareApiService
 
 	/// <summary>
 	/// إنشاء عرض جديد (مساحة)
+	/// ملاحظة: VendorId يُستخرج تلقائياً من المستخدم المصادق في الباك اند
 	/// </summary>
 	public async Task<SpaceItem?> CreateSpaceAsync(CreateSpaceRequest request)
 	{
 		try
 		{
-			// إنشاء عرض ProductListing (وليس Product)
+			// إنشاء عرض ProductListing
+			// ملاحظة: VendorId يُعيَّن تلقائياً في الباك اند من التوكن
 			var listingRequest = new CreateListingRequest
 			{
-				VendorId = Guid.Empty, // TODO: Get from current user
+				// VendorId: يُستخرج تلقائياً من التوكن في الباك اند
 				ProductId = Guid.Empty, // TODO: Get product template based on category
 				CategoryId = request.CategoryId,
 				Title = request.Title,
