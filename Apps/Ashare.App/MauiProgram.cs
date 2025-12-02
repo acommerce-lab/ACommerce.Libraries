@@ -192,6 +192,9 @@ public static class MauiProgram
         // Space Data Service (mock data for development)
         builder.Services.AddSingleton<SpaceDataService>();
 
+        // Timezone Service (Device implementation using local timezone)
+        builder.Services.AddSingleton<ITimezoneService, DeviceTimezoneService>();
+
         // ═══════════════════════════════════════════════════════════════════
         // Ashare API Service (ربط التطبيق بالباك اند)
         // ═══════════════════════════════════════════════════════════════════
