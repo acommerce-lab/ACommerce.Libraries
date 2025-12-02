@@ -96,3 +96,26 @@ public sealed class NafathCompleteResponse
 }
 
 #endregion
+
+#region Test (Development Only)
+
+/// <summary>
+/// طلب محاكاة webhook نفاذ (للاختبار فقط)
+/// </summary>
+public sealed class TestWebhookRequest
+{
+    public string TransactionId { get; set; } = string.Empty;
+    public string? NationalId { get; set; }
+    public string? Status { get; set; }
+}
+
+/// <summary>
+/// استجابة محاكاة webhook
+/// </summary>
+public sealed class TestWebhookResponse
+{
+    public bool Success { get; set; }
+    public string? Message { get; set; }
+}
+
+#endregion

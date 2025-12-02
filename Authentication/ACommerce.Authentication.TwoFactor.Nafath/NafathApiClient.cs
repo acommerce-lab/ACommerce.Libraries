@@ -124,6 +124,27 @@ public class NafathApiClient : INafathApiClient
         string nationalId,
         CancellationToken cancellationToken)
     {
+        // التحقق من رقم الهوية المسجل في الإعدادات
+        var testNationalId = _configuration[$"{NafathOptions.SectionName}:TestNationalId"] ?? "2507643761";
+
+        if (nationalId != testNationalId)
+        {
+            _logger.LogWarning(
+                "[Nafath] Test mode: Invalid national ID {NationalId}, expected {TestNationalId}",
+                nationalId, testNationalId);
+
+            return new NafathInitiationResponse
+            {
+                Success = false,
+                Error = new TwoFactorError
+                {
+                    Code = "INVALID_TEST_ID",
+                    Message = "رقم الهوية غير صالح في وضع الاختبار",
+                    Details = $"في وضع الاختبار، يجب استخدام رقم الهوية: {testNationalId}"
+                }
+            };
+        }
+
         _logger.LogInformation(
             "[Nafath] Test mode: Creating fake transaction for {NationalId}",
             nationalId);
@@ -138,7 +159,9 @@ public class NafathApiClient : INafathApiClient
         {
             Success = true,
             TransactionId = transactionId,
-            VerificationCode = verificationCode // ✅ إرجاع الكود
+            VerificationCode = verificationCode,
+            Identifier = nationalId,
+            IsTestSession = true // ✅ علامة أنها جلسة اختبار
         };
     }
 
@@ -202,7 +225,9 @@ public class NafathApiClient : INafathApiClient
             {
                 Success = true,
                 TransactionId = result.Data.TransactionId,
-                VerificationCode = result.Data.Code // ✅ من Production API
+                VerificationCode = result.Data.Code,
+                Identifier = nationalId,
+                IsTestSession = false
             };
         }
         catch (Exception ex)

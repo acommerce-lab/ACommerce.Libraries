@@ -48,4 +48,26 @@ public sealed class NafathClient(IApiClient httpClient, string serviceName = "Ma
             new NafathCompleteRequest { TransactionId = transactionId },
             cancellationToken);
     }
+
+    /// <summary>
+    /// محاكاة webhook نفاذ (للاختبار فقط)
+    /// يُستخدم في وضع الاختبار لمحاكاة استجابة نفاذ
+    /// </summary>
+    public async Task<TestWebhookResponse?> SimulateWebhookAsync(
+        string transactionId,
+        string nationalId,
+        string status = "COMPLETED",
+        CancellationToken cancellationToken = default)
+    {
+        return await httpClient.PostAsync<TestWebhookRequest, TestWebhookResponse>(
+            serviceName,
+            "/api/auth/nafath/test-webhook",
+            new TestWebhookRequest
+            {
+                TransactionId = transactionId,
+                NationalId = nationalId,
+                Status = status
+            },
+            cancellationToken);
+    }
 }
