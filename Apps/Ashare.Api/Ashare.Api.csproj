@@ -18,6 +18,11 @@
     <ProjectReference Include="..\..\Authentication\ACommerce.Authentication.JWT\ACommerce.Authentication.JWT.csproj" />
     <ProjectReference Include="..\..\AspNetCore\ACommerce.Authentication.AspNetCore\ACommerce.Authentication.AspNetCore.csproj" />
 
+    <!-- Two-Factor Authentication (Nafath, SMS, Email) -->
+    <ProjectReference Include="..\..\Authentication\ACommerce.Authentication.TwoFactor.Nafath\ACommerce.Authentication.TwoFactor.Nafath.csproj" />
+    <ProjectReference Include="..\..\ACommerce.Authentication.TwoFactor.SessionStore.InMemory\ACommerce.Authentication.TwoFactor.SessionStore.InMemory.csproj" />
+    <ProjectReference Include="..\..\AspNetCore\ACommerce.Authentication.AspNetCore.NafathWH\ACommerce.Authentication.AspNetCore.NafathWH.csproj" />
+
     <!-- Identity & Profiles -->
     <ProjectReference Include="..\..\Identity\ACommerce.Profiles\ACommerce.Profiles.csproj" />
     <ProjectReference Include="..\..\Identity\ACommerce.Profiles.Api\ACommerce.Profiles.Api.csproj" />

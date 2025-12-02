@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using ACommerce.Authentication.Abstractions;
+using ACommerce.Authentication.AspNetCore.Controllers;
 using ACommerce.Authentication.Users.Abstractions;
 using ACommerce.Authentication.Users.Abstractions.Models;
 using ACommerce.Profiles.Entities;
@@ -8,31 +9,34 @@ using ACommerce.SharedKernel.Abstractions.Repositories;
 using Ashare.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Ashare.Api.Controllers;
 
 /// <summary>
 /// Controller للمصادقة وإدارة الحسابات
+/// يرث من AuthenticationControllerBase للحصول على endpoints المصادقة الثنائية
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController : ControllerBase
+public class AuthController : AuthenticationControllerBase
 {
-    private readonly IAuthenticationProvider _authProvider;
     private readonly IUserProvider _userProvider;
-    private readonly IRepositoryFactory _repositoryFactory;
-    private readonly ILogger<AuthController> _logger;
+    private readonly IBaseAsyncRepository<Profile> _profileRepository;
+    private readonly DbContext _dbContext;
 
     public AuthController(
         IAuthenticationProvider authProvider,
+        ITwoFactorAuthenticationProvider twoFactorProvider,
         IUserProvider userProvider,
-        IRepositoryFactory repositoryFactory,
+        IBaseAsyncRepository<Profile> profileRepository,
+        DbContext dbContext,
         ILogger<AuthController> logger)
+        : base(authProvider, twoFactorProvider, logger)
     {
-        _authProvider = authProvider;
         _userProvider = userProvider;
-        _repositoryFactory = repositoryFactory;
-        _logger = logger;
+        _profileRepository = profileRepository;
+        _dbContext = dbContext;
     }
 
     /// <summary>
@@ -113,7 +117,7 @@ public class AuthController : ControllerBase
             await CreateProfileForUser(createResult.User, request.FullName, request.PhoneNumber);
 
             // إنشاء التوكن
-            var authResult = await _authProvider.AuthenticateAsync(new AuthenticationRequest
+            var authResult = await AuthProvider.AuthenticateAsync(new AuthenticationRequest
             {
                 Identifier = createResult.User.UserId,
                 Claims = new Dictionary<string, string>
@@ -134,7 +138,7 @@ public class AuthController : ControllerBase
                 });
             }
 
-            _logger.LogInformation("New user registered: {Email}", request.Email);
+            Logger.LogInformation("New user registered: {Email}", request.Email);
 
             return Ok(new LoginResponse
             {
@@ -149,7 +153,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during registration for {Email}", request.Email);
+            Logger.LogError(ex, "Error during registration for {Email}", request.Email);
             return BadRequest(new LoginResponse
             {
                 Success = false,
@@ -220,16 +224,16 @@ public class AuthController : ControllerBase
                 {
                     Success = true,
                     RequiresTwoFactor = true,
-                    TwoFactorMethod = "SMS",
+                    TwoFactorMethod = TwoFactorProvider.ProviderName,
                     SessionId = Guid.NewGuid().ToString(),
-                    Message = "يرجى إدخال رمز التحقق"
+                    Message = "يرجى إكمال المصادقة الثنائية"
                 });
             }
 
             var role = user.Roles.FirstOrDefault() ?? "Customer";
 
             // إنشاء التوكن
-            var authResult = await _authProvider.AuthenticateAsync(new AuthenticationRequest
+            var authResult = await AuthProvider.AuthenticateAsync(new AuthenticationRequest
             {
                 Identifier = user.UserId,
                 Claims = new Dictionary<string, string>
@@ -250,7 +254,7 @@ public class AuthController : ControllerBase
                 });
             }
 
-            _logger.LogInformation("User logged in: {Email}", user.Email);
+            Logger.LogInformation("User logged in: {Email}", user.Email);
 
             return Ok(new LoginResponse
             {
@@ -265,7 +269,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during login for {Identifier}", request.Email ?? request.Username);
+            Logger.LogError(ex, "Error during login for {Identifier}", request.Email ?? request.Username);
             return Unauthorized(new LoginResponse
             {
                 Success = false,
@@ -313,49 +317,12 @@ public class AuthController : ControllerBase
     public IActionResult Logout()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        _logger.LogInformation("User logged out: {UserId}", userId);
+        Logger.LogInformation("User logged out: {UserId}", userId);
 
         // JWT is stateless, but we can log the event
         // In production, you might want to add token to a blacklist
 
         return Ok(new { success = true, message = "تم تسجيل الخروج بنجاح" });
-    }
-
-    /// <summary>
-    /// تحديث التوكن
-    /// </summary>
-    [HttpPost("refresh")]
-    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<LoginResponse>> RefreshToken([FromBody] RefreshTokenRequest request)
-    {
-        try
-        {
-            var result = await _authProvider.RefreshAsync(request.RefreshToken);
-            if (!result.Success)
-            {
-                return Unauthorized(new LoginResponse
-                {
-                    Success = false,
-                    Message = "انتهت صلاحية الجلسة"
-                });
-            }
-
-            return Ok(new LoginResponse
-            {
-                Success = true,
-                Token = result.AccessToken ?? "",
-                ExpiresAt = result.ExpiresAt?.DateTime ?? DateTime.UtcNow.AddHours(1)
-            });
-        }
-        catch
-        {
-            return Unauthorized(new LoginResponse
-            {
-                Success = false,
-                Message = "فشل تحديث الجلسة"
-            });
-        }
     }
 
     /// <summary>
@@ -365,8 +332,6 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var profileRepo = _repositoryFactory.Create<Profile>();
-
             var profile = new Profile
             {
                 Id = Guid.NewGuid(),
@@ -380,14 +345,14 @@ public class AuthController : ControllerBase
                 CreatedAt = DateTime.UtcNow
             };
 
-            await profileRepo.AddAsync(profile);
-            await _repositoryFactory.UnitOfWork.SaveChangesAsync();
+            await _profileRepository.AddAsync(profile);
+            await _dbContext.SaveChangesAsync();
 
-            _logger.LogInformation("Profile created for user: {UserId}", user.UserId);
+            Logger.LogInformation("Profile created for user: {UserId}", user.UserId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating profile for user: {UserId}", user.UserId);
+            Logger.LogError(ex, "Error creating profile for user: {UserId}", user.UserId);
             // Don't throw - profile creation failure shouldn't block registration
         }
     }
