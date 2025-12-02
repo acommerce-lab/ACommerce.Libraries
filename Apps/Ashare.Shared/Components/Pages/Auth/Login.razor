@@ -172,28 +172,61 @@
     {
         try
         {
+            Console.WriteLine($"[Login] 📩 Received notification: {notification.GetRawText()}");
+
             // استخراج البيانات من الإشعار
-            var type = notification.GetProperty("type").GetString();
-            var data = notification.GetProperty("data");
+            if (!notification.TryGetProperty("type", out var typeElement))
+            {
+                Console.WriteLine("[Login] ⚠️ Notification has no 'type' property");
+                return;
+            }
+            var type = typeElement.GetString();
+            Console.WriteLine($"[Login] Notification type: {type}");
 
             // التحقق من أن الإشعار متعلق بنفاذ
-            if (type != "SecurityAlert") return;
+            if (type != "SecurityAlert")
+            {
+                Console.WriteLine($"[Login] ⏭️ Skipping - type is not SecurityAlert");
+                return;
+            }
+
+            if (!notification.TryGetProperty("data", out var data))
+            {
+                Console.WriteLine("[Login] ⚠️ Notification has no 'data' property");
+                return;
+            }
 
             // التحقق من transactionId
-            if (!data.TryGetProperty("transactionId", out var transactionIdElement)) return;
+            if (!data.TryGetProperty("transactionId", out var transactionIdElement))
+            {
+                Console.WriteLine("[Login] ⚠️ Data has no 'transactionId' property");
+                return;
+            }
             var transactionId = transactionIdElement.GetString();
+            Console.WriteLine($"[Login] Notification transactionId: {transactionId}");
+            Console.WriteLine($"[Login] Expected transactionId: {_nafathResult?.TransactionId}");
 
-            if (transactionId != _nafathResult?.TransactionId) return;
+            if (transactionId != _nafathResult?.TransactionId)
+            {
+                Console.WriteLine("[Login] ⏭️ TransactionId mismatch - skipping");
+                return;
+            }
+
+            Console.WriteLine("[Login] ✅ TransactionId matches!");
 
             // التحقق من حالة المصادقة
             if (data.TryGetProperty("provider", out var providerElement) &&
                 providerElement.GetString() == "Nafath")
             {
                 // التحقق من النجاح أو الفشل عبر العنوان
-                var title = notification.GetProperty("title").GetString();
+                var title = notification.TryGetProperty("title", out var titleElement)
+                    ? titleElement.GetString()
+                    : null;
+                Console.WriteLine($"[Login] Notification title: {title}");
 
                 if (title?.Contains("بنجاح") == true || title?.Contains("success") == true)
                 {
+                    Console.WriteLine("[Login] 🎉 Authentication SUCCESS - completing flow");
                     // نجاح المصادقة
                     InvokeAsync(async () =>
                     {
@@ -205,12 +238,18 @@
                         var result = await NafathClient.CompleteAsync(_nafathResult!.TransactionId!);
                         if (result?.Success == true)
                         {
+                            Console.WriteLine("[Login] ✅ Token received - navigating to home");
                             Navigation.NavigateTo("/");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"[Login] ❌ CompleteAsync failed: {result?.Message}");
                         }
                     });
                 }
                 else
                 {
+                    Console.WriteLine("[Login] ❌ Authentication FAILED");
                     // فشل المصادقة
                     InvokeAsync(() =>
                     {
@@ -224,10 +263,15 @@
                     });
                 }
             }
+            else
+            {
+                Console.WriteLine("[Login] ⚠️ Provider is not Nafath or missing");
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[Login] Error handling notification: {ex.Message}");
+            Console.WriteLine($"[Login] 💥 Error handling notification: {ex.Message}");
+            Console.WriteLine($"[Login] Stack: {ex.StackTrace}");
         }
     }
 
