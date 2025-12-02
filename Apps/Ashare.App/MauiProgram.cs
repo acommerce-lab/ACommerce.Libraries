@@ -120,10 +120,7 @@ public static class MauiProgram
         builder.Services.AddNafathClient();
 
         // Profiles Client
-        //builder.Services.AddProfilesClient(options =>
-        //{
-        //    options.BaseUrl = apiBaseUrl;
-        //});
+        builder.Services.AddScoped<ProfilesClient>();
 
         // Locations Client
         builder.Services.AddLocationsClient(apiBaseUrl);
