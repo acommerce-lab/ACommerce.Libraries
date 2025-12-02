@@ -86,49 +86,51 @@
     @* Content based on current step *@
     <div class="ac-page-content">
         @* IMPORTANT: Map component placed OUTSIDE switch to prevent DOM conflicts in MAUI WebView *@
-        @* When Blazor removes switch case content, Leaflet-modified DOM causes crashes *@
-        @* Using CSS visibility ensures the map container stays in DOM at all times *@
-        <div class="ac-persistent-map-container" style="display: @(CurrentStep == CreateListingStep.SetLocation ? "block" : "none");">
-            <div class="ac-location-section">
-                <div class="ac-form-section">
-                    <div class="ac-section-header">
-                        <i class="bi bi-geo-alt"></i>
-                        <h2>موقع العرض</h2>
+        @* Only render after user first reaches the location step, then keep in DOM *@
+        @if (_hasReachedLocationStep)
+        {
+            <div class="ac-persistent-map-container" style="display: @(CurrentStep == CreateListingStep.SetLocation ? "block" : "none");">
+                <div class="ac-location-section">
+                    <div class="ac-form-section">
+                        <div class="ac-section-header">
+                            <i class="bi bi-geo-alt"></i>
+                            <h2>موقع العرض</h2>
+                        </div>
+                        <p class="ac-section-desc">حرّك الخريطة واضغط لتحديد موقع عرضك بدقة</p>
                     </div>
-                    <p class="ac-section-desc">حرّك الخريطة واضغط لتحديد موقع عرضك بدقة</p>
-                </div>
 
-                <div class="ac-location-card">
-                    @* Interactive Map Component - kept in stable DOM location *@
-                    <AcInteractiveMap @ref="_mapComponent"
-                                      Latitude="@Model.Latitude"
-                                      LatitudeChanged="(lat) => Model.Latitude = lat"
-                                      Longitude="@Model.Longitude"
-                                      LongitudeChanged="(lng) => Model.Longitude = lng"
-                                      OnLocationSelected="OnLocationSelectedFromMap"
-                                      OnRequestCurrentLocation="RequestLocation"
-                                      Height="280"
-                                      ShowControls="true"
-                                      Interactive="true" />
+                    <div class="ac-location-card">
+                        @* Interactive Map Component - kept in stable DOM location *@
+                        <AcInteractiveMap @ref="_mapComponent"
+                                          Latitude="@Model.Latitude"
+                                          LatitudeChanged="(lat) => Model.Latitude = lat"
+                                          Longitude="@Model.Longitude"
+                                          LongitudeChanged="(lng) => Model.Longitude = lng"
+                                          OnLocationSelected="OnLocationSelectedFromMap"
+                                          OnRequestCurrentLocation="RequestLocation"
+                                          Height="280"
+                                          ShowControls="true"
+                                          Interactive="true" />
 
-                    <div style="margin-top: 16px;">
-                        <AcInput Id="address"
-                                 Label="العنوان التفصيلي (اختياري)"
-                                 Placeholder="مثال: حي النرجس، شارع الأمير سلطان"
-                                 Value="@Model.Address"
-                                 ValueChanged="(v) => Model.Address = v"
-                                 IconStart="bi-signpost" />
+                        <div style="margin-top: 16px;">
+                            <AcInput Id="address"
+                                     Label="العنوان التفصيلي (اختياري)"
+                                     Placeholder="مثال: حي النرجس، شارع الأمير سلطان"
+                                     Value="@Model.Address"
+                                     ValueChanged="(v) => Model.Address = v"
+                                     IconStart="bi-signpost" />
+                        </div>
                     </div>
-                </div>
 
-                <div class="ac-form-actions">
-                    <AcButton Text="التالي"
-                              IconEnd="bi-arrow-left"
-                              OnClick="GoToReview"
-                              FullWidth="true" />
+                    <div class="ac-form-actions">
+                        <AcButton Text="التالي"
+                                  IconEnd="bi-arrow-left"
+                                  OnClick="GoToReview"
+                                  FullWidth="true" />
+                    </div>
                 </div>
             </div>
-        </div>
+        }
 
         @switch (CurrentStep)
         {
@@ -564,6 +566,7 @@
     private bool _isFormValid = true;
     private Dictionary<string, string> _validationErrors = new();
     private AcInteractiveMap? _mapComponent;
+    private bool _hasReachedLocationStep;
 
     // Filter out images attribute - it's handled separately
     private List<ListingAttributeDefinition>? FilteredAttributes =>
@@ -743,6 +746,7 @@
 
     private void GoToLocation()
     {
+        _hasReachedLocationStep = true;
         CurrentStep = CreateListingStep.SetLocation;
     }
 
@@ -877,6 +881,7 @@
         CreatedListingId = null;
         ErrorMessage = null;
         _validationErrors.Clear();
+        _hasReachedLocationStep = false;
     }
 
     private string GetAttributeDisplayValue(ListingAttributeInput input, ListingAttributeDefinition def)
