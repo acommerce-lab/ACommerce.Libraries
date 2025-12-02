@@ -58,57 +58,133 @@
 
             <div class="ashare-space-location-large">
                 <i class="bi bi-geo-alt"></i>
-                <span>@_space.Location، @_space.City</span>
-                <a href="#map" class="ashare-map-link">عرض الخريطة</a>
+                <span>@GetLocationDisplay()</span>
+                @if (_space.Latitude.HasValue && _space.Longitude.HasValue)
+                {
+                    <a href="#map" class="ashare-map-link">عرض الخريطة</a>
+                }
             </div>
 
+            @* Main Attributes - Quick Stats *@
             <div class="ashare-space-stats">
-                <div class="ashare-stat">
-                    <i class="bi bi-people"></i>
-                    <span>السعة: @_space.Capacity شخص</span>
-                </div>
-                <div class="ashare-stat">
-                    <i class="bi bi-rulers"></i>
-                    <span>المساحة: @_space.Area م²</span>
-                </div>
+                @if (HasAttribute("property_type"))
+                {
+                    <div class="ashare-stat">
+                        <i class="bi bi-house"></i>
+                        <span>@TranslatePropertyType(GetAttribute("property_type"))</span>
+                    </div>
+                }
+                @if (HasAttribute("area"))
+                {
+                    <div class="ashare-stat">
+                        <i class="bi bi-rulers"></i>
+                        <span>المساحة: @GetAttribute("area") م²</span>
+                    </div>
+                }
+                @if (HasAttribute("rooms_count"))
+                {
+                    <div class="ashare-stat">
+                        <i class="bi bi-door-open"></i>
+                        <span>@GetAttribute("rooms_count") غرف</span>
+                    </div>
+                }
+                @if (HasAttribute("bathrooms_count"))
+                {
+                    <div class="ashare-stat">
+                        <i class="bi bi-droplet"></i>
+                        <span>@GetAttribute("bathrooms_count") حمام</span>
+                    </div>
+                }
+                @if (_space.Capacity > 0)
+                {
+                    <div class="ashare-stat">
+                        <i class="bi bi-people"></i>
+                        <span>السعة: @_space.Capacity شخص</span>
+                    </div>
+                }
+                @if (_space.Area > 0 && !HasAttribute("area"))
+                {
+                    <div class="ashare-stat">
+                        <i class="bi bi-rulers"></i>
+                        <span>المساحة: @_space.Area م²</span>
+                    </div>
+                }
             </div>
 
             @* Description *@
-            <div class="ashare-section">
-                <h2 class="ashare-section-title">الوصف</h2>
-                <p class="ashare-description">@_space.Description</p>
-            </div>
-
-            @* Amenities *@
-            <div class="ashare-section">
-                <h2 class="ashare-section-title">المرافق والخدمات</h2>
-                <div class="ashare-amenities-list">
-                    @foreach (var amenity in _space.Amenities)
-                    {
-                        <div class="ashare-amenity-item">
-                            <i class="bi @GetAmenityIcon(amenity)"></i>
-                            <span>@amenity</span>
-                        </div>
-                    }
+            @if (!string.IsNullOrEmpty(GetDescription()))
+            {
+                <div class="ashare-section">
+                    <h2 class="ashare-section-title">الوصف</h2>
+                    <p class="ashare-description">@GetDescription()</p>
                 </div>
-            </div>
+            }
+
+            @* Property Details - Dynamic Attributes *@
+            @{
+                var propertyDetails = GetPropertyDetails();
+            }
+            @if (propertyDetails.Any())
+            {
+                <div class="ashare-section">
+                    <h2 class="ashare-section-title">تفاصيل العقار</h2>
+                    <div class="ashare-details-list">
+                        @foreach (var detail in propertyDetails)
+                        {
+                            <div class="ashare-detail-item">
+                                <span class="ashare-detail-label">@detail.Label</span>
+                                <span class="ashare-detail-value">@detail.Value</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Amenities - Dynamic from Attributes *@
+            @{
+                var amenities = GetAmenities();
+            }
+            @if (amenities.Any())
+            {
+                <div class="ashare-section">
+                    <h2 class="ashare-section-title">المرافق والخدمات</h2>
+                    <div class="ashare-amenities-list">
+                        @foreach (var amenity in amenities)
+                        {
+                            <div class="ashare-amenity-item">
+                                <i class="bi @GetAmenityIcon(amenity)"></i>
+                                <span>@amenity</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
 
             @* Pricing *@
             <div class="ashare-section">
                 <h2 class="ashare-section-title">الأسعار</h2>
                 <div class="ashare-pricing-cards">
-                    <div class="ashare-pricing-card">
-                        <span class="ashare-pricing-period">بالساعة</span>
-                        <span class="ashare-pricing-amount">@_space.PricePerHour ر.س</span>
-                    </div>
-                    <div class="ashare-pricing-card">
-                        <span class="ashare-pricing-period">باليوم</span>
-                        <span class="ashare-pricing-amount">@_space.PricePerDay ر.س</span>
-                    </div>
-                    <div class="ashare-pricing-card featured">
-                        <span class="ashare-pricing-period">بالشهر</span>
-                        <span class="ashare-pricing-amount">@_space.PricePerMonth ر.س</span>
-                    </div>
+                    @if (_space.PricePerHour > 0)
+                    {
+                        <div class="ashare-pricing-card">
+                            <span class="ashare-pricing-period">بالساعة</span>
+                            <span class="ashare-pricing-amount">@_space.PricePerHour ر.س</span>
+                        </div>
+                    }
+                    @if (_space.PricePerDay > 0)
+                    {
+                        <div class="ashare-pricing-card">
+                            <span class="ashare-pricing-period">باليوم</span>
+                            <span class="ashare-pricing-amount">@_space.PricePerDay ر.س</span>
+                        </div>
+                    }
+                    @if (_space.PricePerMonth > 0)
+                    {
+                        <div class="ashare-pricing-card featured">
+                            <span class="ashare-pricing-period">بالشهر</span>
+                            <span class="ashare-pricing-amount">@_space.PricePerMonth ر.س</span>
+                        </div>
+                    }
                 </div>
             </div>
 
@@ -126,6 +202,26 @@
                 </div>
             }
 
+            @* Contact Options *@
+            @{
+                var contactOptions = GetContactOptions();
+            }
+            @if (contactOptions.Any())
+            {
+                <div class="ashare-section">
+                    <h2 class="ashare-section-title">طرق التواصل</h2>
+                    <div class="ashare-contact-options">
+                        @foreach (var option in contactOptions)
+                        {
+                            <button class="ashare-contact-btn @option.Class" @onclick="() => HandleContact(option.Type)">
+                                <i class="bi @option.Icon"></i>
+                                <span>@option.Label</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+
             @* Owner Info *@
             <div class="ashare-section ashare-owner-section">
                 <h2 class="ashare-section-title">مالك المساحة</h2>
@@ -134,8 +230,11 @@
                         <i class="bi bi-person-circle"></i>
                     </div>
                     <div class="ashare-owner-info">
-                        <h3>@_space.OwnerName</h3>
-                        <span>عضو منذ @_space.OwnerJoinDate.ToString("yyyy")</span>
+                        <h3>@(string.IsNullOrEmpty(_space.OwnerName) ? "المعلن" : _space.OwnerName)</h3>
+                        @if (_space.OwnerJoinDate != default)
+                        {
+                            <span>عضو منذ @_space.OwnerJoinDate.ToString("yyyy")</span>
+                        }
                     </div>
                     <button class="ac-btn ac-btn-secondary" @onclick="ContactOwner">
                         <i class="bi bi-chat"></i>
@@ -184,8 +283,7 @@
         @* Booking Bar *@
         <div class="ashare-booking-bar">
             <div class="ashare-booking-price">
-                <span class="ashare-booking-amount">@_space.PricePerHour ر.س</span>
-                <span class="ashare-booking-period">/ الساعة</span>
+                <span class="ashare-booking-amount">@GetDisplayPrice()</span>
             </div>
             <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="StartBooking">
                 احجز الآن
@@ -217,9 +315,18 @@
                     <div class="ac-form-group">
                         <label>نوع الحجز</label>
                         <select class="ac-input" @bind="_bookingType">
-                            <option value="hourly">بالساعة</option>
-                            <option value="daily">باليوم</option>
-                            <option value="monthly">بالشهر</option>
+                            @if (_space?.PricePerHour > 0)
+                            {
+                                <option value="hourly">بالساعة</option>
+                            }
+                            @if (_space?.PricePerDay > 0)
+                            {
+                                <option value="daily">باليوم</option>
+                            }
+                            @if (_space?.PricePerMonth > 0)
+                            {
+                                <option value="monthly">بالشهر</option>
+                            }
                         </select>
                     </div>
 
@@ -244,7 +351,7 @@
 
                     <div class="ac-form-group">
                         <label>عدد الأشخاص</label>
-                        <input type="number" class="ac-input" @bind="_bookingGuests" min="1" max="@_space?.Capacity" />
+                        <input type="number" class="ac-input" @bind="_bookingGuests" min="1" max="@(_space?.Capacity > 0 ? _space.Capacity : 100)" />
                     </div>
 
                     <div class="ac-form-group">
@@ -305,6 +412,14 @@
             _space = await spaceTask;
             _reviews = await reviewsTask;
             _isFavorite = ApiService.GetFavorites().Contains(SpaceId);
+
+            // Set default booking type based on available pricing
+            if (_space != null)
+            {
+                if (_space.PricePerHour > 0) _bookingType = "hourly";
+                else if (_space.PricePerDay > 0) _bookingType = "daily";
+                else if (_space.PricePerMonth > 0) _bookingType = "monthly";
+            }
         }
         catch (Exception ex)
         {
@@ -315,6 +430,305 @@
             _isLoading = false;
         }
     }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Attribute Helpers
+    // ═══════════════════════════════════════════════════════════════════
+
+    private bool HasAttribute(string key)
+    {
+        return _space?.Attributes?.ContainsKey(key) == true &&
+               _space.Attributes[key] != null &&
+               !string.IsNullOrEmpty(_space.Attributes[key].ToString());
+    }
+
+    private string GetAttribute(string key)
+    {
+        if (_space?.Attributes?.TryGetValue(key, out var value) == true && value != null)
+        {
+            return value.ToString() ?? "";
+        }
+        return "";
+    }
+
+    private bool GetBoolAttribute(string key)
+    {
+        if (_space?.Attributes?.TryGetValue(key, out var value) == true)
+        {
+            if (value is bool b) return b;
+            if (value is string s) return s.ToLower() == "true" || s == "1";
+        }
+        return false;
+    }
+
+    private string GetDescription()
+    {
+        // Try to get description from attributes first
+        if (HasAttribute("description"))
+            return GetAttribute("description");
+
+        return _space?.Description ?? "";
+    }
+
+    private string GetLocationDisplay()
+    {
+        var parts = new List<string>();
+
+        if (HasAttribute("district"))
+            parts.Add(GetAttribute("district"));
+        else if (!string.IsNullOrEmpty(_space?.Location))
+            parts.Add(_space.Location);
+
+        if (HasAttribute("city"))
+            parts.Add(TranslateCity(GetAttribute("city")));
+        else if (!string.IsNullOrEmpty(_space?.City))
+            parts.Add(_space.City);
+
+        return parts.Any() ? string.Join("، ", parts) : "غير محدد";
+    }
+
+    private string GetDisplayPrice()
+    {
+        if (_space == null) return "";
+
+        if (HasAttribute("price"))
+        {
+            var price = GetAttribute("price");
+            var rentType = HasAttribute("rent_type") ? TranslateRentType(GetAttribute("rent_type")) : "شهرياً";
+            return $"{price} ر.س / {rentType}";
+        }
+
+        return _space.DisplayPrice;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Property Details Builder
+    // ═══════════════════════════════════════════════════════════════════
+
+    private List<(string Label, string Value)> GetPropertyDetails()
+    {
+        var details = new List<(string Label, string Value)>();
+
+        if (HasAttribute("property_type"))
+            details.Add(("نوع العقار", TranslatePropertyType(GetAttribute("property_type"))));
+
+        if (HasAttribute("area"))
+            details.Add(("المساحة", $"{GetAttribute("area")} م²"));
+
+        if (HasAttribute("rooms_count"))
+            details.Add(("عدد الغرف", GetAttribute("rooms_count")));
+
+        if (HasAttribute("bathrooms_count"))
+            details.Add(("عدد الحمامات", GetAttribute("bathrooms_count")));
+
+        if (HasAttribute("floor_number"))
+            details.Add(("الطابق", GetAttribute("floor_number")));
+
+        if (HasAttribute("building_age"))
+            details.Add(("عمر المبنى", $"{GetAttribute("building_age")} سنة"));
+
+        if (HasAttribute("furnished"))
+            details.Add(("مفروش", TranslateFurnished(GetAttribute("furnished"))));
+
+        if (HasAttribute("city"))
+            details.Add(("المدينة", TranslateCity(GetAttribute("city"))));
+
+        if (HasAttribute("district"))
+            details.Add(("الحي", GetAttribute("district")));
+
+        if (HasAttribute("street"))
+            details.Add(("الشارع", GetAttribute("street")));
+
+        if (HasAttribute("rent_type"))
+            details.Add(("نوع الإيجار", TranslateRentType(GetAttribute("rent_type"))));
+
+        if (HasAttribute("price"))
+            details.Add(("السعر", $"{GetAttribute("price")} ر.س"));
+
+        return details;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Amenities Builder
+    // ═══════════════════════════════════════════════════════════════════
+
+    private List<string> GetAmenities()
+    {
+        var amenities = new List<string>();
+
+        // Check boolean amenity attributes
+        if (GetBoolAttribute("has_wifi") || GetBoolAttribute("wifi"))
+            amenities.Add("واي فاي");
+
+        if (GetBoolAttribute("has_parking") || GetBoolAttribute("parking"))
+            amenities.Add("موقف سيارات");
+
+        if (GetBoolAttribute("has_ac") || GetBoolAttribute("ac"))
+            amenities.Add("مكيف");
+
+        if (GetBoolAttribute("has_elevator") || GetBoolAttribute("elevator"))
+            amenities.Add("مصعد");
+
+        if (GetBoolAttribute("has_kitchen") || GetBoolAttribute("kitchen"))
+            amenities.Add("مطبخ");
+
+        if (GetBoolAttribute("has_pool") || GetBoolAttribute("pool"))
+            amenities.Add("مسبح");
+
+        if (GetBoolAttribute("has_gym") || GetBoolAttribute("gym"))
+            amenities.Add("صالة رياضية");
+
+        if (GetBoolAttribute("has_security") || GetBoolAttribute("security"))
+            amenities.Add("حراسة أمنية");
+
+        if (GetBoolAttribute("has_garden") || GetBoolAttribute("garden"))
+            amenities.Add("حديقة");
+
+        if (GetBoolAttribute("has_balcony") || GetBoolAttribute("balcony"))
+            amenities.Add("شرفة");
+
+        if (GetBoolAttribute("has_storage") || GetBoolAttribute("storage"))
+            amenities.Add("مخزن");
+
+        if (GetBoolAttribute("has_maid_room") || GetBoolAttribute("maid_room"))
+            amenities.Add("غرفة خادمة");
+
+        if (GetBoolAttribute("has_driver_room") || GetBoolAttribute("driver_room"))
+            amenities.Add("غرفة سائق");
+
+        // Fallback to legacy amenities list
+        if (!amenities.Any() && _space?.Amenities?.Any() == true)
+        {
+            return _space.Amenities;
+        }
+
+        return amenities;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Contact Options Builder
+    // ═══════════════════════════════════════════════════════════════════
+
+    private List<(string Type, string Icon, string Label, string Class)> GetContactOptions()
+    {
+        var options = new List<(string Type, string Icon, string Label, string Class)>();
+
+        if (GetBoolAttribute("is_phone_allowed"))
+        {
+            options.Add(("phone", "bi-telephone", "اتصال", "contact-phone"));
+        }
+
+        if (GetBoolAttribute("is_whatsapp_allowed"))
+        {
+            options.Add(("whatsapp", "bi-whatsapp", "واتساب", "contact-whatsapp"));
+        }
+
+        if (GetBoolAttribute("is_messaging_allowed"))
+        {
+            options.Add(("chat", "bi-chat-dots", "رسالة", "contact-chat"));
+        }
+
+        // Default fallback if no contact options specified
+        if (!options.Any())
+        {
+            options.Add(("chat", "bi-chat-dots", "تواصل", "contact-chat"));
+        }
+
+        return options;
+    }
+
+    private void HandleContact(string type)
+    {
+        switch (type)
+        {
+            case "phone":
+                if (HasAttribute("phone"))
+                {
+                    Navigation.NavigateTo($"tel:{GetAttribute("phone")}");
+                }
+                break;
+            case "whatsapp":
+                if (HasAttribute("phone"))
+                {
+                    var phone = GetAttribute("phone").Replace("+", "").Replace(" ", "");
+                    Navigation.NavigateTo($"https://wa.me/{phone}");
+                }
+                break;
+            case "chat":
+            default:
+                ContactOwner();
+                break;
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Translation Helpers
+    // ═══════════════════════════════════════════════════════════════════
+
+    private string TranslatePropertyType(string type) => type?.ToLower() switch
+    {
+        "apartment" => "شقة",
+        "villa" => "فيلا",
+        "duplex" => "دوبلكس",
+        "studio" => "استوديو",
+        "room" => "غرفة",
+        "office" => "مكتب",
+        "shop" => "محل",
+        "warehouse" => "مستودع",
+        "land" => "أرض",
+        "building" => "عمارة",
+        "floor" => "دور كامل",
+        "chalet" => "شاليه",
+        "farm" => "مزرعة",
+        "rest_house" => "استراحة",
+        "tent" => "خيمة",
+        _ => type ?? ""
+    };
+
+    private string TranslateCity(string city) => city?.ToLower() switch
+    {
+        "riyadh" => "الرياض",
+        "jeddah" => "جدة",
+        "makkah" or "mecca" => "مكة المكرمة",
+        "madinah" or "medina" => "المدينة المنورة",
+        "dammam" => "الدمام",
+        "khobar" => "الخبر",
+        "dhahran" => "الظهران",
+        "taif" => "الطائف",
+        "tabuk" => "تبوك",
+        "abha" => "أبها",
+        "khamis_mushait" => "خميس مشيط",
+        "hail" => "حائل",
+        "najran" => "نجران",
+        "jubail" => "الجبيل",
+        "yanbu" => "ينبع",
+        "qatif" => "القطيف",
+        "hofuf" => "الهفوف",
+        "buraydah" => "بريدة",
+        _ => city ?? ""
+    };
+
+    private string TranslateRentType(string type) => type?.ToLower() switch
+    {
+        "daily" => "يومياً",
+        "weekly" => "أسبوعياً",
+        "monthly" => "شهرياً",
+        "yearly" or "annual" => "سنوياً",
+        "hourly" => "بالساعة",
+        _ => type ?? ""
+    };
+
+    private string TranslateFurnished(string value) => value?.ToLower() switch
+    {
+        "furnished" or "true" or "yes" or "1" => "نعم",
+        "semi_furnished" or "semi" => "شبه مفروش",
+        "unfurnished" or "false" or "no" or "0" => "لا",
+        _ => value ?? ""
+    };
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Navigation & Actions
+    // ═══════════════════════════════════════════════════════════════════
 
     private void GoBack()
     {
@@ -383,13 +797,30 @@
         "واي فاي" => "bi-wifi",
         "موقف سيارات" => "bi-p-square",
         "مكيف" => "bi-snow",
-        "شاشة عرض" => "bi-display",
+        "مصعد" => "bi-arrow-up-square",
         "مطبخ" => "bi-cup-hot",
+        "مسبح" => "bi-water",
+        "صالة رياضية" => "bi-bicycle",
+        "حراسة أمنية" => "bi-shield-check",
+        "حديقة" => "bi-tree",
+        "شرفة" => "bi-box-arrow-up-right",
+        "مخزن" => "bi-box",
+        "غرفة خادمة" => "bi-person",
+        "غرفة سائق" => "bi-car-front",
+        "شاشة عرض" => "bi-display",
         "غرفة اجتماعات" => "bi-people",
         "طابعة" => "bi-printer",
         "قهوة وشاي" => "bi-cup",
         "إنترنت سريع" => "bi-router",
-        "حماية أمنية" => "bi-shield-check",
-        _ => "bi-check"
+        "سبورة" => "bi-easel",
+        "إضاءة احترافية" => "bi-lightbulb",
+        "نظام صوت" => "bi-speaker",
+        "مسرح" => "bi-film",
+        "كراسي" => "bi-grid",
+        "غرفة مفروشة" => "bi-house-door",
+        "مطبخ مشترك" => "bi-cup-straw",
+        "غسالة" => "bi-droplet-half",
+        "نظافة أسبوعية" => "bi-stars",
+        _ => "bi-check-circle"
     };
 }

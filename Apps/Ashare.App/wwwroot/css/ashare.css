@@ -1676,6 +1676,83 @@ h1, h2, h3, .ashare-logo-text {
     color: var(--ashare-success);
 }
 
+/* Property Details List */
+.ashare-details-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--ashare-spacing-md);
+}
+
+.ashare-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: var(--ashare-spacing-sm);
+    background-color: var(--ashare-gray-50);
+    border-radius: var(--ashare-radius-sm);
+}
+
+.ashare-detail-label {
+    font-size: 12px;
+    color: var(--ashare-gray-500);
+}
+
+.ashare-detail-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ashare-gray-900);
+}
+
+/* Contact Options */
+.ashare-contact-options {
+    display: flex;
+    gap: var(--ashare-spacing-sm);
+    flex-wrap: wrap;
+}
+
+.ashare-contact-btn {
+    flex: 1;
+    min-width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ashare-spacing-sm);
+    padding: var(--ashare-spacing-md);
+    border: none;
+    border-radius: var(--ashare-radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ashare-contact-btn.contact-phone {
+    background-color: var(--ashare-primary);
+    color: white;
+}
+
+.ashare-contact-btn.contact-phone:hover {
+    background-color: var(--ashare-primary-dark);
+}
+
+.ashare-contact-btn.contact-whatsapp {
+    background-color: #25D366;
+    color: white;
+}
+
+.ashare-contact-btn.contact-whatsapp:hover {
+    background-color: #20BD5C;
+}
+
+.ashare-contact-btn.contact-chat {
+    background-color: var(--ashare-gray-100);
+    color: var(--ashare-gray-700);
+}
+
+.ashare-contact-btn.contact-chat:hover {
+    background-color: var(--ashare-gray-200);
+}
+
 .ashare-pricing-cards {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -3765,16 +3842,17 @@ h1, h2, h3, .ashare-logo-text {
 /* Bottom Sheet Preview */
 .ashare-map-preview-sheet {
     position: fixed;
-    bottom: 0;
+    bottom: 60px; /* Height of bottom tab bar */
     left: 0;
     right: 0;
     background: var(--ashare-white);
     border-radius: 20px 20px 0 0;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
     z-index: 100;
-    transform: translateY(100%);
-    transition: transform 0.3s ease;
-    padding-bottom: env(safe-area-inset-bottom, 20px);
+    transform: translateY(calc(100% + 60px));
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+    max-height: 200px;
 }
 
 .ashare-map-preview-sheet.visible {
@@ -3869,4 +3947,67 @@ h1, h2, h3, .ashare-logo-text {
 
 .ashare-preview-rating i {
     color: #f59e0b;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Home Page - CTA Section (Create Listing)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.ashare-cta-section {
+    margin: 16px;
+    background: linear-gradient(135deg, var(--ashare-primary) 0%, #1e40af 100%);
+    border-radius: var(--ashare-radius-lg);
+    padding: 20px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ashare-cta-section:active {
+    transform: scale(0.98);
+}
+
+.ashare-cta-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.ashare-cta-icon {
+    width: 56px;
+    height: 56px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.ashare-cta-icon i {
+    font-size: 28px;
+    color: white;
+}
+
+.ashare-cta-text {
+    flex: 1;
+}
+
+.ashare-cta-text h3 {
+    margin: 0 0 4px 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: white;
+}
+
+.ashare-cta-text p {
+    margin: 0;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.4;
+}
+
+.ashare-cta-arrow {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.7);
+    flex-shrink: 0;
 }
