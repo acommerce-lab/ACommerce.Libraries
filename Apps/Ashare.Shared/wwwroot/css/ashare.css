@@ -77,23 +77,281 @@
     --bottom-nav-height: 64px;
 }
 
-/* Dark Mode - Ashare Brand */
+/* Dark Mode - Ashare Brand Visual Identity 2025 */
 .ac-dark {
-    --ashare-white: #111827;
-    --ashare-cream: #1F2937;
-    --ashare-gray-50: #1F2937;
-    --ashare-gray-100: #374151;
-    --ashare-gray-200: #4B5563;
-    --ashare-gray-300: #6B7280;
-    --ashare-gray-400: #9CA3AF;
-    --ashare-gray-500: #D1D5DB;
-    --ashare-gray-600: #E5E7EB;
-    --ashare-gray-700: #F3F4F6;
-    --ashare-gray-800: #F9FAFB;
-    --ashare-gray-900: #FFFFFF;
-    /* Keep primary/secondary consistent in dark mode */
-    --ashare-primary: #4A6B6B;
+    /* Background colors inverted */
+    --ashare-white: #0F1419;
+    --ashare-cream: #16202A;
+    --ashare-surface: #1C2732;
+    --ashare-gray-50: #16202A;
+    --ashare-gray-100: #1C2732;
+    --ashare-gray-200: #253341;
+    --ashare-gray-300: #38444D;
+    --ashare-gray-400: #5C6E7E;
+    --ashare-gray-500: #8899A6;
+    --ashare-gray-600: #AAB8C2;
+    --ashare-gray-700: #D1D9DD;
+    --ashare-gray-800: #E7ECF0;
+    --ashare-gray-900: #F5F8FA;
+
+    /* Brand colors adjusted for dark mode - slightly lighter for visibility */
+    --ashare-primary: #4A7A7A;
+    --ashare-primary-light: #5A9090;
+    --ashare-primary-dark: #3A6666;
     --ashare-secondary: #F69B6B;
+    --ashare-secondary-light: #F8B08A;
+    --ashare-secondary-dark: #E5854A;
+    --ashare-accent: #F69B6B;
+
+    /* Shadows for dark mode */
+    --ashare-shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+    --ashare-shadow-md: 0 4px 6px rgba(0,0,0,0.4);
+    --ashare-shadow-lg: 0 10px 15px rgba(0,0,0,0.5);
+}
+
+/* Dark mode specific overrides */
+.ac-dark .ashare-app {
+    background-color: var(--ashare-white);
+}
+
+.ac-dark .ac-navbar {
+    background-color: var(--ashare-surface);
+    border-bottom-color: var(--ashare-gray-200);
+}
+
+.ac-dark .ac-bottom-nav {
+    background-color: var(--ashare-surface);
+    border-top-color: var(--ashare-gray-200);
+}
+
+.ac-dark .ac-bottom-nav-item.active {
+    color: var(--ashare-secondary);
+}
+
+.ac-dark .ac-bottom-nav-item.active .ac-bottom-nav-icon {
+    background-color: rgba(246, 155, 107, 0.15);
+}
+
+/* Dark mode hero section */
+.ac-dark .ashare-hero-branded {
+    background: linear-gradient(135deg, var(--ashare-primary) 0%, var(--ashare-primary-dark) 100%);
+}
+
+/* Dark mode cards */
+.ac-dark .ashare-space-card,
+.ac-dark .ashare-action-card,
+.ac-dark .ashare-menu-items,
+.ac-dark .ac-search-box {
+    background-color: var(--ashare-surface);
+    border-color: var(--ashare-gray-200);
+}
+
+/* Dark mode profile header - keep branded look */
+.ac-dark .ashare-profile-header {
+    background: linear-gradient(135deg, var(--ashare-primary) 0%, var(--ashare-primary-dark) 100%);
+}
+
+/* Dark mode login header */
+.ac-dark .ashare-login-header {
+    background: linear-gradient(135deg, var(--ashare-primary) 0%, var(--ashare-primary-dark) 100%);
+}
+
+/* Dark mode filter chips */
+.ac-dark .ashare-filter-chip {
+    background-color: var(--ashare-surface);
+    border-color: var(--ashare-gray-300);
+    color: var(--ashare-gray-700);
+}
+
+.ac-dark .ashare-filter-chip.active {
+    background-color: var(--ashare-primary);
+    border-color: var(--ashare-primary);
+    color: white;
+}
+
+/* Dark mode inputs */
+.ac-dark .ac-input,
+.ac-dark .ac-select,
+.ac-dark .ac-textarea {
+    background-color: var(--ashare-surface);
+    border-color: var(--ashare-gray-300);
+    color: var(--ashare-gray-900);
+}
+
+.ac-dark .ac-input:focus,
+.ac-dark .ac-select:focus,
+.ac-dark .ac-textarea:focus {
+    border-color: var(--ashare-secondary);
+    box-shadow: 0 0 0 3px rgba(246, 155, 107, 0.2);
+}
+
+/* Dark mode buttons */
+.ac-dark .ac-btn-primary {
+    background-color: var(--ashare-secondary);
+    color: white;
+}
+
+.ac-dark .ac-btn-secondary {
+    background-color: var(--ashare-surface);
+    border-color: var(--ashare-gray-300);
+    color: var(--ashare-gray-900);
+}
+
+/* Dark mode chat bubbles */
+.ac-dark .ashare-message.mine .ashare-message-bubble {
+    background: var(--ashare-primary);
+}
+
+.ac-dark .ashare-message.theirs .ashare-message-bubble {
+    background: var(--ashare-surface);
+    border-color: var(--ashare-gray-300);
+}
+
+/* Dark mode CTA section */
+.ac-dark .ashare-cta-section {
+    background: linear-gradient(135deg, var(--ashare-secondary) 0%, var(--ashare-secondary-dark) 100%);
+}
+
+/* Dark mode booking bar */
+.ac-dark .ashare-booking-bar {
+    background-color: var(--ashare-surface);
+    border-top-color: var(--ashare-gray-200);
+}
+
+/* Dark mode empty states */
+.ac-dark .ashare-empty-state,
+.ac-dark .ashare-login-prompt {
+    background-color: var(--ashare-surface);
+}
+
+/* Dark mode tabs */
+.ac-dark .ashare-tabs {
+    background-color: var(--ashare-gray-200);
+}
+
+.ac-dark .ashare-tab {
+    color: var(--ashare-gray-600);
+}
+
+.ac-dark .ashare-tab.active {
+    background-color: var(--ashare-surface);
+    color: var(--ashare-secondary);
+}
+
+.ac-dark .ashare-tab-badge {
+    background-color: var(--ashare-secondary);
+}
+
+/* Dark mode notification items */
+.ac-dark .ashare-notification-item {
+    background-color: var(--ashare-surface);
+    border-color: var(--ashare-gray-200);
+}
+
+.ac-dark .ashare-notification-item.unread {
+    background-color: var(--ashare-gray-100);
+    border-right-color: var(--ashare-secondary);
+}
+
+.ac-dark .ashare-unread-dot {
+    background-color: var(--ashare-secondary);
+}
+
+/* Dark mode booking cards */
+.ac-dark .ashare-booking-card {
+    background-color: var(--ashare-surface);
+}
+
+.ac-dark .ashare-booking-price {
+    color: var(--ashare-secondary);
+}
+
+.ac-dark .ashare-action-btn {
+    background-color: var(--ashare-gray-200);
+    color: var(--ashare-gray-700);
+}
+
+.ac-dark .ashare-action-btn.primary {
+    background-color: var(--ashare-secondary);
+    color: white;
+}
+
+/* Dark mode favorites */
+.ac-dark .ashare-favorite-card {
+    background-color: var(--ashare-surface);
+}
+
+.ac-dark .ashare-favorite-price {
+    color: var(--ashare-secondary);
+}
+
+.ac-dark .ashare-remove-favorite {
+    background-color: rgba(246, 155, 107, 0.15);
+    color: var(--ashare-secondary);
+}
+
+/* Dark mode search page */
+.ac-dark .ashare-search-header {
+    background-color: var(--ashare-surface);
+    border-color: var(--ashare-gray-200);
+}
+
+.ac-dark .ashare-search-input-wrapper {
+    background-color: var(--ashare-gray-100);
+}
+
+.ac-dark .ashare-quick-filter {
+    background-color: var(--ashare-surface);
+    border-color: var(--ashare-gray-300);
+    color: var(--ashare-gray-700);
+}
+
+.ac-dark .ashare-quick-filter.active {
+    background-color: var(--ashare-secondary);
+    border-color: var(--ashare-secondary);
+    color: white;
+}
+
+.ac-dark .ashare-recent-item {
+    background-color: var(--ashare-surface);
+    color: var(--ashare-gray-700);
+}
+
+.ac-dark .ashare-popular-tag {
+    background-color: var(--ashare-gray-200);
+    color: var(--ashare-gray-700);
+}
+
+.ac-dark .ashare-search-result-card {
+    background-color: var(--ashare-surface);
+}
+
+/* Dark mode modals */
+.ac-dark .ac-modal {
+    background-color: var(--ashare-surface);
+}
+
+.ac-dark .ac-modal-header {
+    border-color: var(--ashare-gray-200);
+}
+
+.ac-dark .ac-modal-footer {
+    border-color: var(--ashare-gray-200);
+}
+
+/* Dark mode chatroom */
+.ac-dark .ashare-chatroom-header {
+    background-color: var(--ashare-surface);
+    border-color: var(--ashare-gray-200);
+}
+
+.ac-dark .ashare-chat-input {
+    background-color: var(--ashare-surface);
+    border-color: var(--ashare-gray-200);
+}
+
+.ac-dark .ashare-send-btn:not(:disabled) {
+    background-color: var(--ashare-secondary);
 }
 
 /* ─────────────────────────────────────────────────────────────────
