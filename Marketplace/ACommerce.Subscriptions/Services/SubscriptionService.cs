@@ -381,6 +381,25 @@ public class SubscriptionService : ISubscriptionService
 
     public async Task<CanAddListingResult> CanAddListingAsync(Guid vendorId, CancellationToken ct = default)
     {
+        // أولاً: تحقق من وجود باقات في النظام
+        // إذا لم توجد باقات، يسمح للجميع بإنشاء العروض (للتطبيقات بدون اشتراكات)
+        var hasPlans = await _context.Set<SubscriptionPlan>()
+            .AnyAsync(p => p.IsActive && !p.IsDeleted, ct);
+
+        if (!hasPlans)
+        {
+            return new CanAddListingResult
+            {
+                CanAdd = true,
+                Reason = null,
+                CurrentCount = 0,
+                MaxAllowed = -1, // غير محدود
+                ShouldUpgrade = false,
+                SubscriptionRequired = false
+            };
+        }
+
+        // توجد باقات في النظام - يجب التحقق من اشتراك المستخدم
         var subscription = await _context.Set<Subscription>()
             .FirstOrDefaultAsync(s => s.VendorId == vendorId && !s.IsDeleted, ct);
 
@@ -392,7 +411,8 @@ public class SubscriptionService : ISubscriptionService
                 Reason = "لا يوجد اشتراك نشط",
                 CurrentCount = 0,
                 MaxAllowed = 0,
-                ShouldUpgrade = true
+                ShouldUpgrade = true,
+                SubscriptionRequired = true
             };
         }
 
@@ -401,10 +421,11 @@ public class SubscriptionService : ISubscriptionService
             return new CanAddListingResult
             {
                 CanAdd = false,
-                Reason = "الاشتراك غير نشط",
+                Reason = "الاشتراك غير نشط أو منتهي",
                 CurrentCount = subscription.CurrentListingsCount,
                 MaxAllowed = subscription.MaxListings,
-                ShouldUpgrade = true
+                ShouldUpgrade = true,
+                SubscriptionRequired = true
             };
         }
 
@@ -413,10 +434,11 @@ public class SubscriptionService : ISubscriptionService
             return new CanAddListingResult
             {
                 CanAdd = false,
-                Reason = "وصلت للحد الأقصى من العروض",
+                Reason = "وصلت للحد الأقصى من العروض المسموحة في باقتك",
                 CurrentCount = subscription.CurrentListingsCount,
                 MaxAllowed = subscription.MaxListings,
-                ShouldUpgrade = true
+                ShouldUpgrade = true,
+                SubscriptionRequired = false
             };
         }
 
@@ -425,7 +447,8 @@ public class SubscriptionService : ISubscriptionService
             CanAdd = true,
             CurrentCount = subscription.CurrentListingsCount,
             MaxAllowed = subscription.MaxListings,
-            ShouldUpgrade = false
+            ShouldUpgrade = false,
+            SubscriptionRequired = false
         };
     }
 

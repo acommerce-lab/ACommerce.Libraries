@@ -146,11 +146,25 @@ public record CouponValidationResult
 /// </summary>
 public record CanAddListingResult
 {
+    /// <summary>هل يمكن إضافة عرض جديد</summary>
     public bool CanAdd { get; init; }
+
+    /// <summary>سبب عدم السماح (إذا لم يُسمح)</summary>
     public string? Reason { get; init; }
+
+    /// <summary>عدد العروض الحالية</summary>
     public int CurrentCount { get; init; }
+
+    /// <summary>الحد الأقصى المسموح (-1 = غير محدود)</summary>
     public int MaxAllowed { get; init; }
+
+    /// <summary>هل يجب ترقية الباقة</summary>
     public bool ShouldUpgrade { get; init; }
+
+    /// <summary>هل يجب الاشتراك أولاً (لا يوجد اشتراك حالي)</summary>
+    public bool SubscriptionRequired { get; init; }
+
+    /// <summary>الباقات المقترحة للترقية</summary>
     public List<SubscriptionPlanSummaryDto>? SuggestedPlans { get; init; }
 }
 

@@ -4,8 +4,8 @@ using ACommerce.Catalog.Products.Enums;
 using ACommerce.Catalog.Attributes.Entities;
 using ACommerce.Catalog.Attributes.Enums;
 using ACommerce.Catalog.Currencies.Entities;
-using ACommerce.Subscriptions;
 using ACommerce.Subscriptions.Entities;
+using Ashare.Shared.Services;
 
 namespace Ashare.Api.Services;
 
@@ -267,9 +267,10 @@ public class AshareSeedDataService
 		var existing = await repo.GetAllWithPredicateAsync();
 		var existingIds = existing.Select(p => p.Id).ToHashSet();
 
-		var defaultPlans = DefaultPlans.GetAll();
+		// استخدام باقات عشير المخصصة
+		var asharePlans = AshareSubscriptionPlans.GetAll();
 
-		foreach (var plan in defaultPlans)
+		foreach (var plan in asharePlans)
 		{
 			if (!existingIds.Contains(plan.Id))
 			{
@@ -278,7 +279,7 @@ public class AshareSeedDataService
 			}
 		}
 
-		Console.WriteLine($"[Seed] Subscription plans seeding complete. Total: {defaultPlans.Count}");
+		Console.WriteLine($"[Seed] Subscription plans seeding complete. Total: {asharePlans.Count}");
 	}
 
 	private async Task SeedCurrenciesAsync()

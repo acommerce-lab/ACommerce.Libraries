@@ -6858,3 +6858,160 @@ h1, h2, h3, .ashare-logo-text {
 .ashare-menu-icon-accent i {
     color: var(--ashare-white);
 }
+
+/* ========================================
+   SUBSCRIPTION SHEET / BOTTOM SHEET
+   ======================================== */
+
+.ac-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+}
+
+.ac-bottom-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--ashare-white);
+    border-radius: 24px 24px 0 0;
+    z-index: 1001;
+    animation: slideUp 0.3s ease;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.ac-sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--ashare-spacing-lg);
+    border-bottom: 1px solid var(--ashare-gray-100);
+}
+
+.ac-sheet-header h2 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--ashare-gray-900);
+}
+
+.ac-sheet-header .ac-close-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: var(--ashare-gray-100);
+    color: var(--ashare-gray-600);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.ac-sheet-header .ac-close-btn:hover {
+    background: var(--ashare-gray-200);
+    color: var(--ashare-gray-900);
+}
+
+.ac-sheet-content {
+    padding: var(--ashare-spacing-lg);
+    overflow-y: auto;
+}
+
+.ac-subscription-message {
+    text-align: center;
+    padding: var(--ashare-spacing-xl) 0;
+}
+
+.ac-icon-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--ashare-spacing-lg);
+}
+
+.ac-icon-circle i {
+    font-size: 2rem;
+}
+
+.ac-icon-circle.warning {
+    background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+    color: #D97706;
+}
+
+.ac-icon-circle.info {
+    background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
+    color: #2563EB;
+}
+
+.ac-icon-circle.success {
+    background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
+    color: #059669;
+}
+
+.ac-subscription-message h3 {
+    margin: 0 0 var(--ashare-spacing-sm);
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--ashare-gray-900);
+}
+
+.ac-subscription-message p {
+    margin: 0;
+    color: var(--ashare-gray-600);
+    font-size: 0.9375rem;
+}
+
+.ac-sheet-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ashare-spacing-sm);
+    padding-top: var(--ashare-spacing-lg);
+}
+
+.ac-sheet-actions .ac-btn {
+    width: 100%;
+    justify-content: center;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Dark mode */
+.ac-dark .ac-bottom-sheet {
+    background: var(--ashare-surface);
+}
+
+.ac-dark .ac-sheet-header {
+    border-color: var(--ashare-gray-200);
+}
+
+.ac-dark .ac-sheet-header h2,
+.ac-dark .ac-subscription-message h3 {
+    color: var(--ashare-gray-900);
+}
