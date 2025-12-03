@@ -377,6 +377,8 @@ public class LocalizationService : ILocalizationService
         ["Offline"] = "غير متصل",
         ["Typing"] = "يكتب...",
         ["Now"] = "الآن",
+        ["NoMessagesYet"] = "لا توجد رسائل بعد",
+        ["SendFirstMessage"] = "أرسل أول رسالة لبدء المحادثة",
 
         // Notifications
         ["AllNotifications"] = "كل الإشعارات",
@@ -640,6 +642,8 @@ public class LocalizationService : ILocalizationService
         ["Offline"] = "Offline",
         ["Typing"] = "Typing...",
         ["Now"] = "Now",
+        ["NoMessagesYet"] = "No messages yet",
+        ["SendFirstMessage"] = "Send a message to start the conversation",
 
         // Notifications
         ["AllNotifications"] = "All Notifications",
