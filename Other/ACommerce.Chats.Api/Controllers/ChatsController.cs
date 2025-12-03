@@ -51,11 +51,10 @@ public class ChatsController : BaseCrudController<
 	/// الحصول على تفاصيل محادثة محددة مع بيانات المشاركين
 	/// GET /api/chats/{id}
 	/// </summary>
-	[HttpGet("{id}")]
 	[ProducesResponseType(typeof(ChatDetailDto), 200)]
 	[ProducesResponseType(404)]
 	[ProducesResponseType(500)]
-	public new async Task<ActionResult<ChatDetailDto>> GetById(
+	public override async Task<ActionResult<ChatDto>> GetById(
 		Guid id,
 		[FromQuery] List<string>? includes = null,
 		[FromQuery] bool includeDeleted = false)
