@@ -4,16 +4,55 @@ namespace ACommerce.Client.Auth;
 
 /// <summary>
 /// Token Manager للتعامل مع Authentication Token
-/// يخزن Token في الذاكرة (يمكن توسيعه للتخزين الدائم)
+/// يستخدم ITokenStorage للتخزين الدائم
 /// </summary>
 public sealed class TokenManager : ITokenProvider
 {
-	private string? _token;
-	private DateTime? _expiresAt;
+	private readonly ITokenStorage _storage;
 
-	public TokenManager()
+	// Cache in memory for performance
+	private string? _cachedToken;
+	private DateTime? _cachedExpiresAt;
+	private bool _isInitialized;
+
+	public TokenManager(ITokenStorage storage)
 	{
-		Console.WriteLine($"[TokenManager] Created (HashCode: {GetHashCode()})");
+		_storage = storage;
+		Console.WriteLine($"[TokenManager] Created with storage: {storage.GetType().Name}");
+	}
+
+	/// <summary>
+	/// تهيئة المدير واسترجاع التوكن المحفوظ
+	/// </summary>
+	public async Task InitializeAsync()
+	{
+		if (_isInitialized) return;
+
+		try
+		{
+			var (token, expiresAt) = await _storage.GetTokenAsync();
+			if (!string.IsNullOrEmpty(token))
+			{
+				// تحقق من الصلاحية
+				if (expiresAt.HasValue && DateTime.UtcNow >= expiresAt.Value)
+				{
+					Console.WriteLine("[TokenManager] Stored token expired, clearing");
+					await _storage.ClearTokenAsync();
+				}
+				else
+				{
+					_cachedToken = token;
+					_cachedExpiresAt = expiresAt;
+					Console.WriteLine($"[TokenManager] Loaded token from storage (expires: {expiresAt})");
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"[TokenManager] Error loading token from storage: {ex.Message}");
+		}
+
+		_isInitialized = true;
 	}
 
 	/// <summary>
@@ -21,28 +60,34 @@ public sealed class TokenManager : ITokenProvider
 	/// </summary>
 	public void SetToken(string token, DateTime? expiresAt = null)
 	{
-		Console.WriteLine($"[TokenManager] SetToken called (HashCode: {GetHashCode()}) - Token: {token.Substring(0, Math.Min(20, token.Length))}...");
-		_token = token;
-		_expiresAt = expiresAt;
+		Console.WriteLine($"[TokenManager] SetToken called - Token: {token.Substring(0, Math.Min(20, token.Length))}...");
+		_cachedToken = token;
+		_cachedExpiresAt = expiresAt;
+
+		// حفظ في التخزين الدائم
+		_ = _storage.SaveTokenAsync(token, expiresAt);
 	}
 
 	/// <summary>
 	/// الحصول على Token
 	/// </summary>
-	public Task<string?> GetTokenAsync()
+	public async Task<string?> GetTokenAsync()
 	{
-		Console.WriteLine($"[TokenManager] GetTokenAsync called (HashCode: {GetHashCode()}) - HasToken: {!string.IsNullOrEmpty(_token)}");
-
-		// تحقق من الصلاحية
-		if (_expiresAt.HasValue && DateTime.UtcNow >= _expiresAt.Value)
+		// تأكد من التهيئة
+		if (!_isInitialized)
 		{
-			Console.WriteLine($"[TokenManager] Token expired, clearing");
-			_token = null;
-			_expiresAt = null;
-			return Task.FromResult<string?>(null);
+			await InitializeAsync();
 		}
 
-		return Task.FromResult(_token);
+		// تحقق من الصلاحية
+		if (_cachedExpiresAt.HasValue && DateTime.UtcNow >= _cachedExpiresAt.Value)
+		{
+			Console.WriteLine("[TokenManager] Token expired, clearing");
+			await ClearTokenInternalAsync();
+			return null;
+		}
+
+		return _cachedToken;
 	}
 
 	/// <summary>
@@ -50,32 +95,38 @@ public sealed class TokenManager : ITokenProvider
 	/// </summary>
 	public void ClearToken()
 	{
-		_token = null;
-		_expiresAt = null;
+		_ = ClearTokenInternalAsync();
+	}
+
+	private async Task ClearTokenInternalAsync()
+	{
+		_cachedToken = null;
+		_cachedExpiresAt = null;
+		await _storage.ClearTokenAsync();
 	}
 
 	/// <summary>
 	/// هل يوجد Token؟
 	/// </summary>
-	public bool HasToken => !string.IsNullOrEmpty(_token);
+	public bool HasToken => !string.IsNullOrEmpty(_cachedToken);
 
 	/// <summary>
 	/// هل Token منتهي الصلاحية؟
 	/// </summary>
-	public bool IsExpired => _expiresAt.HasValue && DateTime.UtcNow >= _expiresAt.Value;
+	public bool IsExpired => _cachedExpiresAt.HasValue && DateTime.UtcNow >= _cachedExpiresAt.Value;
 
 	/// <summary>
 	/// استخراج معرف المستخدم من JWT Token
 	/// </summary>
 	public string? GetUserIdFromToken()
 	{
-		if (string.IsNullOrEmpty(_token))
+		if (string.IsNullOrEmpty(_cachedToken))
 			return null;
 
 		try
 		{
 			// JWT Token structure: header.payload.signature
-			var parts = _token.Split('.');
+			var parts = _cachedToken.Split('.');
 			if (parts.Length != 3)
 				return null;
 

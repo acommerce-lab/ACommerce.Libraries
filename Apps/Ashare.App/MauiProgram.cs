@@ -92,7 +92,13 @@ public static class MauiProgram
         // Client SDKs with Service Discovery (Predefined Services)
         // ═══════════════════════════════════════════════════════════════════
 
-        // Token Manager (singleton) - يجب تسجيله قبل AddACommerceClientWithServices
+        // Storage Service (MAUI implementation using SecureStorage) - يجب تسجيله قبل TokenManager
+        builder.Services.AddSingleton<IStorageService, Ashare.App.Services.MauiStorageService>();
+
+        // Token Storage (يستخدم IStorageService للتخزين الدائم)
+        builder.Services.AddSingleton<ITokenStorage, TokenStorageService>();
+
+        // Token Manager (singleton) - يستخدم ITokenStorage للحفاظ على الجلسة
         builder.Services.AddSingleton<TokenManager>();
 
         // ACommerce Client مع خدمات محددة مسبقاً
@@ -193,9 +199,6 @@ public static class MauiProgram
         // ═══════════════════════════════════════════════════════════════════
         // App Services
         // ═══════════════════════════════════════════════════════════════════
-
-        // Storage Service (MAUI implementation using SecureStorage)
-        builder.Services.AddSingleton<IStorageService, Ashare.App.Services.MauiStorageService>();
 
         // Localization (AR, EN, UR)
         builder.Services.AddSingleton<ILocalizationService, LocalizationService>();

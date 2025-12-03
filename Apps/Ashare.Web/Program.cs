@@ -42,8 +42,16 @@ var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localh
 // Client SDKs with Service Discovery (Predefined Services)
 // ═══════════════════════════════════════════════════════════════════
 
-// Token Manager (singleton) - يجب تسجيله قبل AddACommerceClientWithServices
-builder.Services.AddSingleton<TokenManager>();
+// Storage Service (Browser localStorage implementation) - يجب تسجيله قبل TokenManager
+// Scoped لأنه يستخدم IJSRuntime الذي هو per-circuit في Blazor Server
+builder.Services.AddScoped<IStorageService, BrowserStorageService>();
+
+// Token Storage (يستخدم IStorageService للتخزين الدائم)
+builder.Services.AddScoped<ITokenStorage, TokenStorageService>();
+
+// Token Manager - Scoped في الويب لتوافق lifetimes
+// Note: كل circuit (اتصال) له TokenManager خاص، لكن التوكن محفوظ في localStorage
+builder.Services.AddScoped<TokenManager>();
 
 // ACommerce Client مع خدمات محددة مسبقاً
 // يسجل الخدمات في Cache محلي لاستخدامها من قبل DynamicHttpClient
@@ -128,9 +136,6 @@ builder.Services.AddScoped<FilesClient>();
 // ═══════════════════════════════════════════════════════════════════
 // App Services
 // ═══════════════════════════════════════════════════════════════════
-
-// Storage Service (Browser localStorage implementation)
-builder.Services.AddScoped<IStorageService, BrowserStorageService>();
 
 // Localization (AR, EN, UR)
 builder.Services.AddScoped<ILocalizationService, LocalizationService>();
