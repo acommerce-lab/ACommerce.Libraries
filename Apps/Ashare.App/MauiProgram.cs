@@ -22,6 +22,7 @@ using ACommerce.Client.Products;
 using ACommerce.Client.Products.Extensions;
 using ACommerce.Client.Profiles;
 using ACommerce.Client.Realtime;
+using ACommerce.Client.Subscriptions;
 using ACommerce.Client.Vendors;
 using ACommerce.ServiceRegistry.Client.Extensions;
 using ACommerce.Templates.Customer.Services;
@@ -169,6 +170,9 @@ public static class MauiProgram
 
         // Vendors Client (Hosts)
         builder.Services.AddScoped<VendorsClient>();
+
+        // Subscriptions Client (Host/Vendor Subscription Plans)
+        builder.Services.AddScoped<SubscriptionClient>();
 
         // ═══════════════════════════════════════════════════════════════════
         // Communication Clients

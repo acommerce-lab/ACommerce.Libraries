@@ -24,6 +24,7 @@ using ACommerce.Client.Products.Extensions;
 using ACommerce.Client.Realtime;
 using ACommerce.Client.Vendors;
 using ACommerce.Client.Profiles;
+using ACommerce.Client.Subscriptions;
 using ACommerce.ServiceRegistry.Client.Extensions;
 using Ashare.Web;
 
@@ -117,6 +118,9 @@ builder.Services.AddScoped<VendorsClient>();
 
 // Profiles Client (User Profiles)
 builder.Services.AddScoped<ProfilesClient>();
+
+// Subscriptions Client (Host/Vendor Subscription Plans)
+builder.Services.AddScoped<SubscriptionClient>();
 
 // ═══════════════════════════════════════════════════════════════════
 // Communication Clients
