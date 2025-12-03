@@ -234,19 +234,24 @@
             if (incomingMessage == null) return;
 
             // Avoid adding duplicate messages (e.g., if we already added it locally when sending)
-            if (_messages.Any(m => m.Id == incomingMessage.Id)) return;
+            // This check works because we update the local message ID with the server response
+            if (_messages.Any(m => m.Id == incomingMessage.Id))
+            {
+                Console.WriteLine($"[ChatRoom] ⏭️ Skipping duplicate message: {incomingMessage.Id}");
+                return;
+            }
 
-            // Don't add our own messages again (they're already added locally when sent)
-            if (!string.IsNullOrEmpty(_currentUserId) && incomingMessage.SenderId == _currentUserId) return;
+            // Determine if this message is from the current user (sent from another device)
+            var isMine = !string.IsNullOrEmpty(_currentUserId) && incomingMessage.SenderId == _currentUserId;
 
-            Console.WriteLine($"[ChatRoom] ✅ Adding new message from other party: {incomingMessage.Content}");
+            Console.WriteLine($"[ChatRoom] ✅ Adding new message: {incomingMessage.Content} (IsMine: {isMine})");
 
             var chatMessage = new ChatMessage
             {
                 Id = incomingMessage.Id,
                 Content = incomingMessage.Content,
                 Type = incomingMessage.Type?.ToString()?.ToLower() ?? "text",
-                IsMine = false, // It's from the other party
+                IsMine = isMine, // Could be from current user on another device
                 IsRead = false,
                 SentAt = incomingMessage.CreatedAt
             };
@@ -301,14 +306,24 @@
 
         try
         {
-            await ChatsClient.SendMessageAsync(ChatId, new SendMessageRequest
+            var response = await ChatsClient.SendMessageAsync(ChatId, new SendMessageRequest
             {
                 Content = messageToSend,
                 Type = "text"
             });
+
+            // Update local message with server-assigned ID
+            // This ensures the duplicate check works when SignalR broadcast arrives
+            if (response != null)
+            {
+                Console.WriteLine($"[ChatRoom] ✅ Message sent, updating ID from {message.Id} to {response.Id}");
+                message.Id = response.Id;
+                message.SentAt = response.CreatedAt;
+            }
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"[ChatRoom] ❌ Failed to send message: {ex.Message}");
             // Handle send failure
             message.IsFailed = true;
         }
