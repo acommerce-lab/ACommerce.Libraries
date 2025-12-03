@@ -40,9 +40,14 @@ public sealed class RealtimeClient : IAsyncDisposable
     /// <summary>
     /// الاتصال بـ SignalR Hub
     /// </summary>
+	/// <param name="serviceName">اسم الخدمة</param>
+	/// <param name="hubPath">مسار الـ Hub</param>
+	/// <param name="accessToken">رمز المصادقة (اختياري)</param>
+	/// <param name="cancellationToken">رمز الإلغاء</param>
     public async Task ConnectAsync(
 		string serviceName = "Marketplace",
 		string hubPath = "/hubs/notifications",
+		string? accessToken = null,
 		CancellationToken cancellationToken = default)
 	{
 		if (_isConnected)
@@ -71,6 +76,12 @@ public sealed class RealtimeClient : IAsyncDisposable
 					{
 						ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
 					};
+				}
+
+				// إرسال رمز المصادقة مع الاتصال
+				if (!string.IsNullOrEmpty(accessToken))
+				{
+					options.AccessTokenProvider = () => Task.FromResult(accessToken);
 				}
 			})
 			.WithAutomaticReconnect();

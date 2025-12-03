@@ -1,4 +1,5 @@
 @page "/chat/{ChatId:guid}"
+@using System.Text.Json
 @using ACommerce.Client.Auth
 @using ACommerce.Client.Chats
 @using ACommerce.Client.Profiles
@@ -125,6 +126,7 @@
     private bool _isTyping = false;
     private ElementReference _messagesContainer;
     private IDisposable? _messageSubscription;
+    private string? _currentUserId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -167,7 +169,7 @@
             var messages = await ChatsClient.GetMessagesAsync(ChatId);
 
             // Get current user ID to calculate IsMine correctly
-            var currentUserId = TokenManager.GetUserIdFromToken();
+            _currentUserId = TokenManager.GetUserIdFromToken();
 
             _messages = messages?
             .Select(message =>
@@ -177,16 +179,22 @@
                 Id = message.Id,
                 IsFailed = false,
                 // Calculate IsMine by comparing SenderId with current user ID
-                IsMine = !string.IsNullOrEmpty(currentUserId) && message.SenderId == currentUserId,
+                IsMine = !string.IsNullOrEmpty(_currentUserId) && message.SenderId == _currentUserId,
                 IsRead = message.IsRead,
                 SentAt = message.SentAt,
                 Type = message.Type
             })
             .ToList() ?? [];
 
-            // Subscribe to real-time updates (connect to chat hub)
-            await RealtimeClient.ConnectAsync("Marketplace", "/hubs/chat");
-            _messageSubscription = RealtimeClient.On<object>("ReceiveMessage", HandleNewMessage);
+            // Subscribe to real-time updates (connect to chat hub with auth token)
+            var accessToken = await TokenManager.GetTokenAsync();
+            await RealtimeClient.ConnectAsync("Marketplace", "/hubs/chat", accessToken);
+
+            // Join the chat group to receive messages for this conversation
+            await RealtimeClient.SendAsync("JoinChat", ChatId.ToString());
+
+            // Subscribe to "MessageReceived" event (matches server's broadcast method name)
+            _messageSubscription = RealtimeClient.On<object>("MessageReceived", HandleNewMessage);
 
             // Mark as read
             await ChatsClient.MarkAsReadAsync(ChatId);
@@ -201,10 +209,54 @@
         }
     }
 
-    private void HandleNewMessage(object message)
+    private void HandleNewMessage(object messageData)
     {
-        // Handle incoming real-time message
-        InvokeAsync(StateHasChanged);
+        try
+        {
+            // Parse the incoming message
+            var json = messageData?.ToString();
+            if (string.IsNullOrEmpty(json)) return;
+
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var incomingMessage = JsonSerializer.Deserialize<IncomingMessage>(json, options);
+
+            if (incomingMessage == null) return;
+
+            // Avoid adding duplicate messages (e.g., if we already added it locally when sending)
+            if (_messages.Any(m => m.Id == incomingMessage.Id)) return;
+
+            // Don't add our own messages again (they're already added locally when sent)
+            if (!string.IsNullOrEmpty(_currentUserId) && incomingMessage.SenderId == _currentUserId) return;
+
+            var chatMessage = new ChatMessage
+            {
+                Id = incomingMessage.Id,
+                Content = incomingMessage.Content,
+                Type = incomingMessage.Type?.ToString()?.ToLower() ?? "text",
+                IsMine = false, // It's from the other party
+                IsRead = false,
+                SentAt = incomingMessage.CreatedAt
+            };
+
+            _messages.Add(chatMessage);
+
+            InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ChatRoom] Error handling new message: {ex.Message}");
+        }
+    }
+
+    // DTO for incoming real-time messages
+    private class IncomingMessage
+    {
+        public Guid Id { get; set; }
+        public Guid ChatId { get; set; }
+        public string SenderId { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
+        public object? Type { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
     private async Task HandleKeyUp(KeyboardEventArgs e)
@@ -252,6 +304,14 @@
     public async ValueTask DisposeAsync()
     {
         _messageSubscription?.Dispose();
+
+        // Leave the chat group before disconnecting
+        try
+        {
+            await RealtimeClient.SendAsync("LeaveChat", ChatId.ToString());
+        }
+        catch { /* Ignore errors when leaving */ }
+
         await RealtimeClient.DisconnectAsync();
     }
 
