@@ -1,4 +1,5 @@
 using ACommerce.ServiceRegistry.Client;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -76,6 +77,11 @@ public sealed class RealtimeClient : IAsyncDisposable
 					{
 						ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
 					};
+
+					// استخدام LongPolling لأن WebSocket لا يدعم تجاوز SSL
+					// LongPolling يستخدم HTTP requests التي تمر عبر HttpMessageHandlerFactory
+					options.Transports = HttpTransportType.LongPolling;
+					_logger.LogInformation("Using LongPolling transport for SSL bypass");
 				}
 
 				// إرسال رمز المصادقة مع الاتصال
