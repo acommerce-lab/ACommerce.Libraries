@@ -36,4 +36,62 @@ public class AppNavigationService : IAppNavigationService
             _navigationManager.NavigateTo("/");
         }
     }
+
+    /// <summary>
+    /// Open location in native maps app using MAUI Essentials
+    /// </summary>
+    public async Task OpenMapAsync(double latitude, double longitude, string? label = null)
+    {
+        try
+        {
+            var location = new Location(latitude, longitude);
+            var options = new MapLaunchOptions
+            {
+                Name = label ?? "الموقع",
+                NavigationMode = NavigationMode.None
+            };
+
+            await Microsoft.Maui.ApplicationModel.Map.Default.OpenAsync(location, options);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[AppNavigationService] Error opening map: {ex.Message}");
+
+            // Fallback: try opening via Launcher with geo URI
+            try
+            {
+                var geoUri = $"geo:{latitude},{longitude}?q={latitude},{longitude}({Uri.EscapeDataString(label ?? "الموقع")})";
+                await Launcher.Default.OpenAsync(new Uri(geoUri));
+            }
+            catch (Exception fallbackEx)
+            {
+                Console.WriteLine($"[AppNavigationService] Fallback also failed: {fallbackEx.Message}");
+
+                // Last resort: open Google Maps web
+                var webUrl = $"https://www.google.com/maps?q={latitude},{longitude}";
+                await Launcher.Default.OpenAsync(new Uri(webUrl));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Open external URL using MAUI Launcher
+    /// </summary>
+    public async Task OpenExternalAsync(string url)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(url))
+            {
+                Console.WriteLine("[AppNavigationService] OpenExternalAsync: URL is null or empty");
+                return;
+            }
+
+            await Launcher.Default.OpenAsync(new Uri(url));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[AppNavigationService] Error opening external URL: {ex.Message}");
+        }
+    }
 }

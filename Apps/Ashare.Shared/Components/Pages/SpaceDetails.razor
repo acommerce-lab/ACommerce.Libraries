@@ -460,20 +460,21 @@
 
     private async Task OpenInNativeMaps()
     {
-        if (_space?.Latitude == null || _space?.Longitude == null) return;
+        if (_space?.Latitude == null || _space?.Longitude == null)
+        {
+            Console.WriteLine("[SpaceDetails] Cannot open map - coordinates are null");
+            return;
+        }
 
         try
         {
-            // Open in native maps using JavaScript (works on both web and MAUI)
+            // Open in native maps using platform-specific service
             var label = _space.Name ?? "الموقع";
-            await JS.InvokeVoidAsync("AcMap.openNativeMaps",
-                _space.Latitude.Value,
-                _space.Longitude.Value,
-                label);
+            await Navigation.OpenMapAsync(_space.Latitude.Value, _space.Longitude.Value, label);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error opening native maps: {ex.Message}");
+            Console.WriteLine($"[SpaceDetails] Error opening native maps: {ex.Message}");
         }
     }
 

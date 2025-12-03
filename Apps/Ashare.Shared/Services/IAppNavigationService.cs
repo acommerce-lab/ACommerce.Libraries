@@ -19,4 +19,14 @@ public interface IAppNavigationService
     /// Get the current URI
     /// </summary>
     string CurrentUri { get; }
+
+    /// <summary>
+    /// Open location in native maps app
+    /// </summary>
+    Task OpenMapAsync(double latitude, double longitude, string? label = null);
+
+    /// <summary>
+    /// Open external URL (browser, phone, etc.)
+    /// </summary>
+    Task OpenExternalAsync(string url);
 }
