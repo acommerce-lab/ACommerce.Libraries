@@ -53,6 +53,9 @@ builder.Services.AddScoped<ITokenStorage, TokenStorageService>();
 // Note: كل circuit (اتصال) له TokenManager خاص، لكن التوكن محفوظ في localStorage
 builder.Services.AddScoped<TokenManager>();
 
+// Scoped Token Provider - singleton wrapper للوصول إلى TokenManager من HttpClient
+builder.Services.AddSingleton<ScopedTokenProvider>();
+
 // ACommerce Client مع خدمات محددة مسبقاً
 // يسجل الخدمات في Cache محلي لاستخدامها من قبل DynamicHttpClient
 builder.Services.AddACommerceClientWithServices(
@@ -69,7 +72,8 @@ builder.Services.AddACommerceClientWithServices(
         options.TimeoutSeconds = 30;
         // تفعيل Authentication لإرسال التوكن مع كل طلب
         options.EnableAuthentication = true;
-        options.TokenProvider = sp => sp.GetRequiredService<TokenManager>();
+        // استخدام ScopedTokenProvider للوصول إلى TokenManager الـ scoped
+        options.TokenProvider = sp => sp.GetRequiredService<ScopedTokenProvider>();
     });
 
 // Authentication Client (يستخدم TokenManager المسجل أعلاه)
