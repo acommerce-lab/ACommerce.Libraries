@@ -179,11 +179,18 @@ public class ChatsController : BaseCrudController<
 
 			_logger.LogDebug("Sending message to chat {ChatId} by user {UserId}", chatId, userId);
 
+			// تحويل نوع الرسالة من string إلى enum
+			var messageType = MessageType.Text;
+			if (!string.IsNullOrEmpty(request.Type))
+			{
+				Enum.TryParse<MessageType>(request.Type, ignoreCase: true, out messageType);
+			}
+
 			var dto = new SendMessageDto
 			{
 				SenderId = userId,
 				Content = request.Content,
-				Type = request.Type,
+				Type = messageType,
 				ReplyToMessageId = request.ReplyToMessageId,
 				Attachments = request.Attachments
 			};
@@ -650,8 +657,8 @@ public class PartialUpdateChatDto
 
 public class SendMessageRequest
 {
-	public required string Content { get; set; }
-	public MessageType Type { get; set; } = MessageType.Text;
+	public string Content { get; set; } = string.Empty;
+	public string Type { get; set; } = "Text";
 	public Guid? ReplyToMessageId { get; set; }
 	public List<string>? Attachments { get; set; }
 }
