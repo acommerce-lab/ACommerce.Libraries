@@ -26,6 +26,11 @@ public class TokenStorageService : ITokenStorage
 
 	public async Task SaveTokenAsync(string token, DateTime? expiresAt)
 	{
+		// Notify subscribers IMMEDIATELY (before async storage save)
+		// This ensures ScopedTokenProvider's cache is updated before any requests are made
+		OnTokenChanged?.Invoke(token, expiresAt);
+		Console.WriteLine("[TokenStorageService] OnTokenChanged fired immediately");
+
 		try
 		{
 			await _storage.SetAsync(TokenKey, token);
@@ -40,9 +45,6 @@ public class TokenStorageService : ITokenStorage
 			}
 
 			Console.WriteLine("[TokenStorageService] Token saved to persistent storage");
-
-			// Notify subscribers (like ScopedTokenProvider) that token changed
-			OnTokenChanged?.Invoke(token, expiresAt);
 		}
 		catch (Exception ex)
 		{
@@ -79,14 +81,15 @@ public class TokenStorageService : ITokenStorage
 
 	public async Task ClearTokenAsync()
 	{
+		// Notify subscribers IMMEDIATELY (before async storage clear)
+		OnTokenChanged?.Invoke(null, null);
+		Console.WriteLine("[TokenStorageService] OnTokenChanged (clear) fired immediately");
+
 		try
 		{
 			await _storage.RemoveAsync(TokenKey);
 			await _storage.RemoveAsync(ExpiresAtKey);
 			Console.WriteLine("[TokenStorageService] Token cleared from persistent storage");
-
-			// Notify subscribers that token was cleared
-			OnTokenChanged?.Invoke(null, null);
 		}
 		catch (Exception ex)
 		{

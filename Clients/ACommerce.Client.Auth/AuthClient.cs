@@ -80,12 +80,23 @@ public sealed class AuthClient(IApiClient httpClient, TokenManager tokenManager)
     /// </summary>
     public async Task LogoutAsync(CancellationToken cancellationToken = default)
     {
+        // Call server FIRST (while we still have the token)
+        try
+        {
+            await httpClient.PostAsync<object>(
+                ServiceName,
+                "/api/auth/logout",
+                new { },
+                cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // Log but don't throw - we still want to clear local token
+            Console.WriteLine($"[AuthClient] Logout request failed: {ex.Message}");
+        }
+
+        // THEN clear local token
         tokenManager.ClearToken();
-        await httpClient.PostAsync<object>(
-            ServiceName,
-            "/api/auth/logout",
-            new { },
-            cancellationToken);
     }
 
     #endregion
