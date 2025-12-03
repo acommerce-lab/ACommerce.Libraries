@@ -1,24 +1,25 @@
 using ACommerce.Chats.Abstractions.DTOs;
 using ACommerce.Chats.Abstractions.Providers;
-using ACommerce.Realtime.Abstractions.Contracts; // ? ??????? ??????? ????????!
+using ACommerce.Chats.Core.Hubs;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace ACommerce.Chats.Core.Providers;
 
 /// <summary>
-/// ???? Real-time ???????? ACommerce.Realtime! ??
+/// مزود Real-time للدردشة باستخدام ChatHub مباشرة
 /// </summary>
 public class SignalRRealtimeChatProvider : IRealtimeChatProvider
 {
-	// ? ??????? IRealtimeHub ?? ACommerce.Realtime.Abstractions!
-	private readonly IRealtimeHub _realtimeHub;
+	// استخدام IHubContext للـ ChatHub مباشرة بدلاً من IRealtimeHub
+	private readonly IHubContext<ChatHub, IChatClient> _hubContext;
 	private readonly ILogger<SignalRRealtimeChatProvider> _logger;
 
 	public SignalRRealtimeChatProvider(
-		IRealtimeHub realtimeHub,
+		IHubContext<ChatHub, IChatClient> hubContext,
 		ILogger<SignalRRealtimeChatProvider> logger)
 	{
-		_realtimeHub = realtimeHub ?? throw new ArgumentNullException(nameof(realtimeHub));
+		_hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
@@ -27,14 +28,15 @@ public class SignalRRealtimeChatProvider : IRealtimeChatProvider
 		MessageDto message,
 		CancellationToken cancellationToken = default)
 	{
-		_logger.LogDebug("Sending real-time message to chat {ChatId}", chatId);
+		_logger.LogInformation("📤 Sending real-time message to chat {ChatId}, MessageId: {MessageId}",
+			chatId, message.Id);
 
-		// ? ??????? IRealtimeHub.SendToGroupAsync
-		await _realtimeHub.SendToGroupAsync(
-			groupName: $"chat_{chatId}",
-			method: "MessageReceived",
-			data: message,
-			cancellationToken: cancellationToken);
+		// إرسال للمجموعة chat_{chatId}
+		await _hubContext.Clients
+			.Group($"chat_{chatId}")
+			.ReceiveMessage("MessageReceived", message);
+
+		_logger.LogInformation("✅ Message sent to group chat_{ChatId}", chatId);
 	}
 
 	public async Task SendTypingIndicator(
@@ -45,12 +47,9 @@ public class SignalRRealtimeChatProvider : IRealtimeChatProvider
 		_logger.LogDebug("Sending typing indicator for {UserId} in chat {ChatId}",
 			indicator.UserId, chatId);
 
-		// ? ??????? IRealtimeHub.SendToGroupAsync
-		await _realtimeHub.SendToGroupAsync(
-			groupName: $"chat_{chatId}",
-			method: "UserTyping",
-			data: indicator,
-			cancellationToken: cancellationToken);
+		await _hubContext.Clients
+			.Group($"chat_{chatId}")
+			.ReceiveMessage("UserTyping", indicator);
 	}
 
 	public async Task SendParticipantJoined(
@@ -61,12 +60,9 @@ public class SignalRRealtimeChatProvider : IRealtimeChatProvider
 		_logger.LogDebug("Sending participant joined notification for {UserId} in chat {ChatId}",
 			participant.UserId, chatId);
 
-		// ? ??????? IRealtimeHub.SendToGroupAsync
-		await _realtimeHub.SendToGroupAsync(
-			groupName: $"chat_{chatId}",
-			method: "ParticipantJoined",
-			data: participant,
-			cancellationToken: cancellationToken);
+		await _hubContext.Clients
+			.Group($"chat_{chatId}")
+			.ReceiveMessage("ParticipantJoined", participant);
 	}
 
 	public async Task SendParticipantLeft(
@@ -77,12 +73,9 @@ public class SignalRRealtimeChatProvider : IRealtimeChatProvider
 		_logger.LogDebug("Sending participant left notification for {UserId} in chat {ChatId}",
 			userId, chatId);
 
-		// ? ??????? IRealtimeHub.SendToGroupAsync
-		await _realtimeHub.SendToGroupAsync(
-			groupName: $"chat_{chatId}",
-			method: "ParticipantLeft",
-			data: new { ChatId = chatId, UserId = userId },
-			cancellationToken: cancellationToken);
+		await _hubContext.Clients
+			.Group($"chat_{chatId}")
+			.ReceiveMessage("ParticipantLeft", new { ChatId = chatId, UserId = userId });
 	}
 
 	public async Task SendUserPresenceUpdate(
@@ -92,11 +85,8 @@ public class SignalRRealtimeChatProvider : IRealtimeChatProvider
 	{
 		_logger.LogDebug("Sending presence update for {UserId}: {IsOnline}", userId, isOnline);
 
-		// ? ??????? IRealtimeHub.SendToAllAsync
-		await _realtimeHub.SendToAllAsync(
-			method: "UserPresenceChanged",
-			data: new { UserId = userId, IsOnline = isOnline },
-			cancellationToken: cancellationToken);
+		await _hubContext.Clients.All
+			.ReceiveMessage("UserPresenceChanged", new { UserId = userId, IsOnline = isOnline });
 	}
 
 	public async Task SendMessageRead(
@@ -108,12 +98,8 @@ public class SignalRRealtimeChatProvider : IRealtimeChatProvider
 		_logger.LogDebug("Sending message read notification for {MessageId} by {UserId}",
 			messageId, userId);
 
-		// ? ??????? IRealtimeHub.SendToGroupAsync
-		await _realtimeHub.SendToGroupAsync(
-			groupName: $"chat_{chatId}",
-			method: "MessageRead",
-			data: new { ChatId = chatId, UserId = userId, MessageId = messageId },
-			cancellationToken: cancellationToken);
+		await _hubContext.Clients
+			.Group($"chat_{chatId}")
+			.ReceiveMessage("MessageRead", new { ChatId = chatId, UserId = userId, MessageId = messageId });
 	}
 }
-
