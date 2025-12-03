@@ -36,6 +36,7 @@
 
 		<!-- Marketplace Clients -->
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Vendors\ACommerce.Client.Vendors.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Subscriptions\ACommerce.Client.Subscriptions.csproj" />
 
 		<!-- Communication Clients -->
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Chats\ACommerce.Client.Chats.csproj" />

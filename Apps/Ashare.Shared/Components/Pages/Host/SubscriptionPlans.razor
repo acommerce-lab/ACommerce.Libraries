@@ -1,0 +1,296 @@
+@page "/host/subscription"
+@page "/host/plans"
+@using ACommerce.Subscriptions.DTOs
+@using ACommerce.Subscriptions.Enums
+@inject AshareApiService ApiService
+@inject IAppNavigationService Navigation
+@inject Ashare.Shared.Services.ThemeService ThemeService
+@inject ILocalizationService L
+
+<div class="ac-page ashare-subscription-page @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
+    @* Header *@
+    <div class="ac-navbar">
+        <button class="ac-navbar-back" @onclick="() => Navigation.GoBack()">
+            <i class="bi bi-chevron-@(L.IsRtl ? "right" : "left")"></i>
+        </button>
+        <h1 class="ac-navbar-title">@L["SubscriptionPlans"]</h1>
+        <div class="ac-navbar-spacer"></div>
+    </div>
+
+    <div class="ashare-subscription-content">
+        @if (_isLoading)
+        {
+            <div class="ashare-loading">
+                <div class="ac-spinner"></div>
+                <span>@L["Loading"]</span>
+            </div>
+        }
+        else
+        {
+            @* Current Subscription Banner *@
+            @if (_currentSubscription != null)
+            {
+                <div class="ashare-current-plan-banner">
+                    <div class="ashare-current-plan-info">
+                        <span class="ashare-current-plan-label">@L["CurrentPlan"]</span>
+                        <span class="ashare-current-plan-name">@_currentSubscription.PlanName</span>
+                    </div>
+                    @if (_currentSubscription.DaysRemaining > 0)
+                    {
+                        <div class="ashare-days-remaining">
+                            <span class="ashare-days-count">@_currentSubscription.DaysRemaining</span>
+                            <span class="ashare-days-label">@L["DaysRemaining"]</span>
+                        </div>
+                    }
+                </div>
+            }
+
+            @* Billing Cycle Toggle *@
+            <div class="ashare-billing-toggle">
+                <button class="ashare-toggle-btn @(_selectedCycle == BillingCycle.Monthly ? "active" : "")"
+                        @onclick="() => _selectedCycle = BillingCycle.Monthly">
+                    @L["Monthly"]
+                </button>
+                <button class="ashare-toggle-btn @(_selectedCycle == BillingCycle.Annual ? "active" : "")"
+                        @onclick="() => _selectedCycle = BillingCycle.Annual">
+                    @L["Annual"]
+                    <span class="ashare-discount-badge">@L["Save20Percent"]</span>
+                </button>
+            </div>
+
+            @* Plans Grid *@
+            <div class="ashare-plans-grid">
+                @foreach (var plan in _plans)
+                {
+                    var isCurrentPlan = _currentSubscription?.PlanId == plan.Id;
+                    var price = GetPriceForCycle(plan, _selectedCycle);
+
+                    <div class="ashare-plan-card @(plan.IsRecommended ? "recommended" : "") @(isCurrentPlan ? "current" : "")">
+                        @if (plan.IsRecommended)
+                        {
+                            <div class="ashare-recommended-badge">
+                                <i class="bi bi-star-fill"></i>
+                                @L["Recommended"]
+                            </div>
+                        }
+
+                        <div class="ashare-plan-header">
+                            <div class="ashare-plan-icon" style="background-color: @plan.Color;">
+                                <i class="bi @plan.Icon"></i>
+                            </div>
+                            <h3 class="ashare-plan-name">@(L.IsRtl ? plan.Name : plan.NameEn)</h3>
+                            <p class="ashare-plan-description">@(L.IsRtl ? plan.Description : plan.DescriptionEn)</p>
+                        </div>
+
+                        <div class="ashare-plan-pricing">
+                            <span class="ashare-plan-price">@price.ToString("N0")</span>
+                            <span class="ashare-plan-currency">@plan.Currency</span>
+                            <span class="ashare-plan-period">/@(_selectedCycle == BillingCycle.Monthly ? L["Month"] : L["Year"])</span>
+                        </div>
+
+                        <div class="ashare-plan-features">
+                            @* Listings Limit *@
+                            <div class="ashare-feature-item">
+                                <i class="bi bi-building"></i>
+                                <span>
+                                    @if (plan.MaxListings < 0)
+                                    {
+                                        @L["UnlimitedListings"]
+                                    }
+                                    else
+                                    {
+                                        @string.Format(L["MaxListingsFormat"], plan.MaxListings)
+                                    }
+                                </span>
+                            </div>
+
+                            @* Images per Listing *@
+                            <div class="ashare-feature-item">
+                                <i class="bi bi-images"></i>
+                                <span>@string.Format(L["MaxImagesFormat"], plan.MaxImagesPerListing)</span>
+                            </div>
+
+                            @* Commission *@
+                            <div class="ashare-feature-item highlight">
+                                <i class="bi bi-percent"></i>
+                                <span>@string.Format(L["CommissionFormat"], plan.CommissionPercentage)</span>
+                            </div>
+
+                            @* Storage *@
+                            <div class="ashare-feature-item">
+                                <i class="bi bi-hdd"></i>
+                                <span>
+                                    @if (plan.StorageLimitMB < 0)
+                                    {
+                                        @L["UnlimitedStorage"]
+                                    }
+                                    else if (plan.StorageLimitMB >= 1000)
+                                    {
+                                        @string.Format(L["StorageGBFormat"], plan.StorageLimitMB / 1000)
+                                    }
+                                    else
+                                    {
+                                        @string.Format(L["StorageMBFormat"], plan.StorageLimitMB)
+                                    }
+                                </span>
+                            </div>
+
+                            @* Verified Badge *@
+                            <div class="ashare-feature-item @(plan.HasVerifiedBadge ? "" : "disabled")">
+                                <i class="bi bi-patch-check-fill"></i>
+                                <span>@L["VerifiedBadge"]</span>
+                                @if (!plan.HasVerifiedBadge)
+                                {
+                                    <i class="bi bi-x-circle ashare-feature-no"></i>
+                                }
+                            </div>
+
+                            @* Analytics *@
+                            <div class="ashare-feature-item @(plan.AnalyticsLevel != AnalyticsLevel.None ? "" : "disabled")">
+                                <i class="bi bi-graph-up"></i>
+                                <span>@GetAnalyticsLabel(plan.AnalyticsLevel)</span>
+                            </div>
+
+                            @* Support *@
+                            <div class="ashare-feature-item">
+                                <i class="bi bi-headset"></i>
+                                <span>@GetSupportLabel(plan.SupportLevel)</span>
+                            </div>
+
+                            @* API Access *@
+                            <div class="ashare-feature-item @(plan.AllowApiAccess ? "" : "disabled")">
+                                <i class="bi bi-code-slash"></i>
+                                <span>@L["ApiAccess"]</span>
+                                @if (!plan.AllowApiAccess)
+                                {
+                                    <i class="bi bi-x-circle ashare-feature-no"></i>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="ashare-plan-action">
+                            @if (isCurrentPlan)
+                            {
+                                <button class="ac-btn ac-btn-secondary ac-btn-block" disabled>
+                                    <i class="bi bi-check-circle"></i>
+                                    @L["CurrentPlan"]
+                                </button>
+                            }
+                            else if (plan.MonthlyPrice == 0)
+                            {
+                                <button class="ac-btn ac-btn-outline-primary ac-btn-block" @onclick="() => SelectPlan(plan)">
+                                    @L["GetStarted"]
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="ac-btn ac-btn-primary ac-btn-block" @onclick="() => SelectPlan(plan)">
+                                    @if (_currentSubscription != null && price > GetPriceForCycle(_currentPlan!, _selectedCycle))
+                                    {
+                                        <i class="bi bi-arrow-up-circle"></i>
+                                        @L["Upgrade"]
+                                    }
+                                    else
+                                    {
+                                        @L["Subscribe"]
+                                    }
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @* Features Comparison Link *@
+            <div class="ashare-compare-link">
+                <button class="ac-btn ac-btn-link" @onclick="ToggleComparison">
+                    <i class="bi bi-table"></i>
+                    @L["CompareAllFeatures"]
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private bool _isLoading = true;
+    private List<SubscriptionPlanDto> _plans = new();
+    private SubscriptionDto? _currentSubscription;
+    private SubscriptionPlanDto? _currentPlan;
+    private BillingCycle _selectedCycle = BillingCycle.Monthly;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+
+        try
+        {
+            _plans = await ApiService.GetSubscriptionPlansAsync();
+
+            // TODO: Get current vendor ID from auth context
+            // For now, mock it
+            // _currentSubscription = await ApiService.GetHostSubscriptionAsync(vendorId);
+            // if (_currentSubscription != null)
+            // {
+            //     _currentPlan = _plans.FirstOrDefault(p => p.Id == _currentSubscription.PlanId);
+            // }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading subscription data: {ex.Message}");
+        }
+
+        _isLoading = false;
+    }
+
+    private decimal GetPriceForCycle(SubscriptionPlanDto plan, BillingCycle cycle)
+    {
+        return cycle switch
+        {
+            BillingCycle.Quarterly => plan.QuarterlyPrice ?? plan.MonthlyPrice * 3,
+            BillingCycle.SemiAnnual => plan.SemiAnnualPrice ?? plan.MonthlyPrice * 6,
+            BillingCycle.Annual => plan.AnnualPrice ?? plan.MonthlyPrice * 12,
+            _ => plan.MonthlyPrice
+        };
+    }
+
+    private string GetAnalyticsLabel(AnalyticsLevel level)
+    {
+        return level switch
+        {
+            AnalyticsLevel.None => L["NoAnalytics"],
+            AnalyticsLevel.Basic => L["BasicAnalytics"],
+            AnalyticsLevel.Advanced => L["AdvancedAnalytics"],
+            AnalyticsLevel.Full => L["FullAnalytics"],
+            _ => L["NoAnalytics"]
+        };
+    }
+
+    private string GetSupportLabel(SupportLevel level)
+    {
+        return level switch
+        {
+            SupportLevel.Basic => L["BasicSupport"],
+            SupportLevel.Standard => L["StandardSupport"],
+            SupportLevel.Priority => L["PrioritySupport"],
+            SupportLevel.Dedicated => L["DedicatedSupport"],
+            _ => L["BasicSupport"]
+        };
+    }
+
+    private void SelectPlan(SubscriptionPlanDto plan)
+    {
+        // Navigate to checkout/payment page
+        Navigation.NavigateTo($"/host/subscribe/{plan.Slug}?cycle={(int)_selectedCycle}");
+    }
+
+    private void ToggleComparison()
+    {
+        Navigation.NavigateTo("/host/plans/compare");
+    }
+}

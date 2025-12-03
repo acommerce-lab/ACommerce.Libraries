@@ -3,7 +3,9 @@ using ACommerce.Client.Categories;
 using ACommerce.Client.Products;
 using ACommerce.Client.ProductListings;
 using ACommerce.Client.Orders;
+using ACommerce.Client.Subscriptions;
 using ACommerce.Client.Core.Http;
+using ACommerce.Subscriptions.DTOs;
 
 namespace Ashare.Shared.Services;
 
@@ -18,6 +20,7 @@ public class AshareApiService
 	private readonly ProductsClient _productsClient;
 	private readonly ProductListingsClient _listingsClient;
 	private readonly OrdersClient _ordersClient;
+	private readonly SubscriptionClient _subscriptionClient;
 
     // Local cache for favorites (can be persisted to local storage)
     private readonly HashSet<Guid> _favorites = [];
@@ -27,13 +30,15 @@ public class AshareApiService
 		CategoryAttributesClient categoryAttributesClient,
 		ProductsClient productsClient,
 		ProductListingsClient listingsClient,
-		OrdersClient ordersClient)
+		OrdersClient ordersClient,
+		SubscriptionClient subscriptionClient)
 	{
 		_categoriesClient = categoriesClient;
 		_categoryAttributesClient = categoryAttributesClient;
 		_productsClient = productsClient;
 		_listingsClient = listingsClient;
 		_ordersClient = ordersClient;
+		_subscriptionClient = subscriptionClient;
 	}
 
 	// ═══════════════════════════════════════════════════════════════════
@@ -390,6 +395,156 @@ public class AshareApiService
 	}
 
 	public int GetNotificationsCount() => 0; // TODO: Implement with Notifications API
+
+	// ═══════════════════════════════════════════════════════════════════
+	// Subscriptions - الاشتراكات
+	// ═══════════════════════════════════════════════════════════════════
+
+	/// <summary>
+	/// الحصول على جميع الباقات المتاحة
+	/// </summary>
+	public async Task<List<SubscriptionPlanDto>> GetSubscriptionPlansAsync()
+	{
+		try
+		{
+			var plans = await _subscriptionClient.GetPlansAsync();
+			return plans ?? new List<SubscriptionPlanDto>();
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error fetching subscription plans: {ex.Message}");
+			return new List<SubscriptionPlanDto>();
+		}
+	}
+
+	/// <summary>
+	/// الحصول على باقة بواسطة المعرف
+	/// </summary>
+	public async Task<SubscriptionPlanDto?> GetSubscriptionPlanBySlugAsync(string slug)
+	{
+		try
+		{
+			return await _subscriptionClient.GetPlanBySlugAsync(slug);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error fetching plan by slug: {ex.Message}");
+			return null;
+		}
+	}
+
+	/// <summary>
+	/// الحصول على اشتراك المضيف الحالي
+	/// </summary>
+	public async Task<SubscriptionDto?> GetHostSubscriptionAsync(Guid vendorId)
+	{
+		try
+		{
+			return await _subscriptionClient.GetVendorSubscriptionAsync(vendorId);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error fetching host subscription: {ex.Message}");
+			return null;
+		}
+	}
+
+	/// <summary>
+	/// الحصول على ملخص اشتراك المضيف
+	/// </summary>
+	public async Task<SubscriptionSummaryDto?> GetSubscriptionSummaryAsync(Guid vendorId)
+	{
+		try
+		{
+			return await _subscriptionClient.GetSubscriptionSummaryAsync(vendorId);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error fetching subscription summary: {ex.Message}");
+			return null;
+		}
+	}
+
+	/// <summary>
+	/// التحقق من إمكانية إضافة مساحة جديدة
+	/// </summary>
+	public async Task<CanAddListingResult?> CanAddSpaceAsync(Guid vendorId)
+	{
+		try
+		{
+			return await _subscriptionClient.CanAddListingAsync(vendorId);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error checking can add space: {ex.Message}");
+			return null;
+		}
+	}
+
+	/// <summary>
+	/// الحصول على إحصائيات الاستخدام
+	/// </summary>
+	public async Task<VendorUsageStatsDto?> GetUsageStatsAsync(Guid vendorId)
+	{
+		try
+		{
+			return await _subscriptionClient.GetUsageStatsAsync(vendorId);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error fetching usage stats: {ex.Message}");
+			return null;
+		}
+	}
+
+	/// <summary>
+	/// إنشاء اشتراك جديد
+	/// </summary>
+	public async Task<SubscriptionDto?> CreateSubscriptionAsync(CreateSubscriptionDto dto)
+	{
+		try
+		{
+			return await _subscriptionClient.CreateSubscriptionAsync(dto);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error creating subscription: {ex.Message}");
+			return null;
+		}
+	}
+
+	/// <summary>
+	/// تغيير الباقة
+	/// </summary>
+	public async Task<SubscriptionDto?> ChangePlanAsync(Guid subscriptionId, ChangePlanDto dto)
+	{
+		try
+		{
+			return await _subscriptionClient.ChangePlanAsync(subscriptionId, dto);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error changing plan: {ex.Message}");
+			return null;
+		}
+	}
+
+	/// <summary>
+	/// الحصول على فواتير المضيف
+	/// </summary>
+	public async Task<List<InvoiceSummaryDto>> GetHostInvoicesAsync(Guid vendorId)
+	{
+		try
+		{
+			var invoices = await _subscriptionClient.GetVendorInvoicesAsync(vendorId);
+			return invoices ?? new List<InvoiceSummaryDto>();
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error fetching invoices: {ex.Message}");
+			return new List<InvoiceSummaryDto>();
+		}
+	}
 
 	// ═══════════════════════════════════════════════════════════════════
 	// Mapping Helpers

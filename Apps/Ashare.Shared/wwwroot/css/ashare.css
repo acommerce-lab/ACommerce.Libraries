@@ -6175,3 +6175,686 @@ h1, h2, h3, .ashare-logo-text {
     font-size: 13px;
     color: var(--ashare-gray-400);
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Subscription Plans & Dashboard Styles
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ashare-subscription-page,
+.ashare-subscription-dashboard {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--ashare-gray-50);
+}
+
+.ashare-subscription-content,
+.ashare-dashboard-content {
+    flex: 1;
+    padding: var(--ashare-spacing-md);
+    padding-top: calc(var(--navbar-height) + var(--ashare-spacing-md));
+    padding-bottom: calc(var(--bottom-nav-height) + var(--ashare-spacing-xl));
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Current Plan Banner */
+.ashare-current-plan-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, var(--ashare-primary), var(--ashare-primary-dark));
+    color: var(--ashare-white);
+    padding: var(--ashare-spacing-md) var(--ashare-spacing-lg);
+    border-radius: var(--ashare-radius-lg);
+    margin-bottom: var(--ashare-spacing-lg);
+}
+
+.ashare-current-plan-label {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.ashare-current-plan-name {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.ashare-days-remaining {
+    text-align: center;
+    background: rgba(255,255,255,0.15);
+    padding: var(--ashare-spacing-sm) var(--ashare-spacing-md);
+    border-radius: var(--ashare-radius-md);
+}
+
+.ashare-days-count {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.ashare-days-label {
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+/* Billing Cycle Toggle */
+.ashare-billing-toggle {
+    display: flex;
+    background: var(--ashare-white);
+    border-radius: var(--ashare-radius-full);
+    padding: 4px;
+    margin-bottom: var(--ashare-spacing-lg);
+    box-shadow: var(--ashare-shadow-sm);
+}
+
+.ashare-toggle-btn {
+    flex: 1;
+    padding: var(--ashare-spacing-sm) var(--ashare-spacing-md);
+    border: none;
+    background: transparent;
+    border-radius: var(--ashare-radius-full);
+    font-weight: 500;
+    color: var(--ashare-gray-600);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ashare-spacing-xs);
+}
+
+.ashare-toggle-btn.active {
+    background: var(--ashare-primary);
+    color: var(--ashare-white);
+}
+
+.ashare-discount-badge {
+    font-size: 10px;
+    background: var(--ashare-secondary);
+    color: var(--ashare-white);
+    padding: 2px 6px;
+    border-radius: var(--ashare-radius-full);
+}
+
+/* Plans Grid */
+.ashare-plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--ashare-spacing-md);
+    margin-bottom: var(--ashare-spacing-lg);
+}
+
+/* Plan Card */
+.ashare-plan-card {
+    background: var(--ashare-white);
+    border-radius: var(--ashare-radius-lg);
+    padding: var(--ashare-spacing-lg);
+    box-shadow: var(--ashare-shadow-md);
+    border: 2px solid transparent;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.ashare-plan-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--ashare-shadow-lg);
+}
+
+.ashare-plan-card.recommended {
+    border-color: var(--ashare-secondary);
+}
+
+.ashare-plan-card.current {
+    border-color: var(--ashare-primary);
+    background: linear-gradient(to bottom, rgba(52, 84, 84, 0.03), transparent);
+}
+
+.ashare-recommended-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ashare-secondary);
+    color: var(--ashare-white);
+    padding: 4px 12px;
+    border-radius: var(--ashare-radius-full);
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.ashare-plan-header {
+    text-align: center;
+    margin-bottom: var(--ashare-spacing-md);
+}
+
+.ashare-plan-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--ashare-spacing-sm);
+    font-size: 24px;
+    color: var(--ashare-white);
+}
+
+.ashare-plan-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ashare-gray-900);
+    margin: 0 0 var(--ashare-spacing-xs);
+}
+
+.ashare-plan-description {
+    font-size: 13px;
+    color: var(--ashare-gray-500);
+    margin: 0;
+}
+
+.ashare-plan-pricing {
+    text-align: center;
+    padding: var(--ashare-spacing-md) 0;
+    border-top: 1px solid var(--ashare-gray-100);
+    border-bottom: 1px solid var(--ashare-gray-100);
+    margin-bottom: var(--ashare-spacing-md);
+}
+
+.ashare-plan-price {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--ashare-primary);
+}
+
+.ashare-plan-currency {
+    font-size: 16px;
+    color: var(--ashare-gray-600);
+    margin-inline-start: 4px;
+}
+
+.ashare-plan-period {
+    font-size: 14px;
+    color: var(--ashare-gray-500);
+}
+
+/* Plan Features */
+.ashare-plan-features {
+    margin-bottom: var(--ashare-spacing-lg);
+}
+
+.ashare-feature-item {
+    display: flex;
+    align-items: center;
+    gap: var(--ashare-spacing-sm);
+    padding: var(--ashare-spacing-xs) 0;
+    font-size: 14px;
+    color: var(--ashare-gray-700);
+}
+
+.ashare-feature-item i {
+    width: 20px;
+    text-align: center;
+    color: var(--ashare-primary);
+}
+
+.ashare-feature-item.disabled {
+    opacity: 0.5;
+    text-decoration: line-through;
+}
+
+.ashare-feature-item.highlight {
+    font-weight: 600;
+    color: var(--ashare-secondary);
+}
+
+.ashare-feature-item.highlight i {
+    color: var(--ashare-secondary);
+}
+
+.ashare-feature-no {
+    margin-inline-start: auto;
+    color: var(--ashare-danger);
+}
+
+/* Plan Action */
+.ashare-plan-action {
+    margin-top: auto;
+}
+
+.ashare-compare-link {
+    text-align: center;
+    margin-bottom: var(--ashare-spacing-lg);
+}
+
+/* No Subscription State */
+.ashare-no-subscription {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--ashare-spacing-xl) var(--ashare-spacing-lg);
+    min-height: 60vh;
+}
+
+.ashare-no-sub-icon {
+    width: 100px;
+    height: 100px;
+    background: var(--ashare-gray-100);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--ashare-spacing-lg);
+}
+
+.ashare-no-sub-icon i {
+    font-size: 48px;
+    color: var(--ashare-gray-400);
+}
+
+.ashare-no-subscription h2 {
+    font-size: 20px;
+    color: var(--ashare-gray-800);
+    margin-bottom: var(--ashare-spacing-sm);
+}
+
+.ashare-no-subscription p {
+    color: var(--ashare-gray-500);
+    margin-bottom: var(--ashare-spacing-lg);
+}
+
+/* Plan Status Card */
+.ashare-plan-status-card {
+    background: var(--ashare-white);
+    border-radius: var(--ashare-radius-lg);
+    padding: var(--ashare-spacing-lg);
+    margin-bottom: var(--ashare-spacing-lg);
+    box-shadow: var(--ashare-shadow-md);
+    border-inline-start: 4px solid;
+}
+
+.ashare-plan-status-header {
+    display: flex;
+    align-items: center;
+    gap: var(--ashare-spacing-md);
+    margin-bottom: var(--ashare-spacing-md);
+}
+
+.ashare-plan-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--ashare-white);
+}
+
+.ashare-plan-info {
+    flex: 1;
+}
+
+.ashare-plan-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ashare-gray-900);
+    margin: 0 0 4px;
+}
+
+.ashare-subscription-status {
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: var(--ashare-radius-full);
+    font-weight: 500;
+}
+
+.ashare-subscription-status.status-active {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--ashare-success);
+}
+
+.ashare-subscription-status.status-trial {
+    background: rgba(52, 84, 84, 0.1);
+    color: var(--ashare-primary);
+}
+
+.ashare-subscription-status.status-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--ashare-warning);
+}
+
+.ashare-subscription-status.status-cancelled,
+.ashare-subscription-status.status-expired,
+.ashare-subscription-status.status-suspended {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--ashare-danger);
+}
+
+.ashare-plan-dates {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--ashare-spacing-md);
+    padding-top: var(--ashare-spacing-md);
+    border-top: 1px solid var(--ashare-gray-100);
+}
+
+.ashare-date-item {
+    text-align: center;
+}
+
+.ashare-date-label {
+    display: block;
+    font-size: 12px;
+    color: var(--ashare-gray-500);
+    margin-bottom: 4px;
+}
+
+.ashare-date-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ashare-gray-800);
+}
+
+.ashare-date-item.highlight .ashare-date-value {
+    color: var(--ashare-secondary);
+}
+
+.ashare-renewal-warning {
+    display: flex;
+    align-items: center;
+    gap: var(--ashare-spacing-sm);
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--ashare-warning);
+    padding: var(--ashare-spacing-sm) var(--ashare-spacing-md);
+    border-radius: var(--ashare-radius-md);
+    margin-top: var(--ashare-spacing-md);
+    font-size: 13px;
+}
+
+.ashare-renewal-warning button {
+    margin-inline-start: auto;
+}
+
+/* Usage Section */
+.ashare-usage-section,
+.ashare-commission-section,
+.ashare-invoices-section {
+    margin-bottom: var(--ashare-spacing-lg);
+}
+
+.ashare-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ashare-gray-800);
+    margin-bottom: var(--ashare-spacing-md);
+}
+
+.ashare-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--ashare-spacing-md);
+}
+
+.ashare-usage-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--ashare-spacing-md);
+}
+
+.ashare-usage-card {
+    background: var(--ashare-white);
+    border-radius: var(--ashare-radius-md);
+    padding: var(--ashare-spacing-md);
+    box-shadow: var(--ashare-shadow-sm);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ashare-spacing-sm);
+}
+
+.ashare-usage-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--ashare-gray-100);
+    border-radius: var(--ashare-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ashare-primary);
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.ashare-usage-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.ashare-usage-label {
+    display: block;
+    font-size: 12px;
+    color: var(--ashare-gray-500);
+    margin-bottom: 4px;
+}
+
+.ashare-usage-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ashare-progress-bar {
+    height: 6px;
+    background: var(--ashare-gray-200);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.ashare-progress-fill {
+    height: 100%;
+    background: var(--ashare-primary);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.ashare-usage-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ashare-gray-700);
+}
+
+/* Commission Card */
+.ashare-commission-card {
+    background: var(--ashare-white);
+    border-radius: var(--ashare-radius-md);
+    padding: var(--ashare-spacing-lg);
+    box-shadow: var(--ashare-shadow-sm);
+    text-align: center;
+}
+
+.ashare-commission-rate {
+    margin-bottom: var(--ashare-spacing-sm);
+}
+
+.ashare-rate-value {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--ashare-secondary);
+}
+
+.ashare-rate-label {
+    font-size: 14px;
+    color: var(--ashare-gray-500);
+    margin-inline-start: 4px;
+}
+
+.ashare-commission-note {
+    font-size: 13px;
+    color: var(--ashare-gray-500);
+    margin: 0;
+}
+
+/* Invoices List */
+.ashare-invoices-list {
+    background: var(--ashare-white);
+    border-radius: var(--ashare-radius-md);
+    overflow: hidden;
+    box-shadow: var(--ashare-shadow-sm);
+}
+
+.ashare-invoice-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--ashare-spacing-md);
+    border-bottom: 1px solid var(--ashare-gray-100);
+}
+
+.ashare-invoice-item:last-child {
+    border-bottom: none;
+}
+
+.ashare-invoice-number {
+    font-weight: 600;
+    color: var(--ashare-gray-800);
+}
+
+.ashare-invoice-date {
+    font-size: 12px;
+    color: var(--ashare-gray-500);
+    display: block;
+    margin-top: 2px;
+}
+
+.ashare-invoice-amount {
+    text-align: end;
+}
+
+.ashare-amount {
+    font-weight: 600;
+    color: var(--ashare-gray-800);
+}
+
+.ashare-invoice-status {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: var(--ashare-radius-full);
+    display: block;
+    margin-top: 2px;
+}
+
+.ashare-invoice-status.status-paid {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--ashare-success);
+}
+
+.ashare-invoice-status.status-pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--ashare-warning);
+}
+
+.ashare-invoice-status.status-failed {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--ashare-danger);
+}
+
+.ashare-invoice-status.status-refunded {
+    background: rgba(107, 114, 128, 0.1);
+    color: var(--ashare-gray-600);
+}
+
+/* Quick Actions */
+.ashare-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--ashare-spacing-sm);
+    margin-top: var(--ashare-spacing-lg);
+}
+
+.ashare-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--ashare-spacing-xs);
+    padding: var(--ashare-spacing-md);
+    background: var(--ashare-white);
+    border: none;
+    border-radius: var(--ashare-radius-md);
+    box-shadow: var(--ashare-shadow-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ashare-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ashare-shadow-md);
+}
+
+.ashare-action-btn i {
+    font-size: 24px;
+    color: var(--ashare-primary);
+}
+
+.ashare-action-btn span {
+    font-size: 11px;
+    color: var(--ashare-gray-600);
+    text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .ashare-plans-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ashare-quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ashare-plan-dates {
+        grid-template-columns: 1fr;
+        gap: var(--ashare-spacing-sm);
+    }
+}
+
+/* Dark mode for subscription */
+.ac-dark .ashare-subscription-page,
+.ac-dark .ashare-subscription-dashboard {
+    background-color: var(--ashare-gray-50);
+}
+
+.ac-dark .ashare-plan-card,
+.ac-dark .ashare-plan-status-card,
+.ac-dark .ashare-usage-card,
+.ac-dark .ashare-commission-card,
+.ac-dark .ashare-invoices-list,
+.ac-dark .ashare-action-btn,
+.ac-dark .ashare-billing-toggle {
+    background: var(--ashare-surface);
+}
+
+.ac-dark .ashare-plan-name,
+.ac-dark .ashare-plan-title,
+.ac-dark .ashare-invoice-number,
+.ac-dark .ashare-amount,
+.ac-dark .ashare-usage-text,
+.ac-dark .ashare-date-value {
+    color: var(--ashare-gray-900);
+}
+
+/* Subscription menu icon accent */
+.ashare-menu-icon-accent {
+    background: linear-gradient(135deg, var(--ashare-secondary), var(--ashare-secondary-dark)) !important;
+}
+
+.ashare-menu-icon-accent i {
+    color: var(--ashare-white);
+}
