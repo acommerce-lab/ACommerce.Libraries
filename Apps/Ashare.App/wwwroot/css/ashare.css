@@ -75,6 +75,52 @@
     /* Layout */
     --navbar-height: 56px;
     --bottom-nav-height: 64px;
+
+    /* ════════════════════════════════════════════════════════════════
+       ACommerce Template Variables Override - Map to Ashare Brand
+       ════════════════════════════════════════════════════════════════ */
+    /* Primary colors - use Ashare Deep Olive Green */
+    --ac-primary: #345454;
+    --ac-primary-dark: #263F3F;
+    --ac-primary-light: #4A6B6B;
+
+    /* Secondary colors - use Ashare Soft Orange */
+    --ac-secondary: #F4844C;
+    --ac-secondary-dark: #E06D34;
+    --ac-secondary-light: #F69B6B;
+
+    /* Accent color */
+    --ac-accent: #F4844C;
+    --ac-accent-dark: #E06D34;
+    --ac-accent-light: #F69B6B;
+
+    /* Background & Surface */
+    --ac-bg: #FFFFFF;
+    --ac-bg-alt: #F9FAFB;
+    --ac-surface: #FFFFFF;
+    --ac-surface-alt: #F3F4F6;
+
+    /* Text colors */
+    --ac-text: #111827;
+    --ac-text-secondary: #6B7280;
+    --ac-text-muted: #9CA3AF;
+    --ac-text-on-primary: #FFFFFF;
+
+    /* Status colors */
+    --ac-success: #10B981;
+    --ac-warning: #F59E0B;
+    --ac-error: #EF4444;
+    --ac-info: #345454;
+
+    /* Border colors */
+    --ac-border: #E5E7EB;
+    --ac-border-light: #F3F4F6;
+    --ac-border-dark: #D1D5DB;
+
+    /* Special badges - use brand colors */
+    --ac-sale: #EF4444;
+    --ac-new: #10B981;
+    --ac-featured: #F4844C;
 }
 
 /* Dark Mode - Ashare Brand Visual Identity 2025 */
@@ -107,6 +153,26 @@
     --ashare-shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
     --ashare-shadow-md: 0 4px 6px rgba(0,0,0,0.4);
     --ashare-shadow-lg: 0 10px 15px rgba(0,0,0,0.5);
+
+    /* ACommerce Template Variables Override - Dark Mode */
+    --ac-primary: #4A7A7A;
+    --ac-primary-dark: #3A6666;
+    --ac-primary-light: #5A9090;
+    --ac-secondary: #F69B6B;
+    --ac-secondary-dark: #E5854A;
+    --ac-secondary-light: #F8B08A;
+    --ac-accent: #F69B6B;
+    --ac-bg: #0F1419;
+    --ac-bg-alt: #16202A;
+    --ac-surface: #1C2732;
+    --ac-surface-alt: #253341;
+    --ac-text: #F5F8FA;
+    --ac-text-secondary: #AAB8C2;
+    --ac-text-muted: #8899A6;
+    --ac-border: #253341;
+    --ac-border-light: #1C2732;
+    --ac-border-dark: #38444D;
+    --ac-info: #4A7A7A;
 }
 
 /* Dark mode specific overrides */
@@ -1296,6 +1362,148 @@ h1, h2, h3, .ashare-logo-text {
 
 .ac-modal-footer .ac-btn {
     flex: 1;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Filter Modal - Ashare Visual Identity 2025
+   ───────────────────────────────────────────────────────────────── */
+.ashare-filter-section {
+    margin-bottom: var(--ashare-spacing-lg);
+}
+
+.ashare-filter-section h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ashare-gray-900);
+    margin-bottom: var(--ashare-spacing-sm);
+}
+
+.ashare-price-inputs {
+    display: flex;
+    align-items: center;
+    gap: var(--ashare-spacing-sm);
+}
+
+.ashare-price-inputs .ac-input {
+    flex: 1;
+    text-align: center;
+}
+
+.ashare-price-inputs span {
+    color: var(--ashare-gray-400);
+    font-weight: 500;
+}
+
+.ashare-capacity-options,
+.ashare-rating-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ashare-spacing-sm);
+}
+
+.ashare-capacity-btn,
+.ashare-rating-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: var(--ashare-spacing-sm) var(--ashare-spacing-md);
+    background-color: var(--ashare-gray-100);
+    border: 1px solid var(--ashare-gray-200);
+    border-radius: var(--ashare-radius-md);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ashare-gray-700);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ashare-capacity-btn:hover,
+.ashare-rating-btn:hover {
+    background-color: var(--ashare-gray-200);
+}
+
+.ashare-capacity-btn.active,
+.ashare-rating-btn.active {
+    background-color: var(--ashare-primary);
+    border-color: var(--ashare-primary);
+    color: white;
+}
+
+.ashare-rating-btn i {
+    color: var(--ashare-secondary);
+}
+
+.ashare-rating-btn.active i {
+    color: white;
+}
+
+.ashare-amenities-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--ashare-spacing-sm);
+}
+
+.ashare-amenity-check {
+    display: flex;
+    align-items: center;
+    gap: var(--ashare-spacing-sm);
+    padding: var(--ashare-spacing-sm);
+    background-color: var(--ashare-gray-50);
+    border-radius: var(--ashare-radius-sm);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.ashare-amenity-check:hover {
+    background-color: var(--ashare-gray-100);
+}
+
+.ashare-amenity-check input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--ashare-primary);
+    cursor: pointer;
+}
+
+.ashare-amenity-check span {
+    font-size: 13px;
+    color: var(--ashare-gray-700);
+}
+
+/* Dark mode filter modal */
+.ac-dark .ashare-filter-section h4 {
+    color: var(--ashare-gray-900);
+}
+
+.ac-dark .ashare-capacity-btn,
+.ac-dark .ashare-rating-btn {
+    background-color: var(--ashare-surface);
+    border-color: var(--ashare-gray-300);
+    color: var(--ashare-gray-700);
+}
+
+.ac-dark .ashare-capacity-btn:hover,
+.ac-dark .ashare-rating-btn:hover {
+    background-color: var(--ashare-gray-200);
+}
+
+.ac-dark .ashare-capacity-btn.active,
+.ac-dark .ashare-rating-btn.active {
+    background-color: var(--ashare-secondary);
+    border-color: var(--ashare-secondary);
+}
+
+.ac-dark .ashare-amenity-check {
+    background-color: var(--ashare-surface);
+}
+
+.ac-dark .ashare-amenity-check:hover {
+    background-color: var(--ashare-gray-200);
+}
+
+.ac-dark .ashare-amenity-check span {
+    color: var(--ashare-gray-700);
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -2853,8 +3061,8 @@ h1, h2, h3, .ashare-logo-text {
 }
 
 .ashare-notification-icon.payment {
-    background-color: rgba(139, 92, 246, 0.15);
-    color: #8B5CF6;
+    background-color: rgba(52, 84, 84, 0.15);
+    color: var(--ashare-primary);
 }
 
 .ashare-notification-icon.system {
