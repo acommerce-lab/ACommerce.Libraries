@@ -1902,15 +1902,24 @@ h1, h2, h3, .ashare-logo-text {
 }
 
 .ashare-owner-avatar {
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: var(--ashare-gray-200);
     border-radius: var(--ashare-radius-full);
-    font-size: 28px;
+    font-size: 32px;
     color: var(--ashare-gray-400);
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid var(--ashare-primary);
+}
+
+.ashare-owner-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .ashare-owner-info {

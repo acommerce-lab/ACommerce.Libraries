@@ -1,10 +1,12 @@
 @page "/space/{SpaceId:guid}"
 @using ACommerce.Client.Chats
 @using ACommerce.Client.Auth
+@using ACommerce.Client.Profiles
 @inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
 @inject IJSRuntime JS
 @inject ChatsClient ChatsClient
+@inject ProfilesClient ProfilesClient
 @inject TokenManager TokenManager
 
 <div class="ac-page ashare-space-details">
@@ -267,11 +269,22 @@
                 <h2 class="ashare-section-title">مالك المساحة</h2>
                 <div class="ashare-owner-card">
                     <div class="ashare-owner-avatar">
-                        <i class="bi bi-person-circle"></i>
+                        @if (!string.IsNullOrEmpty(_ownerProfile?.Avatar))
+                        {
+                            <img src="@_ownerProfile.Avatar" alt="@GetOwnerDisplayName()" />
+                        }
+                        else
+                        {
+                            <i class="bi bi-person-circle"></i>
+                        }
                     </div>
                     <div class="ashare-owner-info">
-                        <h3>@(string.IsNullOrEmpty(_space.OwnerName) ? "المعلن" : _space.OwnerName)</h3>
-                        @if (_space.OwnerJoinDate != default)
+                        <h3>@GetOwnerDisplayName()</h3>
+                        @if (_ownerProfile?.CreatedAt != null && _ownerProfile.CreatedAt != default)
+                        {
+                            <span>عضو منذ @_ownerProfile.CreatedAt.ToString("yyyy")</span>
+                        }
+                        else if (_space.OwnerJoinDate != default)
                         {
                             <span>عضو منذ @_space.OwnerJoinDate.ToString("yyyy")</span>
                         }
@@ -428,6 +441,7 @@
 
     private SpaceItem? _space;
     private List<SpaceReview>? _reviews;
+    private ProfileDto? _ownerProfile; // بروفايل صاحب العرض
     private bool _isFavorite;
     private bool _isOwnListing; // هل هذا معلن المستخدم الحالي
     private int _currentImageIndex;
@@ -516,6 +530,19 @@
                 _isOwnListing = !string.IsNullOrEmpty(currentUserId) &&
                                 _space.OwnerId != Guid.Empty &&
                                 _space.OwnerId.ToString().Equals(currentUserId, StringComparison.OrdinalIgnoreCase);
+
+                // جلب بروفايل صاحب العرض
+                if (_space.OwnerId != Guid.Empty)
+                {
+                    try
+                    {
+                        _ownerProfile = await ProfilesClient.GetByUserIdAsync(_space.OwnerId.ToString());
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[SpaceDetails] Error loading owner profile: {ex.Message}");
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -822,6 +849,28 @@
         "unfurnished" or "false" or "no" or "0" => "لا",
         _ => value ?? ""
     };
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Owner Profile Helper
+    // ═══════════════════════════════════════════════════════════════════
+
+    private string GetOwnerDisplayName()
+    {
+        // أولاً: من البروفايل
+        if (_ownerProfile != null)
+        {
+            if (!string.IsNullOrEmpty(_ownerProfile.FullName))
+                return _ownerProfile.FullName;
+            if (!string.IsNullOrEmpty(_ownerProfile.BusinessName))
+                return _ownerProfile.BusinessName;
+        }
+
+        // ثانياً: من بيانات المساحة
+        if (!string.IsNullOrEmpty(_space?.OwnerName))
+            return _space.OwnerName;
+
+        return "المعلن";
+    }
 
     // ═══════════════════════════════════════════════════════════════════
     // Navigation & Actions
