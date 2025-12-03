@@ -530,16 +530,17 @@ public class ChatsController : BaseCrudController<
 			var paginationRequest = new PaginationRequest { PageNumber = 1, PageSize = 100 };
 			var existingChats = await _chatProvider.GetUserChatsAsync(currentUserId, paginationRequest);
 
-			var existingDirectChat = existingChats.Items?.FirstOrDefault(c =>
-				c.Type == ChatType.Direct &&
-				c.Participants != null &&
-				c.Participants.Count == 2 &&
-				c.Participants.Any(p => p.UserId == targetUserId));
+			// البحث في المحادثات المباشرة عن المحادثة مع المستخدم المستهدف
+			var directChats = existingChats.Items?.Where(c => c.Type == ChatType.Direct).ToList() ?? new List<ChatDto>();
 
-			if (existingDirectChat != null)
+			foreach (var chat in directChats)
 			{
-				_logger.LogDebug("Found existing direct chat {ChatId}", existingDirectChat.Id);
-				return Ok(existingDirectChat);
+				var participants = await _chatProvider.GetParticipantsAsync(chat.Id);
+				if (participants.Count == 2 && participants.Any(p => p.UserId == targetUserId))
+				{
+					_logger.LogDebug("Found existing direct chat {ChatId}", chat.Id);
+					return Ok(chat);
+				}
 			}
 
 			// إنشاء محادثة جديدة
