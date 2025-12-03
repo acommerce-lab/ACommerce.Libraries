@@ -33,7 +33,7 @@
                 <div class="ashare-current-plan-banner">
                     <div class="ashare-current-plan-info">
                         <span class="ashare-current-plan-label">@L["CurrentPlan"]</span>
-                        <span class="ashare-current-plan-name">@_currentSubscription.PlanName</span>
+                        <span class="ashare-current-plan-name">@(_currentSubscription.Plan?.Name ?? "N/A")</span>
                     </div>
                     @if (_currentSubscription.DaysRemaining > 0)
                     {

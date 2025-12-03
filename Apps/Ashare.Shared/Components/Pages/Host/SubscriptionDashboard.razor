@@ -42,13 +42,13 @@
         else
         {
             @* Current Plan Card *@
-            <div class="ashare-plan-status-card" style="border-color: @_subscription.PlanColor;">
+            <div class="ashare-plan-status-card" style="border-color: @(_subscription.Plan?.Color ?? "#345454");">
                 <div class="ashare-plan-status-header">
-                    <div class="ashare-plan-badge" style="background-color: @_subscription.PlanColor;">
-                        <i class="bi @_subscription.PlanIcon"></i>
+                    <div class="ashare-plan-badge" style="background-color: @(_subscription.Plan?.Color ?? "#345454");">
+                        <i class="bi @(_subscription.Plan?.Icon ?? "bi-box")"></i>
                     </div>
                     <div class="ashare-plan-info">
-                        <h2 class="ashare-plan-title">@_subscription.PlanName</h2>
+                        <h2 class="ashare-plan-title">@(_subscription.Plan?.Name ?? "N/A")</h2>
                         <span class="ashare-subscription-status @GetStatusClass(_subscription.Status)">
                             @GetStatusLabel(_subscription.Status)
                         </span>
@@ -65,7 +65,7 @@
                     </div>
                     <div class="ashare-date-item">
                         <span class="ashare-date-label">@L["EndDate"]</span>
-                        <span class="ashare-date-value">@_subscription.EndDate.ToString("dd/MM/yyyy")</span>
+                        <span class="ashare-date-value">@_subscription.CurrentPeriodEnd.ToString("dd/MM/yyyy")</span>
                     </div>
                     <div class="ashare-date-item highlight">
                         <span class="ashare-date-label">@L["DaysRemaining"]</span>
@@ -99,10 +99,10 @@
                                 <span class="ashare-usage-label">@L["Listings"]</span>
                                 <div class="ashare-usage-progress">
                                     <div class="ashare-progress-bar">
-                                        <div class="ashare-progress-fill" style="width: @GetUsagePercentage(_usageStats.CurrentListingsCount, _usageStats.MaxListings)%"></div>
+                                        <div class="ashare-progress-fill" style="width: @GetUsagePercentage(_usageStats.ListingsUsed, _usageStats.ListingsLimit)%"></div>
                                     </div>
                                     <span class="ashare-usage-text">
-                                        @_usageStats.CurrentListingsCount / @(_usageStats.MaxListings < 0 ? "∞" : _usageStats.MaxListings.ToString())
+                                        @_usageStats.ListingsUsed / @(_usageStats.ListingsLimit < 0 ? "∞" : _usageStats.ListingsLimit.ToString())
                                     </span>
                                 </div>
                             </div>
@@ -117,10 +117,10 @@
                                 <span class="ashare-usage-label">@L["Storage"]</span>
                                 <div class="ashare-usage-progress">
                                     <div class="ashare-progress-bar">
-                                        <div class="ashare-progress-fill" style="width: @GetUsagePercentage((int)_usageStats.CurrentStorageUsedMB, _usageStats.MaxStorageMB)%"></div>
+                                        <div class="ashare-progress-fill" style="width: @GetUsagePercentage((int)_usageStats.StorageUsedMB, _usageStats.StorageLimitMB)%"></div>
                                     </div>
                                     <span class="ashare-usage-text">
-                                        @FormatStorage(_usageStats.CurrentStorageUsedMB) / @(_usageStats.MaxStorageMB < 0 ? "∞" : FormatStorage(_usageStats.MaxStorageMB))
+                                        @FormatStorage(_usageStats.StorageUsedMB) / @(_usageStats.StorageLimitMB < 0 ? "∞" : FormatStorage(_usageStats.StorageLimitMB))
                                     </span>
                                 </div>
                             </div>
@@ -135,28 +135,28 @@
                                 <span class="ashare-usage-label">@L["FeaturedListings"]</span>
                                 <div class="ashare-usage-progress">
                                     <div class="ashare-progress-bar">
-                                        <div class="ashare-progress-fill" style="width: @GetUsagePercentage(_usageStats.CurrentFeaturedCount, _usageStats.MaxFeaturedListings)%"></div>
+                                        <div class="ashare-progress-fill" style="width: @GetUsagePercentage(_usageStats.FeaturedUsed, _usageStats.FeaturedLimit)%"></div>
                                     </div>
                                     <span class="ashare-usage-text">
-                                        @_usageStats.CurrentFeaturedCount / @(_usageStats.MaxFeaturedListings < 0 ? "∞" : _usageStats.MaxFeaturedListings.ToString())
+                                        @_usageStats.FeaturedUsed / @(_usageStats.FeaturedLimit < 0 ? "∞" : _usageStats.FeaturedLimit.ToString())
                                     </span>
                                 </div>
                             </div>
                         </div>
 
-                        @* Team Members *@
+                        @* API Calls *@
                         <div class="ashare-usage-card">
                             <div class="ashare-usage-icon">
-                                <i class="bi bi-people"></i>
+                                <i class="bi bi-code-slash"></i>
                             </div>
                             <div class="ashare-usage-info">
-                                <span class="ashare-usage-label">@L["TeamMembers"]</span>
+                                <span class="ashare-usage-label">@L["ApiAccess"]</span>
                                 <div class="ashare-usage-progress">
                                     <div class="ashare-progress-bar">
-                                        <div class="ashare-progress-fill" style="width: @GetUsagePercentage(_usageStats.CurrentTeamMembersCount, _usageStats.MaxTeamMembers)%"></div>
+                                        <div class="ashare-progress-fill" style="width: @GetUsagePercentage(_usageStats.ApiCallsThisMonth, _usageStats.ApiCallsLimit)%"></div>
                                     </div>
                                     <span class="ashare-usage-text">
-                                        @_usageStats.CurrentTeamMembersCount / @(_usageStats.MaxTeamMembers < 0 ? "∞" : _usageStats.MaxTeamMembers.ToString())
+                                        @_usageStats.ApiCallsThisMonth / @(_usageStats.ApiCallsLimit < 0 ? "∞" : _usageStats.ApiCallsLimit.ToString())
                                     </span>
                                 </div>
                             </div>
@@ -194,10 +194,10 @@
                             <div class="ashare-invoice-item">
                                 <div class="ashare-invoice-info">
                                     <span class="ashare-invoice-number">@invoice.InvoiceNumber</span>
-                                    <span class="ashare-invoice-date">@invoice.IssueDate.ToString("dd/MM/yyyy")</span>
+                                    <span class="ashare-invoice-date">@invoice.CreatedAt.ToString("dd/MM/yyyy")</span>
                                 </div>
                                 <div class="ashare-invoice-amount">
-                                    <span class="ashare-amount">@invoice.TotalAmount.ToString("N2") @invoice.Currency</span>
+                                    <span class="ashare-amount">@invoice.Total.ToString("N2") @invoice.Currency</span>
                                     <span class="ashare-invoice-status @GetInvoiceStatusClass(invoice.Status)">
                                         @GetInvoiceStatusLabel(invoice.Status)
                                     </span>
