@@ -46,6 +46,10 @@
     <ProjectReference Include="..\..\Marketplace\ACommerce.Vendors\ACommerce.Vendors.csproj" />
     <ProjectReference Include="..\..\Marketplace\ACommerce.Vendors.Api\ACommerce.Vendors.Api.csproj" />
 
+    <!-- Subscriptions (Vendor Subscription Plans) -->
+    <ProjectReference Include="..\..\Marketplace\ACommerce.Subscriptions\ACommerce.Subscriptions.csproj" />
+    <ProjectReference Include="..\..\Marketplace\ACommerce.Subscriptions.Api\ACommerce.Subscriptions.Api.csproj" />
+
     <!-- Orders & Cart (Bookings = Orders with time attributes) -->
     <ProjectReference Include="..\..\Sales\ACommerce.Cart\ACommerce.Cart.csproj" />
     <ProjectReference Include="..\..\Sales\ACommerce.Orders\ACommerce.Orders.csproj" />

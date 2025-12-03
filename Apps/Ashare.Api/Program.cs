@@ -47,6 +47,8 @@ using ACommerce.Transactions.Core.Api.Controllers;
 using ACommerce.Locations.Api.Controllers;
 using ACommerce.Chats.Api.Controllers;
 using ACommerce.Notifications.Recipients.Api.Controllers;
+using ACommerce.Subscriptions.Api.Controllers;
+using ACommerce.Subscriptions.Services;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -104,6 +106,7 @@ try
         .AddApplicationPart(typeof(LocationSearchController).Assembly)
         .AddApplicationPart(typeof(ChatsController).Assembly)
         .AddApplicationPart(typeof(ContactPointsController).Assembly)
+        .AddApplicationPart(typeof(SubscriptionsController).Assembly)
         .AddApplicationPart(typeof(RegistryController).Assembly); // Service Registry & Discovery
 
     builder.Services.AddEndpointsApiExplorer();
@@ -177,6 +180,9 @@ try
 
     // Product Services
     builder.Services.AddScoped<IProductService, ProductService>();
+
+    // Subscription Services
+    builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 
     // Ashare Seed Service
     builder.Services.AddScoped<AshareSeedDataService>();
