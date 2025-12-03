@@ -247,6 +247,23 @@ public sealed class ChatsClient
 			$"{BasePath}/{chatId}/participants/{userId}",
 			cancellationToken);
 	}
+
+	/// <summary>
+	/// الحصول على أو إنشاء محادثة مباشرة مع مستخدم معين
+	/// إذا كانت هناك محادثة موجودة، يتم إرجاعها
+	/// وإلا يتم إنشاء محادثة جديدة
+	/// POST /api/chats/with-user/{userId}
+	/// </summary>
+	public async Task<ConversationResponse?> GetOrCreateConversationAsync(
+		string targetUserId,
+		CancellationToken cancellationToken = default)
+	{
+		return await _httpClient.PostAsync<object, ConversationResponse>(
+			ServiceName,
+			$"{BasePath}/with-user/{targetUserId}",
+			new { },
+			cancellationToken);
+	}
 }
 
 public sealed class ConversationResponse

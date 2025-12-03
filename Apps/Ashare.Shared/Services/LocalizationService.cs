@@ -370,11 +370,13 @@ public class LocalizationService : ILocalizationService
         ["Chat"] = "المحادثات",
         ["NoChats"] = "لا توجد محادثات",
         ["StartChat"] = "بدء محادثة",
+        ["StartChatHint"] = "ابدأ محادثة من صفحة أي مساحة",
         ["TypeMessage"] = "اكتب رسالة...",
         ["Send"] = "إرسال",
         ["Online"] = "متصل",
         ["Offline"] = "غير متصل",
         ["Typing"] = "يكتب...",
+        ["Now"] = "الآن",
 
         // Notifications
         ["AllNotifications"] = "كل الإشعارات",
@@ -631,11 +633,13 @@ public class LocalizationService : ILocalizationService
         ["Chat"] = "Chat",
         ["NoChats"] = "No chats yet",
         ["StartChat"] = "Start Chat",
+        ["StartChatHint"] = "Start a conversation from any space page",
         ["TypeMessage"] = "Type a message...",
         ["Send"] = "Send",
         ["Online"] = "Online",
         ["Offline"] = "Offline",
         ["Typing"] = "Typing...",
+        ["Now"] = "Now",
 
         // Notifications
         ["AllNotifications"] = "All Notifications",

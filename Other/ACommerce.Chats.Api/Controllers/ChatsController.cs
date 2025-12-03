@@ -468,7 +468,7 @@ public class ChatsController : BaseCrudController<
 	}
 
 	/// <summary>
-	/// ?????? ??? ?????? ???????
+	/// الحصول على قائمة المشاركين
 	/// GET /api/chats/{chatId}/participants
 	/// </summary>
 	[HttpGet("{chatId}/participants")]
@@ -495,10 +495,81 @@ public class ChatsController : BaseCrudController<
 			});
 		}
 	}
+
+	/// <summary>
+	/// الحصول على أو إنشاء محادثة مباشرة مع مستخدم معين
+	/// POST /api/chats/with-user/{targetUserId}
+	/// إذا كانت هناك محادثة موجودة مع هذا المستخدم، يتم إرجاعها
+	/// وإلا يتم إنشاء محادثة جديدة
+	/// </summary>
+	[HttpPost("with-user/{targetUserId}")]
+	[ProducesResponseType(typeof(ChatDto), 200)]
+	[ProducesResponseType(201)]
+	[ProducesResponseType(401)]
+	[ProducesResponseType(500)]
+	public async Task<ActionResult<ChatDto>> GetOrCreateDirectChat(string targetUserId)
+	{
+		try
+		{
+			var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+			if (string.IsNullOrEmpty(currentUserId))
+			{
+				return Unauthorized(new { message = "User not authenticated" });
+			}
+
+			if (currentUserId == targetUserId)
+			{
+				return BadRequest(new { message = "Cannot create chat with yourself" });
+			}
+
+			_logger.LogDebug("Getting or creating direct chat between {CurrentUser} and {TargetUser}",
+				currentUserId, targetUserId);
+
+			// البحث عن محادثة مباشرة موجودة
+			var paginationRequest = new PaginationRequest { PageNumber = 1, PageSize = 100 };
+			var existingChats = await _chatProvider.GetUserChatsAsync(currentUserId, paginationRequest);
+
+			var existingDirectChat = existingChats.Items?.FirstOrDefault(c =>
+				c.Type == ChatType.Direct &&
+				c.Participants != null &&
+				c.Participants.Count == 2 &&
+				c.Participants.Any(p => p.UserId == targetUserId));
+
+			if (existingDirectChat != null)
+			{
+				_logger.LogDebug("Found existing direct chat {ChatId}", existingDirectChat.Id);
+				return Ok(existingDirectChat);
+			}
+
+			// إنشاء محادثة جديدة
+			_logger.LogDebug("Creating new direct chat");
+			var createDto = new CreateChatDto
+			{
+				Title = "محادثة مباشرة",
+				Type = ChatType.Direct,
+				CreatorUserId = currentUserId,
+				ParticipantUserIds = new List<string> { currentUserId, targetUserId }
+			};
+
+			var newChat = await _chatProvider.CreateChatAsync(createDto);
+
+			return CreatedAtAction(nameof(GetById), new { id = newChat.Id }, newChat);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error getting or creating direct chat with user {TargetUserId}", targetUserId);
+			return StatusCode(500, new
+			{
+				message = "An error occurred while processing your request",
+				detail = ex.Message
+			});
+		}
+	}
 }
 
 // ============================================================================
-// DTOs ???????
+// DTOs للمحادثات
 // ============================================================================
 
 public class UpdateChatDto

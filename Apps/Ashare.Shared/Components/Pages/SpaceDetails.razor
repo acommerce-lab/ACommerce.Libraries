@@ -1,7 +1,9 @@
 @page "/space/{SpaceId:guid}"
+@using ACommerce.Client.Chats
 @inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
 @inject IJSRuntime JS
+@inject ChatsClient ChatsClient
 
 <div class="ac-page ashare-space-details">
     @if (_space != null)
@@ -825,9 +827,32 @@
         // Platform share functionality
     }
 
-    private void ContactOwner()
+    private async Task ContactOwner()
     {
-        Navigation.NavigateTo($"/chat/{_space?.OwnerId}");
+        if (_space?.OwnerId == null)
+        {
+            Console.WriteLine("[SpaceDetails] Cannot contact owner - OwnerId is null");
+            return;
+        }
+
+        try
+        {
+            // الحصول على أو إنشاء محادثة مع المالك
+            var conversation = await ChatsClient.GetOrCreateConversationAsync(_space.OwnerId.ToString());
+
+            if (conversation != null)
+            {
+                Navigation.NavigateTo($"/chat/{conversation.Id}");
+            }
+            else
+            {
+                Console.WriteLine("[SpaceDetails] Failed to create/get conversation");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[SpaceDetails] Error contacting owner: {ex.Message}");
+        }
     }
 
     private void StartBooking()
