@@ -798,8 +798,8 @@ h1, h2, h3, .ashare-logo-text {
 .ashare-filter-chip {
     flex-shrink: 0;
     padding: var(--ashare-spacing-sm) var(--ashare-spacing-md);
-    background-color: var(--ashare-gray-100);
-    border: 1px solid var(--ashare-gray-200);
+    background-color: var(--ashare-white);
+    border: 1.5px solid var(--ashare-gray-200);
     border-radius: var(--ashare-radius-full);
     font-size: 13px;
     color: var(--ashare-gray-700);
@@ -807,6 +807,12 @@ h1, h2, h3, .ashare-logo-text {
     display: flex;
     align-items: center;
     gap: var(--ashare-spacing-xs);
+    transition: all 0.2s ease;
+}
+
+.ashare-filter-chip:hover {
+    border-color: var(--ashare-primary);
+    color: var(--ashare-primary);
 }
 
 .ashare-filter-chip.active {
@@ -815,18 +821,27 @@ h1, h2, h3, .ashare-logo-text {
     color: white;
 }
 
+.ashare-filter-chip.active i {
+    color: var(--ashare-secondary);
+}
+
 .ashare-filter-button {
     width: 40px;
     height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--ashare-gray-100);
-    border: 1px solid var(--ashare-gray-200);
+    background-color: var(--ashare-primary);
+    border: none;
     border-radius: var(--ashare-radius-md);
-    color: var(--ashare-gray-700);
+    color: white;
     font-size: 18px;
     cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.ashare-filter-button:hover {
+    background-color: var(--ashare-primary-dark);
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -1243,62 +1258,106 @@ h1, h2, h3, .ashare-logo-text {
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   Profile Page
+   Profile Page - Ashare Visual Identity 2025
    ───────────────────────────────────────────────────────────────── */
+.ashare-profile-page {
+    background: linear-gradient(180deg, var(--ashare-gray-50) 0%, var(--ashare-white) 100%);
+}
+
 .ashare-profile-header {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: var(--ashare-spacing-lg) 0;
+    padding: var(--ashare-spacing-xl) var(--ashare-spacing-md);
     text-align: center;
+    background: linear-gradient(135deg, var(--ashare-primary) 0%, var(--ashare-primary-dark) 100%);
+    margin: calc(-1 * var(--ashare-spacing-md));
+    margin-bottom: var(--ashare-spacing-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.ashare-profile-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='45' viewBox='0 0 60 45'%3E%3Cpath d='M8 22L18 12L28 22' stroke='rgba(255,255,255,0.06)' stroke-width='1.5' fill='none'/%3E%3Cpath d='M32 22L42 12L52 22' stroke='rgba(244,132,76,0.08)' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 60px 45px;
+    pointer-events: none;
 }
 
 .ashare-profile-avatar {
     position: relative;
-    width: 80px;
-    height: 80px;
+    width: 96px;
+    height: 96px;
     border-radius: var(--ashare-radius-full);
-    background-color: var(--ashare-gray-200);
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 3px solid var(--ashare-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 48px;
-    color: var(--ashare-gray-400);
+    font-size: 56px;
+    color: white;
     margin-bottom: var(--ashare-spacing-md);
+    z-index: 1;
+}
+
+.ashare-profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--ashare-radius-full);
 }
 
 .ashare-edit-avatar {
     position: absolute;
     bottom: 0;
     right: 0;
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--ashare-primary);
-    border: 2px solid var(--ashare-white);
+    background-color: var(--ashare-secondary);
+    border: 3px solid var(--ashare-primary);
     border-radius: var(--ashare-radius-full);
     color: white;
-    font-size: 12px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.ashare-edit-avatar:hover {
+    transform: scale(1.1);
 }
 
 .ashare-profile-name {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
-    color: var(--ashare-gray-900);
+    color: white;
     margin-bottom: var(--ashare-spacing-xs);
+    z-index: 1;
+}
+
+.ashare-profile-phone {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: var(--ashare-spacing-lg);
+    z-index: 1;
 }
 
 .ashare-profile-email {
     font-size: 14px;
-    color: var(--ashare-gray-500);
+    color: rgba(255, 255, 255, 0.8);
     margin-bottom: var(--ashare-spacing-lg);
+    z-index: 1;
 }
 
 .ashare-profile-stats {
     display: flex;
     gap: var(--ashare-spacing-xl);
+    z-index: 1;
 }
 
 .ashare-stat-item {
@@ -1308,14 +1367,14 @@ h1, h2, h3, .ashare-logo-text {
 }
 
 .ashare-stat-value {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
-    color: var(--ashare-primary);
+    color: var(--ashare-secondary);
 }
 
 .ashare-stat-label {
     font-size: 12px;
-    color: var(--ashare-gray-500);
+    color: rgba(255, 255, 255, 0.8);
 }
 
 /* Profile Menu */
@@ -2135,7 +2194,7 @@ h1, h2, h3, .ashare-logo-text {
 .ashare-booking-amount {
     font-size: 20px;
     font-weight: 700;
-    color: var(--ashare-gray-900);
+    color: var(--ashare-primary);
 }
 
 .ashare-booking-period {
@@ -4928,13 +4987,13 @@ h1, h2, h3, .ashare-logo-text {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   Login Page Enhancements - تحسينات صفحة الدخول
+   Login Page - Ashare Visual Identity 2025
    ═══════════════════════════════════════════════════════════════════ */
 .ashare-login-page {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(180deg, var(--ashare-gray-50) 0%, var(--ashare-white) 100%);
+    background: var(--ashare-white);
 }
 
 .ashare-login-header {
@@ -4943,22 +5002,37 @@ h1, h2, h3, .ashare-logo-text {
     align-items: center;
     padding: var(--ashare-spacing-xl) var(--ashare-spacing-md);
     padding-top: calc(var(--safe-area-top) + var(--ashare-spacing-xl));
+    background: linear-gradient(135deg, var(--ashare-primary) 0%, var(--ashare-primary-dark) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.ashare-login-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='60' viewBox='0 0 80 60'%3E%3Cpath d='M10 30L25 15L40 30' stroke='rgba(255,255,255,0.06)' stroke-width='2' fill='none'/%3E%3Cpath d='M40 30L55 15L70 30' stroke='rgba(244,132,76,0.1)' stroke-width='2' fill='none'/%3E%3Ccircle cx='25' cy='22' r='3' fill='rgba(255,255,255,0.04)'/%3E%3Ccircle cx='55' cy='22' r='3' fill='rgba(244,132,76,0.06)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 80px 60px;
+    pointer-events: none;
 }
 
 .ashare-login-header .ashare-logo {
     text-align: center;
+    z-index: 1;
 }
 
 .ashare-login-header .ashare-logo-text {
     font-size: 42px;
-    color: var(--ashare-primary);
+    color: white;
 }
 
 .ashare-login-header .ashare-logo-subtitle {
     display: block;
     font-size: 14px;
-    color: var(--ashare-gray-500);
+    color: var(--ashare-secondary);
     margin-top: var(--ashare-spacing-xs);
+    font-weight: 500;
 }
 
 .ashare-login-content {
