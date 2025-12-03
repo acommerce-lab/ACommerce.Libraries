@@ -68,6 +68,9 @@ public class TokenStorageService : ITokenStorage
 			if (!string.IsNullOrEmpty(token))
 			{
 				Console.WriteLine($"[TokenStorageService] Token loaded from persistent storage (expires: {expiresAt})");
+				// Notify subscribers that we loaded a token - updates ScopedTokenProvider's cache
+				OnTokenChanged?.Invoke(token, expiresAt);
+				Console.WriteLine("[TokenStorageService] OnTokenChanged fired after loading token");
 			}
 
 			return (token, expiresAt);
