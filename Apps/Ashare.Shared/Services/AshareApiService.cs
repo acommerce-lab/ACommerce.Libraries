@@ -436,7 +436,10 @@ public class AshareApiService
 			ReviewsCount = dto.RatingsCount,
 			ViewCount = dto.ViewCount,
 			Attributes = dto.Attributes,
-			CreatedAt = dto.CreatedAt
+			CreatedAt = dto.CreatedAt,
+			// ربط المالك من بيانات البائع
+			OwnerId = dto.VendorId,
+			OwnerName = dto.VendorName ?? string.Empty
 		};
 	}
 

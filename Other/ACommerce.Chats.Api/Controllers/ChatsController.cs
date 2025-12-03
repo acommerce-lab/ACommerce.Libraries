@@ -42,10 +42,74 @@ public class ChatsController : BaseCrudController<
 	// ? ?? ??? CRUD operations ?????? ?? BaseCrudController!
 	// GET /api/chats
 	// POST /api/chats
-	// GET /api/chats/{id}
+	// GET /api/chats/{id} - تم تجاوزه لإضافة بيانات المشاركين
 	// PUT /api/chats/{id}
 	// PATCH /api/chats/{id}
 	// DELETE /api/chats/{id}
+
+	/// <summary>
+	/// الحصول على تفاصيل محادثة محددة مع بيانات المشاركين
+	/// GET /api/chats/{id}
+	/// </summary>
+	[HttpGet("{id}")]
+	[ProducesResponseType(typeof(ChatDetailDto), 200)]
+	[ProducesResponseType(404)]
+	[ProducesResponseType(500)]
+	public new async Task<ActionResult<ChatDetailDto>> GetById(
+		Guid id,
+		[FromQuery] List<string>? includes = null,
+		[FromQuery] bool includeDeleted = false)
+	{
+		try
+		{
+			var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+			_logger.LogDebug("Getting chat {ChatId} for user {UserId}", id, currentUserId);
+
+			// جلب بيانات المحادثة
+			var chat = await _chatProvider.GetChatAsync(id);
+			if (chat == null)
+			{
+				return NotFound(new { message = "Chat not found" });
+			}
+
+			// جلب المشاركين
+			var participants = await _chatProvider.GetParticipantsAsync(id);
+
+			// إيجاد الطرف الآخر (في المحادثات المباشرة)
+			var otherParticipant = participants.FirstOrDefault(p => p.UserId != currentUserId);
+
+			var result = new ChatDetailDto
+			{
+				Id = chat.Id,
+				Title = chat.Title,
+				Type = chat.Type.ToString(),
+				Description = chat.Description,
+				ImageUrl = chat.ImageUrl,
+				ParticipantsCount = chat.ParticipantsCount,
+				UnreadMessagesCount = chat.UnreadMessagesCount,
+				CreatedAt = chat.CreatedAt,
+				UpdatedAt = chat.UpdatedAt,
+				// بيانات الطرف الآخر (للمحادثات المباشرة)
+				OtherPartyId = otherParticipant?.UserId,
+				OtherPartyName = otherParticipant?.UserId ?? "مستخدم", // TODO: جلب الاسم من خدمة المستخدمين
+				OtherPartyAvatar = null, // TODO: جلب الصورة من خدمة المستخدمين
+				IsOnline = false, // TODO: التحقق من حالة الاتصال
+				Participants = participants.Select(p => p.UserId).ToList()
+			};
+
+			return Ok(result);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error getting chat {ChatId}", id);
+			return StatusCode(500, new
+			{
+				message = "An error occurred while processing your request",
+				detail = ex.Message
+			});
+		}
+	}
 
 	/// <summary>
 	/// ?????? ??? ?????? ???????? ??????
@@ -591,5 +655,30 @@ public class SendMessageRequest
 	public MessageType Type { get; set; } = MessageType.Text;
 	public Guid? ReplyToMessageId { get; set; }
 	public List<string>? Attachments { get; set; }
+}
+
+/// <summary>
+/// DTO تفصيلي للمحادثة يتضمن بيانات المشاركين
+/// </summary>
+public class ChatDetailDto
+{
+	public Guid Id { get; set; }
+	public string Title { get; set; } = string.Empty;
+	public string Type { get; set; } = "Direct";
+	public string? Description { get; set; }
+	public string? ImageUrl { get; set; }
+	public int ParticipantsCount { get; set; }
+	public int UnreadMessagesCount { get; set; }
+	public DateTime CreatedAt { get; set; }
+	public DateTime? UpdatedAt { get; set; }
+
+	// بيانات الطرف الآخر (للمحادثات المباشرة)
+	public string? OtherPartyId { get; set; }
+	public string OtherPartyName { get; set; } = string.Empty;
+	public string? OtherPartyAvatar { get; set; }
+	public bool IsOnline { get; set; }
+
+	// قائمة المشاركين
+	public List<string> Participants { get; set; } = new();
 }
 

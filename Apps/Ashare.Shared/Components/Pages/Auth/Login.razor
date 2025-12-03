@@ -161,6 +161,22 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // التحقق من وجود جلسة نشطة
+        if (TokenManager.HasToken)
+        {
+            Console.WriteLine("[Login] ✅ User already logged in - redirecting to home");
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        // التحقق من وضع الضيف
+        if (GuestMode.IsGuestMode)
+        {
+            Console.WriteLine("[Login] ✅ Guest mode active - redirecting to home");
+            Navigation.NavigateTo("/");
+            return;
+        }
+
         await ConnectToNotifications();
     }
 
