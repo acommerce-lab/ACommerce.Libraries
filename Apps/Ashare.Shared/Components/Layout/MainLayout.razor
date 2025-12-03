@@ -7,7 +7,7 @@
 
 <div class="ashare-app @(ThemeService.IsDarkMode ? "ac-dark" : "")">
     @* Navbar *@
-    @if (!IsAuthPage)
+    @if (!HideNavigation)
     {
         <nav class="ac-navbar ac-navbar-sticky">
             <div class="ac-navbar-container">
@@ -33,12 +33,12 @@
     }
 
     @* Main Content *@
-    <main class="ac-main @(IsAuthPage ? "" : "ac-has-navbar ac-has-bottom-nav")">
+    <main class="ac-main @(HideNavigation ? "" : "ac-has-navbar ac-has-bottom-nav")">
         @Body
     </main>
 
     @* Bottom Navigation *@
-    @if (!IsAuthPage)
+    @if (!HideNavigation)
     {
         <nav class="ac-bottom-nav">
             <a href="/" class="ac-bottom-nav-item @(IsActive("/") ? "active" : "")">
@@ -95,6 +95,27 @@
                    currentPath.Contains("/profile/edit");
         }
     }
+
+    /// <summary>
+    /// صفحات تحتاج شاشة كاملة بدون navbar و bottom nav
+    /// </summary>
+    private bool IsFullScreenPage
+    {
+        get
+        {
+            var pageName = RouteData?.PageType?.Name;
+            if (pageName is "ChatRoom")
+                return true;
+
+            var currentPath = Navigation.CurrentUri?.ToLowerInvariant() ?? "";
+            return currentPath.Contains("/chat/");
+        }
+    }
+
+    /// <summary>
+    /// هل يجب إخفاء القوائم (لصفحات المصادقة أو الشاشة الكاملة)
+    /// </summary>
+    private bool HideNavigation => IsAuthPage || IsFullScreenPage;
 
     protected override async Task OnInitializedAsync()
     {
