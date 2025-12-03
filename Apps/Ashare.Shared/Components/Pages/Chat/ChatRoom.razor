@@ -48,6 +48,14 @@
                 <div class="ac-spinner"></div>
             </div>
         }
+        else if (_messages.Count == 0)
+        {
+            <div class="ashare-chat-empty">
+                <i class="bi bi-chat-text"></i>
+                <p>@L["NoMessagesYet"]</p>
+                <span class="ashare-chat-hint">@L["SendFirstMessage"]</span>
+            </div>
+        }
         else
         {
             @foreach (var message in _messages)
