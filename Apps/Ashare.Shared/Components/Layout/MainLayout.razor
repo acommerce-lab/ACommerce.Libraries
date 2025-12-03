@@ -3,6 +3,7 @@
 @inject IAppNavigationService Navigation
 @inject AshareApiService ApiService
 @inject ACommerce.Client.Auth.TokenManager TokenManager
+@inject ACommerce.Client.Auth.AuthClient AuthClient
 @inject Ashare.Shared.Services.GuestModeService GuestMode
 
 <div class="ashare-app @(ThemeService.IsDarkMode ? "ac-dark" : "")">
@@ -130,14 +131,53 @@
         {
             _authChecked = true;
 
-            // التحقق من المصادقة - إذا لم يكن مسجلاً دخوله وليس في وضع الضيف وليس في صفحة تسجيل الدخول
-            var hasToken = await TokenManager.GetTokenAsync() != null;
+            // التحقق من المصادقة
+            var token = await TokenManager.GetTokenAsync();
             var isGuest = GuestMode.IsGuestMode;
 
-            if (!hasToken && !isGuest && !IsAuthPage)
+            if (token != null && !IsAuthPage)
             {
+                // التحقق من صلاحية التوكن مع الباك اند
+                var isValid = await ValidateTokenAsync();
+                if (!isValid)
+                {
+                    // التوكن غير صالح - حذفه والذهاب لصفحة الدخول
+                    Console.WriteLine("[Auth] Token is invalid, clearing and redirecting to login");
+                    await TokenManager.ClearTokenAsync();
+                    Navigation.NavigateTo("/login");
+                    return;
+                }
+            }
+            else if (token == null && !isGuest && !IsAuthPage)
+            {
+                // لا يوجد توكن وليس في وضع الضيف
                 Navigation.NavigateTo("/login");
             }
+        }
+    }
+
+    /// <summary>
+    /// التحقق من صلاحية التوكن من الباك اند
+    /// </summary>
+    private async Task<bool> ValidateTokenAsync()
+    {
+        try
+        {
+            // استدعاء /api/auth/me للتحقق من صلاحية التوكن
+            var user = await AuthClient.GetMeAsync();
+            return user != null;
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            // 401 = التوكن غير صالح
+            Console.WriteLine("[Auth] Token validation failed: Unauthorized");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            // أي خطأ آخر - نفترض أن التوكن صالح لتجنب تسجيل الخروج بسبب مشاكل الشبكة
+            Console.WriteLine($"[Auth] Token validation error (assuming valid): {ex.Message}");
+            return true;
         }
     }
 
