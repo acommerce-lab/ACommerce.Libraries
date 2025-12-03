@@ -36,44 +36,120 @@ else
     @if (_showSubscriptionSheet)
     {
         <div class="ac-overlay" @onclick="CloseSubscriptionSheet"></div>
-        <div class="ac-bottom-sheet ac-subscription-sheet">
+        <div class="ac-bottom-sheet ac-subscription-sheet @(_showPlansInSheet ? "expanded" : "")">
             <div class="ac-sheet-header">
-                <h2>@(_subscriptionCheckResult?.SubscriptionRequired == true ? "اشتراك مطلوب" : "ترقية الباقة")</h2>
+                <h2>@GetSheetTitle()</h2>
                 <button class="ac-close-btn" @onclick="CloseSubscriptionSheet">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
             <div class="ac-sheet-content">
-                @if (_subscriptionCheckResult?.SubscriptionRequired == true)
+                @if (!_showPlansInSheet)
                 {
-                    <div class="ac-subscription-message">
-                        <div class="ac-icon-circle warning">
-                            <i class="bi bi-credit-card"></i>
+                    @* الرسالة الأولية *@
+                    @if (_subscriptionCheckResult?.SubscriptionRequired == true)
+                    {
+                        <div class="ac-subscription-message">
+                            <div class="ac-icon-circle warning">
+                                <i class="bi bi-credit-card"></i>
+                            </div>
+                            <h3>لإنشاء عروض، تحتاج للاشتراك في إحدى الباقات</h3>
+                            <p>اختر الباقة المناسبة لك للبدء في نشر عروضك</p>
                         </div>
-                        <h3>لإنشاء عروض، تحتاج للاشتراك في إحدى الباقات</h3>
-                        <p>اختر الباقة المناسبة لك للبدء في نشر عروضك</p>
+                    }
+                    else
+                    {
+                        <div class="ac-subscription-message">
+                            <div class="ac-icon-circle info">
+                                <i class="bi bi-arrow-up-circle"></i>
+                            </div>
+                            <h3>@_subscriptionCheckResult?.Reason</h3>
+                            <p>لديك @_subscriptionCheckResult?.CurrentCount من @(_subscriptionCheckResult?.MaxAllowed == -1 ? "غير محدود" : _subscriptionCheckResult?.MaxAllowed.ToString()) عرض</p>
+                        </div>
+                    }
+
+                    <div class="ac-sheet-actions">
+                        <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="ShowPlansInSheet">
+                            <i class="bi bi-credit-card"></i>
+                            عرض الباقات
+                        </button>
+                        <button class="ac-btn ac-btn-secondary" @onclick="CloseSubscriptionSheet">
+                            إلغاء
+                        </button>
                     </div>
                 }
                 else
                 {
-                    <div class="ac-subscription-message">
-                        <div class="ac-icon-circle info">
-                            <i class="bi bi-arrow-up-circle"></i>
+                    @* عرض قائمة الباقات *@
+                    @if (_isLoadingPlans)
+                    {
+                        <div class="ac-loading-plans">
+                            <div class="ac-spinner"></div>
+                            <p>جاري تحميل الباقات...</p>
                         </div>
-                        <h3>@_subscriptionCheckResult?.Reason</h3>
-                        <p>لديك @_subscriptionCheckResult?.CurrentCount من @(_subscriptionCheckResult?.MaxAllowed == -1 ? "غير محدود" : _subscriptionCheckResult?.MaxAllowed.ToString()) عرض</p>
-                    </div>
+                    }
+                    else if (_availablePlans != null && _availablePlans.Any())
+                    {
+                        <div class="ac-plans-list">
+                            @foreach (var plan in _availablePlans)
+                            {
+                                <div class="ac-plan-card-mini @(plan.IsRecommended ? "recommended" : "")" @onclick="() => SelectPlan(plan)">
+                                    @if (plan.IsRecommended)
+                                    {
+                                        <span class="ac-recommended-badge">موصى به</span>
+                                    }
+                                    <div class="ac-plan-header">
+                                        <div class="ac-plan-icon" style="background: @(plan.Color)20; color: @plan.Color;">
+                                            <i class="bi @plan.Icon"></i>
+                                        </div>
+                                        <div class="ac-plan-info">
+                                            <h4>@plan.Name</h4>
+                                            <p>@plan.Description</p>
+                                        </div>
+                                    </div>
+                                    <div class="ac-plan-price">
+                                        <span class="ac-price">@plan.MonthlyPrice.ToString("N0")</span>
+                                        <span class="ac-currency">ر.س</span>
+                                        @if (plan.AnnualPrice > 0 && plan.AnnualPrice != plan.MonthlyPrice * 12)
+                                        {
+                                            <span class="ac-period">/ شهري</span>
+                                        }
+                                    </div>
+                                    <div class="ac-plan-features">
+                                        <span class="ac-feature">
+                                            <i class="bi bi-check-circle-fill"></i>
+                                            @(plan.MaxListings == -1 ? "عدد غير محدود" : $"{plan.MaxListings} عروض")
+                                        </span>
+                                        @if (plan.CommissionPercentage > 0)
+                                        {
+                                            <span class="ac-feature">
+                                                <i class="bi bi-percent"></i>
+                                                @plan.CommissionPercentage% عمولة
+                                            </span>
+                                        }
+                                    </div>
+                                    <button class="ac-btn ac-btn-outline ac-btn-sm">
+                                        اختيار الباقة
+                                        <i class="bi bi-arrow-left"></i>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                        <div class="ac-sheet-actions">
+                            <button class="ac-btn ac-btn-secondary" @onclick="HidePlansInSheet">
+                                <i class="bi bi-arrow-right"></i>
+                                رجوع
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="ac-no-plans">
+                            <i class="bi bi-inbox"></i>
+                            <p>لا توجد باقات متاحة حالياً</p>
+                        </div>
+                    }
                 }
-
-                <div class="ac-sheet-actions">
-                    <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="GoToSubscriptionPlans">
-                        <i class="bi bi-credit-card"></i>
-                        عرض الباقات
-                    </button>
-                    <button class="ac-btn ac-btn-secondary" @onclick="CloseSubscriptionSheet">
-                        إلغاء
-                    </button>
-                </div>
             </div>
         </div>
     }
@@ -88,9 +164,13 @@ else
     private CreateListingModel? _pendingModel;
     private Guid? _currentUserId;
 
+    // للباقات
+    private bool _showPlansInSheet;
+    private bool _isLoadingPlans;
+    private List<SubscriptionPlanDto>? _availablePlans;
+
     protected override async Task OnInitializedAsync()
     {
-        // التحقق من المصادقة أولاً (use async to trigger token initialization)
         var token = await TokenManager.GetTokenAsync();
         _isAuthenticated = !string.IsNullOrEmpty(token);
 
@@ -212,6 +292,7 @@ else
                     _subscriptionCheckResult = canAddResult;
                     _pendingModel = model;
                     _showSubscriptionSheet = true;
+                    _showPlansInSheet = false;
                     StateHasChanged();
                     return;
                 }
@@ -274,13 +355,78 @@ else
     private void CloseSubscriptionSheet()
     {
         _showSubscriptionSheet = false;
+        _showPlansInSheet = false;
         _subscriptionCheckResult = null;
     }
 
-    private void GoToSubscriptionPlans()
+    private string GetSheetTitle()
     {
-        _showSubscriptionSheet = false;
-        Navigation.NavigateTo("/host/subscription/plans");
+        if (_showPlansInSheet)
+            return "اختر باقتك";
+
+        return _subscriptionCheckResult?.SubscriptionRequired == true ? "اشتراك مطلوب" : "ترقية الباقة";
+    }
+
+    private async Task ShowPlansInSheet()
+    {
+        _showPlansInSheet = true;
+        _isLoadingPlans = true;
+        StateHasChanged();
+
+        try
+        {
+            _availablePlans = await SubscriptionClient.GetPlansAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading plans: {ex.Message}");
+            _availablePlans = new List<SubscriptionPlanDto>();
+        }
+        finally
+        {
+            _isLoadingPlans = false;
+            StateHasChanged();
+        }
+    }
+
+    private void HidePlansInSheet()
+    {
+        _showPlansInSheet = false;
+    }
+
+    private async Task SelectPlan(SubscriptionPlanDto plan)
+    {
+        // إنشاء اشتراك جديد
+        if (_currentUserId.HasValue)
+        {
+            try
+            {
+                var subscription = await SubscriptionClient.CreateSubscriptionAsync(new CreateSubscriptionDto
+                {
+                    VendorId = _currentUserId.Value,
+                    PlanId = plan.Id,
+                    BillingCycle = ACommerce.Subscriptions.Enums.BillingCycle.Monthly,
+                    AutoRenew = true
+                });
+
+                if (subscription != null)
+                {
+                    // تم الاشتراك بنجاح - إكمال إنشاء العرض
+                    _showSubscriptionSheet = false;
+                    _showPlansInSheet = false;
+
+                    if (_pendingModel != null)
+                    {
+                        await CreateListingInternal(_pendingModel);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating subscription: {ex.Message}");
+                // TODO: عرض رسالة خطأ للمستخدم
+            }
+        }
     }
 
     private void ViewListing(Guid listingId)
