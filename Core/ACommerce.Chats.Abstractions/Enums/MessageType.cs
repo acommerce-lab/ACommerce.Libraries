@@ -1,8 +1,11 @@
+using System.Text.Json.Serialization;
+
 namespace ACommerce.Chats.Abstractions.Enums;
 
 /// <summary>
-/// ??? ???????
+/// نوع الرسالة
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum MessageType
 {
 	/// <summary>
