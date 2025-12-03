@@ -65,9 +65,23 @@ public static class ServiceCollectionExtensions
 				RequireSignedTokens = true
 			};
 
-			// Optional: Add custom event handlers
+			// Add custom event handlers
 			options.Events = new JwtBearerEvents
 			{
+				// استخراج التوكن من query string لـ SignalR connections
+				OnMessageReceived = context =>
+				{
+					var accessToken = context.Request.Query["access_token"];
+
+					// إذا كان الطلب لـ SignalR hub
+					var path = context.HttpContext.Request.Path;
+					if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+					{
+						context.Token = accessToken;
+					}
+
+					return Task.CompletedTask;
+				},
 				OnAuthenticationFailed = context =>
 				{
 					if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
