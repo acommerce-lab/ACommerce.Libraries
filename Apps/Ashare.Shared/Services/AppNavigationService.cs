@@ -40,6 +40,14 @@ public class AppNavigationService : IAppNavigationService
         }
     }
 
+    public void NavigateToAndClearHistory(string uri)
+    {
+        // Clear navigation history
+        _history.Clear();
+        // Navigate with force reload
+        _navigationManager.NavigateTo(uri, forceLoad: true);
+    }
+
     /// <summary>
     /// Open location in maps (web version - uses JavaScript)
     /// </summary>
