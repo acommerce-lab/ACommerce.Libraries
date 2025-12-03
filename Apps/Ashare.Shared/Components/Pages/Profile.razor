@@ -321,6 +321,8 @@
     {
         await AuthClient.LogoutAsync();
         _isLoggedIn = false;
-        Navigation.NavigateTo("/login");
+        // Clear history and force navigate to welcome/login page
+        // This prevents back button from returning to authenticated pages
+        Navigation.NavigateToAndClearHistory("/");
     }
 }

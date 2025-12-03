@@ -38,6 +38,14 @@ public class WebNavigationService : IAppNavigationService
         }
     }
 
+    public void NavigateToAndClearHistory(string uri)
+    {
+        // Clear navigation history
+        _history.Clear();
+        // Navigate with force reload
+        _navigationManager.NavigateTo(uri, forceLoad: true);
+    }
+
     public string CurrentUri => _navigationManager.Uri;
 
     /// <summary>

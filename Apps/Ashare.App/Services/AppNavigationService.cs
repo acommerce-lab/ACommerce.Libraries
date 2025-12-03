@@ -37,6 +37,14 @@ public class AppNavigationService : IAppNavigationService
         }
     }
 
+    public void NavigateToAndClearHistory(string uri)
+    {
+        // Clear all navigation history to prevent back button returning to authenticated pages
+        _history.Clear();
+        // Navigate with force reload to ensure fresh state
+        _navigationManager.NavigateTo(uri, forceLoad: true);
+    }
+
     /// <summary>
     /// Open location in native maps app using MAUI Essentials
     /// </summary>
