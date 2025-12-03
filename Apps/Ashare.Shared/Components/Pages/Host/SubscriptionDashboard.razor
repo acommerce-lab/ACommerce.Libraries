@@ -9,7 +9,7 @@
 <div class="ac-page ashare-subscription-dashboard @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
     @* Header *@
     <div class="ac-navbar">
-        <button class="ac-navbar-back" @onclick="() => Navigation.GoBack()">
+        <button class="ac-navbar-back" @onclick="() => Navigation.NavigateBack()">
             <i class="bi bi-chevron-@(L.IsRtl ? "right" : "left")"></i>
         </button>
         <h1 class="ac-navbar-title">@L["MySubscription"]</h1>

@@ -6,25 +6,20 @@ namespace Ashare.Shared.Services;
 /// <summary>
 /// تنفيذ خدمة التنقل مع دعم السجل (للويب)
 /// </summary>
-public class AppNavigationService : IAppNavigationService
+public class AppNavigationService(
+    NavigationManager navigationManager,
+    IJSRuntime jsRuntime)
+    : IAppNavigationService
 {
-    private readonly NavigationManager _navigationManager;
-    private readonly IJSRuntime _jsRuntime;
     private readonly Stack<string> _history = new();
 
-    public AppNavigationService(NavigationManager navigationManager, IJSRuntime jsRuntime)
-    {
-        _navigationManager = navigationManager;
-        _jsRuntime = jsRuntime;
-    }
-
-    public string CurrentUrl => _navigationManager.Uri;
-    public string CurrentUri => _navigationManager.Uri;
+    public string CurrentUrl => navigationManager.Uri;
+    public string CurrentUri => navigationManager.Uri;
 
     public void NavigateTo(string url, bool forceLoad)
     {
-        _history.Push(_navigationManager.Uri);
-        _navigationManager.NavigateTo(url);
+        _history.Push(navigationManager.Uri);
+        navigationManager.NavigateTo(url);
     }
 
     public void NavigateBack()
@@ -32,11 +27,11 @@ public class AppNavigationService : IAppNavigationService
         if (_history.Count > 0)
         {
             var previousUrl = _history.Pop();
-            _navigationManager.NavigateTo(previousUrl);
+            navigationManager.NavigateTo(previousUrl);
         }
         else
         {
-            _navigationManager.NavigateTo("/");
+            navigationManager.NavigateTo("/");
         }
     }
 
@@ -45,7 +40,7 @@ public class AppNavigationService : IAppNavigationService
         // Clear navigation history
         _history.Clear();
         // Navigate with force reload
-        _navigationManager.NavigateTo(uri, forceLoad: true);
+        navigationManager.NavigateTo(uri, forceLoad: true);
     }
 
     /// <summary>
@@ -56,7 +51,7 @@ public class AppNavigationService : IAppNavigationService
         try
         {
             // Use the JavaScript function
-            await _jsRuntime.InvokeVoidAsync("AcMap.openNativeMaps", latitude, longitude, label ?? "الموقع");
+            await jsRuntime.InvokeVoidAsync("AcMap.openNativeMaps", latitude, longitude, label ?? "الموقع");
         }
         catch (Exception ex)
         {
@@ -64,7 +59,7 @@ public class AppNavigationService : IAppNavigationService
 
             // Fallback: open Google Maps in new tab
             var url = $"https://www.google.com/maps?q={latitude},{longitude}";
-            await _jsRuntime.InvokeVoidAsync("window.open", url, "_blank");
+            await jsRuntime.InvokeVoidAsync("window.open", url, "_blank");
         }
     }
 
@@ -81,7 +76,7 @@ public class AppNavigationService : IAppNavigationService
                 return;
             }
 
-            await _jsRuntime.InvokeVoidAsync("window.open", url, "_blank");
+            await jsRuntime.InvokeVoidAsync("window.open", url, "_blank");
         }
         catch (Exception ex)
         {
