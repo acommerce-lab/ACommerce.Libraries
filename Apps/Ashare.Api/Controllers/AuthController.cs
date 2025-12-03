@@ -251,7 +251,9 @@ public class AuthController : AuthenticationControllerBase
         var profile = await _profileRepository.GetByIdAsync(id);
         if (profile == null)
         {
-            return NotFound();
+            // الـ Profile غير موجود = التوكن من قاعدة بيانات قديمة أو محذوف
+            // نُرجع 401 حتى يحذف العميل التوكن ويعيد تسجيل الدخول
+            return Unauthorized(new { message = "Profile not found. Please login again." });
         }
 
         return Ok(new ProfileResponse
