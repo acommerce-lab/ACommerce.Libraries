@@ -1,8 +1,10 @@
 @page "/chat/{ChatId:guid}"
 @using ACommerce.Client.Chats
+@using ACommerce.Client.Profiles
 @using ACommerce.Client.Realtime
 @using Ashare.Shared.Services
 @inject ChatsClient ChatsClient
+@inject ProfilesClient ProfilesClient
 @inject RealtimeClient RealtimeClient
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
@@ -119,12 +121,36 @@
         try
         {
             // Load chat info
-            var chat = (await ChatsClient.GetConversationAsync(ChatId));
+            var chat = await ChatsClient.GetConversationAsync(ChatId);
+
+            // تعيين بيانات أولية
+            var otherPartyId = chat?.OtherPartyId;
+            var displayName = "مستخدم";
+            string? avatar = chat?.OtherPartyAvatar;
+
+            // جلب اسم المستخدم الحقيقي من البروفايل
+            if (!string.IsNullOrEmpty(otherPartyId))
+            {
+                try
+                {
+                    var profile = await ProfilesClient.GetByUserIdAsync(otherPartyId);
+                    if (profile != null)
+                    {
+                        displayName = profile.FullName ?? profile.BusinessName ?? "مستخدم";
+                        avatar = profile.Avatar ?? avatar;
+                    }
+                }
+                catch
+                {
+                    // إذا فشل جلب البروفايل، نستخدم الاسم الافتراضي
+                }
+            }
+
             _chat = new()
             {
-                Avatar = chat?.OtherPartyAvatar ?? "",
+                Avatar = avatar ?? "",
                 Id = chat?.Id ?? Guid.Empty,
-                Name = chat?.OtherPartyName ?? "Other"
+                Name = displayName
             };
 
             // Load messages
@@ -150,9 +176,9 @@
             // Mark as read
             await ChatsClient.MarkAsReadAsync(ChatId);
         }
-        catch
+        catch (Exception ex)
         {
-            // Handle error
+            Console.WriteLine($"[ChatRoom] Error loading chat: {ex.Message}");
         }
         finally
         {

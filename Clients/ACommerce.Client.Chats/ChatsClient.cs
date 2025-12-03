@@ -270,6 +270,10 @@ public sealed class ConversationResponse
 {
 	public Guid Id { get; set; }
 	public string Title { get; set; } = string.Empty;
+	/// <summary>
+	/// معرف الطرف الآخر في المحادثة (UserId)
+	/// </summary>
+	public string? OtherPartyId { get; set; }
 	public string OtherPartyName { get; set; } = string.Empty;
 	public string? OtherPartyAvatar { get; set; }
 	public bool IsOnline { get; set; }

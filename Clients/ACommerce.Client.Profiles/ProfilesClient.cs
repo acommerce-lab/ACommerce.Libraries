@@ -16,6 +16,14 @@ public sealed class ProfilesClient(IApiClient httpClient)
 		return await httpClient.GetAsync<ProfileDto>(ServiceName, $"/api/profiles/{id}", cancellationToken);
 	}
 
+	/// <summary>
+	/// الحصول على بروفايل بواسطة UserId (معرف المستخدم من المصادقة)
+	/// </summary>
+	public async Task<ProfileDto?> GetByUserIdAsync(string userId, CancellationToken cancellationToken = default)
+	{
+		return await httpClient.GetAsync<ProfileDto>(ServiceName, $"/api/profiles/by-user/{userId}", cancellationToken);
+	}
+
 	public async Task<ProfileDto?> CreateAsync(CreateProfileRequest request, CancellationToken cancellationToken = default)
 	{
 		return await httpClient.PostAsync<CreateProfileRequest, ProfileDto>(ServiceName, "/api/profiles", request, cancellationToken);
