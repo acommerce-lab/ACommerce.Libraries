@@ -46,36 +46,55 @@ public class ScopedTokenProvider : ITokenProvider
         // First check static cache for performance
         lock (_lock)
         {
-            if (_isInitialized && !string.IsNullOrEmpty(_cachedToken))
+            if (_isInitialized)
             {
-                // Check if expired
-                if (_cachedExpiresAt.HasValue && DateTime.UtcNow >= _cachedExpiresAt.Value)
+                if (!string.IsNullOrEmpty(_cachedToken))
                 {
-                    Console.WriteLine("[ScopedTokenProvider] Cached token expired");
-                    _cachedToken = null;
-                    _cachedExpiresAt = null;
+                    // Check if expired
+                    if (_cachedExpiresAt.HasValue && DateTime.UtcNow >= _cachedExpiresAt.Value)
+                    {
+                        Console.WriteLine("[ScopedTokenProvider] Cached token expired");
+                        _cachedToken = null;
+                        _cachedExpiresAt = null;
+                        _isInitialized = false; // Allow retry
+                    }
+                    else
+                    {
+                        Console.WriteLine("[ScopedTokenProvider] Returning cached token");
+                        return _cachedToken;
+                    }
                 }
+                // If _isInitialized but _cachedToken is null, it means user logged out
+                // Return null without trying storage
                 else
                 {
-                    Console.WriteLine("[ScopedTokenProvider] Returning cached token");
-                    return _cachedToken;
+                    Console.WriteLine("[ScopedTokenProvider] No token in cache (logged out)");
+                    return null;
                 }
             }
         }
 
-        // Not in cache or expired, try to load from storage via TokenManager
+        // Not initialized, try to load from storage via TokenManager
         try
         {
             using var scope = _scopeFactory.CreateScope();
             var tokenManager = scope.ServiceProvider.GetRequiredService<ACommerce.Client.Auth.TokenManager>();
             var token = await tokenManager.GetTokenAsync();
 
-            // Update cache
-            lock (_lock)
+            // Only cache if we got a real token
+            // If null (e.g., during prerendering), don't cache - try again next time
+            if (!string.IsNullOrEmpty(token))
             {
-                _cachedToken = token;
-                _isInitialized = true;
-                Console.WriteLine($"[ScopedTokenProvider] Token loaded from storage: {(token != null ? "found" : "not found")}");
+                lock (_lock)
+                {
+                    _cachedToken = token;
+                    _isInitialized = true;
+                    Console.WriteLine("[ScopedTokenProvider] Token loaded from storage and cached");
+                }
+            }
+            else
+            {
+                Console.WriteLine("[ScopedTokenProvider] No token from storage (might be prerendering)");
             }
 
             return token;
