@@ -1,4 +1,5 @@
 @page "/chat/{ChatId:guid}"
+@using ACommerce.Client.Auth
 @using ACommerce.Client.Chats
 @using ACommerce.Client.Profiles
 @using ACommerce.Client.Realtime
@@ -6,6 +7,7 @@
 @inject ChatsClient ChatsClient
 @inject ProfilesClient ProfilesClient
 @inject RealtimeClient RealtimeClient
+@inject TokenManager TokenManager
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
 @inject ITimezoneService Timezone
@@ -163,6 +165,10 @@
 
             // Load messages
             var messages = await ChatsClient.GetMessagesAsync(ChatId);
+
+            // Get current user ID to calculate IsMine correctly
+            var currentUserId = TokenManager.GetUserIdFromToken();
+
             _messages = messages?
             .Select(message =>
             new ChatMessage
@@ -170,7 +176,8 @@
                 Content = message.Content,
                 Id = message.Id,
                 IsFailed = false,
-                IsMine = message.IsMine,
+                // Calculate IsMine by comparing SenderId with current user ID
+                IsMine = !string.IsNullOrEmpty(currentUserId) && message.SenderId == currentUserId,
                 IsRead = message.IsRead,
                 SentAt = message.SentAt,
                 Type = message.Type
