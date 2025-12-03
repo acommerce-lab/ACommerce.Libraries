@@ -266,8 +266,9 @@
 
         try
         {
-            // Check if user is logged in
-            _isLoggedIn = AuthClient.HasToken;
+            // Check if user is logged in (use async to trigger token initialization)
+            var token = await AuthClient.GetTokenAsync();
+            _isLoggedIn = !string.IsNullOrEmpty(token);
 
             if (_isLoggedIn)
             {

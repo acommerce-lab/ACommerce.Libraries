@@ -37,8 +37,9 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        // التحقق من المصادقة أولاً
-        _isAuthenticated = TokenManager.HasToken;
+        // التحقق من المصادقة أولاً (use async to trigger token initialization)
+        var token = await TokenManager.GetTokenAsync();
+        _isAuthenticated = !string.IsNullOrEmpty(token);
 
         if (_isAuthenticated)
         {
