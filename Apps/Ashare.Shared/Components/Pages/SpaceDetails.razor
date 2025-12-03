@@ -1,9 +1,11 @@
 @page "/space/{SpaceId:guid}"
 @using ACommerce.Client.Chats
+@using ACommerce.Client.Auth
 @inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
 @inject IJSRuntime JS
 @inject ChatsClient ChatsClient
+@inject TokenManager TokenManager
 
 <div class="ac-page ashare-space-details">
     @if (_space != null)
@@ -274,10 +276,17 @@
                             <span>عضو منذ @_space.OwnerJoinDate.ToString("yyyy")</span>
                         }
                     </div>
-                    <button class="ac-btn ac-btn-secondary" @onclick="ContactOwner">
-                        <i class="bi bi-chat"></i>
-                        تواصل
-                    </button>
+                    @if (_isOwnListing)
+                    {
+                        <span class="ac-badge ac-badge-primary">معلنك</span>
+                    }
+                    else
+                    {
+                        <button class="ac-btn ac-btn-secondary" @onclick="ContactOwner">
+                            <i class="bi bi-chat"></i>
+                            تواصل
+                        </button>
+                    }
                 </div>
             </div>
 
@@ -420,6 +429,7 @@
     private SpaceItem? _space;
     private List<SpaceReview>? _reviews;
     private bool _isFavorite;
+    private bool _isOwnListing; // هل هذا معلن المستخدم الحالي
     private int _currentImageIndex;
     private bool _isLoading = true;
 
@@ -500,6 +510,12 @@
                 if (_space.PricePerHour > 0) _bookingType = "hourly";
                 else if (_space.PricePerDay > 0) _bookingType = "daily";
                 else if (_space.PricePerMonth > 0) _bookingType = "monthly";
+
+                // التحقق من أن هذا المعلن خاص بالمستخدم الحالي
+                var currentUserId = TokenManager.GetUserIdFromToken();
+                _isOwnListing = !string.IsNullOrEmpty(currentUserId) &&
+                                _space.OwnerId != Guid.Empty &&
+                                _space.OwnerId.ToString().Equals(currentUserId, StringComparison.OrdinalIgnoreCase);
             }
         }
         catch (Exception ex)
@@ -829,9 +845,19 @@
 
     private async Task ContactOwner()
     {
-        if (_space?.OwnerId == null)
+        if (_space?.OwnerId == null || _space.OwnerId == Guid.Empty)
         {
-            Console.WriteLine("[SpaceDetails] Cannot contact owner - OwnerId is null");
+            Console.WriteLine("[SpaceDetails] Cannot contact owner - OwnerId is null or empty");
+            return;
+        }
+
+        // التحقق من أن المستخدم لا يحاول التواصل مع نفسه
+        var currentUserId = TokenManager.GetUserIdFromToken();
+        if (!string.IsNullOrEmpty(currentUserId) &&
+            _space.OwnerId.ToString().Equals(currentUserId, StringComparison.OrdinalIgnoreCase))
+        {
+            Console.WriteLine("[SpaceDetails] Cannot contact yourself - this is your own listing");
+            // يمكن إظهار رسالة للمستخدم هنا
             return;
         }
 
