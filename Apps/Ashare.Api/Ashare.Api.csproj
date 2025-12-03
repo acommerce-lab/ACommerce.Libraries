@@ -99,6 +99,7 @@
 
     <!-- Notifications Messaging (handles SendNotificationCommand) -->
     <ProjectReference Include="..\..\ACommerce.Notifications.Messaging\ACommerce.Notifications.Messaging.csproj" />
+    <ProjectReference Include="..\Ashare.Shared\Ashare.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

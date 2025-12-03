@@ -106,7 +106,7 @@ else
         try
         {
             var user = await AuthClient.GetMeAsync();
-            _currentUserId = user?.Id;
+            _currentUserId = Guid.Parse(user?.Id ?? Guid.Empty.ToString());
         }
         catch (Exception ex)
         {

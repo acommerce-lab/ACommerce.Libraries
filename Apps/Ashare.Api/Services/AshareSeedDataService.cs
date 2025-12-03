@@ -267,8 +267,8 @@ public class AshareSeedDataService
 		var existing = await repo.GetAllWithPredicateAsync();
 		var existingIds = existing.Select(p => p.Id).ToHashSet();
 
-		// استخدام باقات عشير المخصصة
-		var asharePlans = AshareSubscriptionPlans.GetAll();
+        // استخدام باقات عشير المخصصة
+        var asharePlans = AshareSubscriptionPlans.GetAll();
 
 		foreach (var plan in asharePlans)
 		{
