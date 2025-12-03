@@ -5,6 +5,7 @@
 @using ACommerce.Client.Profiles
 @using ACommerce.Client.Realtime
 @using Ashare.Shared.Services
+@using Microsoft.JSInterop
 @inject ChatsClient ChatsClient
 @inject ProfilesClient ProfilesClient
 @inject RealtimeClient RealtimeClient
@@ -12,6 +13,7 @@
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
 @inject ITimezoneService Timezone
+@inject IJSRuntime JS
 @implements IAsyncDisposable
 
 <div class="ac-page ashare-chatroom-page">
@@ -127,6 +129,7 @@
     private ElementReference _messagesContainer;
     private IDisposable? _messageSubscription;
     private string? _currentUserId;
+    private bool _shouldScrollToBottom = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -193,8 +196,9 @@
             // Join the chat group to receive messages for this conversation
             await RealtimeClient.SendAsync("JoinChat", ChatId.ToString());
 
-            // Subscribe to "MessageReceived" event (matches server's broadcast method name)
-            _messageSubscription = RealtimeClient.On<object>("MessageReceived", HandleNewMessage);
+            // Subscribe to "ReceiveMessage" event (the method name on IChatClient)
+            // Server calls: client.ReceiveMessage("MessageReceived", message)
+            _messageSubscription = RealtimeClient.On<string, object>("ReceiveMessage", HandleNewMessage);
 
             // Mark as read
             await ChatsClient.MarkAsReadAsync(ChatId);
@@ -209,12 +213,19 @@
         }
     }
 
-    private void HandleNewMessage(object messageData)
+    private void HandleNewMessage(string method, object messageData)
     {
         try
         {
+            Console.WriteLine($"[ChatRoom] 📩 Received event: method={method}");
+
+            // Only process MessageReceived events
+            if (method != "MessageReceived") return;
+
             // Parse the incoming message
             var json = messageData?.ToString();
+            Console.WriteLine($"[ChatRoom] 📩 Message data: {json?.Substring(0, Math.Min(100, json?.Length ?? 0))}...");
+
             if (string.IsNullOrEmpty(json)) return;
 
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
@@ -228,6 +239,8 @@
             // Don't add our own messages again (they're already added locally when sent)
             if (!string.IsNullOrEmpty(_currentUserId) && incomingMessage.SenderId == _currentUserId) return;
 
+            Console.WriteLine($"[ChatRoom] ✅ Adding new message from other party: {incomingMessage.Content}");
+
             var chatMessage = new ChatMessage
             {
                 Id = incomingMessage.Id,
@@ -239,6 +252,7 @@
             };
 
             _messages.Add(chatMessage);
+            _shouldScrollToBottom = true;
 
             InvokeAsync(StateHasChanged);
         }
@@ -283,6 +297,7 @@
         _messages.Add(message);
         var messageToSend = _newMessage;
         _newMessage = "";
+        _shouldScrollToBottom = true;
 
         try
         {
@@ -320,6 +335,13 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        // Scroll to bottom when needed
+        if (_shouldScrollToBottom && !_isLoading)
+        {
+            _shouldScrollToBottom = false;
+            await ScrollToBottomAsync();
+        }
+
         if (firstRender || _messages.Any(m => !_formattedTimes.ContainsKey(m.Id)))
         {
             // Format all message times using timezone service
@@ -330,6 +352,15 @@
             }
             StateHasChanged();
         }
+    }
+
+    private async Task ScrollToBottomAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("eval", "document.querySelector('.ashare-messages-container')?.scrollTo(0, document.querySelector('.ashare-messages-container')?.scrollHeight || 0)");
+        }
+        catch { /* Ignore scroll errors */ }
     }
 
     private string GetFormattedTime(Guid messageId, DateTime sentAt)
