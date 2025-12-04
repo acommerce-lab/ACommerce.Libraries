@@ -233,6 +233,7 @@ public static class MauiProgram
         // Ashare API Service (ربط التطبيق بالباك اند)
         // ═══════════════════════════════════════════════════════════════════
         builder.Services.AddScoped<AshareApiService>();
+        builder.Services.AddScoped<PendingListingService>();
 
         // ⬅️ إذا لم تُسجَّل بعد:
         builder.Services.AddScoped<CategoriesClient>();          // من ACommerce SDK
