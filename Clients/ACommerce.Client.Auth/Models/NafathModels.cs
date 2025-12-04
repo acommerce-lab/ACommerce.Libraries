@@ -149,6 +149,10 @@ public sealed class VerifyTwoFactorRequest
 {
     public string TransactionId { get; set; } = string.Empty;
     public string Code { get; set; } = string.Empty;
+    /// <summary>
+    /// رقم الهاتف أو البريد الإلكتروني للتحقق
+    /// </summary>
+    public string PhoneOrEmail { get; set; } = string.Empty;
 }
 
 /// <summary>
@@ -158,6 +162,19 @@ public sealed class SelectNafathNumberRequest
 {
     public string TransactionId { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
+    /// <summary>
+    /// معرف الجلسة
+    /// </summary>
+    public string? SessionId { get; set; }
+}
+
+/// <summary>
+/// طلب إكمال مصادقة نفاذ بعد الـ callback
+/// </summary>
+public sealed class CompleteNafathAuthRequest
+{
+    public string Code { get; set; } = string.Empty;
+    public string State { get; set; } = string.Empty;
 }
 
 /// <summary>
