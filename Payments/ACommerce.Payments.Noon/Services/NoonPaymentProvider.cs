@@ -46,12 +46,14 @@ public class NoonPaymentProvider : IPaymentProvider
 
 	/// <summary>
 	/// إنشاء مفتاح التفويض
-	/// صيغة التفويض: Key_Test/Key_Live BusinessId.AppId:AuthKey
+	/// صيغة التفويض: Key_Test/Key_Live {Base64(BusinessId.AppId:AuthKey)}
 	/// </summary>
 	private string CreateAuthorizationHeader()
 	{
 		var prefix = _options.UseSandbox ? "Key_Test" : "Key_Live";
-		return $"{prefix} {_options.BusinessIdentifier}.{_options.ApplicationIdentifier}:{_options.AuthorizationKey}";
+		var credentials = $"{_options.BusinessIdentifier}.{_options.ApplicationIdentifier}:{_options.AuthorizationKey}";
+		var base64Credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes(credentials));
+		return $"{prefix} {base64Credentials}";
 	}
 
 	/// <summary>
@@ -68,15 +70,17 @@ public class NoonPaymentProvider : IPaymentProvider
 		var authHeader = CreateAuthorizationHeader();
 		client.DefaultRequestHeaders.Add("Authorization", authHeader);
 
-		// تسجيل معلومات التفويض للتصحيح (مع إخفاء المفتاح جزئياً)
-		var maskedKey = _options.AuthorizationKey.Length > 8
-			? _options.AuthorizationKey.Substring(0, 8) + "..."
-			: "***";
-		_logger.LogInformation("Noon Authorization: {Prefix} {BusinessId}.{AppId}:{MaskedKey}",
+		// تسجيل معلومات التفويض للتصحيح (Base64 مُشفّر)
+		var credentials = $"{_options.BusinessIdentifier}.{_options.ApplicationIdentifier}:{_options.AuthorizationKey}";
+		var base64Creds = Convert.ToBase64String(Encoding.UTF8.GetBytes(credentials));
+		var maskedBase64 = base64Creds.Length > 20
+			? base64Creds.Substring(0, 20) + "..."
+			: base64Creds;
+		_logger.LogInformation("Noon Authorization: {Prefix} {MaskedBase64} (credentials: {BusinessId}.{AppId}:***)",
 			_options.UseSandbox ? "Key_Test" : "Key_Live",
+			maskedBase64,
 			_options.BusinessIdentifier,
-			_options.ApplicationIdentifier,
-			maskedKey);
+			_options.ApplicationIdentifier);
 
 		client.Timeout = TimeSpan.FromSeconds(_options.TimeoutSeconds);
 		return client;
