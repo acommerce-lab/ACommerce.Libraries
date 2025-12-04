@@ -68,11 +68,15 @@ public class NoonPaymentProvider : IPaymentProvider
 		var authHeader = CreateAuthorizationHeader();
 		client.DefaultRequestHeaders.Add("Authorization", authHeader);
 
-		// تسجيل معلومات التفويض للتصحيح (بدون المفتاح السري)
-		_logger.LogDebug("Noon Auth Header Format: {Prefix} {BusinessId}.{AppId}:***",
+		// تسجيل معلومات التفويض للتصحيح (مع إخفاء المفتاح جزئياً)
+		var maskedKey = _options.AuthorizationKey.Length > 8
+			? _options.AuthorizationKey.Substring(0, 8) + "..."
+			: "***";
+		_logger.LogInformation("Noon Authorization: {Prefix} {BusinessId}.{AppId}:{MaskedKey}",
 			_options.UseSandbox ? "Key_Test" : "Key_Live",
 			_options.BusinessIdentifier,
-			_options.ApplicationIdentifier);
+			_options.ApplicationIdentifier,
+			maskedKey);
 
 		client.Timeout = TimeSpan.FromSeconds(_options.TimeoutSeconds);
 		return client;
@@ -88,7 +92,12 @@ public class NoonPaymentProvider : IPaymentProvider
 			_logger.LogInformation("Creating Noon payment for order {OrderId}, amount {Amount} {Currency}",
 				request.OrderId, request.Amount, request.Currency);
 
-			var noonRequest = new NoonOrderRequest
+			// تقصير اسم الطلب لتجنب مشاكل مع API نون
+		var orderName = request.Description ?? "Subscription Payment";
+		if (orderName.Length > 50)
+			orderName = orderName.Substring(0, 50);
+
+		var noonRequest = new NoonOrderRequest
 			{
 				ApiOperation = "INITIATE",
 				Order = new NoonOrderInfo
@@ -96,7 +105,7 @@ public class NoonPaymentProvider : IPaymentProvider
 					Reference = request.OrderId,
 					Amount = request.Amount,
 					Currency = request.Currency ?? _options.DefaultCurrency,
-					Name = request.Description ?? $"Order {request.OrderId}",
+					Name = orderName,
 					Category = _options.DefaultOrderCategory,
 					Channel = _options.DefaultChannel
 				},
