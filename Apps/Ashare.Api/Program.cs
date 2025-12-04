@@ -49,6 +49,9 @@ using ACommerce.Chats.Api.Controllers;
 using ACommerce.Notifications.Recipients.Api.Controllers;
 using ACommerce.Subscriptions.Api.Controllers;
 using ACommerce.Subscriptions.Services;
+using ACommerce.Payments.Api.Controllers;
+using ACommerce.Payments.Abstractions.Contracts;
+using ACommerce.Payments.Noon.Extensions;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -107,6 +110,7 @@ try
         .AddApplicationPart(typeof(ChatsController).Assembly)
         .AddApplicationPart(typeof(ContactPointsController).Assembly)
         .AddApplicationPart(typeof(SubscriptionsController).Assembly)
+        .AddApplicationPart(typeof(PaymentsController).Assembly) // Payments
         .AddApplicationPart(typeof(RegistryController).Assembly); // Service Registry & Discovery
 
     builder.Services.AddEndpointsApiExplorer();
@@ -183,6 +187,9 @@ try
 
     // Subscription Services
     builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+
+    // Payment Provider (Noon)
+    builder.Services.AddNoonPayments(builder.Configuration);
 
     // Ashare Seed Service
     builder.Services.AddScoped<AshareSeedDataService>();

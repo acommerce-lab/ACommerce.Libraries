@@ -85,6 +85,8 @@
 
     <!-- Payments -->
     <ProjectReference Include="..\..\Payments\ACommerce.Payments.Abstractions\ACommerce.Payments.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Payments\ACommerce.Payments.Api\ACommerce.Payments.Api.csproj" />
+    <ProjectReference Include="..\..\Payments\ACommerce.Payments.Noon\ACommerce.Payments.Noon.csproj" />
 
     <!-- Service Registry (for development - self-hosting) -->
     <ProjectReference Include="..\..\Infrastructure\ACommerce.ServiceRegistry.Core\ACommerce.ServiceRegistry.Core.csproj" />
