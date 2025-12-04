@@ -1,7 +1,9 @@
 @using Microsoft.JSInterop
 @using Ashare.Shared.Models
+@using Ashare.Shared.Services
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
+@inject IAppNavigationService AppNavigation
 @implements IAsyncDisposable
 
 <div class="payment-webview-container">
@@ -115,17 +117,13 @@
 
         try
         {
-            // Try to open in a new window/tab, or redirect if popup is blocked
-            await JS.InvokeVoidAsync("eval", $@"
-                var paymentWindow = window.open('{PaymentUrl}', '_blank');
-                if (!paymentWindow || paymentWindow.closed || typeof paymentWindow.closed == 'undefined') {{
-                    // Popup blocked, redirect instead
-                    window.location.href = '{PaymentUrl}';
-                }}
-            ");
+            // Use IAppNavigationService.OpenExternalAsync which handles
+            // platform-specific URL opening (MAUI Launcher for mobile, browser for web)
+            await AppNavigation.OpenExternalAsync(PaymentUrl);
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"Error opening payment page: {ex.Message}");
             // Fallback: Direct navigation
             Navigation.NavigateTo(PaymentUrl, forceLoad: true);
         }
