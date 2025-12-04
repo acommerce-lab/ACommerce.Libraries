@@ -52,7 +52,9 @@ public class NoonPaymentProvider : IPaymentProvider
 	private HttpClient CreateHttpClient()
 	{
 		var client = _httpClientFactory.CreateClient("NoonPayments");
-		client.BaseAddress = new Uri(_options.ApiUrl);
+		// التأكد من أن الـ BaseAddress ينتهي بـ /
+		var apiUrl = _options.ApiUrl.TrimEnd('/') + "/";
+		client.BaseAddress = new Uri(apiUrl);
 		client.DefaultRequestHeaders.Clear();
 		client.DefaultRequestHeaders.Add("Authorization", CreateAuthorizationHeader());
 		client.Timeout = TimeSpan.FromSeconds(_options.TimeoutSeconds);
@@ -113,7 +115,7 @@ public class NoonPaymentProvider : IPaymentProvider
 			_logger.LogDebug("Noon request: {Request}", json);
 
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
-			var response = await client.PostAsync("/order", content, cancellationToken);
+			var response = await client.PostAsync("order", content, cancellationToken);
 
 			var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 			_logger.LogDebug("Noon response: {Response}", responseContent);
@@ -178,7 +180,7 @@ public class NoonPaymentProvider : IPaymentProvider
 			_logger.LogInformation("Getting Noon payment status for {TransactionId}", transactionId);
 
 			var client = CreateHttpClient();
-			var response = await client.GetAsync($"/order/{transactionId}", cancellationToken);
+			var response = await client.GetAsync($"order/{transactionId}", cancellationToken);
 			var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
 			_logger.LogDebug("Noon status response: {Response}", responseContent);
@@ -241,7 +243,7 @@ public class NoonPaymentProvider : IPaymentProvider
 			var json = JsonSerializer.Serialize(noonRequest, _jsonOptions);
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-			var response = await client.PostAsync($"/order/{request.TransactionId}", content, cancellationToken);
+			var response = await client.PostAsync($"order/{request.TransactionId}", content, cancellationToken);
 			var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
 			_logger.LogDebug("Noon refund response: {Response}", responseContent);
@@ -296,7 +298,7 @@ public class NoonPaymentProvider : IPaymentProvider
 			var json = JsonSerializer.Serialize(noonRequest, _jsonOptions);
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-			var response = await client.PostAsync($"/order/{transactionId}", content, cancellationToken);
+			var response = await client.PostAsync($"order/{transactionId}", content, cancellationToken);
 			var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
 			_logger.LogDebug("Noon cancel response: {Response}", responseContent);
@@ -371,7 +373,7 @@ public class NoonPaymentProvider : IPaymentProvider
 			var json = JsonSerializer.Serialize(noonRequest, _jsonOptions);
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-			var response = await client.PostAsync($"/order/{transactionId}", content, cancellationToken);
+			var response = await client.PostAsync($"order/{transactionId}", content, cancellationToken);
 			var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
 			_logger.LogDebug("Noon capture response: {Response}", responseContent);
