@@ -581,7 +581,7 @@ public class AshareApiService
 			}
 
 			// إذا كانت الباقة مجانية أو فترة تجريبية
-			if (subscription.TotalAmount == 0)
+			if (subscription.Price == 0)
 			{
 				return new CreateSubscriptionPaymentResponse
 				{
@@ -598,7 +598,7 @@ public class AshareApiService
 			var payment = await _paymentsClient.CreatePaymentAsync(new CreatePaymentRequest
 			{
 				OrderId = subscription.Id, // استخدام معرف الاشتراك كمعرف الطلب
-				Amount = subscription.TotalAmount,
+				Amount = subscription.Price,
 				Currency = subscription.Plan?.Currency ?? "SAR",
 				PaymentMethod = "Noon", // أو حسب الاختيار
 				Metadata = new Dictionary<string, string>
@@ -627,7 +627,7 @@ public class AshareApiService
 				PaymentId = payment.PaymentId,
 				PaymentUrl = payment.PaymentUrl,
 				RequiresPayment = true,
-				Amount = subscription.TotalAmount,
+				Amount = subscription.Price,
 				Currency = subscription.Plan?.Currency ?? "SAR"
 			};
 		}
