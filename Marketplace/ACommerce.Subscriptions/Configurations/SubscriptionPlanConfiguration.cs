@@ -79,12 +79,10 @@ public class SubscriptionPlanConfiguration : IEntityTypeConfiguration<Subscripti
             .HasConversion<string>()
             .HasMaxLength(20);
 
-        // Metadata
-        builder.Property(e => e.ExtraFeaturesJson)
-            .HasColumnType("nvarchar(max)");
+        // Metadata - use database-agnostic text type
+        builder.Property(e => e.ExtraFeaturesJson);
 
-        builder.Property(e => e.MetadataJson)
-            .HasColumnType("nvarchar(max)");
+        builder.Property(e => e.MetadataJson);
 
         // Ignore NotMapped
         builder.Ignore(e => e.ExtraFeatures);

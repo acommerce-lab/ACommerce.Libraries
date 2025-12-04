@@ -95,8 +95,8 @@ public class SubscriptionInvoiceConfiguration : IEntityTypeConfiguration<Subscri
         builder.Property(e => e.Notes)
             .HasMaxLength(1000);
 
-        builder.Property(e => e.MetadataJson)
-            .HasColumnType("nvarchar(max)");
+        // Metadata - use database-agnostic text type
+        builder.Property(e => e.MetadataJson);
 
         // Ignore NotMapped
         builder.Ignore(e => e.AmountDue);

@@ -52,9 +52,8 @@ public class SubscriptionEventConfiguration : IEntityTypeConfiguration<Subscript
         builder.Property(e => e.UserAgent)
             .HasMaxLength(500);
 
-        // Metadata
-        builder.Property(e => e.MetadataJson)
-            .HasColumnType("nvarchar(max)");
+        // Metadata - use database-agnostic text type
+        builder.Property(e => e.MetadataJson);
 
         builder.Property(e => e.ErrorMessage)
             .HasMaxLength(1000);

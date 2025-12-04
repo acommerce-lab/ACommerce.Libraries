@@ -60,9 +60,8 @@ public class SubscriptionConfiguration : IEntityTypeConfiguration<Subscription>
         builder.Property(e => e.DiscountPercentage)
             .HasPrecision(5, 2);
 
-        // Metadata
-        builder.Property(e => e.MetadataJson)
-            .HasColumnType("nvarchar(max)");
+        // Metadata - use database-agnostic text type
+        builder.Property(e => e.MetadataJson);
 
         builder.Property(e => e.InternalNotes)
             .HasMaxLength(1000);
