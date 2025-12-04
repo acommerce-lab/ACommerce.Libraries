@@ -213,6 +213,9 @@ try
     // Swagger Documentation
     builder.Services.AddSwaggerGen(options =>
     {
+        // Fix duplicate schema names by using full type name
+        options.CustomSchemaIds(type => type.FullName?.Replace("+", "."));
+
         options.SwaggerDoc("v1", new()
         {
             Title = "Ashare API",
