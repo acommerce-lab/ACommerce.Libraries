@@ -5,31 +5,61 @@
 @implements IAsyncDisposable
 
 <div class="payment-webview-container">
-    @if (_isLoading)
+    @if (UseRedirect)
     {
-        <div class="payment-loading">
-            <div class="ac-spinner"></div>
-            <span>جاري تحميل صفحة الدفع...</span>
+        @* Redirect mode - Payment gateways don't allow iframe embedding *@
+        <div class="payment-redirect-message">
+            <div class="payment-redirect-icon">
+                <i class="bi bi-credit-card-2-front"></i>
+            </div>
+            <h3>جاري توجيهك لصفحة الدفع الآمنة</h3>
+            <p>سيتم فتح صفحة الدفع في نافذة جديدة أو توجيهك لها تلقائياً</p>
+
+            <div class="payment-redirect-actions">
+                <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="OpenPaymentPage">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                    فتح صفحة الدفع
+                </button>
+                <button class="ac-btn ac-btn-outline-secondary" @onclick="HandleCancel">
+                    إلغاء
+                </button>
+            </div>
+
+            <p class="payment-redirect-note">
+                <i class="bi bi-shield-check"></i>
+                سيتم إرجاعك تلقائياً بعد إتمام الدفع
+            </p>
         </div>
     }
+    else
+    {
+        @* Iframe mode - for gateways that allow it *@
+        @if (_isLoading)
+        {
+            <div class="payment-loading">
+                <div class="ac-spinner"></div>
+                <span>جاري تحميل صفحة الدفع...</span>
+            </div>
+        }
 
-    <div class="payment-header">
-        <button class="payment-close-btn" @onclick="HandleCancel">
-            <i class="bi bi-x-lg"></i>
-        </button>
-        <span class="payment-secure-badge">
-            <i class="bi bi-shield-lock-fill"></i>
-            دفع آمن
-        </span>
-    </div>
+        <div class="payment-header">
+            <button class="payment-close-btn" @onclick="HandleCancel">
+                <i class="bi bi-x-lg"></i>
+            </button>
+            <span class="payment-secure-badge">
+                <i class="bi bi-shield-lock-fill"></i>
+                دفع آمن
+            </span>
+        </div>
 
-    <iframe
-        @ref="_iframeRef"
-        src="@PaymentUrl"
-        class="payment-iframe @(_isLoading ? "loading" : "")"
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
-        @onload="HandleIframeLoad">
-    </iframe>
+        <iframe
+            @ref="_iframeRef"
+            src="@PaymentUrl"
+            class="payment-iframe @(_isLoading ? "loading" : "")"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
+            @onload="HandleIframeLoad">
+        </iframe>
+    }
 </div>
 
 @code {
@@ -45,6 +75,18 @@
     [Parameter]
     public EventCallback OnPaymentCancelled { get; set; }
 
+    /// <summary>
+    /// Use redirect mode instead of iframe (required for most payment gateways)
+    /// </summary>
+    [Parameter]
+    public bool UseRedirect { get; set; } = true;
+
+    /// <summary>
+    /// Payment ID for tracking
+    /// </summary>
+    [Parameter]
+    public string? PaymentId { get; set; }
+
     private ElementReference _iframeRef;
     private bool _isLoading = true;
     private DotNetObjectReference<PaymentWebView>? _objRef;
@@ -54,7 +96,38 @@
         if (firstRender)
         {
             _objRef = DotNetObjectReference.Create(this);
-            await SetupNavigationListener();
+
+            if (UseRedirect)
+            {
+                // Auto-open payment page on first render
+                await OpenPaymentPage();
+            }
+            else
+            {
+                await SetupNavigationListener();
+            }
+        }
+    }
+
+    private async Task OpenPaymentPage()
+    {
+        if (string.IsNullOrEmpty(PaymentUrl)) return;
+
+        try
+        {
+            // Try to open in a new window/tab, or redirect if popup is blocked
+            await JS.InvokeVoidAsync("eval", $@"
+                var paymentWindow = window.open('{PaymentUrl}', '_blank');
+                if (!paymentWindow || paymentWindow.closed || typeof paymentWindow.closed == 'undefined') {{
+                    // Popup blocked, redirect instead
+                    window.location.href = '{PaymentUrl}';
+                }}
+            ");
+        }
+        catch
+        {
+            // Fallback: Direct navigation
+            Navigation.NavigateTo(PaymentUrl, forceLoad: true);
         }
     }
 
@@ -263,5 +336,67 @@
 
     .payment-loading span {
         color: var(--ac-text-secondary);
+    }
+
+    /* Redirect mode styles */
+    .payment-redirect-message {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: var(--ac-spacing-xl);
+        gap: var(--ac-spacing-md);
+        min-height: 400px;
+    }
+
+    .payment-redirect-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: var(--ac-primary-light, rgba(99, 102, 241, 0.1));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: var(--ac-spacing-md);
+    }
+
+    .payment-redirect-icon i {
+        font-size: 40px;
+        color: var(--ac-primary);
+    }
+
+    .payment-redirect-message h3 {
+        margin: 0;
+        font-size: var(--ac-font-lg);
+        color: var(--ac-text-primary);
+    }
+
+    .payment-redirect-message p {
+        margin: 0;
+        color: var(--ac-text-secondary);
+        font-size: var(--ac-font-sm);
+    }
+
+    .payment-redirect-actions {
+        display: flex;
+        flex-direction: column;
+        gap: var(--ac-spacing-sm);
+        width: 100%;
+        max-width: 300px;
+        margin-top: var(--ac-spacing-md);
+    }
+
+    .payment-redirect-note {
+        display: flex;
+        align-items: center;
+        gap: var(--ac-spacing-xs);
+        color: var(--ac-success) !important;
+        font-size: var(--ac-font-xs) !important;
+        margin-top: var(--ac-spacing-md);
+    }
+
+    .payment-redirect-note i {
+        font-size: 14px;
     }
 </style>

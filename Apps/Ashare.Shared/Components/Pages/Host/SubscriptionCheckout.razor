@@ -37,11 +37,13 @@
         }
         else if (_showPaymentWebView && !string.IsNullOrEmpty(_paymentUrl))
         {
-            @* Payment WebView *@
+            @* Payment WebView - uses redirect mode for Noon *@
             <div class="ashare-payment-webview">
                 <PaymentWebView
                     PaymentUrl="@_paymentUrl"
+                    PaymentId="@_paymentId"
                     ReturnUrlPattern="@_returnUrlPattern"
+                    UseRedirect="true"
                     OnPaymentCompleted="HandlePaymentCompleted"
                     OnPaymentCancelled="HandlePaymentCancelled" />
             </div>
@@ -172,6 +174,7 @@
     private bool _isProcessing = false;
     private bool _showPaymentWebView = false;
     private string? _paymentUrl;
+    private string? _paymentId;
     private string _returnUrlPattern = "/host/payment/callback";
 
     private SubscriptionPlanDto? _selectedPlan;
@@ -252,6 +255,7 @@
             if (response != null && !string.IsNullOrEmpty(response.PaymentUrl))
             {
                 _paymentUrl = response.PaymentUrl;
+                _paymentId = response.PaymentId;
                 _showPaymentWebView = true;
             }
             else if (response?.RequiresPayment == false)
