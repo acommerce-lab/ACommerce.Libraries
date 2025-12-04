@@ -65,11 +65,23 @@ public class NoonOptions
 	public string Region { get; set; } = "SA";
 
 	/// <summary>
-	/// رابط API (يتم تحديده تلقائياً حسب UseSandbox)
+	/// رابط API (يتم تحديده تلقائياً حسب UseSandbox والمنطقة)
 	/// </summary>
-	public string ApiUrl => UseSandbox
-		? "https://api-stg.noonpayments.com/payment/v1"
-		: "https://api.noonpayments.com/payment/v1";
+	public string ApiUrl => GetApiUrl();
+
+	private string GetApiUrl()
+	{
+		var regionPath = Region?.ToUpperInvariant() switch
+		{
+			"SA" => ".sa",
+			"EG" => ".eg",
+			_ => "" // Global endpoint
+		};
+
+		return UseSandbox
+			? $"https://api-test{regionPath}.noonpayments.com/payment/v1"
+			: $"https://api{regionPath}.noonpayments.com/payment/v1";
+	}
 
 	/// <summary>
 	/// العملة الافتراضية
