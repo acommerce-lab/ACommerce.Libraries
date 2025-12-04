@@ -199,6 +199,27 @@ public sealed class AuthClient(IApiClient httpClient, TokenManager tokenManager)
     }
 
     /// <summary>
+    /// إكمال مصادقة نفاذ بعد الـ callback (OAuth-style)
+    /// </summary>
+    public async Task<LoginResponse?> CompleteNafathAuthAsync(
+        CompleteNafathAuthRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsync<CompleteNafathAuthRequest, LoginResponse>(
+            ServiceName,
+            "/api/auth/nafath/callback",
+            request,
+            cancellationToken);
+
+        if (response?.Success == true && !string.IsNullOrEmpty(response.Token))
+        {
+            tokenManager.SetToken(response.Token, response.ExpiresAt);
+        }
+
+        return response;
+    }
+
+    /// <summary>
     /// الحصول على أرقام الهواتف المتاحة من نفاذ
     /// </summary>
     public async Task<NafathPhoneNumbersResponse?> GetNafathPhoneNumbersAsync(
