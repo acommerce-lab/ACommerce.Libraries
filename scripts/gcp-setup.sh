@@ -14,8 +14,8 @@
 set -e
 
 # Configuration
-PROJECT_ID="${GCP_PROJECT_ID:-your-project-id}"
-REGION="${GCP_REGION:-me-central1}"  # Middle East (Dammam, Saudi Arabia)
+PROJECT_ID="${GCP_PROJECT_ID:-asharesa}"
+REGION="${GCP_REGION:-me-central2}"  # Middle East (Dammam, Saudi Arabia)
 SERVICE_NAME="ashare-api"
 ARTIFACT_REGISTRY_REPO="ashare"
 

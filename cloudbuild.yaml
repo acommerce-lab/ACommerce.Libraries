@@ -3,7 +3,7 @@
 
 substitutions:
   _SERVICE_NAME: ashare-api
-  _REGION: me-central1  # Middle East (Dammam, Saudi Arabia)
+  _REGION: me-central2  # Middle East (Dammam, Saudi Arabia)
   _IMAGE_NAME: ashare-api
 
 steps:
