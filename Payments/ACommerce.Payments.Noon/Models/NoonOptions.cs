@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace ACommerce.Payments.Noon.Models;
 
 /// <summary>
@@ -8,27 +10,59 @@ public class NoonOptions
 	/// <summary>
 	/// معرف التطبيق من لوحة تحكم نون
 	/// </summary>
-	public required string ApplicationIdentifier { get; set; }
+	public string ApplicationIdentifier { get; set; } = string.Empty;
 
 	/// <summary>
-	/// مفتاح التفويض
+	/// مفتاح التفويض (AuthorizationKey أو ApplicationKey)
 	/// </summary>
-	public required string AuthorizationKey { get; set; }
+	public string AuthorizationKey { get; set; } = string.Empty;
+
+	/// <summary>
+	/// مفتاح التطبيق (بديل لـ AuthorizationKey)
+	/// </summary>
+	public string ApplicationKey
+	{
+		get => AuthorizationKey;
+		set => AuthorizationKey = value;
+	}
 
 	/// <summary>
 	/// معرف الأعمال
 	/// </summary>
-	public required string BusinessIdentifier { get; set; }
+	public string BusinessIdentifier { get; set; } = string.Empty;
 
 	/// <summary>
-	/// مفتاح API
+	/// مفتاح API (اختياري)
 	/// </summary>
-	public required string ApiKey { get; set; }
+	public string? ApiKey { get; set; }
 
 	/// <summary>
 	/// هل نستخدم بيئة الاختبار
 	/// </summary>
 	public bool UseSandbox { get; set; } = true;
+
+	/// <summary>
+	/// بديل لـ UseSandbox
+	/// </summary>
+	public bool IsSandbox
+	{
+		get => UseSandbox;
+		set => UseSandbox = value;
+	}
+
+	/// <summary>
+	/// البيئة (Test أو Live) - بديل لـ UseSandbox
+	/// </summary>
+	public string? Environment
+	{
+		get => UseSandbox ? "Test" : "Live";
+		set => UseSandbox = string.Equals(value, "Test", StringComparison.OrdinalIgnoreCase);
+	}
+
+	/// <summary>
+	/// المنطقة (SA, AE, etc)
+	/// </summary>
+	public string Region { get; set; } = "SA";
 
 	/// <summary>
 	/// رابط API (يتم تحديده تلقائياً حسب UseSandbox)
