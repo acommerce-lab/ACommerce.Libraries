@@ -102,7 +102,7 @@ public class NoonPaymentProvider : IPaymentProvider
 				},
 				Configuration = new NoonConfiguration
 				{
-					ReturnUrl = request.CallbackUrl ?? _options.ReturnUrl ?? throw new InvalidOperationException("Return URL is required"),
+					ReturnUrl = GetValidReturnUrl(request.CallbackUrl),
 					Locale = "ar",
 					PaymentAction = "SALE"
 				}
@@ -445,6 +445,31 @@ public class NoonPaymentProvider : IPaymentProvider
 			NoonOrderStatus.Expired => PaymentStatus.Failed,
 			_ => PaymentStatus.Pending
 		};
+	}
+
+	/// <summary>
+	/// التحقق من صحة رابط العودة واستخدام الرابط المُكوّن كبديل
+	/// </summary>
+	private string GetValidReturnUrl(string? callbackUrl)
+	{
+		// إذا كان الرابط فارغاً أو نسبياً، استخدم الرابط المُكوّن
+		if (string.IsNullOrEmpty(callbackUrl) ||
+		    !Uri.TryCreate(callbackUrl, UriKind.Absolute, out var uri) ||
+		    (uri.Scheme != "http" && uri.Scheme != "https"))
+		{
+			var configuredUrl = _options.ReturnUrl;
+			if (string.IsNullOrEmpty(configuredUrl))
+			{
+				throw new InvalidOperationException("Return URL is required. Configure it in Payments:Noon:ReturnUrl or provide a valid absolute URL.");
+			}
+
+			_logger.LogWarning("Invalid callback URL '{CallbackUrl}', using configured ReturnUrl: {ConfiguredUrl}",
+				callbackUrl, configuredUrl);
+
+			return configuredUrl;
+		}
+
+		return callbackUrl;
 	}
 
 	/// <summary>
