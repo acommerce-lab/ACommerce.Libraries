@@ -39,11 +39,12 @@ public class NoonPaymentProvider : IPaymentProvider
 
 	/// <summary>
 	/// إنشاء مفتاح التفويض
+	/// صيغة التفويض: Key_Test/Key_Live BusinessId.AppId:AuthKey
 	/// </summary>
 	private string CreateAuthorizationHeader()
 	{
 		var prefix = _options.UseSandbox ? "Key_Test" : "Key_Live";
-		return $"{prefix} {_options.AuthorizationKey}";
+		return $"{prefix} {_options.BusinessIdentifier}.{_options.ApplicationIdentifier}:{_options.AuthorizationKey}";
 	}
 
 	/// <summary>
