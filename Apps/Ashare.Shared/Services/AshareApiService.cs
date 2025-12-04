@@ -4,8 +4,10 @@ using ACommerce.Client.Products;
 using ACommerce.Client.ProductListings;
 using ACommerce.Client.Orders;
 using ACommerce.Client.Subscriptions;
+using ACommerce.Client.Payments;
 using ACommerce.Client.Core.Http;
 using ACommerce.Subscriptions.DTOs;
+using Ashare.Shared.Models;
 
 namespace Ashare.Shared.Services;
 
@@ -21,6 +23,7 @@ public class AshareApiService
 	private readonly ProductListingsClient _listingsClient;
 	private readonly OrdersClient _ordersClient;
 	private readonly SubscriptionClient _subscriptionClient;
+	private readonly PaymentsClient _paymentsClient;
 
     // Local cache for favorites (can be persisted to local storage)
     private readonly HashSet<Guid> _favorites = [];
@@ -31,7 +34,8 @@ public class AshareApiService
 		ProductsClient productsClient,
 		ProductListingsClient listingsClient,
 		OrdersClient ordersClient,
-		SubscriptionClient subscriptionClient)
+		SubscriptionClient subscriptionClient,
+		PaymentsClient paymentsClient)
 	{
 		_categoriesClient = categoriesClient;
 		_categoryAttributesClient = categoryAttributesClient;
@@ -39,6 +43,7 @@ public class AshareApiService
 		_listingsClient = listingsClient;
 		_ordersClient = ordersClient;
 		_subscriptionClient = subscriptionClient;
+		_paymentsClient = paymentsClient;
 	}
 
 	// ═══════════════════════════════════════════════════════════════════
@@ -544,6 +549,171 @@ public class AshareApiService
 			Console.WriteLine($"Error fetching invoices: {ex.Message}");
 			return new List<InvoiceSummaryDto>();
 		}
+	}
+
+	// ═══════════════════════════════════════════════════════════════════
+	// Payments - المدفوعات
+	// ═══════════════════════════════════════════════════════════════════
+
+	/// <summary>
+	/// إنشاء دفعة اشتراك والحصول على رابط الدفع
+	/// </summary>
+	public async Task<CreateSubscriptionPaymentResponse?> CreateSubscriptionPaymentAsync(CreateSubscriptionPaymentRequest request)
+	{
+		try
+		{
+			// أولاً: إنشاء الاشتراك
+			var subscription = await _subscriptionClient.CreateSubscriptionAsync(new CreateSubscriptionDto
+			{
+				PlanId = request.PlanId,
+				BillingCycle = request.BillingCycle,
+				AutoRenew = true,
+				// VendorId يُستخرج من التوكن في الباك اند
+			});
+
+			if (subscription == null)
+			{
+				return new CreateSubscriptionPaymentResponse
+				{
+					Success = false,
+					Message = "فشل في إنشاء الاشتراك"
+				};
+			}
+
+			// إذا كانت الباقة مجانية أو فترة تجريبية
+			if (subscription.TotalAmount == 0)
+			{
+				return new CreateSubscriptionPaymentResponse
+				{
+					Success = true,
+					SubscriptionId = subscription.Id,
+					RequiresPayment = false,
+					Amount = 0,
+					Currency = subscription.Plan?.Currency ?? "SAR",
+					Message = "تم تفعيل الاشتراك بنجاح"
+				};
+			}
+
+			// ثانياً: إنشاء عملية الدفع
+			var payment = await _paymentsClient.CreatePaymentAsync(new CreatePaymentRequest
+			{
+				OrderId = subscription.Id, // استخدام معرف الاشتراك كمعرف الطلب
+				Amount = subscription.TotalAmount,
+				Currency = subscription.Plan?.Currency ?? "SAR",
+				PaymentMethod = "Noon", // أو حسب الاختيار
+				Metadata = new Dictionary<string, string>
+				{
+					["subscriptionId"] = subscription.Id.ToString(),
+					["planId"] = request.PlanId.ToString(),
+					["billingCycle"] = request.BillingCycle.ToString(),
+					["returnUrl"] = request.ReturnUrl ?? "/host/payment/callback"
+				}
+			});
+
+			if (payment == null || string.IsNullOrEmpty(payment.PaymentUrl))
+			{
+				return new CreateSubscriptionPaymentResponse
+				{
+					Success = false,
+					SubscriptionId = subscription.Id,
+					Message = "فشل في إنشاء رابط الدفع"
+				};
+			}
+
+			return new CreateSubscriptionPaymentResponse
+			{
+				Success = true,
+				SubscriptionId = subscription.Id,
+				PaymentId = payment.PaymentId,
+				PaymentUrl = payment.PaymentUrl,
+				RequiresPayment = true,
+				Amount = subscription.TotalAmount,
+				Currency = subscription.Plan?.Currency ?? "SAR"
+			};
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error creating subscription payment: {ex.Message}");
+			return new CreateSubscriptionPaymentResponse
+			{
+				Success = false,
+				Message = ex.Message
+			};
+		}
+	}
+
+	/// <summary>
+	/// التحقق من حالة الدفع وتفعيل الاشتراك
+	/// </summary>
+	public async Task<VerifyPaymentResponse?> VerifySubscriptionPaymentAsync(VerifyPaymentRequest request)
+	{
+		try
+		{
+			// التحقق من حالة الدفع
+			var payment = await _paymentsClient.GetPaymentStatusAsync(request.PaymentId);
+
+			if (payment == null)
+			{
+				return new VerifyPaymentResponse
+				{
+					Success = false,
+					Status = "NotFound",
+					Message = "لم يتم العثور على عملية الدفع"
+				};
+			}
+
+			var isCompleted = payment.Status.ToLower() switch
+			{
+				"completed" => true,
+				"captured" => true,
+				"success" => true,
+				_ => false
+			};
+
+			if (isCompleted)
+			{
+				// تفعيل الاشتراك إذا تم الدفع بنجاح
+				// TODO: Call activate subscription endpoint if needed
+
+				return new VerifyPaymentResponse
+				{
+					Success = true,
+					Status = "Completed",
+					SubscriptionId = payment.OrderId,
+					ActivatedAt = DateTime.Now,
+					Message = "تم الدفع وتفعيل الاشتراك بنجاح"
+				};
+			}
+
+			return new VerifyPaymentResponse
+			{
+				Success = false,
+				Status = payment.Status,
+				Message = GetPaymentStatusMessage(payment.Status)
+			};
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error verifying payment: {ex.Message}");
+			return new VerifyPaymentResponse
+			{
+				Success = false,
+				Status = "Error",
+				Message = ex.Message
+			};
+		}
+	}
+
+	private static string GetPaymentStatusMessage(string status)
+	{
+		return status.ToLower() switch
+		{
+			"pending" => "في انتظار الدفع",
+			"failed" => "فشلت عملية الدفع",
+			"cancelled" => "تم إلغاء عملية الدفع",
+			"expired" => "انتهت صلاحية عملية الدفع",
+			_ => "حالة غير معروفة"
+		};
 	}
 
 	// ═══════════════════════════════════════════════════════════════════

@@ -24,6 +24,7 @@ using ACommerce.Client.Products.Extensions;
 using ACommerce.Client.Realtime;
 using ACommerce.Client.Vendors;
 using ACommerce.Client.Profiles;
+using ACommerce.Client.Payments;
 using ACommerce.Client.Subscriptions;
 using ACommerce.ServiceRegistry.Client.Extensions;
 using Ashare.Web;
@@ -67,6 +68,9 @@ builder.Services.AddACommerceClientWithServices(
 
         // تسجيل خدمة Ashare - للـ SignalR و الإشعارات
         services.AddService("Ashare", apiBaseUrl);
+
+        // تسجيل خدمة Payments - للدفع عبر Noon وغيرها
+        services.AddService("Payments", apiBaseUrl);
     },
     options =>
     {
@@ -121,6 +125,9 @@ builder.Services.AddScoped<ProfilesClient>();
 
 // Subscriptions Client (Host/Vendor Subscription Plans)
 builder.Services.AddScoped<SubscriptionClient>();
+
+// Payments Client (Payment Gateway Integration)
+builder.Services.AddScoped<PaymentsClient>();
 
 // ═══════════════════════════════════════════════════════════════════
 // Communication Clients

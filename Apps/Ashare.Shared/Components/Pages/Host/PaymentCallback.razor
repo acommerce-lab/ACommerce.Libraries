@@ -1,0 +1,279 @@
+@page "/host/payment/callback"
+@using Ashare.Shared.Models
+@inject AshareApiService ApiService
+@inject IAppNavigationService Navigation
+@inject Ashare.Shared.Services.ThemeService ThemeService
+@inject ILocalizationService L
+
+<div class="ac-page ashare-payment-callback @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
+    <div class="ashare-callback-content">
+        @if (_isVerifying)
+        {
+            <div class="ashare-callback-loading">
+                <div class="ac-spinner ac-spinner-lg"></div>
+                <h2>@L["VerifyingPayment"]</h2>
+                <p>@L["PleaseWait"]</p>
+            </div>
+        }
+        else if (_paymentSuccess)
+        {
+            <div class="ashare-callback-success">
+                <div class="ashare-callback-icon success">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <h2>@L["PaymentSuccessful"]</h2>
+                <p>@L["SubscriptionActivated"]</p>
+
+                <div class="ashare-callback-details">
+                    @if (!string.IsNullOrEmpty(_transactionId))
+                    {
+                        <div class="ashare-detail-row">
+                            <span>@L["TransactionId"]</span>
+                            <span class="ashare-detail-value">@_transactionId</span>
+                        </div>
+                    }
+                    @if (_activatedAt.HasValue)
+                    {
+                        <div class="ashare-detail-row">
+                            <span>@L["ActivatedAt"]</span>
+                            <span class="ashare-detail-value">@_activatedAt.Value.ToString("yyyy/MM/dd HH:mm")</span>
+                        </div>
+                    }
+                </div>
+
+                <div class="ashare-callback-actions">
+                    <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="GoToSubscription">
+                        <i class="bi bi-box-arrow-in-left"></i>
+                        @L["ViewSubscription"]
+                    </button>
+                    <button class="ac-btn ac-btn-outline-secondary" @onclick="GoToHome">
+                        @L["GoToHome"]
+                    </button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="ashare-callback-failed">
+                <div class="ashare-callback-icon failed">
+                    <i class="bi bi-x-circle-fill"></i>
+                </div>
+                <h2>@L["PaymentFailed"]</h2>
+                <p>@(_errorMessage ?? L["PaymentFailedMessage"])</p>
+
+                <div class="ashare-callback-actions">
+                    <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="RetryPayment">
+                        <i class="bi bi-arrow-clockwise"></i>
+                        @L["TryAgain"]
+                    </button>
+                    <button class="ac-btn ac-btn-outline-secondary" @onclick="ContactSupport">
+                        <i class="bi bi-headset"></i>
+                        @L["ContactSupport"]
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery] public string? OrderId { get; set; }
+    [SupplyParameterFromQuery] public string? TransactionId { get; set; }
+    [SupplyParameterFromQuery] public string? Status { get; set; }
+    [SupplyParameterFromQuery] public string? ResultCode { get; set; }
+    [SupplyParameterFromQuery] public string? Message { get; set; }
+
+    private bool _isVerifying = true;
+    private bool _paymentSuccess = false;
+    private string? _transactionId;
+    private DateTime? _activatedAt;
+    private string? _errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await VerifyPayment();
+    }
+
+    private async Task VerifyPayment()
+    {
+        _isVerifying = true;
+
+        try
+        {
+            // Check if status indicates success from URL params
+            var isSuccessFromUrl = Status?.ToLower() switch
+            {
+                "success" => true,
+                "captured" => true,
+                "completed" => true,
+                "payment_complete" => true,
+                _ => ResultCode == "0"
+            };
+
+            if (isSuccessFromUrl)
+            {
+                // Verify with backend
+                var response = await ApiService.VerifySubscriptionPaymentAsync(new VerifyPaymentRequest
+                {
+                    PaymentId = OrderId ?? "",
+                    TransactionId = TransactionId,
+                    OrderId = OrderId
+                });
+
+                if (response?.Success == true)
+                {
+                    _paymentSuccess = true;
+                    _transactionId = TransactionId ?? OrderId;
+                    _activatedAt = response.ActivatedAt ?? DateTime.Now;
+                }
+                else
+                {
+                    _paymentSuccess = false;
+                    _errorMessage = response?.Message ?? Message;
+                }
+            }
+            else
+            {
+                _paymentSuccess = false;
+                _errorMessage = Message ?? GetErrorMessage(Status);
+            }
+        }
+        catch (Exception ex)
+        {
+            _paymentSuccess = false;
+            _errorMessage = ex.Message;
+        }
+
+        _isVerifying = false;
+    }
+
+    private string GetErrorMessage(string? status)
+    {
+        return status?.ToLower() switch
+        {
+            "failed" => L["PaymentDeclined"],
+            "cancelled" => L["PaymentCancelled"],
+            "expired" => L["PaymentExpired"],
+            "reversed" => L["PaymentReversed"],
+            _ => L["PaymentFailedMessage"]
+        };
+    }
+
+    private void GoToSubscription()
+    {
+        Navigation.NavigateTo("/host/subscription");
+    }
+
+    private void GoToHome()
+    {
+        Navigation.NavigateTo("/host");
+    }
+
+    private void RetryPayment()
+    {
+        Navigation.NavigateTo("/host/plans");
+    }
+
+    private void ContactSupport()
+    {
+        Navigation.NavigateTo("/support");
+    }
+}
+
+<style>
+    .ashare-payment-callback {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--ac-bg-secondary);
+        padding: var(--ac-spacing-lg);
+    }
+
+    .ashare-callback-content {
+        max-width: 480px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .ashare-callback-loading,
+    .ashare-callback-success,
+    .ashare-callback-failed {
+        background: var(--ac-bg-primary);
+        padding: var(--ac-spacing-xl);
+        border-radius: var(--ac-radius-lg);
+        box-shadow: var(--ac-shadow-md);
+    }
+
+    .ashare-callback-loading h2,
+    .ashare-callback-success h2,
+    .ashare-callback-failed h2 {
+        margin: var(--ac-spacing-lg) 0 var(--ac-spacing-sm);
+    }
+
+    .ashare-callback-loading p,
+    .ashare-callback-success p,
+    .ashare-callback-failed p {
+        color: var(--ac-text-secondary);
+        margin: 0;
+    }
+
+    .ashare-callback-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    .ashare-callback-icon i {
+        font-size: 48px;
+    }
+
+    .ashare-callback-icon.success {
+        background: rgba(34, 197, 94, 0.1);
+    }
+
+    .ashare-callback-icon.success i {
+        color: var(--ac-success);
+    }
+
+    .ashare-callback-icon.failed {
+        background: rgba(239, 68, 68, 0.1);
+    }
+
+    .ashare-callback-icon.failed i {
+        color: var(--ac-danger);
+    }
+
+    .ashare-callback-details {
+        background: var(--ac-bg-secondary);
+        border-radius: var(--ac-radius-md);
+        padding: var(--ac-spacing-md);
+        margin: var(--ac-spacing-lg) 0;
+    }
+
+    .ashare-detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: var(--ac-spacing-xs) 0;
+    }
+
+    .ashare-detail-row:not(:last-child) {
+        border-bottom: 1px solid var(--ac-border);
+    }
+
+    .ashare-detail-value {
+        font-weight: 500;
+        font-family: monospace;
+    }
+
+    .ashare-callback-actions {
+        display: flex;
+        flex-direction: column;
+        gap: var(--ac-spacing-sm);
+        margin-top: var(--ac-spacing-lg);
+    }
+</style>

@@ -1,0 +1,266 @@
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@implements IAsyncDisposable
+
+<div class="payment-webview-container">
+    @if (_isLoading)
+    {
+        <div class="payment-loading">
+            <div class="ac-spinner"></div>
+            <span>جاري تحميل صفحة الدفع...</span>
+        </div>
+    }
+
+    <div class="payment-header">
+        <button class="payment-close-btn" @onclick="HandleCancel">
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <span class="payment-secure-badge">
+            <i class="bi bi-shield-lock-fill"></i>
+            دفع آمن
+        </span>
+    </div>
+
+    <iframe
+        @ref="_iframeRef"
+        src="@PaymentUrl"
+        class="payment-iframe @(_isLoading ? "loading" : "")"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
+        @onload="HandleIframeLoad">
+    </iframe>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string PaymentUrl { get; set; } = string.Empty;
+
+    [Parameter]
+    public string ReturnUrlPattern { get; set; } = "/payment/callback";
+
+    [Parameter]
+    public EventCallback<PaymentResult> OnPaymentCompleted { get; set; }
+
+    [Parameter]
+    public EventCallback OnPaymentCancelled { get; set; }
+
+    private ElementReference _iframeRef;
+    private bool _isLoading = true;
+    private DotNetObjectReference<PaymentWebView>? _objRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _objRef = DotNetObjectReference.Create(this);
+            await SetupNavigationListener();
+        }
+    }
+
+    private async Task SetupNavigationListener()
+    {
+        try
+        {
+            // Setup message listener for payment completion
+            await JS.InvokeVoidAsync("eval", $@"
+                window.paymentMessageHandler = function(event) {{
+                    // Check if message is from payment gateway
+                    if (event.data && event.data.type === 'payment_complete') {{
+                        DotNet.invokeMethodAsync('Ashare.Shared', 'OnPaymentMessage', JSON.stringify(event.data));
+                    }}
+                }};
+                window.addEventListener('message', window.paymentMessageHandler);
+            ");
+        }
+        catch
+        {
+            // JS interop not available (e.g., prerendering)
+        }
+    }
+
+    private void HandleIframeLoad()
+    {
+        _isLoading = false;
+        StateHasChanged();
+
+        // Try to detect URL change in iframe (for same-origin)
+        CheckIframeNavigation();
+    }
+
+    private async void CheckIframeNavigation()
+    {
+        try
+        {
+            // This only works for same-origin URLs
+            var currentUrl = await JS.InvokeAsync<string>("eval", @"
+                try {
+                    return document.querySelector('.payment-iframe').contentWindow.location.href;
+                } catch(e) {
+                    return '';
+                }
+            ");
+
+            if (!string.IsNullOrEmpty(currentUrl) && currentUrl.Contains(ReturnUrlPattern))
+            {
+                await ProcessReturnUrl(currentUrl);
+            }
+        }
+        catch
+        {
+            // Cross-origin - can't access iframe URL
+        }
+    }
+
+    private async Task ProcessReturnUrl(string url)
+    {
+        var uri = new Uri(url);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+
+        var result = new PaymentResult
+        {
+            Success = query["status"]?.ToLower() == "success" ||
+                     query["status"]?.ToLower() == "captured" ||
+                     query["resultCode"] == "0",
+            TransactionId = query["orderId"] ?? query["transactionId"] ?? "",
+            Message = query["message"] ?? query["error"] ?? ""
+        };
+
+        await OnPaymentCompleted.InvokeAsync(result);
+    }
+
+    [JSInvokable]
+    public async Task OnPaymentMessage(string messageJson)
+    {
+        try
+        {
+            var message = System.Text.Json.JsonSerializer.Deserialize<PaymentMessage>(messageJson);
+            if (message != null)
+            {
+                var result = new PaymentResult
+                {
+                    Success = message.Status == "success",
+                    TransactionId = message.TransactionId ?? "",
+                    Message = message.Message ?? ""
+                };
+                await OnPaymentCompleted.InvokeAsync(result);
+            }
+        }
+        catch
+        {
+            // Invalid message format
+        }
+    }
+
+    private async Task HandleCancel()
+    {
+        await OnPaymentCancelled.InvokeAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("eval", @"
+                if (window.paymentMessageHandler) {
+                    window.removeEventListener('message', window.paymentMessageHandler);
+                    delete window.paymentMessageHandler;
+                }
+            ");
+        }
+        catch
+        {
+            // Ignore disposal errors
+        }
+
+        _objRef?.Dispose();
+    }
+
+    private class PaymentMessage
+    {
+        public string Type { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public string? TransactionId { get; set; }
+        public string? Message { get; set; }
+    }
+}
+
+<style>
+    .payment-webview-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        background: var(--ac-bg-primary);
+        position: relative;
+    }
+
+    .payment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--ac-spacing-sm) var(--ac-spacing-md);
+        background: var(--ac-bg-secondary);
+        border-bottom: 1px solid var(--ac-border);
+    }
+
+    .payment-close-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border: none;
+        background: transparent;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .payment-close-btn:hover {
+        background: var(--ac-bg-tertiary);
+    }
+
+    .payment-close-btn i {
+        font-size: 18px;
+        color: var(--ac-text-primary);
+    }
+
+    .payment-secure-badge {
+        display: flex;
+        align-items: center;
+        gap: var(--ac-spacing-xs);
+        color: var(--ac-success);
+        font-size: var(--ac-font-sm);
+        font-weight: 500;
+    }
+
+    .payment-secure-badge i {
+        font-size: 16px;
+    }
+
+    .payment-iframe {
+        flex: 1;
+        width: 100%;
+        border: none;
+        background: white;
+    }
+
+    .payment-iframe.loading {
+        opacity: 0;
+    }
+
+    .payment-loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--ac-spacing-md);
+        z-index: 10;
+    }
+
+    .payment-loading span {
+        color: var(--ac-text-secondary);
+    }
+</style>

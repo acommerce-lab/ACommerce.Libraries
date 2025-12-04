@@ -24,6 +24,7 @@ using ACommerce.Client.Profiles;
 using ACommerce.Client.Realtime;
 using ACommerce.Client.Subscriptions;
 using ACommerce.Client.Vendors;
+using ACommerce.Client.Payments;
 using ACommerce.ServiceRegistry.Client.Extensions;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Themes;
@@ -113,6 +114,9 @@ public static class MauiProgram
                 // تسجيل خدمة Ashare - للـ SignalR و الإشعارات
                 services.AddService("Ashare", apiBaseUrl);
 
+                // تسجيل خدمة Payments - للدفع عبر Noon وغيرها
+                services.AddService("Payments", apiBaseUrl);
+
                 // يمكن إضافة خدمات أخرى إذا كانت على URLs مختلفة
                 // services.AddService("Files", "https://files.ashare.app");
                 // services.AddService("Payments", "https://payments.ashare.app");
@@ -173,6 +177,9 @@ public static class MauiProgram
 
         // Subscriptions Client (Host/Vendor Subscription Plans)
         builder.Services.AddScoped<SubscriptionClient>();
+
+        // Payments Client (Payment Gateway Integration)
+        builder.Services.AddScoped<PaymentsClient>();
 
         // ═══════════════════════════════════════════════════════════════════
         // Communication Clients
