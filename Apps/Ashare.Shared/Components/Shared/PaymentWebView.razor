@@ -17,10 +17,26 @@
             <h3>جاري توجيهك لصفحة الدفع الآمنة</h3>
             <p>سيتم فتح صفحة الدفع في نافذة جديدة أو توجيهك لها تلقائياً</p>
 
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="payment-error-message">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    @_errorMessage
+                </div>
+            }
+
             <div class="payment-redirect-actions">
-                <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="OpenPaymentPage">
-                    <i class="bi bi-box-arrow-up-right"></i>
-                    فتح صفحة الدفع
+                <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="OpenPaymentPage" disabled="@_isOpening">
+                    @if (_isOpening)
+                    {
+                        <div class="ac-spinner ac-spinner-sm"></div>
+                        <span>جاري الفتح...</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-box-arrow-up-right"></i>
+                        <span>فتح صفحة الدفع</span>
+                    }
                 </button>
                 <button class="ac-btn ac-btn-outline-secondary" @onclick="HandleCancel">
                     إلغاء
@@ -31,6 +47,15 @@
                 <i class="bi bi-shield-check"></i>
                 سيتم إرجاعك تلقائياً بعد إتمام الدفع
             </p>
+
+            @* Debug info - can be removed in production *@
+            @if (!string.IsNullOrEmpty(PaymentUrl))
+            {
+                <details class="payment-debug-info">
+                    <summary>معلومات تقنية</summary>
+                    <p class="payment-url-display">@PaymentUrl</p>
+                </details>
+            }
         </div>
     }
     else
@@ -111,21 +136,52 @@
         }
     }
 
+    private string? _errorMessage;
+    private bool _isOpening = false;
+
     private async Task OpenPaymentPage()
     {
-        if (string.IsNullOrEmpty(PaymentUrl)) return;
+        if (string.IsNullOrEmpty(PaymentUrl))
+        {
+            _errorMessage = "رابط الدفع غير متوفر";
+            Console.WriteLine("[PaymentWebView] PaymentUrl is null or empty");
+            StateHasChanged();
+            return;
+        }
+
+        _isOpening = true;
+        _errorMessage = null;
+        StateHasChanged();
 
         try
         {
+            Console.WriteLine($"[PaymentWebView] Opening payment URL: {PaymentUrl}");
+
             // Use IAppNavigationService.OpenExternalAsync which handles
-            // platform-specific URL opening (MAUI Launcher for mobile, browser for web)
+            // platform-specific URL opening (MAUI Browser for mobile, browser for web)
             await AppNavigation.OpenExternalAsync(PaymentUrl);
+
+            Console.WriteLine("[PaymentWebView] OpenExternalAsync completed");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error opening payment page: {ex.Message}");
+            Console.WriteLine($"[PaymentWebView] Error opening payment page: {ex.Message}");
+            _errorMessage = $"فشل فتح صفحة الدفع: {ex.Message}";
+
             // Fallback: Direct navigation
-            Navigation.NavigateTo(PaymentUrl, forceLoad: true);
+            try
+            {
+                Navigation.NavigateTo(PaymentUrl, forceLoad: true);
+            }
+            catch (Exception navEx)
+            {
+                Console.WriteLine($"[PaymentWebView] Fallback navigation also failed: {navEx.Message}");
+            }
+        }
+        finally
+        {
+            _isOpening = false;
+            StateHasChanged();
         }
     }
 
@@ -396,5 +452,46 @@
 
     .payment-redirect-note i {
         font-size: 14px;
+    }
+
+    .payment-error-message {
+        display: flex;
+        align-items: center;
+        gap: var(--ac-spacing-sm);
+        padding: var(--ac-spacing-md);
+        background: var(--ac-danger-light, rgba(239, 68, 68, 0.1));
+        color: var(--ac-danger);
+        border-radius: var(--ac-radius-md);
+        font-size: var(--ac-font-sm);
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .payment-error-message i {
+        font-size: 18px;
+    }
+
+    .payment-debug-info {
+        margin-top: var(--ac-spacing-lg);
+        width: 100%;
+        max-width: 400px;
+        text-align: start;
+    }
+
+    .payment-debug-info summary {
+        cursor: pointer;
+        color: var(--ac-text-tertiary);
+        font-size: var(--ac-font-xs);
+    }
+
+    .payment-url-display {
+        margin: var(--ac-spacing-sm) 0 0;
+        padding: var(--ac-spacing-sm);
+        background: var(--ac-bg-tertiary);
+        border-radius: var(--ac-radius-sm);
+        font-size: var(--ac-font-xs);
+        word-break: break-all;
+        color: var(--ac-text-secondary);
+        font-family: monospace;
     }
 </style>

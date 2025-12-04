@@ -83,7 +83,7 @@ public class AppNavigationService : IAppNavigationService
     }
 
     /// <summary>
-    /// Open external URL using MAUI Launcher
+    /// Open external URL using MAUI Browser (more reliable for web URLs)
     /// </summary>
     public async Task OpenExternalAsync(string url)
     {
@@ -95,11 +95,31 @@ public class AppNavigationService : IAppNavigationService
                 return;
             }
 
-            await Launcher.Default.OpenAsync(new Uri(url));
+            Console.WriteLine($"[AppNavigationService] Opening external URL: {url}");
+
+            // Use Browser.OpenAsync for web URLs - more reliable than Launcher
+            var result = await Browser.Default.OpenAsync(url, BrowserLaunchMode.External);
+
+            if (!result)
+            {
+                Console.WriteLine("[AppNavigationService] Browser.OpenAsync returned false, trying Launcher fallback");
+                // Fallback to Launcher if Browser fails
+                await Launcher.Default.OpenAsync(new Uri(url));
+            }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[AppNavigationService] Error opening external URL: {ex.Message}");
+
+            // Last resort: try with Launcher
+            try
+            {
+                await Launcher.Default.OpenAsync(new Uri(url));
+            }
+            catch (Exception fallbackEx)
+            {
+                Console.WriteLine($"[AppNavigationService] Fallback also failed: {fallbackEx.Message}");
+            }
         }
     }
 }

@@ -233,16 +233,35 @@
 
             if (incomingMessage == null) return;
 
-            // Avoid adding duplicate messages (e.g., if we already added it locally when sending)
-            // This check works because we update the local message ID with the server response
+            // Check 1: Exact ID match (message already processed)
             if (_messages.Any(m => m.Id == incomingMessage.Id))
             {
-                Console.WriteLine($"[ChatRoom] ⏭️ Skipping duplicate message: {incomingMessage.Id}");
+                Console.WriteLine($"[ChatRoom] ⏭️ Skipping duplicate message (ID match): {incomingMessage.Id}");
                 return;
             }
 
-            // Determine if this message is from the current user (sent from another device)
+            // Determine if this message is from the current user
             var isMine = !string.IsNullOrEmpty(_currentUserId) && incomingMessage.SenderId == _currentUserId;
+
+            // Check 2: For messages from current user, check for pending local message with same content
+            // This handles the race condition where SignalR arrives before API response updates the local ID
+            if (isMine)
+            {
+                var pendingMessage = _messages.FirstOrDefault(m =>
+                    m.IsMine &&
+                    m.Content == incomingMessage.Content &&
+                    Math.Abs((m.SentAt - incomingMessage.CreatedAt).TotalSeconds) < 30);
+
+                if (pendingMessage != null)
+                {
+                    // Update the pending message's ID with the server ID instead of adding duplicate
+                    Console.WriteLine($"[ChatRoom] 🔄 Updating pending message ID: {pendingMessage.Id} → {incomingMessage.Id}");
+                    pendingMessage.Id = incomingMessage.Id;
+                    pendingMessage.SentAt = incomingMessage.CreatedAt;
+                    InvokeAsync(StateHasChanged);
+                    return;
+                }
+            }
 
             Console.WriteLine($"[ChatRoom] ✅ Adding new message: {incomingMessage.Content} (IsMine: {isMine})");
 
