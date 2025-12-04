@@ -297,7 +297,7 @@ public class NoonPaymentProvider : IPaymentProvider
 				return new RefundResult
 				{
 					Success = true,
-					RefundId = noonResponse.Result?.Order?.Id ?? request.TransactionId
+					RefundId = noonResponse.Result?.Order?.Id.ToString() ?? request.TransactionId
 				};
 			}
 
