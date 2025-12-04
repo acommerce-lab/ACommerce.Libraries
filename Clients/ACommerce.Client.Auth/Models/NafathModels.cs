@@ -27,6 +27,10 @@ public sealed class NafathAuthResponse
     /// الرقم العشوائي الذي يجب اختياره في تطبيق نفاذ
     /// </summary>
     public string? RandomNumber { get; set; }
+    /// <summary>
+    /// رابط صفحة المصادقة (للتوجيه في المتصفح)
+    /// </summary>
+    public string? AuthUrl { get; set; }
     public int ExpiresInSeconds { get; set; }
     public string? Message { get; set; }
 }
@@ -63,6 +67,18 @@ public sealed class LoginResponse
     public string? FullName { get; set; }
     public DateTime? ExpiresAt { get; set; }
     public string? Message { get; set; }
+    /// <summary>
+    /// يتطلب التحقق بخطوتين (OTP)
+    /// </summary>
+    public bool RequiresTwoFactor { get; set; }
+    /// <summary>
+    /// طريقة التحقق بخطوتين (Phone, Email)
+    /// </summary>
+    public string? TwoFactorMethod { get; set; }
+    /// <summary>
+    /// معرف الجلسة للتحقق بخطوتين
+    /// </summary>
+    public string? SessionId { get; set; }
 }
 
 /// <summary>
