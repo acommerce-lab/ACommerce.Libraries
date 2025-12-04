@@ -72,6 +72,10 @@ public sealed class LoginResponse
     /// </summary>
     public bool RequiresTwoFactor { get; set; }
     /// <summary>
+    /// يتطلب اختيار رقم هاتف من نفاذ (عند وجود أكثر من رقم)
+    /// </summary>
+    public bool RequiresNumberSelection { get; set; }
+    /// <summary>
     /// طريقة التحقق بخطوتين (Phone, Email)
     /// </summary>
     public string? TwoFactorMethod { get; set; }
