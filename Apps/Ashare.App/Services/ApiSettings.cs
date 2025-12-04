@@ -14,12 +14,12 @@ public class ApiSettings
     /// <summary>
     /// Development URL for Android Emulator (10.0.2.2 maps to host's localhost)
     /// </summary>
-    public const string AndroidEmulatorUrl = "https://10.0.2.2:5001";
+    public const string AndroidEmulatorUrl = "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net";
 
     /// <summary>
     /// Development URL for Windows/Desktop
     /// </summary>
-    public const string LocalhostUrl = "https://localhost:5001";
+    public const string LocalhostUrl = "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net";
 
     /// <summary>
     /// Gets the appropriate API base URL based on the current platform and build configuration.

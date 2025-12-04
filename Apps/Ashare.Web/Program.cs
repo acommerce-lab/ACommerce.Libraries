@@ -38,7 +38,7 @@ builder.Services.AddRazorComponents()
 // ═══════════════════════════════════════════════════════════════════
 // API Configuration
 // ═══════════════════════════════════════════════════════════════════
-var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:5001";
+var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net";
 
 // ═══════════════════════════════════════════════════════════════════
 // Client SDKs with Service Discovery (Predefined Services)
