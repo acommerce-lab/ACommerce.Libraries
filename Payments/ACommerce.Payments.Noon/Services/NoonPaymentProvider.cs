@@ -35,6 +35,13 @@ public class NoonPaymentProvider : IPaymentProvider
 			PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
 			DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
 		};
+
+		// تسجيل الإعدادات عند البدء
+		_logger.LogInformation("NoonPaymentProvider initialized with: BusinessId={BusinessId}, AppId={AppId}, Sandbox={Sandbox}, ApiUrl={ApiUrl}",
+			_options.BusinessIdentifier,
+			_options.ApplicationIdentifier,
+			_options.UseSandbox,
+			_options.ApiUrl);
 	}
 
 	/// <summary>
@@ -57,7 +64,16 @@ public class NoonPaymentProvider : IPaymentProvider
 		var apiUrl = _options.ApiUrl.TrimEnd('/') + "/";
 		client.BaseAddress = new Uri(apiUrl);
 		client.DefaultRequestHeaders.Clear();
-		client.DefaultRequestHeaders.Add("Authorization", CreateAuthorizationHeader());
+
+		var authHeader = CreateAuthorizationHeader();
+		client.DefaultRequestHeaders.Add("Authorization", authHeader);
+
+		// تسجيل معلومات التفويض للتصحيح (بدون المفتاح السري)
+		_logger.LogDebug("Noon Auth Header Format: {Prefix} {BusinessId}.{AppId}:***",
+			_options.UseSandbox ? "Key_Test" : "Key_Live",
+			_options.BusinessIdentifier,
+			_options.ApplicationIdentifier);
+
 		client.Timeout = TimeSpan.FromSeconds(_options.TimeoutSeconds);
 		return client;
 	}
@@ -113,13 +129,23 @@ public class NoonPaymentProvider : IPaymentProvider
 			var client = CreateHttpClient();
 			var json = JsonSerializer.Serialize(noonRequest, _jsonOptions);
 
-			_logger.LogDebug("Noon request: {Request}", json);
+			_logger.LogInformation("Noon request payload: {Request}", json);
 
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
 			var response = await client.PostAsync("order", content, cancellationToken);
 
 			var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
-			_logger.LogDebug("Noon response: {Response}", responseContent);
+
+			// تسجيل الاستجابة دائماً للتصحيح
+			if (!response.IsSuccessStatusCode)
+			{
+				_logger.LogError("Noon API returned HTTP {StatusCode}. Response: {Response}",
+					(int)response.StatusCode, responseContent);
+			}
+			else
+			{
+				_logger.LogDebug("Noon response: {Response}", responseContent);
+			}
 
 			var noonResponse = JsonSerializer.Deserialize<NoonApiResponse>(responseContent, _jsonOptions);
 
