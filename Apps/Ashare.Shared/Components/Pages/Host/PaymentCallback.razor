@@ -3,6 +3,7 @@
 @inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
 @inject Ashare.Shared.Services.ThemeService ThemeService
+@inject Ashare.Shared.Services.PendingListingService PendingListingService
 @inject ILocalizationService L
 
 <div class="ac-page ashare-payment-callback @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
@@ -159,14 +160,30 @@
         };
     }
 
-    private void GoToSubscription()
+    private async Task GoToSubscription()
     {
-        Navigation.NavigateTo("/host/subscription");
+        // التحقق من وجود عرض معلق لإنشائه
+        if (await PendingListingService.HasPendingListingAsync())
+        {
+            Navigation.NavigateTo("/create-listing?success=true");
+        }
+        else
+        {
+            Navigation.NavigateTo("/host/subscription");
+        }
     }
 
-    private void GoToHome()
+    private async Task GoToHome()
     {
-        Navigation.NavigateTo("/host");
+        // التحقق من وجود عرض معلق لإنشائه
+        if (await PendingListingService.HasPendingListingAsync())
+        {
+            Navigation.NavigateTo("/create-listing?success=true");
+        }
+        else
+        {
+            Navigation.NavigateTo("/host");
+        }
     }
 
     private void RetryPayment()

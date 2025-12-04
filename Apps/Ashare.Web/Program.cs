@@ -174,6 +174,7 @@ builder.Services.AddScoped<ITimezoneService, BrowserTimezoneService>();
 // Ashare API Service (ربط التطبيق بالباك اند)
 // ═══════════════════════════════════════════════════════════════════
 builder.Services.AddScoped<AshareApiService>();
+builder.Services.AddScoped<PendingListingService>();
 
 // Additional client registrations
 builder.Services.AddScoped<CategoriesClient>();
