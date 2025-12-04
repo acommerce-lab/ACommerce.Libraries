@@ -169,10 +169,10 @@ public class NoonPaymentProvider : IPaymentProvider
 
 			if (noonResponse.ResultCode == NoonResultCode.Success)
 			{
-				var orderId = noonResponse.Result?.Order?.Id ?? string.Empty;
+				var orderId = noonResponse.Result?.Order?.Id.ToString() ?? string.Empty;
 				var checkoutUrl = noonResponse.Result?.CheckoutData?.PostUrl;
 
-				_logger.LogInformation("Noon payment created successfully. OrderId: {OrderId}", orderId);
+				_logger.LogInformation("Noon payment created successfully. OrderId: {OrderId}, CheckoutUrl: {CheckoutUrl}", orderId, checkoutUrl);
 
 				return new PaymentResult
 				{

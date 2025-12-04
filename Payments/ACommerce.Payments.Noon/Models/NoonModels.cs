@@ -224,7 +224,8 @@ public class NoonOrderResult
 public class NoonOrderResponse
 {
 	[JsonPropertyName("id")]
-	public string? Id { get; set; }
+	[JsonNumberHandling(JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString)]
+	public long Id { get; set; }
 
 	[JsonPropertyName("reference")]
 	public string? Reference { get; set; }
