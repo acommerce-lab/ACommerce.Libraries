@@ -344,17 +344,35 @@ Built using ACommerce libraries with configuration-first approach:
     }
 
     // Health check endpoint
-    app.MapGet("/health", () => new
+    app.MapGet("/health", () => Results.Ok(new
     {
         Service = "Ashare API",
-        Status = "Running",
-        Version = "1.0.0"
+        Status = "Healthy",
+        Version = "1.0.0",
+        Environment = app.Environment.EnvironmentName,
+        Timestamp = DateTime.UtcNow
+    }));
+
+    // Readiness check (for Kubernetes/Cloud Run)
+    app.MapGet("/ready", async (ApplicationDbContext db) =>
+    {
+        try
+        {
+            // Check database connectivity
+            await db.Database.CanConnectAsync();
+            return Results.Ok(new { Status = "Ready" });
+        }
+        catch
+        {
+            return Results.StatusCode(503);
+        }
     });
 
     // ✅ تسجيل الخدمة في Service Registry
-    var serviceBaseUrl = app.Environment.IsDevelopment()
-        ? "https://localhost:5001"
-        : "http://safqatasheer-001-site1.qtempurl.com";
+    var serviceBaseUrl = Environment.GetEnvironmentVariable("SERVICE_URL")
+        ?? (app.Environment.IsDevelopment()
+            ? "https://localhost:5001"
+            : "https://api.ashare.app");
 
     using (var scope = app.Services.CreateScope())
     {
