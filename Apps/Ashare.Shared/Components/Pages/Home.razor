@@ -1,4 +1,5 @@
 @page "/"
+@using Ashare.Shared.Components.Shared
 @inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
 
@@ -85,7 +86,7 @@
                         <div class="ashare-space-image">
                             @if (space.Images.Any())
                             {
-                                <img src="@space.Images.First()" alt="@space.Name" loading="lazy" />
+                                <LazyImage Src="@space.Images.First()" Alt="@space.Name" FallbackIcon="bi-building" />
                             }
                             else
                             {
@@ -136,7 +137,13 @@
                         <div class="ashare-space-image">
                             @if (space.Images.Any())
                             {
-                                <img src="@space.Images.First()" alt="@space.Name" loading="lazy" />
+                                <LazyImage Src="@space.Images.First()" Alt="@space.Name" FallbackIcon="bi-building" />
+                            }
+                            else
+                            {
+                                <div class="ashare-space-no-image">
+                                    <i class="bi bi-building"></i>
+                                </div>
                             }
                             <span class="ac-product-badge ac-product-badge-new">جديد</span>
                         </div>

@@ -26,20 +26,20 @@
     /* Accent uses secondary orange */
     --ashare-accent: #F4844C;
 
-    /* Neutral Colors - Clean white/gray tones for modern UI */
+    /* Neutral Colors - Warm tones aligned with brand identity */
     --ashare-white: #FFFFFF;
-    --ashare-cream: #FAFAFA;
+    --ashare-cream: #FFFCF9;
     --ashare-surface: #FFFFFF;
-    --ashare-gray-50: #F9FAFB;
-    --ashare-gray-100: #F3F4F6;
-    --ashare-gray-200: #E5E7EB;
-    --ashare-gray-300: #D1D5DB;
-    --ashare-gray-400: #9CA3AF;
-    --ashare-gray-500: #6B7280;
-    --ashare-gray-600: #4B5563;
-    --ashare-gray-700: #374151;
-    --ashare-gray-800: #1F2937;
-    --ashare-gray-900: #111827;
+    --ashare-gray-50: #FDFCFB;
+    --ashare-gray-100: #FAF8F6;
+    --ashare-gray-200: #F0EDE9;
+    --ashare-gray-300: #E0DCD6;
+    --ashare-gray-400: #A8A29E;
+    --ashare-gray-500: #78716C;
+    --ashare-gray-600: #57534E;
+    --ashare-gray-700: #44403C;
+    --ashare-gray-800: #292524;
+    --ashare-gray-900: #1C1917;
 
     /* Status Colors */
     --ashare-success: #10B981;
@@ -94,16 +94,19 @@
     --ac-accent-dark: #E06D34;
     --ac-accent-light: #F69B6B;
 
-    /* Background & Surface */
+    /* Background & Surface - Warm tones */
     --ac-bg: #FFFFFF;
-    --ac-bg-alt: #F9FAFB;
+    --ac-bg-alt: #FDFCFB;
+    --ac-bg-secondary: #FAF8F6;
+    --ac-bg-tertiary: #F0EDE9;
     --ac-surface: #FFFFFF;
-    --ac-surface-alt: #F3F4F6;
+    --ac-surface-alt: #FAF8F6;
 
     /* Text colors */
-    --ac-text: #111827;
-    --ac-text-secondary: #6B7280;
-    --ac-text-muted: #9CA3AF;
+    --ac-text: #1C1917;
+    --ac-text-secondary: #57534E;
+    --ac-text-muted: #78716C;
+    --ac-text-tertiary: #A8A29E;
     --ac-text-on-primary: #FFFFFF;
 
     /* Status colors */
@@ -112,10 +115,10 @@
     --ac-error: #EF4444;
     --ac-info: #345454;
 
-    /* Border colors */
-    --ac-border: #E5E7EB;
-    --ac-border-light: #F3F4F6;
-    --ac-border-dark: #D1D5DB;
+    /* Border colors - Warm tones */
+    --ac-border: #E0DCD6;
+    --ac-border-light: #F0EDE9;
+    --ac-border-dark: #D6D3D1;
 
     /* Special badges - use brand colors */
     --ac-sale: #EF4444;
@@ -125,20 +128,20 @@
 
 /* Dark Mode - Ashare Brand Visual Identity 2025 */
 .ac-dark {
-    /* Background colors inverted */
-    --ashare-white: #0F1419;
-    --ashare-cream: #16202A;
-    --ashare-surface: #1C2732;
-    --ashare-gray-50: #16202A;
-    --ashare-gray-100: #1C2732;
-    --ashare-gray-200: #253341;
-    --ashare-gray-300: #38444D;
-    --ashare-gray-400: #5C6E7E;
-    --ashare-gray-500: #8899A6;
-    --ashare-gray-600: #AAB8C2;
-    --ashare-gray-700: #D1D9DD;
-    --ashare-gray-800: #E7ECF0;
-    --ashare-gray-900: #F5F8FA;
+    /* Background colors inverted - warm dark tones */
+    --ashare-white: #1C1917;
+    --ashare-cream: #231F1D;
+    --ashare-surface: #292524;
+    --ashare-gray-50: #231F1D;
+    --ashare-gray-100: #292524;
+    --ashare-gray-200: #3D3835;
+    --ashare-gray-300: #524D49;
+    --ashare-gray-400: #78716C;
+    --ashare-gray-500: #A8A29E;
+    --ashare-gray-600: #D6D3D1;
+    --ashare-gray-700: #E7E5E4;
+    --ashare-gray-800: #F5F5F4;
+    --ashare-gray-900: #FAFAF9;
 
     /* Brand colors adjusted for dark mode - slightly lighter for visibility */
     --ashare-primary: #4A7A7A;
@@ -162,16 +165,19 @@
     --ac-secondary-dark: #E5854A;
     --ac-secondary-light: #F8B08A;
     --ac-accent: #F69B6B;
-    --ac-bg: #0F1419;
-    --ac-bg-alt: #16202A;
-    --ac-surface: #1C2732;
-    --ac-surface-alt: #253341;
-    --ac-text: #F5F8FA;
-    --ac-text-secondary: #AAB8C2;
-    --ac-text-muted: #8899A6;
-    --ac-border: #253341;
-    --ac-border-light: #1C2732;
-    --ac-border-dark: #38444D;
+    --ac-bg: #1C1917;
+    --ac-bg-alt: #231F1D;
+    --ac-bg-secondary: #292524;
+    --ac-bg-tertiary: #3D3835;
+    --ac-surface: #292524;
+    --ac-surface-alt: #3D3835;
+    --ac-text: #FAFAF9;
+    --ac-text-secondary: #D6D3D1;
+    --ac-text-muted: #A8A29E;
+    --ac-text-tertiary: #78716C;
+    --ac-border: #3D3835;
+    --ac-border-light: #292524;
+    --ac-border-dark: #524D49;
     --ac-info: #4A7A7A;
 }
 

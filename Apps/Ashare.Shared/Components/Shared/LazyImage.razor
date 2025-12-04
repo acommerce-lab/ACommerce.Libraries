@@ -1,0 +1,111 @@
+@namespace Ashare.Shared.Components.Shared
+
+<div class="lazy-image-container @(_isLoaded ? "loaded" : "")">
+    @if (!_isLoaded)
+    {
+        <div class="lazy-image-skeleton">
+            <div class="skeleton-shimmer"></div>
+        </div>
+    }
+    <img src="@Src"
+         alt="@Alt"
+         class="lazy-image @(_isLoaded ? "visible" : "")"
+         loading="lazy"
+         @onload="HandleImageLoaded"
+         @onerror="HandleImageError" />
+    @if (_hasError)
+    {
+        <div class="lazy-image-fallback">
+            <i class="bi @FallbackIcon"></i>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Src { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Alt { get; set; } = "";
+
+    [Parameter]
+    public string FallbackIcon { get; set; } = "bi-image";
+
+    private bool _isLoaded = false;
+    private bool _hasError = false;
+
+    private void HandleImageLoaded()
+    {
+        _isLoaded = true;
+        _hasError = false;
+    }
+
+    private void HandleImageError()
+    {
+        _isLoaded = true;
+        _hasError = true;
+    }
+}
+
+<style>
+    .lazy-image-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: var(--ac-bg-secondary);
+    }
+
+    .lazy-image-skeleton {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            90deg,
+            var(--ac-bg-secondary) 0%,
+            var(--ac-bg-tertiary) 50%,
+            var(--ac-bg-secondary) 100%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+    }
+
+    .skeleton-shimmer {
+        width: 100%;
+        height: 100%;
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: 200% 0;
+        }
+        100% {
+            background-position: -200% 0;
+        }
+    }
+
+    .lazy-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .lazy-image.visible {
+        opacity: 1;
+    }
+
+    .lazy-image-fallback {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--ac-bg-secondary);
+        color: var(--ac-text-tertiary);
+    }
+
+    .lazy-image-fallback i {
+        font-size: 32px;
+    }
+</style>
