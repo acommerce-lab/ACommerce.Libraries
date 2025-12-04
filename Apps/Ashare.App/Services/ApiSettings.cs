@@ -7,9 +7,9 @@ namespace Ashare.App.Services;
 public class ApiSettings
 {
     /// <summary>
-    /// Production API URL
+    /// Production API URL (Azure Canada East)
     /// </summary>
-    public const string ProductionUrl = "http://safqatasheer-001-site1.qtempurl.com";
+    public const string ProductionUrl = "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net";
 
     /// <summary>
     /// Development URL for Android Emulator (10.0.2.2 maps to host's localhost)

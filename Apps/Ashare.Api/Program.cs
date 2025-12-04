@@ -391,7 +391,7 @@ Built using ACommerce libraries with configuration-first approach:
     var serviceBaseUrl = Environment.GetEnvironmentVariable("SERVICE_URL")
         ?? (app.Environment.IsDevelopment()
             ? "https://localhost:5001"
-            : "https://api.ashare.app");
+            : "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net");
 
     using (var scope = app.Services.CreateScope())
     {
