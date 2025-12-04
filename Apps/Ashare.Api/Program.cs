@@ -115,12 +115,28 @@ try
 
     builder.Services.AddEndpointsApiExplorer();
 
-    // Database (SQLite - entities auto-discovered from all ACommerce assemblies)
+    // Database - Auto-detect provider from connection string
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
     {
-        options.UseSqlite(
-            builder.Configuration.GetConnectionString("DefaultConnection")
-            ?? "Data Source=ashare.db");
+        if (string.IsNullOrEmpty(connectionString) || connectionString.Contains("Data Source="))
+        {
+            // SQLite for local development
+            Log.Information("Using SQLite database");
+            options.UseSqlite(connectionString ?? "Data Source=ashare.db");
+        }
+        else
+        {
+            // SQL Server for Azure/Production
+            Log.Information("Using SQL Server database");
+            options.UseSqlServer(connectionString, sqlOptions =>
+            {
+                sqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 5,
+                    maxRetryDelay: TimeSpan.FromSeconds(30),
+                    errorNumbersToAdd: null);
+            });
+        }
         options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
     });
 
