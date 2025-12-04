@@ -13,10 +13,10 @@ public class NoonOrderRequest
 	public string ApiOperation { get; set; } = "INITIATE";
 
 	[JsonPropertyName("order")]
-	public NoonOrderInfo Order { get; set; } = new();
+	public NoonOrderInfo Order { get; set; } = null!;
 
 	[JsonPropertyName("configuration")]
-	public NoonConfiguration Configuration { get; set; } = new();
+	public NoonConfiguration Configuration { get; set; } = null!;
 
 	[JsonPropertyName("billing")]
 	public NoonBillingInfo? Billing { get; set; }
@@ -31,10 +31,10 @@ public class NoonOrderRequest
 public class NoonOrderInfo
 {
 	[JsonPropertyName("reference")]
-	public required string Reference { get; set; }
+	public string Reference { get; set; } = null!;
 
 	[JsonPropertyName("amount")]
-	public required decimal Amount { get; set; }
+	public decimal Amount { get; set; }
 
 	[JsonPropertyName("currency")]
 	public string Currency { get; set; } = "SAR";
@@ -55,7 +55,7 @@ public class NoonOrderInfo
 public class NoonConfiguration
 {
 	[JsonPropertyName("returnUrl")]
-	public required string ReturnUrl { get; set; }
+	public string ReturnUrl { get; set; } = null!;
 
 	[JsonPropertyName("locale")]
 	public string Locale { get; set; } = "ar";
@@ -139,7 +139,7 @@ public class NoonRefundRequest
 	public string ApiOperation { get; set; } = "REFUND";
 
 	[JsonPropertyName("order")]
-	public NoonRefundOrderInfo Order { get; set; } = new();
+	public NoonRefundOrderInfo Order { get; set; } = null!;
 }
 
 /// <summary>
@@ -148,7 +148,7 @@ public class NoonRefundRequest
 public class NoonRefundOrderInfo
 {
 	[JsonPropertyName("id")]
-	public required string Id { get; set; }
+	public string Id { get; set; } = null!;
 
 	[JsonPropertyName("amount")]
 	public decimal? Amount { get; set; }

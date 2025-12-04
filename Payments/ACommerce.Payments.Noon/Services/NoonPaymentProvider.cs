@@ -90,8 +90,10 @@ public class NoonPaymentProvider : IPaymentProvider
 			};
 
 			// إضافة معلومات العميل إذا متوفرة
-			if (request.Metadata.TryGetValue("customerEmail", out var email) ||
-				request.Metadata.TryGetValue("customerPhone", out var phone))
+			var hasEmail = request.Metadata.TryGetValue("customerEmail", out var email);
+			var hasPhone = request.Metadata.TryGetValue("customerPhone", out var phone);
+
+			if (hasEmail || hasPhone)
 			{
 				noonRequest.Billing = new NoonBillingInfo
 				{

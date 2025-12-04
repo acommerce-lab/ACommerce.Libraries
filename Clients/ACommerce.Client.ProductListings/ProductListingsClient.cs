@@ -141,12 +141,22 @@ public sealed class ProductListingDto
 	public string? FeaturedImage { get; set; }
 
 	/// <summary>
+	/// Alias for FeaturedImage (للتوافق)
+	/// </summary>
+	public string? ImageUrl => FeaturedImage ?? Images.FirstOrDefault();
+
+	/// <summary>
 	/// السعر
 	/// </summary>
 	public decimal Price { get; set; }
 	public decimal? CompareAtPrice { get; set; }
 	public int? DiscountPercentage { get; set; }
 	public string Currency { get; set; } = "SAR";
+
+	/// <summary>
+	/// Alias for CompareAtPrice (للتوافق)
+	/// </summary>
+	public decimal? OriginalPrice => CompareAtPrice;
 
 	/// <summary>
 	/// الموقع
@@ -177,6 +187,11 @@ public sealed class ProductListingDto
 	/// الخصائص الديناميكية
 	/// </summary>
 	public Dictionary<string, object> Attributes { get; set; } = new();
+
+	/// <summary>
+	/// Alias for Attributes (للتوافق)
+	/// </summary>
+	public Dictionary<string, object> Properties => Attributes;
 
 	public DateTime CreatedAt { get; set; }
 	public DateTime? UpdatedAt { get; set; }
