@@ -2,6 +2,7 @@ using ACommerce.Subscriptions.DTOs;
 using ACommerce.Subscriptions.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ACommerce.Subscriptions.Api.Controllers;
 
@@ -108,6 +109,18 @@ public class SubscriptionsController : ControllerBase
     {
         try
         {
+            // استخراج معرف المستخدم من التوكن كـ VendorId
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                           ?? User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var vendorId))
+            {
+                return Unauthorized("لم يتم العثور على معرف المستخدم");
+            }
+
+            // تعيين VendorId من التوكن
+            dto.VendorId = vendorId;
+
             var subscription = await _subscriptionService.CreateSubscriptionAsync(dto, ct);
             return CreatedAtAction(nameof(GetSubscriptionById), new { subscriptionId = subscription.Id }, subscription);
         }
