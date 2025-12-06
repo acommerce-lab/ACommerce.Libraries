@@ -1,0 +1,338 @@
+@page "/host/subscription/dashboard"
+@using ACommerce.Subscriptions.DTOs
+@using ACommerce.Subscriptions.Enums
+@inject AshareApiService ApiService
+@inject IAppNavigationService Navigation
+@inject Ashare.Shared.Services.ThemeService ThemeService
+@inject ILocalizationService L
+
+<div class="ac-page ashare-subscription-dashboard @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
+    @* Header *@
+    <div class="ac-navbar">
+        <button class="ac-navbar-back" @onclick="() => Navigation.NavigateBack()">
+            <i class="bi bi-chevron-@(L.IsRtl ? "right" : "left")"></i>
+        </button>
+        <h1 class="ac-navbar-title">@L["MySubscription"]</h1>
+        <div class="ac-navbar-spacer"></div>
+    </div>
+
+    <div class="ashare-dashboard-content">
+        @if (_isLoading)
+        {
+            <div class="ashare-loading">
+                <div class="ac-spinner"></div>
+                <span>@L["Loading"]</span>
+            </div>
+        }
+        else if (_subscription == null)
+        {
+            @* No Subscription - Show CTA *@
+            <div class="ashare-no-subscription">
+                <div class="ashare-no-sub-icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <h2>@L["NoActiveSubscription"]</h2>
+                <p>@L["SubscribeToStartHosting"]</p>
+                <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick='() => Navigation.NavigateTo("/host/plans")'>
+                    <i class="bi bi-rocket-takeoff"></i>
+                    @L["ViewPlans"]
+                </button>
+            </div>
+        }
+        else
+        {
+            @* Current Plan Card *@
+            <div class="ashare-plan-status-card" style="border-color: @(_subscription.Plan?.Color ?? "#345454");">
+                <div class="ashare-plan-status-header">
+                    <div class="ashare-plan-badge" style="background-color: @(_subscription.Plan?.Color ?? "#345454");">
+                        <i class="bi @(_subscription.Plan?.Icon ?? "bi-box")"></i>
+                    </div>
+                    <div class="ashare-plan-info">
+                        <h2 class="ashare-plan-title">@(_subscription.Plan?.Name ?? "N/A")</h2>
+                        <span class="ashare-subscription-status @GetStatusClass(_subscription.Status)">
+                            @GetStatusLabel(_subscription.Status)
+                        </span>
+                    </div>
+                    <button class="ac-btn ac-btn-outline-primary ac-btn-sm" @onclick='() => Navigation.NavigateTo("/host/plans")'>
+                        @L["ChangePlan"]
+                    </button>
+                </div>
+
+                <div class="ashare-plan-dates">
+                    <div class="ashare-date-item">
+                        <span class="ashare-date-label">@L["StartDate"]</span>
+                        <span class="ashare-date-value">@_subscription.StartDate.ToString("dd/MM/yyyy")</span>
+                    </div>
+                    <div class="ashare-date-item">
+                        <span class="ashare-date-label">@L["EndDate"]</span>
+                        <span class="ashare-date-value">@_subscription.CurrentPeriodEnd.ToString("dd/MM/yyyy")</span>
+                    </div>
+                    <div class="ashare-date-item highlight">
+                        <span class="ashare-date-label">@L["DaysRemaining"]</span>
+                        <span class="ashare-date-value">@_subscription.DaysRemaining @L["Days"]</span>
+                    </div>
+                </div>
+
+                @if (_subscription.DaysRemaining <= 7 && _subscription.DaysRemaining > 0)
+                {
+                    <div class="ashare-renewal-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span>@L["SubscriptionExpiringWarning"]</span>
+                        <button class="ac-btn ac-btn-warning ac-btn-sm">@L["RenewNow"]</button>
+                    </div>
+                }
+            </div>
+
+            @* Usage Stats *@
+            @if (_usageStats != null)
+            {
+                <div class="ashare-usage-section">
+                    <h3 class="ashare-section-title">@L["UsageStatistics"]</h3>
+
+                    <div class="ashare-usage-grid">
+                        @* Listings Usage *@
+                        <div class="ashare-usage-card">
+                            <div class="ashare-usage-icon">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            <div class="ashare-usage-info">
+                                <span class="ashare-usage-label">@L["Listings"]</span>
+                                <div class="ashare-usage-progress">
+                                    <div class="ashare-progress-bar">
+                                        <div class="ashare-progress-fill" style="width: @GetUsagePercentage(_usageStats.ListingsUsed, _usageStats.ListingsLimit)%"></div>
+                                    </div>
+                                    <span class="ashare-usage-text">
+                                        @_usageStats.ListingsUsed / @(_usageStats.ListingsLimit < 0 ? "∞" : _usageStats.ListingsLimit.ToString())
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        @* Storage Usage *@
+                        <div class="ashare-usage-card">
+                            <div class="ashare-usage-icon">
+                                <i class="bi bi-hdd"></i>
+                            </div>
+                            <div class="ashare-usage-info">
+                                <span class="ashare-usage-label">@L["Storage"]</span>
+                                <div class="ashare-usage-progress">
+                                    <div class="ashare-progress-bar">
+                                        <div class="ashare-progress-fill" style="width: @GetUsagePercentage((int)_usageStats.StorageUsedMB, _usageStats.StorageLimitMB)%"></div>
+                                    </div>
+                                    <span class="ashare-usage-text">
+                                        @FormatStorage(_usageStats.StorageUsedMB) / @(_usageStats.StorageLimitMB < 0 ? "∞" : FormatStorage(_usageStats.StorageLimitMB))
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        @* Featured Listings *@
+                        <div class="ashare-usage-card">
+                            <div class="ashare-usage-icon">
+                                <i class="bi bi-star-fill"></i>
+                            </div>
+                            <div class="ashare-usage-info">
+                                <span class="ashare-usage-label">@L["FeaturedListings"]</span>
+                                <div class="ashare-usage-progress">
+                                    <div class="ashare-progress-bar">
+                                        <div class="ashare-progress-fill" style="width: @GetUsagePercentage(_usageStats.FeaturedUsed, _usageStats.FeaturedLimit)%"></div>
+                                    </div>
+                                    <span class="ashare-usage-text">
+                                        @_usageStats.FeaturedUsed / @(_usageStats.FeaturedLimit < 0 ? "∞" : _usageStats.FeaturedLimit.ToString())
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        @* API Calls *@
+                        <div class="ashare-usage-card">
+                            <div class="ashare-usage-icon">
+                                <i class="bi bi-code-slash"></i>
+                            </div>
+                            <div class="ashare-usage-info">
+                                <span class="ashare-usage-label">@L["ApiAccess"]</span>
+                                <div class="ashare-usage-progress">
+                                    <div class="ashare-progress-bar">
+                                        <div class="ashare-progress-fill" style="width: @GetUsagePercentage(_usageStats.ApiCallsThisMonth, _usageStats.ApiCallsLimit)%"></div>
+                                    </div>
+                                    <span class="ashare-usage-text">
+                                        @_usageStats.ApiCallsThisMonth / @(_usageStats.ApiCallsLimit < 0 ? "∞" : _usageStats.ApiCallsLimit.ToString())
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @* Commission Info *@
+            <div class="ashare-commission-section">
+                <h3 class="ashare-section-title">@L["CommissionRate"]</h3>
+                <div class="ashare-commission-card">
+                    <div class="ashare-commission-rate">
+                        <span class="ashare-rate-value">@_subscription.CommissionPercentage%</span>
+                        <span class="ashare-rate-label">@L["PerTransaction"]</span>
+                    </div>
+                    <p class="ashare-commission-note">@L["CommissionNote"]</p>
+                </div>
+            </div>
+
+            @* Recent Invoices *@
+            @if (_invoices.Any())
+            {
+                <div class="ashare-invoices-section">
+                    <div class="ashare-section-header">
+                        <h3 class="ashare-section-title">@L["RecentInvoices"]</h3>
+                        <button class="ac-btn ac-btn-link" @onclick='() => Navigation.NavigateTo("/host/invoices")'>
+                            @L["ViewAll"]
+                        </button>
+                    </div>
+
+                    <div class="ashare-invoices-list">
+                        @foreach (var invoice in _invoices.Take(3))
+                        {
+                            <div class="ashare-invoice-item">
+                                <div class="ashare-invoice-info">
+                                    <span class="ashare-invoice-number">@invoice.InvoiceNumber</span>
+                                    <span class="ashare-invoice-date">@invoice.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                </div>
+                                <div class="ashare-invoice-amount">
+                                    <span class="ashare-amount">@invoice.Total.ToString("N2") @invoice.Currency</span>
+                                    <span class="ashare-invoice-status @GetInvoiceStatusClass(invoice.Status)">
+                                        @GetInvoiceStatusLabel(invoice.Status)
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Quick Actions *@
+            <div class="ashare-quick-actions">
+                <button class="ashare-action-btn" @onclick='() => Navigation.NavigateTo("/host/plans")'>
+                    <i class="bi bi-arrow-up-circle"></i>
+                    <span>@L["UpgradePlan"]</span>
+                </button>
+                <button class="ashare-action-btn" @onclick='() => Navigation.NavigateTo("/host/invoices")'>
+                    <i class="bi bi-receipt"></i>
+                    <span>@L["Invoices"]</span>
+                </button>
+                <button class="ashare-action-btn" @onclick='() => Navigation.NavigateTo("/host/billing")'>
+                    <i class="bi bi-credit-card"></i>
+                    <span>@L["BillingSettings"]</span>
+                </button>
+                <button class="ashare-action-btn" @onclick='() => Navigation.NavigateTo("/support")'>
+                    <i class="bi bi-headset"></i>
+                    <span>@L["Support"]</span>
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private bool _isLoading = true;
+    private SubscriptionDto? _subscription;
+    private VendorUsageStatsDto? _usageStats;
+    private List<InvoiceSummaryDto> _invoices = new();
+
+    // TODO: Get from auth context
+    private Guid _vendorId = Guid.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+
+        try
+        {
+            // TODO: Get vendor ID from authenticated user
+            // For now, we'll show empty state
+
+            if (_vendorId != Guid.Empty)
+            {
+                _subscription = await ApiService.GetHostSubscriptionAsync(_vendorId);
+                _usageStats = await ApiService.GetUsageStatsAsync(_vendorId);
+                _invoices = await ApiService.GetHostInvoicesAsync(_vendorId);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading subscription dashboard: {ex.Message}");
+        }
+
+        _isLoading = false;
+    }
+
+    private string GetStatusClass(SubscriptionStatus status)
+    {
+        return status switch
+        {
+            SubscriptionStatus.Active => "status-active",
+            SubscriptionStatus.Trial => "status-trial",
+            SubscriptionStatus.PastDue => "status-warning",
+            SubscriptionStatus.Cancelled => "status-cancelled",
+            SubscriptionStatus.Expired => "status-expired",
+            SubscriptionStatus.Suspended => "status-suspended",
+            _ => ""
+        };
+    }
+
+    private string GetStatusLabel(SubscriptionStatus status)
+    {
+        return status switch
+        {
+            SubscriptionStatus.Active => L["StatusActive"],
+            SubscriptionStatus.Trial => L["StatusTrial"],
+            SubscriptionStatus.PastDue => L["StatusPastDue"],
+            SubscriptionStatus.Cancelled => L["StatusCancelled"],
+            SubscriptionStatus.Expired => L["StatusExpired"],
+            SubscriptionStatus.Suspended => L["StatusSuspended"],
+            _ => ""
+        };
+    }
+
+    private string GetInvoiceStatusClass(InvoiceStatus status)
+    {
+        return status switch
+        {
+            InvoiceStatus.Paid => "status-paid",
+            InvoiceStatus.Pending => "status-pending",
+            InvoiceStatus.Failed => "status-failed",
+            InvoiceStatus.Refunded => "status-refunded",
+            _ => ""
+        };
+    }
+
+    private string GetInvoiceStatusLabel(InvoiceStatus status)
+    {
+        return status switch
+        {
+            InvoiceStatus.Paid => L["Paid"],
+            InvoiceStatus.Pending => L["Pending"],
+            InvoiceStatus.Failed => L["Failed"],
+            InvoiceStatus.Refunded => L["Refunded"],
+            InvoiceStatus.Draft => L["Draft"],
+            InvoiceStatus.Cancelled => L["Cancelled"],
+            _ => ""
+        };
+    }
+
+    private int GetUsagePercentage(int current, int max)
+    {
+        if (max <= 0) return 0; // Unlimited
+        return Math.Min(100, (int)((double)current / max * 100));
+    }
+
+    private string FormatStorage(decimal mb)
+    {
+        if (mb >= 1000)
+            return $"{mb / 1000:N1} GB";
+        return $"{mb:N0} MB";
+    }
+}

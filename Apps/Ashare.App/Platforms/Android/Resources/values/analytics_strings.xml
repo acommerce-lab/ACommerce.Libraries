@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+    ═══════════════════════════════════════════════════════════════════════════
+    Analytics SDK Configuration - Android
+    ═══════════════════════════════════════════════════════════════════════════
+
+    ⚠️ ضع المعرفات الحقيقية هنا:
+
+    📘 Meta (Facebook):
+       1. اذهب إلى: https://developers.facebook.com
+       2. اختر تطبيقك → Settings → Basic
+       3. انسخ App ID و Client Token
+
+    📙 TikTok:
+       1. اذهب إلى: https://ads.tiktok.com
+       2. Assets → Events → App Events
+       3. أضف تطبيقك واحصل على App ID
+
+    📕 Snapchat:
+       1. اذهب إلى: https://ads.snapchat.com
+       2. Events Manager → Mobile App
+       3. احصل على Client ID
+
+    📗 Google/Firebase:
+       يتم تكوينه عبر ملف google-services.json
+       حمّله من: https://console.firebase.google.com → Project Settings
+
+    ═══════════════════════════════════════════════════════════════════════════
+    -->
+
+    <!-- Meta (Facebook) SDK -->
+    <string name="facebook_app_id">1462339382120412</string>
+    <string name="facebook_client_token">6cd3a67432f9e6693943424a7c53b97d</string>
+
+    <!-- TikTok SDK -->
+    <string name="tiktok_app_id">YOUR_TIKTOK_APP_ID</string>
+
+    <!-- Snapchat SDK -->
+    <string name="snapchat_client_id">YOUR_SNAPCHAT_CLIENT_ID</string>
+</resources>
