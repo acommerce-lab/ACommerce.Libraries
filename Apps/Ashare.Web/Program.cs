@@ -1,4 +1,5 @@
 using Ashare.Shared.Services;
+using Ashare.Shared.Services.Analytics;
 using Ashare.Web.Components;
 using Ashare.Web.Services;
 using ACommerce.Client.Auth;
@@ -175,6 +176,11 @@ builder.Services.AddScoped<ITimezoneService, BrowserTimezoneService>();
 // ═══════════════════════════════════════════════════════════════════
 builder.Services.AddScoped<AshareApiService>();
 builder.Services.AddScoped<PendingListingService>();
+
+// ═══════════════════════════════════════════════════════════════════
+// Analytics Services (Meta, Google, TikTok, Snapchat)
+// ═══════════════════════════════════════════════════════════════════
+builder.Services.AddAshareAnalytics(builder.Configuration);
 
 // Additional client registrations
 builder.Services.AddScoped<CategoriesClient>();
