@@ -114,8 +114,11 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        Console.WriteLine($"[PaymentWebView] OnAfterRenderAsync: firstRender={firstRender}, AutoOpen={AutoOpen}, HasUrl={!string.IsNullOrEmpty(PaymentUrl)}");
+
         if (firstRender && AutoOpen && !string.IsNullOrEmpty(PaymentUrl))
         {
+            Console.WriteLine("[PaymentWebView] Auto-opening payment page...");
             await TryOpenPayment();
         }
     }

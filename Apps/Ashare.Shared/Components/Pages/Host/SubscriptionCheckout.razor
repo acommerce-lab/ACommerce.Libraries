@@ -255,9 +255,12 @@
 
         _isProcessing = true;
         _errorMessage = null;
+        StateHasChanged();
 
         try
         {
+            Console.WriteLine("[SubscriptionCheckout] Creating subscription payment...");
+
             // Create subscription and get payment URL
             var response = await ApiService.CreateSubscriptionPaymentAsync(new CreateSubscriptionPaymentRequest
             {
@@ -266,31 +269,37 @@
                 ReturnUrl = _returnUrlPattern
             });
 
+            Console.WriteLine($"[SubscriptionCheckout] Response: Success={response?.Success}, PaymentUrl={response?.PaymentUrl?.Substring(0, Math.Min(50, response?.PaymentUrl?.Length ?? 0))}...");
+
             if (response != null && !string.IsNullOrEmpty(response.PaymentUrl))
             {
                 _paymentUrl = response.PaymentUrl;
                 _paymentId = response.PaymentId;
                 _showPaymentWebView = true;
+                Console.WriteLine($"[SubscriptionCheckout] PaymentWebView will show with URL: {_paymentUrl.Substring(0, Math.Min(50, _paymentUrl.Length))}...");
             }
             else if (response?.RequiresPayment == false)
             {
                 // Free trial or free plan - no payment needed
+                Console.WriteLine("[SubscriptionCheckout] No payment required, redirecting...");
                 Navigation.NavigateTo("/host/subscription?success=true");
+                return;
             }
             else
             {
                 // API returned but no payment URL
                 _errorMessage = L["PaymentInitError"];
-                Console.WriteLine("Error: API returned null or empty payment URL");
+                Console.WriteLine($"[SubscriptionCheckout] Error: No payment URL. Response: {response?.Message}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error processing payment: {ex.Message}");
+            Console.WriteLine($"[SubscriptionCheckout] Error processing payment: {ex.Message}");
             _errorMessage = L["PaymentConnectionError"];
         }
 
         _isProcessing = false;
+        StateHasChanged();
     }
 
     private void HandlePaymentCompleted(PaymentResult result)
