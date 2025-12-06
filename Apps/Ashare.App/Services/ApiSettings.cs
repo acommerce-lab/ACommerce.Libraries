@@ -4,12 +4,27 @@ namespace Ashare.App.Services;
 /// Centralized API configuration for Ashare App.
 /// All API base URLs should be retrieved from this single source.
 /// </summary>
-public class ApiSettings
+public static class ApiSettings
 {
+    // ═══════════════════════════════════════════════════════════════════════════
+    // 🔧 التبديل السريع بين البيئات
+    // ═══════════════════════════════════════════════════════════════════════════
+
     /// <summary>
-    /// Production API URL
+    /// 🔄 تبديل سريع للبيئة:
+    /// - true = استخدام الباك اند المحلي (localhost)
+    /// - false = استخدام الباك اند الإنتاجي (Azure)
     /// </summary>
-    public const string ProductionUrl = "https://api.ashare.app";
+    public const bool UseLocalApi = true;  // ← غيّر هذا للتبديل
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // 📍 عناوين الـ API
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Production API URL (Azure)
+    /// </summary>
+    public const string ProductionUrl = "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net";
 
     /// <summary>
     /// Development URL for Android Emulator (10.0.2.2 maps to host's localhost)
@@ -21,27 +36,33 @@ public class ApiSettings
     /// </summary>
     public const string LocalhostUrl = "https://localhost:5001";
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // 🎯 الـ URL المستخدم
+    // ═══════════════════════════════════════════════════════════════════════════
+
     /// <summary>
-    /// Gets the appropriate API base URL based on the current platform and build configuration.
+    /// Gets the appropriate API base URL based on UseLocalApi setting and platform.
     /// </summary>
     public static string BaseUrl
     {
         get
         {
-#if DEBUG
-            if (DeviceInfo.Platform == DevicePlatform.Android)
+            // إذا تم اختيار الباك اند المحلي
+            if (UseLocalApi)
             {
-                return AndroidEmulatorUrl;
-            }
-            else if (DeviceInfo.Platform == DevicePlatform.WinUI)
-            {
+                if (DeviceInfo.Platform == DevicePlatform.Android)
+                {
+                    return AndroidEmulatorUrl;
+                }
+                else if (DeviceInfo.Platform == DevicePlatform.WinUI)
+                {
+                    return LocalhostUrl;
+                }
                 return LocalhostUrl;
             }
-            // iOS Simulator and other platforms in debug mode
-            return LocalhostUrl;
-#else
+
+            // استخدام الباك اند الإنتاجي
             return ProductionUrl;
-#endif
         }
     }
 
@@ -49,4 +70,14 @@ public class ApiSettings
     /// Gets the base URL as a Uri object.
     /// </summary>
     public static Uri BaseUri => new Uri(BaseUrl);
+
+    /// <summary>
+    /// Logs current configuration (for debugging)
+    /// </summary>
+    public static void LogConfiguration()
+    {
+        System.Diagnostics.Debug.WriteLine($"[ApiSettings] UseLocalApi: {UseLocalApi}");
+        System.Diagnostics.Debug.WriteLine($"[ApiSettings] Platform: {DeviceInfo.Platform}");
+        System.Diagnostics.Debug.WriteLine($"[ApiSettings] BaseUrl: {BaseUrl}");
+    }
 }

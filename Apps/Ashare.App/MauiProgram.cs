@@ -87,6 +87,10 @@ public static class MauiProgram
         // ═══════════════════════════════════════════════════════════════════
         var apiBaseUrl = ApiSettings.BaseUrl;
 
+        // 🔍 Debug: Log API configuration
+        ApiSettings.LogConfiguration();
+        Console.WriteLine($"[MauiProgram] 🌐 API Base URL: {apiBaseUrl}");
+
         // ═══════════════════════════════════════════════════════════════════
         // Client SDKs with Service Discovery (Predefined Services)
         // ═══════════════════════════════════════════════════════════════════
