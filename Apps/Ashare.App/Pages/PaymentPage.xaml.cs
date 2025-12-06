@@ -81,29 +81,39 @@ public partial class PaymentPage : ContentPage
             var status = query["status"] ?? query["Status"];
             var orderId = query["orderId"] ?? query["OrderId"];
             var transactionId = query["transactionId"] ?? query["TransactionId"];
-            var resultCode = query["resultCode"] ?? query["ResultCode"];
-            var message = query["message"] ?? query["Message"];
+            var merchantReference = query["merchantReference"] ?? query["MerchantReference"];
             var error = query["error"] ?? query["Error"];
 
-            // Noon لا يرسل status في الـ redirect URL
-            // الوصول إلى صفحة الـ callback يعني أن الدفع تم بنجاح
-            // إذا فشل الدفع، Noon يظهر رسالة خطأ ولا يقوم بإعادة التوجيه
-            var isSuccess = !string.IsNullOrEmpty(orderId) &&
-                           string.IsNullOrEmpty(error) &&
-                           (string.IsNullOrEmpty(status) ||
-                            status.ToLower() == "success" ||
-                            status.ToLower() == "captured" ||
-                            resultCode == "0");
+            Console.WriteLine($"[PaymentPage] Callback params: orderId={orderId}, merchantReference={merchantReference}, status={status}, error={error}");
 
-            Console.WriteLine($"[PaymentPage] Payment result: Success={isSuccess}, OrderId={orderId}, Status={status ?? "redirect-success"}");
+            // إذا كان هناك خطأ صريح من Noon، نعتبره فشل
+            if (!string.IsNullOrEmpty(error))
+            {
+                Console.WriteLine($"[PaymentPage] ❌ Payment failed with error: {error}");
+                _resultTcs.TrySetResult(new PaymentPageResult
+                {
+                    Success = false,
+                    OrderId = orderId,
+                    Status = "failed",
+                    Message = error
+                });
+                ClosePageAsync();
+                return;
+            }
+
+            // Noon لا يرسل status في redirect URL
+            // يجب التحقق من حالة الدفع عبر API
+            // نُرسل orderId للتحقق من الحالة الفعلية
+            Console.WriteLine($"[PaymentPage] 🔄 Callback received - returning orderId for API verification");
+            Console.WriteLine($"[PaymentPage] OrderId={orderId}, Status=pending_verification");
 
             var result = new PaymentPageResult
             {
-                Success = isSuccess,
-                OrderId = orderId,
+                Success = false, // لا نفترض النجاح - يجب التحقق عبر API
+                OrderId = orderId ?? merchantReference, // استخدام merchantReference كبديل
                 TransactionId = transactionId ?? orderId,
-                Status = status ?? "redirect-success",
-                Message = isSuccess ? "تم الدفع بنجاح" : (message ?? error ?? "فشلت عملية الدفع")
+                Status = "pending_verification", // حالة تحتاج تحقق من API
+                Message = "جاري التحقق من حالة الدفع..."
             };
 
             // Complete and close
@@ -116,6 +126,7 @@ public partial class PaymentPage : ContentPage
             _resultTcs.TrySetResult(new PaymentPageResult
             {
                 Success = false,
+                Status = "error",
                 Message = "حدث خطأ في معالجة نتيجة الدفع"
             });
             ClosePageAsync();
