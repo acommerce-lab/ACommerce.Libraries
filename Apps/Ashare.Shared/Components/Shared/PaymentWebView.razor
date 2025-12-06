@@ -1,283 +1,556 @@
 @using Microsoft.JSInterop
+
 @using Ashare.Shared.Models
+
 @using Ashare.Shared.Services
+
 @inject IJSRuntime JS
+
 @inject NavigationManager Navigation
+
 @inject IAppNavigationService AppNavigation
+
 @implements IAsyncDisposable
 
+
+
 <div class="payment-webview-container">
+
     @if (UseRedirect)
+
     {
+
         <div class="payment-redirect-message">
+
             <div class="payment-redirect-icon">
+
                 <i class="bi bi-credit-card-2-front"></i>
+
             </div>
+
             <h3>جاري توجيهك لصفحة الدفع الآمنة</h3>
+
             <p>سيتم فتح صفحة الدفع في نافذة جديدة أو توجيهك لها تلقائياً</p>
 
+
+
             @if (!string.IsNullOrEmpty(_errorMessage))
+
             {
+
                 <div class="payment-error-message">
+
                     <i class="bi bi-exclamation-triangle"></i>
+
                     @_errorMessage
+
                 </div>
+
             }
+
+
 
             <div class="payment-redirect-actions">
+
                 <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="OpenPaymentPage" disabled="@_isOpening">
+
                     @if (_isOpening)
+
                     {
+
                         <div class="ac-spinner ac-spinner-sm"></div>
+
                         <span>جاري الفتح...</span>
+
                     }
+
                     else
+
                     {
+
                         <i class="bi bi-box-arrow-up-right"></i>
+
                         <span>فتح صفحة الدفع</span>
+
                     }
+
                 </button>
+
+
 
                 @if (!string.IsNullOrEmpty(PaymentUrl))
+
                 {
+
                     <a href="@PaymentUrl" target="_blank" class="ac-btn ac-btn-outline-primary">
+
                         <i class="bi bi-box-arrow-up-right"></i>
+
                         فتح يدوياً
+
                     </a>
+
                 }
+
+
 
                 <button class="ac-btn ac-btn-outline-secondary" @onclick="HandleCancel">
+
                     إلغاء
+
                 </button>
+
             </div>
+
+
 
             <p class="payment-redirect-note">
+
                 <i class="bi bi-shield-check"></i>
+
                 سيتم إرجاعك تلقائياً بعد إتمام الدفع
+
             </p>
 
+
+
             @if (!string.IsNullOrEmpty(PaymentUrl))
+
             {
+
                 <details class="payment-debug-info">
+
                     <summary>معلومات تقنية</summary>
+
                     <p class="payment-url-display">@PaymentUrl</p>
+
                 </details>
+
             }
+
         </div>
+
     }
+
     else
+
     {
+
         @if (_isLoading)
+
         {
+
             <div class="payment-loading">
+
                 <div class="ac-spinner"></div>
+
                 <span>جاري تحميل صفحة الدفع...</span>
+
             </div>
+
         }
+
+
 
         <div class="payment-header">
+
             <button class="payment-close-btn" @onclick="HandleCancel">
+
                 <i class="bi bi-x-lg"></i>
+
             </button>
+
             <span class="payment-secure-badge">
+
                 <i class="bi bi-shield-lock-fill"></i>
+
                 دفع آمن
+
             </span>
+
         </div>
 
-        <iframe
-            @ref="_iframeRef"
-            src="@PaymentUrl"
-            class="payment-iframe @(_isLoading ? "loading" : "")"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
-            @onload="HandleIframeLoad">
+
+
+        <iframe @ref="_iframeRef"
+                src="@PaymentUrl"
+                class="payment-iframe @(_isLoading ? "loading" : "")"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
+                @onload="HandleIframeLoad">
         </iframe>
+
     }
+
 </div>
 
+
+
 @code {
+
     [Parameter, EditorRequired]
+
     public string PaymentUrl { get; set; } = string.Empty;
 
+
+
     [Parameter]
+
     public string? PaymentId { get; set; }
 
+
+
     [Parameter]
+
     public string ReturnUrlPattern { get; set; } = "/payment/callback";
 
+
+
     [Parameter]
+
     public EventCallback<PaymentResult> OnPaymentCompleted { get; set; }
 
+
+
     [Parameter]
+
     public EventCallback OnPaymentCancelled { get; set; }
 
+
+
     [Parameter]
+
     public bool UseRedirect { get; set; } = true;
 
+
+
     private ElementReference _iframeRef;
+
     private bool _isLoading = true;
+
     private string? _errorMessage;
+
     private bool _isOpening = false;
+
     private DotNetObjectReference<PaymentWebView>? _objRef;
 
+
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
+
     {
+
         if (firstRender)
+
         {
+
             _objRef = DotNetObjectReference.Create(this);
 
+
+
             if (UseRedirect)
+
             {
+
                 await OpenPaymentPage();
+
             }
+
             else
+
             {
+
                 await SetupNavigationListener();
+
             }
+
         }
+
     }
+
+
 
     private async Task OpenPaymentPage()
+
     {
+
         if (string.IsNullOrEmpty(PaymentUrl))
+
         {
+
             _errorMessage = "رابط الدفع غير متوفر";
+
             StateHasChanged();
+
             return;
+
         }
+
+
 
         _isOpening = true;
+
         _errorMessage = null;
+
         StateHasChanged();
 
+
+
         try
+
         {
+
             await AppNavigation.OpenExternalAsync(PaymentUrl);
+
         }
+
         catch (Exception ex)
+
         {
+
             _errorMessage = $"فشل فتح صفحة الدفع: {ex.Message}";
+
             try
+
             {
+
                 Navigation.NavigateTo(PaymentUrl, forceLoad: true);
+
             }
+
             catch { }
+
         }
+
         finally
+
         {
+
             _isOpening = false;
+
             StateHasChanged();
+
         }
+
     }
+
+
 
     private async Task SetupNavigationListener()
+
     {
+
         try
+
         {
+
             await JS.InvokeVoidAsync("eval", @"
+
                 window.paymentMessageHandler = function(event) {
+
                     if (event.data && event.data.type === 'payment_complete') {
+
                         DotNet.invokeMethodAsync('Ashare.Shared', 'OnPaymentMessage', JSON.stringify(event.data));
+
                     }
+
                 };
+
                 window.addEventListener('message', window.paymentMessageHandler);
+
             ");
+
         }
+
         catch { }
+
     }
+
+
 
     private void HandleIframeLoad()
+
     {
+
         _isLoading = false;
+
         StateHasChanged();
+
         CheckIframeNavigation();
+
     }
+
+
 
     private async void CheckIframeNavigation()
+
     {
+
         try
+
         {
+
             var currentUrl = await JS.InvokeAsync<string>("eval", @"
+
                 try { return document.querySelector('.payment-iframe').contentWindow.location.href; }
+
                 catch(e) { return ''; }
+
             ");
+
+
 
             if (!string.IsNullOrEmpty(currentUrl) && currentUrl.Contains(ReturnUrlPattern))
+
             {
+
                 await ProcessReturnUrl(currentUrl);
+
             }
+
         }
+
         catch { }
+
     }
+
+
 
     private async Task ProcessReturnUrl(string url)
+
     {
+
         var uri = new Uri(url);
+
         var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
 
+
+
         var result = new PaymentResult
+
         {
+
             Success = query["status"]?.ToLower() == "success" ||
+
                      query["status"]?.ToLower() == "captured" ||
+
                      query["resultCode"] == "0",
+
             TransactionId = query["orderId"] ?? query["transactionId"] ?? "",
+
             Message = query["message"] ?? query["error"] ?? ""
+
         };
 
+
+
         await OnPaymentCompleted.InvokeAsync(result);
+
     }
+
+
 
     [JSInvokable]
+
     public async Task OnPaymentMessage(string messageJson)
+
     {
+
         try
+
         {
+
             var message = System.Text.Json.JsonSerializer.Deserialize<PaymentMessage>(messageJson);
+
             if (message != null)
+
             {
+
                 var result = new PaymentResult
+
                 {
+
                     Success = message.Status == "success",
+
                     TransactionId = message.TransactionId ?? "",
+
                     Message = message.Message ?? ""
+
                 };
+
                 await OnPaymentCompleted.InvokeAsync(result);
+
             }
+
         }
+
         catch { }
+
     }
+
+
 
     private async Task HandleCancel()
+
     {
+
         await OnPaymentCancelled.InvokeAsync();
+
     }
+
+
 
     public async ValueTask DisposeAsync()
+
     {
+
         try
+
         {
+
             await JS.InvokeVoidAsync("eval", @"
+
                 if (window.paymentMessageHandler) {
+
                     window.removeEventListener('message', window.paymentMessageHandler);
+
                     delete window.paymentMessageHandler;
+
                 }
+
             ");
+
         }
+
         catch { }
 
+
+
         _objRef?.Dispose();
+
     }
+
+
 
     private class PaymentMessage
+
     {
+
         public string Type { get; set; } = string.Empty;
+
         public string Status { get; set; } = string.Empty;
+
         public string? TransactionId { get; set; }
+
         public string? Message { get; set; }
+
     }
+
 }
 
+
+
 <style>
+
     .payment-webview-container {
         display: flex;
         flex-direction: column;
@@ -285,6 +558,8 @@
         background: var(--ac-bg-primary);
         position: relative;
     }
+
+
 
     .payment-header {
         display: flex;
@@ -294,6 +569,8 @@
         background: var(--ac-bg-secondary);
         border-bottom: 1px solid var(--ac-border);
     }
+
+
 
     .payment-close-btn {
         display: flex;
@@ -307,14 +584,20 @@
         cursor: pointer;
     }
 
-    .payment-close-btn:hover {
-        background: var(--ac-bg-tertiary);
-    }
 
-    .payment-close-btn i {
-        font-size: 18px;
-        color: var(--ac-text-primary);
-    }
+
+        .payment-close-btn:hover {
+            background: var(--ac-bg-tertiary);
+        }
+
+
+
+        .payment-close-btn i {
+            font-size: 18px;
+            color: var(--ac-text-primary);
+        }
+
+
 
     .payment-secure-badge {
         display: flex;
@@ -325,6 +608,8 @@
         font-weight: 500;
     }
 
+
+
     .payment-iframe {
         flex: 1;
         width: 100%;
@@ -332,9 +617,13 @@
         background: white;
     }
 
-    .payment-iframe.loading {
-        opacity: 0;
-    }
+
+
+        .payment-iframe.loading {
+            opacity: 0;
+        }
+
+
 
     .payment-loading {
         position: absolute;
@@ -348,6 +637,8 @@
         z-index: 10;
     }
 
+
+
     .payment-redirect-message {
         display: flex;
         flex-direction: column;
@@ -359,6 +650,8 @@
         min-height: 400px;
     }
 
+
+
     .payment-redirect-icon {
         width: 80px;
         height: 80px;
@@ -369,20 +662,28 @@
         justify-content: center;
     }
 
-    .payment-redirect-icon i {
-        font-size: 40px;
-        color: var(--ac-primary);
-    }
+
+
+        .payment-redirect-icon i {
+            font-size: 40px;
+            color: var(--ac-primary);
+        }
+
+
 
     .payment-redirect-message h3 {
         margin: 0;
         font-size: var(--ac-font-lg);
     }
 
+
+
     .payment-redirect-message p {
         margin: 0;
         color: var(--ac-text-secondary);
     }
+
+
 
     .payment-redirect-actions {
         display: flex;
@@ -393,6 +694,8 @@
         margin-top: var(--ac-spacing-md);
     }
 
+
+
     .payment-redirect-note {
         display: flex;
         align-items: center;
@@ -401,6 +704,8 @@
         color: var(--ac-success) !important;
         font-size: var(--ac-font-xs) !important;
     }
+
+
 
     .payment-error-message {
         display: flex;
@@ -414,17 +719,23 @@
         max-width: 300px;
     }
 
+
+
     .payment-debug-info {
         margin-top: var(--ac-spacing-lg);
         width: 100%;
         max-width: 400px;
     }
 
-    .payment-debug-info summary {
-        cursor: pointer;
-        color: var(--ac-text-tertiary);
-        font-size: var(--ac-font-xs);
-    }
+
+
+        .payment-debug-info summary {
+            cursor: pointer;
+            color: var(--ac-text-tertiary);
+            font-size: var(--ac-font-xs);
+        }
+
+
 
     .payment-url-display {
         margin: var(--ac-spacing-sm) 0 0;
@@ -435,4 +746,5 @@
         word-break: break-all;
         font-family: monospace;
     }
+
 </style>
