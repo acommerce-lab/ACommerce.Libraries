@@ -1,4 +1,5 @@
 using Ashare.Shared.Services;
+using Ashare.Shared.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -20,6 +21,25 @@ public class WebPaymentService : IPaymentService
     }
 
     public bool CanOpenExternal => true;
+
+    /// <summary>
+    /// Web doesn't support in-app WebView - uses redirect instead
+    /// </summary>
+    public bool SupportsInAppPayment => false;
+
+    /// <summary>
+    /// Not supported on web - use OpenPaymentPageAsync instead
+    /// </summary>
+    public Task<PaymentResult> OpenPaymentInAppAsync(string paymentUrl, string callbackPattern = "/host/payment/callback")
+    {
+        // Web uses redirect, not in-app WebView
+        // This shouldn't be called since SupportsInAppPayment is false
+        return Task.FromResult(new PaymentResult
+        {
+            Success = false,
+            Message = "In-app payment not supported on web"
+        });
+    }
 
     public async Task<bool> OpenPaymentPageAsync(string paymentUrl)
     {

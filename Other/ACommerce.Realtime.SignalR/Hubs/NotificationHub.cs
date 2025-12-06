@@ -78,6 +78,53 @@ public class NotificationHub : BaseRealtimeHub<INotificationClient>
 	}
 
 	/// <summary>
+	/// Subscribe to payment notifications for a specific payment ID
+	/// This allows clients to receive payment success/failure notifications
+	/// </summary>
+	public async Task SubscribeToPayment(string paymentId)
+	{
+		if (string.IsNullOrEmpty(paymentId))
+		{
+			Logger.LogWarning("SubscribeToPayment called with empty paymentId");
+			return;
+		}
+
+		var groupName = $"payment_{paymentId}";
+		await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+
+		Logger.LogInformation(
+			"Connection {ConnectionId} subscribed to payment notifications for {PaymentId}",
+			Context.ConnectionId,
+			paymentId);
+
+		// Confirm subscription to client
+		await Clients.Caller.ReceiveMessage("PaymentSubscribed", new
+		{
+			PaymentId = paymentId,
+			GroupName = groupName
+		});
+	}
+
+	/// <summary>
+	/// Unsubscribe from payment notifications
+	/// </summary>
+	public async Task UnsubscribeFromPayment(string paymentId)
+	{
+		if (string.IsNullOrEmpty(paymentId))
+		{
+			return;
+		}
+
+		var groupName = $"payment_{paymentId}";
+		await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
+
+		Logger.LogInformation(
+			"Connection {ConnectionId} unsubscribed from payment notifications for {PaymentId}",
+			Context.ConnectionId,
+			paymentId);
+	}
+
+	/// <summary>
 	/// Unsubscribe from a specific notification topic
 	/// </summary>
 	public async Task UnsubscribeFromTopic(string topic)

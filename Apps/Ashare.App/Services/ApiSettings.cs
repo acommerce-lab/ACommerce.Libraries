@@ -22,7 +22,7 @@ public static class ApiSettings
     // ═══════════════════════════════════════════════════════════════════════════
 
     /// <summary>
-    /// Production API URL
+    /// Production API URL (Azure)
     /// </summary>
     public const string ProductionUrl = "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net";
 
@@ -30,11 +30,6 @@ public static class ApiSettings
     /// Development URL for Android Emulator (10.0.2.2 maps to host's localhost)
     /// </summary>
     public const string AndroidEmulatorUrl = "https://10.0.2.2:5001";
-
-    /// <summary>
-    /// Development URL for iOS Simulator
-    /// </summary>
-    public const string IosSimulatorUrl = "https://localhost:5001";
 
     /// <summary>
     /// Development URL for Windows/Desktop
@@ -46,26 +41,28 @@ public static class ApiSettings
     // ═══════════════════════════════════════════════════════════════════════════
 
     /// <summary>
-    /// Gets the appropriate API base URL based on the current platform and build configuration.
+    /// Gets the appropriate API base URL based on UseLocalApi setting and platform.
     /// </summary>
     public static string BaseUrl
     {
         get
         {
-#if DEBUG
-            if (DeviceInfo.Platform == DevicePlatform.Android)
+            // إذا تم اختيار الباك اند المحلي
+            if (UseLocalApi)
             {
-                return AndroidEmulatorUrl;
-            }
-            else if (DeviceInfo.Platform == DevicePlatform.WinUI)
-            {
+                if (DeviceInfo.Platform == DevicePlatform.Android)
+                {
+                    return AndroidEmulatorUrl;
+                }
+                else if (DeviceInfo.Platform == DevicePlatform.WinUI)
+                {
+                    return LocalhostUrl;
+                }
                 return LocalhostUrl;
             }
-            // iOS Simulator and other platforms in debug mode
-            return LocalhostUrl;
-#else
+
+            // استخدام الباك اند الإنتاجي
             return ProductionUrl;
-#endif
         }
     }
 
@@ -73,4 +70,14 @@ public static class ApiSettings
     /// Gets the base URL as a Uri object.
     /// </summary>
     public static Uri BaseUri => new Uri(BaseUrl);
+
+    /// <summary>
+    /// Logs current configuration (for debugging)
+    /// </summary>
+    public static void LogConfiguration()
+    {
+        System.Diagnostics.Debug.WriteLine($"[ApiSettings] UseLocalApi: {UseLocalApi}");
+        System.Diagnostics.Debug.WriteLine($"[ApiSettings] Platform: {DeviceInfo.Platform}");
+        System.Diagnostics.Debug.WriteLine($"[ApiSettings] BaseUrl: {BaseUrl}");
+    }
 }

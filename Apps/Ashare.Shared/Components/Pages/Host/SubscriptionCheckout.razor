@@ -3,12 +3,16 @@
 @using ACommerce.Subscriptions.Enums
 @using Ashare.Shared.Models
 @using Ashare.Shared.Services
+@using ACommerce.Client.Realtime
+@using System.Text.Json
 @inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
 @inject Ashare.Shared.Services.ThemeService ThemeService
 @inject ILocalizationService L
 @inject IPaymentService PaymentService
 @inject NavigationManager NavigationManager
+@inject RealtimeClient RealtimeClient
+@implements IAsyncDisposable
 
 <div class="ac-page ashare-checkout-page @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
     @* Header *@
@@ -45,7 +49,7 @@
                 <PaymentWebView
                     PaymentUrl="@_paymentUrl"
                     PaymentId="@_paymentId"
-                    ReturnUrlPattern="@_returnUrlPattern"
+                    ReturnUrlPattern="/host/payment/callback"
                     UseRedirect="true"
                     OnPaymentCompleted="HandlePaymentCompleted"
                     OnPaymentCancelled="HandlePaymentCancelled" />
@@ -191,6 +195,13 @@
     private string? _paymentUrl;
     private string? _paymentId;
 
+    private string? _errorMessage;
+
+    // SignalR for payment notifications
+    private IDisposable? _notificationSubscription;
+    private bool _isConnectedToSignalR;
+    private bool _waitingForPaymentResult;
+
     private SubscriptionPlanDto? _selectedPlan;
     private SubscriptionDto? _currentSubscription;
     private BillingCycle _billingCycle = BillingCycle.Monthly;
@@ -286,21 +297,61 @@
             {
                 _paymentUrl = response.PaymentUrl;
                 _paymentId = response.PaymentId;
-                Console.WriteLine($"[SubscriptionCheckout] Opening payment URL directly: {_paymentUrl.Substring(0, Math.Min(50, _paymentUrl.Length))}...");
+                Console.WriteLine($"[SubscriptionCheckout] PaymentId: {_paymentId}");
 
-                // فتح صفحة الدفع مباشرة بدلاً من استخدام PaymentWebView
-                var success = await PaymentService.OpenPaymentPageAsync(_paymentUrl);
-                if (!success)
+                // التحقق من دعم الدفع داخل التطبيق (WebView)
+                if (PaymentService.SupportsInAppPayment)
                 {
-                    // إذا فشل الفتح التلقائي، نعرض الرابط للمستخدم
-                _showPaymentWebView = true;
-                    Console.WriteLine("[SubscriptionCheckout] Auto-open failed, showing manual link");
+                    Console.WriteLine("[SubscriptionCheckout] Using in-app WebView for payment");
+
+                    // الاتصال بـ SignalR للاستماع لإشعارات الدفع (كبديل احتياطي)
+                    await ConnectAndSubscribeToPayment(_paymentId);
+
+                    // فتح صفحة الدفع في WebView داخل التطبيق
+                    // يتم اعتراض رابط الـ callback لمعرفة نتيجة الدفع
+                    var result = await PaymentService.OpenPaymentInAppAsync(_paymentUrl, "/host/payment/callback");
+
+                    Console.WriteLine($"[SubscriptionCheckout] Payment result: Success={result.Success}, Message={result.Message}");
+
+                    // معالجة النتيجة
+                    if (result.Success)
+                    {
+                        Navigation.NavigateTo("/host/subscription?success=true");
+                        return;
+                    }
+                    else if (result.Cancelled)
+                    {
+                        // المستخدم ألغى الدفع - نبقى في الصفحة
+                        _errorMessage = null;
+                        Console.WriteLine("[SubscriptionCheckout] Payment cancelled by user");
+                    }
+                    else
+                    {
+                        // فشل الدفع
+                        _errorMessage = result.Message ?? L["PaymentFailed"];
+                        Console.WriteLine($"[SubscriptionCheckout] Payment failed: {result.Message}");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine("[SubscriptionCheckout] Payment page opened successfully");
-                    return; // لا نحتاج لتحديث الواجهة بعد التوجيه
-            }
+                    // Fallback: فتح في المتصفح الخارجي مع الاعتماد على SignalR
+                    Console.WriteLine("[SubscriptionCheckout] In-app payment not supported, using external browser");
+
+                    // الاتصال بـ SignalR للاستماع لإشعارات الدفع
+                    await ConnectAndSubscribeToPayment(_paymentId);
+
+                    _waitingForPaymentResult = true;
+                    var success = await PaymentService.OpenPaymentPageAsync(_paymentUrl);
+                    if (!success)
+                    {
+                        _showPaymentWebView = true;
+                        Console.WriteLine("[SubscriptionCheckout] Auto-open failed, showing manual link");
+                    }
+                    else
+                    {
+                        Console.WriteLine("[SubscriptionCheckout] Payment page opened - waiting for SignalR notification");
+                    }
+                }
             }
             else if (response?.RequiresPayment == false)
             {
@@ -314,14 +365,117 @@
                 // API returned but no payment URL
                 _errorMessage = L["PaymentInitError"];
                 Console.WriteLine($"[SubscriptionCheckout] Error: No payment URL. Response: {response?.Message}");
-        }
+            }
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"[SubscriptionCheckout] Exception: {ex.Message}");
+            _errorMessage = ex.Message;
         }
 
         _isProcessing = false;
         StateHasChanged();
+    }
+
+    /// <summary>
+    /// Connect to SignalR and subscribe to payment notifications
+    /// </summary>
+    private async Task ConnectAndSubscribeToPayment(string? paymentId)
+    {
+        if (string.IsNullOrEmpty(paymentId)) return;
+
+        try
+        {
+            // Connect to SignalR if not already connected
+            if (!_isConnectedToSignalR)
+            {
+                Console.WriteLine("[SubscriptionCheckout] Connecting to SignalR...");
+                await RealtimeClient.ConnectAsync(serviceName: "Ashare", hubPath: "/hubs/notifications");
+                _isConnectedToSignalR = true;
+                Console.WriteLine("[SubscriptionCheckout] ✅ Connected to SignalR");
+
+                // Subscribe to ReceiveMessage
+                _notificationSubscription = RealtimeClient.On<string, JsonElement>("ReceiveMessage", HandlePaymentMessage);
+            }
+
+            // Subscribe to payment notifications for this paymentId
+            Console.WriteLine($"[SubscriptionCheckout] Subscribing to payment notifications for {paymentId}...");
+            await RealtimeClient.SendAsync("SubscribeToPayment", paymentId);
+            Console.WriteLine($"[SubscriptionCheckout] ✅ Subscribed to payment_{paymentId}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[SubscriptionCheckout] ⚠️ SignalR connection failed: {ex.Message}");
+            // Continue without SignalR - fallback to manual result handling
+        }
+    }
+
+    /// <summary>
+    /// Handle payment messages from SignalR
+    /// </summary>
+    private void HandlePaymentMessage(string method, JsonElement data)
+    {
+        Console.WriteLine($"[SubscriptionCheckout] 📨 ReceiveMessage: method={method}");
+
+        if (method == "PaymentSubscribed")
+        {
+            Console.WriteLine($"[SubscriptionCheckout] ✅ PaymentSubscribed confirmed: {data.GetRawText()}");
+            return;
+        }
+
+        if (method == "PaymentSuccess" || method == "PaymentFailed")
+        {
+            var isSuccess = method == "PaymentSuccess";
+            Console.WriteLine($"[SubscriptionCheckout] 🎉 Payment result received: {method}");
+
+            try
+            {
+                var orderId = data.TryGetProperty("OrderId", out var orderIdProp) ? orderIdProp.GetString() : null;
+                var transactionId = data.TryGetProperty("TransactionId", out var txProp) ? txProp.GetString() : null;
+                var message = data.TryGetProperty("Message", out var msgProp) ? msgProp.GetString() : null;
+
+                Console.WriteLine($"[SubscriptionCheckout] OrderId={orderId}, TransactionId={transactionId}, Message={message}");
+
+                // Check if this notification is for our payment
+                if (!string.IsNullOrEmpty(_paymentId) && (orderId == _paymentId || transactionId == _paymentId))
+                {
+                    Console.WriteLine("[SubscriptionCheckout] ✅ This is our payment!");
+
+                    InvokeAsync(async () =>
+                    {
+                        _waitingForPaymentResult = false;
+
+                        // Unsubscribe from payment notifications
+                        if (_isConnectedToSignalR && !string.IsNullOrEmpty(_paymentId))
+                        {
+                            try
+                            {
+                                await RealtimeClient.SendAsync("UnsubscribeFromPayment", _paymentId);
+                            }
+                            catch { /* ignore */ }
+                        }
+
+                        // Navigate to result page
+                        if (isSuccess)
+                        {
+                            Navigation.NavigateTo("/host/subscription?success=true");
+                        }
+                        else
+                        {
+                            Navigation.NavigateTo($"/host/subscription?error={Uri.EscapeDataString(message ?? "فشلت عملية الدفع")}");
+                        }
+                    });
+                }
+                else
+                {
+                    Console.WriteLine($"[SubscriptionCheckout] ⏭️ Not our payment - expected {_paymentId}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[SubscriptionCheckout] ⚠️ Error parsing payment result: {ex.Message}");
+            }
+        }
     }
 
     private void HandlePaymentCompleted(PaymentResult result)
@@ -336,10 +490,47 @@
         }
     }
 
-    private void HandlePaymentCancelled()
+    private async Task HandlePaymentCancelled()
     {
         _showPaymentWebView = false;
+        _waitingForPaymentResult = false;
+
+        // Unsubscribe from payment notifications
+        if (_isConnectedToSignalR && !string.IsNullOrEmpty(_paymentId))
+        {
+            try
+            {
+                await RealtimeClient.SendAsync("UnsubscribeFromPayment", _paymentId);
+            }
+            catch { /* ignore */ }
+        }
+
         _paymentUrl = null;
+        _paymentId = null;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _notificationSubscription?.Dispose();
+
+        // Unsubscribe from payment notifications
+        if (_isConnectedToSignalR && !string.IsNullOrEmpty(_paymentId))
+        {
+            try
+            {
+                await RealtimeClient.SendAsync("UnsubscribeFromPayment", _paymentId);
+            }
+            catch { /* ignore */ }
+        }
+
+        if (_isConnectedToSignalR)
+        {
+            try
+            {
+                await RealtimeClient.DisconnectAsync();
+            }
+            catch { /* ignore */ }
+        }
     }
 }
 
