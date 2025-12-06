@@ -289,6 +289,7 @@
             {
                 PlanId = _selectedPlan.Id,
                 BillingCycle = _billingCycle,
+                ReturnUrl = returnUrl // إرسال URL المطلق إلى الباك إند
             });
 
             Console.WriteLine($"[SubscriptionCheckout] Response: Success={response?.Success}, PaymentUrl={response?.PaymentUrl?.Substring(0, Math.Min(50, response?.PaymentUrl?.Length ?? 0))}...");
