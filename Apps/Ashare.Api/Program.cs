@@ -53,6 +53,7 @@ using ACommerce.Payments.Api.Controllers;
 using ACommerce.Payments.Abstractions.Contracts;
 using ACommerce.Payments.Noon.Extensions;
 using Ashare.Api.Middleware;
+using Microsoft.AspNetCore.SignalR;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()

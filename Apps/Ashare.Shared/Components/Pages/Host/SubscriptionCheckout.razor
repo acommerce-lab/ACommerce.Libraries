@@ -45,7 +45,7 @@
                 <PaymentWebView
                     PaymentUrl="@_paymentUrl"
                     PaymentId="@_paymentId"
-                    ReturnUrlPattern="/host/payment/callback"
+                    ReturnUrlPattern="@_returnUrlPattern"
                     UseRedirect="true"
                     OnPaymentCompleted="HandlePaymentCompleted"
                     OnPaymentCancelled="HandlePaymentCancelled" />
@@ -190,7 +190,6 @@
     private bool _showPaymentWebView = false;
     private string? _paymentUrl;
     private string? _paymentId;
-    private string? _errorMessage;
 
     private SubscriptionPlanDto? _selectedPlan;
     private SubscriptionDto? _currentSubscription;
@@ -279,7 +278,6 @@
             {
                 PlanId = _selectedPlan.Id,
                 BillingCycle = _billingCycle,
-                ReturnUrl = returnUrl
             });
 
             Console.WriteLine($"[SubscriptionCheckout] Response: Success={response?.Success}, PaymentUrl={response?.PaymentUrl?.Substring(0, Math.Min(50, response?.PaymentUrl?.Length ?? 0))}...");
@@ -295,14 +293,14 @@
                 if (!success)
                 {
                     // إذا فشل الفتح التلقائي، نعرض الرابط للمستخدم
-                    _showPaymentWebView = true;
+                _showPaymentWebView = true;
                     Console.WriteLine("[SubscriptionCheckout] Auto-open failed, showing manual link");
                 }
                 else
                 {
                     Console.WriteLine("[SubscriptionCheckout] Payment page opened successfully");
                     return; // لا نحتاج لتحديث الواجهة بعد التوجيه
-                }
+            }
             }
             else if (response?.RequiresPayment == false)
             {
@@ -316,12 +314,10 @@
                 // API returned but no payment URL
                 _errorMessage = L["PaymentInitError"];
                 Console.WriteLine($"[SubscriptionCheckout] Error: No payment URL. Response: {response?.Message}");
-            }
+        }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[SubscriptionCheckout] Error processing payment: {ex.Message}");
-            _errorMessage = L["PaymentConnectionError"];
         }
 
         _isProcessing = false;

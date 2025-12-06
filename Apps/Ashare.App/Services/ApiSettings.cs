@@ -4,29 +4,25 @@ namespace Ashare.App.Services;
 /// Centralized API configuration for Ashare App.
 /// All API base URLs should be retrieved from this single source.
 /// </summary>
-public class ApiSettings
+public static class ApiSettings
 {
-    // ═══════════════════════════════════════════════════════════════════
-    // ⚙️ التبديل الرئيسي - غير هذه القيمة فقط للتبديل بين البيئات
-    // ═══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════════
+    // 🔧 التبديل السريع بين البيئات
+    // ═══════════════════════════════════════════════════════════════════════════
 
     /// <summary>
-    /// true = استخدام الباك اند المحلي (localhost)
-    /// false = استخدام الباك اند العالمي (Azure)
+    /// 🔄 تبديل سريع للبيئة:
+    /// - true = استخدام الباك اند المحلي (localhost)
+    /// - false = استخدام الباك اند الإنتاجي (Azure)
     /// </summary>
-    public const bool UseLocalApi = false;
+    public const bool UseLocalApi = true;  // ← غيّر هذا للتبديل
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // 📍 عناوين الـ API
+    // ═══════════════════════════════════════════════════════════════════════════
 
     /// <summary>
-    /// رقم الهوية المقبول للاختبار (يعمل فقط مع الباك اند المحلي)
-    /// </summary>
-    public const string TestNationalId = "2507643761";
-
-    // ═══════════════════════════════════════════════════════════════════
-    // روابط الـ API
-    // ═══════════════════════════════════════════════════════════════════
-
-    /// <summary>
-    /// Production API URL (Azure Canada East)
+    /// Production API URL
     /// </summary>
     public const string ProductionUrl = "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net";
 
@@ -45,30 +41,31 @@ public class ApiSettings
     /// </summary>
     public const string LocalhostUrl = "https://localhost:5001";
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // 🎯 الـ URL المستخدم
+    // ═══════════════════════════════════════════════════════════════════════════
+
     /// <summary>
-    /// Gets the appropriate API base URL based on configuration.
+    /// Gets the appropriate API base URL based on the current platform and build configuration.
     /// </summary>
     public static string BaseUrl
     {
         get
         {
-            // إذا كان UseLocalApi = false، استخدم Production دائماً
-            if (!UseLocalApi)
-            {
-                return ProductionUrl;
-            }
-
-            // UseLocalApi = true، اختر الرابط المناسب للمنصة
+#if DEBUG
             if (DeviceInfo.Platform == DevicePlatform.Android)
             {
                 return AndroidEmulatorUrl;
             }
-            else if (DeviceInfo.Platform == DevicePlatform.iOS)
+            else if (DeviceInfo.Platform == DevicePlatform.WinUI)
             {
-                return IosSimulatorUrl;
+                return LocalhostUrl;
             }
-
+            // iOS Simulator and other platforms in debug mode
             return LocalhostUrl;
+#else
+            return ProductionUrl;
+#endif
         }
     }
 
@@ -76,9 +73,4 @@ public class ApiSettings
     /// Gets the base URL as a Uri object.
     /// </summary>
     public static Uri BaseUri => new Uri(BaseUrl);
-
-    /// <summary>
-    /// هل نحن في وضع التطوير المحلي؟
-    /// </summary>
-    public static bool IsLocalDevelopment => UseLocalApi;
 }
