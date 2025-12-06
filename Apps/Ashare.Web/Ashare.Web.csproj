@@ -13,6 +13,9 @@
 
 		<!-- Service Registry for AddACommerceClientWithServices -->
 		<ProjectReference Include="..\..\Infrastructure\ACommerce.ServiceRegistry.Client\ACommerce.ServiceRegistry.Client.csproj" />
+
+		<!-- Payments Client for DI registration -->
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Payments\ACommerce.Client.Payments.csproj" />
 	</ItemGroup>
 
 </Project>

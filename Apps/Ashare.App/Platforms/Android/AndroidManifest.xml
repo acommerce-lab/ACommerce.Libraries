@@ -7,7 +7,59 @@
 		android:supportsRtl="true"
 		android:networkSecurityConfig="@xml/network_security_config"
 		android:usesCleartextTraffic="true">
+
+		<!-- ═══════════════════════════════════════════════════════════════════
+		     Meta (Facebook) SDK Configuration
+		     Get App ID from: https://developers.facebook.com → My Apps → Settings → Basic
+		     ═══════════════════════════════════════════════════════════════════ -->
+		<meta-data
+			android:name="com.facebook.sdk.ApplicationId"
+			android:value="@string/facebook_app_id" />
+		<meta-data
+			android:name="com.facebook.sdk.ClientToken"
+			android:value="@string/facebook_client_token" />
+
+		<!-- ═══════════════════════════════════════════════════════════════════
+		     TikTok SDK Configuration
+		     Get App ID from: https://ads.tiktok.com → Assets → Events → App Events
+		     ═══════════════════════════════════════════════════════════════════ -->
+		<meta-data
+			android:name="com.tiktok.sdk.AppId"
+			android:value="@string/tiktok_app_id" />
+
+		<!-- ═══════════════════════════════════════════════════════════════════
+		     Snapchat SDK Configuration
+		     Get App ID from: https://ads.snapchat.com → Events Manager → Mobile App
+		     ═══════════════════════════════════════════════════════════════════ -->
+		<meta-data
+			android:name="com.snap.kit.clientId"
+			android:value="@string/snapchat_client_id" />
+
 	</application>
+
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />
+
+	<!-- Required for Google/Firebase Analytics -->
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+	<!-- Required for Advertising ID (optional but recommended) -->
+	<uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+
+	<!-- ═══════════════════════════════════════════════════════════════════
+	     Deep Links for Ad Attribution
+	     ═══════════════════════════════════════════════════════════════════ -->
+	<queries>
+		<intent>
+			<action android:name="android.intent.action.VIEW" />
+			<category android:name="android.intent.category.BROWSABLE" />
+			<data android:scheme="https" />
+		</intent>
+		<!-- Facebook Deep Links -->
+		<package android:name="com.facebook.katana" />
+		<!-- TikTok Deep Links -->
+		<package android:name="com.zhiliaoapp.musically" />
+		<!-- Snapchat Deep Links -->
+		<package android:name="com.snapchat.android" />
+	</queries>
 </manifest>

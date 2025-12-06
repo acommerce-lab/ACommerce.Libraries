@@ -36,6 +36,8 @@
 
 		<!-- Marketplace Clients -->
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Vendors\ACommerce.Client.Vendors.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Subscriptions\ACommerce.Client.Subscriptions.csproj" />
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Payments\ACommerce.Client.Payments.csproj" />
 
 		<!-- Communication Clients -->
 		<ProjectReference Include="..\..\Clients\ACommerce.Client.Chats\ACommerce.Client.Chats.csproj" />
@@ -48,6 +50,15 @@
 
 		<!-- Reference to Localization -->
 		<ProjectReference Include="..\..\Modules\ACommerce.Localization\ACommerce.Localization.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Update="wwwroot\images\ashare-icon.svg">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Update="wwwroot\images\ashare-logo.svg">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	</ItemGroup>
 
 </Project>

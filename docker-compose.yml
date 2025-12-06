@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # Ashare API Service
+  ashare-api:
+    build:
+      context: .
+      dockerfile: Apps/Ashare.Api/Dockerfile
+    image: ashare-api:latest
+    container_name: ashare-api
+    ports:
+      - "5001:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      # Database
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/ashare.db
+      # JWT Configuration
+      - Jwt__Issuer=https://ashare.app
+      - Jwt__Audience=ashare-api
+      - Jwt__SecretKey=${JWT_SECRET_KEY:-YourSuperSecretKeyThatIsAtLeast32CharactersLong!}
+      # Noon Payments
+      - Payments__Noon__ApplicationIdentifier=${NOON_APP_ID:-newAshier}
+      - Payments__Noon__BusinessIdentifier=${NOON_BUSINESS_ID:-ashier}
+      - Payments__Noon__AuthorizationKey=${NOON_AUTH_KEY}
+      - Payments__Noon__IsSandbox=${NOON_SANDBOX:-true}
+      - Payments__Noon__Region=SA
+      - Payments__Noon__ReturnUrl=https://ashare.app/host/payment/callback
+    volumes:
+      # Persist SQLite database
+      - ashare-data:/app/data
+      # Persist logs
+      - ashare-logs:/app/logs
+      # Persist uploaded files
+      - ashare-uploads:/app/uploads
+    networks:
+      - ashare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Redis for caching and session storage (optional - for production)
+  redis:
+    image: redis:7-alpine
+    container_name: ashare-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - ashare-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  ashare-network:
+    driver: bridge
+
+volumes:
+  ashare-data:
+    driver: local
+  ashare-logs:
+    driver: local
+  ashare-uploads:
+    driver: local
+  redis-data:
+    driver: local

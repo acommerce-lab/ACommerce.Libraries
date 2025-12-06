@@ -2,15 +2,18 @@
 @inject Ashare.Shared.Services.ThemeService ThemeService
 @inject IAppNavigationService Navigation
 @inject AshareApiService ApiService
+@inject ACommerce.Client.Auth.TokenManager TokenManager
+@inject ACommerce.Client.Auth.AuthClient AuthClient
+@inject Ashare.Shared.Services.GuestModeService GuestMode
 
 <div class="ashare-app @(ThemeService.IsDarkMode ? "ac-dark" : "")">
     @* Navbar *@
-    @if (!IsAuthPage)
+    @if (!HideNavigation)
     {
         <nav class="ac-navbar ac-navbar-sticky">
             <div class="ac-navbar-container">
                 <div class="ac-navbar-brand">
-                    <img src="images/ashare-icon.svg" alt="عشير" class="ac-navbar-logo" width="36" height="36" />
+                    <img src="_content/Ashare.Shared/images/ashare-icon.svg" alt="عشير" class="ac-navbar-logo" width="36" height="36" />
                     <span class="ac-navbar-brand-text">عشير</span>
                 </div>
 
@@ -31,12 +34,12 @@
     }
 
     @* Main Content *@
-    <main class="ac-main @(IsAuthPage ? "" : "ac-has-navbar ac-has-bottom-nav")">
+    <main class="ac-main @(HideNavigation ? "" : "ac-has-navbar ac-has-bottom-nav")">
         @Body
     </main>
 
     @* Bottom Navigation *@
-    @if (!IsAuthPage)
+    @if (!HideNavigation)
     {
         <nav class="ac-bottom-nav">
             <a href="/" class="ac-bottom-nav-item @(IsActive("/") ? "active" : "")">
@@ -75,13 +78,107 @@
 
     private int BookingsCount { get; set; }
     private int NotificationCount { get; set; }
+    private bool _authChecked;
 
-    private bool IsAuthPage => RouteData?.PageType?.Name is "Login" or "Register";
+    private bool IsAuthPage
+    {
+        get
+        {
+            // التحقق من اسم الصفحة
+            var pageName = RouteData?.PageType?.Name;
+            if (pageName is "Login" or "Register" or "ProfileEdit")
+                return true;
+
+            // التحقق من المسار (للتوافق مع MAUI)
+            var currentPath = Navigation.CurrentUri?.ToLowerInvariant() ?? "";
+            return currentPath.Contains("/login") ||
+                   currentPath.Contains("/register") ||
+                   currentPath.Contains("/profile/edit");
+        }
+    }
+
+    /// <summary>
+    /// صفحات تحتاج شاشة كاملة بدون navbar و bottom nav
+    /// </summary>
+    private bool IsFullScreenPage
+    {
+        get
+        {
+            var pageName = RouteData?.PageType?.Name;
+            if (pageName is "ChatRoom")
+                return true;
+
+            var currentPath = Navigation.CurrentUri?.ToLowerInvariant() ?? "";
+            return currentPath.Contains("/chat/");
+        }
+    }
+
+    /// <summary>
+    /// هل يجب إخفاء القوائم (لصفحات المصادقة أو الشاشة الكاملة)
+    /// </summary>
+    private bool HideNavigation => IsAuthPage || IsFullScreenPage;
 
     protected override async Task OnInitializedAsync()
     {
+        // تحميل عدد الحجوزات والإشعارات
         BookingsCount = await ApiService.GetBookingsCountAsync();
         NotificationCount = ApiService.GetNotificationsCount();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_authChecked)
+        {
+            _authChecked = true;
+
+            // التحقق من المصادقة
+            var token = await TokenManager.GetTokenAsync();
+            var isGuest = GuestMode.IsGuestMode;
+
+            if (token != null && !IsAuthPage)
+            {
+                // التحقق من صلاحية التوكن مع الباك اند
+                var isValid = await ValidateTokenAsync();
+                if (!isValid)
+                {
+                    // التوكن غير صالح - حذفه والذهاب لصفحة الدخول
+                    Console.WriteLine("[Auth] Token is invalid, clearing and redirecting to login");
+                    TokenManager.ClearToken();
+                    Navigation.NavigateTo("/login");
+                    return;
+                }
+            }
+            else if (token == null && !isGuest && !IsAuthPage)
+            {
+                // لا يوجد توكن وليس في وضع الضيف
+                Navigation.NavigateTo("/login");
+            }
+        }
+    }
+
+    /// <summary>
+    /// التحقق من صلاحية التوكن من الباك اند
+    /// </summary>
+    private async Task<bool> ValidateTokenAsync()
+    {
+        try
+        {
+            // استدعاء /api/auth/me للتحقق من صلاحية التوكن
+            var user = await AuthClient.GetMeAsync();
+            return user != null;
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            // 401 = التوكن غير صالح
+            Console.WriteLine("[Auth] Token validation failed: Unauthorized");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            // أي خطأ آخر - نفترض أن التوكن صالح لتجنب تسجيل الخروج بسبب مشاكل الشبكة
+            Console.WriteLine($"[Auth] Token validation error (assuming valid): {ex.Message}");
+            return true;
+        }
     }
 
     private bool IsActive(string path)

@@ -46,6 +46,10 @@
     <ProjectReference Include="..\..\Marketplace\ACommerce.Vendors\ACommerce.Vendors.csproj" />
     <ProjectReference Include="..\..\Marketplace\ACommerce.Vendors.Api\ACommerce.Vendors.Api.csproj" />
 
+    <!-- Subscriptions (Vendor Subscription Plans) -->
+    <ProjectReference Include="..\..\Marketplace\ACommerce.Subscriptions\ACommerce.Subscriptions.csproj" />
+    <ProjectReference Include="..\..\Marketplace\ACommerce.Subscriptions.Api\ACommerce.Subscriptions.Api.csproj" />
+
     <!-- Orders & Cart (Bookings = Orders with time attributes) -->
     <ProjectReference Include="..\..\Sales\ACommerce.Cart\ACommerce.Cart.csproj" />
     <ProjectReference Include="..\..\Sales\ACommerce.Orders\ACommerce.Orders.csproj" />
@@ -81,6 +85,8 @@
 
     <!-- Payments -->
     <ProjectReference Include="..\..\Payments\ACommerce.Payments.Abstractions\ACommerce.Payments.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Payments\ACommerce.Payments.Api\ACommerce.Payments.Api.csproj" />
+    <ProjectReference Include="..\..\Payments\ACommerce.Payments.Noon\ACommerce.Payments.Noon.csproj" />
 
     <!-- Service Registry (for development - self-hosting) -->
     <ProjectReference Include="..\..\Infrastructure\ACommerce.ServiceRegistry.Core\ACommerce.ServiceRegistry.Core.csproj" />
@@ -95,6 +101,7 @@
 
     <!-- Notifications Messaging (handles SendNotificationCommand) -->
     <ProjectReference Include="..\..\ACommerce.Notifications.Messaging\ACommerce.Notifications.Messaging.csproj" />
+    <ProjectReference Include="..\Ashare.Shared\Ashare.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

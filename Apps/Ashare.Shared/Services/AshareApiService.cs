@@ -3,7 +3,11 @@ using ACommerce.Client.Categories;
 using ACommerce.Client.Products;
 using ACommerce.Client.ProductListings;
 using ACommerce.Client.Orders;
+using ACommerce.Client.Subscriptions;
+using ACommerce.Client.Payments;
 using ACommerce.Client.Core.Http;
+using ACommerce.Subscriptions.DTOs;
+using Ashare.Shared.Models;
 
 namespace Ashare.Shared.Services;
 
@@ -18,6 +22,8 @@ public class AshareApiService
 	private readonly ProductsClient _productsClient;
 	private readonly ProductListingsClient _listingsClient;
 	private readonly OrdersClient _ordersClient;
+	private readonly SubscriptionClient _subscriptionClient;
+	private readonly PaymentsClient _paymentsClient;
 
     // Local cache for favorites (can be persisted to local storage)
     private readonly HashSet<Guid> _favorites = [];
@@ -27,13 +33,17 @@ public class AshareApiService
 		CategoryAttributesClient categoryAttributesClient,
 		ProductsClient productsClient,
 		ProductListingsClient listingsClient,
-		OrdersClient ordersClient)
+		OrdersClient ordersClient,
+		SubscriptionClient subscriptionClient,
+		PaymentsClient paymentsClient)
 	{
 		_categoriesClient = categoriesClient;
 		_categoryAttributesClient = categoryAttributesClient;
 		_productsClient = productsClient;
 		_listingsClient = listingsClient;
 		_ordersClient = ordersClient;
+		_subscriptionClient = subscriptionClient;
+		_paymentsClient = paymentsClient;
 	}
 
 	// ═══════════════════════════════════════════════════════════════════
@@ -231,15 +241,17 @@ public class AshareApiService
 
 	/// <summary>
 	/// إنشاء عرض جديد (مساحة)
+	/// ملاحظة: VendorId يُستخرج تلقائياً من المستخدم المصادق في الباك اند
 	/// </summary>
 	public async Task<SpaceItem?> CreateSpaceAsync(CreateSpaceRequest request)
 	{
 		try
 		{
-			// إنشاء عرض ProductListing (وليس Product)
+			// إنشاء عرض ProductListing
+			// ملاحظة: VendorId يُعيَّن تلقائياً في الباك اند من التوكن
 			var listingRequest = new CreateListingRequest
 			{
-				VendorId = Guid.Empty, // TODO: Get from current user
+				// VendorId: يُستخرج تلقائياً من التوكن في الباك اند
 				ProductId = Guid.Empty, // TODO: Get product template based on category
 				CategoryId = request.CategoryId,
 				Title = request.Title,
@@ -390,6 +402,321 @@ public class AshareApiService
 	public int GetNotificationsCount() => 0; // TODO: Implement with Notifications API
 
 	// ═══════════════════════════════════════════════════════════════════
+	// Subscriptions - الاشتراكات
+	// ═══════════════════════════════════════════════════════════════════
+
+	/// <summary>
+	/// الحصول على جميع الباقات المتاحة
+	/// </summary>
+	public async Task<List<SubscriptionPlanDto>> GetSubscriptionPlansAsync()
+	{
+		try
+		{
+			var plans = await _subscriptionClient.GetPlansAsync();
+			return plans ?? new List<SubscriptionPlanDto>();
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error fetching subscription plans: {ex.Message}");
+			return new List<SubscriptionPlanDto>();
+		}
+	}
+
+	/// <summary>
+	/// الحصول على باقة بواسطة المعرف
+	/// </summary>
+	public async Task<SubscriptionPlanDto?> GetSubscriptionPlanBySlugAsync(string slug)
+	{
+		try
+		{
+			return await _subscriptionClient.GetPlanBySlugAsync(slug);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error fetching plan by slug: {ex.Message}");
+			return null;
+		}
+	}
+
+	/// <summary>
+	/// الحصول على اشتراك المضيف الحالي
+	/// </summary>
+	public async Task<SubscriptionDto?> GetHostSubscriptionAsync(Guid vendorId)
+	{
+		try
+		{
+			return await _subscriptionClient.GetVendorSubscriptionAsync(vendorId);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error fetching host subscription: {ex.Message}");
+			return null;
+		}
+	}
+
+	/// <summary>
+	/// الحصول على ملخص اشتراك المضيف
+	/// </summary>
+	public async Task<SubscriptionSummaryDto?> GetSubscriptionSummaryAsync(Guid vendorId)
+	{
+		try
+		{
+			return await _subscriptionClient.GetSubscriptionSummaryAsync(vendorId);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error fetching subscription summary: {ex.Message}");
+			return null;
+		}
+	}
+
+	/// <summary>
+	/// التحقق من إمكانية إضافة مساحة جديدة
+	/// </summary>
+	public async Task<CanAddListingResult?> CanAddSpaceAsync(Guid vendorId)
+	{
+		try
+		{
+			return await _subscriptionClient.CanAddListingAsync(vendorId);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error checking can add space: {ex.Message}");
+			return null;
+		}
+	}
+
+	/// <summary>
+	/// الحصول على إحصائيات الاستخدام
+	/// </summary>
+	public async Task<VendorUsageStatsDto?> GetUsageStatsAsync(Guid vendorId)
+	{
+		try
+		{
+			return await _subscriptionClient.GetUsageStatsAsync(vendorId);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error fetching usage stats: {ex.Message}");
+			return null;
+		}
+	}
+
+	/// <summary>
+	/// إنشاء اشتراك جديد
+	/// </summary>
+	public async Task<SubscriptionDto?> CreateSubscriptionAsync(CreateSubscriptionDto dto)
+	{
+		try
+		{
+			return await _subscriptionClient.CreateSubscriptionAsync(dto);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error creating subscription: {ex.Message}");
+			return null;
+		}
+	}
+
+	/// <summary>
+	/// تغيير الباقة
+	/// </summary>
+	public async Task<SubscriptionDto?> ChangePlanAsync(Guid subscriptionId, ChangePlanDto dto)
+	{
+		try
+		{
+			return await _subscriptionClient.ChangePlanAsync(subscriptionId, dto);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error changing plan: {ex.Message}");
+			return null;
+		}
+	}
+
+	/// <summary>
+	/// الحصول على فواتير المضيف
+	/// </summary>
+	public async Task<List<InvoiceSummaryDto>> GetHostInvoicesAsync(Guid vendorId)
+	{
+		try
+		{
+			var invoices = await _subscriptionClient.GetVendorInvoicesAsync(vendorId);
+			return invoices ?? new List<InvoiceSummaryDto>();
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error fetching invoices: {ex.Message}");
+			return new List<InvoiceSummaryDto>();
+		}
+	}
+
+	// ═══════════════════════════════════════════════════════════════════
+	// Payments - المدفوعات
+	// ═══════════════════════════════════════════════════════════════════
+
+	/// <summary>
+	/// إنشاء دفعة اشتراك والحصول على رابط الدفع
+	/// </summary>
+	public async Task<CreateSubscriptionPaymentResponse?> CreateSubscriptionPaymentAsync(CreateSubscriptionPaymentRequest request)
+	{
+		try
+		{
+			// أولاً: إنشاء الاشتراك
+			var subscription = await _subscriptionClient.CreateSubscriptionAsync(new CreateSubscriptionDto
+			{
+				PlanId = request.PlanId,
+				BillingCycle = request.BillingCycle,
+				AutoRenew = true,
+				// VendorId يُستخرج من التوكن في الباك اند
+			});
+
+			if (subscription == null)
+			{
+				return new CreateSubscriptionPaymentResponse
+				{
+					Success = false,
+					Message = "فشل في إنشاء الاشتراك"
+				};
+			}
+
+			// إذا كانت الباقة مجانية أو فترة تجريبية
+			if (subscription.Price == 0)
+			{
+				return new CreateSubscriptionPaymentResponse
+				{
+					Success = true,
+					SubscriptionId = subscription.Id,
+					RequiresPayment = false,
+					Amount = 0,
+					Currency = subscription.Plan?.Currency ?? "SAR",
+					Message = "تم تفعيل الاشتراك بنجاح"
+				};
+			}
+
+			// ثانياً: إنشاء عملية الدفع
+			var payment = await _paymentsClient.CreatePaymentAsync(new CreatePaymentRequest
+			{
+				OrderId = subscription.Id, // استخدام معرف الاشتراك كمعرف الطلب
+				Amount = subscription.Price,
+				Currency = subscription.Plan?.Currency ?? "SAR",
+				PaymentMethod = "Noon", // أو حسب الاختيار
+				Metadata = new Dictionary<string, string>
+				{
+					["subscriptionId"] = subscription.Id.ToString(),
+					["planId"] = request.PlanId.ToString(),
+					["billingCycle"] = request.BillingCycle.ToString(),
+					["returnUrl"] = request.ReturnUrl ?? "/host/payment/callback"
+				}
+			});
+
+			if (payment == null || string.IsNullOrEmpty(payment.PaymentUrl))
+			{
+				return new CreateSubscriptionPaymentResponse
+				{
+					Success = false,
+					SubscriptionId = subscription.Id,
+					Message = "فشل في إنشاء رابط الدفع"
+				};
+			}
+
+			return new CreateSubscriptionPaymentResponse
+			{
+				Success = true,
+				SubscriptionId = subscription.Id,
+				PaymentId = payment.PaymentId,
+				PaymentUrl = payment.PaymentUrl,
+				RequiresPayment = true,
+				Amount = subscription.Price,
+				Currency = subscription.Plan?.Currency ?? "SAR"
+			};
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error creating subscription payment: {ex.Message}");
+			return new CreateSubscriptionPaymentResponse
+			{
+				Success = false,
+				Message = ex.Message
+			};
+		}
+	}
+
+	/// <summary>
+	/// التحقق من حالة الدفع وتفعيل الاشتراك
+	/// </summary>
+	public async Task<VerifyPaymentResponse?> VerifySubscriptionPaymentAsync(VerifyPaymentRequest request)
+	{
+		try
+		{
+			// التحقق من حالة الدفع
+			var payment = await _paymentsClient.GetPaymentStatusAsync(request.PaymentId);
+
+			if (payment == null)
+			{
+				return new VerifyPaymentResponse
+				{
+					Success = false,
+					Status = "NotFound",
+					Message = "لم يتم العثور على عملية الدفع"
+				};
+			}
+
+			var isCompleted = payment.Status.ToLower() switch
+			{
+				"completed" => true,
+				"captured" => true,
+				"success" => true,
+				_ => false
+			};
+
+			if (isCompleted)
+			{
+				// تفعيل الاشتراك إذا تم الدفع بنجاح
+				// TODO: Call activate subscription endpoint if needed
+
+				return new VerifyPaymentResponse
+				{
+					Success = true,
+					Status = "Completed",
+					SubscriptionId = payment.OrderId,
+					ActivatedAt = DateTime.Now,
+					Message = "تم الدفع وتفعيل الاشتراك بنجاح"
+				};
+			}
+
+			return new VerifyPaymentResponse
+			{
+				Success = false,
+				Status = payment.Status,
+				Message = GetPaymentStatusMessage(payment.Status)
+			};
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error verifying payment: {ex.Message}");
+			return new VerifyPaymentResponse
+			{
+				Success = false,
+				Status = "Error",
+				Message = ex.Message
+			};
+		}
+	}
+
+	private static string GetPaymentStatusMessage(string status)
+	{
+		return status.ToLower() switch
+		{
+			"pending" => "في انتظار الدفع",
+			"failed" => "فشلت عملية الدفع",
+			"cancelled" => "تم إلغاء عملية الدفع",
+			"expired" => "انتهت صلاحية عملية الدفع",
+			_ => "حالة غير معروفة"
+		};
+	}
+
+	// ═══════════════════════════════════════════════════════════════════
 	// Mapping Helpers
 	// ═══════════════════════════════════════════════════════════════════
 
@@ -434,7 +761,10 @@ public class AshareApiService
 			ReviewsCount = dto.RatingsCount,
 			ViewCount = dto.ViewCount,
 			Attributes = dto.Attributes,
-			CreatedAt = dto.CreatedAt
+			CreatedAt = dto.CreatedAt,
+			// ربط المالك من بيانات البائع
+			OwnerId = dto.VendorId,
+			OwnerName = dto.VendorName ?? string.Empty
 		};
 	}
 

@@ -1,0 +1,576 @@
+@page "/host/subscribe/{PlanSlug}"
+@using ACommerce.Subscriptions.DTOs
+@using ACommerce.Subscriptions.Enums
+@using Ashare.Shared.Models
+@using Ashare.Shared.Services
+@inject AshareApiService ApiService
+@inject IAppNavigationService Navigation
+@inject Ashare.Shared.Services.ThemeService ThemeService
+@inject ILocalizationService L
+@inject IPaymentService PaymentService
+@inject NavigationManager NavigationManager
+
+<div class="ac-page ashare-checkout-page @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
+    @* Header *@
+    <div class="ac-navbar">
+        <button class="ac-navbar-back" @onclick="() => Navigation.NavigateBack()">
+            <i class="bi bi-chevron-@(L.IsRtl ? "right" : "left")"></i>
+        </button>
+        <h1 class="ac-navbar-title">@L["SubscribeNow"]</h1>
+        <div class="ac-navbar-spacer"></div>
+    </div>
+
+    <div class="ashare-checkout-content">
+        @if (_isLoading)
+        {
+            <div class="ashare-loading">
+                <div class="ac-spinner"></div>
+                <span>@L["Loading"]</span>
+            </div>
+        }
+        else if (_selectedPlan == null)
+        {
+            <div class="ashare-error">
+                <i class="bi bi-exclamation-circle"></i>
+                <span>@L["PlanNotFound"]</span>
+                <button class="ac-btn ac-btn-primary" @onclick='() => Navigation.NavigateTo("/host/plans")'>
+                    @L["ViewPlans"]
+                </button>
+            </div>
+        }
+        else if (_showPaymentWebView && !string.IsNullOrEmpty(_paymentUrl))
+        {
+            @* Payment WebView - uses redirect mode for Noon *@
+            <div class="ashare-payment-webview">
+                <PaymentWebView
+                    PaymentUrl="@_paymentUrl"
+                    PaymentId="@_paymentId"
+                    ReturnUrlPattern="@_returnUrlPattern"
+                    UseRedirect="true"
+                    OnPaymentCompleted="HandlePaymentCompleted"
+                    OnPaymentCancelled="HandlePaymentCancelled" />
+            </div>
+        }
+        else
+        {
+            @* Order Summary *@
+            <div class="ashare-order-summary">
+                <div class="ashare-plan-summary-card">
+                    <div class="ashare-plan-icon" style="background-color: @_selectedPlan.Color;">
+                        <i class="bi @_selectedPlan.Icon"></i>
+                    </div>
+                    <div class="ashare-plan-details">
+                        <h2>@(L.IsRtl ? _selectedPlan.Name : _selectedPlan.NameEn)</h2>
+                        <p>@(L.IsRtl ? _selectedPlan.Description : _selectedPlan.DescriptionEn)</p>
+                    </div>
+                </div>
+
+                @* Billing Cycle Selection *@
+                <div class="ashare-billing-section">
+                    <h3>@L["BillingCycle"]</h3>
+                    <div class="ashare-billing-options">
+                        <label class="ashare-billing-option @(_billingCycle == BillingCycle.Monthly ? "selected" : "")">
+                            <input type="radio" name="billing" checked="@(_billingCycle == BillingCycle.Monthly)"
+                                   @onchange="() => SetBillingCycle(BillingCycle.Monthly)" />
+                            <div class="ashare-option-content">
+                                <span class="ashare-option-label">@L["Monthly"]</span>
+                                <span class="ashare-option-price">@_selectedPlan.MonthlyPrice.ToString("N0") @_selectedPlan.Currency</span>
+                            </div>
+                        </label>
+
+                        @if (_selectedPlan.QuarterlyPrice.HasValue)
+                        {
+                            <label class="ashare-billing-option @(_billingCycle == BillingCycle.Quarterly ? "selected" : "")">
+                                <input type="radio" name="billing" checked="@(_billingCycle == BillingCycle.Quarterly)"
+                                       @onchange="() => SetBillingCycle(BillingCycle.Quarterly)" />
+                                <div class="ashare-option-content">
+                                    <span class="ashare-option-label">@L["Quarterly"]</span>
+                                    <span class="ashare-option-price">@_selectedPlan.QuarterlyPrice.Value.ToString("N0") @_selectedPlan.Currency</span>
+                                    @{ var quarterlyDiscount = CalculateDiscount(_selectedPlan.MonthlyPrice * 3, _selectedPlan.QuarterlyPrice.Value); }
+                                    @if (quarterlyDiscount > 0)
+                                    {
+                                        <span class="ashare-option-discount">@L["Save"] @quarterlyDiscount%</span>
+                                    }
+                                </div>
+                            </label>
+                        }
+
+                        @if (_selectedPlan.AnnualPrice.HasValue)
+                        {
+                            <label class="ashare-billing-option @(_billingCycle == BillingCycle.Annual ? "selected" : "")">
+                                <input type="radio" name="billing" checked="@(_billingCycle == BillingCycle.Annual)"
+                                       @onchange="() => SetBillingCycle(BillingCycle.Annual)" />
+                                <div class="ashare-option-content">
+                                    <span class="ashare-option-label">@L["Annual"]</span>
+                                    <span class="ashare-option-price">@_selectedPlan.AnnualPrice.Value.ToString("N0") @_selectedPlan.Currency</span>
+                                    @{ var annualDiscount = CalculateDiscount(_selectedPlan.MonthlyPrice * 12, _selectedPlan.AnnualPrice.Value); }
+                                    @if (annualDiscount > 0)
+                                    {
+                                        <span class="ashare-option-discount">@L["Save"] @annualDiscount%</span>
+                                    }
+                                </div>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                @* Price Breakdown *@
+                <div class="ashare-price-breakdown">
+                    <div class="ashare-price-row">
+                        <span>@L["Subtotal"]</span>
+                        <span>@GetSelectedPrice().ToString("N2") @_selectedPlan.Currency</span>
+                    </div>
+                    @if (_selectedPlan.TrialDays > 0 && _currentSubscription == null)
+                    {
+                        <div class="ashare-price-row trial">
+                            <span>@L["FreeTrial"]</span>
+                            <span>@_selectedPlan.TrialDays @L["Days"]</span>
+                        </div>
+                    }
+                    <div class="ashare-price-row tax">
+                        <span>@L["VAT"] (15%)</span>
+                        <span>@(GetSelectedPrice() * 0.15m).ToString("N2") @_selectedPlan.Currency</span>
+                    </div>
+                    <div class="ashare-price-row total">
+                        <span>@L["Total"]</span>
+                        <span>@(GetSelectedPrice() * 1.15m).ToString("N2") @_selectedPlan.Currency</span>
+                    </div>
+                </div>
+
+                @* Error Message *@
+                @if (!string.IsNullOrEmpty(_errorMessage))
+                {
+                    <div class="ashare-payment-error">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span>@_errorMessage</span>
+                        <button class="ashare-error-dismiss" @onclick="() => _errorMessage = null">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                }
+
+                @* Payment Button *@
+                <div class="ashare-checkout-actions">
+                    <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
+                            disabled="@_isProcessing"
+                            @onclick="ProcessPayment">
+                        @if (_isProcessing)
+                        {
+                            <div class="ac-spinner ac-spinner-sm"></div>
+                            <span>@L["Processing"]</span>
+                        }
+                        else if (_selectedPlan.TrialDays > 0 && _currentSubscription == null)
+                        {
+                            <i class="bi bi-gift"></i>
+                            <span>@L["StartFreeTrial"]</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-credit-card"></i>
+                            <span>@L["PayNow"]</span>
+                        }
+                    </button>
+
+                    <p class="ashare-terms-notice">
+                        <i class="bi bi-shield-check"></i>
+                        @L["PaymentSecureNotice"]
+                    </p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string PlanSlug { get; set; } = string.Empty;
+    [SupplyParameterFromQuery] public int? Cycle { get; set; }
+
+    private bool _isLoading = true;
+    private bool _isProcessing = false;
+    private bool _showPaymentWebView = false;
+    private string? _paymentUrl;
+    private string? _paymentId;
+
+    private SubscriptionPlanDto? _selectedPlan;
+    private SubscriptionDto? _currentSubscription;
+    private BillingCycle _billingCycle = BillingCycle.Monthly;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Cycle.HasValue && Enum.IsDefined(typeof(BillingCycle), Cycle.Value))
+        {
+            _billingCycle = (BillingCycle)Cycle.Value;
+        }
+
+        await LoadPlan();
+    }
+
+    private async Task LoadPlan()
+    {
+        _isLoading = true;
+
+        try
+        {
+            var plans = await ApiService.GetSubscriptionPlansAsync();
+            _selectedPlan = plans.FirstOrDefault(p =>
+                p.Slug.Equals(PlanSlug, StringComparison.OrdinalIgnoreCase));
+
+            // TODO: Get current subscription from API
+            // _currentSubscription = await ApiService.GetHostSubscriptionAsync(vendorId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading plan: {ex.Message}");
+        }
+
+        _isLoading = false;
+    }
+
+    private void SetBillingCycle(BillingCycle cycle)
+    {
+        _billingCycle = cycle;
+    }
+
+    private decimal GetSelectedPrice()
+    {
+        if (_selectedPlan == null) return 0;
+
+        return _billingCycle switch
+        {
+            BillingCycle.Quarterly => _selectedPlan.QuarterlyPrice ?? _selectedPlan.MonthlyPrice * 3,
+            BillingCycle.SemiAnnual => _selectedPlan.SemiAnnualPrice ?? _selectedPlan.MonthlyPrice * 6,
+            BillingCycle.Annual => _selectedPlan.AnnualPrice ?? _selectedPlan.MonthlyPrice * 12,
+            _ => _selectedPlan.MonthlyPrice
+        };
+    }
+
+    private int CalculateDiscount(decimal original, decimal discounted)
+    {
+        if (original <= 0) return 0;
+        return (int)Math.Round((1 - discounted / original) * 100);
+    }
+
+    /// <summary>
+    /// Get the absolute return URL based on current browser location
+    /// </summary>
+    private string GetPaymentReturnUrl()
+    {
+        // Get the base URI from NavigationManager (e.g., https://localhost:57217/)
+        var baseUri = NavigationManager.BaseUri.TrimEnd('/');
+        return $"{baseUri}/host/payment/callback";
+    }
+
+    private async Task ProcessPayment()
+    {
+        if (_selectedPlan == null) return;
+
+        _isProcessing = true;
+        _errorMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            var returnUrl = GetPaymentReturnUrl();
+            Console.WriteLine($"[SubscriptionCheckout] Creating subscription payment with returnUrl: {returnUrl}");
+
+            // Create subscription and get payment URL
+            var response = await ApiService.CreateSubscriptionPaymentAsync(new CreateSubscriptionPaymentRequest
+            {
+                PlanId = _selectedPlan.Id,
+                BillingCycle = _billingCycle,
+            });
+
+            Console.WriteLine($"[SubscriptionCheckout] Response: Success={response?.Success}, PaymentUrl={response?.PaymentUrl?.Substring(0, Math.Min(50, response?.PaymentUrl?.Length ?? 0))}...");
+
+            if (response != null && !string.IsNullOrEmpty(response.PaymentUrl))
+            {
+                _paymentUrl = response.PaymentUrl;
+                _paymentId = response.PaymentId;
+                Console.WriteLine($"[SubscriptionCheckout] Opening payment URL directly: {_paymentUrl.Substring(0, Math.Min(50, _paymentUrl.Length))}...");
+
+                // فتح صفحة الدفع مباشرة بدلاً من استخدام PaymentWebView
+                var success = await PaymentService.OpenPaymentPageAsync(_paymentUrl);
+                if (!success)
+                {
+                    // إذا فشل الفتح التلقائي، نعرض الرابط للمستخدم
+                _showPaymentWebView = true;
+                    Console.WriteLine("[SubscriptionCheckout] Auto-open failed, showing manual link");
+                }
+                else
+                {
+                    Console.WriteLine("[SubscriptionCheckout] Payment page opened successfully");
+                    return; // لا نحتاج لتحديث الواجهة بعد التوجيه
+            }
+            }
+            else if (response?.RequiresPayment == false)
+            {
+                // Free trial or free plan - no payment needed
+                Console.WriteLine("[SubscriptionCheckout] No payment required, redirecting...");
+                Navigation.NavigateTo("/host/subscription?success=true");
+                return;
+            }
+            else
+            {
+                // API returned but no payment URL
+                _errorMessage = L["PaymentInitError"];
+                Console.WriteLine($"[SubscriptionCheckout] Error: No payment URL. Response: {response?.Message}");
+        }
+        }
+        catch (Exception ex)
+        {
+        }
+
+        _isProcessing = false;
+        StateHasChanged();
+    }
+
+    private void HandlePaymentCompleted(PaymentResult result)
+    {
+        if (result.Success)
+        {
+            Navigation.NavigateTo("/host/subscription?success=true");
+        }
+        else
+        {
+            Navigation.NavigateTo($"/host/subscription?error={Uri.EscapeDataString(result.Message ?? "Payment failed")}");
+        }
+    }
+
+    private void HandlePaymentCancelled()
+    {
+        _showPaymentWebView = false;
+        _paymentUrl = null;
+    }
+}
+
+<style>
+    .ashare-checkout-page {
+        min-height: 100vh;
+        background: var(--ac-bg-secondary);
+    }
+
+    .ashare-checkout-content {
+        padding: var(--ac-spacing-md);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .ashare-order-summary {
+        display: flex;
+        flex-direction: column;
+        gap: var(--ac-spacing-lg);
+    }
+
+    .ashare-plan-summary-card {
+        display: flex;
+        align-items: center;
+        gap: var(--ac-spacing-md);
+        background: var(--ac-bg-primary);
+        padding: var(--ac-spacing-lg);
+        border-radius: var(--ac-radius-lg);
+        box-shadow: var(--ac-shadow-sm);
+    }
+
+    .ashare-plan-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: var(--ac-radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: white;
+    }
+
+    .ashare-plan-details h2 {
+        margin: 0;
+        font-size: var(--ac-font-lg);
+    }
+
+    .ashare-plan-details p {
+        margin: var(--ac-spacing-xs) 0 0;
+        color: var(--ac-text-secondary);
+        font-size: var(--ac-font-sm);
+    }
+
+    .ashare-billing-section {
+        background: var(--ac-bg-primary);
+        padding: var(--ac-spacing-lg);
+        border-radius: var(--ac-radius-lg);
+    }
+
+    .ashare-billing-section h3 {
+        margin: 0 0 var(--ac-spacing-md);
+        font-size: var(--ac-font-md);
+    }
+
+    .ashare-billing-options {
+        display: flex;
+        flex-direction: column;
+        gap: var(--ac-spacing-sm);
+    }
+
+    .ashare-billing-option {
+        display: flex;
+        align-items: center;
+        gap: var(--ac-spacing-md);
+        padding: var(--ac-spacing-md);
+        border: 2px solid var(--ac-border);
+        border-radius: var(--ac-radius-md);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .ashare-billing-option:hover {
+        border-color: var(--ac-primary);
+    }
+
+    .ashare-billing-option.selected {
+        border-color: var(--ac-primary);
+        background: var(--ac-primary-light);
+    }
+
+    .ashare-billing-option input[type="radio"] {
+        display: none;
+    }
+
+    .ashare-option-content {
+        flex: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: var(--ac-spacing-xs);
+    }
+
+    .ashare-option-label {
+        font-weight: 500;
+    }
+
+    .ashare-option-price {
+        font-weight: 600;
+        color: var(--ac-primary);
+    }
+
+    .ashare-option-discount {
+        background: var(--ac-success);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: var(--ac-font-xs);
+        font-weight: 600;
+    }
+
+    .ashare-price-breakdown {
+        background: var(--ac-bg-primary);
+        padding: var(--ac-spacing-lg);
+        border-radius: var(--ac-radius-lg);
+    }
+
+    .ashare-price-row {
+        display: flex;
+        justify-content: space-between;
+        padding: var(--ac-spacing-sm) 0;
+        border-bottom: 1px solid var(--ac-border);
+    }
+
+    .ashare-price-row:last-child {
+        border-bottom: none;
+    }
+
+    .ashare-price-row.trial {
+        color: var(--ac-success);
+    }
+
+    .ashare-price-row.tax {
+        color: var(--ac-text-secondary);
+        font-size: var(--ac-font-sm);
+    }
+
+    .ashare-price-row.total {
+        font-size: var(--ac-font-lg);
+        font-weight: 700;
+        padding-top: var(--ac-spacing-md);
+        margin-top: var(--ac-spacing-sm);
+        border-top: 2px solid var(--ac-border);
+    }
+
+    .ashare-checkout-actions {
+        display: flex;
+        flex-direction: column;
+        gap: var(--ac-spacing-md);
+    }
+
+    .ashare-terms-notice {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--ac-spacing-xs);
+        color: var(--ac-text-secondary);
+        font-size: var(--ac-font-sm);
+        margin: 0;
+    }
+
+    .ashare-terms-notice i {
+        color: var(--ac-success);
+    }
+
+    .ashare-payment-webview {
+        height: calc(100vh - 120px);
+        background: var(--ac-bg-primary);
+        border-radius: var(--ac-radius-lg);
+        overflow: hidden;
+    }
+
+    .ashare-error {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: var(--ac-spacing-md);
+        padding: var(--ac-spacing-xl);
+        text-align: center;
+    }
+
+    .ashare-error i {
+        font-size: 48px;
+        color: var(--ac-danger);
+    }
+
+    .ashare-payment-error {
+        display: flex;
+        align-items: center;
+        gap: var(--ac-spacing-sm);
+        padding: var(--ac-spacing-md);
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid var(--ac-danger, #EF4444);
+        border-radius: var(--ac-radius-md);
+        color: var(--ac-danger, #EF4444);
+    }
+
+    .ashare-payment-error i {
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .ashare-payment-error span {
+        flex: 1;
+    }
+
+    .ashare-error-dismiss {
+        background: none;
+        border: none;
+        color: var(--ac-danger, #EF4444);
+        cursor: pointer;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+
+    .ashare-error-dismiss:hover {
+        opacity: 1;
+    }
+</style>

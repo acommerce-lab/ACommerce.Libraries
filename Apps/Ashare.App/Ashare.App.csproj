@@ -58,11 +58,21 @@
 	<ItemGroup>
 		<!-- Reference to Shared Library (contains all pages, components, services) -->
 		<ProjectReference Include="..\Ashare.Shared\Ashare.Shared.csproj" />
+		<!-- Payments Client for DI registration -->
+		<ProjectReference Include="..\..\Clients\ACommerce.Client.Payments\ACommerce.Client.Payments.csproj" />
 	</ItemGroup>
 
 	<!-- Ensure wwwroot files are included -->
 	<ItemGroup>
 		<Content Update="wwwroot\**" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
+
+	<!-- Sync CSS from Shared project before build -->
+	<Target Name="SyncSharedCss" BeforeTargets="Build">
+		<Copy SourceFiles="..\Ashare.Shared\wwwroot\css\ashare.css"
+			  DestinationFiles="wwwroot\css\ashare.css"
+			  SkipUnchangedFiles="true" />
+		<Message Text="Synced ashare.css from Ashare.Shared" Importance="high" />
+	</Target>
 
 </Project>

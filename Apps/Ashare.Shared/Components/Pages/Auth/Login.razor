@@ -9,6 +9,7 @@
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
 @inject Ashare.Shared.Services.ThemeService Theme
+@inject Ashare.Shared.Services.GuestModeService GuestMode
 @implements IAsyncDisposable
 
 <div class="ac-page ashare-login-page @(Theme.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
@@ -58,6 +59,16 @@
                     {
                         <span>@L["ContinueWithNafath"]</span>
                     }
+                </button>
+
+                <div class="ashare-login-divider">
+                    <span>@L["Or"]</span>
+                </div>
+
+                <button class="ac-btn ac-btn-outline ac-btn-lg ac-btn-block"
+                        @onclick="ContinueAsGuest">
+                    <i class="bi bi-person"></i>
+                    <span>@L["ContinueAsGuest"]</span>
                 </button>
             }
             else
@@ -150,6 +161,23 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // التحقق من وجود جلسة نشطة (use async to trigger token initialization)
+        var token = await TokenManager.GetTokenAsync();
+        if (!string.IsNullOrEmpty(token))
+        {
+            Console.WriteLine("[Login] ✅ User already logged in - redirecting to home");
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        // التحقق من وضع الضيف
+        if (GuestMode.IsGuestMode)
+        {
+            Console.WriteLine("[Login] ✅ Guest mode active - redirecting to home");
+            Navigation.NavigateTo("/");
+            return;
+        }
+
         await ConnectToNotifications();
     }
 
@@ -261,8 +289,8 @@
 
                             if (result.IsNewUser)
                             {
-                                Console.WriteLine("[Login] ✅ NEW USER - navigating to profile");
-                                Navigation.NavigateTo("/profile");
+                                Console.WriteLine("[Login] ✅ NEW USER - navigating to profile edit");
+                                Navigation.NavigateTo("/profile/edit?new=true");
                             }
                             else
                             {
@@ -376,6 +404,12 @@
         _nafathFailReason = null;
         _countdown = 120;
         _errorMessage = null;
+    }
+
+    private void ContinueAsGuest()
+    {
+        GuestMode.EnableGuestMode();
+        Navigation.NavigateTo("/");
     }
 
     private async Task CancelNafath()

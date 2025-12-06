@@ -36,6 +36,14 @@ public class ApplicationDbContext : DbContext
 
 		// 2. تطبيق Configurations إذا وجدت
 		ApplyConfigurationsFromAssemblies(modelBuilder);
+
+		// 3. Fix SQL Server cascade delete issue - change all cascades to Restrict
+		// SQL Server doesn't allow multiple cascade paths to the same table
+		foreach (var relationship in modelBuilder.Model.GetEntityTypes()
+			.SelectMany(e => e.GetForeignKeys()))
+		{
+			relationship.DeleteBehavior = DeleteBehavior.Restrict;
+		}
 	}
 
 	/// <summary>

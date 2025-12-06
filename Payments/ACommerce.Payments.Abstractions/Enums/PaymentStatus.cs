@@ -27,5 +27,7 @@ public enum PaymentMethod
 	ApplePay = 6,
 	GooglePay = 7,
 	Tabby = 8,
-	Tamara = 9
+	Tamara = 9,
+    Mada = 10,
+    StcPay = 11
 }

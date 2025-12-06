@@ -142,6 +142,10 @@ public sealed class CategoryDto
 	public string? Image { get; set; }
 	public string? Icon { get; set; }
 	public int ProductsCount { get; set; }
+	/// <summary>
+	/// Alias for ProductsCount (للتوافق)
+	/// </summary>
+	public int ProductCount => ProductsCount;
 	public int SubCategoriesCount { get; set; }
 	public Guid? ParentCategoryId { get; set; }
 	public string? ParentCategoryName { get; set; }

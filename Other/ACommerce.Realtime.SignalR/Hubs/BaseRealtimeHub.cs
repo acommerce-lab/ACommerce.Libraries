@@ -38,15 +38,16 @@ public abstract class BaseRealtimeHub<TClient> : Hub<TClient>
 			}
 			else
 			{
-				Logger.LogWarning("Anonymous connection attempt");
+				Logger.LogDebug("Anonymous connection - allowed for auth subscriptions");
 			}
 
 			await base.OnConnectedAsync();
 		}
 		catch (Exception ex)
 		{
-			Logger.LogError(ex, "Error during connection");
-			throw;
+			// ✅ لا نرمي الخطأ - نسجله فقط ونستمر
+			Logger.LogError(ex, "Error during connection for {ConnectionId}", Context.ConnectionId);
+			// لا throw - السماح للاتصال بالاستمرار
 		}
 	}
 

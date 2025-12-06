@@ -223,6 +223,16 @@ public sealed class ProductDto
 	public Dictionary<string, string> Metadata { get; set; } = new();
 	public DateTime CreatedAt { get; set; }
 	public DateTime? UpdatedAt { get; set; }
+
+	/// <summary>
+	/// السعر (للاستخدام في الـ demos - عادةً يكون السعر على الـ Listing)
+	/// </summary>
+	public decimal? Price { get; set; }
+
+	/// <summary>
+	/// العملة (للاستخدام في الـ demos)
+	/// </summary>
+	public string? Currency { get; set; }
 }
 
 /// <summary>

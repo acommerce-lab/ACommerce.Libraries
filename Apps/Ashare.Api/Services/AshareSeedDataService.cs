@@ -4,6 +4,8 @@ using ACommerce.Catalog.Products.Enums;
 using ACommerce.Catalog.Attributes.Entities;
 using ACommerce.Catalog.Attributes.Enums;
 using ACommerce.Catalog.Currencies.Entities;
+using ACommerce.Subscriptions.Entities;
+using Ashare.Shared.Services;
 
 namespace Ashare.Api.Services;
 
@@ -255,6 +257,29 @@ public class AshareSeedDataService
 		await SeedCategoryAttributeMappingsAsync();
 		await SeedProductsAsync();
 		await SeedProductPricesAsync();
+		await SeedSubscriptionPlansAsync();
+	}
+
+	private async Task SeedSubscriptionPlansAsync()
+	{
+		var repo = _repositoryFactory.CreateRepository<SubscriptionPlan>();
+
+		var existing = await repo.GetAllWithPredicateAsync();
+		var existingIds = existing.Select(p => p.Id).ToHashSet();
+
+        // استخدام باقات عشير المخصصة
+        var asharePlans = AshareSubscriptionPlans.GetAll();
+
+		foreach (var plan in asharePlans)
+		{
+			if (!existingIds.Contains(plan.Id))
+			{
+				await repo.AddAsync(plan);
+				Console.WriteLine($"[Seed] Added subscription plan: {plan.Name} ({plan.Slug})");
+			}
+		}
+
+		Console.WriteLine($"[Seed] Subscription plans seeding complete. Total: {asharePlans.Count}");
 	}
 
 	private async Task SeedCurrenciesAsync()

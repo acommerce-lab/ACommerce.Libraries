@@ -164,6 +164,15 @@
             <div class="ashare-menu-section">
                 <h3 class="ashare-menu-title">@L["Host"]</h3>
                 <div class="ashare-menu-items">
+                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/host/subscription/dashboard")'>
+                        <div class="ashare-menu-icon ashare-menu-icon-accent">
+                            <i class="bi bi-gem"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["MySubscription"]</span>
+                        </div>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
                     <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/host/spaces")'>
                         <div class="ashare-menu-icon">
                             <i class="bi bi-building"></i>
@@ -266,8 +275,9 @@
 
         try
         {
-            // Check if user is logged in
-            _isLoggedIn = AuthClient.HasToken;
+            // Check if user is logged in (use async to trigger token initialization)
+            var token = await AuthClient.GetTokenAsync();
+            _isLoggedIn = !string.IsNullOrEmpty(token);
 
             if (_isLoggedIn)
             {
@@ -286,9 +296,9 @@
                     var profile = await ProfilesClient.GetMyProfileAsync();
                     if (profile != null)
                     {
-                        _userName = profile.DisplayName ?? $"{profile.FirstName} {profile.LastName}".Trim();
+                        _userName = profile.FullName ?? _userName;
                         _phoneNumber = profile.PhoneNumber ?? _phoneNumber;
-                        _avatarUrl = profile.AvatarUrl ?? _avatarUrl;
+                        _avatarUrl = profile.Avatar ?? _avatarUrl;
                     }
                 }
                 catch
@@ -321,6 +331,8 @@
     {
         await AuthClient.LogoutAsync();
         _isLoggedIn = false;
-        Navigation.NavigateTo("/login");
+        // Clear history and force navigate to welcome/login page
+        // This prevents back button from returning to authenticated pages
+        Navigation.NavigateToAndClearHistory("/");
     }
 }

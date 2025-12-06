@@ -22,7 +22,9 @@ using ACommerce.Client.Products;
 using ACommerce.Client.Products.Extensions;
 using ACommerce.Client.Profiles;
 using ACommerce.Client.Realtime;
+using ACommerce.Client.Subscriptions;
 using ACommerce.Client.Vendors;
+using ACommerce.Client.Payments;
 using ACommerce.ServiceRegistry.Client.Extensions;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Themes;
@@ -88,11 +90,21 @@ public static class MauiProgram
         // ═══════════════════════════════════════════════════════════════════
         var apiBaseUrl = ApiSettings.BaseUrl;
 
+        // 🔍 Debug: Log API configuration
+        ApiSettings.LogConfiguration();
+        Console.WriteLine($"[MauiProgram] 🌐 API Base URL: {apiBaseUrl}");
+
         // ═══════════════════════════════════════════════════════════════════
         // Client SDKs with Service Discovery (Predefined Services)
         // ═══════════════════════════════════════════════════════════════════
 
-        // Token Manager (singleton) - يجب تسجيله قبل AddACommerceClientWithServices
+        // Storage Service (MAUI implementation using SecureStorage) - يجب تسجيله قبل TokenManager
+        builder.Services.AddSingleton<IStorageService, Ashare.App.Services.MauiStorageService>();
+
+        // Token Storage (يستخدم IStorageService للتخزين الدائم)
+        builder.Services.AddSingleton<ITokenStorage, TokenStorageService>();
+
+        // Token Manager (singleton) - يستخدم ITokenStorage للحفاظ على الجلسة
         builder.Services.AddSingleton<TokenManager>();
 
         // ACommerce Client مع خدمات محددة مسبقاً
@@ -102,6 +114,12 @@ public static class MauiProgram
             {
                 // تسجيل خدمة Marketplace - تستخدمها معظم الـ Clients
                 services.AddService("Marketplace", apiBaseUrl);
+
+                // تسجيل خدمة Ashare - للـ SignalR و الإشعارات
+                services.AddService("Ashare", apiBaseUrl);
+
+                // تسجيل خدمة Payments - للدفع عبر Noon وغيرها
+                services.AddService("Payments", apiBaseUrl);
 
                 // يمكن إضافة خدمات أخرى إذا كانت على URLs مختلفة
                 // services.AddService("Files", "https://files.ashare.app");
@@ -161,6 +179,12 @@ public static class MauiProgram
         // Vendors Client (Hosts)
         builder.Services.AddScoped<VendorsClient>();
 
+        // Subscriptions Client (Host/Vendor Subscription Plans)
+        builder.Services.AddScoped<SubscriptionClient>();
+
+        // Payments Client (Payment Gateway Integration)
+        builder.Services.AddScoped<PaymentsClient>();
+
         // ═══════════════════════════════════════════════════════════════════
         // Communication Clients
         // ═══════════════════════════════════════════════════════════════════
@@ -175,6 +199,13 @@ public static class MauiProgram
         builder.Services.AddContactPointsClient(apiBaseUrl);
 
         // Real-time Client (SignalR)
+#if DEBUG
+        // تجاوز SSL في التطوير للشهادات الذاتية
+        builder.Services.Configure<RealtimeClientOptions>(options =>
+        {
+            options.BypassSslValidation = true;
+        });
+#endif
         builder.Services.AddSingleton<RealtimeClient>();
 
         // Files Client
@@ -184,14 +215,14 @@ public static class MauiProgram
         // App Services
         // ═══════════════════════════════════════════════════════════════════
 
-        // Storage Service (MAUI implementation using SecureStorage)
-        builder.Services.AddSingleton<IStorageService, Ashare.App.Services.MauiStorageService>();
-
         // Localization (AR, EN, UR)
         builder.Services.AddSingleton<ILocalizationService, LocalizationService>();
 
         // Theme Service (Dark/Light Mode)
         builder.Services.AddSingleton<ThemeService>();
+
+        // Guest Mode Service (allows browsing without login)
+        builder.Services.AddSingleton<GuestModeService>();
 
         // Navigation Service (MAUI implementation)
         builder.Services.AddScoped<IAppNavigationService, Ashare.App.Services.AppNavigationService>();
@@ -206,6 +237,63 @@ public static class MauiProgram
         // Ashare API Service (ربط التطبيق بالباك اند)
         // ═══════════════════════════════════════════════════════════════════
         builder.Services.AddScoped<AshareApiService>();
+        builder.Services.AddScoped<PendingListingService>();
+
+        // ═══════════════════════════════════════════════════════════════════
+        // Payment Service (خدمة الدفع)
+        // ═══════════════════════════════════════════════════════════════════
+        builder.Services.AddSingleton<IPaymentService, MauiPaymentService>();
+
+        // ═══════════════════════════════════════════════════════════════════
+        // Analytics Services (Meta, Google, TikTok, Snapchat)
+        // ضع المعرفات في AnalyticsSettings.cs
+        // ═══════════════════════════════════════════════════════════════════
+        builder.Services.Configure<Ashare.Shared.Services.Analytics.AnalyticsOptions>(options =>
+        {
+            options.Enabled = AnalyticsSettings.IsEnabled;
+            options.Meta = new Ashare.Shared.Services.Analytics.AnalyticsConfig
+            {
+                AppId = AnalyticsSettings.GetMetaAppId(),
+                IosAppId = AnalyticsSettings.MetaIosAppId,
+                AndroidAppId = AnalyticsSettings.MetaAndroidAppId,
+                DebugMode = AnalyticsSettings.DebugMode
+            };
+            options.Google = new Ashare.Shared.Services.Analytics.AnalyticsConfig
+            {
+                AppId = AnalyticsSettings.GetGoogleAppId(),
+                IosAppId = AnalyticsSettings.FirebaseIosAppId,
+                AndroidAppId = AnalyticsSettings.FirebaseAndroidAppId,
+                DebugMode = AnalyticsSettings.DebugMode
+            };
+            options.TikTok = new Ashare.Shared.Services.Analytics.AnalyticsConfig
+            {
+                AppId = AnalyticsSettings.GetTikTokAppId(),
+                IosAppId = AnalyticsSettings.TikTokIosAppId,
+                AndroidAppId = AnalyticsSettings.TikTokAndroidAppId,
+                DebugMode = AnalyticsSettings.DebugMode
+            };
+            options.Snapchat = new Ashare.Shared.Services.Analytics.AnalyticsConfig
+            {
+                AppId = AnalyticsSettings.GetSnapchatAppId(),
+                IosAppId = AnalyticsSettings.SnapchatIosAppId,
+                AndroidAppId = AnalyticsSettings.SnapchatAndroidAppId,
+                DebugMode = AnalyticsSettings.DebugMode
+            };
+        });
+        builder.Services.AddScoped<Ashare.Shared.Services.Analytics.Providers.MetaAnalyticsProvider>();
+        builder.Services.AddScoped<Ashare.Shared.Services.Analytics.Providers.GoogleAnalyticsProvider>();
+        builder.Services.AddScoped<Ashare.Shared.Services.Analytics.Providers.TikTokAnalyticsProvider>();
+        builder.Services.AddScoped<Ashare.Shared.Services.Analytics.Providers.SnapchatAnalyticsProvider>();
+        builder.Services.AddScoped<Ashare.Shared.Services.Analytics.AnalyticsService>(sp =>
+        {
+            var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<Ashare.Shared.Services.Analytics.AnalyticsOptions>>();
+            var service = new Ashare.Shared.Services.Analytics.AnalyticsService(options);
+            service.AddProvider(sp.GetRequiredService<Ashare.Shared.Services.Analytics.Providers.MetaAnalyticsProvider>());
+            service.AddProvider(sp.GetRequiredService<Ashare.Shared.Services.Analytics.Providers.GoogleAnalyticsProvider>());
+            service.AddProvider(sp.GetRequiredService<Ashare.Shared.Services.Analytics.Providers.TikTokAnalyticsProvider>());
+            service.AddProvider(sp.GetRequiredService<Ashare.Shared.Services.Analytics.Providers.SnapchatAnalyticsProvider>());
+            return service;
+        });
 
         // ⬅️ إذا لم تُسجَّل بعد:
         builder.Services.AddScoped<CategoriesClient>();          // من ACommerce SDK

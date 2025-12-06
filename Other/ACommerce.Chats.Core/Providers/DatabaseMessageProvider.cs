@@ -85,8 +85,9 @@ public class DatabaseMessageProvider : IMessageProvider
 			m => m.ChatId == chatId,
 			includeDeleted: false);
 
+		// ترتيب من الأقدم للأحدث (أحدث رسالة في الأسفل كما هو شائع في الدردشة)
 		var orderedMessages = messages
-			.OrderByDescending(m => m.CreatedAt)
+			.OrderBy(m => m.CreatedAt)
 			.ToList();
 
 		var skip = (request.PageNumber - 1) * request.PageSize;
@@ -209,8 +210,9 @@ public class DatabaseMessageProvider : IMessageProvider
 			m => m.ChatId == chatId && m.Content.Contains(searchQuery),
 			includeDeleted: false);
 
+		// ترتيب من الأقدم للأحدث (أحدث رسالة في الأسفل كما هو شائع في الدردشة)
 		var orderedMessages = messages
-			.OrderByDescending(m => m.CreatedAt)
+			.OrderBy(m => m.CreatedAt)
 			.ToList();
 
 		var skip = (request.PageNumber - 1) * request.PageSize;

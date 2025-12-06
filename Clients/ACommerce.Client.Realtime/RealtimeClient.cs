@@ -1,47 +1,98 @@
 using ACommerce.ServiceRegistry.Client;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ACommerce.Client.Realtime;
 
 /// <summary>
+/// خيارات RealtimeClient
+/// </summary>
+public class RealtimeClientOptions
+{
+	/// <summary>
+	/// تجاوز التحقق من شهادة SSL (للتطوير فقط!)
+	/// </summary>
+	public bool BypassSslValidation { get; set; } = false;
+}
+
+/// <summary>
 /// Client للتواصل Realtime باستخدام SignalR
 /// </summary>
-public sealed class RealtimeClient(
-    ServiceRegistryClient registryClient,
-    ILogger<RealtimeClient> logger) : IAsyncDisposable
+public sealed class RealtimeClient : IAsyncDisposable
 {
+	private readonly ServiceRegistryClient _registryClient;
+	private readonly ILogger<RealtimeClient> _logger;
+	private readonly RealtimeClientOptions _options;
     private HubConnection? _connection;
 	private bool _isConnected;
+
+	public RealtimeClient(
+		ServiceRegistryClient registryClient,
+		ILogger<RealtimeClient> logger,
+		IOptions<RealtimeClientOptions>? options = null)
+	{
+		_registryClient = registryClient;
+		_logger = logger;
+		_options = options?.Value ?? new RealtimeClientOptions();
+	}
 
     /// <summary>
     /// الاتصال بـ SignalR Hub
     /// </summary>
+	/// <param name="serviceName">اسم الخدمة</param>
+	/// <param name="hubPath">مسار الـ Hub</param>
+	/// <param name="accessToken">رمز المصادقة (اختياري)</param>
+	/// <param name="cancellationToken">رمز الإلغاء</param>
     public async Task ConnectAsync(
 		string serviceName = "Marketplace",
 		string hubPath = "/hubs/notifications",
+		string? accessToken = null,
 		CancellationToken cancellationToken = default)
 	{
 		if (_isConnected)
 		{
-			logger.LogWarning("Already connected to SignalR hub");
+			_logger.LogWarning("Already connected to SignalR hub");
 			return;
 		}
 
 		// اكتشاف الخدمة
-		var endpoint = await registryClient.DiscoverAsync(serviceName, cancellationToken);
+		var endpoint = await _registryClient.DiscoverAsync(serviceName, cancellationToken);
 		if (endpoint == null)
 		{
 			throw new InvalidOperationException($"Service not found: {serviceName}");
 		}
 
 		var hubUrl = $"{endpoint.BaseUrl.TrimEnd('/')}{hubPath}";
-		logger.LogInformation("Connecting to SignalR hub: {HubUrl}", hubUrl);
+		_logger.LogInformation("Connecting to SignalR hub: {HubUrl}", hubUrl);
 
-		_connection = new HubConnectionBuilder()
-			.WithUrl(hubUrl)
-			.WithAutomaticReconnect()
-			.Build();
+		var hubConnectionBuilder = new HubConnectionBuilder()
+			.WithUrl(hubUrl, options =>
+			{
+				// تجاوز SSL في التطوير
+				if (_options.BypassSslValidation)
+				{
+					options.HttpMessageHandlerFactory = _ => new HttpClientHandler
+					{
+						ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+					};
+
+					// استخدام LongPolling لأن WebSocket لا يدعم تجاوز SSL
+					// LongPolling يستخدم HTTP requests التي تمر عبر HttpMessageHandlerFactory
+					options.Transports = HttpTransportType.LongPolling;
+					_logger.LogInformation("Using LongPolling transport for SSL bypass");
+				}
+
+				// إرسال رمز المصادقة مع الاتصال
+				if (!string.IsNullOrEmpty(accessToken))
+				{
+					options.AccessTokenProvider = () => Task.FromResult(accessToken);
+				}
+			})
+			.WithAutomaticReconnect();
+
+		_connection = hubConnectionBuilder.Build();
 
 		_connection.Closed += OnConnectionClosed;
 		_connection.Reconnecting += OnReconnecting;
@@ -50,7 +101,7 @@ public sealed class RealtimeClient(
 		await _connection.StartAsync(cancellationToken);
 		_isConnected = true;
 
-		logger.LogInformation("✅ Connected to SignalR hub");
+		_logger.LogInformation("✅ Connected to SignalR hub");
 	}
 
 	/// <summary>
@@ -131,7 +182,7 @@ public sealed class RealtimeClient(
 		{
 			await _connection.StopAsync(cancellationToken);
 			_isConnected = false;
-			logger.LogInformation("❌ Disconnected from SignalR hub");
+			_logger.LogInformation("❌ Disconnected from SignalR hub");
 		}
 	}
 
@@ -139,20 +190,20 @@ public sealed class RealtimeClient(
 	private Task OnConnectionClosed(Exception? exception)
 	{
 		_isConnected = false;
-		logger.LogWarning(exception, "SignalR connection closed");
+		_logger.LogWarning(exception, "SignalR connection closed");
 		return Task.CompletedTask;
 	}
 
 	private Task OnReconnecting(Exception? exception)
 	{
-		logger.LogWarning(exception, "SignalR reconnecting...");
+		_logger.LogWarning(exception, "SignalR reconnecting...");
 		return Task.CompletedTask;
 	}
 
 	private Task OnReconnected(string? connectionId)
 	{
 		_isConnected = true;
-		logger.LogInformation("✅ SignalR reconnected (ConnectionId: {ConnectionId})", connectionId);
+		_logger.LogInformation("✅ SignalR reconnected (ConnectionId: {ConnectionId})", connectionId);
 		return Task.CompletedTask;
 	}
 

@@ -1,4 +1,5 @@
 using Ashare.Shared.Services;
+using Ashare.Shared.Services.Analytics;
 using Ashare.Web.Components;
 using Ashare.Web.Services;
 using ACommerce.Client.Auth;
@@ -24,6 +25,8 @@ using ACommerce.Client.Products.Extensions;
 using ACommerce.Client.Realtime;
 using ACommerce.Client.Vendors;
 using ACommerce.Client.Profiles;
+using ACommerce.Client.Payments;
+using ACommerce.Client.Subscriptions;
 using ACommerce.ServiceRegistry.Client.Extensions;
 using Ashare.Web;
 
@@ -36,14 +39,25 @@ builder.Services.AddRazorComponents()
 // ═══════════════════════════════════════════════════════════════════
 // API Configuration
 // ═══════════════════════════════════════════════════════════════════
-var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:5001";
+var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net";
 
 // ═══════════════════════════════════════════════════════════════════
 // Client SDKs with Service Discovery (Predefined Services)
 // ═══════════════════════════════════════════════════════════════════
 
-// Token Manager (singleton) - يجب تسجيله قبل AddACommerceClientWithServices
-builder.Services.AddSingleton<TokenManager>();
+// Storage Service (Browser localStorage implementation) - يجب تسجيله قبل TokenManager
+// Scoped لأنه يستخدم IJSRuntime الذي هو per-circuit في Blazor Server
+builder.Services.AddScoped<IStorageService, BrowserStorageService>();
+
+// Token Storage (يستخدم IStorageService للتخزين الدائم)
+builder.Services.AddScoped<ITokenStorage, TokenStorageService>();
+
+// Token Manager - Scoped في الويب لتوافق lifetimes
+// Note: كل circuit (اتصال) له TokenManager خاص، لكن التوكن محفوظ في localStorage
+builder.Services.AddScoped<TokenManager>();
+
+// Scoped Token Provider - singleton wrapper للوصول إلى TokenManager من HttpClient
+builder.Services.AddSingleton<ScopedTokenProvider>();
 
 // ACommerce Client مع خدمات محددة مسبقاً
 // يسجل الخدمات في Cache محلي لاستخدامها من قبل DynamicHttpClient
@@ -52,13 +66,20 @@ builder.Services.AddACommerceClientWithServices(
     {
         // تسجيل خدمة Marketplace - تستخدمها معظم الـ Clients
         services.AddService("Marketplace", apiBaseUrl);
+
+        // تسجيل خدمة Ashare - للـ SignalR و الإشعارات
+        services.AddService("Ashare", apiBaseUrl);
+
+        // تسجيل خدمة Payments - للدفع عبر Noon وغيرها
+        services.AddService("Payments", apiBaseUrl);
     },
     options =>
     {
         options.TimeoutSeconds = 30;
         // تفعيل Authentication لإرسال التوكن مع كل طلب
         options.EnableAuthentication = true;
-        options.TokenProvider = sp => sp.GetRequiredService<TokenManager>();
+        // استخدام ScopedTokenProvider للوصول إلى TokenManager الـ scoped
+        options.TokenProvider = sp => sp.GetRequiredService<ScopedTokenProvider>();
     });
 
 // Authentication Client (يستخدم TokenManager المسجل أعلاه)
@@ -103,6 +124,12 @@ builder.Services.AddScoped<VendorsClient>();
 // Profiles Client (User Profiles)
 builder.Services.AddScoped<ProfilesClient>();
 
+// Subscriptions Client (Host/Vendor Subscription Plans)
+builder.Services.AddScoped<SubscriptionClient>();
+
+// Payments Client (Payment Gateway Integration)
+builder.Services.AddScoped<PaymentsClient>();
+
 // ═══════════════════════════════════════════════════════════════════
 // Communication Clients
 // ═══════════════════════════════════════════════════════════════════
@@ -126,14 +153,14 @@ builder.Services.AddScoped<FilesClient>();
 // App Services
 // ═══════════════════════════════════════════════════════════════════
 
-// Storage Service (Browser localStorage implementation)
-builder.Services.AddScoped<IStorageService, BrowserStorageService>();
-
 // Localization (AR, EN, UR)
 builder.Services.AddScoped<ILocalizationService, LocalizationService>();
 
 // Theme Service (Dark/Light Mode)
 builder.Services.AddScoped<ThemeService>();
+
+// Guest Mode Service (allows browsing without login)
+builder.Services.AddSingleton<GuestModeService>();
 
 // Navigation Service (Web implementation)
 builder.Services.AddScoped<IAppNavigationService, WebNavigationService>();
@@ -148,6 +175,17 @@ builder.Services.AddScoped<ITimezoneService, BrowserTimezoneService>();
 // Ashare API Service (ربط التطبيق بالباك اند)
 // ═══════════════════════════════════════════════════════════════════
 builder.Services.AddScoped<AshareApiService>();
+builder.Services.AddScoped<PendingListingService>();
+
+// ═══════════════════════════════════════════════════════════════════
+// Payment Service (خدمة الدفع)
+// ═══════════════════════════════════════════════════════════════════
+builder.Services.AddScoped<IPaymentService, WebPaymentService>();
+
+// ═══════════════════════════════════════════════════════════════════
+// Analytics Services (Meta, Google, TikTok, Snapchat)
+// ═══════════════════════════════════════════════════════════════════
+builder.Services.AddAshareAnalytics(builder.Configuration);
 
 // Additional client registrations
 builder.Services.AddScoped<CategoriesClient>();

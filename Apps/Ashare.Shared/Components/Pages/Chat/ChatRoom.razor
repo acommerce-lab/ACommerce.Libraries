@@ -1,12 +1,19 @@
 @page "/chat/{ChatId:guid}"
+@using System.Text.Json
+@using ACommerce.Client.Auth
 @using ACommerce.Client.Chats
+@using ACommerce.Client.Profiles
 @using ACommerce.Client.Realtime
 @using Ashare.Shared.Services
+@using Microsoft.JSInterop
 @inject ChatsClient ChatsClient
+@inject ProfilesClient ProfilesClient
 @inject RealtimeClient RealtimeClient
+@inject TokenManager TokenManager
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
 @inject ITimezoneService Timezone
+@inject IJSRuntime JS
 @implements IAsyncDisposable
 
 <div class="ac-page ashare-chatroom-page">
@@ -44,6 +51,14 @@
         {
             <div class="ashare-loading">
                 <div class="ac-spinner"></div>
+            </div>
+        }
+        else if (_messages.Count == 0)
+        {
+            <div class="ashare-chat-empty">
+                <i class="bi bi-chat-text"></i>
+                <p>@L["NoMessagesYet"]</p>
+                <span class="ashare-chat-hint">@L["SendFirstMessage"]</span>
             </div>
         }
         else
@@ -113,22 +128,52 @@
     private bool _isTyping = false;
     private ElementReference _messagesContainer;
     private IDisposable? _messageSubscription;
+    private string? _currentUserId;
+    private bool _shouldScrollToBottom = true;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             // Load chat info
-            var chat = (await ChatsClient.GetConversationAsync(ChatId));
+            var chat = await ChatsClient.GetConversationAsync(ChatId);
+
+            // تعيين بيانات أولية
+            var otherPartyId = chat?.OtherPartyId;
+            var displayName = "مستخدم";
+            string? avatar = chat?.OtherPartyAvatar;
+
+            // جلب اسم المستخدم الحقيقي من البروفايل
+            if (!string.IsNullOrEmpty(otherPartyId))
+            {
+                try
+                {
+                    var profile = await ProfilesClient.GetByUserIdAsync(otherPartyId);
+                    if (profile != null)
+                    {
+                        displayName = profile.FullName ?? profile.BusinessName ?? "مستخدم";
+                        avatar = profile.Avatar ?? avatar;
+                    }
+                }
+                catch
+                {
+                    // إذا فشل جلب البروفايل، نستخدم الاسم الافتراضي
+                }
+            }
+
             _chat = new()
             {
-                Avatar = chat?.OtherPartyAvatar ?? "",
+                Avatar = avatar ?? "",
                 Id = chat?.Id ?? Guid.Empty,
-                Name = chat?.OtherPartyName ?? "Other"
+                Name = displayName
             };
 
             // Load messages
             var messages = await ChatsClient.GetMessagesAsync(ChatId);
+
+            // Get current user ID to calculate IsMine correctly
+            _currentUserId = TokenManager.GetUserIdFromToken();
+
             _messages = messages?
             .Select(message =>
             new ChatMessage
@@ -136,23 +181,31 @@
                 Content = message.Content,
                 Id = message.Id,
                 IsFailed = false,
-                IsMine = message.IsMine,
+                // Calculate IsMine by comparing SenderId with current user ID
+                IsMine = !string.IsNullOrEmpty(_currentUserId) && message.SenderId == _currentUserId,
                 IsRead = message.IsRead,
                 SentAt = message.SentAt,
                 Type = message.Type
             })
             .ToList() ?? [];
 
-            // Subscribe to real-time updates (connect to chat hub)
-            await RealtimeClient.ConnectAsync("Marketplace", "/hubs/chat");
-            _messageSubscription = RealtimeClient.On<object>("ReceiveMessage", HandleNewMessage);
+            // Subscribe to real-time updates (connect to chat hub with auth token)
+            var accessToken = await TokenManager.GetTokenAsync();
+            await RealtimeClient.ConnectAsync("Marketplace", "/hubs/chat", accessToken);
+
+            // Join the chat group to receive messages for this conversation
+            await RealtimeClient.SendAsync("JoinChat", ChatId.ToString());
+
+            // Subscribe to "ReceiveMessage" event (the method name on IChatClient)
+            // Server calls: client.ReceiveMessage("MessageReceived", message)
+            _messageSubscription = RealtimeClient.On<string, object>("ReceiveMessage", HandleNewMessage);
 
             // Mark as read
             await ChatsClient.MarkAsReadAsync(ChatId);
         }
-        catch
+        catch (Exception ex)
         {
-            // Handle error
+            Console.WriteLine($"[ChatRoom] Error loading chat: {ex.Message}");
         }
         finally
         {
@@ -160,10 +213,88 @@
         }
     }
 
-    private void HandleNewMessage(object message)
+    private void HandleNewMessage(string method, object messageData)
     {
-        // Handle incoming real-time message
-        InvokeAsync(StateHasChanged);
+        try
+        {
+            Console.WriteLine($"[ChatRoom] 📩 Received event: method={method}");
+
+            // Only process MessageReceived events
+            if (method != "MessageReceived") return;
+
+            // Parse the incoming message
+            var json = messageData?.ToString();
+            Console.WriteLine($"[ChatRoom] 📩 Message data: {json?.Substring(0, Math.Min(100, json?.Length ?? 0))}...");
+
+            if (string.IsNullOrEmpty(json)) return;
+
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var incomingMessage = JsonSerializer.Deserialize<IncomingMessage>(json, options);
+
+            if (incomingMessage == null) return;
+
+            // Check 1: Exact ID match (message already processed)
+            if (_messages.Any(m => m.Id == incomingMessage.Id))
+            {
+                Console.WriteLine($"[ChatRoom] ⏭️ Skipping duplicate message (ID match): {incomingMessage.Id}");
+                return;
+            }
+
+            // Determine if this message is from the current user
+            var isMine = !string.IsNullOrEmpty(_currentUserId) && incomingMessage.SenderId == _currentUserId;
+
+            // Check 2: For messages from current user, check for pending local message with same content
+            // This handles the race condition where SignalR arrives before API response updates the local ID
+            if (isMine)
+            {
+                var pendingMessage = _messages.FirstOrDefault(m =>
+                    m.IsMine &&
+                    m.Content == incomingMessage.Content &&
+                    Math.Abs((m.SentAt - incomingMessage.CreatedAt).TotalSeconds) < 30);
+
+                if (pendingMessage != null)
+                {
+                    // Update the pending message's ID with the server ID instead of adding duplicate
+                    Console.WriteLine($"[ChatRoom] 🔄 Updating pending message ID: {pendingMessage.Id} → {incomingMessage.Id}");
+                    pendingMessage.Id = incomingMessage.Id;
+                    pendingMessage.SentAt = incomingMessage.CreatedAt;
+                    InvokeAsync(StateHasChanged);
+                    return;
+                }
+            }
+
+            Console.WriteLine($"[ChatRoom] ✅ Adding new message: {incomingMessage.Content} (IsMine: {isMine})");
+
+            var chatMessage = new ChatMessage
+            {
+                Id = incomingMessage.Id,
+                Content = incomingMessage.Content,
+                Type = incomingMessage.Type?.ToString()?.ToLower() ?? "text",
+                IsMine = isMine, // Could be from current user on another device
+                IsRead = false,
+                SentAt = incomingMessage.CreatedAt
+            };
+
+            _messages.Add(chatMessage);
+            _shouldScrollToBottom = true;
+
+            InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ChatRoom] Error handling new message: {ex.Message}");
+        }
+    }
+
+    // DTO for incoming real-time messages
+    private class IncomingMessage
+    {
+        public Guid Id { get; set; }
+        public Guid ChatId { get; set; }
+        public string SenderId { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
+        public object? Type { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
     private async Task HandleKeyUp(KeyboardEventArgs e)
@@ -190,17 +321,28 @@
         _messages.Add(message);
         var messageToSend = _newMessage;
         _newMessage = "";
+        _shouldScrollToBottom = true;
 
         try
         {
-            await ChatsClient.SendMessageAsync(ChatId, new SendMessageRequest
+            var response = await ChatsClient.SendMessageAsync(ChatId, new SendMessageRequest
             {
                 Content = messageToSend,
                 Type = "text"
             });
+
+            // Update local message with server-assigned ID
+            // This ensures the duplicate check works when SignalR broadcast arrives
+            if (response != null)
+            {
+                Console.WriteLine($"[ChatRoom] ✅ Message sent, updating ID from {message.Id} to {response.Id}");
+                message.Id = response.Id;
+                message.SentAt = response.CreatedAt;
+            }
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"[ChatRoom] ❌ Failed to send message: {ex.Message}");
             // Handle send failure
             message.IsFailed = true;
         }
@@ -211,6 +353,14 @@
     public async ValueTask DisposeAsync()
     {
         _messageSubscription?.Dispose();
+
+        // Leave the chat group before disconnecting
+        try
+        {
+            await RealtimeClient.SendAsync("LeaveChat", ChatId.ToString());
+        }
+        catch { /* Ignore errors when leaving */ }
+
         await RealtimeClient.DisconnectAsync();
     }
 
@@ -219,6 +369,13 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        // Scroll to bottom when needed
+        if (_shouldScrollToBottom && !_isLoading)
+        {
+            _shouldScrollToBottom = false;
+            await ScrollToBottomAsync();
+        }
+
         if (firstRender || _messages.Any(m => !_formattedTimes.ContainsKey(m.Id)))
         {
             // Format all message times using timezone service
@@ -229,6 +386,15 @@
             }
             StateHasChanged();
         }
+    }
+
+    private async Task ScrollToBottomAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("eval", "document.querySelector('.ashare-messages-container')?.scrollTo(0, document.querySelector('.ashare-messages-container')?.scrollHeight || 0)");
+        }
+        catch { /* Ignore scroll errors */ }
     }
 
     private string GetFormattedTime(Guid messageId, DateTime sentAt)

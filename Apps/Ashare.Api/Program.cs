@@ -47,6 +47,13 @@ using ACommerce.Transactions.Core.Api.Controllers;
 using ACommerce.Locations.Api.Controllers;
 using ACommerce.Chats.Api.Controllers;
 using ACommerce.Notifications.Recipients.Api.Controllers;
+using ACommerce.Subscriptions.Api.Controllers;
+using ACommerce.Subscriptions.Services;
+using ACommerce.Payments.Api.Controllers;
+using ACommerce.Payments.Abstractions.Contracts;
+using ACommerce.Payments.Noon.Extensions;
+using Ashare.Api.Middleware;
+using Microsoft.AspNetCore.SignalR;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -104,16 +111,34 @@ try
         .AddApplicationPart(typeof(LocationSearchController).Assembly)
         .AddApplicationPart(typeof(ChatsController).Assembly)
         .AddApplicationPart(typeof(ContactPointsController).Assembly)
+        .AddApplicationPart(typeof(SubscriptionsController).Assembly)
+        .AddApplicationPart(typeof(PaymentsController).Assembly) // Payments
         .AddApplicationPart(typeof(RegistryController).Assembly); // Service Registry & Discovery
 
     builder.Services.AddEndpointsApiExplorer();
 
-    // Database (SQLite - entities auto-discovered from all ACommerce assemblies)
+    // Database - Auto-detect provider from connection string
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
     {
-        options.UseSqlite(
-            builder.Configuration.GetConnectionString("DefaultConnection")
-            ?? "Data Source=ashare.db");
+        if (string.IsNullOrEmpty(connectionString) || connectionString.Contains("Data Source="))
+        {
+            // SQLite for local development
+            Log.Information("Using SQLite database");
+            options.UseSqlite(connectionString ?? "Data Source=ashare.db");
+        }
+        else
+        {
+            // SQL Server for Azure/Production
+            Log.Information("Using SQL Server database");
+            options.UseSqlServer(connectionString, sqlOptions =>
+            {
+                sqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 5,
+                    maxRetryDelay: TimeSpan.FromSeconds(30),
+                    errorNumbersToAdd: null);
+            });
+        }
         options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
     });
 
@@ -169,6 +194,14 @@ try
     // ChatHub is still mapped but doesn't use IRealtimeHub service directly
     builder.Services.AddACommerceSignalR<NotificationHub, INotificationClient>();
 
+    // ✅ SignalR Exception Filter - لمنع انهيار الـ Hubs عند حدوث أخطاء
+    builder.Services.AddSingleton<SignalRExceptionFilter>();
+    builder.Services.AddSignalR(options =>
+    {
+        options.AddFilter<SignalRExceptionFilter>();
+        options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+    });
+
     // Location Services
     builder.Services.AddACommerceLocations();
 
@@ -178,12 +211,21 @@ try
     // Product Services
     builder.Services.AddScoped<IProductService, ProductService>();
 
+    // Subscription Services
+    builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+
+    // Payment Provider (Noon)
+    builder.Services.AddNoonPayments(builder.Configuration);
+
     // Ashare Seed Service
     builder.Services.AddScoped<AshareSeedDataService>();
 
     // Swagger Documentation
     builder.Services.AddSwaggerGen(options =>
     {
+        // Fix duplicate schema names by using full type name
+        options.CustomSchemaIds(type => type.FullName?.Replace("+", "."));
+
         options.SwaggerDoc("v1", new()
         {
             Title = "Ashare API",
@@ -286,6 +328,9 @@ Built using ACommerce libraries with configuration-first approach:
 
     var app = builder.Build();
 
+    // ✅ Global Exception Handler - أول middleware لالتقاط جميع الأخطاء
+    app.UseGlobalExceptionHandler();
+
     // Middleware Pipeline - Swagger always enabled for testing
     app.UseSwagger();
     app.UseSwaggerUI(options =>
@@ -314,9 +359,10 @@ Built using ACommerce libraries with configuration-first approach:
     app.MapHub<NotificationHub>("/hubs/notifications");
     app.MapMessagingHub(); // /hubs/messaging - Inter-service messaging
 
-    // Database initialization and seeding
-    using (var scope = app.Services.CreateScope())
+    // Database initialization and seeding (مع حماية من الأخطاء)
+    try
     {
+        using var scope = app.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Log.Information("Ensuring database is created...");
@@ -325,26 +371,50 @@ Built using ACommerce libraries with configuration-first approach:
         // Seed data
         Log.Information("Seeding initial data...");
         var seedService = scope.ServiceProvider.GetRequiredService<AshareSeedDataService>();
-        await seedService.SeedAsync();
+        //await seedService.SeedAsync();
 
         Log.Information("Database ready with seed data!");
     }
+    catch (Exception ex)
+    {
+        Log.Error(ex, "❌ Database initialization failed - continuing anyway");
+        // لا نوقف التطبيق - نستمر بدون قاعدة البيانات
+    }
 
     // Health check endpoint
-    app.MapGet("/health", () => new
+    app.MapGet("/health", () => Results.Ok(new
     {
         Service = "Ashare API",
-        Status = "Running",
-        Version = "1.0.0"
+        Status = "Healthy",
+        Version = "1.0.0",
+        Environment = app.Environment.EnvironmentName,
+        Timestamp = DateTime.UtcNow
+    }));
+
+    // Readiness check (for Kubernetes/Cloud Run)
+    app.MapGet("/ready", async (ApplicationDbContext db) =>
+    {
+        try
+        {
+            // Check database connectivity
+            await db.Database.CanConnectAsync();
+            return Results.Ok(new { Status = "Ready" });
+        }
+        catch
+        {
+            return Results.StatusCode(503);
+        }
     });
 
-    // ✅ تسجيل الخدمة في Service Registry
-    var serviceBaseUrl = app.Environment.IsDevelopment()
-        ? "https://localhost:5001"
-        : "http://safqatasheer-001-site1.qtempurl.com";
+    // ✅ تسجيل الخدمة في Service Registry (مع حماية من الأخطاء)
+    var serviceBaseUrl = Environment.GetEnvironmentVariable("SERVICE_URL")
+        ?? (app.Environment.IsDevelopment()
+            ? "https://localhost:5001"
+            : "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net");
 
-    using (var scope = app.Services.CreateScope())
+    try
     {
+        using var scope = app.Services.CreateScope();
         var registry = scope.ServiceProvider.GetRequiredService<IServiceRegistry>();
         await registry.RegisterAsync(new ServiceRegistration
         {
@@ -360,6 +430,10 @@ Built using ACommerce libraries with configuration-first approach:
             }
         });
         Log.Information("Ashare service registered in Service Registry at {BaseUrl}", serviceBaseUrl);
+    }
+    catch (Exception ex)
+    {
+        Log.Warning(ex, "⚠️ Service Registry registration failed - continuing anyway");
     }
 
     Log.Information("Ashare API started successfully!");

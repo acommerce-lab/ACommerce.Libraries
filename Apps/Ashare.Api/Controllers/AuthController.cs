@@ -204,14 +204,14 @@ public class AuthController : AuthenticationControllerBase
     //        Logger.LogInformation("[Test Webhook] Simulating Nafath callback for {TransactionId}", request.TransactionId);
 
             // الحصول على provider ومعالجة الـ webhook
-            if (TwoFactorProvider is ACommerce.Authentication.TwoFactor.Nafath.NafathAuthenticationProvider nafathProvider)
-            {
-                var webhookRequest = new ACommerce.Authentication.TwoFactor.Nafath.NafathWebhookRequest
-                {
-                    TransactionId = request.TransactionId,
-                    NationalId = request.NationalId ?? "test_national_id",
-                    Status = request.Status ?? "COMPLETED"
-                };
+            //if (TwoFactorProvider is ACommerce.Authentication.TwoFactor.Nafath.NafathAuthenticationProvider nafathProvider)
+            //{
+            //    var webhookRequest = new ACommerce.Authentication.TwoFactor.Nafath.NafathWebhookRequest
+            //    {
+            //        TransactionId = request.TransactionId,
+            //        NationalId = request.NationalId ?? "test_national_id",
+            //        Status = request.Status ?? "COMPLETED"
+            //    };
 
     //            var result = await nafathProvider.HandleWebhookAsync(webhookRequest);
 
@@ -251,7 +251,9 @@ public class AuthController : AuthenticationControllerBase
         var profile = await _profileRepository.GetByIdAsync(id);
         if (profile == null)
         {
-            return NotFound();
+            // الـ Profile غير موجود = التوكن من قاعدة بيانات قديمة أو محذوف
+            // نُرجع 401 حتى يحذف العميل التوكن ويعيد تسجيل الدخول
+            return Unauthorized(new { message = "Profile not found. Please login again." });
         }
 
         return Ok(new ProfileResponse

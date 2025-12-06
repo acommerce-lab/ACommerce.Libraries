@@ -88,7 +88,32 @@ public enum CreateListingStep
 	AddImages,
 	SetLocation,
 	Review,
+	SubscriptionCheck,  // التحقق من الباقة قبل النشر
 	Submitting,
 	Success,
 	Error
+}
+
+/// <summary>
+/// نتيجة التحقق من إمكانية إضافة عرض (نسخة مبسطة للـ Frontend)
+/// </summary>
+public class SubscriptionCheckResult
+{
+	/// <summary>هل يمكن إضافة عرض</summary>
+	public bool CanAdd { get; set; }
+
+	/// <summary>سبب عدم السماح</summary>
+	public string? Reason { get; set; }
+
+	/// <summary>هل يجب الاشتراك أولاً</summary>
+	public bool SubscriptionRequired { get; set; }
+
+	/// <summary>هل يجب ترقية الباقة</summary>
+	public bool ShouldUpgrade { get; set; }
+
+	/// <summary>العدد الحالي من العروض</summary>
+	public int CurrentCount { get; set; }
+
+	/// <summary>الحد الأقصى المسموح</summary>
+	public int MaxAllowed { get; set; }
 }

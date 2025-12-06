@@ -35,6 +35,12 @@ public sealed class RetryInterceptor : DelegatingHandler
 					return response;
 				}
 
+				// لا تُعد المحاولة للأخطاء التي لن تتغير بإعادة المحاولة
+				if (IsNonRetryableStatusCode(response.StatusCode))
+				{
+					return response;
+				}
+
 				// إذا كانت آخر محاولة، ارجع حتى لو فشل
 				if (i == _maxRetries)
 				{
@@ -76,5 +82,25 @@ public sealed class RetryInterceptor : DelegatingHandler
 		}
 
 		return response!;
+	}
+
+	/// <summary>
+	/// أكواد الحالة التي لا يجب إعادة المحاولة عليها
+	/// لأن إعادة المحاولة لن تغير النتيجة
+	/// </summary>
+	private static bool IsNonRetryableStatusCode(System.Net.HttpStatusCode statusCode)
+	{
+		return statusCode switch
+		{
+			System.Net.HttpStatusCode.Unauthorized => true,        // 401 - التوكن غير صالح
+			System.Net.HttpStatusCode.Forbidden => true,           // 403 - ممنوع
+			System.Net.HttpStatusCode.BadRequest => true,          // 400 - طلب خاطئ
+			System.Net.HttpStatusCode.NotFound => true,            // 404 - غير موجود
+			System.Net.HttpStatusCode.MethodNotAllowed => true,    // 405 - الطريقة غير مسموحة
+			System.Net.HttpStatusCode.Conflict => true,            // 409 - تعارض
+			System.Net.HttpStatusCode.Gone => true,                // 410 - محذوف
+			System.Net.HttpStatusCode.UnprocessableEntity => true, // 422 - غير قابل للمعالجة
+			_ => false
+		};
 	}
 }

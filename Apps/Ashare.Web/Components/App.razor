@@ -12,9 +12,10 @@
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-    <!-- App Styles -->
-    <link rel="stylesheet" href="_content/Ashare.Shared/css/ashare.css" />
+    <!-- ACommerce Base Styles -->
     <link rel="stylesheet" href="_content/ACommerce.Templates.Customer/css/acommerce.css" />
+    <!-- Ashare Brand Styles - v2025.2 Visual Identity Update (overrides ACommerce defaults) -->
+    <link rel="stylesheet" href="_content/Ashare.Shared/css/ashare.css?v=2025.2" />
 
     <HeadOutlet @rendermode="InteractiveServer" />
 </head>
@@ -26,6 +27,9 @@
 
     <!-- App Scripts -->
     <script src="_content/Ashare.Shared/js/ac-map.js"></script>
+
+    <!-- Analytics Pixels (Meta, Google, TikTok, Snapchat) -->
+    <script src="_content/Ashare.Shared/js/analytics-init.js"></script>
 
     <script src="_framework/blazor.web.js"></script>
 </body>

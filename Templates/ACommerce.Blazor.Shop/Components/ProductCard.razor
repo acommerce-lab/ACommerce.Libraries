@@ -62,9 +62,9 @@
 			<div class="product-price-container">
 				@if (Listing.DiscountPercentage > 0)
 				{
-					<span class="original-price">@Listing.OriginalPrice.ToString("C")</span>
+					<span class="original-price">@Listing.OriginalPrice?.ToString("N2") @Listing.Currency</span>
 				}
-				<span class="product-price">@Listing.Price.ToString("C")</span>
+				<span class="product-price">@Listing.Price.ToString("N2") @Listing.Currency</span>
 			</div>
 
 			<!-- Stock Status -->

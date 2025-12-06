@@ -16,6 +16,14 @@ public sealed class ProfilesClient(IApiClient httpClient)
 		return await httpClient.GetAsync<ProfileDto>(ServiceName, $"/api/profiles/{id}", cancellationToken);
 	}
 
+	/// <summary>
+	/// الحصول على بروفايل بواسطة UserId (معرف المستخدم من المصادقة)
+	/// </summary>
+	public async Task<ProfileDto?> GetByUserIdAsync(string userId, CancellationToken cancellationToken = default)
+	{
+		return await httpClient.GetAsync<ProfileDto>(ServiceName, $"/api/profiles/by-user/{userId}", cancellationToken);
+	}
+
 	public async Task<ProfileDto?> CreateAsync(CreateProfileRequest request, CancellationToken cancellationToken = default)
 	{
 		return await httpClient.PostAsync<CreateProfileRequest, ProfileDto>(ServiceName, "/api/profiles", request, cancellationToken);
@@ -42,13 +50,16 @@ public sealed class ProfileDto
 {
 	public Guid Id { get; set; }
 	public string UserId { get; set; } = string.Empty;
-	public string FirstName { get; set; } = string.Empty;
-	public string LastName { get; set; } = string.Empty;
-	public string? DisplayName { get; set; }
+	public string? FullName { get; set; }
+	public string? BusinessName { get; set; }
 	public string? Email { get; set; }
 	public string? PhoneNumber { get; set; }
 	public string? Address { get; set; }
-	public string? AvatarUrl { get; set; }
+	public string? City { get; set; }
+	public string? Country { get; set; }
+	public string? Avatar { get; set; }
+	public bool IsActive { get; set; }
+	public bool IsVerified { get; set; }
 	public DateTime CreatedAt { get; set; }
 	public DateTime? UpdatedAt { get; set; }
 }
@@ -56,16 +67,17 @@ public sealed class ProfileDto
 public sealed class CreateProfileRequest
 {
 	public string UserId { get; set; } = string.Empty;
-	public string FirstName { get; set; } = string.Empty;
-	public string LastName { get; set; } = string.Empty;
+	public string? FullName { get; set; }
 	public string? PhoneNumber { get; set; }
 	public string? Address { get; set; }
 }
 
 public sealed class UpdateProfileRequest
 {
-	public string? FirstName { get; set; }
-	public string? LastName { get; set; }
+	public string? FullName { get; set; }
 	public string? PhoneNumber { get; set; }
+	public string? Email { get; set; }
 	public string? Address { get; set; }
+	public string? City { get; set; }
+	public string? Avatar { get; set; }
 }
