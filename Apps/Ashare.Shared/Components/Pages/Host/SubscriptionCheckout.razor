@@ -8,6 +8,7 @@
 @inject Ashare.Shared.Services.ThemeService ThemeService
 @inject ILocalizationService L
 @inject IPaymentService PaymentService
+@inject NavigationManager NavigationManager
 
 <div class="ac-page ashare-checkout-page @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
     @* Header *@
@@ -44,7 +45,7 @@
                 <PaymentWebView
                     PaymentUrl="@_paymentUrl"
                     PaymentId="@_paymentId"
-                    ReturnUrlPattern="@_returnUrlPattern"
+                    ReturnUrlPattern="/host/payment/callback"
                     UseRedirect="true"
                     OnPaymentCompleted="HandlePaymentCompleted"
                     OnPaymentCancelled="HandlePaymentCancelled" />
@@ -189,7 +190,6 @@
     private bool _showPaymentWebView = false;
     private string? _paymentUrl;
     private string? _paymentId;
-    private string _returnUrlPattern = "/host/payment/callback";
     private string? _errorMessage;
 
     private SubscriptionPlanDto? _selectedPlan;
@@ -251,6 +251,16 @@
         return (int)Math.Round((1 - discounted / original) * 100);
     }
 
+    /// <summary>
+    /// Get the absolute return URL based on current browser location
+    /// </summary>
+    private string GetPaymentReturnUrl()
+    {
+        // Get the base URI from NavigationManager (e.g., https://localhost:57217/)
+        var baseUri = NavigationManager.BaseUri.TrimEnd('/');
+        return $"{baseUri}/host/payment/callback";
+    }
+
     private async Task ProcessPayment()
     {
         if (_selectedPlan == null) return;
@@ -261,14 +271,15 @@
 
         try
         {
-            Console.WriteLine("[SubscriptionCheckout] Creating subscription payment...");
+            var returnUrl = GetPaymentReturnUrl();
+            Console.WriteLine($"[SubscriptionCheckout] Creating subscription payment with returnUrl: {returnUrl}");
 
             // Create subscription and get payment URL
             var response = await ApiService.CreateSubscriptionPaymentAsync(new CreateSubscriptionPaymentRequest
             {
                 PlanId = _selectedPlan.Id,
                 BillingCycle = _billingCycle,
-                ReturnUrl = _returnUrlPattern
+                ReturnUrl = returnUrl
             });
 
             Console.WriteLine($"[SubscriptionCheckout] Response: Success={response?.Success}, PaymentUrl={response?.PaymentUrl?.Substring(0, Math.Min(50, response?.PaymentUrl?.Length ?? 0))}...");
