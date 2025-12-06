@@ -2,10 +2,12 @@
 @using ACommerce.Subscriptions.DTOs
 @using ACommerce.Subscriptions.Enums
 @using Ashare.Shared.Models
+@using Ashare.Shared.Services
 @inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
 @inject Ashare.Shared.Services.ThemeService ThemeService
 @inject ILocalizationService L
+@inject IPaymentService PaymentService
 
 <div class="ac-page ashare-checkout-page @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
     @* Header *@
@@ -275,8 +277,21 @@
             {
                 _paymentUrl = response.PaymentUrl;
                 _paymentId = response.PaymentId;
-                _showPaymentWebView = true;
-                Console.WriteLine($"[SubscriptionCheckout] PaymentWebView will show with URL: {_paymentUrl.Substring(0, Math.Min(50, _paymentUrl.Length))}...");
+                Console.WriteLine($"[SubscriptionCheckout] Opening payment URL directly: {_paymentUrl.Substring(0, Math.Min(50, _paymentUrl.Length))}...");
+
+                // فتح صفحة الدفع مباشرة بدلاً من استخدام PaymentWebView
+                var success = await PaymentService.OpenPaymentPageAsync(_paymentUrl);
+                if (!success)
+                {
+                    // إذا فشل الفتح التلقائي، نعرض الرابط للمستخدم
+                    _showPaymentWebView = true;
+                    Console.WriteLine("[SubscriptionCheckout] Auto-open failed, showing manual link");
+                }
+                else
+                {
+                    Console.WriteLine("[SubscriptionCheckout] Payment page opened successfully");
+                    return; // لا نحتاج لتحديث الواجهة بعد التوجيه
+                }
             }
             else if (response?.RequiresPayment == false)
             {
