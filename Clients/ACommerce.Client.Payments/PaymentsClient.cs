@@ -82,7 +82,7 @@ public sealed class CreatePaymentRequest
 public sealed class PaymentResponse
 {
 	public string PaymentId { get; set; } = string.Empty;
-	public Guid OrderId { get; set; }
+	public Guid? OrderId { get; set; }
 	public decimal Amount { get; set; }
 	public string Currency { get; set; } = string.Empty;
 	public string Status { get; set; } = string.Empty; // "Pending", "Completed", "Failed", "Cancelled"
