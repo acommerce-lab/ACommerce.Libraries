@@ -9,7 +9,6 @@
 <div class="payment-webview-container">
     @if (UseRedirect)
     {
-        @* Redirect mode - Payment gateways don't allow iframe embedding *@
         <div class="payment-redirect-message">
             <div class="payment-redirect-icon">
                 <i class="bi bi-credit-card-2-front"></i>
@@ -39,10 +38,13 @@
                     }
                 </button>
 
-                        <a href="@PaymentUrl" target="_blank" class="ac-btn ac-btn-outline-primary">
-                            <i class="bi bi-box-arrow-up-right"></i>
-                            فتح يدوياً
-                        </a>
+                @if (!string.IsNullOrEmpty(PaymentUrl))
+                {
+                    <a href="@PaymentUrl" target="_blank" class="ac-btn ac-btn-outline-primary">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                        فتح يدوياً
+                    </a>
+                }
 
                 <button class="ac-btn ac-btn-outline-secondary" @onclick="HandleCancel">
                     إلغاء
@@ -61,16 +63,8 @@
                     <p class="payment-url-display">@PaymentUrl</p>
                 </details>
             }
-                else
-                {
-                    <div class="payment-actions">
-                        <button class="ac-btn ac-btn-outline-secondary" @onclick="HandleCancel">
-                            العودة
-                        </button>
         </div>
     }
-            </div>
-        }
     else
     {
         @if (_isLoading)
@@ -100,7 +94,6 @@
         </iframe>
     }
 </div>
-</div>
 
 @code {
     [Parameter, EditorRequired]
@@ -120,9 +113,6 @@
 
     [Parameter]
     public bool UseRedirect { get; set; } = true;
-
-    [Parameter]
-    public string? PaymentId { get; set; }
 
     private ElementReference _iframeRef;
     private bool _isLoading = true;
@@ -151,14 +141,12 @@
     {
         if (string.IsNullOrEmpty(PaymentUrl))
         {
-            _openFailed = true;
             _errorMessage = "رابط الدفع غير متوفر";
             StateHasChanged();
             return;
         }
 
         _isOpening = true;
-        _openFailed = false;
         _errorMessage = null;
         StateHasChanged();
 
