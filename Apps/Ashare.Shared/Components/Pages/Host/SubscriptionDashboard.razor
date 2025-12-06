@@ -2,6 +2,7 @@
 @using ACommerce.Subscriptions.DTOs
 @using ACommerce.Subscriptions.Enums
 @inject AshareApiService ApiService
+@inject AuthClient AuthClient
 @inject IAppNavigationService Navigation
 @inject Ashare.Shared.Services.ThemeService ThemeService
 @inject ILocalizationService L
@@ -237,7 +238,6 @@
     private VendorUsageStatsDto? _usageStats;
     private List<InvoiceSummaryDto> _invoices = new();
 
-    // TODO: Get from auth context
     private Guid _vendorId = Guid.Empty;
 
     protected override async Task OnInitializedAsync()
@@ -251,14 +251,25 @@
 
         try
         {
-            // TODO: Get vendor ID from authenticated user
-            // For now, we'll show empty state
-
-            if (_vendorId != Guid.Empty)
+            // الحصول على معرف المستخدم/المزود من حساب المستخدم الحالي
+            var user = await AuthClient.GetMeAsync();
+            if (user != null && Guid.TryParse(user.Id, out var userId))
             {
+                _vendorId = userId;
+                Console.WriteLine($"[SubscriptionDashboard] Loading subscription for vendor: {_vendorId}");
+
                 _subscription = await ApiService.GetHostSubscriptionAsync(_vendorId);
-                _usageStats = await ApiService.GetUsageStatsAsync(_vendorId);
-                _invoices = await ApiService.GetHostInvoicesAsync(_vendorId);
+                Console.WriteLine($"[SubscriptionDashboard] Subscription loaded: {_subscription?.Id}, Status: {_subscription?.Status}");
+
+                if (_subscription != null)
+                {
+                    _usageStats = await ApiService.GetUsageStatsAsync(_vendorId);
+                    _invoices = await ApiService.GetHostInvoicesAsync(_vendorId);
+                }
+            }
+            else
+            {
+                Console.WriteLine("[SubscriptionDashboard] User not authenticated");
             }
         }
         catch (Exception ex)
