@@ -134,6 +134,18 @@
                     </div>
                 </div>
 
+                @* Error Message *@
+                @if (!string.IsNullOrEmpty(_errorMessage))
+                {
+                    <div class="ashare-payment-error">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span>@_errorMessage</span>
+                        <button class="ashare-error-dismiss" @onclick="() => _errorMessage = null">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                }
+
                 @* Payment Button *@
                 <div class="ashare-checkout-actions">
                     <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
@@ -176,6 +188,7 @@
     private string? _paymentUrl;
     private string? _paymentId;
     private string _returnUrlPattern = "/host/payment/callback";
+    private string? _errorMessage;
 
     private SubscriptionPlanDto? _selectedPlan;
     private SubscriptionDto? _currentSubscription;
@@ -241,6 +254,7 @@
         if (_selectedPlan == null) return;
 
         _isProcessing = true;
+        _errorMessage = null;
 
         try
         {
@@ -263,11 +277,17 @@
                 // Free trial or free plan - no payment needed
                 Navigation.NavigateTo("/host/subscription?success=true");
             }
+            else
+            {
+                // API returned but no payment URL
+                _errorMessage = L["PaymentInitError"];
+                Console.WriteLine("Error: API returned null or empty payment URL");
+            }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error processing payment: {ex.Message}");
-            // Show error to user
+            _errorMessage = L["PaymentConnectionError"];
         }
 
         _isProcessing = false;
@@ -484,5 +504,42 @@
     .ashare-error i {
         font-size: 48px;
         color: var(--ac-danger);
+    }
+
+    .ashare-payment-error {
+        display: flex;
+        align-items: center;
+        gap: var(--ac-spacing-sm);
+        padding: var(--ac-spacing-md);
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid var(--ac-danger, #EF4444);
+        border-radius: var(--ac-radius-md);
+        color: var(--ac-danger, #EF4444);
+    }
+
+    .ashare-payment-error i {
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .ashare-payment-error span {
+        flex: 1;
+    }
+
+    .ashare-error-dismiss {
+        background: none;
+        border: none;
+        color: var(--ac-danger, #EF4444);
+        cursor: pointer;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+
+    .ashare-error-dismiss:hover {
+        opacity: 1;
     }
 </style>

@@ -236,6 +236,11 @@ public static class MauiProgram
         builder.Services.AddScoped<PendingListingService>();
 
         // ═══════════════════════════════════════════════════════════════════
+        // Payment Service (خدمة الدفع)
+        // ═══════════════════════════════════════════════════════════════════
+        builder.Services.AddSingleton<IPaymentService, MauiPaymentService>();
+
+        // ═══════════════════════════════════════════════════════════════════
         // Analytics Services (Meta, Google, TikTok, Snapchat)
         // ضع المعرفات في AnalyticsSettings.cs
         // ═══════════════════════════════════════════════════════════════════

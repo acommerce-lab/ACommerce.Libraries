@@ -477,6 +477,21 @@ public class LocalizationService : ILocalizationService
         ["Hour"] = "ساعة",
         ["Day"] = "يوم",
         ["Month"] = "شهر",
+
+        // Payment
+        ["SubscribeNow"] = "اشترك الآن",
+        ["BillingCycle"] = "دورة الفوترة",
+        ["Quarterly"] = "ربع سنوي",
+        ["Subtotal"] = "المجموع الفرعي",
+        ["FreeTrial"] = "فترة تجريبية مجانية",
+        ["VAT"] = "ضريبة القيمة المضافة",
+        ["Processing"] = "جاري المعالجة...",
+        ["StartFreeTrial"] = "ابدأ الفترة التجريبية",
+        ["PayNow"] = "ادفع الآن",
+        ["PaymentSecureNotice"] = "ستتم معالجة الدفع بشكل آمن عبر بوابة الدفع",
+        ["PaymentInitError"] = "تعذر بدء عملية الدفع. يرجى المحاولة مرة أخرى.",
+        ["PaymentConnectionError"] = "حدث خطأ في الاتصال. تحقق من اتصالك بالإنترنت وحاول مرة أخرى.",
+        ["PlanNotFound"] = "الباقة غير موجودة",
     };
 
     // ═══════════════════════════════════════════════════════════════════
@@ -815,6 +830,21 @@ public class LocalizationService : ILocalizationService
         ["Hour"] = "hour",
         ["Day"] = "day",
         ["Month"] = "month",
+
+        // Payment
+        ["SubscribeNow"] = "Subscribe Now",
+        ["BillingCycle"] = "Billing Cycle",
+        ["Quarterly"] = "Quarterly",
+        ["Subtotal"] = "Subtotal",
+        ["FreeTrial"] = "Free Trial",
+        ["VAT"] = "VAT",
+        ["Processing"] = "Processing...",
+        ["StartFreeTrial"] = "Start Free Trial",
+        ["PayNow"] = "Pay Now",
+        ["PaymentSecureNotice"] = "Your payment will be securely processed through the payment gateway",
+        ["PaymentInitError"] = "Unable to initialize payment. Please try again.",
+        ["PaymentConnectionError"] = "Connection error. Please check your internet and try again.",
+        ["PlanNotFound"] = "Plan not found",
     };
 
     // ═══════════════════════════════════════════════════════════════════

@@ -178,6 +178,11 @@ builder.Services.AddScoped<AshareApiService>();
 builder.Services.AddScoped<PendingListingService>();
 
 // ═══════════════════════════════════════════════════════════════════
+// Payment Service (خدمة الدفع)
+// ═══════════════════════════════════════════════════════════════════
+builder.Services.AddScoped<IPaymentService, WebPaymentService>();
+
+// ═══════════════════════════════════════════════════════════════════
 // Analytics Services (Meta, Google, TikTok, Snapchat)
 // ═══════════════════════════════════════════════════════════════════
 builder.Services.AddAshareAnalytics(builder.Configuration);
