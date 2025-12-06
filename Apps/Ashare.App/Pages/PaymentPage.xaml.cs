@@ -85,18 +85,24 @@ public partial class PaymentPage : ContentPage
             var message = query["message"] ?? query["Message"];
             var error = query["error"] ?? query["Error"];
 
-            var isSuccess = status?.ToLower() == "success" ||
-                           status?.ToLower() == "captured" ||
-                           resultCode == "0";
+            // Noon لا يرسل status في الـ redirect URL
+            // الوصول إلى صفحة الـ callback يعني أن الدفع تم بنجاح
+            // إذا فشل الدفع، Noon يظهر رسالة خطأ ولا يقوم بإعادة التوجيه
+            var isSuccess = !string.IsNullOrEmpty(orderId) &&
+                           string.IsNullOrEmpty(error) &&
+                           (string.IsNullOrEmpty(status) ||
+                            status.ToLower() == "success" ||
+                            status.ToLower() == "captured" ||
+                            resultCode == "0");
 
-            Console.WriteLine($"[PaymentPage] Payment result: Success={isSuccess}, OrderId={orderId}, Status={status}");
+            Console.WriteLine($"[PaymentPage] Payment result: Success={isSuccess}, OrderId={orderId}, Status={status ?? "redirect-success"}");
 
             var result = new PaymentPageResult
             {
                 Success = isSuccess,
                 OrderId = orderId,
                 TransactionId = transactionId ?? orderId,
-                Status = status ?? "unknown",
+                Status = status ?? "redirect-success",
                 Message = isSuccess ? "تم الدفع بنجاح" : (message ?? error ?? "فشلت عملية الدفع")
             };
 
