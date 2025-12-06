@@ -52,6 +52,7 @@ using ACommerce.Subscriptions.Services;
 using ACommerce.Payments.Api.Controllers;
 using ACommerce.Payments.Abstractions.Contracts;
 using ACommerce.Payments.Noon.Extensions;
+using Ashare.Api.Middleware;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -192,6 +193,14 @@ try
     // ChatHub is still mapped but doesn't use IRealtimeHub service directly
     builder.Services.AddACommerceSignalR<NotificationHub, INotificationClient>();
 
+    // ✅ SignalR Exception Filter - لمنع انهيار الـ Hubs عند حدوث أخطاء
+    builder.Services.AddSingleton<SignalRExceptionFilter>();
+    builder.Services.AddSignalR(options =>
+    {
+        options.AddFilter<SignalRExceptionFilter>();
+        options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+    });
+
     // Location Services
     builder.Services.AddACommerceLocations();
 
@@ -318,6 +327,9 @@ Built using ACommerce libraries with configuration-first approach:
 
     var app = builder.Build();
 
+    // ✅ Global Exception Handler - أول middleware لالتقاط جميع الأخطاء
+    app.UseGlobalExceptionHandler();
+
     // Middleware Pipeline - Swagger always enabled for testing
     app.UseSwagger();
     app.UseSwaggerUI(options =>
@@ -346,9 +358,10 @@ Built using ACommerce libraries with configuration-first approach:
     app.MapHub<NotificationHub>("/hubs/notifications");
     app.MapMessagingHub(); // /hubs/messaging - Inter-service messaging
 
-    // Database initialization and seeding
-    using (var scope = app.Services.CreateScope())
+    // Database initialization and seeding (مع حماية من الأخطاء)
+    try
     {
+        using var scope = app.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         Log.Information("Ensuring database is created...");
@@ -360,6 +373,11 @@ Built using ACommerce libraries with configuration-first approach:
         //await seedService.SeedAsync();
 
         Log.Information("Database ready with seed data!");
+    }
+    catch (Exception ex)
+    {
+        Log.Error(ex, "❌ Database initialization failed - continuing anyway");
+        // لا نوقف التطبيق - نستمر بدون قاعدة البيانات
     }
 
     // Health check endpoint
@@ -387,14 +405,15 @@ Built using ACommerce libraries with configuration-first approach:
         }
     });
 
-    // ✅ تسجيل الخدمة في Service Registry
+    // ✅ تسجيل الخدمة في Service Registry (مع حماية من الأخطاء)
     var serviceBaseUrl = Environment.GetEnvironmentVariable("SERVICE_URL")
         ?? (app.Environment.IsDevelopment()
             ? "https://localhost:5001"
             : "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net");
 
-    using (var scope = app.Services.CreateScope())
+    try
     {
+        using var scope = app.Services.CreateScope();
         var registry = scope.ServiceProvider.GetRequiredService<IServiceRegistry>();
         await registry.RegisterAsync(new ServiceRegistration
         {
@@ -410,6 +429,10 @@ Built using ACommerce libraries with configuration-first approach:
             }
         });
         Log.Information("Ashare service registered in Service Registry at {BaseUrl}", serviceBaseUrl);
+    }
+    catch (Exception ex)
+    {
+        Log.Warning(ex, "⚠️ Service Registry registration failed - continuing anyway");
     }
 
     Log.Information("Ashare API started successfully!");
