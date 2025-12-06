@@ -8,7 +8,10 @@ namespace Ashare.Shared.Models;
 public class PaymentResult
 {
     public bool Success { get; set; }
+    public bool Cancelled { get; set; }
+    public string? OrderId { get; set; }
     public string TransactionId { get; set; } = string.Empty;
+    public string? Status { get; set; }
     public string? Message { get; set; }
     public string? ErrorCode { get; set; }
     public Dictionary<string, string> Metadata { get; set; } = new();

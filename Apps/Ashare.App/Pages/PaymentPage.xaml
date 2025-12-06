@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Ashare.App.Pages.PaymentPage"
+             Title="الدفع الآمن"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{DynamicResource PageBackgroundColor}">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Header -->
+        <Grid Grid.Row="0"
+              BackgroundColor="#345454"
+              Padding="16,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0"
+                    Text="✕"
+                    TextColor="White"
+                    BackgroundColor="Transparent"
+                    FontSize="20"
+                    Clicked="OnCloseClicked"
+                    WidthRequest="44"
+                    HeightRequest="44"/>
+
+            <Label Grid.Column="1"
+                   Text="الدفع الآمن"
+                   TextColor="White"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"/>
+
+            <HorizontalStackLayout Grid.Column="2"
+                                   Spacing="4"
+                                   VerticalOptions="Center">
+                <Label Text="🔒" FontSize="14"/>
+                <Label Text="آمن"
+                       TextColor="#10B981"
+                       FontSize="14"
+                       FontAttributes="Bold"/>
+            </HorizontalStackLayout>
+        </Grid>
+
+        <!-- WebView -->
+        <WebView x:Name="PaymentWebView"
+                 Grid.Row="1"
+                 Navigating="OnWebViewNavigating"
+                 Navigated="OnWebViewNavigated"/>
+
+        <!-- Loading Overlay -->
+        <Grid x:Name="LoadingOverlay"
+              Grid.Row="1"
+              BackgroundColor="#80FFFFFF"
+              IsVisible="True">
+            <VerticalStackLayout VerticalOptions="Center"
+                                 HorizontalOptions="Center"
+                                 Spacing="16">
+                <ActivityIndicator IsRunning="True"
+                                   Color="#345454"
+                                   HeightRequest="50"
+                                   WidthRequest="50"/>
+                <Label Text="جاري تحميل صفحة الدفع..."
+                       TextColor="#345454"
+                       FontSize="16"
+                       HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+        </Grid>
+
+        <!-- Bottom Status Bar -->
+        <Frame Grid.Row="2"
+               BackgroundColor="#F3F4F6"
+               Padding="12"
+               CornerRadius="0"
+               HasShadow="False"
+               BorderColor="Transparent">
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
+                <Label Text="💳" FontSize="14"/>
+                <Label x:Name="StatusLabel"
+                       Text="يتم معالجة الدفع عبر بوابة نون الآمنة"
+                       TextColor="#6B7280"
+                       FontSize="12"/>
+            </HorizontalStackLayout>
+        </Frame>
+    </Grid>
+</ContentPage>

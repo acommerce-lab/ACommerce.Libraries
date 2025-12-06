@@ -299,24 +299,58 @@
                 _paymentId = response.PaymentId;
                 Console.WriteLine($"[SubscriptionCheckout] PaymentId: {_paymentId}");
 
-                // الاتصال بـ SignalR والاشتراك في إشعارات الدفع قبل فتح صفحة الدفع
-                await ConnectAndSubscribeToPayment(_paymentId);
-
-                Console.WriteLine($"[SubscriptionCheckout] Opening payment URL directly: {_paymentUrl.Substring(0, Math.Min(50, _paymentUrl.Length))}...");
-
-                // فتح صفحة الدفع مباشرة بدلاً من استخدام PaymentWebView
-                _waitingForPaymentResult = true;
-                var success = await PaymentService.OpenPaymentPageAsync(_paymentUrl);
-                if (!success)
+                // التحقق من دعم الدفع داخل التطبيق (WebView)
+                if (PaymentService.SupportsInAppPayment)
                 {
-                    // إذا فشل الفتح التلقائي، نعرض الرابط للمستخدم
-                    _showPaymentWebView = true;
-                    Console.WriteLine("[SubscriptionCheckout] Auto-open failed, showing manual link");
+                    Console.WriteLine("[SubscriptionCheckout] Using in-app WebView for payment");
+
+                    // الاتصال بـ SignalR للاستماع لإشعارات الدفع (كبديل احتياطي)
+                    await ConnectAndSubscribeToPayment(_paymentId);
+
+                    // فتح صفحة الدفع في WebView داخل التطبيق
+                    // يتم اعتراض رابط الـ callback لمعرفة نتيجة الدفع
+                    var result = await PaymentService.OpenPaymentInAppAsync(_paymentUrl, "/host/payment/callback");
+
+                    Console.WriteLine($"[SubscriptionCheckout] Payment result: Success={result.Success}, Message={result.Message}");
+
+                    // معالجة النتيجة
+                    if (result.Success)
+                    {
+                        Navigation.NavigateTo("/host/subscription?success=true");
+                        return;
+                    }
+                    else if (result.Cancelled)
+                    {
+                        // المستخدم ألغى الدفع - نبقى في الصفحة
+                        _errorMessage = null;
+                        Console.WriteLine("[SubscriptionCheckout] Payment cancelled by user");
+                    }
+                    else
+                    {
+                        // فشل الدفع
+                        _errorMessage = result.Message ?? L["PaymentFailed"];
+                        Console.WriteLine($"[SubscriptionCheckout] Payment failed: {result.Message}");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine("[SubscriptionCheckout] Payment page opened successfully - waiting for SignalR notification");
-                    // لا نعود فوراً - ننتظر إشعار SignalR
+                    // Fallback: فتح في المتصفح الخارجي مع الاعتماد على SignalR
+                    Console.WriteLine("[SubscriptionCheckout] In-app payment not supported, using external browser");
+
+                    // الاتصال بـ SignalR للاستماع لإشعارات الدفع
+                    await ConnectAndSubscribeToPayment(_paymentId);
+
+                    _waitingForPaymentResult = true;
+                    var success = await PaymentService.OpenPaymentPageAsync(_paymentUrl);
+                    if (!success)
+                    {
+                        _showPaymentWebView = true;
+                        Console.WriteLine("[SubscriptionCheckout] Auto-open failed, showing manual link");
+                    }
+                    else
+                    {
+                        Console.WriteLine("[SubscriptionCheckout] Payment page opened - waiting for SignalR notification");
+                    }
                 }
             }
             else if (response?.RequiresPayment == false)
