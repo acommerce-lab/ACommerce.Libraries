@@ -20,6 +20,10 @@ public class MauiPaymentService : IPaymentService
     /// </summary>
     public async Task<PaymentResult> OpenPaymentInAppAsync(string paymentUrl, string callbackPattern = "/host/payment/callback")
     {
+        Console.WriteLine("═══════════════════════════════════════════════════════════════");
+        Console.WriteLine("[MauiPaymentService] 🚀 WebView Payment Mode ENABLED (v2.0)");
+        Console.WriteLine("═══════════════════════════════════════════════════════════════");
+
         if (string.IsNullOrEmpty(paymentUrl))
         {
             Console.WriteLine("[MauiPaymentService] Payment URL is null or empty");
@@ -32,7 +36,7 @@ public class MauiPaymentService : IPaymentService
 
         try
         {
-            Console.WriteLine($"[MauiPaymentService] Opening payment in WebView: {paymentUrl}");
+            Console.WriteLine($"[MauiPaymentService] 📱 Opening payment in IN-APP WebView: {paymentUrl}");
             Console.WriteLine($"[MauiPaymentService] Callback pattern: {callbackPattern}");
 
             // Create payment page
