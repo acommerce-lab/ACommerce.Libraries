@@ -673,15 +673,39 @@ public class AshareApiService
 			if (isCompleted)
 			{
 				// تفعيل الاشتراك إذا تم الدفع بنجاح
-				// TODO: Call activate subscription endpoint if needed
+				if (payment.OrderId.HasValue)
+				{
+					Console.WriteLine($"[VerifySubscriptionPayment] Activating subscription: {payment.OrderId.Value}");
+					var activatedSubscription = await _subscriptionClient.ActivateSubscriptionAsync(
+						payment.OrderId.Value,
+						payment.PaymentId);
 
+					if (activatedSubscription != null)
+					{
+						Console.WriteLine($"[VerifySubscriptionPayment] ✅ Subscription activated successfully: {activatedSubscription.Id}");
+						return new VerifyPaymentResponse
+						{
+							Success = true,
+							Status = "Completed",
+							SubscriptionId = activatedSubscription.Id,
+							ActivatedAt = DateTime.Now,
+							Message = "تم الدفع وتفعيل الاشتراك بنجاح"
+						};
+					}
+					else
+					{
+						Console.WriteLine("[VerifySubscriptionPayment] ⚠️ Payment succeeded but subscription activation failed");
+					}
+				}
+
+				// الدفع نجح لكن لم نتمكن من تفعيل الاشتراك
 				return new VerifyPaymentResponse
 				{
 					Success = true,
 					Status = "Completed",
 					SubscriptionId = payment.OrderId,
 					ActivatedAt = DateTime.Now,
-					Message = "تم الدفع وتفعيل الاشتراك بنجاح"
+					Message = "تم الدفع بنجاح"
 				};
 			}
 

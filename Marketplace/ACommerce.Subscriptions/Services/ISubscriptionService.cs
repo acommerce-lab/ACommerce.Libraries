@@ -51,6 +51,9 @@ public interface ISubscriptionService
     /// <summary>تجديد الاشتراك</summary>
     Task<SubscriptionDto?> RenewSubscriptionAsync(Guid subscriptionId, RenewSubscriptionDto dto, CancellationToken ct = default);
 
+    /// <summary>تفعيل الاشتراك بعد الدفع</summary>
+    Task<SubscriptionDto?> ActivateSubscriptionAsync(Guid subscriptionId, string? paymentId = null, CancellationToken ct = default);
+
     /// <summary>الحصول على ملخص الاشتراك</summary>
     Task<SubscriptionSummaryDto?> GetSubscriptionSummaryAsync(Guid vendorId, CancellationToken ct = default);
 

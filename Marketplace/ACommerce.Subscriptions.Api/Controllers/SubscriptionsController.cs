@@ -147,6 +147,16 @@ public class SubscriptionsController : ControllerBase
         return Ok(subscription);
     }
 
+    /// <summary>تفعيل الاشتراك بعد الدفع</summary>
+    [HttpPost("{subscriptionId:guid}/activate")]
+    [Authorize]
+    public async Task<ActionResult<SubscriptionDto>> ActivateSubscription(Guid subscriptionId, [FromBody] ActivateSubscriptionRequest? request, CancellationToken ct)
+    {
+        var subscription = await _subscriptionService.ActivateSubscriptionAsync(subscriptionId, request?.PaymentId, ct);
+        if (subscription == null) return NotFound();
+        return Ok(subscription);
+    }
+
     /// <summary>الحصول على ملخص الاشتراك</summary>
     [HttpGet("vendor/{vendorId:guid}/summary")]
     [Authorize]
@@ -213,4 +223,10 @@ public class SubscriptionsController : ControllerBase
     }
 
     #endregion
+}
+
+/// <summary>طلب تفعيل الاشتراك</summary>
+public class ActivateSubscriptionRequest
+{
+    public string? PaymentId { get; set; }
 }

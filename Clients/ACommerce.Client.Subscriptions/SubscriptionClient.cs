@@ -117,6 +117,16 @@ public sealed class SubscriptionClient
             ct);
     }
 
+    /// <summary>تفعيل الاشتراك بعد الدفع</summary>
+    public async Task<SubscriptionDto?> ActivateSubscriptionAsync(Guid subscriptionId, string? paymentId = null, CancellationToken ct = default)
+    {
+        return await _httpClient.PostAsync<object, SubscriptionDto>(
+            ServiceName,
+            $"{BasePath}/{subscriptionId}/activate",
+            new { PaymentId = paymentId },
+            ct);
+    }
+
     /// <summary>الحصول على ملخص الاشتراك</summary>
     public async Task<SubscriptionSummaryDto?> GetSubscriptionSummaryAsync(Guid vendorId, CancellationToken ct = default)
     {
