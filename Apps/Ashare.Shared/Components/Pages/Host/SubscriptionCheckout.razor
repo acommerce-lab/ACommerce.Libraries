@@ -45,7 +45,7 @@
                 <PaymentWebView
                     PaymentUrl="@_paymentUrl"
                     PaymentId="@_paymentId"
-                    ReturnUrlPattern="@_returnUrlPattern"
+                    ReturnUrlPattern="/host/payment/callback"
                     UseRedirect="true"
                     OnPaymentCompleted="HandlePaymentCompleted"
                     OnPaymentCancelled="HandlePaymentCancelled" />
