@@ -80,9 +80,12 @@
 @code {
     [SupplyParameterFromQuery] public string? OrderId { get; set; }
     [SupplyParameterFromQuery] public string? TransactionId { get; set; }
+    [SupplyParameterFromQuery] public string? MerchantReference { get; set; }
+    [SupplyParameterFromQuery] public string? PaymentType { get; set; }
     [SupplyParameterFromQuery] public string? Status { get; set; }
     [SupplyParameterFromQuery] public string? ResultCode { get; set; }
     [SupplyParameterFromQuery] public string? Message { get; set; }
+    [SupplyParameterFromQuery] public string? Error { get; set; }
 
     private bool _isVerifying = true;
     private bool _paymentSuccess = false;
@@ -98,49 +101,60 @@
     private async Task VerifyPayment()
     {
         _isVerifying = true;
+        Console.WriteLine($"[PaymentCallback] Verifying payment: OrderId={OrderId}, Status={Status}, MerchantReference={MerchantReference}");
 
         try
         {
-            // Check if status indicates success from URL params
-            var isSuccessFromUrl = Status?.ToLower() switch
-            {
-                "success" => true,
-                "captured" => true,
-                "completed" => true,
-                "payment_complete" => true,
-                _ => ResultCode == "0"
-            };
+            // Check for explicit error in URL
+            var hasError = !string.IsNullOrEmpty(Error) ||
+                          Status?.ToLower() == "failed" ||
+                          Status?.ToLower() == "cancelled";
 
-            if (isSuccessFromUrl)
+            if (hasError)
             {
-                // Verify with backend
+                Console.WriteLine($"[PaymentCallback] ❌ Explicit error/failure in URL: {Error ?? Status}");
+                _paymentSuccess = false;
+                _errorMessage = Error ?? Message ?? GetErrorMessage(Status);
+            }
+            // Noon لا يرسل status في redirect URL
+            // إذا وصل orderId بدون خطأ، نتحقق من حالة الدفع عبر API
+            else if (!string.IsNullOrEmpty(OrderId))
+            {
+                Console.WriteLine($"[PaymentCallback] 🔍 Verifying payment via API for OrderId: {OrderId}");
+
                 var response = await ApiService.VerifySubscriptionPaymentAsync(new VerifyPaymentRequest
                 {
-                    PaymentId = OrderId ?? "",
-                    TransactionId = TransactionId,
+                    PaymentId = OrderId,
+                    TransactionId = TransactionId ?? OrderId,
                     OrderId = OrderId
                 });
 
+                Console.WriteLine($"[PaymentCallback] API response: Success={response?.Success}, Status={response?.Status}");
+
                 if (response?.Success == true)
                 {
+                    Console.WriteLine("[PaymentCallback] ✅ Payment verified successfully!");
                     _paymentSuccess = true;
                     _transactionId = TransactionId ?? OrderId;
                     _activatedAt = response.ActivatedAt ?? DateTime.Now;
                 }
                 else
                 {
+                    Console.WriteLine($"[PaymentCallback] ❌ Payment verification failed: {response?.Message}");
                     _paymentSuccess = false;
-                    _errorMessage = response?.Message ?? Message;
+                    _errorMessage = response?.Message ?? Message ?? L["PaymentFailedMessage"];
                 }
             }
             else
             {
+                Console.WriteLine("[PaymentCallback] ❌ No OrderId in callback URL");
                 _paymentSuccess = false;
-                _errorMessage = Message ?? GetErrorMessage(Status);
+                _errorMessage = L["PaymentFailedMessage"];
             }
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"[PaymentCallback] ❌ Exception: {ex.Message}");
             _paymentSuccess = false;
             _errorMessage = ex.Message;
         }

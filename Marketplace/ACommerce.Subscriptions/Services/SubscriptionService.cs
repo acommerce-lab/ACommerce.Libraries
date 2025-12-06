@@ -212,13 +212,22 @@ public class SubscriptionService : ISubscriptionService
         var now = DateTime.UtcNow;
         var trialEnd = plan.TrialDays > 0 ? now.AddDays(plan.TrialDays) : (DateTime?)null;
         var periodEnd = trialEnd ?? now.AddMonths((int)dto.BillingCycle);
+        var price = plan.GetPrice(dto.BillingCycle);
+
+        // تحديد حالة الاشتراك:
+        // - Trial: إذا كان هناك فترة تجريبية
+        // - Active: إذا كانت الباقة مجانية
+        // - PastDue: إذا كان الدفع مطلوباً (ينتظر إتمام الدفع)
+        var status = plan.TrialDays > 0 ? SubscriptionStatus.Trial
+                   : price > 0 ? SubscriptionStatus.PastDue
+                   : SubscriptionStatus.Active;
 
         var subscription = new Subscription
         {
             Id = Guid.NewGuid(),
             VendorId = dto.VendorId,
             PlanId = dto.PlanId,
-            Status = plan.TrialDays > 0 ? SubscriptionStatus.Trial : SubscriptionStatus.Active,
+            Status = status,
             BillingCycle = dto.BillingCycle,
             StartDate = now,
             CurrentPeriodEnd = periodEnd,
@@ -344,6 +353,42 @@ public class SubscriptionService : ISubscriptionService
             subscription.PaymentMethodId = dto.PaymentMethodId;
 
         var evt = SubscriptionEvent.Renewed(subscriptionId, subscription.VendorId, subscription.Price);
+        _context.Set<SubscriptionEvent>().Add(evt);
+
+        await _context.SaveChangesAsync(ct);
+        return MapToSubscriptionDto(subscription);
+    }
+
+    public async Task<SubscriptionDto?> ActivateSubscriptionAsync(Guid subscriptionId, string? paymentId = null, CancellationToken ct = default)
+    {
+        var subscription = await _context.Set<Subscription>()
+            .Include(s => s.Plan)
+            .FirstOrDefaultAsync(s => s.Id == subscriptionId && !s.IsDeleted, ct);
+
+        if (subscription == null) return null;
+
+        // لا تفعّل إذا كان الاشتراك مُفعّل بالفعل أو ملغي
+        if (subscription.Status == SubscriptionStatus.Active)
+            return MapToSubscriptionDto(subscription);
+
+        if (subscription.Status == SubscriptionStatus.Cancelled)
+            return null;
+
+        var now = DateTime.UtcNow;
+
+        subscription.Status = SubscriptionStatus.Active;
+        subscription.LastPaymentDate = now;
+        subscription.PaymentMethodId = paymentId ?? subscription.PaymentMethodId;
+        subscription.UpdatedAt = now;
+
+        // تحديث نهاية الفترة بناءً على دورة الفوترة
+        if (subscription.CurrentPeriodEnd <= now)
+        {
+            subscription.CurrentPeriodEnd = now.AddMonths((int)subscription.BillingCycle);
+            subscription.NextPaymentDate = subscription.CurrentPeriodEnd;
+        }
+
+        var evt = SubscriptionEvent.Activated(subscriptionId, subscription.VendorId, subscription.Price, paymentId);
         _context.Set<SubscriptionEvent>().Add(evt);
 
         await _context.SaveChangesAsync(ct);

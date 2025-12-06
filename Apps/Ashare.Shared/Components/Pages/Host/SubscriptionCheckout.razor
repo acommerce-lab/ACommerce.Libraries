@@ -289,6 +289,7 @@
             {
                 PlanId = _selectedPlan.Id,
                 BillingCycle = _billingCycle,
+                ReturnUrl = returnUrl // إرسال URL المطلق إلى الباك إند
             });
 
             Console.WriteLine($"[SubscriptionCheckout] Response: Success={response?.Success}, PaymentUrl={response?.PaymentUrl?.Substring(0, Math.Min(50, response?.PaymentUrl?.Length ?? 0))}...");
@@ -300,9 +301,12 @@
                 Console.WriteLine($"[SubscriptionCheckout] PaymentId: {_paymentId}");
 
                 // التحقق من دعم الدفع داخل التطبيق (WebView)
+                Console.WriteLine($"[SubscriptionCheckout] SupportsInAppPayment = {PaymentService.SupportsInAppPayment}");
                 if (PaymentService.SupportsInAppPayment)
                 {
-                    Console.WriteLine("[SubscriptionCheckout] Using in-app WebView for payment");
+                    Console.WriteLine("═══════════════════════════════════════════════════════════════");
+                    Console.WriteLine("[SubscriptionCheckout] 🎯 WEBVIEW PAYMENT MODE (v2.0)");
+                    Console.WriteLine("═══════════════════════════════════════════════════════════════");
 
                     // الاتصال بـ SignalR للاستماع لإشعارات الدفع (كبديل احتياطي)
                     await ConnectAndSubscribeToPayment(_paymentId);
@@ -311,19 +315,47 @@
                     // يتم اعتراض رابط الـ callback لمعرفة نتيجة الدفع
                     var result = await PaymentService.OpenPaymentInAppAsync(_paymentUrl, "/host/payment/callback");
 
-                    Console.WriteLine($"[SubscriptionCheckout] Payment result: Success={result.Success}, Message={result.Message}");
+                    Console.WriteLine($"[SubscriptionCheckout] Payment callback: Status={result.Status}, OrderId={result.OrderId}");
 
                     // معالجة النتيجة
-                    if (result.Success)
-                    {
-                        Navigation.NavigateTo("/host/subscription?success=true");
-                        return;
-                    }
-                    else if (result.Cancelled)
+                    if (result.Cancelled)
                     {
                         // المستخدم ألغى الدفع - نبقى في الصفحة
                         _errorMessage = null;
                         Console.WriteLine("[SubscriptionCheckout] Payment cancelled by user");
+                    }
+                    else if (result.Status == "pending_verification" && !string.IsNullOrEmpty(result.OrderId))
+                    {
+                        // التحقق من حالة الدفع عبر API (مصدر الحقيقة الوحيد)
+                        Console.WriteLine($"[SubscriptionCheckout] 🔍 Verifying payment via API for orderId: {result.OrderId}");
+
+                        var verifyResult = await ApiService.VerifySubscriptionPaymentAsync(new VerifyPaymentRequest
+                        {
+                            PaymentId = _paymentId ?? result.OrderId,
+                            OrderId = result.OrderId,
+                            TransactionId = result.TransactionId
+                        });
+
+                        Console.WriteLine($"[SubscriptionCheckout] Verification result: Success={verifyResult?.Success}, Status={verifyResult?.Status}");
+
+                        if (verifyResult?.Success == true)
+                        {
+                            Console.WriteLine("[SubscriptionCheckout] ✅ Payment verified successfully!");
+                            Navigation.NavigateTo("/host/subscription?success=true");
+                            return;
+                        }
+                        else
+                        {
+                            // فشل التحقق أو الدفع لم يكتمل
+                            _errorMessage = verifyResult?.Message ?? L["PaymentFailed"];
+                            Console.WriteLine($"[SubscriptionCheckout] ❌ Payment verification failed: {verifyResult?.Message}");
+                        }
+                    }
+                    else if (result.Success)
+                    {
+                        // نجاح مباشر (حالة نادرة)
+                        Navigation.NavigateTo("/host/subscription?success=true");
+                        return;
                     }
                     else
                     {
