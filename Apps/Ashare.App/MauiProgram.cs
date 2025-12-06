@@ -235,6 +235,57 @@ public static class MauiProgram
         builder.Services.AddScoped<AshareApiService>();
         builder.Services.AddScoped<PendingListingService>();
 
+        // ═══════════════════════════════════════════════════════════════════
+        // Analytics Services (Meta, Google, TikTok, Snapchat)
+        // ضع المعرفات في AnalyticsSettings.cs
+        // ═══════════════════════════════════════════════════════════════════
+        builder.Services.Configure<Ashare.Shared.Services.Analytics.AnalyticsOptions>(options =>
+        {
+            options.Enabled = AnalyticsSettings.IsEnabled;
+            options.Meta = new Ashare.Shared.Services.Analytics.AnalyticsConfig
+            {
+                AppId = AnalyticsSettings.GetMetaAppId(),
+                IosAppId = AnalyticsSettings.MetaIosAppId,
+                AndroidAppId = AnalyticsSettings.MetaAndroidAppId,
+                DebugMode = AnalyticsSettings.DebugMode
+            };
+            options.Google = new Ashare.Shared.Services.Analytics.AnalyticsConfig
+            {
+                AppId = AnalyticsSettings.GetGoogleAppId(),
+                IosAppId = AnalyticsSettings.FirebaseIosAppId,
+                AndroidAppId = AnalyticsSettings.FirebaseAndroidAppId,
+                DebugMode = AnalyticsSettings.DebugMode
+            };
+            options.TikTok = new Ashare.Shared.Services.Analytics.AnalyticsConfig
+            {
+                AppId = AnalyticsSettings.GetTikTokAppId(),
+                IosAppId = AnalyticsSettings.TikTokIosAppId,
+                AndroidAppId = AnalyticsSettings.TikTokAndroidAppId,
+                DebugMode = AnalyticsSettings.DebugMode
+            };
+            options.Snapchat = new Ashare.Shared.Services.Analytics.AnalyticsConfig
+            {
+                AppId = AnalyticsSettings.GetSnapchatAppId(),
+                IosAppId = AnalyticsSettings.SnapchatIosAppId,
+                AndroidAppId = AnalyticsSettings.SnapchatAndroidAppId,
+                DebugMode = AnalyticsSettings.DebugMode
+            };
+        });
+        builder.Services.AddScoped<Ashare.Shared.Services.Analytics.Providers.MetaAnalyticsProvider>();
+        builder.Services.AddScoped<Ashare.Shared.Services.Analytics.Providers.GoogleAnalyticsProvider>();
+        builder.Services.AddScoped<Ashare.Shared.Services.Analytics.Providers.TikTokAnalyticsProvider>();
+        builder.Services.AddScoped<Ashare.Shared.Services.Analytics.Providers.SnapchatAnalyticsProvider>();
+        builder.Services.AddScoped<Ashare.Shared.Services.Analytics.AnalyticsService>(sp =>
+        {
+            var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<Ashare.Shared.Services.Analytics.AnalyticsOptions>>();
+            var service = new Ashare.Shared.Services.Analytics.AnalyticsService(options);
+            service.AddProvider(sp.GetRequiredService<Ashare.Shared.Services.Analytics.Providers.MetaAnalyticsProvider>());
+            service.AddProvider(sp.GetRequiredService<Ashare.Shared.Services.Analytics.Providers.GoogleAnalyticsProvider>());
+            service.AddProvider(sp.GetRequiredService<Ashare.Shared.Services.Analytics.Providers.TikTokAnalyticsProvider>());
+            service.AddProvider(sp.GetRequiredService<Ashare.Shared.Services.Analytics.Providers.SnapchatAnalyticsProvider>());
+            return service;
+        });
+
         // ⬅️ إذا لم تُسجَّل بعد:
         builder.Services.AddScoped<CategoriesClient>();          // من ACommerce SDK
         builder.Services.AddScoped<CategoryAttributesClient>(); // للخصائص الديناميكية
