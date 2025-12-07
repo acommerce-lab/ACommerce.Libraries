@@ -4,37 +4,68 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <!-- Primary Colors - Sky Blue Theme -->
-    <Color x:Key="Primary">#0EA5E9</Color>
-    <Color x:Key="PrimaryDark">#0284C7</Color>
-    <Color x:Key="PrimaryLight">#38BDF8</Color>
+    <!-- ═══════════════════════════════════════════════════════════════
+         Ashare Visual Identity 2025 - Brand Colors
+         عشير - الهوية البصرية
+         ═══════════════════════════════════════════════════════════════ -->
 
-    <!-- Secondary Colors - Violet -->
-    <Color x:Key="Secondary">#8B5CF6</Color>
-    <Color x:Key="SecondaryDark">#7C3AED</Color>
-    <Color x:Key="SecondaryLight">#A78BFA</Color>
+    <!-- Primary Colors - Deep Olive Green (الأخضر الزيتوني العميق)
+         Symbolizes: Trust, Stability, Sustainability -->
+    <Color x:Key="Primary">#345454</Color>
+    <Color x:Key="PrimaryDark">#263F3F</Color>
+    <Color x:Key="PrimaryLight">#4A6B6B</Color>
+
+    <!-- Secondary Colors - Soft Orange (البرتقالي الناعم)
+         Represents: Vitality, Optimism, Positive Energy -->
+    <Color x:Key="Secondary">#F4844C</Color>
+    <Color x:Key="SecondaryDark">#E06D34</Color>
+    <Color x:Key="SecondaryLight">#F69B6B</Color>
+
+    <!-- Accent Color - Uses Secondary Orange -->
+    <Color x:Key="Accent">#F4844C</Color>
+    <Color x:Key="AccentDark">#E06D34</Color>
+    <Color x:Key="AccentLight">#F69B6B</Color>
 
     <!-- Status Colors -->
     <Color x:Key="Success">#10B981</Color>
     <Color x:Key="Danger">#EF4444</Color>
     <Color x:Key="Warning">#F59E0B</Color>
-    <Color x:Key="Info">#06B6D4</Color>
+    <Color x:Key="Info">#345454</Color>
 
-    <!-- Neutral Colors -->
-    <Color x:Key="White">#ffffff</Color>
+    <!-- Neutral Colors - Warm Stone Tones (aligned with brand identity) -->
+    <Color x:Key="White">#FFFFFF</Color>
+    <Color x:Key="Cream">#FFFCF9</Color>
     <Color x:Key="Black">#000000</Color>
-    <Color x:Key="Gray100">#f3f4f6</Color>
-    <Color x:Key="Gray200">#e5e7eb</Color>
-    <Color x:Key="Gray300">#d1d5db</Color>
-    <Color x:Key="Gray400">#9ca3af</Color>
-    <Color x:Key="Gray500">#6b7280</Color>
-    <Color x:Key="Gray600">#4b5563</Color>
-    <Color x:Key="Gray700">#374151</Color>
-    <Color x:Key="Gray800">#1f2937</Color>
-    <Color x:Key="Gray900">#111827</Color>
+    <Color x:Key="Gray50">#FDFCFB</Color>
+    <Color x:Key="Gray100">#FAF8F6</Color>
+    <Color x:Key="Gray200">#F0EDE9</Color>
+    <Color x:Key="Gray300">#E0DCD6</Color>
+    <Color x:Key="Gray400">#A8A29E</Color>
+    <Color x:Key="Gray500">#78716C</Color>
+    <Color x:Key="Gray600">#57534E</Color>
+    <Color x:Key="Gray700">#44403C</Color>
+    <Color x:Key="Gray800">#292524</Color>
+    <Color x:Key="Gray900">#1C1917</Color>
 
     <!-- Page Colors -->
-    <Color x:Key="PageBackgroundColor">#ffffff</Color>
-    <Color x:Key="PageBackgroundColorDark">#0f172a</Color>
+    <Color x:Key="PageBackgroundColor">#FFFFFF</Color>
+    <Color x:Key="PageBackgroundColorDark">#1C1917</Color>
+
+    <!-- Surface Colors -->
+    <Color x:Key="Surface">#FFFFFF</Color>
+    <Color x:Key="SurfaceAlt">#FAF8F6</Color>
+    <Color x:Key="SurfaceDark">#292524</Color>
+
+    <!-- Text Colors -->
+    <Color x:Key="TextPrimary">#1C1917</Color>
+    <Color x:Key="TextSecondary">#57534E</Color>
+    <Color x:Key="TextMuted">#78716C</Color>
+    <Color x:Key="TextOnPrimary">#FFFFFF</Color>
+    <Color x:Key="TextOnSecondary">#FFFFFF</Color>
+
+    <!-- Border Colors -->
+    <Color x:Key="Border">#E0DCD6</Color>
+    <Color x:Key="BorderLight">#F0EDE9</Color>
+    <Color x:Key="BorderDark">#D6D3D1</Color>
 
 </ResourceDictionary>
