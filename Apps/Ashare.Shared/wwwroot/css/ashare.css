@@ -7084,7 +7084,7 @@ h1, h2, h3, .ashare-logo-text {
 
 .ac-plan-card-mini.recommended {
     border-color: var(--ashare-primary);
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.05), rgba(139, 92, 246, 0.05));
+    background: linear-gradient(135deg, rgba(52, 84, 84, 0.05), rgba(74, 107, 107, 0.05));
 }
 
 .ac-recommended-badge {
@@ -7186,7 +7186,7 @@ h1, h2, h3, .ashare-logo-text {
 .ac-plan-card-mini:hover .ac-btn-outline {
     border-color: var(--ashare-primary);
     color: var(--ashare-primary);
-    background: rgba(124, 58, 237, 0.05);
+    background: rgba(52, 84, 84, 0.05);
 }
 
 .ac-no-plans {
@@ -7209,4 +7209,1395 @@ h1, h2, h3, .ashare-logo-text {
 .ac-dark .ac-plan-info h4,
 .ac-dark .ac-plan-price .ac-price {
     color: var(--ashare-gray-900);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ASHARE PREMIUM VISUAL ENHANCEMENTS 2025
+   عشير - تحسينات بصرية متميزة
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────
+   Enhanced CSS Variables for Premium Effects
+   ───────────────────────────────────────────────────────────────── */
+:root {
+    /* Premium Gradients */
+    --ashare-gradient-primary: linear-gradient(135deg, #345454 0%, #263F3F 50%, #1A2E2E 100%);
+    --ashare-gradient-secondary: linear-gradient(135deg, #F4844C 0%, #E06D34 50%, #D05A22 100%);
+    --ashare-gradient-hero: linear-gradient(145deg, #345454 0%, #2D4747 30%, #263F3F 70%, #1F3333 100%);
+    --ashare-gradient-accent: linear-gradient(135deg, #F4844C 0%, #F69B6B 100%);
+    --ashare-gradient-warm: linear-gradient(180deg, #FFFCF9 0%, #FAF8F6 100%);
+    --ashare-gradient-shine: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+    
+    /* Glass-morphism */
+    --ashare-glass-bg: rgba(255, 255, 255, 0.85);
+    --ashare-glass-border: rgba(255, 255, 255, 0.18);
+    --ashare-glass-blur: blur(20px);
+    --ashare-glass-dark-bg: rgba(28, 25, 23, 0.85);
+    --ashare-glass-dark-border: rgba(255, 255, 255, 0.08);
+    
+    /* Premium Shadows with Brand Color Tinting */
+    --ashare-shadow-primary: 0 4px 14px -2px rgba(52, 84, 84, 0.25);
+    --ashare-shadow-primary-lg: 0 10px 40px -10px rgba(52, 84, 84, 0.35);
+    --ashare-shadow-secondary: 0 4px 14px -2px rgba(244, 132, 76, 0.3);
+    --ashare-shadow-secondary-lg: 0 10px 40px -10px rgba(244, 132, 76, 0.4);
+    --ashare-shadow-elevated: 0 8px 30px -5px rgba(0, 0, 0, 0.15), 0 4px 10px -4px rgba(0, 0, 0, 0.1);
+    --ashare-shadow-card: 0 2px 8px -2px rgba(52, 84, 84, 0.08), 0 6px 20px -4px rgba(52, 84, 84, 0.12);
+    --ashare-shadow-card-hover: 0 12px 40px -8px rgba(52, 84, 84, 0.2), 0 4px 12px -2px rgba(52, 84, 84, 0.1);
+    --ashare-shadow-glow-primary: 0 0 30px rgba(52, 84, 84, 0.3);
+    --ashare-shadow-glow-secondary: 0 0 30px rgba(244, 132, 76, 0.35);
+    --ashare-shadow-soft: 0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04);
+    --ashare-shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+    
+    /* Animation Timings */
+    --ashare-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --ashare-ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+    --ashare-ease-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --ashare-ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+    --ashare-transition-fast: 150ms var(--ashare-ease-smooth);
+    --ashare-transition-normal: 300ms var(--ashare-ease-smooth);
+    --ashare-transition-slow: 500ms var(--ashare-ease-smooth);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Premium Keyframe Animations
+   ───────────────────────────────────────────────────────────────── */
+@keyframes ashare-float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes ashare-pulse-glow {
+    0%, 100% { 
+        box-shadow: 0 0 0 0 rgba(244, 132, 76, 0.4);
+    }
+    50% { 
+        box-shadow: 0 0 20px 10px rgba(244, 132, 76, 0.2);
+    }
+}
+
+@keyframes ashare-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+@keyframes ashare-skeleton-loading {
+    0% { background-position: -200px 0; }
+    100% { background-position: calc(200px + 100%) 0; }
+}
+
+@keyframes ashare-slide-up {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px);
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0);
+    }
+}
+
+@keyframes ashare-scale-in {
+    from { 
+        opacity: 0; 
+        transform: scale(0.95);
+    }
+    to { 
+        opacity: 1; 
+        transform: scale(1);
+    }
+}
+
+@keyframes ashare-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes ashare-bounce-in {
+    0% { 
+        opacity: 0; 
+        transform: scale(0.3);
+    }
+    50% { 
+        opacity: 1; 
+        transform: scale(1.05);
+    }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); }
+}
+
+@keyframes ashare-ripple {
+    0% {
+        transform: scale(0);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+@keyframes ashare-gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes ashare-shine {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+@keyframes ashare-wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-3deg); }
+    75% { transform: rotate(3deg); }
+}
+
+@keyframes ashare-heartbeat {
+    0%, 100% { transform: scale(1); }
+    14% { transform: scale(1.1); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.1); }
+    70% { transform: scale(1); }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Enhanced Hero Section - Premium Design
+   ───────────────────────────────────────────────────────────────── */
+.ashare-hero {
+    background: var(--ashare-gradient-hero);
+    padding: var(--ashare-spacing-xl) var(--ashare-spacing-md);
+    margin: calc(-1 * var(--ashare-spacing-md));
+    margin-bottom: var(--ashare-spacing-lg);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.ashare-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(ellipse at 20% 20%, rgba(244, 132, 76, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(244, 132, 76, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.08) 0%, transparent 30%);
+    pointer-events: none;
+}
+
+.ashare-hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to top, rgba(255, 255, 255, 0.05), transparent);
+    pointer-events: none;
+}
+
+.ashare-hero-branded {
+    background: var(--ashare-gradient-hero);
+    position: relative;
+    overflow: hidden;
+}
+
+.ashare-hero-branded::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+        radial-gradient(ellipse at 30% 0%, rgba(244, 132, 76, 0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 100%, rgba(255, 255, 255, 0.05) 0%, transparent 40%);
+    animation: ashare-gradient-shift 8s ease infinite;
+    background-size: 200% 200%;
+}
+
+.ashare-hero-title {
+    color: white;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: var(--ashare-spacing-sm);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1;
+    animation: ashare-slide-up 0.6s var(--ashare-ease-out-expo);
+}
+
+.ashare-hero-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 15px;
+    margin-bottom: var(--ashare-spacing-lg);
+    position: relative;
+    z-index: 1;
+    animation: ashare-slide-up 0.6s var(--ashare-ease-out-expo) 0.1s both;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Glass-morphism Components
+   ───────────────────────────────────────────────────────────────── */
+.ashare-glass {
+    background: var(--ashare-glass-bg);
+    backdrop-filter: var(--ashare-glass-blur);
+    -webkit-backdrop-filter: var(--ashare-glass-blur);
+    border: 1px solid var(--ashare-glass-border);
+    box-shadow: var(--ashare-shadow-soft);
+}
+
+.ashare-glass-dark {
+    background: var(--ashare-glass-dark-bg);
+    backdrop-filter: var(--ashare-glass-blur);
+    -webkit-backdrop-filter: var(--ashare-glass-blur);
+    border: 1px solid var(--ashare-glass-dark-border);
+}
+
+.ashare-glass-card {
+    background: var(--ashare-glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--ashare-radius-lg);
+    box-shadow: 
+        0 4px 24px -4px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transition: all var(--ashare-transition-normal);
+}
+
+.ashare-glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 
+        0 12px 40px -8px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Glass Search Box */
+.ac-search-box {
+    background: var(--ashare-glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 
+        var(--ashare-shadow-elevated),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transition: all var(--ashare-transition-normal);
+    position: relative;
+    z-index: 1;
+    animation: ashare-slide-up 0.6s var(--ashare-ease-out-expo) 0.2s both;
+}
+
+.ac-search-box:hover,
+.ac-search-box:focus-within {
+    transform: translateY(-2px);
+    box-shadow: 
+        var(--ashare-shadow-primary-lg),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Premium Card Designs
+   ───────────────────────────────────────────────────────────────── */
+.ashare-space-card {
+    background: var(--ashare-white);
+    border-radius: var(--ashare-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--ashare-shadow-card);
+    transition: all var(--ashare-transition-normal);
+    position: relative;
+    animation: ashare-scale-in 0.4s var(--ashare-ease-out-expo) backwards;
+}
+
+.ashare-space-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: left 0.5s ease;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.ashare-space-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: var(--ashare-shadow-card-hover);
+}
+
+.ashare-space-card:hover::before {
+    left: 100%;
+}
+
+.ashare-space-card:active {
+    transform: translateY(-4px) scale(0.98);
+}
+
+/* Card Image Container with Overlay */
+.ashare-space-image {
+    position: relative;
+    overflow: hidden;
+}
+
+.ashare-space-image::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--ashare-transition-normal);
+}
+
+.ashare-space-card:hover .ashare-space-image::after {
+    opacity: 1;
+}
+
+.ashare-space-image img {
+    transition: transform 0.5s var(--ashare-ease-out-expo);
+}
+
+.ashare-space-card:hover .ashare-space-image img {
+    transform: scale(1.1);
+}
+
+/* Premium Price Tag */
+.ashare-space-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ashare-primary);
+    position: relative;
+    display: inline-block;
+}
+
+.ashare-space-price::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--ashare-gradient-secondary);
+    border-radius: 1px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--ashare-transition-normal);
+}
+
+.ashare-space-card:hover .ashare-space-price::before {
+    transform: scaleX(1);
+}
+
+/* Action Cards Premium */
+.ashare-action-card {
+    background: var(--ashare-white);
+    border-radius: var(--ashare-radius-lg);
+    padding: var(--ashare-spacing-lg);
+    box-shadow: var(--ashare-shadow-card);
+    transition: all var(--ashare-transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.ashare-action-card::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, rgba(52, 84, 84, 0.1), transparent 70%);
+    transform: translate(-50%, -50%);
+    transition: all 0.4s ease;
+    border-radius: 50%;
+}
+
+.ashare-action-card:hover::before {
+    width: 200%;
+    height: 200%;
+}
+
+.ashare-action-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--ashare-shadow-primary);
+}
+
+.ashare-action-card:active {
+    transform: translateY(-2px) scale(0.98);
+}
+
+.ashare-action-card i {
+    font-size: 32px;
+    background: var(--ashare-gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: var(--ashare-spacing-sm);
+    transition: transform var(--ashare-transition-normal);
+}
+
+.ashare-action-card:hover i {
+    transform: scale(1.15);
+    animation: ashare-wiggle 0.4s ease;
+}
+
+/* Premium Branded Action Cards */
+.ashare-action-primary {
+    background: var(--ashare-gradient-primary);
+    border: none;
+    box-shadow: var(--ashare-shadow-primary);
+}
+
+.ashare-action-primary::before {
+    background: radial-gradient(circle, rgba(244, 132, 76, 0.2), transparent 70%);
+}
+
+.ashare-action-primary:hover {
+    box-shadow: var(--ashare-shadow-primary-lg);
+}
+
+.ashare-action-primary i {
+    background: var(--ashare-gradient-secondary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.ashare-action-secondary {
+    background: var(--ashare-gradient-secondary);
+    border: none;
+    box-shadow: var(--ashare-shadow-secondary);
+}
+
+.ashare-action-secondary::before {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent 70%);
+}
+
+.ashare-action-secondary:hover {
+    box-shadow: var(--ashare-shadow-secondary-lg);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Enhanced Buttons with Ripple Effect
+   ───────────────────────────────────────────────────────────────── */
+.ac-btn {
+    position: relative;
+    overflow: hidden;
+    transition: all var(--ashare-transition-normal);
+    font-weight: 600;
+}
+
+.ac-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+}
+
+.ac-btn:active::before {
+    width: 300%;
+    height: 300%;
+    opacity: 0;
+    transition: width 0s, height 0s, opacity 0.5s ease;
+}
+
+.ac-btn-primary {
+    background: var(--ashare-gradient-primary);
+    border: none;
+    box-shadow: var(--ashare-shadow-primary);
+    color: white;
+}
+
+.ac-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ashare-shadow-primary-lg);
+}
+
+.ac-btn-primary:active {
+    transform: translateY(0);
+    box-shadow: var(--ashare-shadow-sm);
+}
+
+.ac-btn-accent,
+.ac-btn-cta {
+    background: var(--ashare-gradient-secondary);
+    border: none;
+    box-shadow: var(--ashare-shadow-secondary);
+    color: white;
+}
+
+.ac-btn-accent:hover,
+.ac-btn-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ashare-shadow-secondary-lg);
+}
+
+.ac-btn-accent:active,
+.ac-btn-cta:active {
+    transform: translateY(0);
+}
+
+/* Outline Button with Gradient Border */
+.ac-btn-outline {
+    background: transparent;
+    border: 2px solid var(--ashare-primary);
+    color: var(--ashare-primary);
+    position: relative;
+    z-index: 1;
+    transition: all var(--ashare-transition-normal);
+}
+
+.ac-btn-outline::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: var(--ashare-gradient-primary);
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity var(--ashare-transition-normal);
+}
+
+.ac-btn-outline:hover {
+    color: white;
+    border-color: transparent;
+}
+
+.ac-btn-outline:hover::after {
+    opacity: 1;
+}
+
+/* Floating Action Button */
+.ashare-fab {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--ashare-gradient-secondary);
+    border: none;
+    color: white;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--ashare-shadow-secondary-lg);
+    transition: all var(--ashare-transition-normal);
+    position: fixed;
+    bottom: calc(var(--bottom-nav-height) + var(--ashare-spacing-lg) + var(--safe-area-bottom));
+    right: var(--ashare-spacing-md);
+    z-index: 100;
+}
+
+.ashare-fab:hover {
+    transform: scale(1.1) translateY(-4px);
+    box-shadow: 
+        var(--ashare-shadow-secondary-lg),
+        var(--ashare-shadow-glow-secondary);
+}
+
+.ashare-fab:active {
+    transform: scale(0.95);
+}
+
+.ashare-fab i {
+    transition: transform var(--ashare-transition-normal);
+}
+
+.ashare-fab:hover i {
+    transform: rotate(90deg);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Enhanced Bottom Navigation
+   ───────────────────────────────────────────────────────────────── */
+.ac-bottom-nav {
+    background: var(--ashare-glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(224, 220, 214, 0.5);
+    box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.08);
+}
+
+.ac-bottom-nav-item {
+    position: relative;
+    transition: all var(--ashare-transition-fast);
+}
+
+.ac-bottom-nav-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 40px;
+    height: 3px;
+    background: var(--ashare-gradient-secondary);
+    border-radius: 0 0 3px 3px;
+    transition: transform var(--ashare-transition-normal);
+}
+
+.ac-bottom-nav-item.active::before {
+    transform: translateX(-50%) scaleX(1);
+}
+
+.ac-bottom-nav-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 28px;
+    border-radius: 14px;
+    transition: all var(--ashare-transition-normal);
+}
+
+.ac-bottom-nav-item.active .ac-bottom-nav-icon {
+    background: linear-gradient(135deg, rgba(52, 84, 84, 0.12), rgba(52, 84, 84, 0.06));
+}
+
+.ac-bottom-nav-item.active {
+    color: var(--ashare-primary);
+}
+
+.ac-bottom-nav-item:active {
+    transform: scale(0.9);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Enhanced Profile Header
+   ───────────────────────────────────────────────────────────────── */
+.ashare-profile-header {
+    background: var(--ashare-gradient-hero);
+    position: relative;
+    overflow: hidden;
+}
+
+.ashare-profile-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+        radial-gradient(ellipse at 0% 0%, rgba(244, 132, 76, 0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at 100% 100%, rgba(255, 255, 255, 0.08) 0%, transparent 40%);
+    animation: ashare-gradient-shift 10s ease infinite;
+    background-size: 200% 200%;
+}
+
+.ashare-profile-avatar {
+    position: relative;
+    z-index: 1;
+}
+
+.ashare-profile-avatar::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: var(--ashare-gradient-secondary);
+    z-index: -1;
+    opacity: 0.5;
+    animation: ashare-pulse-glow 3s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Enhanced Login Page
+   ───────────────────────────────────────────────────────────────── */
+.ashare-login-header {
+    background: var(--ashare-gradient-hero);
+    position: relative;
+    overflow: hidden;
+}
+
+.ashare-login-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+        radial-gradient(circle at 30% 20%, rgba(244, 132, 76, 0.25) 0%, transparent 40%),
+        radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 35%);
+}
+
+.ashare-login-header::after {
+    content: '';
+    position: absolute;
+    bottom: -50%;
+    left: -20%;
+    right: -20%;
+    height: 100%;
+    background: radial-gradient(ellipse, rgba(244, 132, 76, 0.15) 0%, transparent 60%);
+    animation: ashare-float 8s ease-in-out infinite;
+}
+
+.ashare-login-logo {
+    position: relative;
+    z-index: 1;
+    animation: ashare-bounce-in 0.8s var(--ashare-ease-elastic);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Enhanced Form Inputs
+   ───────────────────────────────────────────────────────────────── */
+.ac-input,
+.ac-select,
+.ac-textarea {
+    transition: all var(--ashare-transition-normal);
+    border: 1.5px solid var(--ashare-gray-200);
+}
+
+.ac-input:focus,
+.ac-select:focus,
+.ac-textarea:focus {
+    border-color: var(--ashare-primary);
+    box-shadow: 
+        0 0 0 4px rgba(52, 84, 84, 0.1),
+        var(--ashare-shadow-sm);
+    outline: none;
+}
+
+.ac-input:hover,
+.ac-select:hover,
+.ac-textarea:hover {
+    border-color: var(--ashare-gray-300);
+}
+
+/* Floating Labels */
+.ashare-input-group {
+    position: relative;
+}
+
+.ashare-input-group .ac-input {
+    padding-top: 20px;
+}
+
+.ashare-input-group label {
+    position: absolute;
+    top: 50%;
+    right: var(--ashare-spacing-md);
+    transform: translateY(-50%);
+    color: var(--ashare-gray-400);
+    font-size: 14px;
+    transition: all var(--ashare-transition-normal);
+    pointer-events: none;
+}
+
+.ashare-input-group .ac-input:focus + label,
+.ashare-input-group .ac-input:not(:placeholder-shown) + label {
+    top: 10px;
+    font-size: 11px;
+    color: var(--ashare-primary);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Premium CTA Section
+   ───────────────────────────────────────────────────────────────── */
+.ashare-cta-section {
+    background: var(--ashare-gradient-secondary);
+    position: relative;
+    overflow: hidden;
+    padding: var(--ashare-spacing-xl);
+    border-radius: var(--ashare-radius-xl);
+    margin: var(--ashare-spacing-lg) 0;
+}
+
+.ashare-cta-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+        radial-gradient(ellipse at 0% 50%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at 100% 0%, rgba(52, 84, 84, 0.2) 0%, transparent 40%);
+}
+
+.ashare-cta-section::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 50%;
+    height: 200%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: rotate(15deg);
+    animation: ashare-shine 4s ease-in-out infinite;
+}
+
+.ashare-cta-content {
+    position: relative;
+    z-index: 1;
+}
+
+.ashare-cta-title {
+    color: white;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: var(--ashare-spacing-sm);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.ashare-cta-text {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    margin-bottom: var(--ashare-spacing-lg);
+}
+
+.ashare-cta-btn {
+    background: white;
+    color: var(--ashare-secondary-dark);
+    font-weight: 700;
+    padding: var(--ashare-spacing-sm) var(--ashare-spacing-xl);
+    border-radius: var(--ashare-radius-full);
+    border: none;
+    box-shadow: var(--ashare-shadow-elevated);
+    cursor: pointer;
+    transition: all var(--ashare-transition-normal);
+}
+
+.ashare-cta-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+        var(--ashare-shadow-elevated),
+        0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.ashare-cta-btn:active {
+    transform: translateY(-1px) scale(0.98);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Skeleton Loading Animations
+   ───────────────────────────────────────────────────────────────── */
+.ashare-skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--ashare-gray-100) 25%,
+        var(--ashare-gray-200) 50%,
+        var(--ashare-gray-100) 75%
+    );
+    background-size: 200px 100%;
+    animation: ashare-skeleton-loading 1.5s ease-in-out infinite;
+    border-radius: var(--ashare-radius-sm);
+}
+
+.ashare-skeleton-text {
+    height: 14px;
+    margin-bottom: var(--ashare-spacing-sm);
+}
+
+.ashare-skeleton-text.short {
+    width: 60%;
+}
+
+.ashare-skeleton-text.medium {
+    width: 80%;
+}
+
+.ashare-skeleton-title {
+    height: 20px;
+    width: 70%;
+    margin-bottom: var(--ashare-spacing-md);
+}
+
+.ashare-skeleton-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+}
+
+.ashare-skeleton-card {
+    height: 200px;
+    border-radius: var(--ashare-radius-lg);
+}
+
+.ashare-skeleton-image {
+    height: 140px;
+    border-radius: var(--ashare-radius-md);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Enhanced Modals with Glass Effect
+   ───────────────────────────────────────────────────────────────── */
+.ac-modal-overlay {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: ashare-fade-in 0.2s ease;
+}
+
+.ac-modal {
+    background: var(--ashare-white);
+    border-radius: var(--ashare-radius-xl) var(--ashare-radius-xl) 0 0;
+    box-shadow: var(--ashare-shadow-elevated);
+    animation: ashare-slide-up 0.3s var(--ashare-ease-out-expo);
+}
+
+.ac-modal-header {
+    border-bottom: 1px solid var(--ashare-gray-100);
+}
+
+.ac-modal-header h3 {
+    font-weight: 700;
+    background: var(--ashare-gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Enhanced Favorite Button with Heart Animation
+   ───────────────────────────────────────────────────────────────── */
+.ashare-favorite-btn {
+    background: var(--ashare-glass-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: var(--ashare-shadow-sm);
+    transition: all var(--ashare-transition-normal);
+}
+
+.ashare-favorite-btn:hover {
+    transform: scale(1.1);
+    box-shadow: var(--ashare-shadow-md);
+}
+
+.ashare-favorite-btn:active {
+    transform: scale(0.9);
+}
+
+.ashare-favorite-btn .bi-heart-fill {
+    color: var(--ashare-danger);
+    animation: ashare-heartbeat 1s ease-in-out;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Enhanced Filter Chips
+   ───────────────────────────────────────────────────────────────── */
+.ashare-filter-chip {
+    transition: all var(--ashare-transition-normal);
+    border: 1.5px solid var(--ashare-gray-200);
+}
+
+.ashare-filter-chip:hover {
+    border-color: var(--ashare-primary);
+    background: rgba(52, 84, 84, 0.05);
+    transform: translateY(-2px);
+}
+
+.ashare-filter-chip.active {
+    background: var(--ashare-gradient-primary);
+    border-color: transparent;
+    box-shadow: var(--ashare-shadow-primary);
+    transform: translateY(-2px);
+}
+
+.ashare-filter-chip.active:hover {
+    box-shadow: var(--ashare-shadow-primary-lg);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Enhanced Badges with Gradients
+   ───────────────────────────────────────────────────────────────── */
+.ac-badge-primary {
+    background: var(--ashare-gradient-primary);
+    box-shadow: var(--ashare-shadow-primary);
+}
+
+.ac-badge-secondary,
+.ac-badge-accent {
+    background: var(--ashare-gradient-secondary);
+    box-shadow: var(--ashare-shadow-secondary);
+}
+
+.ashare-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: var(--ashare-radius-full);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.ashare-status-badge.available {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+    color: var(--ashare-success);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.ashare-status-badge.booked {
+    background: linear-gradient(135deg, rgba(244, 132, 76, 0.1), rgba(244, 132, 76, 0.05));
+    color: var(--ashare-secondary);
+    border: 1px solid rgba(244, 132, 76, 0.2);
+}
+
+.ashare-status-badge.featured {
+    background: var(--ashare-gradient-secondary);
+    color: white;
+    box-shadow: var(--ashare-shadow-secondary);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Enhanced Tabs
+   ───────────────────────────────────────────────────────────────── */
+.ashare-tabs {
+    background: var(--ashare-gray-100);
+    border-radius: var(--ashare-radius-lg);
+    padding: 4px;
+}
+
+.ashare-tab {
+    transition: all var(--ashare-transition-normal);
+    border-radius: var(--ashare-radius-md);
+}
+
+.ashare-tab:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.ashare-tab.active {
+    background: white;
+    color: var(--ashare-primary);
+    box-shadow: var(--ashare-shadow-sm);
+}
+
+.ashare-tab-badge {
+    background: var(--ashare-gradient-secondary);
+    box-shadow: 0 2px 6px rgba(244, 132, 76, 0.3);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Enhanced Notifications
+   ───────────────────────────────────────────────────────────────── */
+.ashare-notification-item {
+    transition: all var(--ashare-transition-normal);
+    border-radius: var(--ashare-radius-md);
+    margin-bottom: var(--ashare-spacing-sm);
+}
+
+.ashare-notification-item:hover {
+    transform: translateX(-4px);
+    box-shadow: var(--ashare-shadow-card);
+}
+
+.ashare-notification-item.unread {
+    background: linear-gradient(135deg, rgba(52, 84, 84, 0.03), transparent);
+    border-right: 3px solid var(--ashare-secondary);
+}
+
+.ashare-unread-dot {
+    background: var(--ashare-gradient-secondary);
+    box-shadow: var(--ashare-shadow-glow-secondary);
+    animation: ashare-pulse-glow 2s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Enhanced Chat Bubbles
+   ───────────────────────────────────────────────────────────────── */
+.ashare-message.mine .ashare-message-bubble {
+    background: var(--ashare-gradient-primary);
+    color: white;
+    border-radius: var(--ashare-radius-lg) var(--ashare-radius-lg) 4px var(--ashare-radius-lg);
+    box-shadow: var(--ashare-shadow-primary);
+}
+
+.ashare-message.theirs .ashare-message-bubble {
+    background: var(--ashare-white);
+    border: 1px solid var(--ashare-gray-200);
+    border-radius: var(--ashare-radius-lg) var(--ashare-radius-lg) var(--ashare-radius-lg) 4px;
+    box-shadow: var(--ashare-shadow-soft);
+}
+
+/* Chat Input Enhancement */
+.ashare-chat-input {
+    border-radius: var(--ashare-radius-xl);
+    background: var(--ashare-white);
+    box-shadow: var(--ashare-shadow-elevated);
+    border: 1px solid var(--ashare-gray-100);
+}
+
+.ashare-send-btn:not(:disabled) {
+    background: var(--ashare-gradient-secondary);
+    box-shadow: var(--ashare-shadow-secondary);
+    transition: all var(--ashare-transition-normal);
+}
+
+.ashare-send-btn:not(:disabled):hover {
+    transform: scale(1.1);
+    box-shadow: var(--ashare-shadow-secondary-lg);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Micro-interactions & Hover Effects
+   ───────────────────────────────────────────────────────────────── */
+
+/* Smooth hover lift for all interactive cards */
+.ashare-booking-card,
+.ashare-favorite-card,
+.ashare-plan-card,
+.ashare-menu-items {
+    transition: all var(--ashare-transition-normal);
+}
+
+.ashare-booking-card:hover,
+.ashare-favorite-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--ashare-shadow-card-hover);
+}
+
+/* Rating stars animation */
+.ashare-space-rating i {
+    transition: transform var(--ashare-transition-fast);
+}
+
+.ashare-space-rating i:hover {
+    transform: scale(1.2);
+}
+
+/* Link hover effects */
+a {
+    transition: color var(--ashare-transition-fast);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Page Transitions
+   ───────────────────────────────────────────────────────────────── */
+.ashare-page-enter {
+    animation: ashare-slide-up 0.4s var(--ashare-ease-out-expo);
+}
+
+.ashare-page-exit {
+    animation: ashare-fade-out 0.2s ease;
+}
+
+@keyframes ashare-fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Loading States
+   ───────────────────────────────────────────────────────────────── */
+.ashare-loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--ashare-glass-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.ashare-loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--ashare-gray-200);
+    border-top-color: var(--ashare-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.ashare-loading-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--ashare-spacing-md);
+}
+
+.ashare-loading-brand .ashare-loading-spinner {
+    border-top-color: var(--ashare-secondary);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Scroll Indicators
+   ───────────────────────────────────────────────────────────────── */
+.ashare-scroll-indicator {
+    position: fixed;
+    top: calc(var(--navbar-height) + var(--safe-area-top));
+    left: 0;
+    height: 3px;
+    background: var(--ashare-gradient-secondary);
+    z-index: 1001;
+    transform-origin: left;
+    transition: transform 0.1s linear;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Premium Toggle Switch
+   ───────────────────────────────────────────────────────────────── */
+.ashare-toggle input:checked + .ashare-toggle-slider {
+    background: var(--ashare-gradient-primary);
+}
+
+.ashare-toggle input:checked + .ashare-toggle-slider::before {
+    transform: translateX(-20px);
+    background: white;
+    box-shadow: var(--ashare-shadow-sm);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Enhanced Plan Cards
+   ───────────────────────────────────────────────────────────────── */
+.ashare-plan-card {
+    transition: all var(--ashare-transition-normal);
+}
+
+.ashare-plan-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--ashare-shadow-card-hover);
+}
+
+.ashare-plan-card.recommended {
+    border-color: var(--ashare-secondary);
+    position: relative;
+}
+
+.ashare-plan-card.recommended::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: var(--ashare-gradient-secondary);
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0.15;
+}
+
+.ashare-plan-icon {
+    background: var(--ashare-gradient-primary);
+}
+
+.ashare-plan-card.recommended .ashare-plan-icon {
+    background: var(--ashare-gradient-secondary);
+    animation: ashare-pulse-glow 3s ease-in-out infinite;
+}
+
+.ashare-recommended-badge {
+    background: var(--ashare-gradient-secondary);
+    box-shadow: var(--ashare-shadow-secondary);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   RTL Support for Premium Effects
+   ───────────────────────────────────────────────────────────────── */
+[dir="rtl"] .ashare-notification-item:hover {
+    transform: translateX(4px);
+}
+
+[dir="rtl"] .ashare-notification-item.unread {
+    border-right: none;
+    border-left: 3px solid var(--ashare-secondary);
+}
+
+[dir="rtl"] .ac-bottom-nav-item::before {
+    left: auto;
+    right: 50%;
+    transform: translateX(50%) scaleX(0);
+}
+
+[dir="rtl"] .ac-bottom-nav-item.active::before {
+    transform: translateX(50%) scaleX(1);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Dark Mode Premium Enhancements
+   ───────────────────────────────────────────────────────────────── */
+.ac-dark {
+    --ashare-glass-bg: rgba(28, 25, 23, 0.9);
+    --ashare-glass-border: rgba(255, 255, 255, 0.06);
+    --ashare-shadow-card: 0 2px 8px -2px rgba(0, 0, 0, 0.3), 0 6px 20px -4px rgba(0, 0, 0, 0.4);
+    --ashare-shadow-card-hover: 0 12px 40px -8px rgba(0, 0, 0, 0.5), 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+}
+
+.ac-dark .ashare-space-card,
+.ac-dark .ashare-action-card,
+.ac-dark .ac-modal,
+.ac-dark .ac-bottom-nav {
+    background: var(--ashare-surface);
+}
+
+.ac-dark .ac-search-box {
+    background: rgba(41, 37, 36, 0.9);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.ac-dark .ashare-glass-card {
+    background: rgba(41, 37, 36, 0.9);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.ac-dark .ashare-skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--ashare-gray-200) 25%,
+        var(--ashare-gray-300) 50%,
+        var(--ashare-gray-200) 75%
+    );
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Responsive Adjustments for Premium Effects
+   ───────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .ashare-space-card:hover {
+        transform: translateY(-4px);
+    }
+    
+    .ashare-action-card:hover {
+        transform: translateY(-4px);
+    }
+    
+    .ashare-plan-card:hover {
+        transform: translateY(-4px);
+    }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .ashare-space-card:hover,
+    .ashare-action-card:hover,
+    .ashare-plan-card:hover,
+    .ac-btn:hover {
+        transform: none;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Print Styles - Clean output
+   ───────────────────────────────────────────────────────────────── */
+@media print {
+    .ac-bottom-nav,
+    .ac-navbar,
+    .ashare-fab {
+        display: none !important;
+    }
+    
+    .ashare-space-card,
+    .ashare-action-card {
+        box-shadow: none;
+        border: 1px solid var(--ashare-gray-300);
+    }
 }
