@@ -23,8 +23,10 @@ namespace ACommerce.Catalog.Listings.Api.Controllers;
 public class ProductListingsController : BaseCrudController<ProductListing, CreateProductListingDto, CreateProductListingDto, ProductListingResponseDto, CreateProductListingDto>
 {
         private readonly IMemoryCache _cache;
-        private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(2);
-        private static readonly SemaphoreSlim _cacheLock = new(1, 1);
+        private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
+        private static readonly SemaphoreSlim _featuredLock = new(1, 1);
+        private static readonly SemaphoreSlim _newLock = new(1, 1);
+        private static readonly SemaphoreSlim _allLock = new(1, 1);
         private const string FeaturedCacheKey = "listings_featured";
         private const string NewCacheKey = "listings_new";
         private const string AllCacheKey = "listings_all";
@@ -53,7 +55,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                                 return Ok(cachedItems);
                         }
 
-                        await _cacheLock.WaitAsync();
+                        await _allLock.WaitAsync();
                         try
                         {
                                 if (_cache.TryGetValue(cacheKey, out cachedItems) && cachedItems != null)
@@ -84,7 +86,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                         }
                         finally
                         {
-                                _cacheLock.Release();
+                                _allLock.Release();
                         }
                 }
                 catch (Exception ex)
@@ -110,7 +112,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                                 return Ok(cachedItems);
                         }
 
-                        await _cacheLock.WaitAsync();
+                        await _featuredLock.WaitAsync();
                         try
                         {
                                 if (_cache.TryGetValue(cacheKey, out cachedItems) && cachedItems != null)
@@ -141,7 +143,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                         }
                         finally
                         {
-                                _cacheLock.Release();
+                                _featuredLock.Release();
                         }
                 }
                 catch (Exception ex)
@@ -167,7 +169,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                                 return Ok(cachedItems);
                         }
 
-                        await _cacheLock.WaitAsync();
+                        await _newLock.WaitAsync();
                         try
                         {
                                 if (_cache.TryGetValue(cacheKey, out cachedItems) && cachedItems != null)
@@ -198,7 +200,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                         }
                         finally
                         {
-                                _cacheLock.Release();
+                                _newLock.Release();
                         }
                 }
                 catch (Exception ex)

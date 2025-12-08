@@ -37,7 +37,7 @@ public class AshareApiService
     private static DateTime _categoriesCacheTime = DateTime.MinValue;
     private static DateTime _featuredCacheTime = DateTime.MinValue;
     private static DateTime _newSpacesCacheTime = DateTime.MinValue;
-    private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(2);
+    private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
 
         public AshareApiService(
                 CategoriesClient categoriesClient,
