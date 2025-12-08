@@ -42,7 +42,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd Apps/Ashare.Api && dotnet build -c Release && dotnet run --urls \"http://0.0.0.0:3000\""
+args = "cd Apps/Ashare.Api && dotnet run --no-build --urls \"http://0.0.0.0:3000\""
 waitForPort = 3000
 
 [[ports]]
@@ -50,12 +50,8 @@ localPort = 3000
 externalPort = 3000
 
 [[ports]]
-localPort = 5000
+localPort = 42411
 externalPort = 80
-
-[[ports]]
-localPort = 38555
-externalPort = 3001
 
 [deployment]
 deploymentTarget = "autoscale"
