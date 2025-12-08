@@ -69,6 +69,9 @@ try
     // Logging
     builder.Host.UseSerilog();
 
+    // Memory Cache for API-level caching
+    builder.Services.AddMemoryCache();
+
     // CORS
     builder.Services.AddCors(options =>
     {
