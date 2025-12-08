@@ -358,17 +358,27 @@
 
                 // الاشتراك في إشعارات المصادقة لهذا المعرف
                 // هذا يسمح للعميل المجهول باستلام الإشعار عند نجاح المصادقة
-                if (_isConnectedToSignalR)
+                try
                 {
-                    try
+                    // التأكد من الاتصال (إعادة الاتصال إذا انقطع)
+                    if (!RealtimeClient.IsConnected)
                     {
-                        await RealtimeClient.SendAsync("SubscribeToAuth", _nationalId);
-                        Console.WriteLine($"[Login] Subscribed to auth notifications for {_nationalId}");
+                        Console.WriteLine("[Login] SignalR not connected, attempting to reconnect...");
+                        await RealtimeClient.EnsureConnectedAsync();
+                        _isConnectedToSignalR = true;
+                        
+                        // إعادة الاشتراك في الأحداث بعد إعادة الاتصال
+                        _notificationSubscription?.Dispose();
+                        _notificationSubscription = RealtimeClient.On<string, JsonElement>("ReceiveMessage", HandleReceiveMessage);
                     }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"[Login] Failed to subscribe to auth: {ex.Message}");
-                    }
+                    
+                    await RealtimeClient.SendAsync("SubscribeToAuth", _nationalId);
+                    Console.WriteLine($"[Login] Subscribed to auth notifications for {_nationalId}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Login] Failed to subscribe to auth: {ex.Message}");
+                    // سنستمر بدون SignalR - قد نحتاج polling كبديل
                 }
             }
         }
