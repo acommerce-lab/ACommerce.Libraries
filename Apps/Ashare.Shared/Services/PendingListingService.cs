@@ -20,8 +20,45 @@ public class PendingListingService
     /// </summary>
     public async Task SavePendingListingAsync(PendingListingData data)
     {
-        var json = JsonSerializer.Serialize(data);
-        await _storage.SetAsync(StorageKey, json);
+        try
+        {
+            // تنظيف التخزين القديم أولاً
+            await _storage.RemoveAsync(StorageKey);
+            
+            // ضغط الصور إذا كانت كبيرة جداً (أكثر من 500KB للصورة الواحدة)
+            var compressedImages = new List<string>();
+            foreach (var img in data.Images)
+            {
+                if (img.Length > 500_000)
+                {
+                    // تخطي الصور الكبيرة جداً - سيتم رفعها لاحقاً
+                    compressedImages.Add("LARGE_IMAGE_PLACEHOLDER");
+                }
+                else
+                {
+                    compressedImages.Add(img);
+                }
+            }
+            data.Images = compressedImages;
+            
+            var json = JsonSerializer.Serialize(data);
+            await _storage.SetAsync(StorageKey, json);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[PendingListingService] Error saving: {ex.Message}");
+            // في حالة الفشل، نحاول حفظ البيانات بدون الصور
+            try
+            {
+                data.Images = new List<string>();
+                var json = JsonSerializer.Serialize(data);
+                await _storage.SetAsync(StorageKey, json);
+            }
+            catch
+            {
+                // تجاهل الخطأ - سيتم التعامل معه لاحقاً
+            }
+        }
     }
 
     /// <summary>

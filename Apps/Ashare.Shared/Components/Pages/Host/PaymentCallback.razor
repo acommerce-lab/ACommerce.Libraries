@@ -137,6 +137,14 @@
                     _paymentSuccess = true;
                     _transactionId = TransactionId ?? OrderId;
                     _activatedAt = response.ActivatedAt ?? DateTime.Now;
+                    
+                    // الانتقال التلقائي لإنشاء العرض إذا كان هناك عرض معلق
+                    if (await PendingListingService.HasPendingListingAsync())
+                    {
+                        Console.WriteLine("[PaymentCallback] Found pending listing, redirecting to create...");
+                        Navigation.NavigateTo("/create-listing?success=true");
+                        return;
+                    }
                 }
                 else
                 {
