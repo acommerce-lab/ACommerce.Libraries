@@ -409,7 +409,7 @@ Built using ACommerce libraries with configuration-first approach:
     // ✅ تسجيل الخدمة في Service Registry (مع حماية من الأخطاء)
     var serviceBaseUrl = Environment.GetEnvironmentVariable("SERVICE_URL")
         ?? (app.Environment.IsDevelopment()
-            ? "https://localhost:5001"
+            ? "http://localhost:3000"
             : "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net");
 
     try
