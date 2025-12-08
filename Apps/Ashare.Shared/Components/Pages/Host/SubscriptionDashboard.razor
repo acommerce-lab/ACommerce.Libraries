@@ -199,7 +199,7 @@
                                     <span class="ashare-invoice-date">@invoice.CreatedAt.ToString("dd/MM/yyyy")</span>
                                 </div>
                                 <div class="ashare-invoice-amount">
-                                    <span class="ashare-amount">@invoice.Total.ToString("N2") @invoice.Currency</span>
+                                    <span class="ashare-amount">@(invoice.Total.ToString("N2")) @invoice.Currency</span>
                                     <span class="ashare-invoice-status @GetInvoiceStatusClass(invoice.Status)">
                                         @GetInvoiceStatusLabel(invoice.Status)
                                     </span>
