@@ -200,46 +200,46 @@ public static class ServiceCollectionExtensions
 /// </summary>
 public class ClientOptions
 {
-	/// <summary>
-	/// Timeout بالثواني (افتراضياً: 30)
-	/// </summary>
-	public int TimeoutSeconds { get; set; } = 30;
+        /// <summary>
+        /// Timeout بالثواني (افتراضياً: 60)
+        /// </summary>
+        public int TimeoutSeconds { get; set; } = 60;
 
-	/// <summary>
-	/// تفعيل Retry تلقائي؟ (افتراضياً: true)
-	/// </summary>
-	public bool EnableRetry { get; set; } = true;
+        /// <summary>
+        /// تفعيل Retry تلقائي؟ (افتراضياً: true)
+        /// </summary>
+        public bool EnableRetry { get; set; } = true;
 
-	/// <summary>
-	/// عدد المحاولات (افتراضياً: 3)
-	/// </summary>
-	public int MaxRetries { get; set; } = 3;
+        /// <summary>
+        /// عدد المحاولات (افتراضياً: 5)
+        /// </summary>
+        public int MaxRetries { get; set; } = 5;
 
-	/// <summary>
-	/// تفعيل Authentication تلقائي؟ (افتراضياً: false)
-	/// </summary>
-	public bool EnableAuthentication { get; set; } = false;
+        /// <summary>
+        /// تفعيل Authentication تلقائي؟ (افتراضياً: false)
+        /// </summary>
+        public bool EnableAuthentication { get; set; } = false;
 
-	/// <summary>
-	/// Token Provider للـ Authentication
-	/// </summary>
-	public Func<IServiceProvider, ITokenProvider>? TokenProvider { get; set; }
+        /// <summary>
+        /// Token Provider للـ Authentication
+        /// </summary>
+        public Func<IServiceProvider, ITokenProvider>? TokenProvider { get; set; }
 
-	/// <summary>
-	/// تفعيل Localization تلقائي؟ (افتراضياً: true)
-	/// </summary>
-	public bool EnableLocalization { get; set; } = true;
+        /// <summary>
+        /// تفعيل Localization تلقائي؟ (افتراضياً: true)
+        /// </summary>
+        public bool EnableLocalization { get; set; } = true;
 
-	/// <summary>
-	/// Localization Provider مخصص (اختياري)
-	/// </summary>
-	public Func<IServiceProvider, ILocalizationProvider>? LocalizationProvider { get; set; }
+        /// <summary>
+        /// Localization Provider مخصص (اختياري)
+        /// </summary>
+        public Func<IServiceProvider, ILocalizationProvider>? LocalizationProvider { get; set; }
 
-	/// <summary>
-	/// تجاوز التحقق من شهادة SSL (للتطوير فقط!)
-	/// يسمح بالاتصال بخوادم تستخدم شهادات ذاتية
-	/// </summary>
-	public bool BypassSslValidation { get; set; } = false;
+        /// <summary>
+        /// تجاوز التحقق من شهادة SSL (للتطوير فقط!)
+        /// يسمح بالاتصال بخوادم تستخدم شهادات ذاتية
+        /// </summary>
+        public bool BypassSslValidation { get; set; } = false;
 }
 
 /// <summary>
@@ -247,8 +247,8 @@ public class ClientOptions
 /// </summary>
 public class StaticClientOptions
 {
-	/// <summary>
-	/// Timeout بالثواني (افتراضياً: 30)
-	/// </summary>
-	public int TimeoutSeconds { get; set; } = 30;
+        /// <summary>
+        /// Timeout بالثواني (افتراضياً: 30)
+        /// </summary>
+        public int TimeoutSeconds { get; set; } = 30;
 }
