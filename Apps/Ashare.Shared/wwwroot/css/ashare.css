@@ -12,11 +12,11 @@
    CSS Variables - Ashare Visual Identity 2025
    ───────────────────────────────────────────────────────────────── */
 :root {
-    /* Brand Colors from Visual Identity Guidelines */
-    /* Primary: Deep Olive Green - symbolizes sustainability, trust, stability */
-    --ashare-primary: #345454;
-    --ashare-primary-light: #4A6B6B;
-    --ashare-primary-dark: #263F3F;
+    /* Brand Colors - Light Theme */
+    /* Primary: Royal Blue - elegant, professional, trustworthy */
+    --ashare-primary: #1E40AF;
+    --ashare-primary-light: #3B82F6;
+    --ashare-primary-dark: #1E3A8A;
 
     /* Secondary: Soft Orange - represents vitality, optimism, positive energy */
     --ashare-secondary: #F4844C;
@@ -45,7 +45,7 @@
     --ashare-success: #10B981;
     --ashare-warning: #F59E0B;
     --ashare-danger: #EF4444;
-    --ashare-info: #345454;
+    --ashare-info: #1E40AF;
 
     /* Spacing */
     --ashare-spacing-xs: 4px;
@@ -79,10 +79,10 @@
     /* ════════════════════════════════════════════════════════════════
        ACommerce Template Variables Override - Map to Ashare Brand
        ════════════════════════════════════════════════════════════════ */
-    /* Primary colors - use Ashare Deep Olive Green */
-    --ac-primary: #345454;
-    --ac-primary-dark: #263F3F;
-    --ac-primary-light: #4A6B6B;
+    /* Primary colors - Royal Blue */
+    --ac-primary: #1E40AF;
+    --ac-primary-dark: #1E3A8A;
+    --ac-primary-light: #3B82F6;
 
     /* Secondary colors - use Ashare Soft Orange */
     --ac-secondary: #F4844C;
@@ -113,7 +113,7 @@
     --ac-success: #10B981;
     --ac-warning: #F59E0B;
     --ac-error: #EF4444;
-    --ac-info: #345454;
+    --ac-info: #1E40AF;
 
     /* Border colors - Warm tones */
     --ac-border: #E0DCD6;
@@ -143,14 +143,14 @@
     --ashare-gray-800: #F5F5F4;
     --ashare-gray-900: #FAFAF9;
 
-    /* Brand colors adjusted for dark mode - slightly lighter for visibility */
+    /* Brand colors for dark mode - Olive Green + Golden accent */
     --ashare-primary: #4A7A7A;
     --ashare-primary-light: #5A9090;
     --ashare-primary-dark: #3A6666;
-    --ashare-secondary: #F69B6B;
-    --ashare-secondary-light: #F8B08A;
-    --ashare-secondary-dark: #E5854A;
-    --ashare-accent: #F69B6B;
+    --ashare-secondary: #FBBF24;
+    --ashare-secondary-light: #FCD34D;
+    --ashare-secondary-dark: #F59E0B;
+    --ashare-accent: #FBBF24;
 
     /* Shadows for dark mode */
     --ashare-shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
@@ -161,10 +161,10 @@
     --ac-primary: #4A7A7A;
     --ac-primary-dark: #3A6666;
     --ac-primary-light: #5A9090;
-    --ac-secondary: #F69B6B;
-    --ac-secondary-dark: #E5854A;
-    --ac-secondary-light: #F8B08A;
-    --ac-accent: #F69B6B;
+    --ac-secondary: #FBBF24;
+    --ac-secondary-dark: #F59E0B;
+    --ac-secondary-light: #FCD34D;
+    --ac-accent: #FBBF24;
     --ac-bg: #1C1917;
     --ac-bg-alt: #231F1D;
     --ac-bg-secondary: #292524;
@@ -7292,10 +7292,10 @@ h1, h2, h3, .ashare-logo-text {
    Enhanced CSS Variables for Premium Effects
    ───────────────────────────────────────────────────────────────── */
 :root {
-    /* Premium Gradients */
-    --ashare-gradient-primary: linear-gradient(135deg, #345454 0%, #263F3F 50%, #1A2E2E 100%);
+    /* Premium Gradients - Royal Blue */
+    --ashare-gradient-primary: linear-gradient(135deg, #1E40AF 0%, #1E3A8A 50%, #172554 100%);
     --ashare-gradient-secondary: linear-gradient(135deg, #F4844C 0%, #E06D34 50%, #D05A22 100%);
-    --ashare-gradient-hero: linear-gradient(145deg, #345454 0%, #2D4747 30%, #263F3F 70%, #1F3333 100%);
+    --ashare-gradient-hero: linear-gradient(145deg, #1E40AF 0%, #1E3A8A 30%, #1E3A8A 70%, #172554 100%);
     --ashare-gradient-accent: linear-gradient(135deg, #F4844C 0%, #F69B6B 100%);
     --ashare-gradient-warm: linear-gradient(180deg, #FFFCF9 0%, #FAF8F6 100%);
     --ashare-gradient-shine: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
@@ -7307,15 +7307,15 @@ h1, h2, h3, .ashare-logo-text {
     --ashare-glass-dark-bg: rgba(28, 25, 23, 0.85);
     --ashare-glass-dark-border: rgba(255, 255, 255, 0.08);
     
-    /* Premium Shadows with Brand Color Tinting */
-    --ashare-shadow-primary: 0 4px 14px -2px rgba(52, 84, 84, 0.25);
-    --ashare-shadow-primary-lg: 0 10px 40px -10px rgba(52, 84, 84, 0.35);
+    /* Premium Shadows with Royal Blue Tinting */
+    --ashare-shadow-primary: 0 4px 14px -2px rgba(30, 64, 175, 0.25);
+    --ashare-shadow-primary-lg: 0 10px 40px -10px rgba(30, 64, 175, 0.35);
     --ashare-shadow-secondary: 0 4px 14px -2px rgba(244, 132, 76, 0.3);
     --ashare-shadow-secondary-lg: 0 10px 40px -10px rgba(244, 132, 76, 0.4);
     --ashare-shadow-elevated: 0 8px 30px -5px rgba(0, 0, 0, 0.15), 0 4px 10px -4px rgba(0, 0, 0, 0.1);
-    --ashare-shadow-card: 0 2px 8px -2px rgba(52, 84, 84, 0.08), 0 6px 20px -4px rgba(52, 84, 84, 0.12);
-    --ashare-shadow-card-hover: 0 12px 40px -8px rgba(52, 84, 84, 0.2), 0 4px 12px -2px rgba(52, 84, 84, 0.1);
-    --ashare-shadow-glow-primary: 0 0 30px rgba(52, 84, 84, 0.3);
+    --ashare-shadow-card: 0 2px 8px -2px rgba(30, 64, 175, 0.08), 0 6px 20px -4px rgba(30, 64, 175, 0.12);
+    --ashare-shadow-card-hover: 0 12px 40px -8px rgba(30, 64, 175, 0.2), 0 4px 12px -2px rgba(30, 64, 175, 0.1);
+    --ashare-shadow-glow-primary: 0 0 30px rgba(30, 64, 175, 0.3);
     --ashare-shadow-glow-secondary: 0 0 30px rgba(244, 132, 76, 0.35);
     --ashare-shadow-soft: 0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04);
     --ashare-shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.06);
