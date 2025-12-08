@@ -19431,3 +19431,95 @@ FROM [ProductListing] AS [p]
 WHERE [p].[IsDeleted] = CAST(0 AS bit) AND [p].[IsActive] = CAST(1 AS bit) AND [p].[Status] = 3
 ORDER BY [p].[ViewCount] DESC
 OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+2025-12-08 08:17:36.417 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost:3000/api/orders/search - application/json; charset=utf-8 null
+2025-12-08 08:17:36.418 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:3000/api/CategoryAttributes/categories - null null
+2025-12-08 08:17:36.446 +00:00 [INF] Executing endpoint 'ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api)'
+2025-12-08 08:17:36.447 +00:00 [INF] Executing endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+2025-12-08 08:17:36.483 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:3000/api/listings/new?limit=10 - null null
+2025-12-08 08:17:36.484 +00:00 [INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+2025-12-08 08:17:36.485 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:3000/api/listings/featured?limit=10 - null null
+2025-12-08 08:17:36.494 +00:00 [INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+2025-12-08 08:17:36.497 +00:00 [INF] Route matched with {action = "Search", controller = "Orders"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[ACommerce.SharedKernel.Abstractions.Queries.PagedResult`1[ACommerce.Orders.DTOs.OrderResponseDto]]] Search(ACommerce.SharedKernel.Abstractions.Queries.SmartSearchRequest) on controller ACommerce.Orders.Api.Controllers.OrdersController (ACommerce.Orders.Api).
+2025-12-08 08:17:36.500 +00:00 [INF] Route matched with {action = "GetFeatured", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetFeatured(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+2025-12-08 08:17:36.501 +00:00 [INF] Route matched with {action = "GetNew", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetNew(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+2025-12-08 08:17:36.504 +00:00 [INF] Route matched with {action = "GetAvailableCategories", controller = "CategoryAttributes"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult] GetAvailableCategories() on controller Ashare.Api.Controllers.CategoryAttributesController (Ashare.Api).
+2025-12-08 08:17:36.510 +00:00 [INF] [START] SmartSearchQuery`2 (a97779ad-7325-4231-a498-aa0a68c91fea)
+2025-12-08 08:17:36.511 +00:00 [INF] [START] SmartSearchQuery`2 (f0a332bc-a42b-4c82-a493-c76c86a72e28)
+2025-12-08 08:17:36.516 +00:00 [INF] Using SQL Server database
+2025-12-08 08:17:36.524 +00:00 [INF] Using SQL Server database
+2025-12-08 08:17:36.524 +00:00 [INF] Using SQL Server database
+2025-12-08 08:17:36.525 +00:00 [INF] [START] SmartSearchQuery`2 (8bc647e2-cae0-4f37-bd23-3aa9f2915b3d)
+2025-12-08 08:17:36.527 +00:00 [INF] Using SQL Server database
+2025-12-08 08:17:37.108 +00:00 [INF] Executed DbCommand (233ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [ProductListing] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit) AND [p].[IsActive] = CAST(1 AS bit) AND [p].[Status] = 3
+2025-12-08 08:17:37.468 +00:00 [INF] Executed DbCommand (358ms) [Parameters=[@__p_0='0', @__p_1='10'], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[Address], [p].[AttributesJson], [p].[CategoryId], [p].[City], [p].[CompareAtPrice], [p].[Condition], [p].[Cost], [p].[CreatedAt], [p].[Currency], [p].[CurrencyId], [p].[Description], [p].[EndsAt], [p].[FeaturedImage], [p].[ImagesJson], [p].[IsActive], [p].[IsDeleted], [p].[IsFeatured], [p].[IsNew], [p].[Latitude], [p].[Longitude], [p].[LowStockThreshold], [p].[Price], [p].[ProcessingTime], [p].[ProductId], [p].[QuantityAvailable], [p].[QuantityReserved], [p].[Rating], [p].[ReviewCount], [p].[StartsAt], [p].[Status], [p].[Title], [p].[TotalSales], [p].[UpdatedAt], [p].[VendorId], [p].[VendorNotes], [p].[VendorSku], [p].[ViewCount]
+FROM [ProductListing] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit) AND [p].[IsActive] = CAST(1 AS bit) AND [p].[Status] = 3
+ORDER BY [p].[ViewCount] DESC
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+2025-12-08 08:17:38.490 +00:00 [INF] Executed DbCommand (234ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Order] AS [o]
+WHERE [o].[IsDeleted] = CAST(0 AS bit)
+2025-12-08 08:17:38.717 +00:00 [INF] Executed DbCommand (225ms) [Parameters=[@__p_0='0', @__p_1='20'], CommandType='"Text"', CommandTimeout='30']
+SELECT [o].[Id], [o].[BillingAddress], [o].[CancelledAt], [o].[ConfirmedAt], [o].[CouponCode], [o].[CreatedAt], [o].[Currency], [o].[CustomerId], [o].[CustomerNotes], [o].[DeliveredAt], [o].[DiscountAmount], [o].[InternalNotes], [o].[IsDeleted], [o].[OrderNumber], [o].[PaymentId], [o].[PaymentMethod], [o].[ShipmentId], [o].[ShippedAt], [o].[ShippingAddress], [o].[ShippingCost], [o].[Status], [o].[Subtotal], [o].[TaxAmount], [o].[Total], [o].[TrackingNumber], [o].[UpdatedAt], [o].[VendorId]
+FROM [Order] AS [o]
+WHERE [o].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [o].[CreatedAt] DESC
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+2025-12-08 08:17:38.724 +00:00 [INF] Found 0 Order items, returned page 1 with 0 items
+2025-12-08 08:17:38.724 +00:00 [WRN] [PERFORMANCE] Long running request detected: SmartSearchQuery`2 took 2197ms (threshold: 500ms)
+2025-12-08 08:17:38.725 +00:00 [INF] [END] SmartSearchQuery`2 (8bc647e2-cae0-4f37-bd23-3aa9f2915b3d) completed in 2197ms
+2025-12-08 08:17:38.725 +00:00 [INF] Executing OkObjectResult, writing value of type 'ACommerce.SharedKernel.Abstractions.Queries.PagedResult`1[[ACommerce.Orders.DTOs.OrderResponseDto, ACommerce.Orders, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-08 08:17:38.726 +00:00 [INF] Executed action ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api) in 2228.2257ms
+2025-12-08 08:17:38.729 +00:00 [INF] Executed endpoint 'ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api)'
+2025-12-08 08:17:38.730 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost:3000/api/orders/search - 200 null application/json; charset=utf-8 2313.1009ms
+2025-12-08 08:17:39.770 +00:00 [INF] Executed DbCommand (221ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [ProductListing] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit) AND [p].[IsActive] = CAST(1 AS bit) AND [p].[Status] = 3
+2025-12-08 08:17:39.789 +00:00 [INF] Executed DbCommand (243ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[CreatedAt], [p].[Description], [p].[Icon], [p].[Image], [p].[IsActive], [p].[IsDeleted], [p].[Name], [p].[ParentCategoryId], [p].[ProductId], [p].[Slug], [p].[SortOrder], [p].[UpdatedAt]
+FROM [ProductCategory] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit) AND [p].[IsActive] = CAST(1 AS bit)
+2025-12-08 08:17:39.792 +00:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[<>f__AnonymousType5`6[[System.Guid, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], Ashare.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-08 08:17:39.792 +00:00 [INF] Executed action Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api) in 3282.6602ms
+2025-12-08 08:17:39.793 +00:00 [INF] Executed endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+2025-12-08 08:17:39.793 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:3000/api/CategoryAttributes/categories - 200 null application/json; charset=utf-8 3374.9697ms
+2025-12-08 08:17:40.011 +00:00 [INF] Executed DbCommand (234ms) [Parameters=[@__p_0='0', @__p_1='10'], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[Address], [p].[AttributesJson], [p].[CategoryId], [p].[City], [p].[CompareAtPrice], [p].[Condition], [p].[Cost], [p].[CreatedAt], [p].[Currency], [p].[CurrencyId], [p].[Description], [p].[EndsAt], [p].[FeaturedImage], [p].[ImagesJson], [p].[IsActive], [p].[IsDeleted], [p].[IsFeatured], [p].[IsNew], [p].[Latitude], [p].[Longitude], [p].[LowStockThreshold], [p].[Price], [p].[ProcessingTime], [p].[ProductId], [p].[QuantityAvailable], [p].[QuantityReserved], [p].[Rating], [p].[ReviewCount], [p].[StartsAt], [p].[Status], [p].[Title], [p].[TotalSales], [p].[UpdatedAt], [p].[VendorId], [p].[VendorNotes], [p].[VendorSku], [p].[ViewCount]
+FROM [ProductListing] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit) AND [p].[IsActive] = CAST(1 AS bit) AND [p].[Status] = 3
+ORDER BY [p].[CreatedAt] DESC
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+2025-12-08 08:18:42.573 +00:00 [INF] Found 5 ProductListing items, returned page 1 with 5 items
+2025-12-08 08:18:42.584 +00:00 [WRN] [PERFORMANCE] Long running request detected: SmartSearchQuery`2 took 97621ms (threshold: 500ms)
+2025-12-08 08:18:42.585 +00:00 [INF] [END] SmartSearchQuery`2 (9c5af5bc-fed9-4bcc-b0d5-6fcf2d50baf8) completed in 97633ms
+2025-12-08 08:18:42.626 +00:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto, ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-08 08:18:42.707 +00:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api) in 97811.4031ms
+2025-12-08 08:18:42.716 +00:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+2025-12-08 08:18:42.745 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:3000/api/listings/new?limit=10 - 499 null application/json; charset=utf-8 98070.5818ms
+2025-12-08 08:18:43.697 +00:00 [INF] Found 5 ProductListing items, returned page 1 with 5 items
+2025-12-08 08:18:43.698 +00:00 [WRN] [PERFORMANCE] Long running request detected: SmartSearchQuery`2 took 98740ms (threshold: 500ms)
+2025-12-08 08:18:43.699 +00:00 [INF] [END] SmartSearchQuery`2 (fad6e108-9fb3-49f6-b626-0288e410462a) completed in 98744ms
+2025-12-08 08:18:43.700 +00:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto, ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-08 08:18:43.701 +00:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api) in 98801.5962ms
+2025-12-08 08:18:43.702 +00:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+2025-12-08 08:18:43.702 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:3000/api/listings/featured?limit=10 - 499 null application/json; charset=utf-8 99034.9991ms
+2025-12-08 08:19:01.049 +00:00 [INF] Found 5 ProductListing items, returned page 1 with 5 items
+2025-12-08 08:19:01.050 +00:00 [WRN] [PERFORMANCE] Long running request detected: SmartSearchQuery`2 took 84535ms (threshold: 500ms)
+2025-12-08 08:19:01.050 +00:00 [INF] [END] SmartSearchQuery`2 (f0a332bc-a42b-4c82-a493-c76c86a72e28) completed in 84536ms
+2025-12-08 08:19:01.054 +00:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto, ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-08 08:19:01.055 +00:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api) in 84554.0131ms
+2025-12-08 08:19:01.055 +00:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+2025-12-08 08:19:01.055 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:3000/api/listings/featured?limit=10 - 499 null application/json; charset=utf-8 84570.1792ms
+2025-12-08 08:19:01.674 +00:00 [INF] Found 5 ProductListing items, returned page 1 with 5 items
+2025-12-08 08:19:01.674 +00:00 [WRN] [PERFORMANCE] Long running request detected: SmartSearchQuery`2 took 85163ms (threshold: 500ms)
+2025-12-08 08:19:01.674 +00:00 [INF] [END] SmartSearchQuery`2 (a97779ad-7325-4231-a498-aa0a68c91fea) completed in 85164ms
+2025-12-08 08:19:01.675 +00:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto, ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-12-08 08:19:01.676 +00:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api) in 85174.6438ms
+2025-12-08 08:19:01.676 +00:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+2025-12-08 08:19:01.677 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:3000/api/listings/new?limit=10 - 499 null application/json; charset=utf-8 85193.1214ms
