@@ -78,7 +78,8 @@
 
     private int BookingsCount { get; set; }
     private int NotificationCount { get; set; }
-    private bool _authChecked;
+    private bool _initialized;
+    private string? _lastCheckedPath;
 
     private bool IsAuthPage
     {
@@ -114,6 +115,26 @@
     }
 
     /// <summary>
+    /// صفحات محمية تتطلب تسجيل الدخول (لا يمكن للضيف الوصول إليها)
+    /// </summary>
+    private bool IsProtectedPage
+    {
+        get
+        {
+            var pageName = RouteData?.PageType?.Name;
+            if (pageName is "Bookings" or "Favorites" or "Profile" or "Chat" or "ChatRoom" or "Notifications")
+                return true;
+
+            var currentPath = Navigation.CurrentUri?.ToLowerInvariant() ?? "";
+            return currentPath.Contains("/bookings") ||
+                   currentPath.Contains("/favorites") ||
+                   currentPath.Contains("/profile") ||
+                   currentPath.Contains("/chat") ||
+                   currentPath.Contains("/notifications");
+        }
+    }
+
+    /// <summary>
     /// هل يجب إخفاء القوائم (لصفحات المصادقة أو الشاشة الكاملة)
     /// </summary>
     private bool HideNavigation => IsAuthPage || IsFullScreenPage;
@@ -127,32 +148,65 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && !_authChecked)
+        if (firstRender)
         {
-            _authChecked = true;
+            // تهيئة حالة وضع الضيف من التخزين
+            await GuestMode.InitializeAsync();
+            _initialized = true;
+        }
 
-            // التحقق من المصادقة
-            var token = await TokenManager.GetTokenAsync();
-            var isGuest = GuestMode.IsGuestMode;
+        // التحقق من المصادقة بعد التهيئة
+        if (_initialized)
+        {
+            await CheckAuthAsync();
+        }
+    }
 
-            if (token != null && !IsAuthPage)
+    private async Task CheckAuthAsync()
+    {
+        // تجنب التحقق المتكرر لنفس المسار (للأداء)
+        var currentPath = Navigation.CurrentUri?.ToLowerInvariant() ?? "";
+        
+        // دائماً تحقق للصفحات المحمية حتى لو تم التحقق سابقاً
+        var needsCheck = IsProtectedPage || currentPath != _lastCheckedPath;
+        if (!needsCheck) return;
+        
+        _lastCheckedPath = currentPath;
+
+        var token = await TokenManager.GetTokenAsync();
+        var isGuest = GuestMode.IsGuestMode;
+
+        Console.WriteLine($"[MainLayout] Auth check - Path: {currentPath}, Token: {(token != null ? "exists" : "null")}, IsGuest: {isGuest}, IsAuthPage: {IsAuthPage}, IsProtectedPage: {IsProtectedPage}");
+
+        if (IsAuthPage)
+        {
+            // صفحة مصادقة - لا نتدخل
+            return;
+        }
+
+        if (token != null)
+        {
+            // لديه توكن - لا حاجة للتحقق من الصلاحية كل مرة (للأداء)
+            // التحقق من الصلاحية يتم عند أول تحميل فقط
+            return;
+        }
+
+        // لا يوجد توكن
+        if (isGuest)
+        {
+            if (IsProtectedPage)
             {
-                // التحقق من صلاحية التوكن مع الباك اند
-                var isValid = await ValidateTokenAsync();
-                if (!isValid)
-                {
-                    // التوكن غير صالح - حذفه والذهاب لصفحة الدخول
-                    Console.WriteLine("[Auth] Token is invalid, clearing and redirecting to login");
-                    TokenManager.ClearToken();
-                    Navigation.NavigateTo("/login");
-                    return;
-                }
-            }
-            else if (token == null && !isGuest && !IsAuthPage)
-            {
-                // لا يوجد توكن وليس في وضع الضيف
+                // ضيف يحاول الوصول لصفحة محمية - توجيه لصفحة الدخول
+                Console.WriteLine("[Auth] Guest trying to access protected page - redirecting to login");
                 Navigation.NavigateTo("/login");
             }
+            // إذا كان ضيف ويريد الوصول لصفحة عامة - نسمح له
+        }
+        else
+        {
+            // لا يوجد توكن وليس في وضع الضيف - توجيه لصفحة الدخول
+            Console.WriteLine("[Auth] No token and not guest - redirecting to login");
+            Navigation.NavigateTo("/login");
         }
     }
 

@@ -161,6 +161,9 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // تهيئة حالة وضع الضيف من التخزين
+        await GuestMode.InitializeAsync();
+
         // التحقق من وجود جلسة نشطة (use async to trigger token initialization)
         var token = await TokenManager.GetTokenAsync();
         if (!string.IsNullOrEmpty(token))
@@ -170,13 +173,9 @@
             return;
         }
 
-        // التحقق من وضع الضيف
-        if (GuestMode.IsGuestMode)
-        {
-            Console.WriteLine("[Login] ✅ Guest mode active - redirecting to home");
-            Navigation.NavigateTo("/");
-            return;
-        }
+        // ملاحظة: لا نقوم بإعادة التوجيه إذا كان في وضع الضيف
+        // المستخدم يريد الدخول لذلك أتى لصفحة تسجيل الدخول
+        Console.WriteLine($"[Login] Page loaded - GuestMode: {GuestMode.IsGuestMode}");
 
         await ConnectToNotifications();
     }
@@ -406,9 +405,9 @@
         _errorMessage = null;
     }
 
-    private void ContinueAsGuest()
+    private async Task ContinueAsGuest()
     {
-        GuestMode.EnableGuestMode();
+        await GuestMode.EnableGuestModeAsync();
         Navigation.NavigateTo("/");
     }
 
