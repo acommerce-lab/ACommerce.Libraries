@@ -1,0 +1,43 @@
+2025-12-08T21:35:11Z info: Pushing hosting layer...
+2025-12-08T21:35:11Z info: Pushing Repl layer...
+2025-12-08T21:35:13Z info: Created hosting layer
+2025-12-08T21:35:22Z info: Created pid1 binary layer
+2025-12-08T21:37:36Z info: Created Repl layer
+2025-12-08T21:37:44Z info: Pushed image manifest
+2025-12-08T21:37:48Z info: Pushed soci index manifest
+2025-12-08T21:37:53Z info: Creating virtual machine
+2025-12-08T21:38:38Z info: Creating virtual machine
+metasidecar: loaded enterprise status from environment is_enterprise=false
+forwarding local port 39879 to external port 80 (mapped as 1104)
+starting up user application
+metasidecar: loaded enterprise status from environment is_enterprise=false
+starting up user application
+forwarding local port 39879 to external port 80 (mapped as 1104)
+2025-12-08T21:38:43Z info: Virtual machine created
+2025-12-08T21:38:43Z info: Waiting for deployment to be ready
+2025-12-08T21:38:43Z info: Deployment successful
+[21:38:44 INF] Starting Ashare API - Shared Spaces Platform...
+🌐 API Base URL: http://127.0.0.1:3000
+System.InvalidOperationException: JWT configuration section 'JWT' not found in appsettings.json
+info: Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager[62]
+      Creating key {1fc97a9c-f293-4945-baa6-f5e0f2359e46} with creation date 2025-12-08 21:38:47Z, activation date 2025-12-08 21:38:47Z, and expiration date 2026-03-08 21:38:47Z.
+warn: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[16]
+      Hosting environment: Production
+   at ACommerce.Authentication.JWT.ServiceCollectionExtensions.AddJwtAuthentication(IServiceCollection services, IConfiguration configuration) in /home/runner/workspace/Authentication/ACommerce.Authentication.JWT/ServiceCollectionExtensions.cs:line 35
+[21:38:46 FTL] Application terminated unexpectedly
+info: Microsoft.Hosting.Lifetime[0]
+info: Microsoft.Hosting.Lifetime[14]
+      Content root path: /home/runner/workspace
+      The WebRootPath was not found: /home/runner/workspace/wwwroot. Static files may be unavailable.
+info: Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager[58]
+info: Microsoft.AspNetCore.DataProtection.Repositories.FileSystemXmlRepository[39]
+      Writing data to file '/home/runner/.aspnet/DataProtection-Keys/key-1fc97a9c-f293-4945-baa6-f5e0f2359e46.xml'.
+      Application started. Press Ctrl+C to shut down.
+   at Program.<Main>$(String[] args) in /home/runner/workspace/Apps/Ashare.Api/Program.cs:line 155
+warn: Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager[35]
+      Now listening on: http://0.0.0.0:80
+      No XML encryptor configured. Key {1fc97a9c-f293-4945-baa6-f5e0f2359e46} may be persisted to storage in unencrypted form.
+      User profile is available. Using '/home/runner/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+info: Microsoft.Hosting.Lifetime[0]
+info: Microsoft.Hosting.Lifetime[0]
+2025-12-08T21:39:07Z error: The deployment failed to initialize due to a configuration or code error. Check the logs tab for more information. For additional support, contact us at support@replit.com. 
