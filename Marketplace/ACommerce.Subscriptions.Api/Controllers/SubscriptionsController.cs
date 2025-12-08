@@ -108,13 +108,27 @@ public class SubscriptionsController : ControllerBase
     {
         try
         {
-            var subscription = await _subscriptionService.CreateSubscriptionAsync(dto, ct);
+            var vendorId = GetCurrentUserId();
+            if (vendorId == Guid.Empty)
+                return Unauthorized("Unable to identify user");
+
+            var dtoWithVendor = dto with { VendorId = vendorId };
+            var subscription = await _subscriptionService.CreateSubscriptionAsync(dtoWithVendor, ct);
             return CreatedAtAction(nameof(GetSubscriptionById), new { subscriptionId = subscription.Id }, subscription);
         }
         catch (InvalidOperationException ex)
         {
             return BadRequest(ex.Message);
         }
+    }
+
+    private Guid GetCurrentUserId()
+    {
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                       ?? User.FindFirst("sub")?.Value
+                       ?? User.FindFirst("id")?.Value;
+
+        return Guid.TryParse(userIdClaim, out var userId) ? userId : Guid.Empty;
     }
 
     /// <summary>تغيير الباقة</summary>
