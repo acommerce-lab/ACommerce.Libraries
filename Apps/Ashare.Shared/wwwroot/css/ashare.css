@@ -833,45 +833,62 @@ h1, h2, h3, .ashare-logo-text {
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   Categories
+   Categories - Grid Layout (تخطيط شبكي للفئات)
    ───────────────────────────────────────────────────────────────── */
 .ac-categories-scroll {
-    display: flex;
-    gap: var(--ashare-spacing-md);
-    overflow-x: auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--ashare-spacing-sm);
     padding-bottom: var(--ashare-spacing-sm);
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
 }
 
-.ac-categories-scroll::-webkit-scrollbar {
-    display: none;
+@media (min-width: 480px) {
+    .ac-categories-scroll {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media (min-width: 768px) {
+    .ac-categories-scroll {
+        grid-template-columns: repeat(6, 1fr);
+    }
 }
 
 .ashare-category-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 72px;
+    padding: var(--ashare-spacing-xs);
     cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.ashare-category-item:active {
+    transform: scale(0.95);
 }
 
 .ashare-category-icon {
-    width: 56px;
-    height: 56px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--ashare-radius-md);
-    font-size: 24px;
+    border-radius: var(--ashare-radius-sm);
+    font-size: 20px;
     margin-bottom: var(--ashare-spacing-xs);
 }
 
 .ac-category-name {
-    font-size: 12px;
+    font-size: 10px;
     color: var(--ashare-gray-700);
     text-align: center;
-    white-space: nowrap;
+    line-height: 1.2;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 /* ─────────────────────────────────────────────────────────────────
