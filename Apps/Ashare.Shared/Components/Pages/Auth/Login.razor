@@ -286,6 +286,10 @@
                             TokenManager.SetToken(result.Token, result.ExpiresAt);
                             Console.WriteLine("[Login] ✅ Token saved to TokenManager");
 
+                            // إلغاء وضع الضيف بعد تسجيل الدخول بنجاح
+                            await GuestMode.DisableGuestModeAsync();
+                            Console.WriteLine("[Login] ✅ Guest mode disabled");
+
                             if (result.IsNewUser)
                             {
                                 Console.WriteLine("[Login] ✅ NEW USER - navigating to profile edit");

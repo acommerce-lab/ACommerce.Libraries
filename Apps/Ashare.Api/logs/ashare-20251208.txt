@@ -15854,3 +15854,8 @@ Error Number:-2,State:0,Class:11
 2025-12-08 02:40:15.797 +00:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api) in 1851492.2661ms
 2025-12-08 02:40:15.810 +00:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
 2025-12-08 02:40:15.841 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:3000/api/listings/featured?limit=10 - 499 null application/json; charset=utf-8 1853954.0047ms
+2025-12-08 02:48:12.209 +00:00 [WRN] As of ""2025-12-08T02:48:09.9942255+00:00"", the heartbeat has been running for ""00:00:01.2668983"" which is longer than ""00:00:01"". This could be caused by thread pool starvation.
+2025-12-08 02:54:07.724 +00:00 [WRN] As of ""2025-12-08T02:54:07.1163566+00:00"", the heartbeat has been running for ""00:00:01.5695807"" which is longer than ""00:00:01"". This could be caused by thread pool starvation.
+2025-12-08 02:55:37.005 +00:00 [WRN] As of ""2025-12-08T02:55:33.8365312+00:00"", the heartbeat has been running for ""00:00:01.1859313"" which is longer than ""00:00:01"". This could be caused by thread pool starvation.
+2025-12-08 02:58:21.480 +00:00 [INF] Request starting HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/swagger/v1/swagger.json - null null
+2025-12-08 02:58:23.060 +00:00 [INF] Request finished HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 1580.868ms
