@@ -54,14 +54,10 @@ localPort = 5000
 externalPort = 5000
 
 [[ports]]
-localPort = 34925
-externalPort = 3001
-
-[[ports]]
 localPort = 39879
 externalPort = 80
 
 [deployment]
-deploymentTarget = "autoscale"
-run = ["bash", "-c", "cd Examples/ACommerce.MarketplaceApi && ASPNETCORE_URLS=http://0.0.0.0:5000 dotnet bin/Release/net9.0/ACommerce.MarketplaceApi.dll"]
-build = ["bash", "-c", "cd Examples/ACommerce.MarketplaceApi && dotnet build ACommerce.MarketplaceApi.csproj -c Release -m:1 --no-restore -p:CopyBuildOutputToOutputDirectory=true -p:CopyOutputSymbolsToOutputDirectory=true"]
+deploymentTarget = "vm"
+run = ["bash", "-c", "dotnet publish/api/Ashare.Api.dll --urls http://0.0.0.0:3000 & dotnet publish/web/Ashare.Web.dll --urls http://0.0.0.0:5000"]
+build = ["bash", "-c", "cd Apps/Ashare.Api && dotnet publish -c Release -o ../../publish/api && cd ../Ashare.Web && dotnet publish -c Release -o ../../publish/web"]
