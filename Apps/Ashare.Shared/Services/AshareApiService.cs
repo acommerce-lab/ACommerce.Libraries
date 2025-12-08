@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using ACommerce.Client.Categories;
 using ACommerce.Client.Products;
 using ACommerce.Client.ProductListings;
@@ -26,18 +27,10 @@ public class AshareApiService
         private readonly OrdersClient _ordersClient;
         private readonly SubscriptionClient _subscriptionClient;
         private readonly PaymentsClient _paymentsClient;
+        private readonly IListingsCacheService _cacheService;
+        private readonly ILogger<AshareApiService> _logger;
 
     private readonly HashSet<Guid> _favorites = [];
-    
-    private static readonly SemaphoreSlim _apiSemaphore = new(3, 3);
-    
-    private static List<SpaceCategory>? _categoriesCache;
-    private static List<SpaceItem>? _featuredCache;
-    private static List<SpaceItem>? _newSpacesCache;
-    private static DateTime _categoriesCacheTime = DateTime.MinValue;
-    private static DateTime _featuredCacheTime = DateTime.MinValue;
-    private static DateTime _newSpacesCacheTime = DateTime.MinValue;
-    private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
 
         public AshareApiService(
                 CategoriesClient categoriesClient,
@@ -46,7 +39,9 @@ public class AshareApiService
                 ProductListingsClient listingsClient,
                 OrdersClient ordersClient,
                 SubscriptionClient subscriptionClient,
-                PaymentsClient paymentsClient)
+                PaymentsClient paymentsClient,
+                IListingsCacheService cacheService,
+                ILogger<AshareApiService> logger)
         {
                 _categoriesClient = categoriesClient;
                 _categoryAttributesClient = categoryAttributesClient;
@@ -55,6 +50,8 @@ public class AshareApiService
                 _ordersClient = ordersClient;
                 _subscriptionClient = subscriptionClient;
                 _paymentsClient = paymentsClient;
+                _cacheService = cacheService;
+                _logger = logger;
         }
 
         // ═══════════════════════════════════════════════════════════════════
@@ -66,37 +63,27 @@ public class AshareApiService
         /// </summary>
         public async Task<List<SpaceCategory>> GetCategoriesAsync()
         {
-                if (_categoriesCache != null && DateTime.UtcNow - _categoriesCacheTime < CacheDuration)
-                        return _categoriesCache;
-                
-                await _apiSemaphore.WaitAsync();
-                try
+                return await _cacheService.GetCategoriesAsync(async () =>
                 {
-                        if (_categoriesCache != null && DateTime.UtcNow - _categoriesCacheTime < CacheDuration)
-                                return _categoriesCache;
-                        
-                        var categories = await _categoryAttributesClient.GetAvailableCategoriesAsync();
-                        _categoriesCache = categories?.Select(c => new SpaceCategory
+                        try
                         {
-                                Id = c.Id,
-                                Name = c.Name,
-                                NameEn = c.Name,
-                                Icon = c.Icon,
-                                Image = c.Image,
-                                Color = "#6366F1"
-                        }).ToList() ?? new List<SpaceCategory>();
-                        _categoriesCacheTime = DateTime.UtcNow;
-                        return _categoriesCache;
-                }
-                catch (Exception ex)
-                {
-                        Console.WriteLine($"Error fetching categories: {ex.Message}");
-                        return _categoriesCache ?? new List<SpaceCategory>();
-                }
-                finally
-                {
-                        _apiSemaphore.Release();
-                }
+                                var categories = await _categoryAttributesClient.GetAvailableCategoriesAsync();
+                                return categories?.Select(c => new SpaceCategory
+                                {
+                                        Id = c.Id,
+                                        Name = c.Name,
+                                        NameEn = c.Name,
+                                        Icon = c.Icon,
+                                        Image = c.Image,
+                                        Color = "#6366F1"
+                                }).ToList() ?? new List<SpaceCategory>();
+                        }
+                        catch (Exception ex)
+                        {
+                                _logger.LogError(ex, "Error fetching categories");
+                                return new List<SpaceCategory>();
+                        }
+                });
         }
 
         /// <summary>
@@ -151,29 +138,19 @@ public class AshareApiService
         /// </summary>
         public async Task<List<SpaceItem>> GetFeaturedSpacesAsync()
         {
-                if (_featuredCache != null && DateTime.UtcNow - _featuredCacheTime < CacheDuration)
-                        return _featuredCache;
-                
-                await _apiSemaphore.WaitAsync();
-                try
+                return await _cacheService.GetFeaturedAsync(async () =>
                 {
-                        if (_featuredCache != null && DateTime.UtcNow - _featuredCacheTime < CacheDuration)
-                                return _featuredCache;
-                        
-                        var listings = await _listingsClient.GetFeaturedAsync(10);
-                        _featuredCache = listings?.Select(MapListingToSpaceItem).ToList() ?? new List<SpaceItem>();
-                        _featuredCacheTime = DateTime.UtcNow;
-                        return _featuredCache;
-                }
-                catch (Exception ex)
-                {
-                        Console.WriteLine($"Error fetching featured spaces: {ex.Message}");
-                        return _featuredCache ?? new List<SpaceItem>();
-                }
-                finally
-                {
-                        _apiSemaphore.Release();
-                }
+                        try
+                        {
+                                var listings = await _listingsClient.GetFeaturedAsync(10);
+                                return listings?.Select(MapListingToSpaceItem).ToList() ?? new List<SpaceItem>();
+                        }
+                        catch (Exception ex)
+                        {
+                                _logger.LogError(ex, "Error fetching featured spaces");
+                                return new List<SpaceItem>();
+                        }
+                });
         }
 
         /// <summary>
@@ -181,80 +158,79 @@ public class AshareApiService
         /// </summary>
         public async Task<List<SpaceItem>> GetNewSpacesAsync()
         {
-                if (_newSpacesCache != null && DateTime.UtcNow - _newSpacesCacheTime < CacheDuration)
-                        return _newSpacesCache;
-                
-                await _apiSemaphore.WaitAsync();
-                try
+                return await _cacheService.GetNewSpacesAsync(async () =>
                 {
-                        if (_newSpacesCache != null && DateTime.UtcNow - _newSpacesCacheTime < CacheDuration)
-                                return _newSpacesCache;
-                        
-                        var listings = await _listingsClient.GetNewAsync(10);
-                        _newSpacesCache = listings?.Select(MapListingToSpaceItem).ToList() ?? new List<SpaceItem>();
-                        _newSpacesCacheTime = DateTime.UtcNow;
-                        return _newSpacesCache;
-                }
-                catch (Exception ex)
-                {
-                        Console.WriteLine($"Error fetching new spaces: {ex.Message}");
-                        return _newSpacesCache ?? new List<SpaceItem>();
-                }
-                finally
-                {
-                        _apiSemaphore.Release();
-                }
+                        try
+                        {
+                                var listings = await _listingsClient.GetNewAsync(10);
+                                return listings?.Select(MapListingToSpaceItem).ToList() ?? new List<SpaceItem>();
+                        }
+                        catch (Exception ex)
+                        {
+                                _logger.LogError(ex, "Error fetching new spaces");
+                                return new List<SpaceItem>();
+                        }
+                });
         }
 
         /// <summary>
-        /// الحصول على جميع المساحات
+        /// الحصول على جميع المساحات مع تخزين مؤقت
         /// </summary>
         public async Task<List<SpaceItem>> GetAllSpacesAsync()
         {
-                try
+                return await _cacheService.GetAllSpacesAsync(async () =>
                 {
-                        var listings = await _listingsClient.GetAllAsync();
-                        return listings?.Select(MapListingToSpaceItem).ToList() ?? new List<SpaceItem>();
-                }
-                catch (Exception ex)
-                {
-                        Console.WriteLine($"Error fetching all spaces: {ex.Message}");
-                        return new List<SpaceItem>();
-                }
+                        try
+                        {
+                                var listings = await _listingsClient.GetAllAsync();
+                                return listings?.Select(MapListingToSpaceItem).ToList() ?? new List<SpaceItem>();
+                        }
+                        catch (Exception ex)
+                        {
+                                _logger.LogError(ex, "Error fetching all spaces");
+                                return new List<SpaceItem>();
+                        }
+                });
         }
 
         /// <summary>
-        /// الحصول على مساحة بالمعرف
+        /// الحصول على مساحة بالمعرف مع تخزين مؤقت
         /// </summary>
         public async Task<SpaceItem?> GetSpaceByIdAsync(Guid id)
         {
-                try
+                return await _cacheService.GetSpaceByIdAsync(id, async () =>
                 {
-                        var listing = await _listingsClient.GetByIdAsync(id);
-                        return listing != null ? MapListingToSpaceItem(listing) : null;
-                }
-                catch (Exception ex)
-                {
-                        Console.WriteLine($"Error fetching space by id: {ex.Message}");
-                        return null;
-                }
+                        try
+                        {
+                                var listing = await _listingsClient.GetByIdAsync(id);
+                                return listing != null ? MapListingToSpaceItem(listing) : null;
+                        }
+                        catch (Exception ex)
+                        {
+                                _logger.LogError(ex, "Error fetching space by id {Id}", id);
+                                return null;
+                        }
+                });
         }
 
         /// <summary>
-        /// الحصول على المساحات حسب الفئة
+        /// الحصول على المساحات حسب الفئة مع تخزين مؤقت
         /// </summary>
         public async Task<List<SpaceItem>> GetSpacesByCategoryAsync(Guid categoryId)
         {
-                try
+                return await _cacheService.GetSpacesByCategoryAsync(categoryId, async () =>
                 {
-                        var listings = await _listingsClient.GetByCategoryAsync(categoryId);
-                        return listings?.Select(MapListingToSpaceItem).ToList() ?? new List<SpaceItem>();
-                }
-                catch (Exception ex)
-                {
-                        Console.WriteLine($"Error fetching spaces by category: {ex.Message}");
-                        return new List<SpaceItem>();
-                }
+                        try
+                        {
+                                var listings = await _listingsClient.GetByCategoryAsync(categoryId);
+                                return listings?.Select(MapListingToSpaceItem).ToList() ?? new List<SpaceItem>();
+                        }
+                        catch (Exception ex)
+                        {
+                                _logger.LogError(ex, "Error fetching spaces by category {CategoryId}", categoryId);
+                                return new List<SpaceItem>();
+                        }
+                });
         }
 
         /// <summary>
@@ -294,12 +270,9 @@ public class AshareApiService
         {
                 try
                 {
-                        // إنشاء عرض ProductListing
-                        // ملاحظة: VendorId يُعيَّن تلقائياً في الباك اند من التوكن
                         var listingRequest = new CreateListingRequest
                         {
-                                // VendorId: يُستخرج تلقائياً من التوكن في الباك اند
-                                ProductId = Guid.Empty, // TODO: Get product template based on category
+                                ProductId = Guid.Empty,
                                 CategoryId = request.CategoryId,
                                 Title = request.Title,
                                 Description = request.Description,
@@ -315,13 +288,29 @@ public class AshareApiService
                         };
 
                         var listing = await _listingsClient.CreateAsync(listingRequest);
-                        return listing != null ? MapListingToSpaceItem(listing) : null;
+                        
+                        if (listing != null)
+                        {
+                                _cacheService.InvalidateListings();
+                                _logger.LogInformation("Created new listing {ListingId}, cache invalidated", listing.Id);
+                                return MapListingToSpaceItem(listing);
+                        }
+                        
+                        return null;
                 }
                 catch (Exception ex)
                 {
-                        Console.WriteLine($"Error creating space: {ex.Message}");
+                        _logger.LogError(ex, "Error creating space");
                         return null;
                 }
+        }
+        
+        /// <summary>
+        /// إبطال الكاش يدوياً
+        /// </summary>
+        public void InvalidateCache()
+        {
+                _cacheService.InvalidateAll();
         }
 
         // ═══════════════════════════════════════════════════════════════════

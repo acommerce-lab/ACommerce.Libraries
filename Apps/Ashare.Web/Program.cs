@@ -36,6 +36,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// Memory Cache for ListingsCacheService (Singleton)
+builder.Services.AddMemoryCache();
+
 // ═══════════════════════════════════════════════════════════════════
 // API Configuration - يقرأ من HostSettings أولاً ثم ApiSettings للتوافق
 // ═══════════════════════════════════════════════════════════════════
@@ -174,6 +177,11 @@ builder.Services.AddScoped<SpaceDataService>();
 
 // Timezone Service (Browser implementation using JS interop)
 builder.Services.AddScoped<ITimezoneService, BrowserTimezoneService>();
+
+// ═══════════════════════════════════════════════════════════════════
+// Listings Cache Service (Singleton - shared across all circuits)
+// ═══════════════════════════════════════════════════════════════════
+builder.Services.AddSingleton<IListingsCacheService, ListingsCacheService>();
 
 // ═══════════════════════════════════════════════════════════════════
 // Ashare API Service (ربط التطبيق بالباك اند)
