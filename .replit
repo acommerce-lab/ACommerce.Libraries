@@ -57,10 +57,6 @@ externalPort = 5000
 localPort = 39879
 externalPort = 80
 
-[[ports]]
-localPort = 45157
-externalPort = 3001
-
 [deployment]
 deploymentTarget = "autoscale"
 run = ["bash", "-c", "cd Examples/ACommerce.MarketplaceApi && ASPNETCORE_URLS=http://0.0.0.0:5000 dotnet bin/Release/net9.0/ACommerce.MarketplaceApi.dll"]

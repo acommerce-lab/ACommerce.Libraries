@@ -263,6 +263,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.Client.Subscripti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.Payments.Api", "Payments\ACommerce.Payments.Api\ACommerce.Payments.Api.csproj", "{FAAC5746-2E35-063F-9256-D737C6FA0382}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.Files.Storage.AliyunOSS", "Files\ACommerce.Files.Storage.AliyunOSS\ACommerce.Files.Storage.AliyunOSS.csproj", "{C935E145-BC3C-4452-B57D-CC13F709962B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1588,6 +1590,18 @@ Global
 		{FAAC5746-2E35-063F-9256-D737C6FA0382}.Release|x64.Build.0 = Release|Any CPU
 		{FAAC5746-2E35-063F-9256-D737C6FA0382}.Release|x86.ActiveCfg = Release|Any CPU
 		{FAAC5746-2E35-063F-9256-D737C6FA0382}.Release|x86.Build.0 = Release|Any CPU
+		{C935E145-BC3C-4452-B57D-CC13F709962B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C935E145-BC3C-4452-B57D-CC13F709962B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C935E145-BC3C-4452-B57D-CC13F709962B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C935E145-BC3C-4452-B57D-CC13F709962B}.Debug|x64.Build.0 = Debug|Any CPU
+		{C935E145-BC3C-4452-B57D-CC13F709962B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C935E145-BC3C-4452-B57D-CC13F709962B}.Debug|x86.Build.0 = Debug|Any CPU
+		{C935E145-BC3C-4452-B57D-CC13F709962B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C935E145-BC3C-4452-B57D-CC13F709962B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C935E145-BC3C-4452-B57D-CC13F709962B}.Release|x64.ActiveCfg = Release|Any CPU
+		{C935E145-BC3C-4452-B57D-CC13F709962B}.Release|x64.Build.0 = Release|Any CPU
+		{C935E145-BC3C-4452-B57D-CC13F709962B}.Release|x86.ActiveCfg = Release|Any CPU
+		{C935E145-BC3C-4452-B57D-CC13F709962B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1701,6 +1715,7 @@ Global
 		{1D423675-47E1-DBD6-D80D-7B2C97C12C8B} = {8F3AAC03-5D2E-4C65-B00F-F6BDB3F8CCEF}
 		{883C6947-4160-A23C-8EB8-E7A8734B8E10} = {8D24D598-6771-4212-BCF8-D7C2AE543A0E}
 		{FAAC5746-2E35-063F-9256-D737C6FA0382} = {6EE34385-9E7B-43B6-A3F4-C869D8AA4CDE}
+		{C935E145-BC3C-4452-B57D-CC13F709962B} = {9F5E6384-8D91-7B30-BF94-463B36B69FC3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2335E803-317D-466A-9117-E446644730F7}
