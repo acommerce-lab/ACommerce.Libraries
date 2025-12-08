@@ -60,4 +60,4 @@ externalPort = 80
 [deployment]
 deploymentTarget = "vm"
 run = ["bash", "-c", "dotnet publish/api/Ashare.Api.dll --urls http://0.0.0.0:3000 & dotnet publish/web/Ashare.Web.dll --urls http://0.0.0.0:5000"]
-build = ["bash", "-c", "cd Apps/Ashare.Api && dotnet publish -c Release -o ../../publish/api && cd ../Ashare.Web && dotnet publish -c Release -o ../../publish/web"]
+build = ["bash", "-c", "dotnet publish Apps/Ashare.Api/Ashare.Api.csproj -c Release -o publish/api && dotnet publish Apps/Ashare.Web/Ashare.Web.csproj -c Release -o publish/web"]
