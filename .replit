@@ -30,7 +30,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd Apps/Ashare.Web && dotnet bin/Release/net9.0/Ashare.Web.dll --urls \"http://0.0.0.0:5000\""
+args = "cd Apps/Ashare.Web && dotnet run --urls \"http://0.0.0.0:5000\""
 waitForPort = 5000
 
 [[workflows.workflow]]
@@ -42,7 +42,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd Apps/Ashare.Api && dotnet bin/Release/net9.0/Ashare.Api.dll --urls \"http://0.0.0.0:3000\""
+args = "cd Apps/Ashare.Api && dotnet build -c Release && dotnet run --urls \"http://0.0.0.0:3000\""
 waitForPort = 3000
 
 [[ports]]
@@ -52,10 +52,6 @@ externalPort = 3000
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 45579
-externalPort = 3001
 
 [deployment]
 deploymentTarget = "autoscale"
