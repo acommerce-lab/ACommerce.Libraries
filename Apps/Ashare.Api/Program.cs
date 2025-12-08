@@ -386,6 +386,22 @@ Built using ACommerce libraries with configuration-first approach:
         //await seedService.SeedAsync();
 
         Log.Information("Database ready with seed data!");
+
+        // Warm-up: Pre-heat EF Core and AutoMapper to avoid cold start delays
+        Log.Information("Warming up EF Core and AutoMapper...");
+        var warmupStopwatch = System.Diagnostics.Stopwatch.StartNew();
+        
+        // Warm up EF Core by executing a simple query
+        _ = await dbContext.Set<ACommerce.Catalog.Listings.Entities.ProductListing>()
+            .AsNoTracking()
+            .Take(1)
+            .ToListAsync();
+        
+        // Warm up AutoMapper by resolving the mapper
+        var mapper = scope.ServiceProvider.GetRequiredService<AutoMapper.IMapper>();
+        
+        warmupStopwatch.Stop();
+        Log.Information("Warm-up completed in {ElapsedMs}ms", warmupStopwatch.ElapsedMilliseconds);
     }
     catch (Exception ex)
     {

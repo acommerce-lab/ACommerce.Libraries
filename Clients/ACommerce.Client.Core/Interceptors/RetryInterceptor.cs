@@ -11,13 +11,13 @@ public sealed class RetryInterceptor : DelegatingHandler
 {
         private readonly ILogger<RetryInterceptor> _logger;
         private readonly int _maxRetries;
-        private readonly int _baseDelaySeconds;
+        private readonly int _baseDelayMs;
 
-        public RetryInterceptor(ILogger<RetryInterceptor> logger, int maxRetries = 5, int baseDelaySeconds = 2)
+        public RetryInterceptor(ILogger<RetryInterceptor> logger, int maxRetries = 3, int baseDelayMs = 500)
         {
                 _logger = logger;
                 _maxRetries = maxRetries;
-                _baseDelaySeconds = baseDelaySeconds;
+                _baseDelayMs = baseDelayMs;
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(
@@ -113,13 +113,13 @@ public sealed class RetryInterceptor : DelegatingHandler
 
         private async Task WaitBeforeRetry(int attemptIndex, CancellationToken cancellationToken, bool isConnectionError = false)
         {
-                int delaySeconds = isConnectionError 
-                        ? _baseDelaySeconds * (attemptIndex + 1) * 2
-                        : (int)(Math.Pow(2, attemptIndex) * _baseDelaySeconds);
+                int delayMs = isConnectionError 
+                        ? _baseDelayMs * (attemptIndex + 1)
+                        : (int)(Math.Pow(2, attemptIndex) * _baseDelayMs);
                 
-                delaySeconds = Math.Min(delaySeconds, 30);
+                delayMs = Math.Min(delayMs, 3000);
                 
-                await Task.Delay(TimeSpan.FromSeconds(delaySeconds), cancellationToken);
+                await Task.Delay(delayMs, cancellationToken);
         }
 
         private static bool IsConnectionError(HttpRequestException ex)
