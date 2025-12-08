@@ -15,10 +15,10 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "MarketplaceAPI"
+args = "AshareWeb"
 
 [[workflows.workflow]]
-name = "MarketplaceAPI"
+name = "AshareWeb"
 author = "agent"
 
 [workflows.workflow.metadata]
@@ -26,12 +26,16 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd Examples/ACommerce.MarketplaceApi && ASPNETCORE_URLS=http://0.0.0.0:5000 dotnet bin/Release/net9.0/ACommerce.MarketplaceApi.dll"
+args = "cd Apps/Ashare.Web && dotnet run -c Release"
 waitForPort = 5000
 
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 42935
+externalPort = 3000
 
 [deployment]
 deploymentTarget = "autoscale"
