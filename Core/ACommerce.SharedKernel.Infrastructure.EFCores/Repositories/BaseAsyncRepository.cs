@@ -79,6 +79,22 @@ public class BaseAsyncRepository<T> : IBaseAsyncRepository<T>
                 return await query.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
         }
 
+        /// <summary>
+        /// الحصول على كيان بمعرفه مع التتبع (للاستخدام الداخلي في عمليات التحديث)
+        /// </summary>
+        protected virtual async Task<T?> GetByIdTrackedAsync(
+                Guid id,
+                bool includeDeleted,
+                CancellationToken cancellationToken = default)
+        {
+                _logger.LogDebug("Getting tracked {EntityName} by id {EntityId}", typeof(T).Name, id);
+
+                IQueryable<T> query = _dbSet;
+                query = ApplySoftDeleteFilter(query, includeDeleted);
+
+                return await query.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+        }
+
         public virtual async Task<IReadOnlyList<T>> ListAllAsync(
                 CancellationToken cancellationToken = default)
         {
@@ -516,7 +532,7 @@ public class BaseAsyncRepository<T> : IBaseAsyncRepository<T>
         {
                 _logger.LogDebug("Partially updating {EntityName} with id {EntityId}", typeof(T).Name, id);
 
-                var entity = await GetByIdAsync(id, cancellationToken);
+                var entity = await GetByIdTrackedAsync(id, false, cancellationToken);
                 if (entity == null)
                 {
                         _logger.LogWarning("{EntityName} with id {EntityId} not found", typeof(T).Name, id);
@@ -560,6 +576,12 @@ public class BaseAsyncRepository<T> : IBaseAsyncRepository<T>
         {
                 _logger.LogDebug("Hard deleting {EntityName} with id {EntityId}", typeof(T).Name, entity.Id);
 
+                var entry = _context.Entry(entity);
+                if (entry.State == EntityState.Detached)
+                {
+                        _dbSet.Attach(entity);
+                }
+
                 _dbSet.Remove(entity);
                 await _context.SaveChangesAsync(cancellationToken);
 
@@ -570,7 +592,7 @@ public class BaseAsyncRepository<T> : IBaseAsyncRepository<T>
                 Guid id,
                 CancellationToken cancellationToken = default)
         {
-                var entity = await GetByIdAsync(id, true, cancellationToken);
+                var entity = await GetByIdTrackedAsync(id, true, cancellationToken);
                 if (entity != null)
                 {
                         await DeleteAsync(entity, cancellationToken);
@@ -587,6 +609,12 @@ public class BaseAsyncRepository<T> : IBaseAsyncRepository<T>
         {
                 _logger.LogDebug("Soft deleting {EntityName} with id {EntityId}", typeof(T).Name, entity.Id);
 
+                var entry = _context.Entry(entity);
+                if (entry.State == EntityState.Detached)
+                {
+                        _dbSet.Attach(entity);
+                }
+
                 entity.IsDeleted = true;
                 entity.UpdatedAt = DateTime.UtcNow;
 
@@ -599,7 +627,7 @@ public class BaseAsyncRepository<T> : IBaseAsyncRepository<T>
                 Guid id,
                 CancellationToken cancellationToken = default)
         {
-                var entity = await GetByIdAsync(id, false, cancellationToken);
+                var entity = await GetByIdTrackedAsync(id, false, cancellationToken);
                 if (entity != null)
                 {
                         await SoftDeleteAsync(entity, cancellationToken);
@@ -616,7 +644,7 @@ public class BaseAsyncRepository<T> : IBaseAsyncRepository<T>
         {
                 _logger.LogDebug("Restoring {EntityName} with id {EntityId}", typeof(T).Name, id);
 
-                var entity = await GetByIdAsync(id, true, cancellationToken);
+                var entity = await GetByIdTrackedAsync(id, true, cancellationToken);
                 if (entity != null && entity.IsDeleted)
                 {
                         entity.IsDeleted = false;
@@ -643,6 +671,15 @@ public class BaseAsyncRepository<T> : IBaseAsyncRepository<T>
                         softDelete ? "Soft" : "Hard",
                         entityList.Count,
                         typeof(T).Name);
+
+                foreach (var entity in entityList)
+                {
+                        var entry = _context.Entry(entity);
+                        if (entry.State == EntityState.Detached)
+                        {
+                                _dbSet.Attach(entity);
+                        }
+                }
 
                 if (softDelete)
                 {

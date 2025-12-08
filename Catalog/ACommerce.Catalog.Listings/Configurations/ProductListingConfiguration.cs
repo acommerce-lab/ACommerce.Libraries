@@ -15,8 +15,10 @@ public class ProductListingConfiguration : IEntityTypeConfiguration<ProductListi
                 builder.HasIndex(x => x.ProductId);
                 builder.HasIndex(x => x.CategoryId);
                 builder.HasIndex(x => x.CreatedAt);
-                builder.HasIndex(x => new { x.IsActive, x.Status, x.IsDeleted });
-                builder.HasIndex(x => new { x.VendorId, x.IsActive, x.IsDeleted });
-                builder.HasIndex(x => new { x.CategoryId, x.IsActive, x.Status });
+                builder.HasIndex(x => x.ViewCount);
+                builder.HasIndex(x => new { x.IsDeleted, x.IsActive, x.Status, x.CreatedAt });
+                builder.HasIndex(x => new { x.IsDeleted, x.IsActive, x.Status, x.ViewCount });
+                builder.HasIndex(x => new { x.VendorId, x.IsDeleted, x.IsActive, x.CreatedAt });
+                builder.HasIndex(x => new { x.CategoryId, x.IsDeleted, x.IsActive, x.Status, x.CreatedAt });
         }
 }
