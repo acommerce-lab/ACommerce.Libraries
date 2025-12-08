@@ -1,0 +1,248 @@
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[101]
+      Ending HttpMessageHandler cleanup cycle after 0.0014ms - processed: 0 items - remaining: 4 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[100]
+      Starting HttpMessageHandler cleanup cycle with 4 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[101]
+      Ending HttpMessageHandler cleanup cycle after 0.0016ms - processed: 0 items - remaining: 4 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[100]
+      Starting HttpMessageHandler cleanup cycle with 4 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[101]
+      Ending HttpMessageHandler cleanup cycle after 0.0014ms - processed: 0 items - remaining: 4 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[100]
+      Starting HttpMessageHandler cleanup cycle with 4 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[101]
+      Ending HttpMessageHandler cleanup cycle after 0.0018ms - processed: 0 items - remaining: 4 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[100]
+      Starting HttpMessageHandler cleanup cycle with 4 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[101]
+      Ending HttpMessageHandler cleanup cycle after 0.0017ms - processed: 0 items - remaining: 4 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[100]
+      Starting HttpMessageHandler cleanup cycle with 4 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[101]
+      Ending HttpMessageHandler cleanup cycle after 0.0015ms - processed: 0 items - remaining: 4 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[100]
+      Starting HttpMessageHandler cleanup cycle with 4 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[101]
+      Ending HttpMessageHandler cleanup cycle after 0.0016ms - processed: 0 items - remaining: 4 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[100]
+      Starting HttpMessageHandler cleanup cycle with 4 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[101]
+      Ending HttpMessageHandler cleanup cycle after 0.0014ms - processed: 0 items - remaining: 4 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[100]
+      Starting HttpMessageHandler cleanup cycle with 4 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[101]
+      Ending HttpMessageHandler cleanup cycle after 0.0016ms - processed: 0 items - remaining: 4 items
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/_blazor?id=O5W2eaTkMhgjY-CXChxDWQ - 101 - - 303751.4992ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 POST http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/_blazor/disconnect - multipart/form-data;+boundary=----WebKitFormBoundarycRQCmx4CQABeWx7u 359
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 POST http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/_blazor/disconnect - 200 0 - 30.6160ms
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[100]
+      Starting HttpMessageHandler cleanup cycle with 4 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[101]
+      Ending HttpMessageHandler cleanup cycle after 0.0017ms - processed: 0 items - remaining: 4 items
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/ - - -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint '/ (/)'
+[AuthInterceptor] Created with TokenProvider: ScopedTokenProvider (HashCode: 55400607)
+[BrowserStorageService] Created
+[TokenManager] Created with storage: TokenStorageService
+[BrowserStorageService] GetAsync(app_theme): prerendering, returning null
+info: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache miss: Fetching categories from API...
+info: System.Net.Http.HttpClient.ServiceRegistryClient.LogicalHandler[100]
+      Start processing HTTP request GET http://localhost:3000/api/discovery/Marketplace
+info: System.Net.Http.HttpClient.ServiceRegistryClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:3000/api/discovery/Marketplace
+info: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache miss: Fetching featured listings from API...
+info: System.Net.Http.HttpClient.ServiceRegistryClient.LogicalHandler[100]
+      Start processing HTTP request GET http://localhost:3000/api/discovery/Marketplace
+info: System.Net.Http.HttpClient.ServiceRegistryClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:3000/api/discovery/Marketplace
+info: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache miss: Fetching new listings from API...
+info: System.Net.Http.HttpClient.ServiceRegistryClient.LogicalHandler[100]
+      Start processing HTTP request GET http://localhost:3000/api/discovery/Marketplace
+info: System.Net.Http.HttpClient.ServiceRegistryClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:3000/api/discovery/Marketplace
+fail: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Failed to discover service: Marketplace
+      System.Net.Http.HttpRequestException: Connection refused (localhost:3000)
+       ---> System.Net.Sockets.SocketException (111): Connection refused
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at ACommerce.ServiceRegistry.Client.ServiceRegistryClient.DiscoverAsync(String serviceName, CancellationToken cancellationToken) in /home/runner/workspace/Infrastructure/ACommerce.ServiceRegistry.Client/ServiceRegistryClient.cs:line 84
+fail: Ashare.Shared.Services.AshareApiService[0]
+      Error fetching categories
+      System.InvalidOperationException: Service not found: Marketplace
+         at ACommerce.Client.Core.Http.DynamicHttpClient.BuildUrlAsync(String serviceName, String path, CancellationToken cancellationToken) in /home/runner/workspace/Clients/ACommerce.Client.Core/Http/DynamicHttpClient.cs:line 221
+         at ACommerce.Client.Core.Http.DynamicHttpClient.GetAsync[T](String serviceName, String path, CancellationToken cancellationToken) in /home/runner/workspace/Clients/ACommerce.Client.Core/Http/DynamicHttpClient.cs:line 43
+         at ACommerce.Client.Categories.CategoryAttributesClient.GetAvailableCategoriesAsync(CancellationToken cancellationToken) in /home/runner/workspace/Clients/ACommerce.Client.Categories/CategoryAttributesClient.cs:line 32
+         at Ashare.Shared.Services.AshareApiService.<GetCategoriesAsync>b__11_0() in /home/runner/workspace/Apps/Ashare.Shared/Services/AshareApiService.cs:line 70
+fail: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Failed to discover service: Marketplace
+      System.Net.Http.HttpRequestException: Connection refused (localhost:3000)
+       ---> System.Net.Sockets.SocketException (111): Connection refused
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at ACommerce.ServiceRegistry.Client.ServiceRegistryClient.DiscoverAsync(String serviceName, CancellationToken cancellationToken) in /home/runner/workspace/Infrastructure/ACommerce.ServiceRegistry.Client/ServiceRegistryClient.cs:line 84
+fail: Ashare.Shared.Services.AshareApiService[0]
+      Error fetching new spaces
+      System.InvalidOperationException: Service not found: Marketplace
+         at ACommerce.Client.Core.Http.DynamicHttpClient.BuildUrlAsync(String serviceName, String path, CancellationToken cancellationToken) in /home/runner/workspace/Clients/ACommerce.Client.Core/Http/DynamicHttpClient.cs:line 221
+         at ACommerce.Client.Core.Http.DynamicHttpClient.GetAsync[T](String serviceName, String path, CancellationToken cancellationToken) in /home/runner/workspace/Clients/ACommerce.Client.Core/Http/DynamicHttpClient.cs:line 43
+         at ACommerce.Client.ProductListings.ProductListingsClient.GetNewAsync(Int32 limit, CancellationToken cancellationToken) in /home/runner/workspace/Clients/ACommerce.Client.ProductListings/ProductListingsClient.cs:line 37
+         at Ashare.Shared.Services.AshareApiService.<GetNewSpacesAsync>b__14_0() in /home/runner/workspace/Apps/Ashare.Shared/Services/AshareApiService.cs:line 165
+fail: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Failed to discover service: Marketplace
+      System.Net.Http.HttpRequestException: Connection refused (localhost:3000)
+       ---> System.Net.Sockets.SocketException (111): Connection refused
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at ACommerce.ServiceRegistry.Client.ServiceRegistryClient.DiscoverAsync(String serviceName, CancellationToken cancellationToken) in /home/runner/workspace/Infrastructure/ACommerce.ServiceRegistry.Client/ServiceRegistryClient.cs:line 84
+fail: Ashare.Shared.Services.AshareApiService[0]
+      Error fetching featured spaces
+      System.InvalidOperationException: Service not found: Marketplace
+         at ACommerce.Client.Core.Http.DynamicHttpClient.BuildUrlAsync(String serviceName, String path, CancellationToken cancellationToken) in /home/runner/workspace/Clients/ACommerce.Client.Core/Http/DynamicHttpClient.cs:line 221
+         at ACommerce.Client.Core.Http.DynamicHttpClient.GetAsync[T](String serviceName, String path, CancellationToken cancellationToken) in /home/runner/workspace/Clients/ACommerce.Client.Core/Http/DynamicHttpClient.cs:line 43
+         at ACommerce.Client.ProductListings.ProductListingsClient.GetFeaturedAsync(Int32 limit, CancellationToken cancellationToken) in /home/runner/workspace/Clients/ACommerce.Client.ProductListings/ProductListingsClient.cs:line 29
+         at Ashare.Shared.Services.AshareApiService.<GetFeaturedSpacesAsync>b__13_0() in /home/runner/workspace/Apps/Ashare.Shared/Services/AshareApiService.cs:line 145
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint '/ (/)'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/ - 200 - text/html;+charset=utf-8 95.1504ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/_framework/blazor.web.js - - -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Blazor web static files'
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[6]
+      The file /_framework/blazor.web.js was not modified
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Blazor web static files'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/_framework/blazor.web.js - 304 - text/javascript 5.9498ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/_blazor/initializers - - -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/_blazor/initializers - 200 - application/json;+charset=utf-8 0.1994ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 POST http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/_blazor/negotiate?negotiateVersion=1 - - 0
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 POST http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/_blazor/negotiate?negotiateVersion=1 - 200 316 application/json 6.1280ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/_blazor?id=k8V3Nw7N_d204DkuInmUkA - - -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+[BrowserStorageService] Created
+[TokenManager] Created with storage: TokenStorageService
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: Categories
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: Featured listings
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: New listings
+[BrowserStorageService] GetAsync(app_theme): not found
+[BrowserStorageService] GetAsync(auth_token): not found
+[BrowserStorageService] GetAsync(auth_expires_at): not found
+[MainLayout] Auth check - Path: https://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev:5000/, Token: null, IsGuest: False, IsAuthPage: False, IsProtectedPage: False
+[Auth] No token and not guest - redirecting to login
+[Login] Page loaded - GuestMode: False
+info: System.Net.Http.HttpClient.ServiceRegistryClient.LogicalHandler[100]
+      Start processing HTTP request GET http://localhost:3000/api/discovery/Ashare
+info: System.Net.Http.HttpClient.ServiceRegistryClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:3000/api/discovery/Ashare
+fail: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Failed to discover service: Ashare
+      System.Net.Http.HttpRequestException: Connection refused (localhost:3000)
+       ---> System.Net.Sockets.SocketException (111): Connection refused
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.CreateException(SocketError error, Boolean forAsyncThrow)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ConnectAsync(Socket socket, Boolean saeaCancelable)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.AsyncStateMachineBox`1.MoveNext(Thread threadPoolThread)
+         at System.Threading.ThreadPoolWorkQueue.Dispatch()
+         at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+      --- End of stack trace from previous location ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at ACommerce.ServiceRegistry.Client.ServiceRegistryClient.DiscoverAsync(String serviceName, CancellationToken cancellationToken) in /home/runner/workspace/Infrastructure/ACommerce.ServiceRegistry.Client/ServiceRegistryClient.cs:line 84
+[Login] Failed to connect to SignalR: Service not found: Ashare
+[BrowserStorageService] GetAsync(app_language): not found
+[MainLayout] Auth check - Path: https://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev:5000/login, Token: null, IsGuest: False, IsAuthPage: True, IsProtectedPage: False
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[100]
+      Starting HttpMessageHandler cleanup cycle with 4 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[101]
+      Ending HttpMessageHandler cleanup cycle after 0.0016ms - processed: 0 items - remaining: 4 items
+dbug: M
