@@ -139,11 +139,28 @@
     /// </summary>
     private bool HideNavigation => IsAuthPage || IsFullScreenPage;
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
-        // تحميل عدد الحجوزات والإشعارات
-        BookingsCount = await ApiService.GetBookingsCountAsync();
+        // تحميل عدد الإشعارات (متزامن)
         NotificationCount = ApiService.GetNotificationsCount();
+        
+        // تحميل عدد الحجوزات في الخلفية (غير متزامن - لا يُعيق عرض الصفحة)
+        _ = LoadBookingsCountAsync();
+        
+        return Task.CompletedTask;
+    }
+
+    private async Task LoadBookingsCountAsync()
+    {
+        try
+        {
+            BookingsCount = await ApiService.GetBookingsCountAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[MainLayout] Error loading bookings count: {ex.Message}");
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

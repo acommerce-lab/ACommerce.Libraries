@@ -189,27 +189,34 @@
     private List<SpaceItem>? _newSpaces;
     private bool _isLoading = true;
     private bool _isLoadingSpaces = true;
+    private bool _dataLoaded = false;
 
     protected override async Task OnInitializedAsync()
     {
+        if (_dataLoaded) return;
         await LoadDataAsync();
     }
 
     private async Task LoadDataAsync()
     {
+        if (_dataLoaded) return;
+        
         _isLoading = true;
         _isLoadingSpaces = true;
         
         try
         {
-            _categories = await ApiService.GetCategoriesAsync();
-            _isLoading = false;
-            StateHasChanged();
+            var categoriesTask = ApiService.GetCategoriesAsync();
+            var featuredTask = ApiService.GetFeaturedSpacesAsync();
+            var newSpacesTask = ApiService.GetNewSpacesAsync();
             
-            _featuredSpaces = await ApiService.GetFeaturedSpacesAsync();
-            StateHasChanged();
+            await Task.WhenAll(categoriesTask, featuredTask, newSpacesTask);
             
-            _newSpaces = await ApiService.GetNewSpacesAsync();
+            _categories = await categoriesTask;
+            _featuredSpaces = await featuredTask;
+            _newSpaces = await newSpacesTask;
+            
+            _dataLoaded = true;
         }
         catch (Exception ex)
         {

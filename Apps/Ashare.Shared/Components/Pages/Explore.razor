@@ -273,11 +273,21 @@
         new("قهوة وشاي")
     };
 
+    private bool _dataLoaded = false;
+
     protected override async Task OnInitializedAsync()
     {
-        _categories = await ApiService.GetCategoriesAsync();
-        _allSpaces = await ApiService.GetAllSpacesAsync();
+        if (_dataLoaded) return;
+        
+        var categoriesTask = ApiService.GetCategoriesAsync();
+        var spacesTask = ApiService.GetAllSpacesAsync();
+        
+        await Task.WhenAll(categoriesTask, spacesTask);
+        
+        _categories = await categoriesTask;
+        _allSpaces = await spacesTask;
         _favorites = ApiService.GetFavorites();
+        _dataLoaded = true;
 
         if (Guid.TryParse(Category, out var categoryId))
         {
