@@ -61,3 +61,8 @@ externalPort = 3001
 deploymentTarget = "autoscale"
 run = ["bash", "-c", "cd Examples/ACommerce.MarketplaceApi && ASPNETCORE_URLS=http://0.0.0.0:5000 dotnet bin/Release/net9.0/ACommerce.MarketplaceApi.dll"]
 build = ["bash", "-c", "cd Examples/ACommerce.MarketplaceApi && dotnet build ACommerce.MarketplaceApi.csproj -c Release -m:1 --no-restore -p:CopyBuildOutputToOutputDirectory=true -p:CopyOutputSymbolsToOutputDirectory=true"]
+
+[userenv]
+
+[userenv.shared]
+SERVICE_URL = "http://localhost:3000"
