@@ -80,6 +80,8 @@
     private int NotificationCount { get; set; }
     private bool _initialized;
     private string? _lastCheckedPath;
+    private static bool _bookingsCountLoaded;
+    private static int _cachedBookingsCount;
 
     private bool IsAuthPage
     {
@@ -144,23 +146,46 @@
         // تحميل عدد الإشعارات (متزامن)
         NotificationCount = ApiService.GetNotificationsCount();
         
-        // تحميل عدد الحجوزات في الخلفية (غير متزامن - لا يُعيق عرض الصفحة)
-        _ = LoadBookingsCountAsync();
+        // استخدام القيمة المخزنة مباشرة إذا تم تحميلها سابقاً
+        if (_bookingsCountLoaded)
+        {
+            BookingsCount = _cachedBookingsCount;
+        }
+        else
+        {
+            // تحميل عدد الحجوزات في الخلفية (مرة واحدة فقط)
+            _ = LoadBookingsCountAsync();
+        }
         
         return Task.CompletedTask;
     }
 
     private async Task LoadBookingsCountAsync()
     {
+        // تجنب التحميل المتكرر
+        if (_bookingsCountLoaded) return;
+        
         try
         {
-            BookingsCount = await ApiService.GetBookingsCountAsync();
+            var count = await ApiService.GetBookingsCountAsync();
+            _cachedBookingsCount = count;
+            _bookingsCountLoaded = true;
+            BookingsCount = count;
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[MainLayout] Error loading bookings count: {ex.Message}");
         }
+    }
+    
+    /// <summary>
+    /// إعادة تحميل عدد الحجوزات (يُستدعى بعد إنشاء حجز جديد)
+    /// </summary>
+    public static void InvalidateBookingsCache()
+    {
+        _bookingsCountLoaded = false;
+        _cachedBookingsCount = 0;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

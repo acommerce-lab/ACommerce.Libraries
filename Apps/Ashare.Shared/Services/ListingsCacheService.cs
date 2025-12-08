@@ -12,8 +12,10 @@ public interface IListingsCacheService
     Task<List<SpaceCategory>> GetCategoriesAsync(Func<Task<List<SpaceCategory>>> fetchFunc);
     Task<SpaceItem?> GetSpaceByIdAsync(Guid id, Func<Task<SpaceItem?>> fetchFunc);
     Task<List<SpaceItem>> GetSpacesByCategoryAsync(Guid categoryId, Func<Task<List<SpaceItem>>> fetchFunc);
+    Task<int> GetBookingsCountAsync(Func<Task<int>> fetchFunc);
     
     void InvalidateListings();
+    void InvalidateBookingsCount();
     void InvalidateListing(Guid listingId);
     void InvalidateCategories();
     void InvalidateAll();
@@ -38,8 +40,11 @@ public class ListingsCacheService : IListingsCacheService
     private const string NewKey = "cache_new_listings";
     private const string AllKey = "cache_all_listings";
     private const string CategoriesKey = "cache_categories";
+    private const string BookingsCountKey = "cache_bookings_count";
     private const string ListingByIdPrefix = "cache_listing_";
     private const string ListingsByCategoryPrefix = "cache_listings_category_";
+    
+    private readonly SemaphoreSlim _bookingsLock = new(1, 1);
     
     private readonly HashSet<string> _categoryKeys = new();
     private readonly HashSet<string> _listingKeys = new();
@@ -198,6 +203,37 @@ public class ListingsCacheService : IListingsCacheService
         lock (_keysLock) { _categoryKeys.Add(key); }
         
         return items;
+    }
+
+    public async Task<int> GetBookingsCountAsync(Func<Task<int>> fetchFunc)
+    {
+        if (_cache.TryGetValue(BookingsCountKey, out int cached))
+        {
+            _logger.LogDebug("Cache hit: Bookings count");
+            return cached;
+        }
+
+        await _bookingsLock.WaitAsync();
+        try
+        {
+            if (_cache.TryGetValue(BookingsCountKey, out cached))
+                return cached;
+
+            _logger.LogInformation("Cache miss: Fetching bookings count from API...");
+            var count = await fetchFunc();
+            _cache.Set(BookingsCountKey, count, TimeSpan.FromMinutes(5));
+            return count;
+        }
+        finally
+        {
+            _bookingsLock.Release();
+        }
+    }
+
+    public void InvalidateBookingsCount()
+    {
+        _logger.LogInformation("Invalidating bookings count cache");
+        _cache.Remove(BookingsCountKey);
     }
 
     public void InvalidateListings()
