@@ -440,7 +440,18 @@ Built using ACommerce libraries with configuration-first approach:
             EnableHealthCheck = true,
             HealthCheckPath = "/health"
         });
-        Log.Information("Ashare/Marketplace service registered in Service Registry at {BaseUrl}", serviceBaseUrl);
+
+        // تسجيل خدمة الدفع (Payments) للتوافق مع Client SDKs
+        await registry.RegisterAsync(new ServiceRegistration
+        {
+            ServiceName = "Payments",
+            Version = "v1",
+            BaseUrl = serviceBaseUrl,
+            Environment = app.Environment.EnvironmentName,
+            EnableHealthCheck = true,
+            HealthCheckPath = "/health"
+        });
+        Log.Information("Ashare/Marketplace/Payments services registered in Service Registry at {BaseUrl}", serviceBaseUrl);
     }
     catch (Exception ex)
     {
