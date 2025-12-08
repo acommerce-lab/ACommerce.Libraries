@@ -37,9 +37,13 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // ═══════════════════════════════════════════════════════════════════
-// API Configuration
+// API Configuration - يقرأ من HostSettings أولاً ثم ApiSettings للتوافق
 // ═══════════════════════════════════════════════════════════════════
-var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net";
+var apiBaseUrl = builder.Configuration["HostSettings:BaseUrl"] 
+    ?? builder.Configuration["ApiSettings:BaseUrl"] 
+    ?? "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net";
+
+Console.WriteLine($"🌐 API Base URL: {apiBaseUrl}");
 
 // ═══════════════════════════════════════════════════════════════════
 // Client SDKs with Service Discovery (Predefined Services)

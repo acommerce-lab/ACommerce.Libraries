@@ -214,8 +214,20 @@ try
     // Subscription Services
     builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 
-    // Payment Provider (Noon)
+    // Payment Provider (Noon) - مع استخدام HostSettings لبناء ReturnUrl تلقائياً
+    var webBaseUrlForPayment = builder.Configuration["HostSettings:WebBaseUrl"] 
+        ?? builder.Configuration["HostSettings:BaseUrl"]
+        ?? "https://ashare.app";
+    
     builder.Services.AddNoonPayments(builder.Configuration);
+    builder.Services.PostConfigure<ACommerce.Payments.Noon.Models.NoonOptions>(options =>
+    {
+        if (string.IsNullOrEmpty(options.ReturnUrl))
+        {
+            options.ReturnUrl = $"{webBaseUrlForPayment.TrimEnd('/')}/host/payment/callback";
+            Log.Information("💳 Noon ReturnUrl set from HostSettings: {ReturnUrl}", options.ReturnUrl);
+        }
+    });
 
     // Ashare Seed Service
     builder.Services.AddScoped<AshareSeedDataService>();
@@ -406,11 +418,16 @@ Built using ACommerce libraries with configuration-first approach:
         }
     });
 
-    // ✅ تسجيل الخدمة في Service Registry (مع حماية من الأخطاء)
-    var serviceBaseUrl = Environment.GetEnvironmentVariable("SERVICE_URL")
-        ?? (app.Environment.IsDevelopment()
-            ? "http://localhost:3000"
-            : "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net");
+    // ✅ قراءة HostSettings (مكان واحد لجميع الروابط)
+    var hostBaseUrl = builder.Configuration["HostSettings:BaseUrl"]
+        ?? Environment.GetEnvironmentVariable("SERVICE_URL")
+        ?? (app.Environment.IsDevelopment() ? "http://localhost:3000" : "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net");
+    
+    var webBaseUrl = builder.Configuration["HostSettings:WebBaseUrl"] ?? hostBaseUrl;
+    
+    Log.Information("🌐 Host URLs configured: API={ApiUrl}, Web={WebUrl}", hostBaseUrl, webBaseUrl);
+    
+    var serviceBaseUrl = hostBaseUrl;
 
     try
     {
