@@ -79,7 +79,7 @@ builder.Services.AddACommerceClientWithServices(
     },
     options =>
     {
-        options.TimeoutSeconds = 30;
+        options.TimeoutSeconds = 120; // 2 minutes for large operations like listing creation
         // تفعيل Authentication لإرسال التوكن مع كل طلب
         options.EnableAuthentication = true;
         // استخدام ScopedTokenProvider للوصول إلى TokenManager الـ scoped
