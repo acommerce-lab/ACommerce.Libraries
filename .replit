@@ -43,16 +43,14 @@ outputType = "console"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd Apps/Ashare.Api && dotnet bin/Release/net9.0/Ashare.Api.dll --urls \"http://0.0.0.0:3000\""
+waitForPort = 3000
 
 [[ports]]
 localPort = 3000
 externalPort = 3000
 
 [[ports]]
-localPort = 5000
-
-[[ports]]
-localPort = 32979
+localPort = 45711
 externalPort = 80
 
 [deployment]
