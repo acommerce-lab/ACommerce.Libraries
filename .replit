@@ -59,5 +59,10 @@ externalPort = 80
 
 [deployment]
 deploymentTarget = "vm"
-run = ["bash", "-c", "./publish/api/Ashare.Api --urls http://127.0.0.1:3000 & ./publish/web/Ashare.Web --urls http://0.0.0.0:5000"]
+run = ["bash", "-c", "./publish/api/Ashare.Api --urls http://127.0.0.1:3000 & ./publish/web/Ashare.Web --urls http://0.0.0.0:80"]
 build = ["bash", "build.sh"]
+
+[userenv]
+
+[userenv.production]
+HostSettings__BaseUrl = "http://127.0.0.1:3000"
