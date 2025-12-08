@@ -211,9 +211,9 @@ public class ClientOptions
         public bool EnableRetry { get; set; } = true;
 
         /// <summary>
-        /// عدد المحاولات (افتراضياً: 5)
+        /// عدد المحاولات (افتراضياً: 3)
         /// </summary>
-        public int MaxRetries { get; set; } = 5;
+        public int MaxRetries { get; set; } = 3;
 
         /// <summary>
         /// تفعيل Authentication تلقائي؟ (افتراضياً: false)
