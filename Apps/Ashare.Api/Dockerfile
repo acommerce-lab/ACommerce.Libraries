@@ -130,8 +130,13 @@ COPY ["Modules/ACommerce.Reviews/ACommerce.Reviews.csproj", "Modules/ACommerce.R
 COPY ["Modules/ACommerce.Localization/ACommerce.Localization.csproj", "Modules/ACommerce.Localization/"]
 
 # Files
+COPY ["Files/ACommerce.Files.Abstractions/ACommerce.Files.Abstractions.csproj", "Files/ACommerce.Files.Abstractions/"]
 COPY ["Files/ACommerce.Files.Storage.Local/ACommerce.Files.Storage.Local.csproj", "Files/ACommerce.Files.Storage.Local/"]
 COPY ["Files/ACommerce.Files.Storage.AliyunOSS/ACommerce.Files.Storage.AliyunOSS.csproj", "Files/ACommerce.Files.Storage.AliyunOSS/"]
+
+# Templates
+COPY ["Templates/ACommerce.Templates.Customer/ACommerce.Templates.Customer.csproj", "Templates/ACommerce.Templates.Customer/"]
+COPY ["Templates/ACommerce.Blazor.Shop/ACommerce.Blazor.Shop.csproj", "Templates/ACommerce.Blazor.Shop/"]
 
 # Messaging
 COPY ["ACommerce.Messaging.Abstractions/ACommerce.Messaging.Abstractions.csproj", "ACommerce.Messaging.Abstractions/"]
