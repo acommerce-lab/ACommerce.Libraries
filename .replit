@@ -57,6 +57,10 @@ externalPort = 5000
 localPort = 39879
 externalPort = 80
 
+[[ports]]
+localPort = 42071
+externalPort = 3001
+
 [deployment]
 deploymentTarget = "vm"
 run = ["bash", "-c", "./publish/api/Ashare.Api --urls http://127.0.0.1:3000 & ./publish/web/Ashare.Web --urls http://0.0.0.0:80"]
