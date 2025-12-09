@@ -4,7 +4,7 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:$COMMIT_SHA'
+      - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:${SHORT_SHA:-latest}'
       - '-t'
       - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:latest'
       - '-f'
@@ -16,12 +16,8 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:$COMMIT_SHA'
-
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'push'
-      - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:latest'
+      - '--all-tags'
+      - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api'
 
   # Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -31,7 +27,7 @@ steps:
       - 'deploy'
       - 'ashare-api'
       - '--image'
-      - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:$COMMIT_SHA'
+      - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:latest'
       - '--region'
       - 'me-central1'
       - '--platform'
@@ -51,7 +47,6 @@ steps:
       - 'SKIP_SEEDING=true,ASPNETCORE_ENVIRONMENT=Production'
 
 images:
-  - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:$COMMIT_SHA'
   - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:latest'
 
 options:
