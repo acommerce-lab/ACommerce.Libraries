@@ -1690,3 +1690,397 @@ System.ArgumentException: Format of the initialization string does not conform t
 2025-12-09 17:41:46.711 +00:00 [INF] Executed action ACommerce.Catalog.Attributes.Api.Controllers.AttributeDefinitionsController.Search (ACommerce.Catalog.Attributes.Api) in 91.2423ms
 2025-12-09 17:41:46.711 +00:00 [INF] Executed endpoint 'ACommerce.Catalog.Attributes.Api.Controllers.AttributeDefinitionsController.Search (ACommerce.Catalog.Attributes.Api)'
 2025-12-09 17:41:46.711 +00:00 [INF] Request finished HTTP/1.1 POST http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/api/catalog/attribute-definitions/search - 500 null application/json; charset=utf-8 103.4774ms
+2025-12-09 17:42:39.847 +00:00 [INF] Application is shutting down...
+2025-12-09 17:43:37.927 +00:00 [INF] Starting Ashare API - Shared Spaces Platform...
+2025-12-09 17:43:39.100 +00:00 [INF] Using SQL Server database
+2025-12-09 17:43:39.192 +00:00 [INF] Ensuring database is created...
+2025-12-09 17:43:39.868 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.871 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.ServiceRegistry.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.872 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Profiles.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.872 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.872 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Profiles, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.873 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Vendors.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.873 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Vendors, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.873 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Products.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.917 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Listings.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.918 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Attributes.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.934 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Units.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.951 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Currencies.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.961 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Orders.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.962 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Orders, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.962 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Transactions.Core.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.963 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Transactions.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.964 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Locations.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.964 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Chats.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.965 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Chats.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.966 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Chats.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.966 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Recipients.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.966 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Recipients, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.967 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Subscriptions.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.967 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Payments.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.968 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.ServiceRegistry.Server, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.968 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.Infrastructure.EFCores, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.968 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.JWT, Version=1.0.4.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.969 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Users.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.969 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.ServiceRegistry.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.970 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Messaging.InMemory, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.970 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Messaging.SignalR.Hub, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.971 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.971 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Channels.InApp, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.972 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Messaging, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.972 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.973 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.973 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Messaging, Version=1.0.1.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.974 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.974 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.TwoFactor.SessionStore.InMemory, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.975 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.TwoFactor.Nafath, Version=1.0.11.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.975 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.CQRS, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.975 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Realtime.SignalR, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:39.976 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Realtime.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.031 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Payments.Noon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.031 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.AspNetCore.NafathWH, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.032 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.AspNetCore.Swagger, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.032 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Cart, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.032 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.032 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Messaging.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.033 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.TwoFactor.Abstractions, Version=1.0.5.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.033 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Cart, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.033 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Categories, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.034 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Chats, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.034 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.ContactPoints, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.034 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.035 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Files, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.035 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Locations, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.035 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Nafath, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.036 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Notifications, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.036 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Orders, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.036 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Payments, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.036 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Products, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.037 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.ProductListings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.037 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Profiles, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.037 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Subscriptions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.038 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Vendors, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.038 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.038 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Auth, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.039 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Realtime, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.039 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Locations.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.039 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Localization, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.040 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Payments.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.040 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.Storage.Local, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.040 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Reviews, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.041 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.ServiceRegistry.Client, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.042 +00:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Templates.Customer, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2025-12-09 17:43:40.252 +00:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-12-09 17:43:40.354 +00:00 [WRN] No store type was specified for the decimal property 'DiscountAmount' on entity type 'Cart'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.354 +00:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'CartItem'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.355 +00:00 [WRN] No store type was specified for the decimal property 'ConversionFactor' on entity type 'AttributeValueRelationship'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.355 +00:00 [WRN] No store type was specified for the decimal property 'InverseRate' on entity type 'ExchangeRate'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.356 +00:00 [WRN] No store type was specified for the decimal property 'CompareAtPrice' on entity type 'ProductListing'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.356 +00:00 [WRN] No store type was specified for the decimal property 'Cost' on entity type 'ProductListing'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.356 +00:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'ProductListing'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.357 +00:00 [WRN] No store type was specified for the decimal property 'Rating' on entity type 'ProductListing'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.357 +00:00 [WRN] No store type was specified for the decimal property 'LowStockThreshold' on entity type 'ProductInventory'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.358 +00:00 [WRN] No store type was specified for the decimal property 'QuantityInStock' on entity type 'ProductInventory'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.358 +00:00 [WRN] No store type was specified for the decimal property 'QuantityReserved' on entity type 'ProductInventory'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.359 +00:00 [WRN] No store type was specified for the decimal property 'DiscountAmount' on entity type 'Order'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.359 +00:00 [WRN] No store type was specified for the decimal property 'ShippingCost' on entity type 'Order'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.359 +00:00 [WRN] No store type was specified for the decimal property 'Subtotal' on entity type 'Order'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.360 +00:00 [WRN] No store type was specified for the decimal property 'TaxAmount' on entity type 'Order'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.360 +00:00 [WRN] No store type was specified for the decimal property 'Total' on entity type 'Order'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.360 +00:00 [WRN] No store type was specified for the decimal property 'CommissionAmount' on entity type 'OrderItem'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.361 +00:00 [WRN] No store type was specified for the decimal property 'ItemDiscount' on entity type 'OrderItem'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.361 +00:00 [WRN] No store type was specified for the decimal property 'UnitPrice' on entity type 'OrderItem'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.361 +00:00 [WRN] No store type was specified for the decimal property 'VendorAmount' on entity type 'OrderItem'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.361 +00:00 [WRN] No store type was specified for the decimal property 'AdditionalFee' on entity type 'Vendor'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.362 +00:00 [WRN] No store type was specified for the decimal property 'AvailableBalance' on entity type 'Vendor'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.362 +00:00 [WRN] No store type was specified for the decimal property 'CommissionValue' on entity type 'Vendor'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.362 +00:00 [WRN] No store type was specified for the decimal property 'MinimumPayout' on entity type 'Vendor'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.363 +00:00 [WRN] No store type was specified for the decimal property 'PendingBalance' on entity type 'Vendor'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.363 +00:00 [WRN] No store type was specified for the decimal property 'Rating' on entity type 'Vendor'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-12-09 17:43:40.526 +00:00 [ERR] ❌ Database initialization failed - continuing anyway
+System.ArgumentException: Format of the initialization string does not conform to specification starting at index 0.
+   at Microsoft.Data.Common.DbConnectionOptions.GetKeyValuePair(String connectionString, Int32 currentPosition, StringBuilder buffer, Boolean useOdbcRules, String& keyname, String& keyvalue)
+   at Microsoft.Data.Common.DbConnectionOptions.ParseInternal(Dictionary`2 parsetable, String connectionString, Boolean buildChain, Dictionary`2 synonyms, Boolean firstKey)
+   at Microsoft.Data.Common.DbConnectionOptions..ctor(String connectionString, Dictionary`2 synonyms)
+   at Microsoft.Data.SqlClient.SqlConnectionString..ctor(String connectionString)
+   at Microsoft.Data.SqlClient.SqlConnectionFactory.CreateConnectionOptions(String connectionString, DbConnectionOptions previous)
+   at Microsoft.Data.ProviderBase.DbConnectionFactory.GetConnectionPoolGroup(DbConnectionPoolKey key, DbConnectionPoolGroupOptions poolOptions, DbConnectionOptions& userConnectionOptions)
+   at Microsoft.Data.SqlClient.SqlConnection.ConnectionString_Set(DbConnectionPoolKey key)
+   at Microsoft.Data.SqlClient.SqlConnection.set_ConnectionString(String value)
+   at Microsoft.Data.SqlClient.SqlConnection..ctor(String connectionString)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerConnection.CreateDbConnection()
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.get_DbConnection()
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenAsync(CancellationToken cancellationToken, Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerDatabaseCreator.<>c__DisplayClass20_0.<<ExistsAsync>b__0>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerDatabaseCreator.<>c__DisplayClass20_0.<<ExistsAsync>b__0>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.<>c__DisplayClass30_0`2.<<ExecuteAsync>b__0>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteImplementationAsync[TState,TResult](Func`4 operation, Func`4 verifySucceeded, TState state, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.ExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabaseCreator.EnsureCreatedAsync(CancellationToken cancellationToken)
+   at Program.<Main>$(String[] args) in /home/runner/workspace/Apps/Ashare.Api/Program.cs:line 389
+2025-12-09 17:43:40.539 +00:00 [INF] 🌐 Host URLs configured: API=http://localhost:3000, Web=https://ashare.app
+2025-12-09 17:43:40.547 +00:00 [INF] ✅ Service registered: Ashare vv1 at http://localhost:3000 (ID: 308d460a-ca6d-4268-a574-5d2dbc2da412)
+2025-12-09 17:43:40.548 +00:00 [INF] ✅ Service registered: Marketplace vv1 at http://localhost:3000 (ID: 986337b2-aa70-4bb9-aad6-a4c9fa38de9f)
+2025-12-09 17:43:40.549 +00:00 [INF] ✅ Service registered: Payments vv1 at http://localhost:3000 (ID: c1cd085b-257e-476c-bdd9-15d2debd6883)
+2025-12-09 17:43:40.550 +00:00 [INF] Ashare/Marketplace/Payments services registered in Service Registry at http://localhost:3000
+2025-12-09 17:43:40.550 +00:00 [INF] Ashare API started successfully!
+2025-12-09 17:43:40.550 +00:00 [INF] Swagger UI available at: http://localhost:3000
+2025-12-09 17:43:40.562 +00:00 [INF] User profile is available. Using '/home/runner/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-12-09 17:43:40.616 +00:00 [INF] [Notify Messaging] 🎧 Starting notification messaging handler
+2025-12-09 17:43:40.617 +00:00 [INF] [Ashare] Subscribed to topic 'notify.commands.send'
+2025-12-09 17:43:40.618 +00:00 [INF] [Notify Messaging] ✅ Notification messaging handler started
+2025-12-09 17:43:40.622 +00:00 [INF] [Auth Messaging] 🎧 Starting handler with channels: InApp
+2025-12-09 17:43:40.622 +00:00 [INF] [Ashare] Subscribed to topic 'auth.events.authentication.twofactorsucceeded'
+2025-12-09 17:43:40.623 +00:00 [INF] [Ashare] Subscribed to topic 'auth.events.authentication.twofactorfailed'
+2025-12-09 17:43:40.623 +00:00 [INF] [Ashare] Subscribed to topic 'auth.events.authentication.twofactorexpired'
+2025-12-09 17:43:40.623 +00:00 [INF] [Auth Messaging] ✅ Handler started
+2025-12-09 17:43:40.693 +00:00 [INF] Now listening on: http://0.0.0.0:3000
+2025-12-09 17:43:40.694 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-12-09 17:43:40.694 +00:00 [INF] Hosting environment: Development
+2025-12-09 17:43:40.694 +00:00 [INF] Content root path: /home/runner/workspace/Apps/Ashare.Api
+2025-12-09 17:43:41.442 +00:00 [INF] Request starting HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/swagger/v1/swagger.json - null null
+2025-12-09 17:43:42.391 +00:00 [INF] Request finished HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 949.5645ms
+2025-12-09 17:43:45.619 +00:00 [INF] Starting cache warm-up at http://localhost:3000...
+2025-12-09 17:43:45.651 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:3000/api/listings?limit=50 - null null
+2025-12-09 17:43:45.651 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:3000/api/listings/featured?limit=10 - null null
+2025-12-09 17:43:45.652 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:3000/api/listings/new?limit=10 - null null
+2025-12-09 17:43:45.659 +00:00 [WRN] Failed to determine the https port for redirect.
+2025-12-09 17:43:45.682 +00:00 [INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetAll (ACommerce.Catalog.Listings.Api)'
+2025-12-09 17:43:45.682 +00:00 [INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+2025-12-09 17:43:45.682 +00:00 [INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+2025-12-09 17:43:45.697 +00:00 [INF] Route matched with {action = "GetFeatured", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetFeatured(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+2025-12-09 17:43:45.697 +00:00 [INF] Route matched with {action = "GetNew", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetNew(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+2025-12-09 17:43:45.697 +00:00 [INF] Route matched with {action = "GetAll", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetAll(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+2025-12-09 17:43:45.700 +00:00 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2025-12-09 17:43:45.700 +00:00 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2025-12-09 17:43:45.700 +00:00 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2025-12-09 17:43:45.713 +00:00 [INF] [START] SmartSearchQuery`2 (4f369643-a710-40ac-be7e-c961a5da8666)
+2025-12-09 17:43:45.713 +00:00 [INF] [START] SmartSearchQuery`2 (c7d2bef1-50db-47de-b025-9dffa7b638d8)
+2025-12-09 17:43:45.713 +00:00 [INF] [START] SmartSearchQuery`2 (cfd59693-5076-420e-8cfe-f78a9e55e4cd)
+2025-12-09 17:43:45.717 +00:00 [INF] Using SQL Server database
+2025-12-09 17:43:45.717 +00:00 [INF] Using SQL Server database
+2025-12-09 17:43:45.717 +00:00 [INF] Using SQL Server database
+2025-12-09 17:43:46.101 +00:00 [WRN] You do not have a valid license key for the Lucky Penny software AutoMapper. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2025-12-09 17:43:46.144 +00:00 [ERR] [ERROR] SmartSearchQuery`2 (4f369643-a710-40ac-be7e-c961a5da8666) failed after 430ms
+System.ArgumentException: Format of the initialization string does not conform to specification starting at index 0.
+   at System.Data.Common.DbConnectionOptions.GetKeyValuePair(String connectionString, Int32 currentPosition, StringBuilder buffer, Boolean useOdbcRules, String& keyname, String& keyvalue)
+   at System.Data.Common.DbConnectionOptions.ParseInternal(Dictionary`2 parsetable, String connectionString, Boolean buildChain, Dictionary`2 synonyms, Boolean firstKey)
+   at System.Data.Common.DbConnectionOptions..ctor(String connectionString, Dictionary`2 synonyms, Boolean useOdbcRules)
+   at System.Data.Common.DbConnectionStringBuilder.set_ConnectionString(String value)
+   at Microsoft.Data.SqlClient.SqlConnectionStringBuilder..ctor(String connectionString)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerConnection.<>c.<get_IsMultipleActiveResultSetsEnabled>b__7_0(String cs)
+   at System.Collections.Concurrent.ConcurrentDictionary`2.GetOrAdd(TKey key, Func`2 valueFactory)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerConnection.get_IsMultipleActiveResultSetsEnabled()
+   at Microsoft.EntityFrameworkCore.SqlServer.Query.Internal.SqlServerCompiledQueryCacheKeyGenerator.GenerateCacheKey(Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteCore[TResult](Expression query, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.CountAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at ACommerce.SharedKernel.Infrastructure.EFCore.Repositories.BaseAsyncRepository`1.SmartSearchAsync(SmartSearchRequest request, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.Infrastructure.EFCores/Repositories/BaseAsyncRepository.cs:line 213
+   at ACommerce.SharedKernel.CQRS.Handlers.SmartSearchQueryHandler`2.Handle(SmartSearchQuery`2 request, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Handlers/SmartSearchQueryHandler.cs:line 47
+   at ACommerce.SharedKernel.CQRS.Behaviors.PerformanceBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/PerformanceBehavior.cs:line 29
+   at ACommerce.SharedKernel.CQRS.Behaviors.ValidationBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/ValidationBehavior.cs:line 31
+   at ACommerce.SharedKernel.CQRS.Behaviors.LoggingBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/LoggingBehavior.cs:line 37
+2025-12-09 17:43:46.144 +00:00 [ERR] [ERROR] SmartSearchQuery`2 (c7d2bef1-50db-47de-b025-9dffa7b638d8) failed after 430ms
+System.ArgumentException: Format of the initialization string does not conform to specification starting at index 0.
+   at System.Data.Common.DbConnectionOptions.GetKeyValuePair(String connectionString, Int32 currentPosition, StringBuilder buffer, Boolean useOdbcRules, String& keyname, String& keyvalue)
+   at System.Data.Common.DbConnectionOptions.ParseInternal(Dictionary`2 parsetable, String connectionString, Boolean buildChain, Dictionary`2 synonyms, Boolean firstKey)
+   at System.Data.Common.DbConnectionOptions..ctor(String connectionString, Dictionary`2 synonyms, Boolean useOdbcRules)
+   at System.Data.Common.DbConnectionStringBuilder.set_ConnectionString(String value)
+   at Microsoft.Data.SqlClient.SqlConnectionStringBuilder..ctor(String connectionString)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerConnection.<>c.<get_IsMultipleActiveResultSetsEnabled>b__7_0(String cs)
+   at System.Collections.Concurrent.ConcurrentDictionary`2.GetOrAdd(TKey key, Func`2 valueFactory)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerConnection.get_IsMultipleActiveResultSetsEnabled()
+   at Microsoft.EntityFrameworkCore.SqlServer.Query.Internal.SqlServerCompiledQueryCacheKeyGenerator.GenerateCacheKey(Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteCore[TResult](Expression query, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.CountAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at ACommerce.SharedKernel.Infrastructure.EFCore.Repositories.BaseAsyncRepository`1.SmartSearchAsync(SmartSearchRequest request, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.Infrastructure.EFCores/Repositories/BaseAsyncRepository.cs:line 213
+   at ACommerce.SharedKernel.CQRS.Handlers.SmartSearchQueryHandler`2.Handle(SmartSearchQuery`2 request, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Handlers/SmartSearchQueryHandler.cs:line 47
+   at ACommerce.SharedKernel.CQRS.Behaviors.PerformanceBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/PerformanceBehavior.cs:line 29
+   at ACommerce.SharedKernel.CQRS.Behaviors.ValidationBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/ValidationBehavior.cs:line 31
+   at ACommerce.SharedKernel.CQRS.Behaviors.LoggingBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/LoggingBehavior.cs:line 37
+2025-12-09 17:43:46.149 +00:00 [ERR] Error getting new listings
+System.ArgumentException: Format of the initialization string does not conform to specification starting at index 0.
+   at System.Data.Common.DbConnectionOptions.GetKeyValuePair(String connectionString, Int32 currentPosition, StringBuilder buffer, Boolean useOdbcRules, String& keyname, String& keyvalue)
+   at System.Data.Common.DbConnectionOptions.ParseInternal(Dictionary`2 parsetable, String connectionString, Boolean buildChain, Dictionary`2 synonyms, Boolean firstKey)
+   at System.Data.Common.DbConnectionOptions..ctor(String connectionString, Dictionary`2 synonyms, Boolean useOdbcRules)
+   at System.Data.Common.DbConnectionStringBuilder.set_ConnectionString(String value)
+   at Microsoft.Data.SqlClient.SqlConnectionStringBuilder..ctor(String connectionString)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerConnection.<>c.<get_IsMultipleActiveResultSetsEnabled>b__7_0(String cs)
+   at System.Collections.Concurrent.ConcurrentDictionary`2.GetOrAdd(TKey key, Func`2 valueFactory)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerConnection.get_IsMultipleActiveResultSetsEnabled()
+   at Microsoft.EntityFrameworkCore.SqlServer.Query.Internal.SqlServerCompiledQueryCacheKeyGenerator.GenerateCacheKey(Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteCore[TResult](Expression query, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.CountAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at ACommerce.SharedKernel.Infrastructure.EFCore.Repositories.BaseAsyncRepository`1.SmartSearchAsync(SmartSearchRequest request, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.Infrastructure.EFCores/Repositories/BaseAsyncRepository.cs:line 213
+   at ACommerce.SharedKernel.CQRS.Handlers.SmartSearchQueryHandler`2.Handle(SmartSearchQuery`2 request, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Handlers/SmartSearchQueryHandler.cs:line 47
+   at ACommerce.SharedKernel.CQRS.Behaviors.PerformanceBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/PerformanceBehavior.cs:line 29
+   at ACommerce.SharedKernel.CQRS.Behaviors.ValidationBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/ValidationBehavior.cs:line 31
+   at ACommerce.SharedKernel.CQRS.Behaviors.LoggingBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/LoggingBehavior.cs:line 37
+   at ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew(Int32 limit) in /home/runner/workspace/Catalog/ACommerce.Catalog.Listings.Api/Controllers/ProductListingsController.cs:line 194
+2025-12-09 17:43:46.144 +00:00 [ERR] [ERROR] SmartSearchQuery`2 (cfd59693-5076-420e-8cfe-f78a9e55e4cd) failed after 430ms
+System.ArgumentException: Format of the initialization string does not conform to specification starting at index 0.
+   at System.Data.Common.DbConnectionOptions.GetKeyValuePair(String connectionString, Int32 currentPosition, StringBuilder buffer, Boolean useOdbcRules, String& keyname, String& keyvalue)
+   at System.Data.Common.DbConnectionOptions.ParseInternal(Dictionary`2 parsetable, String connectionString, Boolean buildChain, Dictionary`2 synonyms, Boolean firstKey)
+   at System.Data.Common.DbConnectionOptions..ctor(String connectionString, Dictionary`2 synonyms, Boolean useOdbcRules)
+   at System.Data.Common.DbConnectionStringBuilder.set_ConnectionString(String value)
+   at Microsoft.Data.SqlClient.SqlConnectionStringBuilder..ctor(String connectionString)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerConnection.<>c.<get_IsMultipleActiveResultSetsEnabled>b__7_0(String cs)
+   at System.Collections.Concurrent.ConcurrentDictionary`2.GetOrAdd(TKey key, Func`2 valueFactory)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerConnection.get_IsMultipleActiveResultSetsEnabled()
+   at Microsoft.EntityFrameworkCore.SqlServer.Query.Internal.SqlServerCompiledQueryCacheKeyGenerator.GenerateCacheKey(Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteCore[TResult](Expression query, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.CountAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at ACommerce.SharedKernel.Infrastructure.EFCore.Repositories.BaseAsyncRepository`1.SmartSearchAsync(SmartSearchRequest request, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.Infrastructure.EFCores/Repositories/BaseAsyncRepository.cs:line 213
+   at ACommerce.SharedKernel.CQRS.Handlers.SmartSearchQueryHandler`2.Handle(SmartSearchQuery`2 request, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Handlers/SmartSearchQueryHandler.cs:line 47
+   at ACommerce.SharedKernel.CQRS.Behaviors.PerformanceBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/PerformanceBehavior.cs:line 29
+   at ACommerce.SharedKernel.CQRS.Behaviors.ValidationBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/ValidationBehavior.cs:line 31
+   at ACommerce.SharedKernel.CQRS.Behaviors.LoggingBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/LoggingBehavior.cs:line 37
+2025-12-09 17:43:46.149 +00:00 [ERR] Error getting featured listings
+System.ArgumentException: Format of the initialization string does not conform to specification starting at index 0.
+   at System.Data.Common.DbConnectionOptions.GetKeyValuePair(String connectionString, Int32 currentPosition, StringBuilder buffer, Boolean useOdbcRules, String& keyname, String& keyvalue)
+   at System.Data.Common.DbConnectionOptions.ParseInternal(Dictionary`2 parsetable, String connectionString, Boolean buildChain, Dictionary`2 synonyms, Boolean firstKey)
+   at System.Data.Common.DbConnectionOptions..ctor(String connectionString, Dictionary`2 synonyms, Boolean useOdbcRules)
+   at System.Data.Common.DbConnectionStringBuilder.set_ConnectionString(String value)
+   at Microsoft.Data.SqlClient.SqlConnectionStringBuilder..ctor(String connectionString)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerConnection.<>c.<get_IsMultipleActiveResultSetsEnabled>b__7_0(String cs)
+   at System.Collections.Concurrent.ConcurrentDictionary`2.GetOrAdd(TKey key, Func`2 valueFactory)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerConnection.get_IsMultipleActiveResultSetsEnabled()
+   at Microsoft.EntityFrameworkCore.SqlServer.Query.Internal.SqlServerCompiledQueryCacheKeyGenerator.GenerateCacheKey(Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteCore[TResult](Expression query, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.CountAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at ACommerce.SharedKernel.Infrastructure.EFCore.Repositories.BaseAsyncRepository`1.SmartSearchAsync(SmartSearchRequest request, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.Infrastructure.EFCores/Repositories/BaseAsyncRepository.cs:line 213
+   at ACommerce.SharedKernel.CQRS.Handlers.SmartSearchQueryHandler`2.Handle(SmartSearchQuery`2 request, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Handlers/SmartSearchQueryHandler.cs:line 47
+   at ACommerce.SharedKernel.CQRS.Behaviors.PerformanceBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/PerformanceBehavior.cs:line 29
+   at ACommerce.SharedKernel.CQRS.Behaviors.ValidationBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/ValidationBehavior.cs:line 31
+   at ACommerce.SharedKernel.CQRS.Behaviors.LoggingBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/LoggingBehavior.cs:line 37
+   at ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured(Int32 limit) in /home/runner/workspace/Catalog/ACommerce.Catalog.Listings.Api/Controllers/ProductListingsController.cs:line 137
+2025-12-09 17:43:46.152 +00:00 [ERR] Error getting all listings
+System.ArgumentException: Format of the initialization string does not conform to specification starting at index 0.
+   at System.Data.Common.DbConnectionOptions.GetKeyValuePair(String connectionString, Int32 currentPosition, StringBuilder buffer, Boolean useOdbcRules, String& keyname, String& keyvalue)
+   at System.Data.Common.DbConnectionOptions.ParseInternal(Dictionary`2 parsetable, String connectionString, Boolean buildChain, Dictionary`2 synonyms, Boolean firstKey)
+   at System.Data.Common.DbConnectionOptions..ctor(String connectionString, Dictionary`2 synonyms, Boolean useOdbcRules)
+   at System.Data.Common.DbConnectionStringBuilder.set_ConnectionString(String value)
+   at Microsoft.Data.SqlClient.SqlConnectionStringBuilder..ctor(String connectionString)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerConnection.<>c.<get_IsMultipleActiveResultSetsEnabled>b__7_0(String cs)
+   at System.Collections.Concurrent.ConcurrentDictionary`2.GetOrAdd(TKey key, Func`2 valueFactory)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerConnection.get_IsMultipleActiveResultSetsEnabled()
+   at Microsoft.EntityFrameworkCore.SqlServer.Query.Internal.SqlServerCompiledQueryCacheKeyGenerator.GenerateCacheKey(Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteCore[TResult](Expression query, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.CountAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at ACommerce.SharedKernel.Infrastructure.EFCore.Repositories.BaseAsyncRepository`1.SmartSearchAsync(SmartSearchRequest request, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.Infrastructure.EFCores/Repositories/BaseAsyncRepository.cs:line 213
+   at ACommerce.SharedKernel.CQRS.Handlers.SmartSearchQueryHandler`2.Handle(SmartSearchQuery`2 request, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Handlers/SmartSearchQueryHandler.cs:line 47
+   at ACommerce.SharedKernel.CQRS.Behaviors.PerformanceBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/PerformanceBehavior.cs:line 29
+   at ACommerce.SharedKernel.CQRS.Behaviors.ValidationBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/ValidationBehavior.cs:line 31
+   at ACommerce.SharedKernel.CQRS.Behaviors.LoggingBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/LoggingBehavior.cs:line 37
+   at ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetAll(Int32 limit) in /home/runner/workspace/Catalog/ACommerce.Catalog.Listings.Api/Controllers/ProductListingsController.cs:line 80
+2025-12-09 17:43:46.153 +00:00 [INF] Executing ObjectResult, writing value of type '<>f__AnonymousType0`2[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-12-09 17:43:46.153 +00:00 [INF] Executing ObjectResult, writing value of type '<>f__AnonymousType0`2[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-12-09 17:43:46.153 +00:00 [INF] Executing ObjectResult, writing value of type '<>f__AnonymousType0`2[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-12-09 17:43:46.166 +00:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetAll (ACommerce.Catalog.Listings.Api) in 466.3436ms
+2025-12-09 17:43:46.169 +00:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api) in 465.1045ms
+2025-12-09 17:43:46.169 +00:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api) in 466.4616ms
+2025-12-09 17:43:46.171 +00:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetAll (ACommerce.Catalog.Listings.Api)'
+2025-12-09 17:43:46.171 +00:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+2025-12-09 17:43:46.171 +00:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+2025-12-09 17:43:46.174 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:3000/api/listings?limit=50 - 500 null application/json; charset=utf-8 522.6953ms
+2025-12-09 17:43:46.174 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:3000/api/listings/featured?limit=10 - 500 null application/json; charset=utf-8 522.9095ms
+2025-12-09 17:43:46.174 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:3000/api/listings/new?limit=10 - 500 null application/json; charset=utf-8 521.6446ms
+2025-12-09 17:43:46.175 +00:00 [WRN] Failed to warm up New cache
+System.Net.Http.HttpRequestException: Response status code does not indicate success: 500 (Internal Server Error).
+   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at System.Net.Http.HttpClient.GetStringAsyncCore(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Ashare.Api.Services.CacheWarmupService.WarmUpEndpoint(HttpClient client, String url, String name, CancellationToken ct) in /home/runner/workspace/Apps/Ashare.Api/Services/CacheWarmupService.cs:line 53
+2025-12-09 17:43:46.175 +00:00 [WRN] Failed to warm up Featured cache
+System.Net.Http.HttpRequestException: Response status code does not indicate success: 500 (Internal Server Error).
+   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at System.Net.Http.HttpClient.GetStringAsyncCore(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Ashare.Api.Services.CacheWarmupService.WarmUpEndpoint(HttpClient client, String url, String name, CancellationToken ct) in /home/runner/workspace/Apps/Ashare.Api/Services/CacheWarmupService.cs:line 53
+2025-12-09 17:43:46.175 +00:00 [WRN] Failed to warm up All cache
+System.Net.Http.HttpRequestException: Response status code does not indicate success: 500 (Internal Server Error).
+   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at System.Net.Http.HttpClient.GetStringAsyncCore(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Ashare.Api.Services.CacheWarmupService.WarmUpEndpoint(HttpClient client, String url, String name, CancellationToken ct) in /home/runner/workspace/Apps/Ashare.Api/Services/CacheWarmupService.cs:line 53
+2025-12-09 17:43:46.179 +00:00 [INF] Cache warm-up completed successfully!
+2025-12-09 17:44:10.131 +00:00 [INF] Request starting HTTP/1.1 POST http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/api/catalog/attribute-definitions/search - application/json 2
+2025-12-09 17:44:10.134 +00:00 [INF] CORS policy execution failed.
+2025-12-09 17:44:10.135 +00:00 [INF] Request origin https://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev:3000 does not have permission to access the resource.
+2025-12-09 17:44:10.137 +00:00 [INF] Executing endpoint 'ACommerce.Catalog.Attributes.Api.Controllers.AttributeDefinitionsController.Search (ACommerce.Catalog.Attributes.Api)'
+2025-12-09 17:44:10.140 +00:00 [INF] Route matched with {action = "Search", controller = "AttributeDefinitions"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[ACommerce.SharedKernel.Abstractions.Queries.PagedResult`1[ACommerce.Catalog.Attributes.DTOs.AttributeDefinition.AttributeDefinitionResponseDto]]] Search(ACommerce.SharedKernel.Abstractions.Queries.SmartSearchRequest) on controller ACommerce.Catalog.Attributes.Api.Controllers.AttributeDefinitionsController (ACommerce.Catalog.Attributes.Api).
+2025-12-09 17:44:10.159 +00:00 [INF] [START] SmartSearchQuery`2 (87166a08-b8f7-42c1-862f-915e6ca868e7)
+2025-12-09 17:44:10.162 +00:00 [INF] Using SQL Server database
+2025-12-09 17:44:10.222 +00:00 [ERR] [ERROR] SmartSearchQuery`2 (87166a08-b8f7-42c1-862f-915e6ca868e7) failed after 62ms
+System.ArgumentException: Format of the initialization string does not conform to specification starting at index 0.
+   at System.Data.Common.DbConnectionOptions.GetKeyValuePair(String connectionString, Int32 currentPosition, StringBuilder buffer, Boolean useOdbcRules, String& keyname, String& keyvalue)
+   at System.Data.Common.DbConnectionOptions.ParseInternal(Dictionary`2 parsetable, String connectionString, Boolean buildChain, Dictionary`2 synonyms, Boolean firstKey)
+   at System.Data.Common.DbConnectionOptions..ctor(String connectionString, Dictionary`2 synonyms, Boolean useOdbcRules)
+   at System.Data.Common.DbConnectionStringBuilder.set_ConnectionString(String value)
+   at Microsoft.Data.SqlClient.SqlConnectionStringBuilder..ctor(String connectionString)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerConnection.<>c.<get_IsMultipleActiveResultSetsEnabled>b__7_0(String cs)
+   at System.Collections.Concurrent.ConcurrentDictionary`2.GetOrAdd(TKey key, Func`2 valueFactory)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerConnection.get_IsMultipleActiveResultSetsEnabled()
+   at Microsoft.EntityFrameworkCore.SqlServer.Query.Internal.SqlServerCompiledQueryCacheKeyGenerator.GenerateCacheKey(Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteCore[TResult](Expression query, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.CountAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at ACommerce.SharedKernel.Infrastructure.EFCore.Repositories.BaseAsyncRepository`1.SmartSearchAsync(SmartSearchRequest request, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.Infrastructure.EFCores/Repositories/BaseAsyncRepository.cs:line 213
+   at ACommerce.SharedKernel.CQRS.Handlers.SmartSearchQueryHandler`2.Handle(SmartSearchQuery`2 request, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Handlers/SmartSearchQueryHandler.cs:line 47
+   at ACommerce.SharedKernel.CQRS.Behaviors.PerformanceBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/PerformanceBehavior.cs:line 29
+   at ACommerce.SharedKernel.CQRS.Behaviors.ValidationBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/ValidationBehavior.cs:line 31
+   at ACommerce.SharedKernel.CQRS.Behaviors.LoggingBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/LoggingBehavior.cs:line 37
+2025-12-09 17:44:10.224 +00:00 [ERR] Error searching AttributeDefinition
+System.ArgumentException: Format of the initialization string does not conform to specification starting at index 0.
+   at System.Data.Common.DbConnectionOptions.GetKeyValuePair(String connectionString, Int32 currentPosition, StringBuilder buffer, Boolean useOdbcRules, String& keyname, String& keyvalue)
+   at System.Data.Common.DbConnectionOptions.ParseInternal(Dictionary`2 parsetable, String connectionString, Boolean buildChain, Dictionary`2 synonyms, Boolean firstKey)
+   at System.Data.Common.DbConnectionOptions..ctor(String connectionString, Dictionary`2 synonyms, Boolean useOdbcRules)
+   at System.Data.Common.DbConnectionStringBuilder.set_ConnectionString(String value)
+   at Microsoft.Data.SqlClient.SqlConnectionStringBuilder..ctor(String connectionString)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerConnection.<>c.<get_IsMultipleActiveResultSetsEnabled>b__7_0(String cs)
+   at System.Collections.Concurrent.ConcurrentDictionary`2.GetOrAdd(TKey key, Func`2 valueFactory)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerConnection.get_IsMultipleActiveResultSetsEnabled()
+   at Microsoft.EntityFrameworkCore.SqlServer.Query.Internal.SqlServerCompiledQueryCacheKeyGenerator.GenerateCacheKey(Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteCore[TResult](Expression query, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.CountAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at ACommerce.SharedKernel.Infrastructure.EFCore.Repositories.BaseAsyncRepository`1.SmartSearchAsync(SmartSearchRequest request, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.Infrastructure.EFCores/Repositories/BaseAsyncRepository.cs:line 213
+   at ACommerce.SharedKernel.CQRS.Handlers.SmartSearchQueryHandler`2.Handle(SmartSearchQuery`2 request, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Handlers/SmartSearchQueryHandler.cs:line 47
+   at ACommerce.SharedKernel.CQRS.Behaviors.PerformanceBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/PerformanceBehavior.cs:line 29
+   at ACommerce.SharedKernel.CQRS.Behaviors.ValidationBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/ValidationBehavior.cs:line 31
+   at ACommerce.SharedKernel.CQRS.Behaviors.LoggingBehavior`2.Handle(TRequest request, RequestHandlerDelegate`1 next, CancellationToken cancellationToken) in /home/runner/workspace/Core/ACommerce.SharedKernel.CQRS/Behaviors/LoggingBehavior.cs:line 37
+   at ACommerce.SharedKernel.AspNetCore.Controllers.BaseCrudController`5.Search(SmartSearchRequest request) in /home/runner/workspace/AspNetCore/ACommerce.SharedKernel.AspNetCore/Controllers/BaseCrudController.cs:line 102
+2025-12-09 17:44:10.232 +00:00 [INF] Executing ObjectResult, writing value of type '<>f__AnonymousType3`2[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-12-09 17:44:10.234 +00:00 [INF] Executed action ACommerce.Catalog.Attributes.Api.Controllers.AttributeDefinitionsController.Search (ACommerce.Catalog.Attributes.Api) in 93.0474ms
+2025-12-09 17:44:10.234 +00:00 [INF] Executed endpoint 'ACommerce.Catalog.Attributes.Api.Controllers.AttributeDefinitionsController.Search (ACommerce.Catalog.Attributes.Api)'
+2025-12-09 17:44:10.234 +00:00 [INF] Request finished HTTP/1.1 POST http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/api/catalog/attribute-definitions/search - 500 null application/json; charset=utf-8 103.6436ms
