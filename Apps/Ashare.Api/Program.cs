@@ -121,7 +121,9 @@ try
     builder.Services.AddEndpointsApiExplorer();
 
     // Database - Auto-detect provider from connection string
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    // First check environment variable, then fall back to config
+    var connectionString = Environment.GetEnvironmentVariable("GOOGLE_SQL_CONNECTION_STRING") 
+        ?? builder.Configuration.GetConnectionString("DefaultConnection");
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
     {
         if (string.IsNullOrEmpty(connectionString) || connectionString.Contains("Data Source="))
