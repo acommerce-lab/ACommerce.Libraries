@@ -173,6 +173,14 @@ else
     [SupplyParameterFromQuery]
     public bool? Success { get; set; }
 
+    [SupplyParameterFromQuery(Name = "payment_failed")]
+    public bool? PaymentFailed { get; set; }
+
+    [SupplyParameterFromQuery]
+    public string? Error { get; set; }
+
+    private string? _paymentErrorMessage;
+
     protected override async Task OnInitializedAsync()
     {
         var token = await TokenManager.GetTokenAsync();
@@ -188,6 +196,66 @@ else
             {
                 await CheckAndCreatePendingListing();
             }
+            // التحقق من فشل الدفع - عرض رسالة وإعادة عرض البيانات المحفوظة
+            else if (PaymentFailed == true)
+            {
+                await HandlePaymentFailure();
+            }
+        }
+    }
+
+    private async Task HandlePaymentFailure()
+    {
+        _paymentErrorMessage = Error ?? L["PaymentFailedRetry"];
+        
+        // استعادة البيانات المعلقة وعرضها للمستخدم
+        var pendingData = await PendingListingService.GetPendingListingAsync();
+        if (pendingData != null)
+        {
+            Console.WriteLine("[CreateListing] Payment failed, restoring pending listing data...");
+            
+            // إعادة تعيين البيانات للنموذج
+            _pendingModel = new CreateListingModel
+            {
+                CategoryId = pendingData.CategoryId,
+                Title = pendingData.Title,
+                Description = pendingData.Description,
+                Images = pendingData.Images,
+                Latitude = pendingData.Latitude,
+                Longitude = pendingData.Longitude,
+                Address = pendingData.Address
+            };
+            
+            // عرض sheet الاشتراك مباشرة مع رسالة الخطأ
+            _subscriptionCheckResult = new CanAddListingResult
+            {
+                CanAdd = false,
+                SubscriptionRequired = true,
+                Reason = L["PaymentFailedSelectPlan"]
+            };
+            _showSubscriptionSheet = true;
+            _showPlansInSheet = true;
+            await LoadPlansForSheet();
+        }
+        
+        StateHasChanged();
+    }
+
+    private async Task LoadPlansForSheet()
+    {
+        _isLoadingPlans = true;
+        try
+        {
+            _availablePlans = await SubscriptionClient.GetPlansAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading plans: {ex.Message}");
+            _availablePlans = new List<SubscriptionPlanDto>();
+        }
+        finally
+        {
+            _isLoadingPlans = false;
         }
     }
 

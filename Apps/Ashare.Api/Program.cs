@@ -388,10 +388,18 @@ Built using ACommerce libraries with configuration-first approach:
         Log.Information("Ensuring database is created...");
         await dbContext.Database.EnsureCreatedAsync();
 
-        // Seed data
-        Log.Information("Seeding initial data...");
-        var seedService = scope.ServiceProvider.GetRequiredService<AshareSeedDataService>();
-        await seedService.SeedAsync();
+        // Seed data (يمكن تعطيله عبر متغير البيئة SKIP_SEEDING=true)
+        var skipSeeding = Environment.GetEnvironmentVariable("SKIP_SEEDING")?.ToLower() == "true";
+        if (!skipSeeding)
+        {
+            Log.Information("Seeding initial data...");
+            var seedService = scope.ServiceProvider.GetRequiredService<AshareSeedDataService>();
+            await seedService.SeedAsync();
+        }
+        else
+        {
+            Log.Information("⏭️ Skipping seed data (SKIP_SEEDING=true)");
+        }
 
         Log.Information("Database ready with seed data!");
 

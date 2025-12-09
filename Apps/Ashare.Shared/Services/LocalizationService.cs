@@ -492,6 +492,8 @@ public class LocalizationService : ILocalizationService
         ["PaymentInitError"] = "تعذر بدء عملية الدفع. يرجى المحاولة مرة أخرى.",
         ["PaymentConnectionError"] = "حدث خطأ في الاتصال. تحقق من اتصالك بالإنترنت وحاول مرة أخرى.",
         ["PlanNotFound"] = "الباقة غير موجودة",
+        ["PaymentFailedRetry"] = "فشلت عملية الدفع، يرجى المحاولة مرة أخرى",
+        ["PaymentFailedSelectPlan"] = "فشلت عملية الدفع، اختر باقة للمتابعة",
     };
 
     // ═══════════════════════════════════════════════════════════════════
@@ -845,6 +847,8 @@ public class LocalizationService : ILocalizationService
         ["PaymentInitError"] = "Unable to initialize payment. Please try again.",
         ["PaymentConnectionError"] = "Connection error. Please check your internet and try again.",
         ["PlanNotFound"] = "Plan not found",
+        ["PaymentFailedRetry"] = "Payment failed, please try again",
+        ["PaymentFailedSelectPlan"] = "Payment failed, select a plan to continue",
     };
 
     // ═══════════════════════════════════════════════════════════════════
@@ -935,5 +939,9 @@ public class LocalizationService : ILocalizationService
         ["Language"] = "زبان",
         ["Help"] = "مدد",
         ["About"] = "عشیر کے بارے میں",
+
+        // Payment
+        ["PaymentFailedRetry"] = "ادائیگی ناکام ہوگئی، براہ کرم دوبارہ کوشش کریں",
+        ["PaymentFailedSelectPlan"] = "ادائیگی ناکام ہوگئی، جاری رکھنے کے لیے پلان منتخب کریں",
     };
 }

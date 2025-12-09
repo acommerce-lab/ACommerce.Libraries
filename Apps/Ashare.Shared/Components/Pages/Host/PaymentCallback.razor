@@ -208,9 +208,17 @@
         }
     }
 
-    private void RetryPayment()
+    private async Task RetryPayment()
     {
-        Navigation.NavigateTo("/host/plans");
+        // التحقق من وجود عرض معلق - العودة لصفحة إنشاء العرض مع إشارة للفشل
+        if (await PendingListingService.HasPendingListingAsync())
+        {
+            Navigation.NavigateTo("/create-listing?payment_failed=true");
+        }
+        else
+        {
+            Navigation.NavigateTo("/host/plans");
+        }
     }
 
     private void ContactSupport()
