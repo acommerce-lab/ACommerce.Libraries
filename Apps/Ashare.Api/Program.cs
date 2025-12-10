@@ -388,6 +388,10 @@ Built using ACommerce libraries with configuration-first approach:
         Log.Information("Ensuring database is created...");
         await dbContext.Database.EnsureCreatedAsync();
 
+        // إنشاء الفهارس إذا لم تكن موجودة (مهم للأداء)
+        Log.Information("Ensuring indexes exist...");
+        await EnsureIndexesAsync(dbContext);
+
         // Seed data (يمكن تعطيله عبر متغير البيئة SKIP_SEEDING=true)
         var skipSeeding = Environment.GetEnvironmentVariable("SKIP_SEEDING")?.ToLower() == "true";
         if (!skipSeeding)
@@ -519,4 +523,40 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
+}
+
+// دالة إنشاء الفهارس للأداء الأمثل
+static async Task EnsureIndexesAsync(ApplicationDbContext dbContext)
+{
+    var indexCommands = new[]
+    {
+        // فهارس جدول ProductListings
+        "CREATE INDEX IF NOT EXISTS \"IX_ProductListings_IsDeleted\" ON \"ProductListings\" (\"IsDeleted\")",
+        "CREATE INDEX IF NOT EXISTS \"IX_ProductListings_IsActive\" ON \"ProductListings\" (\"IsActive\")",
+        "CREATE INDEX IF NOT EXISTS \"IX_ProductListings_Status\" ON \"ProductListings\" (\"Status\")",
+        "CREATE INDEX IF NOT EXISTS \"IX_ProductListings_VendorId\" ON \"ProductListings\" (\"VendorId\")",
+        "CREATE INDEX IF NOT EXISTS \"IX_ProductListings_ProductId\" ON \"ProductListings\" (\"ProductId\")",
+        "CREATE INDEX IF NOT EXISTS \"IX_ProductListings_CategoryId\" ON \"ProductListings\" (\"CategoryId\")",
+        "CREATE INDEX IF NOT EXISTS \"IX_ProductListings_CreatedAt\" ON \"ProductListings\" (\"CreatedAt\")",
+        "CREATE INDEX IF NOT EXISTS \"IX_ProductListings_ViewCount\" ON \"ProductListings\" (\"ViewCount\")",
+        // فهارس مركبة للاستعلامات الشائعة
+        "CREATE INDEX IF NOT EXISTS \"IX_ProductListings_Composite_Status\" ON \"ProductListings\" (\"IsDeleted\", \"IsActive\", \"Status\", \"CreatedAt\")",
+        "CREATE INDEX IF NOT EXISTS \"IX_ProductListings_Composite_Views\" ON \"ProductListings\" (\"IsDeleted\", \"IsActive\", \"Status\", \"ViewCount\")",
+        "CREATE INDEX IF NOT EXISTS \"IX_ProductListings_Composite_Vendor\" ON \"ProductListings\" (\"VendorId\", \"IsDeleted\", \"IsActive\", \"CreatedAt\")",
+        "CREATE INDEX IF NOT EXISTS \"IX_ProductListings_Composite_Category\" ON \"ProductListings\" (\"CategoryId\", \"IsDeleted\", \"IsActive\", \"Status\", \"CreatedAt\")"
+    };
+
+    foreach (var command in indexCommands)
+    {
+        try
+        {
+            await dbContext.Database.ExecuteSqlRawAsync(command);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning("Index creation warning: {Message}", ex.Message);
+        }
+    }
+    
+    Log.Information("Database indexes ensured successfully");
 }
