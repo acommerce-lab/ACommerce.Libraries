@@ -4,6 +4,7 @@ expertMode = true
 
 [nix]
 channel = "stable-25_05"
+packages = ["google-cloud-sdk-gce"]
 
 [workflows]
 runButton = "Project"
@@ -52,6 +53,9 @@ externalPort = 3000
 [[ports]]
 localPort = 5000
 externalPort = 5000
+
+[[ports]]
+localPort = 8085
 
 [[ports]]
 localPort = 39879
