@@ -4,13 +4,12 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:${SHORT_SHA:-latest}'
+      - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:$BUILD_ID'
       - '-t'
       - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:latest'
       - '-f'
       - 'Apps/Ashare.Api/Dockerfile'
       - '.'
-    dir: '.'
 
   # Push to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
