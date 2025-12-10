@@ -1,0 +1,33 @@
+~/workspace$ git pull --rebase origin main
+From https://github.com/acommerce-lab/ACommerce.Libraries
+ * branch            main       -> FETCH_HEAD
+Auto-merging Apps/Ashare.Api/cloudbuild.yaml
+CONFLICT (content): Merge conflict in Apps/Ashare.Api/cloudbuild.yaml
+Auto-merging Apps/Ashare.Api/logs/ashare-20251209.txt
+CONFLICT (content): Merge conflict in Apps/Ashare.Api/logs/ashare-20251209.txt
+error: could not apply ac98e45... Update build configuration to use short SHA for image tagging
+hint: Resolve all conflicts manually, mark them as resolved with
+hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
+hint: You can instead skip this commit: run "git rebase --skip".
+hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
+hint: Disable this message with "git config set advice.mergeConflict false"
+Could not apply ac98e45... # Update build configuration to use short SHA for image tagging
+~/workspace$ git checkout --ours Apps/Ashare.Api/logs/ashare-20251209.txt
+git add Apps/Ashare.Api/logs/ashare-20251209.txt
+Updated 1 path from the index
+~/workspace$ git checkout --ours Apps/Ashare.Api/cloudbuild.yaml
+git add Apps/Ashare.Api/cloudbuild.yaml
+Updated 1 path from the index
+~/workspace$ git rebase --continue
+Auto-merging Apps/Ashare.Api/Dockerfile
+CONFLICT (content): Merge conflict in Apps/Ashare.Api/Dockerfile
+Auto-merging Apps/Ashare.Api/logs/ashare-20251209.txt
+CONFLICT (content): Merge conflict in Apps/Ashare.Api/logs/ashare-20251209.txt
+error: could not apply f86b6bf... Update Dockerfile to include all project dependencies for successful builds
+hint: Resolve all conflicts manually, mark them as resolved with
+hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
+hint: You can instead skip this commit: run "git rebase --skip".
+hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
+hint: Disable this message with "git config set advice.mergeConflict false"
+Could not apply f86b6bf... # Update Dockerfile to include all project dependencies for successful builds
+~/workspace$ 
