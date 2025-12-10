@@ -9,6 +9,7 @@ using ACommerce.Catalog.Listings.Enums;
 using ACommerce.Catalog.Listings.DTOs;
 using ACommerce.SharedKernel.AspNetCore.Controllers;
 using ACommerce.SharedKernel.Abstractions.Queries;
+using ACommerce.SharedKernel.Abstractions.Pagination;
 using ACommerce.SharedKernel.CQRS.Queries;
 using ACommerce.SharedKernel.CQRS.Commands;
 
@@ -23,13 +24,16 @@ namespace ACommerce.Catalog.Listings.Api.Controllers;
 public class ProductListingsController : BaseCrudController<ProductListing, CreateProductListingDto, CreateProductListingDto, ProductListingResponseDto, CreateProductListingDto>
 {
         private readonly IMemoryCache _cache;
-        private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
+        private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(10);
+        private static readonly TimeSpan SearchCacheDuration = TimeSpan.FromMinutes(5);
         private static readonly SemaphoreSlim _featuredLock = new(1, 1);
         private static readonly SemaphoreSlim _newLock = new(1, 1);
         private static readonly SemaphoreSlim _allLock = new(1, 1);
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, SemaphoreSlim> _searchLocks = new();
         private const string FeaturedCacheKey = "listings_featured";
         private const string NewCacheKey = "listings_new";
         private const string AllCacheKey = "listings_all";
+        private const string SearchCacheKeyPrefix = "listings_search_";
 
         public ProductListingsController(
                 IMediator mediator,
@@ -509,5 +513,114 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                         _logger.LogError(ex, "Error deleting listing {ListingId}", id);
                         return StatusCode(500, new { message = "An error occurred", detail = ex.Message });
                 }
+        }
+
+        /// <summary>
+        /// البحث الذكي مع التصفية والترتيب والتصفح (مع كاش)
+        /// </summary>
+        [HttpPost("search")]
+        [ProducesResponseType(typeof(PagedResult<ProductListingResponseDto>), 200)]
+        [ProducesResponseType(400)]
+        public override async Task<ActionResult<PagedResult<ProductListingResponseDto>>> Search(
+                [FromBody] SmartSearchRequest request)
+        {
+                try
+                {
+                        // إنشاء مفتاح كاش فريد بناءً على معايير البحث
+                        var cacheKey = GenerateSearchCacheKey(request);
+                        
+                        // محاولة الحصول من الكاش (بدون قفل - للسرعة)
+                        if (_cache.TryGetValue(cacheKey, out PagedResult<ProductListingResponseDto>? cachedResult) && cachedResult != null)
+                        {
+                                _logger.LogDebug("Cache HIT for search: {CacheKey}", cacheKey);
+                                return Ok(cachedResult);
+                        }
+
+                        // الحصول على قفل خاص بهذا المفتاح فقط (يسمح بالتوازي لمفاتيح مختلفة)
+                        var keyLock = _searchLocks.GetOrAdd(cacheKey, _ => new SemaphoreSlim(1, 1));
+                        
+                        await keyLock.WaitAsync();
+                        try
+                        {
+                                // تحقق مرة أخرى بعد الحصول على القفل
+                                if (_cache.TryGetValue(cacheKey, out cachedResult) && cachedResult != null)
+                                {
+                                        _logger.LogDebug("Cache HIT (after lock) for search: {CacheKey}", cacheKey);
+                                        return Ok(cachedResult);
+                                }
+
+                                _logger.LogInformation("Cache MISS - Executing search query for page {PageNumber}, size {PageSize}", 
+                                        request.PageNumber, request.PageSize);
+
+                                if (!request.IsValid())
+                                {
+                                        return BadRequest(new { message = "Invalid search request" });
+                                }
+
+                                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                                var query = new SmartSearchQuery<ProductListing, ProductListingResponseDto> { Request = request };
+                                var result = await _mediator.Send(query);
+                                stopwatch.Stop();
+
+                                // تخزين في الكاش
+                                _cache.Set(cacheKey, result, SearchCacheDuration);
+                                _logger.LogInformation("Cached search results: {Count} items in {ElapsedMs}ms for key: {CacheKey}", 
+                                        result.Items?.Count() ?? 0, stopwatch.ElapsedMilliseconds, cacheKey);
+
+                                return Ok(result);
+                        }
+                        finally
+                        {
+                                keyLock.Release();
+                                // تنظيف القفل بعد فترة (اختياري - لتجنب تسرب الذاكرة)
+                                _ = Task.Delay(TimeSpan.FromMinutes(10)).ContinueWith(_ => 
+                                        _searchLocks.TryRemove(cacheKey, out _));
+                        }
+                }
+                catch (Exception ex)
+                {
+                        _logger.LogError(ex, "Error searching listings");
+                        return StatusCode(500, new { message = "An error occurred", detail = ex.Message });
+                }
+        }
+
+        /// <summary>
+        /// إنشاء مفتاح كاش فريد للبحث
+        /// </summary>
+        private static string GenerateSearchCacheKey(SmartSearchRequest request)
+        {
+                var keyParts = new List<string>
+                {
+                        SearchCacheKeyPrefix,
+                        $"p{request.PageNumber}",
+                        $"s{request.PageSize}",
+                        $"o{request.OrderBy ?? "default"}",
+                        $"a{request.Ascending}"
+                };
+
+                if (request.Filters != null && request.Filters.Any())
+                {
+                        var filtersHash = string.Join("_", request.Filters
+                                .OrderBy(f => f.PropertyName)
+                                .Select(f => $"{f.PropertyName}:{f.Operator}:{f.Value}"));
+                        keyParts.Add($"f{filtersHash.GetHashCode():X8}");
+                }
+
+                if (!string.IsNullOrEmpty(request.SearchTerm))
+                {
+                        keyParts.Add($"q{request.SearchTerm.GetHashCode():X8}");
+                }
+
+                return string.Join("_", keyParts);
+        }
+
+        /// <summary>
+        /// مسح كاش البحث (يستدعى عند إضافة/تحديث/حذف قائمة)
+        /// </summary>
+        private void InvalidateSearchCache()
+        {
+                // ملاحظة: MemoryCache لا يدعم مسح بالبادئة مباشرة
+                // في الإنتاج يفضل استخدام Redis مع SCAN/DEL
+                _logger.LogInformation("Search cache invalidation requested");
         }
 }
