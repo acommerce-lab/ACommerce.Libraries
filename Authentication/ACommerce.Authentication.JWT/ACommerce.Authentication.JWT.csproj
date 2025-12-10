@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -7,7 +7,6 @@
     <Version>1.0.4</Version>
     <Authors>ACommerce</Authors>
     <Description># ACommerce.Authentication.Providers.JWT</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,4 +28,7 @@
     <ProjectReference Include="..\ACommerce.Authentication.Abstractions\ACommerce.Authentication.Abstractions.csproj" />
     <ProjectReference Include="..\ACommerce.Authentication.Users.Abstractions\ACommerce.Authentication.Users.Abstractions.csproj" />
   </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
 </Project>

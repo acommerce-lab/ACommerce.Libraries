@@ -1,29 +1,20 @@
 steps:
-  # Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
-      - '-t'
-      - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:$COMMIT_SHA'
+      - '--build-arg'
+      - 'ACOMMERCE_BUILD_MODE=CLOUD'
       - '-t'
       - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:latest'
       - '-f'
       - 'Apps/Ashare.Api/Dockerfile'
       - '.'
-    dir: '.'
-
-  # Push to Artifact Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'push'
-      - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:$COMMIT_SHA'
 
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
       - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:latest'
 
-  # Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
@@ -31,7 +22,7 @@ steps:
       - 'deploy'
       - 'ashare-api'
       - '--image'
-      - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:$COMMIT_SHA'
+      - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:latest'
       - '--region'
       - 'me-central1'
       - '--platform'
@@ -47,11 +38,13 @@ steps:
       - '0'
       - '--max-instances'
       - '10'
+      - '--timeout'
+      - '300s'
+      - '--cpu-boost'
       - '--set-env-vars'
       - 'SKIP_SEEDING=true,ASPNETCORE_ENVIRONMENT=Production'
 
 images:
-  - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:$COMMIT_SHA'
   - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:latest'
 
 options:
