@@ -1,0 +1,44 @@
+Your browser has been opened to visit:
+
+    https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=32555940559.apps.googleusercontent.com&redirect_uri=http%3A%2F%2Flocalhost%3A8085%2F&scope=openid+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fappengine.admin+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fsqlservice.login+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcompute+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Faccounts.reauth&state=UGYrAkiWFoHvXBKl3qklBKre2pZd0p&access_type=offline&code_challenge=P77ORkOVC_aZUjfZYU95m0YwAEzh41HuWqYZOmsG6gk&code_challenge_method=S256
+
+
+You are now logged in as [support@ashare.sa].
+Your current project is [asharesa].  You can change this setting by running:
+  $ gcloud config set project PROJECT_ID
+
+
+Updates are available for some Google Cloud CLI components.  To install them,
+please run:
+  $ gcloud components update
+
+WARNING: INVALID_ARGUMENT: Request contains an invalid argument.
+Are you sure you wish to set property [core/project] to YOUR_PROJECT_ID?
+
+Do you want to continue (Y/n)?  y
+
+ERROR: (gcloud.config.set) The project property must be set to a valid project ID, not the project name [YOUR_PROJECT_ID]
+To set your project, run:
+
+  $ gcloud config set project PROJECT_ID
+
+or to unset it, run:
+
+  $ gcloud config unset project
+WARNING: `docker` not in system PATH.
+`docker` and `docker-credential-gcloud` need to be in the same PATH in order to work correctly together.
+gcloud's Docker credential helper can be configured but it will not work until this is corrected.
+Adding credentials for: me-central1-docker.pkg.dev
+After update, the following will be written to your Docker config file located at [C:\Users\i\.docker\config.json]:
+ {
+  "credHelpers": {
+    "me-central1-docker.pkg.dev": "gcloud"
+  }
+}
+
+Do you want to continue (Y/n)?  y
+
+Docker configuration file updated.
+ERROR: (gcloud.builds.submit) Unable to read file [Apps/Ashare.Api/cloudbuild.yaml]: [Errno 2] No such file or directory: 'Apps/Ashare.Api/cloudbuild.yaml'
+PS C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Api>
+

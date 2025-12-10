@@ -1,0 +1,48 @@
+PS C:\Users\i\Source\Repos\ACommerce.Libraries> # احصل على رقم المشروع
+PS C:\Users\i\Source\Repos\ACommerce.Libraries> $projectNumber = gcloud projects describe ashareapi --format='value(projectNumber)'
+>>
+PS C:\Users\i\Source\Repos\ACommerce.Libraries>
+>>
+PS C:\Users\i\Source\Repos\ACommerce.Libraries> # أعطِ صلاحية لـ Cloud Build service account
+>>
+PS C:\Users\i\Source\Repos\ACommerce.Libraries> gcloud artifacts repositories add-iam-policy-binding ashare-repo `
+>>
+ERROR: (gcloud.artifacts.repositories.add-iam-policy-binding) argument --member --role: Must be specified.
+Usage: gcloud artifacts repositories add-iam-policy-binding (REPOSITORY : --location=LOCATION) --member=PRINCIPAL --role=ROLE [optional flags]
+  optional flags may be  --condition | --condition-from-file | --help |
+                         --location
+
+For detailed information on this command and its flags, run:
+  gcloud artifacts repositories add-iam-policy-binding --help
+PS C:\Users\i\Source\Repos\ACommerce.Libraries>   --location=me-central1 `
+>>
+At line:1 char:5
++   --location=me-central1 `
++     ~
+Missing expression after unary operator '--'.
+At line:1 char:5
++   --location=me-central1 `
++     ~~~~~~~~~~~~~~~~~~~~
+Unexpected token 'location=me-central1' in expression or statement.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : MissingExpressionAfterOperator
+
+PS C:\Users\i\Source\Repos\ACommerce.Libraries>   --member="serviceAccount:$projectNumber@cloudbuild.gserviceaccount.com" `
+>>
+At line:1 char:5
++   --member="serviceAccount:$projectNumber@cloudbuild.gserviceaccount. ...
++     ~
+Missing expression after unary operator '--'.
+At line:1 char:5
++   --member="serviceAccount:$projectNumber@cloudbuild.gserviceaccount. ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Unexpected token 'member="serviceAccount:$projectNumber@cloudbuild.gserviceaccount.com"' in expression or statement.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : MissingExpressionAfterOperator
+
+PS C:\Users\i\Source\Repos\ACommerce.Libraries>   --role="roles/artifactregistry.writer" `
+>>
+At line:1 char:5
++   --role="roles/artifactregistry.writer" `
++     ~
+Missing expression after unary operator '--'.
