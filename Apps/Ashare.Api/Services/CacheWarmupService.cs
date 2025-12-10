@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using System.Text;
+using System.Text.Json;
 
 namespace Ashare.Api.Services;
 
@@ -27,13 +29,14 @@ public class CacheWarmupService : BackgroundService
             Log.Information("Starting cache warm-up at {BaseUrl}...", baseUrl);
             
             using var httpClient = new HttpClient();
-            httpClient.Timeout = TimeSpan.FromMinutes(5);
+            httpClient.Timeout = TimeSpan.FromMinutes(10);
             
-            var tasks = new[]
+            var tasks = new List<Task>
             {
                 WarmUpEndpoint(httpClient, $"{baseUrl}/api/listings/featured?limit=10", "Featured", stoppingToken),
                 WarmUpEndpoint(httpClient, $"{baseUrl}/api/listings/new?limit=10", "New", stoppingToken),
-                WarmUpEndpoint(httpClient, $"{baseUrl}/api/listings?limit=50", "All", stoppingToken)
+                WarmUpEndpoint(httpClient, $"{baseUrl}/api/listings?limit=50", "All", stoppingToken),
+                WarmUpSearchEndpoint(httpClient, baseUrl, stoppingToken)
             };
             
             await Task.WhenAll(tasks);
@@ -50,12 +53,48 @@ public class CacheWarmupService : BackgroundService
     {
         try
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             await client.GetStringAsync(url, ct);
-            Log.Information("{Name} listings cache warmed up", name);
+            stopwatch.Stop();
+            Log.Information("{Name} listings cache warmed up in {ElapsedMs}ms", name, stopwatch.ElapsedMilliseconds);
         }
         catch (Exception ex)
         {
             Log.Warning(ex, "Failed to warm up {Name} cache", name);
+        }
+    }
+    
+    private static async Task WarmUpSearchEndpoint(HttpClient client, string baseUrl, CancellationToken ct)
+    {
+        try
+        {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            
+            var searchRequest = new
+            {
+                pageNumber = 1,
+                pageSize = 50,
+                filters = new[]
+                {
+                    new { propertyName = "IsActive", value = true, @operator = "Equals" },
+                    new { propertyName = "Status", value = 1, @operator = "Equals" }
+                },
+                orderBy = "CreatedAt",
+                ascending = false
+            };
+            
+            var json = JsonSerializer.Serialize(searchRequest);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            
+            var response = await client.PostAsync($"{baseUrl}/api/listings/search", content, ct);
+            response.EnsureSuccessStatusCode();
+            
+            stopwatch.Stop();
+            Log.Information("Search listings cache warmed up in {ElapsedMs}ms", stopwatch.ElapsedMilliseconds);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Failed to warm up Search cache");
         }
     }
 }

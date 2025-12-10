@@ -543,20 +543,48 @@ static async Task EnsureIndexesAsync(ApplicationDbContext dbContext)
         "CREATE INDEX IF NOT EXISTS \"IX_ProductListings_Composite_Status\" ON \"ProductListings\" (\"IsDeleted\", \"IsActive\", \"Status\", \"CreatedAt\")",
         "CREATE INDEX IF NOT EXISTS \"IX_ProductListings_Composite_Views\" ON \"ProductListings\" (\"IsDeleted\", \"IsActive\", \"Status\", \"ViewCount\")",
         "CREATE INDEX IF NOT EXISTS \"IX_ProductListings_Composite_Vendor\" ON \"ProductListings\" (\"VendorId\", \"IsDeleted\", \"IsActive\", \"CreatedAt\")",
-        "CREATE INDEX IF NOT EXISTS \"IX_ProductListings_Composite_Category\" ON \"ProductListings\" (\"CategoryId\", \"IsDeleted\", \"IsActive\", \"Status\", \"CreatedAt\")"
+        "CREATE INDEX IF NOT EXISTS \"IX_ProductListings_Composite_Category\" ON \"ProductListings\" (\"CategoryId\", \"IsDeleted\", \"IsActive\", \"Status\", \"CreatedAt\")",
+        
+        // فهارس جدول AttributeValues (للبحث السريع في السمات)
+        "CREATE INDEX IF NOT EXISTS \"IX_AttributeValues_EntityId\" ON \"AttributeValues\" (\"EntityId\")",
+        "CREATE INDEX IF NOT EXISTS \"IX_AttributeValues_AttributeDefinitionId\" ON \"AttributeValues\" (\"AttributeDefinitionId\")",
+        "CREATE INDEX IF NOT EXISTS \"IX_AttributeValues_IsDeleted\" ON \"AttributeValues\" (\"IsDeleted\")",
+        "CREATE INDEX IF NOT EXISTS \"IX_AttributeValues_Composite\" ON \"AttributeValues\" (\"EntityId\", \"IsDeleted\")",
+        
+        // فهارس جدول Products
+        "CREATE INDEX IF NOT EXISTS \"IX_Products_IsDeleted\" ON \"Products\" (\"IsDeleted\")",
+        "CREATE INDEX IF NOT EXISTS \"IX_Products_CategoryId\" ON \"Products\" (\"CategoryId\")",
+        "CREATE INDEX IF NOT EXISTS \"IX_Products_CreatedAt\" ON \"Products\" (\"CreatedAt\")",
+        
+        // فهارس جدول ProductCategories
+        "CREATE INDEX IF NOT EXISTS \"IX_ProductCategories_IsDeleted\" ON \"ProductCategories\" (\"IsDeleted\")",
+        "CREATE INDEX IF NOT EXISTS \"IX_ProductCategories_ParentId\" ON \"ProductCategories\" (\"ParentId\")",
+        
+        // فهارس جدول Vendors
+        "CREATE INDEX IF NOT EXISTS \"IX_Vendors_IsDeleted\" ON \"Vendors\" (\"IsDeleted\")",
+        "CREATE INDEX IF NOT EXISTS \"IX_Vendors_ProfileId\" ON \"Vendors\" (\"ProfileId\")"
     };
 
+    var successCount = 0;
+    var skipCount = 0;
+    
     foreach (var command in indexCommands)
     {
         try
         {
             await dbContext.Database.ExecuteSqlRawAsync(command);
+            successCount++;
         }
         catch (Exception ex)
         {
-            Log.Warning("Index creation warning: {Message}", ex.Message);
+            // قد يفشل إذا الجدول غير موجود بعد - هذا طبيعي
+            if (!ex.Message.Contains("no such table") && !ex.Message.Contains("does not exist"))
+            {
+                Log.Warning("Index creation warning: {Message}", ex.Message);
+            }
+            skipCount++;
         }
     }
     
-    Log.Information("Database indexes ensured successfully");
+    Log.Information("Database indexes: {Success} created, {Skipped} skipped", successCount, skipCount);
 }
