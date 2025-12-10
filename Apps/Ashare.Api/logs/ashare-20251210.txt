@@ -1,0 +1,3 @@
+2025-12-10 00:19:30.292 +00:00 [WRN] As of ""2025-12-10T00:19:15.0350947+00:00"", the heartbeat has been running for ""00:00:01.5668799"" which is longer than ""00:00:01"". This could be caused by thread pool starvation.
+2025-12-10 00:29:58.213 +00:00 [WRN] As of ""2025-12-10T00:29:45.4952176+00:00"", the heartbeat has been running for ""00:00:06.2062117"" which is longer than ""00:00:01"". This could be caused by thread pool starvation.
+2025-12-10 00:30:32.991 +00:00 [WRN] As of ""2025-12-10T00:30:26.0503514+00:00"", the heartbeat has been running for ""00:00:01.0465053"" which is longer than ""00:00:01"". This could be caused by thread pool starvation.
