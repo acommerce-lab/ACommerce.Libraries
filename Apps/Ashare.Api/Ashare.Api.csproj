@@ -82,6 +82,7 @@
 
     <!-- Files -->
     <ProjectReference Include="..\..\Files\ACommerce.Files.Storage.Local\ACommerce.Files.Storage.Local.csproj" />
+    <ProjectReference Include="..\..\Files\ACommerce.Files.Storage.GoogleCloud\ACommerce.Files.Storage.GoogleCloud.csproj" />
     <ProjectReference Include="..\..\AspNetCore\ACommerce.Files.AspNetCore\ACommerce.Files.AspNetCore.csproj" />
 
     <!-- Payments -->

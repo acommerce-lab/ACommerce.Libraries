@@ -52,6 +52,7 @@ using ACommerce.Subscriptions.Services;
 using ACommerce.Payments.Api.Controllers;
 using ACommerce.Payments.Abstractions.Contracts;
 using ACommerce.Payments.Noon.Extensions;
+using ACommerce.Files.Storage.GoogleCloud.Extensions;
 using Ashare.Api.Middleware;
 using Microsoft.AspNetCore.SignalR;
 
@@ -218,6 +219,9 @@ try
 
     // Subscription Services
     builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+
+    // Google Cloud Storage (for image uploads)
+    builder.Services.AddGoogleCloudStorage(builder.Configuration);
 
     // Payment Provider (Noon) - مع استخدام HostSettings لبناء ReturnUrl تلقائياً
     var webBaseUrlForPayment = builder.Configuration["HostSettings:WebBaseUrl"] 
