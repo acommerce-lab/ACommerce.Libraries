@@ -20,6 +20,13 @@ public class MediaController : ControllerBase
         "image/webp"
     };
 
+    private static readonly HashSet<string> AllowedDirectories = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "listings",
+        "profiles",
+        "vendors"
+    };
+
     private const long MaxFileSizeBytes = 10 * 1024 * 1024;
 
     public MediaController(
@@ -50,10 +57,16 @@ public class MediaController : ControllerBase
             return BadRequest(new { error = $"Content type '{file.ContentType}' is not allowed. Allowed types: {string.Join(", ", AllowedContentTypes)}" });
         }
 
+        var safeDirectory = string.IsNullOrWhiteSpace(directory) ? "listings" : directory;
+        if (!AllowedDirectories.Contains(safeDirectory))
+        {
+            return BadRequest(new { error = $"Directory '{safeDirectory}' is not allowed. Allowed: {string.Join(", ", AllowedDirectories)}" });
+        }
+
         try
         {
             await using var stream = file.OpenReadStream();
-            var objectName = await _storageProvider.SaveAsync(stream, file.FileName, directory, cancellationToken);
+            var objectName = await _storageProvider.SaveAsync(stream, file.FileName, safeDirectory, cancellationToken);
             var publicUrl = await _storageProvider.GetPublicUrlAsync(objectName, cancellationToken);
 
             _logger.LogInformation("File uploaded successfully: {ObjectName}", objectName);
@@ -88,6 +101,12 @@ public class MediaController : ControllerBase
             return BadRequest(new { error = "Maximum 5 files allowed per request" });
         }
 
+        var safeDirectory = string.IsNullOrWhiteSpace(directory) ? "listings" : directory;
+        if (!AllowedDirectories.Contains(safeDirectory))
+        {
+            return BadRequest(new { error = $"Directory '{safeDirectory}' is not allowed. Allowed: {string.Join(", ", AllowedDirectories)}" });
+        }
+
         var results = new List<UploadResponse>();
         var errors = new List<string>();
 
@@ -114,7 +133,7 @@ public class MediaController : ControllerBase
             try
             {
                 await using var stream = file.OpenReadStream();
-                var objectName = await _storageProvider.SaveAsync(stream, file.FileName, directory, cancellationToken);
+                var objectName = await _storageProvider.SaveAsync(stream, file.FileName, safeDirectory, cancellationToken);
                 var publicUrl = await _storageProvider.GetPublicUrlAsync(objectName, cancellationToken);
 
                 results.Add(new UploadResponse
@@ -139,33 +158,6 @@ public class MediaController : ControllerBase
         });
     }
 
-    [HttpDelete("{*objectName}")]
-    [Authorize]
-    public async Task<IActionResult> Delete(string objectName, CancellationToken cancellationToken = default)
-    {
-        if (string.IsNullOrWhiteSpace(objectName))
-        {
-            return BadRequest(new { error = "Object name is required" });
-        }
-
-        try
-        {
-            var deleted = await _storageProvider.DeleteAsync(objectName, cancellationToken);
-            
-            if (!deleted)
-            {
-                return NotFound(new { error = "File not found" });
-            }
-
-            _logger.LogInformation("File deleted: {ObjectName}", objectName);
-            return Ok(new { message = "File deleted successfully" });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to delete file: {ObjectName}", objectName);
-            return StatusCode(500, new { error = "Failed to delete file" });
-        }
-    }
 
     public class UploadResponse
     {
