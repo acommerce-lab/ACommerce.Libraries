@@ -9,7 +9,6 @@ using ACommerce.Catalog.Listings.Enums;
 using ACommerce.Catalog.Listings.DTOs;
 using ACommerce.SharedKernel.AspNetCore.Controllers;
 using ACommerce.SharedKernel.Abstractions.Queries;
-//using ACommerce.SharedKernel.Abstractions.Pagination;
 using ACommerce.SharedKernel.CQRS.Queries;
 using ACommerce.SharedKernel.CQRS.Commands;
 
