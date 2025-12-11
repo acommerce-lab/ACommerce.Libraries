@@ -201,15 +201,16 @@ public class GoogleCloudStorageProvider : IStorageProvider
         {
             var urlSigner = UrlSigner.FromCredential(await Google.Apis.Auth.OAuth2.GoogleCredential.GetApplicationDefaultAsync());
             
-            var signedUrl = await urlSigner.SignAsync(
-                _options.BucketName,
-                objectName,
-                expiration,
-                HttpMethod.Put,
-                contentHeaders: new Dictionary<string, IEnumerable<string>>
+            var requestTemplate = UrlSigner.RequestTemplate
+                .FromBucket(_options.BucketName)
+                .WithObjectName(objectName)
+                .WithHttpMethod(HttpMethod.Put)
+                .WithContentHeaders(new Dictionary<string, IEnumerable<string>>
                 {
                     ["Content-Type"] = new[] { contentType }
                 });
+
+            var signedUrl = await urlSigner.SignAsync(requestTemplate, UrlSigner.Options.FromExpiration(DateTimeOffset.UtcNow.Add(expiration)));
 
             return signedUrl;
         }
