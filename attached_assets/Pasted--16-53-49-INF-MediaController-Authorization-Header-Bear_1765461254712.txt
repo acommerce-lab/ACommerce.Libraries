@@ -1,0 +1,23 @@
+[16:53:49 INF] [MediaController] Authorization Header: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk0YmZjNC0wZmFjLTQ2YzUtYTM3NC03YjkxZjgzZTNlZTAiLCJqdGkiOiI5YjQwZjQ3YS1hNzEwLTRlMDMtOTJlYy00MTAwMWNiY2IxOTgiLCJpYXQiOjE3NjU0NTg3NzQsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWVpZGVudGlmaWVyIjoiNmY5NGJmYzQtMGZhYy00NmM1LWEzNzQtN2I5MWY4M2UzZWUwIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZSI6Iti52LTZitixIiwibmF0aW9uYWxfaWQiOiIyNTA3NjQzNzYyIiwiZXhwIjoxNzY1NDYyMzc0LCJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo1MDAxIiwiYXVkIjoiYXNoYXJlLWFwaSJ9.k1XnnDyxv8dvYIXw1eQpbshIMHnNcgDKDfheASDuw7c
+[16:53:49 INF] [MediaController] User.Identity.IsAuthenticated: True
+[16:53:49 INF] [MediaController] User.Identity.Name: ????
+[16:53:49 INF] [MediaController] Directory: listings
+[16:53:49 INF] [MediaController] File: Untitled design (4) (1).png, Size: 18965, ContentType: image/png
+[16:53:56 INF] File uploaded to GCS: listings/fbca980b27c34db784685afd0326a1a7.png, Generation: 1765461234639134
+[16:53:56 ERR] Failed to generate signed URL for: listings/fbca980b27c34db784685afd0326a1a7.png
+System.InvalidOperationException: The credential type Google.Apis.Auth.OAuth2.UserCredential is not supported for signing.
+   at Google.Cloud.Storage.V1.UrlSigner.FromCredential(GoogleCredential credential)
+   at ACommerce.Files.Storage.GoogleCloud.Providers.GoogleCloudStorageProvider.GetSignedUrlAsync(String filePath, TimeSpan expiration, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Files\ACommerce.Files.Storage.GoogleCloud\Providers\GoogleCloudStorageProvider.cs:line 177
+[16:53:56 ERR] Failed to upload file: Untitled design (4) (1).png
+ACommerce.Files.Abstractions.Exceptions.StorageException: Failed to generate signed URL
+ ---> System.InvalidOperationException: The credential type Google.Apis.Auth.OAuth2.UserCredential is not supported for signing.
+   at Google.Cloud.Storage.V1.UrlSigner.FromCredential(GoogleCredential credential)
+   at ACommerce.Files.Storage.GoogleCloud.Providers.GoogleCloudStorageProvider.GetSignedUrlAsync(String filePath, TimeSpan expiration, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Files\ACommerce.Files.Storage.GoogleCloud\Providers\GoogleCloudStorageProvider.cs:line 177
+   --- End of inner exception stack trace ---
+   at ACommerce.Files.Storage.GoogleCloud.Providers.GoogleCloudStorageProvider.GetSignedUrlAsync(String filePath, TimeSpan expiration, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Files\ACommerce.Files.Storage.GoogleCloud\Providers\GoogleCloudStorageProvider.cs:line 190
+   at Ashare.Api.Controllers.MediaController.Upload(IFormFile file, String directory, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Api\Controllers\MediaController.cs:line 82
+   at Ashare.Api.Controllers.MediaController.Upload(IFormFile file, String directory, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Api\Controllers\MediaController.cs:line 86
+[16:53:56 INF] Executing ObjectResult, writing value of type '<>f__AnonymousType8`1[[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+[16:53:56 INF] Executed action Ashare.Api.Controllers.MediaController.Upload (Ashare.Api) in 7272.8953ms
+[16:53:56 INF] Executed endpoint 'Ashare.Api.Controllers.MediaController.Upload (Ashare.Api)'
+[16:53:56 INF] Request finished HTTP/1.1 POST http://localhost:3000/api/media/upload?directory=listings - 500 null application/json; charset=utf-8 7294.1766ms

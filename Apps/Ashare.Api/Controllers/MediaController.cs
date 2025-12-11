@@ -79,14 +79,16 @@ public class MediaController : ControllerBase
         {
             await using var stream = file.OpenReadStream();
             var objectName = await _storageProvider.SaveAsync(stream, file.FileName, safeDirectory, cancellationToken);
-            var signedUrl = await _storageProvider.GetSignedUrlAsync(objectName, TimeSpan.FromDays(7), cancellationToken);
+            
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var proxyUrl = $"{baseUrl}/api/media/{objectName}";
 
-            _logger.LogInformation("File uploaded successfully: {ObjectName}", objectName);
+            _logger.LogInformation("File uploaded successfully: {ObjectName}, ProxyUrl: {ProxyUrl}", objectName, proxyUrl);
 
             return Ok(new UploadResponse
             {
                 ObjectName = objectName,
-                Url = signedUrl,
+                Url = proxyUrl,
                 ContentType = file.ContentType,
                 Size = file.Length
             });
@@ -146,12 +148,14 @@ public class MediaController : ControllerBase
             {
                 await using var stream = file.OpenReadStream();
                 var objectName = await _storageProvider.SaveAsync(stream, file.FileName, safeDirectory, cancellationToken);
-                var signedUrl = await _storageProvider.GetSignedUrlAsync(objectName, TimeSpan.FromDays(7), cancellationToken);
+                
+                var baseUrl = $"{Request.Scheme}://{Request.Host}";
+                var proxyUrl = $"{baseUrl}/api/media/{objectName}";
 
                 results.Add(new UploadResponse
                 {
                     ObjectName = objectName,
-                    Url = signedUrl,
+                    Url = proxyUrl,
                     ContentType = file.ContentType,
                     Size = file.Length
                 });
@@ -170,6 +174,48 @@ public class MediaController : ControllerBase
         });
     }
 
+
+    [HttpGet("{directory}/{fileName}")]
+    [ResponseCache(Duration = 86400)]
+    public async Task<IActionResult> GetImage(string directory, string fileName, CancellationToken cancellationToken = default)
+    {
+        if (!AllowedDirectories.Contains(directory))
+        {
+            return NotFound();
+        }
+
+        var objectName = $"{directory}/{fileName}";
+        
+        try
+        {
+            var stream = await _storageProvider.GetAsync(objectName, cancellationToken);
+            if (stream == null)
+            {
+                return NotFound();
+            }
+
+            var contentType = GetContentType(fileName);
+            return File(stream, contentType);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get file: {ObjectName}", objectName);
+            return NotFound();
+        }
+    }
+
+    private static string GetContentType(string fileName)
+    {
+        var extension = Path.GetExtension(fileName).ToLowerInvariant();
+        return extension switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".gif" => "image/gif",
+            ".webp" => "image/webp",
+            _ => "application/octet-stream"
+        };
+    }
 
     public class UploadResponse
     {
