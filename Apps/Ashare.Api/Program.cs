@@ -70,8 +70,8 @@ try
     // Logging
     builder.Host.UseSerilog();
 
-    // Memory Cache for API-level caching
-    builder.Services.AddMemoryCache();
+    // Memory Cache - DISABLED for debugging
+    // builder.Services.AddMemoryCache();
 
     // CORS
     builder.Services.AddCors(options =>
@@ -241,8 +241,8 @@ try
     // Ashare Seed Service
     builder.Services.AddScoped<AshareSeedDataService>();
 
-    // Cache Warm-up Service (يسخن الـ cache عند بدء التشغيل)
-    builder.Services.AddHostedService<CacheWarmupService>();
+    // Cache Warm-up Service - DISABLED for debugging
+    // builder.Services.AddHostedService<CacheWarmupService>();
 
     // Swagger Documentation
     builder.Services.AddSwaggerGen(options =>
