@@ -29,6 +29,7 @@ using ACommerce.Client.Payments;
 using ACommerce.Client.Subscriptions;
 using ACommerce.ServiceRegistry.Client.Extensions;
 using Ashare.Web;
+using ACommerce.Client.Core.Interceptors;
 
 var builder = WebApplication.CreateBuilder(args);
 
