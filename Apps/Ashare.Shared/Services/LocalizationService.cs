@@ -133,9 +133,12 @@ public class LocalizationService : ILocalizationService
         try
         {
             var saved = await _storageService.GetAsync("app_language");
-            if (!string.IsNullOrEmpty(saved) && _translations.ContainsKey(saved))
+            if (!string.IsNullOrEmpty(saved) && _translations.ContainsKey(saved) && saved != _currentLanguage)
             {
                 _currentLanguage = saved;
+                CultureInfo.CurrentCulture = new CultureInfo(saved);
+                CultureInfo.CurrentUICulture = new CultureInfo(saved);
+                OnLanguageChanged?.Invoke();
             }
         }
         catch { }

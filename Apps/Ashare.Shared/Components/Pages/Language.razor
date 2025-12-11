@@ -1,0 +1,165 @@
+@page "/language"
+@inject ILocalizationService L
+@inject IAppNavigationService Navigation
+@inject Ashare.Shared.Services.ThemeService ThemeService
+
+<div class="ac-page ashare-language-page @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
+    <div class="ashare-page-header">
+        <button class="ashare-back-btn" @onclick="GoBack">
+            <i class="bi @(L.IsRtl ? "bi-arrow-right" : "bi-arrow-left")"></i>
+        </button>
+        <h1>@L["Language"]</h1>
+    </div>
+
+    <div class="ashare-language-list">
+        @foreach (var lang in L.SupportedLanguages)
+        {
+            <button class="ashare-language-item @(lang.Code == L.CurrentLanguage ? "active" : "")"
+                    @onclick="() => SelectLanguage(lang.Code)">
+                <div class="ashare-language-info">
+                    <span class="ashare-language-native">@lang.NativeName</span>
+                    <span class="ashare-language-english">@lang.EnglishName</span>
+                </div>
+                @if (lang.Code == L.CurrentLanguage)
+                {
+                    <i class="bi bi-check-circle-fill ashare-language-check"></i>
+                }
+            </button>
+        }
+    </div>
+</div>
+
+<style>
+    .ashare-language-page {
+        min-height: 100vh;
+        background: var(--ashare-bg, #f8f9fa);
+    }
+
+    .ashare-page-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--ashare-surface, #fff);
+        border-bottom: 1px solid var(--ashare-border, #e9ecef);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .ashare-page-header h1 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .ashare-back-btn {
+        background: none;
+        border: none;
+        font-size: 1.25rem;
+        color: var(--ashare-text, #212529);
+        cursor: pointer;
+        padding: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ashare-language-list {
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .ashare-language-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+        background: var(--ashare-surface, #fff);
+        border: 2px solid transparent;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: start;
+        width: 100%;
+    }
+
+    .ashare-language-item:hover {
+        background: var(--ashare-hover, #f1f3f5);
+    }
+
+    .ashare-language-item.active {
+        border-color: var(--ashare-primary, #F4844C);
+        background: rgba(244, 132, 76, 0.05);
+    }
+
+    .ashare-language-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .ashare-language-native {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--ashare-text, #212529);
+    }
+
+    .ashare-language-english {
+        font-size: 0.875rem;
+        color: var(--ashare-text-muted, #6c757d);
+    }
+
+    .ashare-language-check {
+        color: var(--ashare-primary, #F4844C);
+        font-size: 1.25rem;
+    }
+
+    .ac-dark .ashare-language-page {
+        background: var(--ashare-dark-bg, #121212);
+    }
+
+    .ac-dark .ashare-page-header {
+        background: var(--ashare-dark-surface, #1e1e1e);
+        border-color: var(--ashare-dark-border, #333);
+    }
+
+    .ac-dark .ashare-page-header h1,
+    .ac-dark .ashare-back-btn {
+        color: var(--ashare-dark-text, #fff);
+    }
+
+    .ac-dark .ashare-language-item {
+        background: var(--ashare-dark-surface, #1e1e1e);
+    }
+
+    .ac-dark .ashare-language-item:hover {
+        background: var(--ashare-dark-hover, #2a2a2a);
+    }
+
+    .ac-dark .ashare-language-native {
+        color: var(--ashare-dark-text, #fff);
+    }
+
+    .ac-dark .ashare-language-english {
+        color: var(--ashare-dark-text-muted, #aaa);
+    }
+</style>
+
+@code {
+    private async Task SelectLanguage(string languageCode)
+    {
+        if (languageCode != L.CurrentLanguage)
+        {
+            await L.SetLanguageAsync(languageCode);
+            StateHasChanged();
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/profile");
+    }
+}

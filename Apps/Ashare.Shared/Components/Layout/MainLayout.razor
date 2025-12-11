@@ -5,8 +5,10 @@
 @inject ACommerce.Client.Auth.TokenManager TokenManager
 @inject ACommerce.Client.Auth.AuthClient AuthClient
 @inject Ashare.Shared.Services.GuestModeService GuestMode
+@inject ILocalizationService L
+@implements IDisposable
 
-<div class="ashare-app @(ThemeService.IsDarkMode ? "ac-dark" : "")">
+<div class="ashare-app @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
     @* Navbar *@
     @if (!HideNavigation)
     {
@@ -17,10 +19,10 @@
                 </div>
 
                 <div class="ac-navbar-actions">
-                    <button class="ac-navbar-action" @onclick="HandleSearchClick" title="البحث">
+                    <button class="ac-navbar-action" @onclick="HandleSearchClick" title="@L["Search"]">
                         <i class="bi bi-search"></i>
                     </button>
-                    <button class="ac-navbar-action" @onclick="HandleNotificationsClick" title="الإشعارات">
+                    <button class="ac-navbar-action" @onclick="HandleNotificationsClick" title="@L["Notifications"]">
                         <i class="bi bi-bell"></i>
                         @if (NotificationCount > 0)
                         {
@@ -43,11 +45,11 @@
         <nav class="ac-bottom-nav">
             <a href="/" class="ac-bottom-nav-item @(IsActive("/") ? "active" : "")">
                 <span class="ac-bottom-nav-icon"><i class="bi bi-house"></i></span>
-                <span class="ac-bottom-nav-label">الرئيسية</span>
+                <span class="ac-bottom-nav-label">@L["Home"]</span>
             </a>
             <a href="/explore" class="ac-bottom-nav-item @(IsActive("/explore") ? "active" : "")">
                 <span class="ac-bottom-nav-icon"><i class="bi bi-compass"></i></span>
-                <span class="ac-bottom-nav-label">استكشف</span>
+                <span class="ac-bottom-nav-label">@L["Explore"]</span>
             </a>
             <a href="/bookings" class="ac-bottom-nav-item @(IsActive("/bookings") ? "active" : "")">
                 <span class="ac-bottom-nav-icon">
@@ -57,15 +59,15 @@
                         <span class="ac-badge ac-badge-primary ac-badge-sm">@BookingsCount</span>
                     }
                 </span>
-                <span class="ac-bottom-nav-label">حجوزاتي</span>
+                <span class="ac-bottom-nav-label">@L["Bookings"]</span>
             </a>
             <a href="/favorites" class="ac-bottom-nav-item @(IsActive("/favorites") ? "active" : "")">
                 <span class="ac-bottom-nav-icon"><i class="bi bi-heart"></i></span>
-                <span class="ac-bottom-nav-label">المفضلة</span>
+                <span class="ac-bottom-nav-label">@L["Favorites"]</span>
             </a>
             <a href="/profile" class="ac-bottom-nav-item @(IsActive("/profile") ? "active" : "")">
                 <span class="ac-bottom-nav-icon"><i class="bi bi-person"></i></span>
-                <span class="ac-bottom-nav-label">حسابي</span>
+                <span class="ac-bottom-nav-label">@L["Profile"]</span>
             </a>
         </nav>
     }
@@ -142,6 +144,9 @@
 
     protected override Task OnInitializedAsync()
     {
+        // الاشتراك في حدث تغيير اللغة
+        L.OnLanguageChanged += HandleLanguageChanged;
+        
         // تحميل عدد الإشعارات (متزامن)
         NotificationCount = ApiService.GetNotificationsCount();
         
@@ -157,6 +162,16 @@
         }
         
         return Task.CompletedTask;
+    }
+    
+    private void HandleLanguageChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+    
+    public void Dispose()
+    {
+        L.OnLanguageChanged -= HandleLanguageChanged;
     }
 
     private async Task LoadBookingsCountAsync()
