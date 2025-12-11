@@ -595,8 +595,8 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                         {
                                 keyLock.Release();
                                 // تنظيف القفل بعد فترة (اختياري - لتجنب تسرب الذاكرة)
-                                _ = Task.Delay(TimeSpan.FromMinutes(10)).ContinueWith(_ => 
-                                        _searchLocks.TryRemove(cacheKey, out var _));
+                                _ = Task.Delay(TimeSpan.FromMinutes(10)).ContinueWith(t => 
+                                        _searchLocks.TryRemove(cacheKey, out _));
                         }
                 }
                 catch (Exception ex)
