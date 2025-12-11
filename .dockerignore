@@ -55,7 +55,6 @@ docs/
 
 # Mobile apps (not needed for API)
 Apps/Ashare.App/
-Apps/Ashare.Web/
 
 # Secrets and local configs
 **/*.local.json
