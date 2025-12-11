@@ -1,0 +1,307 @@
+dbug: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[2]
+      Response markup was updated to include Browser Link script injection.
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_vs/browserLink - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 POST http://localhost:5000/_blazor/disconnect - multipart/form-data;+boundary=----WebKitFormBoundarybxQoxy3LBxlNrgA3 359
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_framework/blazor.web.js - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_framework/aspnetcore-browser-refresh.js - - -
+dbug: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[2]
+      Response markup was updated to include browser refresh script injection.
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+dbug: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserScriptMiddleware[0]
+      Script injected: /_framework/aspnetcore-browser-refresh.js
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_framework/aspnetcore-browser-refresh.js - 200 16505 application/javascript;+charset=utf-8 122.0791ms
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Blazor web static files'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/ - 200 - text/html;+charset=utf-8 313.4561ms
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[6]
+      The file /_framework/blazor.web.js was not modified
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Blazor web static files'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_framework/blazor.web.js - 304 - text/javascript 189.2223ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_vs/browserLink - 200 - text/javascript;+charset=UTF-8 196.5648ms
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_blazor?id=69hQCYYA26MZcasiaQ4mpg - 101 - - 3011.7817ms
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 POST http://localhost:5000/_blazor/disconnect - 200 0 - 212.4896ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_blazor/initializers - - -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_blazor/initializers - 200 - application/json;+charset=utf-8 4.6924ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 POST http://localhost:5000/_blazor/negotiate?negotiateVersion=1 - - 0
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 POST http://localhost:5000/_blazor/negotiate?negotiateVersion=1 - 200 316 application/json 5.3888ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_blazor?id=AeOaxN7VbGj3NOZjUEsLPA - - -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+[BrowserStorageService] Created
+[TokenManager] Created with storage: TokenStorageService
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: Categories
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: Featured listings
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: New listings
+[BrowserStorageService] GetAsync(app_theme): not found
+[BrowserStorageService] GetAsync(auth_token): found
+[BrowserStorageService] GetAsync(auth_expires_at): found
+[TokenStorageService] Token loaded from persistent storage (expires: 12/11/2025 1:12:03 PM)
+[ScopedTokenProvider] Cache updated: token set
+[TokenStorageService] OnTokenChanged fired after loading token
+[TokenManager] Loaded token from storage (expires: 12/11/2025 1:12:03 PM)
+[MainLayout] Auth check - Path: http://localhost:5000/, Token: exists, IsGuest: False, IsAuthPage: False, IsProtectedPage: False
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/ - - -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint '/ (/)'
+[BrowserStorageService] Created
+[TokenManager] Created with storage: TokenStorageService
+[BrowserStorageService] GetAsync(app_theme): prerendering, returning null
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: Categories
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: Featured listings
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: New listings
+dbug: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[1]
+      Response markup is scheduled to include Browser Link script injection.
+dbug: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[1]
+      Response markup is scheduled to include browser refresh script injection.
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint '/ (/)'
+dbug: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[2]
+      Response markup was updated to include Browser Link script injection.
+dbug: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[2]
+      Response markup was updated to include browser refresh script injection.
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/ - 200 - text/html;+charset=utf-8 84.2110ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 POST http://localhost:5000/_blazor/disconnect - multipart/form-data;+boundary=----WebKitFormBoundaryJ7wKOFuB2Lj4ALx4 359
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_blazor?id=AeOaxN7VbGj3NOZjUEsLPA - 101 - - 10259.9388ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 POST http://localhost:5000/_blazor/disconnect - 200 0 - 7.6127ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_framework/aspnetcore-browser-refresh.js - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_vs/browserLink - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_framework/blazor.web.js - - -
+dbug: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserScriptMiddleware[0]
+      Script injected: /_framework/aspnetcore-browser-refresh.js
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Blazor web static files'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_framework/aspnetcore-browser-refresh.js - 200 16505 application/javascript;+charset=utf-8 36.4322ms
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[6]
+      The file /_framework/blazor.web.js was not modified
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Blazor web static files'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_framework/blazor.web.js - 304 - text/javascript 68.1450ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_blazor/initializers - - -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_blazor/initializers - 200 - application/json;+charset=utf-8 6.7088ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_vs/browserLink - 200 - text/javascript;+charset=UTF-8 89.1331ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 POST http://localhost:5000/_blazor/negotiate?negotiateVersion=1 - - 0
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 POST http://localhost:5000/_blazor/negotiate?negotiateVersion=1 - 200 316 application/json 5.5512ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_blazor?id=bECr09rsxKddx2R5CV5E1g - - -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+[BrowserStorageService] Created
+[TokenManager] Created with storage: TokenStorageService
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: Categories
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: Featured listings
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: New listings
+[BrowserStorageService] GetAsync(app_theme): not found
+[BrowserStorageService] GetAsync(auth_token): found
+[BrowserStorageService] GetAsync(auth_expires_at): found
+[TokenStorageService] Token loaded from persistent storage (expires: 12/11/2025 1:12:03 PM)
+[ScopedTokenProvider] Cache updated: token set
+[TokenStorageService] OnTokenChanged fired after loading token
+[TokenManager] Loaded token from storage (expires: 12/11/2025 1:12:03 PM)
+[MainLayout] Auth check - Path: http://localhost:5000/, Token: exists, IsGuest: False, IsAuthPage: False, IsProtectedPage: False
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/login - - -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint '/login (/login)'
+[BrowserStorageService] Created
+[TokenManager] Created with storage: TokenStorageService
+[BrowserStorageService] GetAsync(app_theme): prerendering, returning null
+[BrowserStorageService] GetAsync(app_language): prerendering, returning null
+[BrowserStorageService] GetAsync(auth_token): prerendering, returning null
+[BrowserStorageService] GetAsync(auth_expires_at): prerendering, returning null
+[Login] Page loaded - GuestMode: False
+dbug: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Cache hit for service: Ashare
+info: ACommerce.Client.Realtime.RealtimeClient[0]
+      Connecting to SignalR hub: http://localhost:8080/hubs/notifications
+[Login] Failed to connect to SignalR: No connection could be made because the target machine actively refused it. (localhost:8080)
+dbug: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[1]
+      Response markup is scheduled to include Browser Link script injection.
+dbug: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[1]
+      Response markup is scheduled to include browser refresh script injection.
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint '/login (/login)'
+dbug: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[2]
+      Response markup was updated to include Browser Link script injection.
+dbug: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[2]
+      Response markup was updated to include browser refresh script injection.
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/login - 200 - text/html;+charset=utf-8 5330.9010ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 POST http://localhost:5000/_blazor/disconnect - multipart/form-data;+boundary=----WebKitFormBoundaryRs7QWrAnER7iD6pE 359
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_vs/browserLink - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_framework/blazor.web.js - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_framework/aspnetcore-browser-refresh.js - - -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+dbug: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserScriptMiddleware[0]
+      Script injected: /_framework/aspnetcore-browser-refresh.js
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Blazor web static files'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_blazor?id=bECr09rsxKddx2R5CV5E1g - 101 - - 19238.8543ms
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[6]
+      The file /_framework/blazor.web.js was not modified
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_framework/aspnetcore-browser-refresh.js - 200 16505 application/javascript;+charset=utf-8 187.7839ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 POST http://localhost:5000/_blazor/disconnect - 200 0 - 226.2050ms
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Blazor web static files'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_framework/blazor.web.js - 304 - text/javascript 272.4195ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_blazor/initializers - - -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_vs/browserLink - 200 - text/javascript;+charset=UTF-8 314.6951ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_blazor/initializers - 200 - application/json;+charset=utf-8 5.3404ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 POST http://localhost:5000/_blazor/negotiate?negotiateVersion=1 - - 0
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 POST http://localhost:5000/_blazor/negotiate?negotiateVersion=1 - 200 316 application/json 5.0973ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_blazor?id=I0vVy3eg8fEAQ5JVkdIiyA - - -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+[BrowserStorageService] Created
+[TokenManager] Created with storage: TokenStorageService
+[BrowserStorageService] GetAsync(app_theme): not found
+[BrowserStorageService] GetAsync(app_language): not found
+[BrowserStorageService] GetAsync(auth_token): found
+[BrowserStorageService] GetAsync(auth_expires_at): found
+[TokenStorageService] Token loaded from persistent storage (expires: 12/11/2025 1:12:03 PM)
+[ScopedTokenProvider] Cache updated: token set
+[TokenStorageService] OnTokenChanged fired after loading token
+[TokenManager] Loaded token from storage (expires: 12/11/2025 1:12:03 PM)
+[Login] ? User already logged in - redirecting to home
+[BrowserStorageService] GetAsync(auth_token): found
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: Categories
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: Featured listings
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: New listings
+[BrowserStorageService] GetAsync(auth_expires_at): found
+[TokenStorageService] Token loaded from persistent storage (expires: 12/11/2025 1:12:03 PM)
+[ScopedTokenProvider] Cache updated: token set
+[TokenStorageService] OnTokenChanged fired after loading token
+[TokenManager] Loaded token from storage (expires: 12/11/2025 1:12:03 PM)
+[MainLayout] Auth check - Path: http://localhost:5000/login, Token: exists, IsGuest: False, IsAuthPage: False, IsProtectedPage: False
+[MainLayout] Auth check - Path: http://localhost:5000/, Token: exists, IsGuest: False, IsAuthPage: False, IsProtectedPage: False
+dbug: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Cache hit for service: Marketplace
+dbug: ACommerce.Client.Core.Http.DynamicHttpClient[0]
+      GET http://localhost:8080/api/auth/me
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://localhost:8080/api/auth/me
+[ScopedTokenProvider] Returning cached token
+[AuthInterceptor] Request to /api/auth/me - Token: eyJhbGciOiJIUzI1NiIs...
+[AuthInterceptor] ? Authorization header added
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:8080/api/auth/me
+[MainLayout] Auth check - Path: http://localhost:5000/profile, Token: exists, IsGuest: False, IsAuthPage: False, IsProtectedPage: True
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      ?????? ??? ?????. ?????? ??? ???????? 1/3...
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:8080/api/auth/me
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      ?????? ??? ?????. ?????? ??? ???????? 2/3...
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:8080/api/auth/me
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[103]
+      HttpMessageHandler expired after 120000ms for client 'DynamicHttpClient'
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[103]
+      HttpMessageHandler expired after 120000ms for client 'ServiceRegistryClient'
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      ?????? ??? ?????. ?????? ??? ???????? 3/3...
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:8080/api/auth/me
+fail: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      API ??? ????? ??? 3 ???????. ???? ?? ????? ??????.
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      ?????? ??? ?????. ?????? ??? ???????? 1/3...
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:8080/api/auth/me
+dbug: 
