@@ -79,14 +79,14 @@ public class MediaController : ControllerBase
         {
             await using var stream = file.OpenReadStream();
             var objectName = await _storageProvider.SaveAsync(stream, file.FileName, safeDirectory, cancellationToken);
-            var publicUrl = await _storageProvider.GetPublicUrlAsync(objectName, cancellationToken);
+            var signedUrl = await _storageProvider.GetSignedUrlAsync(objectName, TimeSpan.FromDays(7), cancellationToken);
 
             _logger.LogInformation("File uploaded successfully: {ObjectName}", objectName);
 
             return Ok(new UploadResponse
             {
                 ObjectName = objectName,
-                Url = publicUrl,
+                Url = signedUrl,
                 ContentType = file.ContentType,
                 Size = file.Length
             });
@@ -146,12 +146,12 @@ public class MediaController : ControllerBase
             {
                 await using var stream = file.OpenReadStream();
                 var objectName = await _storageProvider.SaveAsync(stream, file.FileName, safeDirectory, cancellationToken);
-                var publicUrl = await _storageProvider.GetPublicUrlAsync(objectName, cancellationToken);
+                var signedUrl = await _storageProvider.GetSignedUrlAsync(objectName, TimeSpan.FromDays(7), cancellationToken);
 
                 results.Add(new UploadResponse
                 {
                     ObjectName = objectName,
-                    Url = publicUrl,
+                    Url = signedUrl,
                     ContentType = file.ContentType,
                     Size = file.Length
                 });
