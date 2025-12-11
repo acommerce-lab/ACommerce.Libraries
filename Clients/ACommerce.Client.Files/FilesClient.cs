@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using ACommerce.Client.Core.Http;
+using ACommerce.Client.Core.Interceptors;
 
 namespace ACommerce.Client.Files;
 
@@ -8,12 +9,26 @@ public sealed class FilesClient
 {
         private readonly IApiClient _httpClient;
         private readonly HttpClient _rawHttpClient;
+        private readonly ITokenProvider? _tokenProvider;
         private const string ServiceName = "Files"; // أو "Marketplace"
 
-        public FilesClient(IApiClient httpClient, IHttpClientFactory httpClientFactory)
+        public FilesClient(IApiClient httpClient, IHttpClientFactory httpClientFactory, ITokenProvider? tokenProvider = null)
         {
                 _httpClient = httpClient;
-                _rawHttpClient = httpClientFactory.CreateClient();
+                _rawHttpClient = httpClientFactory.CreateClient("DynamicHttpClient");
+                _tokenProvider = tokenProvider;
+        }
+
+        private async Task AddAuthorizationAsync(HttpRequestMessage request)
+        {
+                if (_tokenProvider != null)
+                {
+                        var token = await _tokenProvider.GetTokenAsync();
+                        if (!string.IsNullOrEmpty(token))
+                        {
+                                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                        }
+                }
         }
 
         /// <summary>
@@ -94,7 +109,13 @@ public sealed class FilesClient
                 fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
                 content.Add(fileContent, "file", fileName);
 
-                var response = await _rawHttpClient.PostAsync($"/api/media/upload?directory={directory}", content, cancellationToken);
+                var request = new HttpRequestMessage(HttpMethod.Post, $"/api/media/upload?directory={directory}")
+                {
+                        Content = content
+                };
+                await AddAuthorizationAsync(request);
+                
+                var response = await _rawHttpClient.SendAsync(request, cancellationToken);
                 response.EnsureSuccessStatusCode();
 
                 return await response.Content.ReadFromJsonAsync<MediaUploadResponse>(cancellationToken);
@@ -121,7 +142,13 @@ public sealed class FilesClient
 
                 try
                 {
-                        var response = await _rawHttpClient.PostAsync($"/api/media/upload/multiple?directory={directory}", content, cancellationToken);
+                        var request = new HttpRequestMessage(HttpMethod.Post, $"/api/media/upload/multiple?directory={directory}")
+                        {
+                                Content = content
+                        };
+                        await AddAuthorizationAsync(request);
+                        
+                        var response = await _rawHttpClient.SendAsync(request, cancellationToken);
                         response.EnsureSuccessStatusCode();
 
                         return await response.Content.ReadFromJsonAsync<MultipleMediaUploadResponse>(cancellationToken);
