@@ -9,7 +9,7 @@ using ACommerce.Catalog.Listings.Enums;
 using ACommerce.Catalog.Listings.DTOs;
 using ACommerce.SharedKernel.AspNetCore.Controllers;
 using ACommerce.SharedKernel.Abstractions.Queries;
-using ACommerce.SharedKernel.Abstractions.Pagination;
+//using ACommerce.SharedKernel.Abstractions.Pagination;
 using ACommerce.SharedKernel.CQRS.Queries;
 using ACommerce.SharedKernel.CQRS.Commands;
 
@@ -574,7 +574,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                                 keyLock.Release();
                                 // تنظيف القفل بعد فترة (اختياري - لتجنب تسرب الذاكرة)
                                 _ = Task.Delay(TimeSpan.FromMinutes(10)).ContinueWith(_ => 
-                                        _searchLocks.TryRemove(cacheKey, out _));
+                                        _searchLocks.TryRemove(cacheKey, out var _));
                         }
                 }
                 catch (Exception ex)

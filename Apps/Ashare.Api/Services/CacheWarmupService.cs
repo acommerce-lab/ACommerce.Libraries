@@ -5,24 +5,18 @@ using System.Text.Json;
 
 namespace Ashare.Api.Services;
 
-public class CacheWarmupService : BackgroundService
+public class CacheWarmupService(
+    IServiceProvider serviceProvider,
+    IConfiguration configuration)
+    : BackgroundService
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IConfiguration _configuration;
-
-    public CacheWarmupService(IServiceProvider serviceProvider, IConfiguration configuration)
-    {
-        _serviceProvider = serviceProvider;
-        _configuration = configuration;
-    }
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
         
         try
         {
-            var baseUrl = _configuration["HostSettings:BaseUrl"]
+            var baseUrl = configuration["HostSettings:BaseUrl"]
                 ?? Environment.GetEnvironmentVariable("SERVICE_URL")
                 ?? "http://localhost:3000";
             
@@ -69,26 +63,28 @@ public class CacheWarmupService : BackgroundService
         try
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            
+
+            var filters = new[]
+            {
+                new { propertyName = "IsActive", value = (object)true, @operator = "Equals" },
+                new { propertyName = "Status", value = (object)1, @operator = "Equals" }
+            };
+
             var searchRequest = new
             {
                 pageNumber = 1,
                 pageSize = 50,
-                filters = new[]
-                {
-                    new { propertyName = "IsActive", value = true, @operator = "Equals" },
-                    new { propertyName = "Status", value = 1, @operator = "Equals" }
-                },
+                filters = filters,
                 orderBy = "CreatedAt",
                 ascending = false
             };
-            
+
             var json = JsonSerializer.Serialize(searchRequest);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            
+
             var response = await client.PostAsync($"{baseUrl}/api/listings/search", content, ct);
             response.EnsureSuccessStatusCode();
-            
+
             stopwatch.Stop();
             Log.Information("Search listings cache warmed up in {ElapsedMs}ms", stopwatch.ElapsedMilliseconds);
         }
