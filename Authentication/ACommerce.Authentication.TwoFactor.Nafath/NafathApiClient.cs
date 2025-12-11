@@ -40,13 +40,34 @@ public class NafathApiClient : INafathApiClient
         var isTestMode = mode == "test";
         var testNationalId = _configuration[$"{NafathOptions.SectionName}:TestNationalId"] ?? "2507643761";
 
-        // ✅ وضع الاختبار + رقم الهوية المحدد فقط → محاكاة
-        if (isTestMode && nationalId == testNationalId)
+        // ✅ وضع الاختبار
+        if (isTestMode)
         {
-            return await HandleTestModeInitiation(nationalId, cancellationToken);
+            // الهوية المحددة فقط → محاكاة
+            if (nationalId == testNationalId)
+            {
+                return await HandleTestModeInitiation(nationalId, cancellationToken);
+            }
+            
+            // أي هوية أخرى في وضع الاختبار → رفض (بدلاً من إرسالها إلى API)
+            _logger.LogWarning(
+                "[Nafath] Test mode: NationalId {NationalId} is not the configured test ID ({TestId})",
+                nationalId,
+                testNationalId);
+            
+            return new NafathInitiationResponse
+            {
+                Success = false,
+                Error = new TwoFactorError
+                {
+                    Code = "TEST_MODE_INVALID_ID",
+                    Message = "في وضع الاختبار، يُسمح فقط برقم الهوية التجريبي",
+                    Details = $"الهوية المسموحة: {testNationalId}"
+                }
+            };
         }
 
-        // ✅ أي حالة أخرى → نفاذ الحقيقي
+        // ✅ وضع الإنتاج → نفاذ الحقيقي
         return await HandleProductionModeInitiation(nationalId, cancellationToken);
     }
 
