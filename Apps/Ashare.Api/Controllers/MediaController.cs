@@ -176,7 +176,7 @@ public class MediaController : ControllerBase
 
 
     [HttpGet("{directory}/{fileName}")]
-    [ResponseCache(Duration = 86400)]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public async Task<IActionResult> GetImage(string directory, string fileName, CancellationToken cancellationToken = default)
     {
         if (!AllowedDirectories.Contains(directory))
