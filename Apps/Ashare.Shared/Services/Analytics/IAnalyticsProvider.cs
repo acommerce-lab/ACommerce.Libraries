@@ -98,6 +98,12 @@ public class AnalyticsConfig
     public string? AccessToken { get; set; }
 
     /// <summary>
+    /// Client Token (required for Facebook Mobile SDK)
+    /// Get from: Facebook Developers Console → Settings → Advanced → Client Token
+    /// </summary>
+    public string? ClientToken { get; set; }
+
+    /// <summary>
     /// Enable debug mode
     /// </summary>
     public bool DebugMode { get; set; }
