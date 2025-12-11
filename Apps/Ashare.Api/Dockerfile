@@ -133,6 +133,7 @@ COPY ["Modules/ACommerce.Localization/ACommerce.Localization.csproj", "Modules/A
 COPY ["Files/ACommerce.Files.Abstractions/ACommerce.Files.Abstractions.csproj", "Files/ACommerce.Files.Abstractions/"]
 COPY ["Files/ACommerce.Files.Storage.Local/ACommerce.Files.Storage.Local.csproj", "Files/ACommerce.Files.Storage.Local/"]
 COPY ["Files/ACommerce.Files.Storage.AliyunOSS/ACommerce.Files.Storage.AliyunOSS.csproj", "Files/ACommerce.Files.Storage.AliyunOSS/"]
+COPY ["Files/ACommerce.Files.Storage.GoogleCloud/ACommerce.Files.Storage.GoogleCloud.csproj", "Files/ACommerce.Files.Storage.GoogleCloud/"]
 
 # Templates
 COPY ["Templates/ACommerce.Templates.Customer/ACommerce.Templates.Customer.csproj", "Templates/ACommerce.Templates.Customer/"]
