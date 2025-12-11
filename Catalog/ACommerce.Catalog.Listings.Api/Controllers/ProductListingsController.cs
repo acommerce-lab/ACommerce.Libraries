@@ -25,6 +25,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
         private readonly IMemoryCache _cache;
         private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(10);
         private static readonly TimeSpan SearchCacheDuration = TimeSpan.FromMinutes(5);
+        private static readonly TimeSpan LockTimeout = TimeSpan.FromSeconds(5);
         private static readonly SemaphoreSlim _featuredLock = new(1, 1);
         private static readonly SemaphoreSlim _newLock = new(1, 1);
         private static readonly SemaphoreSlim _allLock = new(1, 1);
@@ -58,7 +59,12 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                                 return Ok(cachedItems);
                         }
 
-                        await _allLock.WaitAsync();
+                        var lockAcquired = await _allLock.WaitAsync(LockTimeout);
+                        if (!lockAcquired)
+                        {
+                                _logger.LogWarning("Lock timeout for GetAll - returning empty result");
+                                return Ok(new List<ProductListingResponseDto>());
+                        }
                         try
                         {
                                 if (_cache.TryGetValue(cacheKey, out cachedItems) && cachedItems != null)
@@ -115,7 +121,12 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                                 return Ok(cachedItems);
                         }
 
-                        await _featuredLock.WaitAsync();
+                        var lockAcquired = await _featuredLock.WaitAsync(LockTimeout);
+                        if (!lockAcquired)
+                        {
+                                _logger.LogWarning("Lock timeout for GetFeatured - returning empty result");
+                                return Ok(new List<ProductListingResponseDto>());
+                        }
                         try
                         {
                                 if (_cache.TryGetValue(cacheKey, out cachedItems) && cachedItems != null)
@@ -172,7 +183,12 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                                 return Ok(cachedItems);
                         }
 
-                        await _newLock.WaitAsync();
+                        var lockAcquired = await _newLock.WaitAsync(LockTimeout);
+                        if (!lockAcquired)
+                        {
+                                _logger.LogWarning("Lock timeout for GetNew - returning empty result");
+                                return Ok(new List<ProductListingResponseDto>());
+                        }
                         try
                         {
                                 if (_cache.TryGetValue(cacheKey, out cachedItems) && cachedItems != null)
@@ -538,7 +554,14 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                         // الحصول على قفل خاص بهذا المفتاح فقط (يسمح بالتوازي لمفاتيح مختلفة)
                         var keyLock = _searchLocks.GetOrAdd(cacheKey, _ => new SemaphoreSlim(1, 1));
                         
-                        await keyLock.WaitAsync();
+                        var lockAcquired = await keyLock.WaitAsync(LockTimeout);
+                        if (!lockAcquired)
+                        {
+                                _logger.LogWarning("Lock timeout for Search - executing without cache protection");
+                                // تنفيذ بدون قفل إذا انتهت المهلة
+                                var query = new SmartSearchQuery<ProductListing, ProductListingResponseDto> { Request = request };
+                                return Ok(await _mediator.Send(query));
+                        }
                         try
                         {
                                 // تحقق مرة أخرى بعد الحصول على القفل
