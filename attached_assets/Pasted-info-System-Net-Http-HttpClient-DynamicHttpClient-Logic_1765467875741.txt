@@ -1,0 +1,151 @@
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[101]
+      End processing HTTP request after 44.1594ms - 200
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/explore - - -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint '/explore (/explore)'
+[BrowserStorageService] Created
+[TokenManager] Created with storage: TokenStorageService
+[BrowserStorageService] GetAsync(app_theme): prerendering, returning null
+info: Ashare.Shared.Services.ListingsCacheService[0]
+      Fetching categories from API (no cache)...
+dbug: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Cache hit for service: Marketplace
+dbug: ACommerce.Client.Core.Http.DynamicHttpClient[0]
+      GET http://localhost:3000/api/CategoryAttributes/categories
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://localhost:3000/api/CategoryAttributes/categories
+[ScopedTokenProvider] Returning cached token
+[AuthInterceptor] Request to /api/CategoryAttributes/categories - Token: eyJhbGciOiJIUzI1NiIs...
+[AuthInterceptor] ? Authorization header added
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:3000/api/CategoryAttributes/categories
+info: Ashare.Shared.Services.ListingsCacheService[0]
+      Fetching all listings from API (no cache)...
+dbug: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Cache hit for service: Marketplace
+dbug: ACommerce.Client.Core.Http.DynamicHttpClient[0]
+      GET http://localhost:3000/api/listings
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://localhost:3000/api/listings
+[ScopedTokenProvider] Returning cached token
+[AuthInterceptor] Request to /api/listings - Token: eyJhbGciOiJIUzI1NiIs...
+[AuthInterceptor] ? Authorization header added
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:3000/api/listings
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[101]
+      Received HTTP response headers after 5.3921ms - 200
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[101]
+      End processing HTTP request after 10.4287ms - 200
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[101]
+      Received HTTP response headers after 39.2023ms - 200
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[101]
+      End processing HTTP request after 44.1415ms - 200
+dbug: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[1]
+      Response markup is scheduled to include Browser Link script injection.
+dbug: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[1]
+      Response markup is scheduled to include browser refresh script injection.
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint '/explore (/explore)'
+dbug: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[2]
+      Response markup was updated to include Browser Link script injection.
+dbug: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[2]
+      Response markup was updated to include browser refresh script injection.
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/explore - 200 - text/html;+charset=utf-8 146.4643ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 POST http://localhost:5000/_blazor/disconnect - multipart/form-data;+boundary=----WebKitFormBoundaryCWSpAcxI33MwJIxT 359
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_blazor?id=D1F-C17HJhmKfoYHCVIIfQ - 101 - - 68150.4306ms
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 POST http://localhost:5000/_blazor/disconnect - 200 0 - 11.5846ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_framework/aspnetcore-browser-refresh.js - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_framework/blazor.web.js - - -
+dbug: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserScriptMiddleware[0]
+      Script injected: /_framework/aspnetcore-browser-refresh.js
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_framework/aspnetcore-browser-refresh.js - 200 16505 application/javascript;+charset=utf-8 4.9181ms
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Blazor web static files'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_vs/browserLink - - -
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[6]
+      The file /_framework/blazor.web.js was not modified
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Blazor web static files'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_framework/blazor.web.js - 304 - text/javascript 59.8455ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_vs/browserLink - 200 - text/javascript;+charset=UTF-8 45.9224ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_blazor/initializers - - -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://localhost:5000/_blazor/initializers - 200 - application/json;+charset=utf-8 4.5745ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 POST http://localhost:5000/_blazor/negotiate?negotiateVersion=1 - - 0
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 POST http://localhost:5000/_blazor/negotiate?negotiateVersion=1 - 200 316 application/json 29.3752ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5000/_blazor?id=pLFmidYMgdHmmFPqWUSxIA - - -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'Microsoft.AspNetCore.Routing.RouteEndpoint'
+[BrowserStorageService] Created
+[TokenManager] Created with storage: TokenStorageService
+info: Ashare.Shared.Services.ListingsCacheService[0]
+      Fetching categories from API (no cache)...
+dbug: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Cache hit for service: Marketplace
+dbug: ACommerce.Client.Core.Http.DynamicHttpClient[0]
+      GET http://localhost:3000/api/CategoryAttributes/categories
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://localhost:3000/api/CategoryAttributes/categories
+[ScopedTokenProvider] Returning cached token
+[AuthInterceptor] Request to /api/CategoryAttributes/categories - Token: eyJhbGciOiJIUzI1NiIs...
+[AuthInterceptor] ? Authorization header added
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:3000/api/CategoryAttributes/categories
+info: Ashare.Shared.Services.ListingsCacheService[0]
+      Fetching all listings from API (no cache)...
+dbug: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Cache hit for service: Marketplace
+dbug: ACommerce.Client.Core.Http.DynamicHttpClient[0]
+      GET http://localhost:3000/api/listings
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://localhost:3000/api/listings
+[ScopedTokenProvider] Returning cached token
+[AuthInterceptor] Request to /api/listings - Token: eyJhbGciOiJIUzI1NiIs...
+[AuthInterceptor] ? Authorization header added
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:3000/api/listings
+[BrowserStorageService] GetAsync(app_theme): not found
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[101]
+      Received HTTP response headers after 6.1992ms - 200
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[101]
+      End processing HTTP request after 11.5551ms - 200
+[BrowserStorageService] GetAsync(auth_token): found
+[BrowserStorageService] GetAsync(auth_expires_at): found
+[TokenStorageService] Token loaded from persistent storage (expires: 12/11/2025 4:19:30 PM)
+[ScopedTokenProvider] Cache updated: token set
+[TokenStorageService] OnTokenChanged fired after loading token
+[TokenManager] Loaded token from storage (expires: 12/11/2025 4:19:30 PM)
+[MainLayout] Auth check - Path: http://localhost:5000/explore, Token: exists, IsGuest: False, IsAuthPage: False, IsProtectedPage: False
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[101]
+      Received HTTP response headers after 39.686ms - 200
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[101]
+      End processing HTTP request after 44.4258ms - 200

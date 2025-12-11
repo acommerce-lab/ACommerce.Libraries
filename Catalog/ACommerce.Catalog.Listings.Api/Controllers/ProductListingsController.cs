@@ -42,7 +42,12 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                 IMemoryCache cache) : base(mediator, logger)
         {
                 _cache = cache;
-                _cacheEnabled = Environment.GetEnvironmentVariable("LISTINGS_CACHE_ENABLED")?.ToLower() != "false";
+                // Cache disabled by default - set LISTINGS_CACHE_ENABLED=true to enable
+                _cacheEnabled = Environment.GetEnvironmentVariable("LISTINGS_CACHE_ENABLED")?.ToLower() == "true";
+                if (!_cacheEnabled)
+                {
+                        logger.LogInformation("ProductListings cache is DISABLED");
+                }
         }
 
         /// <summary>
