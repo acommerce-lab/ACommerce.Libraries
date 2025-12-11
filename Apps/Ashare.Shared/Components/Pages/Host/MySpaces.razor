@@ -131,7 +131,7 @@
                     <i class="bi bi-exclamation-triangle"></i>
                 </div>
                 <h3>@L["ConfirmDelete"]</h3>
-                <p>@L["DeleteSpaceConfirmation", _spaceToDelete.Name]</p>
+                <p>@string.Format(L["DeleteSpaceConfirmation"], _spaceToDelete.Name)</p>
                 <div class="ashare-modal-actions">
                     <button class="ac-btn ac-btn-secondary" @onclick="CancelDelete">
                         @L["Cancel"]
