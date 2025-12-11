@@ -23,6 +23,7 @@ namespace ACommerce.Catalog.Listings.Api.Controllers;
 public class ProductListingsController : BaseCrudController<ProductListing, CreateProductListingDto, CreateProductListingDto, ProductListingResponseDto, CreateProductListingDto>
 {
         private readonly IMemoryCache _cache;
+        private readonly bool _cacheEnabled;
         private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(10);
         private static readonly TimeSpan SearchCacheDuration = TimeSpan.FromMinutes(5);
         private static readonly TimeSpan LockTimeout = TimeSpan.FromSeconds(5);
@@ -41,6 +42,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                 IMemoryCache cache) : base(mediator, logger)
         {
                 _cache = cache;
+                _cacheEnabled = Environment.GetEnvironmentVariable("LISTINGS_CACHE_ENABLED")?.ToLower() != "false";
         }
 
         /// <summary>
@@ -53,7 +55,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                 try
                 {
                         var cacheKey = $"{AllCacheKey}_{limit}";
-                        if (_cache.TryGetValue(cacheKey, out List<ProductListingResponseDto>? cachedItems) && cachedItems != null)
+                        if (_cacheEnabled && _cache.TryGetValue(cacheKey, out List<ProductListingResponseDto>? cachedItems) && cachedItems != null)
                         {
                                 _logger.LogDebug("Returning cached listings (all)");
                                 return Ok(cachedItems);
@@ -67,7 +69,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                         }
                         try
                         {
-                                if (_cache.TryGetValue(cacheKey, out cachedItems) && cachedItems != null)
+                                if (_cacheEnabled && _cache.TryGetValue(cacheKey, out cachedItems) && cachedItems != null)
                                 {
                                         return Ok(cachedItems);
                                 }
@@ -89,7 +91,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                                 var result = await _mediator.Send(query);
 
                                 var items = result.Items?.ToList() ?? new List<ProductListingResponseDto>();
-                                _cache.Set(cacheKey, items, CacheDuration);
+                                if (_cacheEnabled) _cache.Set(cacheKey, items, CacheDuration);
 
                                 return Ok(items);
                         }
@@ -115,7 +117,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                 try
                 {
                         var cacheKey = $"{FeaturedCacheKey}_{limit}";
-                        if (_cache.TryGetValue(cacheKey, out List<ProductListingResponseDto>? cachedItems) && cachedItems != null)
+                        if (_cacheEnabled && _cache.TryGetValue(cacheKey, out List<ProductListingResponseDto>? cachedItems) && cachedItems != null)
                         {
                                 _logger.LogDebug("Returning cached featured listings");
                                 return Ok(cachedItems);
@@ -129,7 +131,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                         }
                         try
                         {
-                                if (_cache.TryGetValue(cacheKey, out cachedItems) && cachedItems != null)
+                                if (_cacheEnabled && _cache.TryGetValue(cacheKey, out cachedItems) && cachedItems != null)
                                 {
                                         return Ok(cachedItems);
                                 }
@@ -151,7 +153,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                                 var result = await _mediator.Send(query);
 
                                 var items = result.Items?.ToList() ?? new List<ProductListingResponseDto>();
-                                _cache.Set(cacheKey, items, CacheDuration);
+                                if (_cacheEnabled) _cache.Set(cacheKey, items, CacheDuration);
 
                                 return Ok(items);
                         }
@@ -177,7 +179,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                 try
                 {
                         var cacheKey = $"{NewCacheKey}_{limit}";
-                        if (_cache.TryGetValue(cacheKey, out List<ProductListingResponseDto>? cachedItems) && cachedItems != null)
+                        if (_cacheEnabled && _cache.TryGetValue(cacheKey, out List<ProductListingResponseDto>? cachedItems) && cachedItems != null)
                         {
                                 _logger.LogDebug("Returning cached new listings");
                                 return Ok(cachedItems);
@@ -191,7 +193,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                         }
                         try
                         {
-                                if (_cache.TryGetValue(cacheKey, out cachedItems) && cachedItems != null)
+                                if (_cacheEnabled && _cache.TryGetValue(cacheKey, out cachedItems) && cachedItems != null)
                                 {
                                         return Ok(cachedItems);
                                 }
@@ -213,7 +215,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                                 var result = await _mediator.Send(query);
 
                                 var items = result.Items?.ToList() ?? new List<ProductListingResponseDto>();
-                                _cache.Set(cacheKey, items, CacheDuration);
+                                if (_cacheEnabled) _cache.Set(cacheKey, items, CacheDuration);
 
                                 return Ok(items);
                         }
@@ -545,7 +547,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                         var cacheKey = GenerateSearchCacheKey(request);
                         
                         // محاولة الحصول من الكاش (بدون قفل - للسرعة)
-                        if (_cache.TryGetValue(cacheKey, out PagedResult<ProductListingResponseDto>? cachedResult) && cachedResult != null)
+                        if (_cacheEnabled && _cache.TryGetValue(cacheKey, out PagedResult<ProductListingResponseDto>? cachedResult) && cachedResult != null)
                         {
                                 _logger.LogDebug("Cache HIT for search: {CacheKey}", cacheKey);
                                 return Ok(cachedResult);
@@ -565,7 +567,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                         try
                         {
                                 // تحقق مرة أخرى بعد الحصول على القفل
-                                if (_cache.TryGetValue(cacheKey, out cachedResult) && cachedResult != null)
+                                if (_cacheEnabled && _cache.TryGetValue(cacheKey, out cachedResult) && cachedResult != null)
                                 {
                                         _logger.LogDebug("Cache HIT (after lock) for search: {CacheKey}", cacheKey);
                                         return Ok(cachedResult);
@@ -585,7 +587,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                                 stopwatch.Stop();
 
                                 // تخزين في الكاش
-                                _cache.Set(cacheKey, result, SearchCacheDuration);
+                                if (_cacheEnabled) _cache.Set(cacheKey, result, SearchCacheDuration);
                                 _logger.LogInformation("Cached search results: {Count} items in {ElapsedMs}ms for key: {CacheKey}", 
                                         result.Items?.Count() ?? 0, stopwatch.ElapsedMilliseconds, cacheKey);
 
