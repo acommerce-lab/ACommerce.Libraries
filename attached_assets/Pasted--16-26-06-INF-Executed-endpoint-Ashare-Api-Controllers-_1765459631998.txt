@@ -1,0 +1,18 @@
+[16:26:06 INF] Executed endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAttributesForCategory (Ashare.Api)'
+[16:26:06 INF] Request finished HTTP/1.1 GET http://localhost:3000/api/CategoryAttributes/category/10000000-0000-0000-0001-000000000001 - 200 null application/json; charset=utf-8 163.9755ms
+[16:26:33 INF] Request starting HTTP/1.1 POST http://localhost:3000/api/media/upload?directory=listings - multipart/form-data; boundary="09884b8d-542c-41b7-b395-8801676bc203" null
+[16:26:33 INF] Executing endpoint 'Ashare.Api.Controllers.MediaController.Upload (Ashare.Api)'
+[16:26:33 INF] Route matched with {action = "Upload", controller = "Media"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Upload(Microsoft.AspNetCore.Http.IFormFile, System.String, System.Threading.CancellationToken) on controller Ashare.Api.Controllers.MediaController (Ashare.Api).
+[16:26:33 INF] Google Cloud Storage Provider initialized for bucket: ashare-images
+[16:26:33 INF] === [MediaController] Upload Request ===
+[16:26:33 INF] [MediaController] Authorization Header: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Zjk0YmZjNC0wZmFjLTQ2YzUtYTM3NC03YjkxZjgzZTNlZTAiLCJqdGkiOiI5YjQwZjQ3YS1hNzEwLTRlMDMtOTJlYy00MTAwMWNiY2IxOTgiLCJpYXQiOjE3NjU0NTg3NzQsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWVpZGVudGlmaWVyIjoiNmY5NGJmYzQtMGZhYy00NmM1LWEzNzQtN2I5MWY4M2UzZWUwIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZSI6Iti52LTZitixIiwibmF0aW9uYWxfaWQiOiIyNTA3NjQzNzYyIiwiZXhwIjoxNzY1NDYyMzc0LCJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo1MDAxIiwiYXVkIjoiYXNoYXJlLWFwaSJ9.k1XnnDyxv8dvYIXw1eQpbshIMHnNcgDKDfheASDuw7c
+[16:26:33 INF] [MediaController] User.Identity.IsAuthenticated: True
+[16:26:33 INF] [MediaController] User.Identity.Name: ????
+[16:26:33 INF] [MediaController] Directory: listings
+[16:26:33 INF] [MediaController] File: Untitled design (4) (1).png, Size: 18965, ContentType: image/png
+[16:26:41 INF] File uploaded to GCS: listings/cbbb7bdca98c46f7bbb51020ca584202.png, Generation: 1765459599334864
+[16:26:41 INF] File uploaded successfully: listings/cbbb7bdca98c46f7bbb51020ca584202.png
+[16:26:41 INF] Executing OkObjectResult, writing value of type 'Ashare.Api.Controllers.MediaController+UploadResponse'.
+[16:26:41 INF] Executed action Ashare.Api.Controllers.MediaController.Upload (Ashare.Api) in 7271.9803ms
+[16:26:41 INF] Executed endpoint 'Ashare.Api.Controllers.MediaController.Upload (Ashare.Api)'
+[16:26:41 INF] Request finished HTTP/1.1 POST http://localhost:3000/api/media/upload?directory=listings - 200 null application/json; charset=utf-8 7284.3074ms
