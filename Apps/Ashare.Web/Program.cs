@@ -65,6 +65,7 @@ builder.Services.AddScoped<TokenManager>();
 
 // Scoped Token Provider - singleton wrapper للوصول إلى TokenManager من HttpClient
 builder.Services.AddSingleton<ScopedTokenProvider>();
+builder.Services.AddSingleton<ITokenProvider>(sp => sp.GetRequiredService<ScopedTokenProvider>());
 
 // ACommerce Client مع خدمات محددة مسبقاً
 // يسجل الخدمات في Cache محلي لاستخدامها من قبل DynamicHttpClient
