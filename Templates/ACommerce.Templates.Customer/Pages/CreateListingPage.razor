@@ -2,6 +2,7 @@
 @using ACommerce.Templates.Customer.Components
 @using Microsoft.JSInterop
 @using Microsoft.AspNetCore.Components.Forms
+@using System.Net.Http.Json
 
 <div class="ac-page ac-create-listing-page">
     @* Header *@
@@ -268,7 +269,7 @@
                                     </div>
                                     <div class="ac-upload-text">
                                         <span class="ac-upload-title">اضغط لإضافة صور</span>
-                                        <span class="ac-upload-hint">PNG, JPG حتى 5MB</span>
+                                        <span class="ac-upload-hint">PNG, JPG حتى 10MB</span>
                                     </div>
                                 }
                             </div>
@@ -582,7 +583,7 @@
     private bool _hasReachedLocationStep;
     private bool _isUploadingImages;
     private string _uploadProgress = "";
-    private const long MaxFileSize = 5 * 1024 * 1024; // 5MB
+    private const long MaxFileSize = 10 * 1024 * 1024; // 10MB
 
     // Filter out images attribute - it's handled separately
     private List<ListingAttributeDefinition>? FilteredAttributes =>
@@ -789,6 +790,7 @@
     }
 
     [Inject] private IJSRuntime? JS { get; set; }
+    [Inject] private HttpClient? Http { get; set; }
 
     private async Task OpenInNativeMaps()
     {
@@ -827,20 +829,17 @@
         {
             foreach (var file in files)
             {
-                // تحقق من الحد الأقصى للصور
                 if (Model.Images.Count >= 10)
                 {
                     break;
                 }
 
-                // تحقق من حجم الملف
                 if (file.Size > MaxFileSize)
                 {
-                    Console.WriteLine($"File {file.Name} exceeds 5MB limit");
+                    Console.WriteLine($"File {file.Name} exceeds 10MB limit");
                     continue;
                 }
 
-                // تحقق من نوع الملف
                 if (!file.ContentType.StartsWith("image/"))
                 {
                     Console.WriteLine($"File {file.Name} is not an image");
@@ -848,21 +847,46 @@
                 }
 
                 processedFiles++;
-                _uploadProgress = $"جاري معالجة {processedFiles} من {totalFiles}...";
+                _uploadProgress = $"جاري رفع {processedFiles} من {totalFiles}...";
                 StateHasChanged();
 
                 try
                 {
-                    // قراءة الصورة وتحويلها لـ Base64
-                    using var stream = file.OpenReadStream(MaxFileSize);
-                    using var memoryStream = new MemoryStream();
-                    await stream.CopyToAsync(memoryStream);
-                    var bytes = memoryStream.ToArray();
-                    var base64 = Convert.ToBase64String(bytes);
-                    var dataUrl = $"data:{file.ContentType};base64,{base64}";
+                    if (Http != null)
+                    {
+                        using var stream = file.OpenReadStream(MaxFileSize);
+                        using var content = new MultipartFormDataContent();
+                        using var fileContent = new StreamContent(stream);
+                        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+                        content.Add(fileContent, "file", file.Name);
 
-                    Model.Images.Add(dataUrl);
-                    StateHasChanged();
+                        var response = await Http.PostAsync("/api/media/upload?directory=listings", content);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var result = await response.Content.ReadFromJsonAsync<MediaUploadResult>();
+                            if (result != null && !string.IsNullOrEmpty(result.Url))
+                            {
+                                Model.Images.Add(result.Url);
+                                StateHasChanged();
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Upload failed for {file.Name}: {response.StatusCode}");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("HttpClient not available, falling back to base64");
+                        using var stream = file.OpenReadStream(MaxFileSize);
+                        using var memoryStream = new MemoryStream();
+                        await stream.CopyToAsync(memoryStream);
+                        var bytes = memoryStream.ToArray();
+                        var base64 = Convert.ToBase64String(bytes);
+                        var dataUrl = $"data:{file.ContentType};base64,{base64}";
+                        Model.Images.Add(dataUrl);
+                        StateHasChanged();
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -1030,5 +1054,13 @@
             "amenities" => "bi-stars",
             _ => "bi-info-circle"
         };
+    }
+
+    private class MediaUploadResult
+    {
+        public string ObjectName { get; set; } = string.Empty;
+        public string Url { get; set; } = string.Empty;
+        public string ContentType { get; set; } = string.Empty;
+        public long Size { get; set; }
     }
 }

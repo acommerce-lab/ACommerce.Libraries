@@ -156,6 +156,9 @@ builder.Services.AddSingleton<RealtimeClient>();
 // Files Client
 builder.Services.AddScoped<FilesClient>();
 
+// HttpClient for direct API calls (used by CreateListingPage for image upload)
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });
+
 // ═══════════════════════════════════════════════════════════════════
 // App Services
 // ═══════════════════════════════════════════════════════════════════
