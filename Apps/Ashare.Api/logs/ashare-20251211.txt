@@ -598,3 +598,183 @@ Incorrect syntax near 'IX_AttributeValues_AttributeDefinitionId'.
 CREATE INDEX IF NOT EXISTS "IX_AttributeValues_IsDeleted" ON "AttributeValues" ("IsDeleted")
 2025-12-11 13:14:59.162 +00:00 [WRN] Index creation warning: Incorrect syntax near the keyword 'IF'.
 Incorrect syntax near 'IX_AttributeValues_IsDeleted'.
+2025-12-11 13:14:59.405 +00:00 [ERR] Failed executing DbCommand (242ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX IF NOT EXISTS "IX_AttributeValues_Composite" ON "AttributeValues" ("EntityId", "IsDeleted")
+2025-12-11 13:14:59.406 +00:00 [WRN] Index creation warning: Incorrect syntax near the keyword 'IF'.
+Incorrect syntax near 'IX_AttributeValues_Composite'.
+2025-12-11 13:14:59.652 +00:00 [ERR] Failed executing DbCommand (245ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX IF NOT EXISTS "IX_Products_IsDeleted" ON "Products" ("IsDeleted")
+2025-12-11 13:14:59.656 +00:00 [WRN] Index creation warning: Incorrect syntax near the keyword 'IF'.
+Incorrect syntax near 'IX_Products_IsDeleted'.
+2025-12-11 13:14:59.900 +00:00 [ERR] Failed executing DbCommand (243ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX IF NOT EXISTS "IX_Products_CategoryId" ON "Products" ("CategoryId")
+2025-12-11 13:14:59.901 +00:00 [WRN] Index creation warning: Incorrect syntax near the keyword 'IF'.
+Incorrect syntax near 'IX_Products_CategoryId'.
+2025-12-11 13:15:00.144 +00:00 [ERR] Failed executing DbCommand (242ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX IF NOT EXISTS "IX_Products_CreatedAt" ON "Products" ("CreatedAt")
+2025-12-11 13:15:00.145 +00:00 [WRN] Index creation warning: Incorrect syntax near the keyword 'IF'.
+Incorrect syntax near 'IX_Products_CreatedAt'.
+2025-12-11 13:15:00.387 +00:00 [ERR] Failed executing DbCommand (242ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX IF NOT EXISTS "IX_ProductCategories_IsDeleted" ON "ProductCategories" ("IsDeleted")
+2025-12-11 13:15:00.388 +00:00 [WRN] Index creation warning: Incorrect syntax near the keyword 'IF'.
+Incorrect syntax near 'IX_ProductCategories_IsDeleted'.
+2025-12-11 13:15:00.632 +00:00 [ERR] Failed executing DbCommand (243ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX IF NOT EXISTS "IX_ProductCategories_ParentId" ON "ProductCategories" ("ParentId")
+2025-12-11 13:15:00.635 +00:00 [WRN] Index creation warning: Incorrect syntax near the keyword 'IF'.
+Incorrect syntax near 'IX_ProductCategories_ParentId'.
+2025-12-11 13:15:00.879 +00:00 [ERR] Failed executing DbCommand (242ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX IF NOT EXISTS "IX_Vendors_IsDeleted" ON "Vendors" ("IsDeleted")
+2025-12-11 13:15:00.880 +00:00 [WRN] Index creation warning: Incorrect syntax near the keyword 'IF'.
+Incorrect syntax near 'IX_Vendors_IsDeleted'.
+2025-12-11 13:15:01.123 +00:00 [ERR] Failed executing DbCommand (243ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX IF NOT EXISTS "IX_Vendors_ProfileId" ON "Vendors" ("ProfileId")
+2025-12-11 13:15:01.124 +00:00 [WRN] Index creation warning: Incorrect syntax near the keyword 'IF'.
+Incorrect syntax near 'IX_Vendors_ProfileId'.
+2025-12-11 13:15:01.124 +00:00 [INF] Database indexes: 0 created, 23 skipped
+2025-12-11 13:15:01.125 +00:00 [INF] Seeding initial data...
+2025-12-11 13:15:02.053 +00:00 [INF] Executed DbCommand (243ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[CreatedAt], [p].[Description], [p].[Icon], [p].[Image], [p].[IsActive], [p].[IsDeleted], [p].[Name], [p].[ParentCategoryId], [p].[ProductId], [p].[Slug], [p].[SortOrder], [p].[UpdatedAt]
+FROM [ProductCategory] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit)
+2025-12-11 13:15:02.320 +00:00 [INF] Executed DbCommand (245ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[Code], [a].[CreatedAt], [a].[DefaultValue], [a].[Description], [a].[IsDeleted], [a].[IsFilterable], [a].[IsRequired], [a].[IsVisibleInDetail], [a].[IsVisibleInList], [a].[Name], [a].[SortOrder], [a].[Type], [a].[UpdatedAt], [a].[ValidationRules]
+FROM [AttributeDefinitions] AS [a]
+WHERE [a].[IsDeleted] = CAST(0 AS bit)
+2025-12-11 13:15:02.587 +00:00 [INF] Executed DbCommand (242ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[CreatedAt], [p].[Description], [p].[Icon], [p].[Image], [p].[IsActive], [p].[IsDeleted], [p].[Name], [p].[ParentCategoryId], [p].[ProductId], [p].[Slug], [p].[SortOrder], [p].[UpdatedAt]
+FROM [ProductCategory] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit)
+2025-12-11 13:15:02.832 +00:00 [INF] Executed DbCommand (242ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[Code], [a].[CreatedAt], [a].[DefaultValue], [a].[Description], [a].[IsDeleted], [a].[IsFilterable], [a].[IsRequired], [a].[IsVisibleInDetail], [a].[IsVisibleInList], [a].[Name], [a].[SortOrder], [a].[Type], [a].[UpdatedAt], [a].[ValidationRules]
+FROM [AttributeDefinitions] AS [a]
+WHERE [a].[IsDeleted] = CAST(0 AS bit)
+2025-12-11 13:15:03.098 +00:00 [INF] Executed DbCommand (248ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [c].[Id], [c].[AttributeDefinitionId], [c].[CategoryId], [c].[CreatedAt], [c].[IsActive], [c].[IsDeleted], [c].[IsRequiredOverride], [c].[SortOrder], [c].[UpdatedAt]
+FROM [CategoryAttributeMappings] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit)
+2025-12-11 13:15:03.386 +00:00 [INF] Executed DbCommand (247ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[Barcode], [p].[CreatedAt], [p].[DimensionUnitId], [p].[FeaturedImage], [p].[Height], [p].[IsDeleted], [p].[IsFeatured], [p].[IsNew], [p].[Length], [p].[LongDescription], [p].[Name], [p].[NewUntil], [p].[ParentProductId], [p].[ShortDescription], [p].[Sku], [p].[SortOrder], [p].[Status], [p].[Type], [p].[UpdatedAt], [p].[Weight], [p].[WeightUnitId], [p].[Width]
+FROM [Products] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit)
+2025-12-11 13:15:03.650 +00:00 [INF] Executed DbCommand (244ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[BasePrice], [p].[CreatedAt], [p].[CurrencyId], [p].[CustomerSegment], [p].[DiscountPercentage], [p].[IsActive], [p].[IsDeleted], [p].[Market], [p].[MaxQuantity], [p].[MinQuantity], [p].[ProductId], [p].[SaleEndDate], [p].[SalePrice], [p].[SaleStartDate], [p].[UpdatedAt]
+FROM [ProductPrices] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit)
+2025-12-11 13:15:03.985 +00:00 [INF] Executed DbCommand (248ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [s].[Id], [s].[AllowApiAccess], [s].[AllowCustomStorePage], [s].[AllowDataExport], [s].[AllowDirectMessages], [s].[AllowPromotionalTools], [s].[AnalyticsLevel], [s].[AnnualPrice], [s].[Color], [s].[CommissionFixedAmount], [s].[CommissionPercentage], [s].[CommissionType], [s].[CreatedAt], [s].[Currency], [s].[Description], [s].[DescriptionEn], [s].[EmailReports], [s].[ExtraFeaturesJson], [s].[GracePeriodDays], [s].[HasVerifiedBadge], [s].[Icon], [s].[IsActive], [s].[IsDefault], [s].[IsDeleted], [s].[IsRecommended], [s].[ListingDurationDays], [s].[MaxCommission], [s].[MaxFeaturedListings], [s].[MaxImagesPerListing], [s].[MaxListings], [s].[MaxMonthlyApiCalls], [s].[MaxMonthlyMessages], [s].[MaxTeamMembers], [s].[MetadataJson], [s].[MinCommission], [s].[MonthlyPrice], [s].[Name], [s].[NameEn], [s].[PushNotifications], [s].[QuarterlyPrice], [s].[RemoveBranding], [s].[SearchPriorityBoost], [s].[SemiAnnualPrice], [s].[Slug], [s].[SortOrder], [s].[StorageLimitMB], [s].[SupportLevel], [s].[TrialDays], [s].[UpdatedAt]
+FROM [SubscriptionPlans] AS [s]
+WHERE [s].[IsDeleted] = CAST(0 AS bit)
+2025-12-11 13:15:03.996 +00:00 [INF] Database ready with seed data!
+2025-12-11 13:15:03.997 +00:00 [INF] Warming up EF Core and AutoMapper...
+2025-12-11 13:15:04.003 +00:00 [WRN] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+2025-12-11 13:15:04.294 +00:00 [INF] Executed DbCommand (256ms) [Parameters=[@__p_0='1'], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(@__p_0) [p].[Id], [p].[Address], [p].[AttributesJson], [p].[CategoryId], [p].[City], [p].[CompareAtPrice], [p].[Condition], [p].[Cost], [p].[CreatedAt], [p].[Currency], [p].[CurrencyId], [p].[Description], [p].[EndsAt], [p].[FeaturedImage], [p].[ImagesJson], [p].[IsActive], [p].[IsDeleted], [p].[IsFeatured], [p].[IsNew], [p].[Latitude], [p].[Longitude], [p].[LowStockThreshold], [p].[Price], [p].[ProcessingTime], [p].[ProductId], [p].[QuantityAvailable], [p].[QuantityReserved], [p].[Rating], [p].[ReviewCount], [p].[StartsAt], [p].[Status], [p].[Title], [p].[TotalSales], [p].[UpdatedAt], [p].[VendorId], [p].[VendorNotes], [p].[VendorSku], [p].[ViewCount]
+FROM [ProductListing] AS [p]
+2025-12-11 13:15:04.957 +00:00 [WRN] You do not have a valid license key for the Lucky Penny software AutoMapper. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2025-12-11 13:15:04.958 +00:00 [INF] Warm-up completed in 960ms
+2025-12-11 13:15:04.974 +00:00 [INF] 🌐 Host URLs configured: API=http://localhost:3000, Web=http://localhost:5000
+2025-12-11 13:15:04.990 +00:00 [INF] ✅ Service registered: Ashare vv1 at http://localhost:3000 (ID: 1bd1a1d9-9656-47fb-bc5f-df61b5f22bcb)
+2025-12-11 13:15:04.990 +00:00 [INF] ✅ Service registered: Marketplace vv1 at http://localhost:3000 (ID: 015464ac-3d1b-4b3d-a359-884665cb987d)
+2025-12-11 13:15:04.991 +00:00 [INF] ✅ Service registered: Payments vv1 at http://localhost:3000 (ID: 8f8829d8-0adc-4e95-b5fc-f8c831b81bd2)
+2025-12-11 13:15:04.991 +00:00 [INF] Ashare/Marketplace/Payments services registered in Service Registry at http://localhost:3000
+2025-12-11 13:15:04.991 +00:00 [INF] Ashare API started successfully!
+2025-12-11 13:15:04.991 +00:00 [INF] Swagger UI available at: http://localhost:3000
+2025-12-11 13:15:05.012 +00:00 [INF] User profile is available. Using '/home/runner/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-12-11 13:15:05.090 +00:00 [INF] [Notify Messaging] 🎧 Starting notification messaging handler
+2025-12-11 13:15:05.092 +00:00 [INF] [Ashare] Subscribed to topic 'notify.commands.send'
+2025-12-11 13:15:05.092 +00:00 [INF] [Notify Messaging] ✅ Notification messaging handler started
+2025-12-11 13:15:05.094 +00:00 [INF] [Auth Messaging] 🎧 Starting handler with channels: InApp
+2025-12-11 13:15:05.094 +00:00 [INF] [Ashare] Subscribed to topic 'auth.events.authentication.twofactorsucceeded'
+2025-12-11 13:15:05.095 +00:00 [INF] [Ashare] Subscribed to topic 'auth.events.authentication.twofactorfailed'
+2025-12-11 13:15:05.095 +00:00 [INF] [Ashare] Subscribed to topic 'auth.events.authentication.twofactorexpired'
+2025-12-11 13:15:05.095 +00:00 [INF] [Auth Messaging] ✅ Handler started
+2025-12-11 13:15:05.310 +00:00 [INF] Now listening on: http://0.0.0.0:8080
+2025-12-11 13:15:05.312 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-12-11 13:15:05.313 +00:00 [INF] Hosting environment: Development
+2025-12-11 13:15:05.313 +00:00 [INF] Content root path: /home/runner/workspace/Apps/Ashare.Api
+2025-12-11 13:15:06.369 +00:00 [INF] Request starting HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/ - null null
+2025-12-11 13:15:06.466 +00:00 [INF] Request finished HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/ - 301 0 null 98.6539ms
+2025-12-11 13:15:06.538 +00:00 [INF] Request starting HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/index.html - null null
+2025-12-11 13:15:06.655 +00:00 [INF] Request finished HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/index.html - 200 null text/html;charset=utf-8 117.2078ms
+2025-12-11 13:15:06.786 +00:00 [INF] Request starting HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/swagger-ui.css - null null
+2025-12-11 13:15:06.823 +00:00 [INF] Request finished HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/swagger-ui.css - 200 23647 text/css 37.1816ms
+2025-12-11 13:15:06.886 +00:00 [INF] Request starting HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/index.css - null null
+2025-12-11 13:15:06.890 +00:00 [INF] Request finished HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/index.css - 200 152 text/css 3.3364ms
+2025-12-11 13:15:06.906 +00:00 [INF] Request starting HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/swagger-ui-bundle.js - null null
+2025-12-11 13:15:06.908 +00:00 [INF] Request starting HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/index.js - null null
+2025-12-11 13:15:06.907 +00:00 [INF] Request starting HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/swagger-ui-standalone-preset.js - null null
+2025-12-11 13:15:06.910 +00:00 [INF] Request finished HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/index.js - 200 null application/javascript;charset=utf-8 1.125ms
+2025-12-11 13:15:06.927 +00:00 [INF] Request finished HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/swagger-ui-standalone-preset.js - 200 77352 text/javascript 20.4214ms
+2025-12-11 13:15:06.932 +00:00 [INF] Request finished HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/swagger-ui-bundle.js - 200 424767 text/javascript 26.0282ms
+2025-12-11 13:15:07.309 +00:00 [INF] Request starting HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/swagger/v1/swagger.json - null null
+2025-12-11 13:15:08.324 +00:00 [INF] Request finished HTTP/1.1 GET http://3feea301-cb02-4d39-87ba-a83e6ccf2097-00-2h5hceivikkej.pike.replit.dev/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 1014.2206ms
+2025-12-11 13:15:10.092 +00:00 [INF] Starting cache warm-up at http://localhost:3000...
+2025-12-11 13:15:10.157 +00:00 [WRN] Failed to warm up Featured cache
+System.Net.Http.HttpRequestException: Connection refused (localhost:3000)
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.GetStringAsyncCore(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Ashare.Api.Services.CacheWarmupService.WarmUpEndpoint(HttpClient client, String url, String name, CancellationToken ct) in /home/runner/workspace/Apps/Ashare.Api/Services/CacheWarmupService.cs:line 51
+2025-12-11 13:15:10.157 +00:00 [WRN] Failed to warm up All cache
+System.Net.Http.HttpRequestException: Connection refused (localhost:3000)
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.GetStringAsyncCore(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Ashare.Api.Services.CacheWarmupService.WarmUpEndpoint(HttpClient client, String url, String name, CancellationToken ct) in /home/runner/workspace/Apps/Ashare.Api/Services/CacheWarmupService.cs:line 51
+2025-12-11 13:15:10.184 +00:00 [WRN] Failed to warm up New cache
+System.Net.Http.HttpRequestException: Connection refused (localhost:3000)
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.GetStringAsyncCore(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Ashare.Api.Services.CacheWarmupService.WarmUpEndpoint(HttpClient client, String url, String name, CancellationToken ct) in /home/runner/workspace/Apps/Ashare.Api/Services/CacheWarmupService.cs:line 51
+2025-12-11 13:15:10.185 +00:00 [WRN] Failed to warm up Search cache
+System.Net.Http.HttpRequestException: Connection refused (localhost:3000)
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at Ashare.Api.Services.CacheWarmupService.WarmUpSearchEndpoint(HttpClient client, String baseUrl, CancellationToken ct) in /home/runner/workspace/Apps/Ashare.Api/Services/CacheWarmupService.cs:line 85
+2025-12-11 13:15:10.241 +00:00 [INF] Cache warm-up completed successfully!

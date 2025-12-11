@@ -1,0 +1,165 @@
+[CreateListing] Attribute: ????? (images) - Type: Text
+[CreateListing] Setting 21 attributes to page
+[CreateListingPage] Token: Bearer eyJhbGciOiJIUzI1NiIs...
+dbug: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Cache hit for service: Marketplace
+dbug: ACommerce.Client.Core.Http.DynamicHttpClient[0]
+      GET http://localhost:3000/api/subscriptions/vendor/6f94bfc4-0fac-46c5-a374-7b91f83e3ee0/can-add-listing
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://localhost:3000/api/subscriptions/vendor/6f94bfc4-0fac-46c5-a374-7b91f83e3ee0/can-add-listing
+[ScopedTokenProvider] Returning cached token
+[AuthInterceptor] Request to /api/subscriptions/vendor/6f94bfc4-0fac-46c5-a374-7b91f83e3ee0/can-add-listing - Token: eyJhbGciOiJIUzI1NiIs...
+[AuthInterceptor] ? Authorization header added
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:3000/api/subscriptions/vendor/6f94bfc4-0fac-46c5-a374-7b91f83e3ee0/can-add-listing
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[101]
+      Received HTTP response headers after 2464.8088ms - 200
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[101]
+      End processing HTTP request after 2468.4467ms - 200
+dbug: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Cache hit for service: Marketplace
+dbug: ACommerce.Client.Core.Http.DynamicHttpClient[0]
+      POST http://localhost:3000/api/listings
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[100]
+      Start processing HTTP request POST http://localhost:3000/api/listings
+[ScopedTokenProvider] Returning cached token
+[AuthInterceptor] Request to /api/listings - Token: eyJhbGciOiJIUzI1NiIs...
+[AuthInterceptor] ? Authorization header added
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request POST http://localhost:3000/api/listings
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[101]
+      Received HTTP response headers after 226.9884ms - 201
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[101]
+      End processing HTTP request after 230.7852ms - 201
+info: Ashare.Shared.Services.ListingsCacheService[0]
+      Invalidating all listings cache
+info: Ashare.Shared.Services.AshareApiService[0]
+      Created new listing 560255e6-824f-4551-87d8-66905a0e50ab, cache invalidated
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache miss: Fetching listing 560255e6-824f-4551-87d8-66905a0e50ab from API...
+dbug: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Cache hit for service: Marketplace
+dbug: ACommerce.Client.Core.Http.DynamicHttpClient[0]
+      GET http://localhost:3000/api/listings/560255e6-824f-4551-87d8-66905a0e50ab
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://localhost:3000/api/listings/560255e6-824f-4551-87d8-66905a0e50ab
+[ScopedTokenProvider] Returning cached token
+[AuthInterceptor] Request to /api/listings/560255e6-824f-4551-87d8-66905a0e50ab - Token: eyJhbGciOiJIUzI1NiIs...
+[AuthInterceptor] ? Authorization header added
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:3000/api/listings/560255e6-824f-4551-87d8-66905a0e50ab
+[MainLayout] Auth check - Path: http://localhost:5000/space/560255e6-824f-4551-87d8-66905a0e50ab, Token: exists, IsGuest: False, IsAuthPage: False, IsProtectedPage: False
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[101]
+      Received HTTP response headers after 75.5144ms - 200
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[101]
+      End processing HTTP request after 79.7134ms - 200
+dbug: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Cache hit for service: Marketplace
+dbug: ACommerce.Client.Core.Http.DynamicHttpClient[0]
+      GET http://localhost:3000/api/profiles/by-user/6f94bfc4-0fac-46c5-a374-7b91f83e3ee0
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://localhost:3000/api/profiles/by-user/6f94bfc4-0fac-46c5-a374-7b91f83e3ee0
+[ScopedTokenProvider] Returning cached token
+[AuthInterceptor] Request to /api/profiles/by-user/6f94bfc4-0fac-46c5-a374-7b91f83e3ee0 - Token: eyJhbGciOiJIUzI1NiIs...
+[AuthInterceptor] ? Authorization header added
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:3000/api/profiles/by-user/6f94bfc4-0fac-46c5-a374-7b91f83e3ee0
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[101]
+      Received HTTP response headers after 196.288ms - 200
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[101]
+      End processing HTTP request after 199.7118ms - 200
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: Categories
+info: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache miss: Fetching featured listings from API...
+dbug: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Cache hit for service: Marketplace
+dbug: ACommerce.Client.Core.Http.DynamicHttpClient[0]
+      GET http://localhost:3000/api/listings/featured?limit=10
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://localhost:3000/api/listings/featured?*
+[ScopedTokenProvider] Returning cached token
+[AuthInterceptor] Request to /api/listings/featured - Token: eyJhbGciOiJIUzI1NiIs...
+[AuthInterceptor] ? Authorization header added
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:3000/api/listings/featured?*
+info: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache miss: Fetching new listings from API...
+dbug: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Cache hit for service: Marketplace
+dbug: ACommerce.Client.Core.Http.DynamicHttpClient[0]
+      GET http://localhost:3000/api/listings/new?limit=10
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://localhost:3000/api/listings/new?*
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[101]
+      Received HTTP response headers after 36.3597ms - 200
+[ScopedTokenProvider] Returning cached token
+[AuthInterceptor] Request to /api/listings/new - Token: eyJhbGciOiJIUzI1NiIs...
+[AuthInterceptor] ? Authorization header added
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:3000/api/listings/new?*
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[101]
+      End processing HTTP request after 45.8891ms - 200
+[MainLayout] Auth check - Path: http://localhost:5000/, Token: exists, IsGuest: False, IsAuthPage: False, IsProtectedPage: False
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[101]
+      Received HTTP response headers after 9.5939ms - 200
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[101]
+      End processing HTTP request after 16.2015ms - 200
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: Categories
+info: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache miss: Fetching all listings from API...
+dbug: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Cache hit for service: Marketplace
+dbug: ACommerce.Client.Core.Http.DynamicHttpClient[0]
+      GET http://localhost:3000/api/listings
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://localhost:3000/api/listings
+[ScopedTokenProvider] Returning cached token
+[AuthInterceptor] Request to /api/listings - Token: eyJhbGciOiJIUzI1NiIs...
+[AuthInterceptor] ? Authorization header added
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:3000/api/listings
+[MainLayout] Auth check - Path: http://localhost:5000/explore, Token: exists, IsGuest: False, IsAuthPage: False, IsProtectedPage: False
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[101]
+      Received HTTP response headers after 6.5198ms - 200
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[101]
+      End processing HTTP request after 11.0887ms - 200
+info: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache fully warmed up at 12/11/2025 13:18:50
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[103]
+      HttpMessageHandler expired after 120000ms for client 'ServiceRegistryClient'
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[103]
+      HttpMessageHandler expired after 120000ms for client 'DynamicHttpClient'
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[100]
+      Starting HttpMessageHandler cleanup cycle with 2 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[101]
+      Ending HttpMessageHandler cleanup cycle after 0.1056ms - processed: 0 items - remaining: 2 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[100]
+      Starting HttpMessageHandler cleanup cycle with 2 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[101]
+      Ending HttpMessageHandler cleanup cycle after 0.004ms - processed: 0 items - remaining: 2 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[100]
+      Starting HttpMessageHandler cleanup cycle with 2 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[101]
+      Ending HttpMessageHandler cleanup cycle after 0.0054ms - processed: 0 items - remaining: 2 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[100]
+      Starting HttpMessageHandler cleanup cycle with 2 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[101]
+      Ending HttpMessageHandler cleanup cycle after 0.0067ms - processed: 0 items - remaining: 2 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[100]
+      Starting HttpMessageHandler cleanup cycle with 2 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[101]
+      Ending HttpMessageHandler cleanup cycle after 0.0075ms - processed: 0 items - remaining: 2 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[100]
+      Starting HttpMessageHandler cleanup cycle with 2 items
+dbug: Microsoft.Extensions.Http.DefaultHttpClientFactory[101]
+      Ending HttpMessageHandler cleanup cycle after 0.007ms - processed: 0 items - remaining: 2 items
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: Categories
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: Featured listings
+dbug: Ashare.Shared.Services.ListingsCacheService[0]
+      Cache hit: New listings
+[MainLayout] Auth check - Path: http://localhost:5000/, Token: exists, IsGuest: False, IsAuthPage: False, IsProtectedPage: False
+dbug: 
