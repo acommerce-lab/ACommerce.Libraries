@@ -60,9 +60,9 @@
                 {
                     <div class="ashare-space-card">
                         <div class="ashare-space-image" @onclick="() => ViewSpace(space.Id)">
-                            @if (!string.IsNullOrEmpty(space.ImageUrl))
+                            @if (space.Images.Count > 0)
                             {
-                                <img src="@space.ImageUrl" alt="@space.Title" />
+                                <img src="@space.Images[0]" alt="@space.Name" />
                             }
                             else
                             {
@@ -70,20 +70,20 @@
                                     <i class="bi bi-image"></i>
                                 </div>
                             }
-                            <span class="ashare-space-status @GetStatusClass(space.IsActive)">
-                                @(space.IsActive ? L["Active"] : L["Inactive"])
+                            <span class="ashare-space-status @GetStatusClass(space.IsAvailable)">
+                                @(space.IsAvailable ? L["Active"] : L["Inactive"])
                             </span>
                         </div>
 
                         <div class="ashare-space-info">
-                            <h3 class="ashare-space-title" @onclick="() => ViewSpace(space.Id)">@space.Title</h3>
+                            <h3 class="ashare-space-title" @onclick="() => ViewSpace(space.Id)">@space.Name</h3>
                             <p class="ashare-space-location">
                                 <i class="bi bi-geo-alt"></i>
                                 @(space.Location ?? L["NoLocation"])
                             </p>
                             <div class="ashare-space-stats">
                                 <span class="ashare-space-price">
-                                    @space.Price.ToString("N0") @L["SAR"]
+                                    @space.PricePerMonth.ToString("N0") @L["SAR"]
                                     <small>/@L["Month"]</small>
                                 </span>
                                 <span class="ashare-space-views">
@@ -131,7 +131,7 @@
                     <i class="bi bi-exclamation-triangle"></i>
                 </div>
                 <h3>@L["ConfirmDelete"]</h3>
-                <p>@L["DeleteSpaceConfirmation", _spaceToDelete.Title]</p>
+                <p>@L["DeleteSpaceConfirmation", _spaceToDelete.Name]</p>
                 <div class="ashare-modal-actions">
                     <button class="ac-btn ac-btn-secondary" @onclick="CancelDelete">
                         @L["Cancel"]
@@ -508,7 +508,7 @@
             if (_isLoggedIn)
             {
                 var userInfo = await AuthClient.GetMeAsync();
-                if (userInfo != null && Guid.TryParse(userInfo.UserId, out var userId))
+                if (userInfo != null && Guid.TryParse(userInfo.Id, out var userId))
                 {
                     _vendorId = userId;
                     _spaces = await ApiService.GetMySpacesAsync(_vendorId);
@@ -569,8 +569,8 @@
         _spaceToDelete = null;
     }
 
-    private string GetStatusClass(bool isActive)
+    private string GetStatusClass(bool isAvailable)
     {
-        return isActive ? "active" : "inactive";
+        return isAvailable ? "active" : "inactive";
     }
 }
