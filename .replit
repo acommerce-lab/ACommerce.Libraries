@@ -18,6 +18,10 @@ author = "agent"
 task = "workflow.run"
 args = "AshareWeb"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "AshareApi"
+
 [[workflows.workflow]]
 name = "AshareWeb"
 author = "agent"
@@ -30,6 +34,18 @@ task = "shell.exec"
 args = "cd Apps/Ashare.Web && dotnet run --urls \"http://0.0.0.0:5000\""
 waitForPort = 5000
 
+[[workflows.workflow]]
+name = "AshareApi"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd Apps/Ashare.Api && dotnet run --urls \"http://0.0.0.0:8080\""
+waitForPort = 8080
+
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[ports]]
 localPort = 3000
 externalPort = 3000
@@ -40,6 +56,10 @@ externalPort = 5000
 
 [[ports]]
 localPort = 8085
+
+[[ports]]
+localPort = 8080
+externalPort = 8080
 
 [deployment]
 deploymentTarget = "vm"
