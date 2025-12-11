@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using ACommerce.Client.Core.Http;
 using ACommerce.Client.Core.Interceptors;
+using ACommerce.ServiceRegistry.Client;
 
 namespace ACommerce.Client.Files;
 
@@ -10,12 +11,14 @@ public sealed class FilesClient
         private readonly IApiClient _httpClient;
         private readonly HttpClient _rawHttpClient;
         private readonly ITokenProvider? _tokenProvider;
-        private const string ServiceName = "Files"; // أو "Marketplace"
+        private readonly IServiceRegistryClient _serviceRegistry;
+        private const string ServiceName = "Files";
 
-        public FilesClient(IApiClient httpClient, IHttpClientFactory httpClientFactory, ITokenProvider? tokenProvider = null)
+        public FilesClient(IApiClient httpClient, IHttpClientFactory httpClientFactory, IServiceRegistryClient serviceRegistry, ITokenProvider? tokenProvider = null)
         {
                 _httpClient = httpClient;
                 _rawHttpClient = httpClientFactory.CreateClient("DynamicHttpClient");
+                _serviceRegistry = serviceRegistry;
                 _tokenProvider = tokenProvider;
         }
 
@@ -109,7 +112,8 @@ public sealed class FilesClient
                 fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
                 content.Add(fileContent, "file", fileName);
 
-                var request = new HttpRequestMessage(HttpMethod.Post, $"/api/media/upload?directory={directory}")
+                var baseUrl = await _serviceRegistry.GetServiceUrlAsync(ServiceName);
+                var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/api/media/upload?directory={directory}")
                 {
                         Content = content
                 };
@@ -142,7 +146,8 @@ public sealed class FilesClient
 
                 try
                 {
-                        var request = new HttpRequestMessage(HttpMethod.Post, $"/api/media/upload/multiple?directory={directory}")
+                        var baseUrl = await _serviceRegistry.GetServiceUrlAsync(ServiceName);
+                        var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/api/media/upload/multiple?directory={directory}")
                         {
                                 Content = content
                         };

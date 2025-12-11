@@ -79,6 +79,9 @@ builder.Services.AddACommerceClientWithServices(
 
         // تسجيل خدمة Payments - للدفع عبر Noon وغيرها
         services.AddService("Payments", apiBaseUrl);
+
+        // تسجيل خدمة Files - لرفع الملفات والصور
+        services.AddService("Files", apiBaseUrl);
     },
     options =>
     {
