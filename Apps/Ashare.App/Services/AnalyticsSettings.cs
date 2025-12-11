@@ -37,17 +37,22 @@ public static class AnalyticsSettings
     /// <summary>
     /// Meta Pixel ID للويب (من Events Manager)
     /// </summary>
-    public const string MetaPixelId = "";
+    public const string MetaPixelId = "1775307086509416";
 
     /// <summary>
     /// Meta App ID للجوال - iOS (من developers.facebook.com)
     /// </summary>
-    public const string MetaIosAppId = "";
+    public const string MetaIosAppId = "1775307086509416";
 
     /// <summary>
     /// Meta App ID للجوال - Android (من developers.facebook.com)
     /// </summary>
-    public const string MetaAndroidAppId = "";
+    public const string MetaAndroidAppId = "1775307086509416";
+    
+    /// <summary>
+    /// Meta Client Token (من Settings → Advanced → Client Token)
+    /// </summary>
+    public const string MetaClientToken = ""; // TODO: اطلب من مدير التسويق
 
     // ═══════════════════════════════════════════════════════════════════
     // Google Analytics / Firebase
