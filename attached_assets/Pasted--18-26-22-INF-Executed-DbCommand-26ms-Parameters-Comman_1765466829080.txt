@@ -1,0 +1,198 @@
+[18:26:22 INF] Executed DbCommand (26ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+SELECT [c].[Id], [c].[AttributeDefinitionId], [c].[CategoryId], [c].[CreatedAt], [c].[IsActive], [c].[IsDeleted], [c].[IsRequiredOverride], [c].[SortOrder], [c].[UpdatedAt]
+FROM [CategoryAttributeMappings] AS [c]
+WHERE [c].[IsDeleted] = CAST(0 AS bit)
+[Seed] Added 0 category-attribute mappings
+[18:26:22 INF] Executed DbCommand (26ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+SELECT [p].[Id], [p].[Barcode], [p].[CreatedAt], [p].[DimensionUnitId], [p].[FeaturedImage], [p].[Height], [p].[IsDeleted], [p].[IsFeatured], [p].[IsNew], [p].[Length], [p].[LongDescription], [p].[Name], [p].[NewUntil], [p].[ParentProductId], [p].[ShortDescription], [p].[Sku], [p].[SortOrder], [p].[Status], [p].[Type], [p].[UpdatedAt], [p].[Weight], [p].[WeightUnitId], [p].[Width]
+FROM [Products] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit)
+[18:26:23 INF] Executed DbCommand (32ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+SELECT [p].[Id], [p].[BasePrice], [p].[CreatedAt], [p].[CurrencyId], [p].[CustomerSegment], [p].[DiscountPercentage], [p].[IsActive], [p].[IsDeleted], [p].[Market], [p].[MaxQuantity], [p].[MinQuantity], [p].[ProductId], [p].[SaleEndDate], [p].[SalePrice], [p].[SaleStartDate], [p].[UpdatedAt]
+FROM [ProductPrices] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit)
+[18:26:23 INF] Executed DbCommand (27ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+SELECT [s].[Id], [s].[AllowApiAccess], [s].[AllowCustomStorePage], [s].[AllowDataExport], [s].[AllowDirectMessages], [s].[AllowPromotionalTools], [s].[AnalyticsLevel], [s].[AnnualPrice], [s].[Color], [s].[CommissionFixedAmount], [s].[CommissionPercentage], [s].[CommissionType], [s].[CreatedAt], [s].[Currency], [s].[Description], [s].[DescriptionEn], [s].[EmailReports], [s].[ExtraFeaturesJson], [s].[GracePeriodDays], [s].[HasVerifiedBadge], [s].[Icon], [s].[IsActive], [s].[IsDefault], [s].[IsDeleted], [s].[IsRecommended], [s].[ListingDurationDays], [s].[MaxCommission], [s].[MaxFeaturedListings], [s].[MaxImagesPerListing], [s].[MaxListings], [s].[MaxMonthlyApiCalls], [s].[MaxMonthlyMessages], [s].[MaxTeamMembers], [s].[MetadataJson], [s].[MinCommission], [s].[MonthlyPrice], [s].[Name], [s].[NameEn], [s].[PushNotifications], [s].[QuarterlyPrice], [s].[RemoveBranding], [s].[SearchPriorityBoost], [s].[SemiAnnualPrice], [s].[Slug], [s].[SortOrder], [s].[StorageLimitMB], [s].[SupportLevel], [s].[TrialDays], [s].[UpdatedAt]
+FROM [SubscriptionPlans] AS [s]
+WHERE [s].[IsDeleted] = CAST(0 AS bit)
+[Seed] Subscription plans seeding complete. Total: 9
+[18:26:23 INF] Database ready with seed data!
+[18:26:23 INF] Warming up EF Core and AutoMapper...
+[18:26:23 WRN] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+[18:26:23 INF] Executed DbCommand (38ms) [Parameters=[@__p_0='1'], CommandType='Text', CommandTimeout='30']
+SELECT TOP(@__p_0) [p].[Id], [p].[Address], [p].[AttributesJson], [p].[CategoryId], [p].[City], [p].[CompareAtPrice], [p].[Condition], [p].[Cost], [p].[CreatedAt], [p].[Currency], [p].[CurrencyId], [p].[Description], [p].[EndsAt], [p].[FeaturedImage], [p].[ImagesJson], [p].[IsActive], [p].[IsDeleted], [p].[IsFeatured], [p].[IsNew], [p].[Latitude], [p].[Longitude], [p].[LowStockThreshold], [p].[Price], [p].[ProcessingTime], [p].[ProductId], [p].[QuantityAvailable], [p].[QuantityReserved], [p].[Rating], [p].[ReviewCount], [p].[StartsAt], [p].[Status], [p].[Title], [p].[TotalSales], [p].[UpdatedAt], [p].[VendorId], [p].[VendorNotes], [p].[VendorSku], [p].[ViewCount]
+FROM [ProductListing] AS [p]
+[18:26:23 WRN] You do not have a valid license key for the Lucky Penny software AutoMapper. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+[18:26:23 INF] Warm-up completed in 381ms
+[18:26:23 INF] ?? Host URLs configured: API=http://localhost:3000, Web=http://localhost:5000
+[18:26:23 INF] ? Service registered: Ashare vv1 at http://localhost:3000 (ID: 26f0c242-6af9-4aea-8b24-647637f4e58c)
+[18:26:23 INF] ? Service registered: Marketplace vv1 at http://localhost:3000 (ID: 18f1d2f4-9e41-4b0f-9879-302ad8b0cf0d)
+[18:26:23 INF] ? Service registered: Payments vv1 at http://localhost:3000 (ID: bd101e48-3b2f-4353-aaab-00ba6928fe46)
+[18:26:23 INF] Ashare/Marketplace/Payments services registered in Service Registry at http://localhost:3000
+[18:26:23 INF] Ashare API started successfully!
+[18:26:23 INF] Swagger UI available at: http://localhost:3000
+[18:26:23 INF] User profile is available. Using 'C:\Users\i\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+[18:26:23 INF] [Notify Messaging] ?? Starting notification messaging handler
+[18:26:23 INF] [Ashare] Subscribed to topic 'notify.commands.send'
+[18:26:23 INF] [Auth Messaging] ?? Starting handler with channels: InApp
+[18:26:23 INF] [Notify Messaging] ? Notification messaging handler started
+[18:26:23 INF] [Ashare] Subscribed to topic 'auth.events.authentication.twofactorsucceeded'
+[18:26:23 INF] [Ashare] Subscribed to topic 'auth.events.authentication.twofactorfailed'
+[18:26:23 INF] [Ashare] Subscribed to topic 'auth.events.authentication.twofactorexpired'
+[18:26:23 INF] [Auth Messaging] ? Handler started
+[18:26:23 INF] Now listening on: http://0.0.0.0:3000
+[18:26:23 INF] Application started. Press Ctrl+C to shut down.
+[18:26:23 INF] Hosting environment: Development
+[18:26:23 INF] Content root path: C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Api
+[18:26:33 INF] Request starting HTTP/1.1 POST http://localhost:3000/api/orders/search - application/json; charset=utf-8 null
+[18:26:33 WRN] Failed to determine the https port for redirect.
+[18:26:33 INF] Executing endpoint 'ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api)'
+[18:26:33 INF] Route matched with {action = "Search", controller = "Orders"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[ACommerce.SharedKernel.Abstractions.Queries.PagedResult`1[ACommerce.Orders.DTOs.OrderResponseDto]]] Search(ACommerce.SharedKernel.Abstractions.Queries.SmartSearchRequest) on controller ACommerce.Orders.Api.Controllers.OrdersController (ACommerce.Orders.Api).
+[18:26:33 WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+[18:26:33 INF] [START] SmartSearchQuery`2 (edc398a8-2d15-4ba6-b9ff-f804c5974a35)
+[18:26:33 INF] Using SQL Server database
+[18:26:33 INF] Request starting HTTP/1.1 GET http://localhost:3000/api/CategoryAttributes/categories - null null
+[18:26:33 INF] Executing endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+[18:26:33 INF] Route matched with {action = "GetAvailableCategories", controller = "CategoryAttributes"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult] GetAvailableCategories() on controller Ashare.Api.Controllers.CategoryAttributesController (Ashare.Api).
+[18:26:33 INF] Using SQL Server database
+[18:26:34 INF] Executed DbCommand (131ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Order] AS [o]
+WHERE [o].[IsDeleted] = CAST(0 AS bit)
+[18:26:34 INF] Request starting HTTP/1.1 GET http://localhost:3000/api/listings - null null
+[18:26:34 INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetAll (ACommerce.Catalog.Listings.Api)'
+[18:26:34 INF] Route matched with {action = "GetAll", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetAll(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+[18:26:34 INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetAll (ACommerce.Catalog.Listings.Api) in 77.5854ms
+[18:26:34 INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetAll (ACommerce.Catalog.Listings.Api)'
+[18:26:34 INF] Executed DbCommand (51ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+SELECT [p].[Id], [p].[CreatedAt], [p].[Description], [p].[Icon], [p].[Image], [p].[IsActive], [p].[IsDeleted], [p].[Name], [p].[ParentCategoryId], [p].[ProductId], [p].[Slug], [p].[SortOrder], [p].[UpdatedAt]
+FROM [ProductCategory] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit) AND [p].[IsActive] = CAST(1 AS bit)
+[18:26:34 INF] Executed DbCommand (94ms) [Parameters=[@__p_0='0', @__p_1='20'], CommandType='Text', CommandTimeout='30']
+SELECT [o].[Id], [o].[BillingAddress], [o].[CancelledAt], [o].[ConfirmedAt], [o].[CouponCode], [o].[CreatedAt], [o].[Currency], [o].[CustomerId], [o].[CustomerNotes], [o].[DeliveredAt], [o].[DiscountAmount], [o].[InternalNotes], [o].[IsDeleted], [o].[OrderNumber], [o].[PaymentId], [o].[PaymentMethod], [o].[ShipmentId], [o].[ShippedAt], [o].[ShippingAddress], [o].[ShippingCost], [o].[Status], [o].[Subtotal], [o].[TaxAmount], [o].[Total], [o].[TrackingNumber], [o].[UpdatedAt], [o].[VendorId]
+FROM [Order] AS [o]
+WHERE [o].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [o].[CreatedAt] DESC
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+[18:26:34 ERR] ? Unhandled exception on GET /api/listings
+System.InvalidOperationException: Unable to resolve service for type 'Microsoft.Extensions.Caching.Memory.IMemoryCache' while attempting to activate 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController'.
+   at Microsoft.Extensions.DependencyInjection.ActivatorUtilities.ThrowHelperUnableToResolveService(Type type, Type requiredBy)
+   at lambda_method640(Closure, IServiceProvider, Object[])
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass6_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Ashare.Api.Middleware.GlobalExceptionMiddleware.InvokeAsync(HttpContext context) in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Api\Middleware\GlobalExceptionMiddleware.cs:line 26
+[18:26:34 INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[<>f__AnonymousType5`6[[System.Guid, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], Ashare.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[18:26:34 INF] Found 0 Order items, returned page 1 with 0 items
+[18:26:34 WRN] [PERFORMANCE] Long running request detected: SmartSearchQuery`2 took 523ms (threshold: 500ms)
+[18:26:34 INF] [END] SmartSearchQuery`2 (edc398a8-2d15-4ba6-b9ff-f804c5974a35) completed in 526ms
+[18:26:34 INF] Executing OkObjectResult, writing value of type 'ACommerce.SharedKernel.Abstractions.Queries.PagedResult`1[[ACommerce.Orders.DTOs.OrderResponseDto, ACommerce.Orders, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[18:26:34 INF] Executed action Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api) in 500.0981ms
+[18:26:34 INF] Request finished HTTP/1.1 GET http://localhost:3000/api/listings - 400 null application/json; charset=utf-8 365.0688ms
+[18:26:34 INF] Executed endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+[18:26:34 INF] Request finished HTTP/1.1 GET http://localhost:3000/api/CategoryAttributes/categories - 200 null application/json; charset=utf-8 517.1482ms
+[18:26:34 INF] Executed action ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api) in 571.239ms
+[18:26:34 INF] Executed endpoint 'ACommerce.Orders.Api.Controllers.OrdersController.Search (ACommerce.Orders.Api)'
+[18:26:34 INF] Request finished HTTP/1.1 POST http://localhost:3000/api/orders/search - 200 null application/json; charset=utf-8 675.1718ms
+[18:26:35 INF] Request starting HTTP/1.1 GET http://localhost:3000/api/CategoryAttributes/categories - null null
+[18:26:35 INF] Executing endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+[18:26:35 INF] Route matched with {action = "GetAvailableCategories", controller = "CategoryAttributes"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult] GetAvailableCategories() on controller Ashare.Api.Controllers.CategoryAttributesController (Ashare.Api).
+[18:26:35 INF] Using SQL Server database
+[18:26:35 INF] Executed DbCommand (29ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+SELECT [p].[Id], [p].[CreatedAt], [p].[Description], [p].[Icon], [p].[Image], [p].[IsActive], [p].[IsDeleted], [p].[Name], [p].[ParentCategoryId], [p].[ProductId], [p].[Slug], [p].[SortOrder], [p].[UpdatedAt]
+FROM [ProductCategory] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit) AND [p].[IsActive] = CAST(1 AS bit)
+[18:26:35 INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[<>f__AnonymousType5`6[[System.Guid, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], Ashare.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[18:26:35 INF] Executed action Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api) in 33.7998ms
+[18:26:35 INF] Executed endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+[18:26:35 INF] Request finished HTTP/1.1 GET http://localhost:3000/api/CategoryAttributes/categories - 200 null application/json; charset=utf-8 40.4988ms
+[18:26:35 INF] Request starting HTTP/1.1 GET http://localhost:3000/api/listings - null null
+[18:26:35 INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetAll (ACommerce.Catalog.Listings.Api)'
+[18:26:35 INF] Route matched with {action = "GetAll", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetAll(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+[18:26:35 INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetAll (ACommerce.Catalog.Listings.Api) in 38.1148ms
+[18:26:35 INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetAll (ACommerce.Catalog.Listings.Api)'
+[18:26:35 ERR] ? Unhandled exception on GET /api/listings
+System.InvalidOperationException: Unable to resolve service for type 'Microsoft.Extensions.Caching.Memory.IMemoryCache' while attempting to activate 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController'.
+   at Microsoft.Extensions.DependencyInjection.ActivatorUtilities.ThrowHelperUnableToResolveService(Type type, Type requiredBy)
+   at lambda_method640(Closure, IServiceProvider, Object[])
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass6_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Ashare.Api.Middleware.GlobalExceptionMiddleware.InvokeAsync(HttpContext context) in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Api\Middleware\GlobalExceptionMiddleware.cs:line 26
+[18:26:35 INF] Request finished HTTP/1.1 GET http://localhost:3000/api/listings - 400 null application/json; charset=utf-8 157.5773ms
+[18:26:37 INF] Request starting HTTP/1.1 GET http://localhost:3000/api/CategoryAttributes/categories - null null
+[18:26:37 INF] Request starting HTTP/1.1 GET http://localhost:3000/api/listings/featured?limit=10 - null null
+[18:26:37 INF] Request starting HTTP/1.1 GET http://localhost:3000/api/listings/new?limit=10 - null null
+[18:26:38 INF] Executing endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+[18:26:38 INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+[18:26:38 INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+[18:26:38 INF] Route matched with {action = "GetAvailableCategories", controller = "CategoryAttributes"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult] GetAvailableCategories() on controller Ashare.Api.Controllers.CategoryAttributesController (Ashare.Api).
+[18:26:38 INF] Using SQL Server database
+[18:26:38 INF] Route matched with {action = "GetNew", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetNew(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+[18:26:38 INF] Route matched with {action = "GetFeatured", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetFeatured(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+[18:26:38 INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api) in 64.0845ms
+[18:26:38 INF] Executed DbCommand (65ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+SELECT [p].[Id], [p].[CreatedAt], [p].[Description], [p].[Icon], [p].[Image], [p].[IsActive], [p].[IsDeleted], [p].[Name], [p].[ParentCategoryId], [p].[ProductId], [p].[Slug], [p].[SortOrder], [p].[UpdatedAt]
+FROM [ProductCategory] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit) AND [p].[IsActive] = CAST(1 AS bit)
+[18:26:38 INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api) in 37.5515ms
+[18:26:38 INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+[18:26:38 INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[<>f__AnonymousType5`6[[System.Guid, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], Ashare.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[18:26:38 INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+[18:26:38 ERR] ? Unhandled exception on GET /api/listings/new
+System.InvalidOperationException: Unable to resolve service for type 'Microsoft.Extensions.Caching.Memory.IMemoryCache' while attempting to activate 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController'.
+   at Microsoft.Extensions.DependencyInjection.ActivatorUtilities.ThrowHelperUnableToResolveService(Type type, Type requiredBy)
+   at lambda_method710(Closure, IServiceProvider, Object[])
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass6_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Ashare.Api.Middleware.GlobalExceptionMiddleware.InvokeAsync(HttpContext context) in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Api\Middleware\GlobalExceptionMiddleware.cs:line 26
+[18:26:38 INF] Executed action Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api) in 282.4068ms
+[18:26:38 ERR] ? Unhandled exception on GET /api/listings/featured
+System.InvalidOperationException: Unable to resolve service for type 'Microsoft.Extensions.Caching.Memory.IMemoryCache' while attempting to activate 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController'.
+   at Microsoft.Extensions.DependencyInjection.ActivatorUtilities.ThrowHelperUnableToResolveService(Type type, Type requiredBy)
+   at lambda_method711(Closure, IServiceProvider, Object[])
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass6_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Ashare.Api.Middleware.GlobalExceptionMiddleware.InvokeAsync(HttpContext context) in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Api\Middleware\GlobalExceptionMiddleware.cs:line 26
+[18:26:38 INF] Request finished HTTP/1.1 GET http://localhost:3000/api/listings/new?limit=10 - 400 null application/json; charset=utf-8 408.4888ms
+[18:26:38 INF] Executed endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+[18:26:38 INF] Request finished HTTP/1.1 GET http://localhost:3000/api/listings/featured?limit=10 - 400 null application/json; charset=utf-8 422.8927ms
+[18:26:38 INF] Request finished HTTP/1.1 GET http://localhost:3000/api/CategoryAttributes/categories - 200 null application/json; charset=utf-8 438.6726ms

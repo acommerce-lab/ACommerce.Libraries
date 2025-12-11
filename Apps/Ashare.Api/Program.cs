@@ -70,8 +70,8 @@ try
     // Logging
     builder.Host.UseSerilog();
 
-    // Memory Cache - DISABLED for debugging
-    // builder.Services.AddMemoryCache();
+    // Memory Cache (required by ACommerce libraries)
+    builder.Services.AddMemoryCache();
 
     // CORS
     builder.Services.AddCors(options =>
