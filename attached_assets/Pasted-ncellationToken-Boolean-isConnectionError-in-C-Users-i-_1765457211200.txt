@@ -1,0 +1,383 @@
+ncellationToken, Boolean isConnectionError) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 122
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 102
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 1/3
+      System.Threading.Tasks.TaskCanceledException: A task was canceled.
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.WaitBeforeRetry(Int32 attemptIndex, CancellationToken cancellationToken, Boolean isConnectionError) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 122
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 102
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 1/3
+      System.Threading.Tasks.TaskCanceledException: A task was canceled.
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.WaitBeforeRetry(Int32 attemptIndex, CancellationToken cancellationToken, Boolean isConnectionError) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 122
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 102
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 95
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 1/3
+      System.Threading.Tasks.TaskCanceledException: A task was canceled.
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.WaitBeforeRetry(Int32 attemptIndex, CancellationToken cancellationToken, Boolean isConnectionError) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 122
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 102
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 1/3
+      System.Threading.Tasks.TaskCanceledException: A task was canceled.
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.WaitBeforeRetry(Int32 attemptIndex, CancellationToken cancellationToken, Boolean isConnectionError) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 122
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 102
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 1/3
+      System.Threading.Tasks.TaskCanceledException: A task was canceled.
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.WaitBeforeRetry(Int32 attemptIndex, CancellationToken cancellationToken, Boolean isConnectionError) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 122
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 102
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 1/3
+      System.Threading.Tasks.TaskCanceledException: A task was canceled.
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.WaitBeforeRetry(Int32 attemptIndex, CancellationToken cancellationToken, Boolean isConnectionError) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 122
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 102
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 3/3
+      System.Net.Http.HttpRequestException: The SSL connection could not be established, see inner exception.
+       ---> System.Security.Authentication.AuthenticationException: Cannot determine the frame size or a corrupted frame was received.
+         at System.Net.Security.SslStream.EnsureFullTlsFrameAsync[TIOAdapter](CancellationToken cancellationToken, Int32 estimatedSize)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+         at System.Net.Security.SslStream.ReceiveHandshakeFrameAsync[TIOAdapter](CancellationToken cancellationToken)
+         at System.Net.Security.SslStream.ForceAuthenticationAsync[TIOAdapter](Boolean receiveFirst, Byte[] reAuthenticationData, CancellationToken cancellationToken)
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 1/3
+      System.Threading.Tasks.TaskCanceledException: A task was canceled.
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.WaitBeforeRetry(Int32 attemptIndex, CancellationToken cancellationToken, Boolean isConnectionError) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 122
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 102
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+fail: ACommerce.Client.Core.Http.DynamicHttpClient[0]
+      POST https://localhost:3000/api/orders/search failed
+      System.Threading.Tasks.TaskCanceledException: The request was canceled due to the configured HttpClient.Timeout of 60 seconds elapsing.
+       ---> System.TimeoutException: A task was canceled.
+       ---> System.Threading.Tasks.TaskCanceledException: A task was canceled.
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.WaitBeforeRetry(Int32 attemptIndex, CancellationToken cancellationToken, Boolean isConnectionError) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 122
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 102
+         at ACommerce.Client.Core.Interceptors.AuthenticationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\AuthenticationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         --- End of inner exception stack trace ---
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpClient.HandleFailure(Exception e, Boolean telemetryStarted, HttpResponseMessage response, CancellationTokenSource cts, CancellationToken cancellationToken, CancellationTokenSource pendingRequestsCts)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at ACommerce.Client.Core.Http.DynamicHttpClient.PostAsync[TRequest,TResponse](String serviceName, String path, TRequest data, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Http\DynamicHttpClient.cs:line 74
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 2/3
+      System.Net.Http.HttpRequestException: The SSL connection could not be established, see inner exception.
+       ---> System.Security.Authentication.AuthenticationException: Cannot determine the frame size or a corrupted frame was received.
+         at System.Net.Security.SslStream.EnsureFullTlsFrameAsync[TIOAdapter](CancellationToken cancellationToken, Int32 estimatedSize)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+         at System.Net.Security.SslStream.ReceiveHandshakeFrameAsync[TIOAdapter](CancellationToken cancellationToken)
+         at System.Net.Security.SslStream.ForceAuthenticationAsync[TIOAdapter](Boolean receiveFirst, Byte[] reAuthenticationData, CancellationToken cancellationToken)
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+Error fetching bookings: The request was canceled due to the configured HttpClient.Timeout of 60 seconds elapsing.
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 3/3
+      System.Net.Http.HttpRequestException: The SSL connection could not be established, see inner exception.
+       ---> System.Security.Authentication.AuthenticationException: Cannot determine the frame size or a corrupted frame was received.
+         at System.Net.Security.SslStream.EnsureFullTlsFrameAsync[TIOAdapter](CancellationToken cancellationToken, Int32 estimatedSize)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+         at System.Net.Security.SslStream.ReceiveHandshakeFrameAsync[TIOAdapter](CancellationToken cancellationToken)
+         at System.Net.Security.SslStream.ForceAuthenticationAsync[TIOAdapter](Boolean receiveFirst, Byte[] reAuthenticationData, CancellationToken cancellationToken)
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 2/3
+      System.Net.Http.HttpRequestException: The SSL connection could not be established, see inner exception.
+       ---> System.Security.Authentication.AuthenticationException: Cannot determine the frame size or a corrupted frame was received.
+         at System.Net.Security.SslStream.EnsureFullTlsFrameAsync[TIOAdapter](CancellationToken cancellationToken, Int32 estimatedSize)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+         at System.Net.Security.SslStream.ReceiveHandshakeFrameAsync[TIOAdapter](CancellationToken cancellationToken)
+         at System.Net.Security.SslStream.ForceAuthenticationAsync[TIOAdapter](Boolean receiveFirst, Byte[] reAuthenticationData, CancellationToken cancellationToken)
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 1/3
+      System.Threading.Tasks.TaskCanceledException: A task was canceled.
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.WaitBeforeRetry(Int32 attemptIndex, CancellationToken cancellationToken, Boolean isConnectionError) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 122
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 102
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 95
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 1/3
+      System.Threading.Tasks.TaskCanceledException: A task was canceled.
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.WaitBeforeRetry(Int32 attemptIndex, CancellationToken cancellationToken, Boolean isConnectionError) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 122
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 102
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 1/3
+      System.Threading.Tasks.TaskCanceledException: A task was canceled.
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.WaitBeforeRetry(Int32 attemptIndex, CancellationToken cancellationToken, Boolean isConnectionError) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 122
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 102
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 1/3
+      System.Threading.Tasks.TaskCanceledException: A task was canceled.
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.WaitBeforeRetry(Int32 attemptIndex, CancellationToken cancellationToken, Boolean isConnectionError) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 122
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 102
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 1/3
+      System.Threading.Tasks.TaskCanceledException: A task was canceled.
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.WaitBeforeRetry(Int32 attemptIndex, CancellationToken cancellationToken, Boolean isConnectionError) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 122
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 102
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:3000/api/listings/new?*
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:3000/api/listings/featured?*
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:3000/api/orders/search
+fail: ACommerce.Client.Core.Http.DynamicHttpClient[0]
+      POST https://localhost:3000/api/orders/search failed
+      System.Threading.Tasks.TaskCanceledException: The request was canceled due to the configured HttpClient.Timeout of 60 seconds elapsing.
+       ---> System.TimeoutException: A task was canceled.
+       ---> System.Threading.Tasks.TaskCanceledException: A task was canceled.
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.WaitBeforeRetry(Int32 attemptIndex, CancellationToken cancellationToken, Boolean isConnectionError) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 122
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 102
+         at ACommerce.Client.Core.Interceptors.AuthenticationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\AuthenticationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         --- End of inner exception stack trace ---
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpClient.HandleFailure(Exception e, Boolean telemetryStarted, HttpResponseMessage response, CancellationTokenSource cts, CancellationToken cancellationToken, CancellationTokenSource pendingRequestsCts)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at ACommerce.Client.Core.Http.DynamicHttpClient.PostAsync[TRequest,TResponse](String serviceName, String path, TRequest data, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Http\DynamicHttpClient.cs:line 74
+Error fetching bookings: The request was canceled due to the configured HttpClient.Timeout of 60 seconds elapsing.
+fail: ACommerce.Client.Core.Http.DynamicHttpClient[0]
+      GET https://localhost:3000/api/auth/me failed
+      System.Threading.Tasks.TaskCanceledException: The request was canceled due to the configured HttpClient.Timeout of 60 seconds elapsing.
+       ---> System.TimeoutException: A task was canceled.
+       ---> System.Threading.Tasks.TaskCanceledException: A task was canceled.
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.WaitBeforeRetry(Int32 attemptIndex, CancellationToken cancellationToken, Boolean isConnectionError) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 122
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 102
+         at ACommerce.Client.Core.Interceptors.AuthenticationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\AuthenticationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         --- End of inner exception stack trace ---
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpClient.HandleFailure(Exception e, Boolean telemetryStarted, HttpResponseMessage response, CancellationTokenSource cts, CancellationToken cancellationToken, CancellationTokenSource pendingRequestsCts)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at ACommerce.Client.Core.Http.DynamicHttpClient.GetAsync[T](String serviceName, String path, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Http\DynamicHttpClient.cs:line 48
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:3000/api/orders/search
+dbug: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Cache hit for service: Marketplace
+dbug: ACommerce.Client.Core.Http.DynamicHttpClient[0]
+      GET https://localhost:3000/api/auth/me
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:3000/api/auth/me
+[ScopedTokenProvider] Returning cached token
+[AuthInterceptor] Request to /api/auth/me - Token: eyJhbGciOiJIUzI1NiIs...
+[AuthInterceptor] ? Authorization header added
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:3000/api/auth/me
+[MainLayout] Auth check - Path: http://localhost:5000/profile, Token: exists, IsGuest: False, IsAuthPage: False, IsProtectedPage: True
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:3000/api/CategoryAttributes/categories
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 2/3
+      System.Net.Http.HttpRequestException: The SSL connection could not be established, see inner exception.
+       ---> System.Security.Authentication.AuthenticationException: Cannot determine the frame size or a corrupted frame was received.
+         at System.Net.Security.SslStream.EnsureFullTlsFrameAsync[TIOAdapter](CancellationToken cancellationToken, Int32 estimatedSize)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+         at System.Net.Security.SslStream.ReceiveHandshakeFrameAsync[TIOAdapter](CancellationToken cancellationToken)
+         at System.Net.Security.SslStream.ForceAuthenticationAsync[TIOAdapter](Boolean receiveFirst, Byte[] reAuthenticationData, CancellationToken cancellationToken)
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 95
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 3/3
+      System.Net.Http.HttpRequestException: The SSL connection could not be established, see inner exception.
+       ---> System.Security.Authentication.AuthenticationException: Cannot determine the frame size or a corrupted frame was received.
+         at System.Net.Security.SslStream.EnsureFullTlsFrameAsync[TIOAdapter](CancellationToken cancellationToken, Int32 estimatedSize)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+         at System.Net.Security.SslStream.ReceiveHandshakeFrameAsync[TIOAdapter](CancellationToken cancellationToken)
+         at System.Net.Security.SslStream.ForceAuthenticationAsync[TIOAdapter](Boolean receiveFirst, Byte[] reAuthenticationData, CancellationToken cancellationToken)
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 2/3
+      System.Net.Http.HttpRequestException: The SSL connection could not be established, see inner exception.
+       ---> System.Security.Authentication.AuthenticationException: Cannot determine the frame size or a corrupted frame was received.
+         at System.Net.Security.SslStream.EnsureFullTlsFrameAsync[TIOAdapter](CancellationToken cancellationToken, Int32 estimatedSize)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+         at System.Net.Security.SslStream.ReceiveHandshakeFrameAsync[TIOAdapter](CancellationToken cancellationToken)
+         at System.Net.Security.SslStream.ForceAuthenticationAsync[TIOAdapter](Boolean receiveFirst, Byte[] reAuthenticationData, CancellationToken cancellationToken)
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 95
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 2/3
+      System.Net.Http.HttpRequestException: The SSL connection could not be established, see inner exception.
+       ---> System.Security.Authentication.AuthenticationException: Cannot determine the frame size or a corrupted frame was received.
+         at System.Net.Security.SslStream.EnsureFullTlsFrameAsync[TIOAdapter](CancellationToken cancellationToken, Int32 estimatedSize)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+         at System.Net.Security.SslStream.ReceiveHandshakeFrameAsync[TIOAdapter](CancellationToken cancellationToken)
+         at System.Net.Security.SslStream.ForceAuthenticationAsync[TIOAdapter](Boolean receiveFirst, Byte[] reAuthenticationData, CancellationToken cancellationToken)
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 95
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 1/3
+      System.Net.Http.HttpRequestException: The SSL connection could not be established, see inner exception.
+       ---> System.Security.Authentication.AuthenticationException: Cannot determine the frame size or a corrupted frame was received.
+         at System.Net.Security.SslStream.EnsureFullTlsFrameAsync[TIOAdapter](CancellationToken cancellationToken, Int32 estimatedSize)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+         at System.Net.Security.SslStream.ReceiveHandshakeFrameAsync[TIOAdapter](CancellationToken cancellationToken)
+         at System.Net.Security.SslStream.ForceAuthenticationAsync[TIOAdapter](Boolean receiveFirst, Byte[] reAuthenticationData, CancellationToken cancellationToken)
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+warn: ACommerce.Client.Core.Interceptors.RetryInterceptor[0]
+      Request failed with exception. Retry 2/3
+      System.Net.Http.HttpRequestException: The SSL connection could not be established, see inner exception.
+       ---> System.Security.Authentication.AuthenticationException: Cannot determine the frame size or a corrupted frame was received.
+         at System.Net.Security.SslStream.EnsureFullTlsFrameAsync[TIOAdapter](CancellationToken cancellationToken, Int32 estimatedSize)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+         at System.Net.Security.SslStream.ReceiveHandshakeFrameAsync[TIOAdapter](CancellationToken cancellationToken)
+         at System.Net.Security.SslStream.ForceAuthenticationAsync[TIOAdapter](Boolean receiveFirst, Byte[] reAuthenticationData, CancellationToken cancellationToken)
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(SslClientAuthenticationOptions sslOptions, HttpRequestMessage request, Boolean async, Stream stream, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 95
+         at ACommerce.Client.Core.Interceptors.LocalizationInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\LocalizationInterceptor.cs:line 38
+         at ACommerce.Client.Core.Interceptors.RetryInterceptor.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Interceptors\RetryInterceptor.cs:line 34
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:3000/api/listings/new?*
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:3000/api/auth/me
+info:
