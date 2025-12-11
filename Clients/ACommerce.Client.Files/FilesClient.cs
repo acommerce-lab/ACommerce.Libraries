@@ -24,23 +24,38 @@ public sealed class FilesClient
         
         private async Task<string> GetServiceUrlAsync(CancellationToken cancellationToken = default)
         {
+                Console.WriteLine($"[FilesClient] GetServiceUrlAsync - Discovering service: {ServiceName}");
                 var endpoint = await _serviceRegistry.DiscoverAsync(ServiceName, cancellationToken);
                 if (endpoint == null)
                 {
+                        Console.WriteLine($"[FilesClient] ERROR: Service not found: {ServiceName}");
                         throw new InvalidOperationException($"Service not found: {ServiceName}");
                 }
-                return endpoint.BaseUrl.TrimEnd('/');
+                var baseUrl = endpoint.BaseUrl.TrimEnd('/');
+                Console.WriteLine($"[FilesClient] Service discovered: {ServiceName} -> {baseUrl}");
+                return baseUrl;
         }
 
         private async Task AddAuthorizationAsync(HttpRequestMessage request)
         {
+                Console.WriteLine($"[FilesClient] AddAuthorizationAsync - TokenProvider is {(_tokenProvider != null ? "available" : "NULL")}");
                 if (_tokenProvider != null)
                 {
                         var token = await _tokenProvider.GetTokenAsync();
+                        Console.WriteLine($"[FilesClient] Token from provider: {(string.IsNullOrEmpty(token) ? "EMPTY/NULL" : $"Bearer {token.Substring(0, Math.Min(20, token.Length))}...")}");
                         if (!string.IsNullOrEmpty(token))
                         {
                                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                                Console.WriteLine($"[FilesClient] Authorization header SET");
                         }
+                        else
+                        {
+                                Console.WriteLine($"[FilesClient] WARNING: Token is empty, Authorization header NOT set");
+                        }
+                }
+                else
+                {
+                        Console.WriteLine($"[FilesClient] WARNING: TokenProvider is null, Authorization header NOT set");
                 }
         }
 
@@ -123,14 +138,26 @@ public sealed class FilesClient
                 content.Add(fileContent, "file", fileName);
 
                 var baseUrl = await GetServiceUrlAsync(cancellationToken);
-                var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/api/media/upload?directory={directory}")
+                var fullUrl = $"{baseUrl}/api/media/upload?directory={directory}";
+                Console.WriteLine($"[FilesClient] UploadMediaAsync - URL: {fullUrl}");
+                Console.WriteLine($"[FilesClient] UploadMediaAsync - FileName: {fileName}, ContentType: {contentType}");
+                
+                var request = new HttpRequestMessage(HttpMethod.Post, fullUrl)
                 {
                         Content = content
                 };
                 await AddAuthorizationAsync(request);
                 
+                Console.WriteLine($"[FilesClient] UploadMediaAsync - Sending request...");
                 var response = await _rawHttpClient.SendAsync(request, cancellationToken);
-                response.EnsureSuccessStatusCode();
+                Console.WriteLine($"[FilesClient] UploadMediaAsync - Response: {(int)response.StatusCode} {response.StatusCode}");
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                        var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                        Console.WriteLine($"[FilesClient] UploadMediaAsync - ERROR Body: {errorBody}");
+                        response.EnsureSuccessStatusCode();
+                }
 
                 return await response.Content.ReadFromJsonAsync<MediaUploadResponse>(cancellationToken);
         }

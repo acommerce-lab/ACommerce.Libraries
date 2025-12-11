@@ -42,8 +42,20 @@ public class MediaController : ControllerBase
     [RequestSizeLimit(MaxFileSizeBytes)]
     public async Task<IActionResult> Upload(IFormFile file, [FromQuery] string? directory = "listings", CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("=== [MediaController] Upload Request ===");
+        _logger.LogInformation("[MediaController] Authorization Header: {AuthHeader}", 
+            Request.Headers.Authorization.FirstOrDefault() ?? "NOT PRESENT");
+        _logger.LogInformation("[MediaController] User.Identity.IsAuthenticated: {IsAuth}", 
+            User?.Identity?.IsAuthenticated ?? false);
+        _logger.LogInformation("[MediaController] User.Identity.Name: {Name}", 
+            User?.Identity?.Name ?? "NULL");
+        _logger.LogInformation("[MediaController] Directory: {Directory}", directory);
+        _logger.LogInformation("[MediaController] File: {FileName}, Size: {Size}, ContentType: {ContentType}", 
+            file?.FileName ?? "NULL", file?.Length ?? 0, file?.ContentType ?? "NULL");
+        
         if (file == null || file.Length == 0)
         {
+            _logger.LogWarning("[MediaController] No file provided");
             return BadRequest(new { error = "No file provided" });
         }
 
