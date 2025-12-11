@@ -11,15 +11,25 @@ public sealed class FilesClient
         private readonly IApiClient _httpClient;
         private readonly HttpClient _rawHttpClient;
         private readonly ITokenProvider? _tokenProvider;
-        private readonly IServiceRegistryClient _serviceRegistry;
+        private readonly ServiceRegistryClient _serviceRegistry;
         private const string ServiceName = "Files";
 
-        public FilesClient(IApiClient httpClient, IHttpClientFactory httpClientFactory, IServiceRegistryClient serviceRegistry, ITokenProvider? tokenProvider = null)
+        public FilesClient(IApiClient httpClient, IHttpClientFactory httpClientFactory, ServiceRegistryClient serviceRegistry, ITokenProvider? tokenProvider = null)
         {
                 _httpClient = httpClient;
                 _rawHttpClient = httpClientFactory.CreateClient("DynamicHttpClient");
                 _serviceRegistry = serviceRegistry;
                 _tokenProvider = tokenProvider;
+        }
+        
+        private async Task<string> GetServiceUrlAsync(CancellationToken cancellationToken = default)
+        {
+                var endpoint = await _serviceRegistry.DiscoverAsync(ServiceName, cancellationToken);
+                if (endpoint == null)
+                {
+                        throw new InvalidOperationException($"Service not found: {ServiceName}");
+                }
+                return endpoint.BaseUrl.TrimEnd('/');
         }
 
         private async Task AddAuthorizationAsync(HttpRequestMessage request)
@@ -112,7 +122,7 @@ public sealed class FilesClient
                 fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
                 content.Add(fileContent, "file", fileName);
 
-                var baseUrl = await _serviceRegistry.GetServiceUrlAsync(ServiceName);
+                var baseUrl = await GetServiceUrlAsync(cancellationToken);
                 var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/api/media/upload?directory={directory}")
                 {
                         Content = content
@@ -146,7 +156,7 @@ public sealed class FilesClient
 
                 try
                 {
-                        var baseUrl = await _serviceRegistry.GetServiceUrlAsync(ServiceName);
+                        var baseUrl = await GetServiceUrlAsync(cancellationToken);
                         var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/api/media/upload/multiple?directory={directory}")
                         {
                                 Content = content
