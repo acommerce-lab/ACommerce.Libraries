@@ -1,0 +1,576 @@
+@page "/host/spaces"
+@using ACommerce.Client.Auth
+@inject AshareApiService ApiService
+@inject AuthClient AuthClient
+@inject IAppNavigationService Navigation
+@inject Ashare.Shared.Services.ThemeService ThemeService
+@inject ILocalizationService L
+
+<div class="ac-page ashare-my-spaces @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
+    <div class="ac-navbar">
+        <button class="ac-navbar-back" @onclick="() => Navigation.NavigateBack()">
+            <i class="bi bi-chevron-@(L.IsRtl ? "right" : "left")"></i>
+        </button>
+        <h1 class="ac-navbar-title">@L["MySpaces"]</h1>
+        <button class="ac-navbar-action" @onclick='() => Navigation.NavigateTo("/host/add")'>
+            <i class="bi bi-plus-lg"></i>
+        </button>
+    </div>
+
+    <div class="ashare-spaces-content">
+        @if (_isLoading)
+        {
+            <div class="ashare-loading">
+                <div class="ac-spinner"></div>
+                <span>@L["Loading"]</span>
+            </div>
+        }
+        else if (!_isLoggedIn)
+        {
+            <div class="ashare-login-prompt">
+                <div class="ashare-prompt-icon">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <h2>@L["LoginRequired"]</h2>
+                <p>@L["LoginToViewSpaces"]</p>
+                <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick='() => Navigation.NavigateTo("/login")'>
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    @L["Login"]
+                </button>
+            </div>
+        }
+        else if (_spaces.Count == 0)
+        {
+            <div class="ashare-empty-state">
+                <div class="ashare-empty-icon">
+                    <i class="bi bi-building"></i>
+                </div>
+                <h2>@L["NoSpacesYet"]</h2>
+                <p>@L["AddYourFirstSpace"]</p>
+                <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick='() => Navigation.NavigateTo("/host/add")'>
+                    <i class="bi bi-plus-circle"></i>
+                    @L["AddNewSpace"]
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="ashare-spaces-list">
+                @foreach (var space in _spaces)
+                {
+                    <div class="ashare-space-card">
+                        <div class="ashare-space-image" @onclick="() => ViewSpace(space.Id)">
+                            @if (!string.IsNullOrEmpty(space.ImageUrl))
+                            {
+                                <img src="@space.ImageUrl" alt="@space.Title" />
+                            }
+                            else
+                            {
+                                <div class="ashare-space-placeholder">
+                                    <i class="bi bi-image"></i>
+                                </div>
+                            }
+                            <span class="ashare-space-status @GetStatusClass(space.IsActive)">
+                                @(space.IsActive ? L["Active"] : L["Inactive"])
+                            </span>
+                        </div>
+
+                        <div class="ashare-space-info">
+                            <h3 class="ashare-space-title" @onclick="() => ViewSpace(space.Id)">@space.Title</h3>
+                            <p class="ashare-space-location">
+                                <i class="bi bi-geo-alt"></i>
+                                @(space.Location ?? L["NoLocation"])
+                            </p>
+                            <div class="ashare-space-stats">
+                                <span class="ashare-space-price">
+                                    @space.Price.ToString("N0") @L["SAR"]
+                                    <small>/@L["Month"]</small>
+                                </span>
+                                <span class="ashare-space-views">
+                                    <i class="bi bi-eye"></i>
+                                    @space.ViewCount
+                                </span>
+                                @if (space.Rating > 0)
+                                {
+                                    <span class="ashare-space-rating">
+                                        <i class="bi bi-star-fill"></i>
+                                        @space.Rating.ToString("F1")
+                                    </span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="ashare-space-actions">
+                            <button class="ac-btn ac-btn-outline-primary ac-btn-sm" @onclick="() => EditSpace(space.Id)">
+                                <i class="bi bi-pencil"></i>
+                                @L["Edit"]
+                            </button>
+                            <button class="ac-btn ac-btn-outline-danger ac-btn-sm" @onclick="() => ConfirmDelete(space)">
+                                <i class="bi bi-trash"></i>
+                                @L["Delete"]
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="ashare-add-more">
+                <button class="ac-btn ac-btn-primary" @onclick='() => Navigation.NavigateTo("/host/add")'>
+                    <i class="bi bi-plus-circle"></i>
+                    @L["AddNewSpace"]
+                </button>
+            </div>
+        }
+    </div>
+
+    @if (_showDeleteConfirm && _spaceToDelete != null)
+    {
+        <div class="ashare-modal-overlay" @onclick="CancelDelete">
+            <div class="ashare-modal" @onclick:stopPropagation="true">
+                <div class="ashare-modal-icon danger">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <h3>@L["ConfirmDelete"]</h3>
+                <p>@L["DeleteSpaceConfirmation", _spaceToDelete.Title]</p>
+                <div class="ashare-modal-actions">
+                    <button class="ac-btn ac-btn-secondary" @onclick="CancelDelete">
+                        @L["Cancel"]
+                    </button>
+                    <button class="ac-btn ac-btn-danger" @onclick="DeleteSpace" disabled="@_isDeleting">
+                        @if (_isDeleting)
+                        {
+                            <span class="ac-spinner-sm"></span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-trash"></i>
+                        }
+                        @L["Delete"]
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .ashare-my-spaces {
+        min-height: 100vh;
+        background: var(--ac-bg-primary, #f8fafc);
+    }
+
+    .ashare-my-spaces.ac-dark {
+        background: var(--ac-dark-bg, #0f172a);
+    }
+
+    .ashare-spaces-content {
+        padding: 1rem;
+        padding-top: calc(60px + 1rem);
+        padding-bottom: 100px;
+    }
+
+    .ashare-loading,
+    .ashare-login-prompt,
+    .ashare-empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 3rem 1.5rem;
+        min-height: 60vh;
+    }
+
+    .ashare-prompt-icon,
+    .ashare-empty-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .ac-dark .ashare-prompt-icon,
+    .ac-dark .ashare-empty-icon {
+        background: linear-gradient(135deg, #312e81 0%, #4338ca 100%);
+    }
+
+    .ashare-prompt-icon i,
+    .ashare-empty-icon i {
+        font-size: 3rem;
+        color: #4f46e5;
+    }
+
+    .ac-dark .ashare-prompt-icon i,
+    .ac-dark .ashare-empty-icon i {
+        color: #a5b4fc;
+    }
+
+    .ashare-login-prompt h2,
+    .ashare-empty-state h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--ac-text-primary, #1e293b);
+        margin-bottom: 0.5rem;
+    }
+
+    .ac-dark .ashare-login-prompt h2,
+    .ac-dark .ashare-empty-state h2 {
+        color: #f1f5f9;
+    }
+
+    .ashare-login-prompt p,
+    .ashare-empty-state p {
+        color: var(--ac-text-secondary, #64748b);
+        margin-bottom: 1.5rem;
+    }
+
+    .ashare-spaces-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .ashare-space-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .ac-dark .ashare-space-card {
+        background: #1e293b;
+    }
+
+    .ashare-space-image {
+        position: relative;
+        height: 180px;
+        cursor: pointer;
+    }
+
+    .ashare-space-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .ashare-space-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    }
+
+    .ac-dark .ashare-space-placeholder {
+        background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    }
+
+    .ashare-space-placeholder i {
+        font-size: 3rem;
+        color: #94a3b8;
+    }
+
+    .ashare-space-status {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    [dir="rtl"] .ashare-space-status {
+        right: auto;
+        left: 12px;
+    }
+
+    .ashare-space-status.active {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .ashare-space-status.inactive {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .ashare-space-info {
+        padding: 1rem;
+    }
+
+    .ashare-space-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--ac-text-primary, #1e293b);
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+    }
+
+    .ac-dark .ashare-space-title {
+        color: #f1f5f9;
+    }
+
+    .ashare-space-location {
+        font-size: 0.875rem;
+        color: var(--ac-text-secondary, #64748b);
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .ashare-space-stats {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .ashare-space-price {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #4f46e5;
+    }
+
+    .ashare-space-price small {
+        font-size: 0.75rem;
+        font-weight: 400;
+        color: var(--ac-text-secondary, #64748b);
+    }
+
+    .ashare-space-views,
+    .ashare-space-rating {
+        font-size: 0.875rem;
+        color: var(--ac-text-secondary, #64748b);
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .ashare-space-rating i {
+        color: #f59e0b;
+    }
+
+    .ashare-space-actions {
+        display: flex;
+        gap: 0.5rem;
+        padding: 0 1rem 1rem;
+    }
+
+    .ashare-space-actions button {
+        flex: 1;
+    }
+
+    .ashare-add-more {
+        margin-top: 1.5rem;
+        text-align: center;
+    }
+
+    .ashare-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 1rem;
+    }
+
+    .ashare-modal {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .ac-dark .ashare-modal {
+        background: #1e293b;
+    }
+
+    .ashare-modal-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+    }
+
+    .ashare-modal-icon.danger {
+        background: #fef2f2;
+    }
+
+    .ac-dark .ashare-modal-icon.danger {
+        background: #450a0a;
+    }
+
+    .ashare-modal-icon.danger i {
+        font-size: 2rem;
+        color: #dc2626;
+    }
+
+    .ashare-modal h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--ac-text-primary, #1e293b);
+        margin-bottom: 0.5rem;
+    }
+
+    .ac-dark .ashare-modal h3 {
+        color: #f1f5f9;
+    }
+
+    .ashare-modal p {
+        color: var(--ac-text-secondary, #64748b);
+        margin-bottom: 1.5rem;
+    }
+
+    .ashare-modal-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .ashare-modal-actions button {
+        flex: 1;
+    }
+
+    .ac-btn-danger {
+        background: #dc2626;
+        color: white;
+        border: none;
+    }
+
+    .ac-btn-danger:hover {
+        background: #b91c1c;
+    }
+
+    .ac-btn-outline-danger {
+        background: transparent;
+        color: #dc2626;
+        border: 1px solid #dc2626;
+    }
+
+    .ac-btn-outline-danger:hover {
+        background: #fef2f2;
+    }
+
+    .ac-spinner-sm {
+        width: 16px;
+        height: 16px;
+        border: 2px solid transparent;
+        border-top-color: currentColor;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        display: inline-block;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+
+@code {
+    private bool _isLoading = true;
+    private bool _isLoggedIn;
+    private Guid _vendorId = Guid.Empty;
+    private List<SpaceItem> _spaces = new();
+    private bool _showDeleteConfirm;
+    private SpaceItem? _spaceToDelete;
+    private bool _isDeleting;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSpaces();
+    }
+
+    private async Task LoadSpaces()
+    {
+        _isLoading = true;
+
+        try
+        {
+            var token = await AuthClient.GetTokenAsync();
+            _isLoggedIn = !string.IsNullOrEmpty(token);
+
+            if (_isLoggedIn)
+            {
+                var userInfo = await AuthClient.GetMeAsync();
+                if (userInfo != null && Guid.TryParse(userInfo.UserId, out var userId))
+                {
+                    _vendorId = userId;
+                    _spaces = await ApiService.GetMySpacesAsync(_vendorId);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading spaces: {ex.Message}");
+        }
+
+        _isLoading = false;
+    }
+
+    private void ViewSpace(Guid spaceId)
+    {
+        Navigation.NavigateTo($"/space/{spaceId}");
+    }
+
+    private void EditSpace(Guid spaceId)
+    {
+        Navigation.NavigateTo($"/host/edit/{spaceId}");
+    }
+
+    private void ConfirmDelete(SpaceItem space)
+    {
+        _spaceToDelete = space;
+        _showDeleteConfirm = true;
+    }
+
+    private void CancelDelete()
+    {
+        _spaceToDelete = null;
+        _showDeleteConfirm = false;
+    }
+
+    private async Task DeleteSpace()
+    {
+        if (_spaceToDelete == null) return;
+
+        _isDeleting = true;
+
+        try
+        {
+            var success = await ApiService.DeleteSpaceAsync(_spaceToDelete.Id);
+            if (success)
+            {
+                _spaces.Remove(_spaceToDelete);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting space: {ex.Message}");
+        }
+
+        _isDeleting = false;
+        _showDeleteConfirm = false;
+        _spaceToDelete = null;
+    }
+
+    private string GetStatusClass(bool isActive)
+    {
+        return isActive ? "active" : "inactive";
+    }
+}

@@ -313,6 +313,42 @@ public class AshareApiService
                 _cacheService.InvalidateAll();
         }
 
+        /// <summary>
+        /// الحصول على إعلانات المستخدم الحالي (مساحاتي)
+        /// </summary>
+        public async Task<List<SpaceItem>> GetMySpacesAsync(Guid vendorId)
+        {
+                try
+                {
+                        // استخدام API المخصص للمستخدم الحالي (يستخرج VendorId من التوكن)
+                        var listings = await _listingsClient.GetMyListingsAsync();
+                        return listings?.Select(MapListingToSpaceItem).ToList() ?? new List<SpaceItem>();
+                }
+                catch (Exception ex)
+                {
+                        _logger.LogError(ex, "Error fetching my spaces for vendor {VendorId}", vendorId);
+                        return new List<SpaceItem>();
+                }
+        }
+
+        /// <summary>
+        /// حذف إعلان
+        /// </summary>
+        public async Task<bool> DeleteSpaceAsync(Guid spaceId)
+        {
+                try
+                {
+                        await _listingsClient.DeleteAsync(spaceId);
+                        _cacheService.InvalidateListings();
+                        return true;
+                }
+                catch (Exception ex)
+                {
+                        _logger.LogError(ex, "Error deleting space {SpaceId}", spaceId);
+                        return false;
+                }
+        }
+
         // ═══════════════════════════════════════════════════════════════════
         // Favorites (Local Storage)
         // ═══════════════════════════════════════════════════════════════════
