@@ -117,6 +117,20 @@ Flexible storage abstraction:
 - **Repository Pattern**: All data access goes through `IBaseAsyncRepository<T>`
 - **Soft Deletes**: Global query filters automatically exclude soft-deleted entities
 
+### File Storage (Google Cloud Storage)
+
+Cloud-based file storage for images and media:
+
+- **Provider Pattern**: `IStorageProvider` abstraction with Google Cloud Storage implementation
+- **Media Controller**: REST API endpoints for secure image upload (`/api/media/upload`)
+- **Security**: 
+  - Allowed directories only (listings, profiles, vendors)
+  - File size limit: 10MB
+  - Content type validation (image/jpeg, png, gif, webp)
+  - Authenticated uploads only
+- **Bucket**: `gs://ashare-images` in `me-central1` region
+- **Client Integration**: `FilesClient.UploadMediaAsync()` for Blazor/MAUI apps
+
 ### Cross-Cutting Concerns
 
 - **Exception Handling**: Global exception middleware with consistent error responses
