@@ -1,0 +1,97 @@
+PS C:\Users\i\Source\Repos\ACommerce.Libraries> gcloud projects add-iam-policy-binding ashareapi --member="serviceAccount:130415035604-compute@developer.gserviceaccount.com" --role="roles/cloudsql.client"
+Updated IAM policy for project [ashareapi].
+bindings:
+- members:
+  - serviceAccount:130415035604@cloudbuild.gserviceaccount.com
+  role: roles/artifactregistry.admin
+- members:
+  - serviceAccount:service-130415035604@gcp-sa-artifactregistry.iam.gserviceaccount.com
+  role: roles/artifactregistry.serviceAgent
+- members:
+  - serviceAccount:130415035604-compute@developer.gserviceaccount.com
+  - serviceAccount:130415035604@cloudbuild.gserviceaccount.com
+  role: roles/artifactregistry.writer
+- members:
+  - serviceAccount:service-130415035604@gcp-sa-cloudaicompanion.iam.gserviceaccount.com
+  role: roles/cloudaicompanion.serviceAgent
+- members:
+  - serviceAccount:130415035604@cloudbuild.gserviceaccount.com
+  role: roles/cloudbuild.builds.builder
+- members:
+  - serviceAccount:service-130415035604@gcp-sa-cloudbuild.iam.gserviceaccount.com
+  role: roles/cloudbuild.serviceAgent
+- members:
+  - serviceAccount:130415035604-compute@developer.gserviceaccount.com
+  role: roles/cloudsql.client
+- members:
+  - serviceAccount:service-130415035604@compute-system.iam.gserviceaccount.com
+  role: roles/compute.serviceAgent
+- members:
+  - serviceAccount:service-130415035604@container-analysis.iam.gserviceaccount.com
+  role: roles/containeranalysis.ServiceAgent
+- members:
+  - serviceAccount:service-130415035604@containerregistry.iam.gserviceaccount.com
+  role: roles/containerregistry.ServiceAgent
+- members:
+  - serviceAccount:service-130415035604@gcp-sa-containerscanning.iam.gserviceaccount.com
+  role: roles/containerscanning.ServiceAgent
+- members:
+  - serviceAccount:130415035604@cloudservices.gserviceaccount.com
+  role: roles/editor
+- members:
+  - serviceAccount:130415035604-compute@developer.gserviceaccount.com
+  role: roles/iam.serviceAccountUser
+- members:
+  - serviceAccount:130415035604-compute@developer.gserviceaccount.com
+  - serviceAccount:130415035604@cloudbuild.gserviceaccount.com
+  role: roles/logging.logWriter
+- members:
+  - user:support@ashare.sa
+role: roles/owner
+- members:
+  - serviceAccount:service-130415035604@gcp-sa-pubsub.iam.gserviceaccount.com
+  role: roles/pubsub.serviceAgent
+- members:
+  - serviceAccount:130415035604-compute@developer.gserviceaccount.com
+  role: roles/run.admin
+- members:
+  - serviceAccount:service-130415035604@serverless-robot-prod.iam.gserviceaccount.com
+  role: roles/run.serviceAgent
+- members:
+  - serviceAccount:service-130415035604@service-networking.iam.gserviceaccount.com
+  role: roles/servicenetworking.serviceAgent
+- members:
+  - serviceAccount:130415035604@cloudbuild.gserviceaccount.com
+  role: roles/serviceusage.serviceUsageAdmin
+- members:
+  - serviceAccount:130415035604@cloudbuild.gserviceaccount.com
+  role: roles/serviceusage.serviceUsageConsumer
+- members:
+  - serviceAccount:130415035604-compute@developer.gserviceaccount.com
+  - serviceAccount:ashare-media-uploader@ashareapi.iam.gserviceaccount.com
+  role: roles/storage.objectAdmin
+- members:
+  - serviceAccount:130415035604@cloudbuild.gserviceaccount.com
+  role: roles/storage.objectViewer
+etag: BwZFzwJTwY0=
+version: 1
+PS C:\Users\i\Source\Repos\ACommerce.Libraries> gcloud run services describe ashare-api --region=me-central2 --format="value(spec.template.metadata.annotations)"
+autoscaling.knative.dev/maxScale=10;autoscaling.knative.dev/minScale=1;run.googleapis.com/client-name=gcloud;run.googleapis.com/client-version=549.0.1;run.googleapis.com/cloudsql-instances=ashareapi:me-central2:ashare-db-dammam;run.googleapis.com/startup-cpu-boost=true
+PS C:\Users\i\Source\Repos\ACommerce.Libraries>
+PS C:\Users\i\Source\Repos\ACommerce.Libraries> gcloud sql instances list
+NAME: ashare-server
+DATABASE_VERSION: SQLSERVER_2022_EXPRESS
+LOCATION: me-central1-b
+TIER: db-custom-1-3840
+PRIMARY_ADDRESS: 34.18.42.98
+PRIVATE_ADDRESS: -
+STATUS: RUNNABLE
+
+NAME: ashare-db-dammam
+DATABASE_VERSION: SQLSERVER_2019_STANDARD
+LOCATION: me-central2-a
+TIER: db-custom-2-8192
+PRIMARY_ADDRESS: 34.166.82.42
+PRIVATE_ADDRESS: 172.28.160.3
+STATUS: RUNNABLE
+PS C:\Users\i\Source\Repos\ACommerce.Libraries>

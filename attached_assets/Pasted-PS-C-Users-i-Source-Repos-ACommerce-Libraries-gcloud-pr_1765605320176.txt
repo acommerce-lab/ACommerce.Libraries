@@ -1,0 +1,49 @@
+PS C:\Users\i\Source\Repos\ACommerce.Libraries> gcloud projects add-iam-policy-binding ashareapi --member="serviceAccount:130415035604-compute@developer.gserviceaccount.com" --role="roles/cloudsql.client"
+Updated IAM policy for project [ashareapi].
+bindings:
+- members:
+  - serviceAccount:130415035604@cloudbuild.gserviceaccount.com
+  role: roles/artifactregistry.admin
+- members:
+  - serviceAccount:service-130415035604@gcp-sa-artifactregistry.iam.gserviceaccount.com
+  role: roles/artifactregistry.serviceAgent
+- members:
+  - serviceAccount:130415035604-compute@developer.gserviceaccount.com
+  - serviceAccount:130415035604@cloudbuild.gserviceaccount.com
+  role: roles/artifactregistry.writer
+- members:
+  - serviceAccount:service-130415035604@gcp-sa-cloudaicompanion.iam.gserviceaccount.com
+  role: roles/cloudaicompanion.serviceAgent
+- members:
+  - serviceAccount:130415035604@cloudbuild.gserviceaccount.com
+  role: roles/cloudbuild.builds.builder
+- members:
+  - serviceAccount:service-130415035604@gcp-sa-cloudbuild.iam.gserviceaccount.com
+  role: roles/cloudbuild.serviceAgent
+- members:
+  - serviceAccount:130415035604-compute@developer.gserviceaccount.com
+  role: roles/cloudsql.client
+- members:
+  - serviceAccount:service-130415035604@compute-system.iam.gserviceaccount.com
+  role: roles/compute.serviceAgent
+- members:
+  - serviceAccount:service-130415035604@container-analysis.iam.gserviceaccount.com
+  role: roles/containeranalysis.ServiceAgent
+- members:
+  - serviceAccount:service-130415035604@containerregistry.iam.gserviceaccount.com
+  role: roles/containerregistry.ServiceAgent
+- members:
+  - serviceAccount:service-130415035604@gcp-sa-containerscanning.iam.gserviceaccount.com
+  role: roles/containerscanning.ServiceAgent
+- members:
+  - serviceAccount:130415035604@cloudservices.gserviceaccount.com
+  role: roles/editor
+- members:
+  - serviceAccount:130415035604-compute@developer.gserviceaccount.com
+  role: roles/iam.serviceAccountUser
+- members:
+  - serviceAccount:130415035604-compute@developer.gserviceaccount.com
+  - serviceAccount:130415035604@cloudbuild.gserviceaccount.com
+  role: roles/logging.logWriter
+- members:
+  - user:support@ashare.sa
