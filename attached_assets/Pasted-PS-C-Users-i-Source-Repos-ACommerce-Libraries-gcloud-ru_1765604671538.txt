@@ -1,0 +1,39 @@
+PS C:\Users\i\Source\Repos\ACommerce.Libraries> gcloud run services update ashare-api --region=me-central2 --add-cloudsql-instances=ashareapi:me-central2:ashare-db-dammam
+OK Deploying... Done.
+  OK Creating Revision...
+  OK Routing traffic...
+Done.
+Service [ashare-api] revision [ashare-api-00002-vvt] has been deployed and is serving 100 percent of traffic.
+Service URL: https://ashare-api-130415035604.me-central2.run.app
+PS C:\Users\i\Source\Repos\ACommerce.Libraries> gcloud run services update ashare-api --region=me-central2 --add-cloudsql-instances=ashareapi:me-central2:ashare-db-dammam
+OK Deploying... Done.
+  OK Creating Revision...
+  OK Routing traffic...
+Done.
+Service [ashare-api] revision [ashare-api-00003-vqq] has been deployed and is serving 100 percent of traffic.
+Service URL: https://ashare-api-130415035604.me-central2.run.app
+PS C:\Users\i\Source\Repos\ACommerce.Libraries> git add -A
+PS C:\Users\i\Source\Repos\ACommerce.Libraries> git commit -m "Use Cloud SQL Auth Proxy for secure connection"
+>>
+On branch main
+Your branch is up to date with 'origin/main'.
+
+nothing to commit, working tree clean
+PS C:\Users\i\Source\Repos\ACommerce.Libraries> gcloud builds submit --config=Apps/Ashare.Api/cloudbuild.yaml --region=me-central2 .
+>>
+Creating temporary archive of 1166 file(s) totalling 8.6 MiB before compression.
+Uploading tarball of [.] to [gs://ashareapi_cloudbuild/source/1765604294.141132-c25f60aa90484ed98bbb98d14a85b2e6.tgz]
+Created [https://cloudbuild.googleapis.com/v1/projects/ashareapi/locations/me-central2/builds/1bc7fceb-a4a2-46ed-a615-36cee5b54071].
+Logs are available at [ https://console.cloud.google.com/cloud-build/builds;region=me-central2/1bc7fceb-a4a2-46ed-a615-36cee5b54071?project=130415035604 ].
+
+gcloud builds submit only displays logs from Cloud Storage. To view logs from Cloud Logging, run:
+gcloud beta builds submit
+
+Waiting for build to complete. Polling interval: 1 second(s).
+ID: 1bc7fceb-a4a2-46ed-a615-36cee5b54071
+CREATE_TIME: 2025-12-13T05:38:20+00:00
+DURATION: 3M42S
+SOURCE: gs://ashareapi_cloudbuild/source/1765604294.141132-c25f60aa90484ed98bbb98d14a85b2e6.tgz
+IMAGES: me-central2-docker.pkg.dev/ashareapi/ashare/ashare-api (+1 more)
+STATUS: SUCCESS
+PS C:\Users\i\Source\Repos\ACommerce.Libraries>
