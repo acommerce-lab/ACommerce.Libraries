@@ -4,37 +4,50 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <!-- Primary Colors -->
-    <Color x:Key="Primary">#2563eb</Color>
-    <Color x:Key="PrimaryDark">#1d4ed8</Color>
-    <Color x:Key="PrimaryLight">#3b82f6</Color>
+    <!-- ═══════════════════════════════════════════════════════════════════
+         Ashare Visual Identity 2025 - عشير
+         ═══════════════════════════════════════════════════════════════════ -->
 
-    <!-- Secondary Colors -->
-    <Color x:Key="Secondary">#64748b</Color>
-    <Color x:Key="SecondaryDark">#475569</Color>
-    <Color x:Key="SecondaryLight">#94a3b8</Color>
+    <!-- Primary Colors - Royal Blue (elegant, professional, trustworthy) -->
+    <Color x:Key="Primary">#1E40AF</Color>
+    <Color x:Key="PrimaryDark">#1E3A8A</Color>
+    <Color x:Key="PrimaryLight">#3B82F6</Color>
+
+    <!-- Secondary Colors - Soft Orange (vitality, optimism, positive energy) -->
+    <Color x:Key="Secondary">#F4844C</Color>
+    <Color x:Key="SecondaryDark">#E06D34</Color>
+    <Color x:Key="SecondaryLight">#F69B6B</Color>
+
+    <!-- Accent Color -->
+    <Color x:Key="Accent">#F4844C</Color>
 
     <!-- Status Colors -->
-    <Color x:Key="Success">#22c55e</Color>
-    <Color x:Key="Danger">#ef4444</Color>
-    <Color x:Key="Warning">#f59e0b</Color>
-    <Color x:Key="Info">#3b82f6</Color>
+    <Color x:Key="Success">#10B981</Color>
+    <Color x:Key="Danger">#EF4444</Color>
+    <Color x:Key="Warning">#F59E0B</Color>
+    <Color x:Key="Info">#1E40AF</Color>
 
-    <!-- Neutral Colors -->
-    <Color x:Key="White">#ffffff</Color>
+    <!-- Neutral Colors - Warm tones aligned with Ashare brand -->
+    <Color x:Key="White">#FFFFFF</Color>
     <Color x:Key="Black">#000000</Color>
-    <Color x:Key="Gray100">#f3f4f6</Color>
-    <Color x:Key="Gray200">#e5e7eb</Color>
-    <Color x:Key="Gray300">#d1d5db</Color>
-    <Color x:Key="Gray400">#9ca3af</Color>
-    <Color x:Key="Gray500">#6b7280</Color>
-    <Color x:Key="Gray600">#4b5563</Color>
-    <Color x:Key="Gray700">#374151</Color>
-    <Color x:Key="Gray800">#1f2937</Color>
-    <Color x:Key="Gray900">#111827</Color>
+    <Color x:Key="Cream">#FFFCF9</Color>
+    <Color x:Key="Gray50">#FDFCFB</Color>
+    <Color x:Key="Gray100">#FAF8F6</Color>
+    <Color x:Key="Gray200">#F0EDE9</Color>
+    <Color x:Key="Gray300">#E0DCD6</Color>
+    <Color x:Key="Gray400">#A8A29E</Color>
+    <Color x:Key="Gray500">#78716C</Color>
+    <Color x:Key="Gray600">#57534E</Color>
+    <Color x:Key="Gray700">#44403C</Color>
+    <Color x:Key="Gray800">#292524</Color>
+    <Color x:Key="Gray900">#1C1917</Color>
 
     <!-- Page Colors -->
-    <Color x:Key="PageBackgroundColor">#ffffff</Color>
-    <Color x:Key="PageBackgroundColorDark">#0f172a</Color>
+    <Color x:Key="PageBackgroundColor">#FFFFFF</Color>
+    <Color x:Key="PageBackgroundColorDark">#1C1917</Color>
+
+    <!-- Surface Colors -->
+    <Color x:Key="Surface">#FFFFFF</Color>
+    <Color x:Key="SurfaceDark">#292524</Color>
 
 </ResourceDictionary>
