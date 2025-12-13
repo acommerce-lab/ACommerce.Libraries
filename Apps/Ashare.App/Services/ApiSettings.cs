@@ -13,18 +13,18 @@ public static class ApiSettings
     /// <summary>
     /// 🔄 تبديل سريع للبيئة:
     /// - true = استخدام الباك اند المحلي (localhost)
-    /// - false = استخدام الباك اند الإنتاجي (Azure)
+    /// - false = استخدام الباك اند الإنتاجي (Google Cloud)
     /// </summary>
-    public const bool UseLocalApi = true;  // ← غيّر هذا للتبديل
+    public const bool UseLocalApi = false;  // ← غيّر هذا للتبديل
 
     // ═══════════════════════════════════════════════════════════════════════════
     // 📍 عناوين الـ API
     // ═══════════════════════════════════════════════════════════════════════════
 
     /// <summary>
-    /// Production API URL (Azure)
+    /// Production API URL (Google Cloud Run - Dammam)
     /// </summary>
-    public const string ProductionUrl = "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net";
+    public const string ProductionUrl = "https://ashare-api-130415035604.me-central1.run.app";
 
     /// <summary>
     /// Development URL for Android Emulator (10.0.2.2 maps to host's localhost)

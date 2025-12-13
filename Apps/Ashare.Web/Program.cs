@@ -187,11 +187,6 @@ builder.Services.AddScoped<SpaceDataService>();
 builder.Services.AddScoped<ITimezoneService, BrowserTimezoneService>();
 
 // ═══════════════════════════════════════════════════════════════════
-// Listings Cache Service (Singleton - shared across all circuits)
-// ═══════════════════════════════════════════════════════════════════
-builder.Services.AddSingleton<IListingsCacheService, ListingsCacheService>();
-
-// ═══════════════════════════════════════════════════════════════════
 // Ashare API Service (ربط التطبيق بالباك اند)
 // ═══════════════════════════════════════════════════════════════════
 builder.Services.AddScoped<AshareApiService>();
