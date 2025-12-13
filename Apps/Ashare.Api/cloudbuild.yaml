@@ -5,7 +5,7 @@ steps:
       - '--build-arg'
       - 'ACOMMERCE_BUILD_MODE=CLOUD'
       - '-t'
-      - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:latest'
+      - 'me-central2-docker.pkg.dev/$PROJECT_ID/ashare/ashare-api:latest'
       - '-f'
       - 'Apps/Ashare.Api/Dockerfile'
       - '.'
@@ -13,7 +13,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:latest'
+      - 'me-central2-docker.pkg.dev/$PROJECT_ID/ashare/ashare-api:latest'
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
@@ -22,9 +22,9 @@ steps:
       - 'deploy'
       - 'ashare-api'
       - '--image'
-      - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:latest'
+      - 'me-central2-docker.pkg.dev/$PROJECT_ID/ashare/ashare-api:latest'
       - '--region'
-      - 'me-central1'
+      - 'me-central2'
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
@@ -42,13 +42,14 @@ steps:
       - '300s'
       - '--cpu-boost'
       - '--set-env-vars'
-      - 'SKIP_SEEDING=true,ASPNETCORE_ENVIRONMENT=Production'
+      - 'SKIP_SEEDING=false,ASPNETCORE_ENVIRONMENT=Production'
 
 images:
-  - 'me-central1-docker.pkg.dev/$PROJECT_ID/ashare-repo/ashare-api:latest'
+  - 'me-central2-docker.pkg.dev/$PROJECT_ID/ashare/ashare-api:latest'
 
 options:
   logging: CLOUD_LOGGING_ONLY
   machineType: 'E2_HIGHCPU_8'
+  region: 'me-central2'
 
 timeout: '1800s'
