@@ -1,0 +1,102 @@
+PS C:\Users\i\Source\Repos\ACommerce.Libraries> gcloud run services logs read ashare-web --region=me-central2 --limit=100
+2025-12-13 06:53:58 [BrowserStorageService] GetAsync(app_language): not found
+2025-12-13 06:53:58 [BrowserStorageService] GetAsync(app_theme): not found
+2025-12-13 06:53:58 [BrowserStorageService] GetAsync(auth_token): not found
+2025-12-13 06:53:58 [BrowserStorageService] GetAsync(auth_expires_at): not found
+2025-12-13 06:53:58 [Login] Page loaded - GuestMode: True
+2025-12-13 06:53:58 info: ACommerce.Client.Realtime.RealtimeClient[0]
+2025-12-13 06:53:58       Connecting to SignalR hub: https://ashare-api.me-central2.run.app/hubs/notifications
+2025-12-13 06:53:58 [BrowserStorageService] GetAsync(auth_token): not found
+2025-12-13 06:53:58 [BrowserStorageService] GetAsync(auth_expires_at): not found
+2025-12-13 06:53:58 [MainLayout] Auth check - Path: https://ashare-web-130415035604.me-central2.run.app/login, Token: null, IsGuest: True, IsAuthPage: True, IsProtectedPage: False
+2025-12-13 06:53:58 [Login] Failed to connect to SignalR: Response status code does not indicate success: 404 (Not Found).
+2025-12-13 06:54:41 GET 200 https://ashare-web-130415035604.me-central2.run.app/login
+2025-12-13 06:54:41 [BrowserStorageService] Created
+2025-12-13 06:54:41 [BrowserStorageService] GetAsync(app_language): prerendering, returning null
+2025-12-13 06:54:41 [TokenManager] Created with storage: TokenStorageService
+2025-12-13 06:54:41 [BrowserStorageService] GetAsync(app_theme): prerendering, returning null
+2025-12-13 06:54:41 [BrowserStorageService] GetAsync(auth_token): prerendering, returning null
+2025-12-13 06:54:41 [BrowserStorageService] GetAsync(auth_expires_at): prerendering, returning null
+2025-12-13 06:54:41 [Login] Page loaded - GuestMode: True
+2025-12-13 06:54:41 info: ACommerce.Client.Realtime.RealtimeClient[0]
+2025-12-13 06:54:41       Connecting to SignalR hub: https://ashare-api.me-central2.run.app/hubs/notifications
+2025-12-13 06:54:41 [Login] Failed to connect to SignalR: Response status code does not indicate success: 404 (Not Found).
+2025-12-13 06:54:41 GET 200 https://ashare-web-130415035604.me-central2.run.app/_content/ACommerce.Templates.Customer/css/acommerce.css
+2025-12-13 06:54:41 GET 200 https://ashare-web-130415035604.me-central2.run.app/_content/Ashare.Shared/css/ashare.css?v=2025.2
+2025-12-13 06:54:41 GET 200 https://ashare-web-130415035604.me-central2.run.app/_content/Ashare.Shared/images/ashare-logo.png
+2025-12-13 06:54:41 GET 200 https://ashare-web-130415035604.me-central2.run.app/_framework/blazor.web.js
+2025-12-13 06:54:41 GET 200 https://ashare-web-130415035604.me-central2.run.app/_content/Ashare.Shared/js/analytics-init.js
+2025-12-13 06:54:41 GET 200 https://ashare-web-130415035604.me-central2.run.app/_content/Ashare.Shared/js/ac-map.js
+2025-12-13 06:54:42 GET 200 https://ashare-web-130415035604.me-central2.run.app/_blazor/initializers
+2025-12-13 06:54:42 POST 200 https://ashare-web-130415035604.me-central2.run.app/_blazor/negotiate?negotiateVersion=1
+2025-12-13 06:54:42 GET 101 https://ashare-web-130415035604.me-central2.run.app/_blazor?id=cWl2Tw2bN7zEVe6tJZahCA
+2025-12-13 06:54:42 [BrowserStorageService] Created
+2025-12-13 06:54:42 [TokenManager] Created with storage: TokenStorageService
+2025-12-13 06:54:42 [BrowserStorageService] GetAsync(app_language): not found
+2025-12-13 06:54:42 [BrowserStorageService] GetAsync(app_theme): not found
+2025-12-13 06:54:42 [BrowserStorageService] GetAsync(auth_token): not found
+2025-12-13 06:54:42 [BrowserStorageService] GetAsync(auth_expires_at): not found
+2025-12-13 06:54:42 [Login] Page loaded - GuestMode: True
+2025-12-13 06:54:42 info: ACommerce.Client.Realtime.RealtimeClient[0]
+2025-12-13 06:54:42       Connecting to SignalR hub: https://ashare-api.me-central2.run.app/hubs/notifications
+2025-12-13 06:54:42 [BrowserStorageService] GetAsync(auth_token): not found
+2025-12-13 06:54:42 [BrowserStorageService] GetAsync(auth_expires_at): not found
+2025-12-13 06:54:42 [MainLayout] Auth check - Path: https://ashare-web-130415035604.me-central2.run.app/login, Token: null, IsGuest: True, IsAuthPage: True, IsProtectedPage: False
+2025-12-13 06:54:42 [Login] Failed to connect to SignalR: Response status code does not indicate success: 404 (Not Found).
+2025-12-13 06:55:02 GET 200 https://ashare-web-130415035604.me-central2.run.app/login
+PS C:\Users\i\Source\Repos\ACommerce.Libraries> gcloud run services logs read ashare-web --region=me-central2 --limit=100
+2025-12-13 06:53:58 [BrowserStorageService] GetAsync(app_language): not found
+2025-12-13 06:53:58 [BrowserStorageService] GetAsync(app_theme): not found
+2025-12-13 06:53:58 [BrowserStorageService] GetAsync(auth_token): not found
+2025-12-13 06:53:58 [BrowserStorageService] GetAsync(auth_expires_at): not found
+2025-12-13 06:53:58 [Login] Page loaded - GuestMode: True
+2025-12-13 06:53:58 info: ACommerce.Client.Realtime.RealtimeClient[0]
+2025-12-13 06:53:58       Connecting to SignalR hub: https://ashare-api.me-central2.run.app/hubs/notifications
+2025-12-13 06:53:58 [BrowserStorageService] GetAsync(auth_token): not found
+2025-12-13 06:53:58 [BrowserStorageService] GetAsync(auth_expires_at): not found
+2025-12-13 06:53:58 [MainLayout] Auth check - Path: https://ashare-web-130415035604.me-central2.run.app/login, Token: null, IsGuest: True, IsAuthPage: True, IsProtectedPage: False
+2025-12-13 06:53:58 [Login] Failed to connect to SignalR: Response status code does not indicate success: 404 (Not Found).
+2025-12-13 06:54:41 GET 200 https://ashare-web-130415035604.me-central2.run.app/login
+2025-12-13 06:54:41 [BrowserStorageService] Created
+2025-12-13 06:54:41 [BrowserStorageService] GetAsync(app_language): prerendering, returning null
+2025-12-13 06:54:41 [TokenManager] Created with storage: TokenStorageService
+2025-12-13 06:54:41 [BrowserStorageService] GetAsync(app_theme): prerendering, returning null
+2025-12-13 06:54:41 [BrowserStorageService] GetAsync(auth_token): prerendering, returning null
+2025-12-13 06:54:41 [BrowserStorageService] GetAsync(auth_expires_at): prerendering, returning null
+2025-12-13 06:54:41 [Login] Page loaded - GuestMode: True
+2025-12-13 06:54:41 info: ACommerce.Client.Realtime.RealtimeClient[0]
+2025-12-13 06:54:41       Connecting to SignalR hub: https://ashare-api.me-central2.run.app/hubs/notifications
+2025-12-13 06:54:41 [Login] Failed to connect to SignalR: Response status code does not indicate success: 404 (Not Found).
+2025-12-13 06:54:41 GET 200 https://ashare-web-130415035604.me-central2.run.app/_content/ACommerce.Templates.Customer/css/acommerce.css
+2025-12-13 06:54:41 GET 200 https://ashare-web-130415035604.me-central2.run.app/_content/Ashare.Shared/css/ashare.css?v=2025.2
+2025-12-13 06:54:41 GET 200 https://ashare-web-130415035604.me-central2.run.app/_content/Ashare.Shared/images/ashare-logo.png
+2025-12-13 06:54:41 GET 200 https://ashare-web-130415035604.me-central2.run.app/_framework/blazor.web.js
+2025-12-13 06:54:41 GET 200 https://ashare-web-130415035604.me-central2.run.app/_content/Ashare.Shared/js/analytics-init.js
+2025-12-13 06:54:41 GET 200 https://ashare-web-130415035604.me-central2.run.app/_content/Ashare.Shared/js/ac-map.js
+2025-12-13 06:54:42 GET 200 https://ashare-web-130415035604.me-central2.run.app/_blazor/initializers
+2025-12-13 06:54:42 POST 200 https://ashare-web-130415035604.me-central2.run.app/_blazor/negotiate?negotiateVersion=1
+2025-12-13 06:54:42 GET 101 https://ashare-web-130415035604.me-central2.run.app/_blazor?id=cWl2Tw2bN7zEVe6tJZahCA
+2025-12-13 06:54:42 [BrowserStorageService] Created
+2025-12-13 06:54:42 [TokenManager] Created with storage: TokenStorageService
+2025-12-13 06:54:42 [BrowserStorageService] GetAsync(app_language): not found
+2025-12-13 06:54:42 [BrowserStorageService] GetAsync(app_theme): not found
+2025-12-13 06:54:42 [BrowserStorageService] GetAsync(auth_token): not found
+2025-12-13 06:54:42 [BrowserStorageService] GetAsync(auth_expires_at): not found
+2025-12-13 06:54:42 [Login] Page loaded - GuestMode: True
+2025-12-13 06:54:42 info: ACommerce.Client.Realtime.RealtimeClient[0]
+2025-12-13 06:54:42       Connecting to SignalR hub: https://ashare-api.me-central2.run.app/hubs/notifications
+2025-12-13 06:54:42 [BrowserStorageService] GetAsync(auth_token): not found
+2025-12-13 06:54:42 [BrowserStorageService] GetAsync(auth_expires_at): not found
+2025-12-13 06:54:42 [MainLayout] Auth check - Path: https://ashare-web-130415035604.me-central2.run.app/login, Token: null, IsGuest: True, IsAuthPage: True, IsProtectedPage: False
+2025-12-13 06:54:42 [Login] Failed to connect to SignalR: Response status code does not indicate success: 404 (Not Found).
+2025-12-13 06:55:02 GET 200 https://ashare-web-130415035604.me-central2.run.app/login
+2025-12-13 06:55:15       Received HTTP response headers after 97.2679ms - 404
+2025-12-13 06:55:15 info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[101]
+2025-12-13 06:55:15       End processing HTTP request after 98.0782ms - 404
+2025-12-13 06:55:15 fail: ACommerce.Client.Core.Http.DynamicHttpClient[0]
+2025-12-13 06:55:15       POST https://ashare-api.me-central2.run.app/api/auth/nafath/initiate failed
+2025-12-13 06:55:16       System.Net.Http.HttpRequestException: Response status code does not indicate success: 404 (Not Found).
+         at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+         at ACommerce.Client.Core.Http.DynamicHttpClient.PostAsync[TRequest,TResponse](String serviceName, String path, TRequest data, CancellationToken cancellationToken) in /src/Clients/ACommerce.Client.Core/Http/DynamicHttpClient.cs:line 74
+2025-12-13 06:57:37 POST 200 https://ashare-web-130415035604.me-central2.run.app/_blazor/disconnect
+PS C:\Users\i\Source\Repos\ACommerce.Libraries>
