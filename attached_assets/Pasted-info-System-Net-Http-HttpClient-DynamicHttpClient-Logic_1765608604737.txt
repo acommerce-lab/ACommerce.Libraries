@@ -1,0 +1,52 @@
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://localhost:3000/api/listings/new?*
+[ScopedTokenProvider] Returning cached token
+[AuthInterceptor] Request to /api/listings/new - Token: eyJhbGciOiJIUzI1NiIs...
+[AuthInterceptor] ? Authorization header added
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request GET http://localhost:3000/api/listings/new?*
+[BrowserStorageService] GetAsync(app_language): not found
+[BrowserStorageService] GetAsync(app_theme): not found
+[BrowserStorageService] GetAsync(auth_token): not found
+[BrowserStorageService] GetAsync(auth_expires_at): not found
+[MainLayout] Auth check - Path: http://localhost:5000/, Token: null, IsGuest: False, IsAuthPage: False, IsProtectedPage: False
+[Auth] No token and not guest - redirecting to login
+[Login] Page loaded - GuestMode: False
+dbug: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Cache hit for service: Ashare
+info: ACommerce.Client.Realtime.RealtimeClient[0]
+      Connecting to SignalR hub: http://localhost:3000/hubs/notifications
+[MainLayout] Auth check - Path: http://localhost:5000/login, Token: null, IsGuest: False, IsAuthPage: True, IsProtectedPage: False
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[101]
+      Received HTTP response headers after 106.826ms - 200
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[101]
+      End processing HTTP request after 112.7823ms - 200
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[101]
+      Received HTTP response headers after 120.1587ms - 200
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[101]
+      Received HTTP response headers after 132.4462ms - 200
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[101]
+      End processing HTTP request after 198.6288ms - 200
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[101]
+      End processing HTTP request after 189.7832ms - 200
+info: ACommerce.Client.Realtime.RealtimeClient[0]
+      ? Connected to SignalR hub
+dbug: ACommerce.ServiceRegistry.Client.ServiceRegistryClient[0]
+      Cache hit for service: Marketplace
+dbug: ACommerce.Client.Core.Http.DynamicHttpClient[0]
+      POST http://localhost:3000/api/auth/nafath/initiate
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[100]
+      Start processing HTTP request POST http://localhost:3000/api/auth/nafath/initiate
+[ScopedTokenProvider] Returning cached token
+[AuthInterceptor] Request to /api/auth/nafath/initiate - Token: eyJhbGciOiJIUzI1NiIs...
+[AuthInterceptor] ? Authorization header added
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[100]
+      Sending HTTP request POST http://localhost:3000/api/auth/nafath/initiate
+info: System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler[101]
+      Received HTTP response headers after 1042.7508ms - 200
+info: System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler[101]
+      End processing HTTP request after 1047.5042ms - 200
+[Login] Subscribed to auth notifications for 2507643761
+[Login] ?? ReceiveMessage: method=AuthSubscribed
+[Login] ? AuthSubscribed confirmed: {"identifier":"2507643761","groupName":"auth_2507643761"}
+

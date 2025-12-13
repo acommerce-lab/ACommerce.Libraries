@@ -1,0 +1,46 @@
+[09:49:05 INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api) in 47.1285ms
+[09:49:05 INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api) in 46.4843ms
+[09:49:05 INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+[09:49:05 INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+[09:49:05 INF] Request finished HTTP/1.1 GET http://localhost:3000/api/listings/featured?limit=10 - 200 null application/json; charset=utf-8 112.3825ms
+[09:49:05 INF] Request finished HTTP/1.1 GET http://localhost:3000/api/listings/new?limit=10 - 200 null application/json; charset=utf-8 113.0678ms
+[09:49:07 INF] Request starting HTTP/1.1 POST http://localhost:3000/hubs/notifications/negotiate?negotiateVersion=1 - null 0
+[09:49:07 INF] Executing endpoint '/hubs/notifications/negotiate'
+[09:49:07 INF] Executed endpoint '/hubs/notifications/negotiate'
+[09:49:07 INF] Request finished HTTP/1.1 POST http://localhost:3000/hubs/notifications/negotiate?negotiateVersion=1 - 200 316 application/json 6.162ms
+[09:49:09 INF] Request starting HTTP/1.1 GET http://localhost:3000/hubs/notifications?id=FSjhtUyOO24rk1XThpwagQ - null null
+[09:49:09 INF] Executing endpoint '/hubs/notifications'
+[09:49:14 INF] Request starting HTTP/1.1 POST http://localhost:3000/api/auth/nafath/initiate - application/json; charset=utf-8 null
+[09:49:14 INF] Failed to validate the token.
+Microsoft.IdentityModel.Tokens.SecurityTokenSignatureKeyNotFoundException: IDX10517: Signature validation failed. The token's kid is missing. Keys tried: 'Microsoft.IdentityModel.Tokens.SymmetricSecurityKey, KeyId: '', InternalId: '7vd8KPzbSJbJMUUgDmggImniIRE1qnVyryuq5LekXsg'. , KeyId:
+'.
+Number of keys in TokenValidationParameters: '1'.
+Number of keys in Configuration: '0'.
+Exceptions caught:
+ '[PII of type 'System.String' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'.
+token: '[PII of type 'Microsoft.IdentityModel.JsonWebTokens.JsonWebToken' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'. See https://aka.ms/IDX10503 for details.
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateSignature(JsonWebToken jwtToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateSignatureAndIssuerSecurityKey(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateJWSAsync(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+[09:49:14 INF] Bearer was not authenticated. Failure message: IDX10517: Signature validation failed. The token's kid is missing. Keys tried: 'Microsoft.IdentityModel.Tokens.SymmetricSecurityKey, KeyId: '', InternalId: '7vd8KPzbSJbJMUUgDmggImniIRE1qnVyryuq5LekXsg'. , KeyId:
+'.
+Number of keys in TokenValidationParameters: '1'.
+Number of keys in Configuration: '0'.
+Exceptions caught:
+ '[PII of type 'System.String' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'.
+token: '[PII of type 'Microsoft.IdentityModel.JsonWebTokens.JsonWebToken' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'. See https://aka.ms/IDX10503 for details.
+[09:49:14 INF] Executing endpoint 'Ashare.Api.Controllers.AuthController.InitiateNafathAuth (Ashare.Api)'
+[09:49:14 INF] Route matched with {action = "InitiateNafathAuth", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[Ashare.Api.Controllers.NafathAuthResponse]] InitiateNafathAuth(Ashare.Api.Controllers.NafathAuthRequest) on controller Ashare.Api.Controllers.AuthController (Ashare.Api).
+[09:49:14 INF] Using SQL Server database
+[09:49:14 INF] ??? ?????? ???? ??????: 2507643761
+[09:49:14 INF] [Nafath] Initiating authentication for NationalId: 2507643761
+[09:49:14 INF] Start processing HTTP request POST https://api.authentica.sa/api/v2/verify-by-nafath
+[09:49:14 INF] Sending HTTP request POST https://api.authentica.sa/api/v2/verify-by-nafath
+[09:49:15 INF] Received HTTP response headers after 974.76ms - 200
+[09:49:15 INF] End processing HTTP request after 981.8656ms - 200
+[09:49:15 INF] [InMemory] Creating session 00601000-1c8b-1160-0003-ccc682570c08 for 2507643761
+[09:49:15 INF] Executing OkObjectResult, writing value of type 'Ashare.Api.Controllers.NafathAuthResponse'.
+[09:49:15 INF] Executed action Ashare.Api.Controllers.AuthController.InitiateNafathAuth (Ashare.Api) in 1016.8517ms
+[09:49:15 INF] Executed endpoint 'Ashare.Api.Controllers.AuthController.InitiateNafathAuth (Ashare.Api)'
+[09:49:15 INF] Request finished HTTP/1.1 POST http://localhost:3000/api/auth/nafath/initiate - 200 null application/json; charset=utf-8 1043.8565ms
+[09:49:15 INF] Connection kA3C5cr5L20wIREKpYrmKA subscribed to auth notifications for 2507643761
