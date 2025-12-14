@@ -9,8 +9,8 @@
     <Description>Location and geography implementation for ACommerce - EF Core configurations, services, and repositories</Description>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\ACommerce.Locations.Abstractions\ACommerce.Locations.Abstractions.csproj" />
-    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.Infrastructure.EFCores\ACommerce.SharedKernel.Infrastructure.EFCores.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.Locations.Abstractions\ACommerce.Locations.Abstractions.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.Infrastructure.EFCores\ACommerce.SharedKernel.Infrastructure.EFCores.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

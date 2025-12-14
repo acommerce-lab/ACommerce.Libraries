@@ -9,18 +9,18 @@
 
   <ItemGroup>
     <!-- Core Infrastructure -->
-    <ProjectReference Include="..\..\Authentication\ACommerce.Authentication.JWT\ACommerce.Authentication.JWT.csproj" />
-    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.Infrastructure.EFCores\ACommerce.SharedKernel.Infrastructure.EFCores.csproj" />
-    <ProjectReference Include="..\..\AspNetCore\ACommerce.SharedKernel.AspNetCore\ACommerce.SharedKernel.AspNetCore.csproj" />
-    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.JWT\ACommerce.Authentication.JWT.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.Infrastructure.EFCores\ACommerce.SharedKernel.Infrastructure.EFCores.csproj" />
+    <ProjectReference Include="..\..\libs\backend\integration\ACommerce.SharedKernel.AspNetCore\ACommerce.SharedKernel.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
 
     <!-- Authentication & Authorization -->
-    <ProjectReference Include="..\..\AspNetCore\ACommerce.Authentication.AspNetCore\ACommerce.Authentication.AspNetCore.csproj" />
-    <ProjectReference Include="..\..\AspNetCore\ACommerce.Authentication.AspNetCore.Swagger\ACommerce.Authentication.AspNetCore.Swagger.csproj" />
+    <ProjectReference Include="..\..\libs\backend\integration\ACommerce.Authentication.AspNetCore\ACommerce.Authentication.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\libs\backend\integration\ACommerce.Authentication.AspNetCore.Swagger\ACommerce.Authentication.AspNetCore.Swagger.csproj" />
 
     <!-- Identity & Profiles -->
-    <ProjectReference Include="..\..\Identity\ACommerce.Profiles\ACommerce.Profiles.csproj" />
-    <ProjectReference Include="..\..\Identity\ACommerce.Profiles.Api\ACommerce.Profiles.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Profiles\ACommerce.Profiles.csproj" />
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Profiles.Api\ACommerce.Profiles.Api.csproj" />
 
     <!-- Contact Points (Notifications Recipients) -->
     <ProjectReference Include="..\..\Other\ACommerce.Notifications.Recipients\ACommerce.Notifications.Recipients.csproj" />
@@ -37,21 +37,21 @@
     <ProjectReference Include="..\..\Other\ACommerce.Catalog.Products.Api\ACommerce.Catalog.Products.Api.csproj" />
 
     <!-- Marketplace -->
-    <ProjectReference Include="..\..\Marketplace\ACommerce.Vendors\ACommerce.Vendors.csproj" />
-    <ProjectReference Include="..\..\Marketplace\ACommerce.Vendors.Api\ACommerce.Vendors.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\marketplace\ACommerce.Vendors\ACommerce.Vendors.csproj" />
+    <ProjectReference Include="..\..\libs\backend\marketplace\ACommerce.Vendors.Api\ACommerce.Vendors.Api.csproj" />
 
     <!-- Orders & Cart -->
-    <ProjectReference Include="..\..\Sales\ACommerce.Cart\ACommerce.Cart.csproj" />
-    <ProjectReference Include="..\..\Sales\ACommerce.Orders\ACommerce.Orders.csproj" />
-    <ProjectReference Include="..\..\Sales\ACommerce.Orders.Api\ACommerce.Orders.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Cart\ACommerce.Cart.csproj" />
+    <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Orders\ACommerce.Orders.csproj" />
+    <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Orders.Api\ACommerce.Orders.Api.csproj" />
 
     <!-- Payments -->
-    <ProjectReference Include="..\..\Payments\ACommerce.Payments.Abstractions\ACommerce.Payments.Abstractions.csproj" />
-    <!-- <ProjectReference Include="..\..\Payments\ACommerce.Payments.Api\ACommerce.Payments.Api.csproj" /> TODO: Not implemented yet -->
+    <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Payments.Abstractions\ACommerce.Payments.Abstractions.csproj" />
+    <!-- <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Payments.Api\ACommerce.Payments.Api.csproj" /> TODO: Not implemented yet -->
 
     <!-- Shipping -->
-    <ProjectReference Include="..\..\Shipping\ACommerce.Shipping.Abstractions\ACommerce.Shipping.Abstractions.csproj" />
-    <!-- <ProjectReference Include="..\..\Shipping\ACommerce.Shipping.Api\ACommerce.Shipping.Api.csproj" /> TODO: Not implemented yet -->
+    <ProjectReference Include="..\..\libs\backend\shipping\ACommerce.Shipping.Abstractions\ACommerce.Shipping.Abstractions.csproj" />
+    <!-- <ProjectReference Include="..\..\libs\backend\shipping\ACommerce.Shipping.Api\ACommerce.Shipping.Api.csproj" /> TODO: Not implemented yet -->
 
     <!-- Notifications & Chat -->
     <ProjectReference Include="..\..\Other\ACommerce.Notifications.Core\ACommerce.Notifications.Core.csproj" />
@@ -60,8 +60,8 @@
     <ProjectReference Include="..\..\Other\ACommerce.Realtime.SignalR\ACommerce.Realtime.SignalR.csproj" />
 
     <!-- Files -->
-    <ProjectReference Include="..\..\Files\ACommerce.Files.Storage.Local\ACommerce.Files.Storage.Local.csproj" />
-    <ProjectReference Include="..\..\AspNetCore\ACommerce.Files.AspNetCore\ACommerce.Files.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\libs\backend\files\ACommerce.Files.Storage.Local\ACommerce.Files.Storage.Local.csproj" />
+    <ProjectReference Include="..\..\libs\backend\integration\ACommerce.Files.AspNetCore\ACommerce.Files.AspNetCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>

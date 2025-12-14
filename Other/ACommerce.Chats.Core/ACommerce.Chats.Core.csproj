@@ -9,10 +9,10 @@
     <Description># ACommerce.Chats.Core</Description>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\ACommerce.Chats.Abstractions\ACommerce.Chats.Abstractions.csproj" />
-    <ProjectReference Include="..\..\Core\ACommerce.Realtime.Abstractions\ACommerce.Realtime.Abstractions.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.Chats.Abstractions\ACommerce.Chats.Abstractions.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.Realtime.Abstractions\ACommerce.Realtime.Abstractions.csproj" />
     <ProjectReference Include="..\ACommerce.Realtime.SignalR\ACommerce.Realtime.SignalR.csproj" />
-    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
   </ItemGroup>
   <ItemGroup>
     <!-- ? ?? SignalR Hub -->

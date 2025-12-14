@@ -18,15 +18,15 @@
         </ItemGroup>
 
         <ItemGroup>
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Products\ACommerce.Client.Products.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Categories\ACommerce.Client.Categories.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Cart\ACommerce.Client.Cart.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Orders\ACommerce.Client.Orders.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Auth\ACommerce.Client.Auth.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Chats\ACommerce.Client.Chats.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Profiles\ACommerce.Client.Profiles.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Notifications\ACommerce.Client.Notifications.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Locations\ACommerce.Client.Locations.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Products\ACommerce.Client.Products.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Categories\ACommerce.Client.Categories.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Cart\ACommerce.Client.Cart.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Orders\ACommerce.Client.Orders.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Auth\ACommerce.Client.Auth.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Chats\ACommerce.Client.Chats.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Profiles\ACommerce.Client.Profiles.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Notifications\ACommerce.Client.Notifications.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Locations\ACommerce.Client.Locations.csproj" />
         </ItemGroup>
 
 </Project>

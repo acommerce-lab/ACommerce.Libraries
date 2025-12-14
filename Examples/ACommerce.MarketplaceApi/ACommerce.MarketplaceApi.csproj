@@ -7,37 +7,37 @@
 
   <ItemGroup>
     <!-- Core -->
-    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
-    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
-    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.Infrastructure.EFCores\ACommerce.SharedKernel.Infrastructure.EFCores.csproj" />
-    <ProjectReference Include="..\..\Core\ACommerce.Configuration\ACommerce.Configuration.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.Infrastructure.EFCores\ACommerce.SharedKernel.Infrastructure.EFCores.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.Configuration\ACommerce.Configuration.csproj" />
 
     <!-- Identity -->
-    <ProjectReference Include="..\..\Identity\ACommerce.Profiles\ACommerce.Profiles.csproj" />
-    <ProjectReference Include="..\..\Identity\ACommerce.Profiles.Api\ACommerce.Profiles.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Profiles\ACommerce.Profiles.csproj" />
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Profiles.Api\ACommerce.Profiles.Api.csproj" />
 
     <!-- Marketplace -->
-    <ProjectReference Include="..\..\Marketplace\ACommerce.Vendors\ACommerce.Vendors.csproj" />
-    <ProjectReference Include="..\..\Marketplace\ACommerce.Vendors.Api\ACommerce.Vendors.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\marketplace\ACommerce.Vendors\ACommerce.Vendors.csproj" />
+    <ProjectReference Include="..\..\libs\backend\marketplace\ACommerce.Vendors.Api\ACommerce.Vendors.Api.csproj" />
 
     <!-- Catalog -->
     <ProjectReference Include="..\..\Other\ACommerce.Catalog.Products\ACommerce.Catalog.Products.csproj" />
     <ProjectReference Include="..\..\Other\ACommerce.Catalog.Products.Api\ACommerce.Catalog.Products.Api.csproj" />
-    <ProjectReference Include="..\..\Catalog\ACommerce.Catalog.Listings\ACommerce.Catalog.Listings.csproj" />
-    <ProjectReference Include="..\..\Catalog\ACommerce.Catalog.Listings.Api\ACommerce.Catalog.Listings.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Listings\ACommerce.Catalog.Listings.csproj" />
+    <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Listings.Api\ACommerce.Catalog.Listings.Api.csproj" />
 
     <!-- Sales -->
-    <ProjectReference Include="..\..\Sales\ACommerce.Cart\ACommerce.Cart.csproj" />
-    <ProjectReference Include="..\..\Sales\ACommerce.Orders\ACommerce.Orders.csproj" />
-    <ProjectReference Include="..\..\Sales\ACommerce.Orders.Api\ACommerce.Orders.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Cart\ACommerce.Cart.csproj" />
+    <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Orders\ACommerce.Orders.csproj" />
+    <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Orders.Api\ACommerce.Orders.Api.csproj" />
 
     <!-- Payments -->
-    <ProjectReference Include="..\..\Payments\ACommerce.Payments.Abstractions\ACommerce.Payments.Abstractions.csproj" />
-    <ProjectReference Include="..\..\Payments\ACommerce.Payments.Moyasar\ACommerce.Payments.Moyasar.csproj" />
+    <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Payments.Abstractions\ACommerce.Payments.Abstractions.csproj" />
+    <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Payments.Moyasar\ACommerce.Payments.Moyasar.csproj" />
 
     <!-- Shipping -->
-    <ProjectReference Include="..\..\Shipping\ACommerce.Shipping.Abstractions\ACommerce.Shipping.Abstractions.csproj" />
-    <ProjectReference Include="..\..\Shipping\ACommerce.Shipping.Mock\ACommerce.Shipping.Mock.csproj" />
+    <ProjectReference Include="..\..\libs\backend\shipping\ACommerce.Shipping.Abstractions\ACommerce.Shipping.Abstractions.csproj" />
+    <ProjectReference Include="..\..\libs\backend\shipping\ACommerce.Shipping.Mock\ACommerce.Shipping.Mock.csproj" />
 
     <!-- Modules -->
     <ProjectReference Include="..\..\Modules\ACommerce.Reviews\ACommerce.Reviews.csproj" />

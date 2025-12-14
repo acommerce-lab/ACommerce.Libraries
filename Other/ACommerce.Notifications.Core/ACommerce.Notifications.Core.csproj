@@ -18,7 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\ACommerce.Messaging.Abstractions\ACommerce.Messaging.Abstractions.csproj" />
-    <ProjectReference Include="..\..\Core\ACommerce.Notifications.Abstractions\ACommerce.Notifications.Abstractions.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.Notifications.Abstractions\ACommerce.Notifications.Abstractions.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

@@ -14,8 +14,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\ACommerce.Notifications.Abstractions\ACommerce.Notifications.Abstractions.csproj" />
-    <ProjectReference Include="..\..\Core\ACommerce.Realtime.Abstractions\ACommerce.Realtime.Abstractions.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.Notifications.Abstractions\ACommerce.Notifications.Abstractions.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.Realtime.Abstractions\ACommerce.Realtime.Abstractions.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

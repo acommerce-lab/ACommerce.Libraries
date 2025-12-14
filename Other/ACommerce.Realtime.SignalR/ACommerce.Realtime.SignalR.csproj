@@ -12,7 +12,7 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\ACommerce.Realtime.Abstractions\ACommerce.Realtime.Abstractions.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.Realtime.Abstractions\ACommerce.Realtime.Abstractions.csproj" />
   </ItemGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
