@@ -24,17 +24,17 @@ public static class ApiSettings
     /// <summary>
     /// Production API URL (Google Cloud Run - Dammam)
     /// </summary>
-    public const string ProductionUrl = "https://ashare-web-130415035604.me-central2.run.app";
+    public const string ProductionUrl = "https://ashare-api-130415035604.me-central2.run.app";
 
     /// <summary>
     /// Development URL for Android Emulator (10.0.2.2 maps to host's localhost)
     /// </summary>
-    public const string AndroidEmulatorUrl = "https://ashare-web-130415035604.me-central2.run.app";
+    public const string AndroidEmulatorUrl = "https://ashare-api-130415035604.me-central2.run.app";
 
     /// <summary>
     /// Development URL for Windows/Desktop
     /// </summary>
-    public const string LocalhostUrl = "https://ashare-web-130415035604.me-central2.run.app";
+    public const string LocalhostUrl = "https://ashare-api-130415035604.me-central2.run.app";
 
     // ═══════════════════════════════════════════════════════════════════════════
     // 🎯 الـ URL المستخدم
