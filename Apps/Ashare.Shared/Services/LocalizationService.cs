@@ -1,940 +1,691 @@
-using System.Globalization;
 using ACommerce.Templates.Customer.Services;
+using ACommerce.Templates.Customer.Services.Localization;
 
 namespace Ashare.Shared.Services;
 
 /// <summary>
 /// خدمة الترجمة لـ Ashare مع دعم العربية والإنجليزية والأردية
+/// ترث من BaseLocalizationService وتضيف الترجمات الخاصة بـ Ashare
 /// </summary>
-public class LocalizationService : ILocalizationService
+public class LocalizationService : BaseLocalizationService
 {
-    private string _currentLanguage = "ar";
-    private readonly Dictionary<string, Dictionary<string, string>> _translations;
-    private readonly IStorageService _storageService;
-
-    public LocalizationService(IStorageService storageService)
+    public LocalizationService(IStorageService storageService) : base(storageService)
     {
-        _storageService = storageService;
-        _translations = new Dictionary<string, Dictionary<string, string>>
-        {
-            ["ar"] = GetArabicStrings(),
-            ["en"] = GetEnglishStrings(),
-            ["ur"] = GetUrduStrings()
-        };
-
-        // تحميل اللغة المحفوظة
-        _ = LoadSavedLanguageAsync();
     }
 
-    public string CurrentLanguage => _currentLanguage;
-
-    public IReadOnlyList<LanguageInfo> SupportedLanguages =>
-    [
-        new() { Code = "ar", NativeName = "العربية", EnglishName = "Arabic", IsRtl = true },
-        new() { Code = "en", NativeName = "English", EnglishName = "English", IsRtl = false },
-        new() { Code = "ur", NativeName = "اردو", EnglishName = "Urdu", IsRtl = true }
-    ];
-
-    public bool IsRtl => _currentLanguage is "ar" or "ur";
-
-    public event Action? OnLanguageChanged;
-
-    public string this[string key] => Get(key);
-
-    public string Get(string key, params object[] args)
+    protected override void ConfigureLanguages(List<LanguageInfo> languages)
     {
-        if (_translations.TryGetValue(_currentLanguage, out var langStrings) &&
-            langStrings.TryGetValue(key, out var value))
-        {
-            return args.Length > 0 ? string.Format(value, args) : value;
-        }
-
-        // Fallback to English
-        if (_translations.TryGetValue("en", out var enStrings) &&
-            enStrings.TryGetValue(key, out var enValue))
-        {
-            return args.Length > 0 ? string.Format(enValue, args) : enValue;
-        }
-
-        return key;
+        // Arabic first (default)
+        languages.Add(new LanguageInfo { Code = "ar", NativeName = "العربية", EnglishName = "Arabic", IsRtl = true });
+        languages.Add(new LanguageInfo { Code = "en", NativeName = "English", EnglishName = "English", IsRtl = false });
+        languages.Add(new LanguageInfo { Code = "ur", NativeName = "اردو", EnglishName = "Urdu", IsRtl = true });
     }
 
-    public async Task SetLanguageAsync(string languageCode)
+    protected override void ConfigureTranslations(Dictionary<string, Dictionary<string, string>> translations)
     {
-        if (_currentLanguage == languageCode) return;
-
-        _currentLanguage = languageCode;
-        CultureInfo.CurrentCulture = new CultureInfo(languageCode);
-        CultureInfo.CurrentUICulture = new CultureInfo(languageCode);
-
-        // Save preference
-        try
-        {
-            await _storageService.SetAsync("app_language", languageCode);
-        }
-        catch { }
-
-        OnLanguageChanged?.Invoke();
+        // Add Arabic translations
+        AddArabicTranslations(translations["ar"]);
+        
+        // Add English translations
+        AddEnglishTranslations(translations["en"]);
+        
+        // Add Urdu translations
+        if (!translations.ContainsKey("ur"))
+            translations["ur"] = new Dictionary<string, string>();
+        AddUrduTranslations(translations["ur"]);
     }
 
-    private async Task LoadSavedLanguageAsync()
+    private static void AddArabicTranslations(Dictionary<string, string> ar)
     {
-        try
-        {
-            var saved = await _storageService.GetAsync("app_language");
-            if (!string.IsNullOrEmpty(saved) && _translations.ContainsKey(saved) && saved != _currentLanguage)
-            {
-                _currentLanguage = saved;
-                CultureInfo.CurrentCulture = new CultureInfo(saved);
-                CultureInfo.CurrentUICulture = new CultureInfo(saved);
-                OnLanguageChanged?.Invoke();
-            }
-        }
-        catch { }
-    }
+        // App (Required)
+        ar["AppName"] = "عشير";
+        ar["AppTagline"] = "شارك المساحات، شارك الإمكانيات";
 
-    // ═══════════════════════════════════════════════════════════════════
-    // Arabic Strings
-    // ═══════════════════════════════════════════════════════════════════
-    private static Dictionary<string, string> GetArabicStrings() => new()
-    {
-        // App
-        ["AppName"] = "عشير",
-        ["AppTagline"] = "شارك المساحات، شارك الإمكانيات",
+        // Bookings (Ashare-specific)
+        ar["Bookings"] = "حجوزاتي";
+        ar["MyBookings"] = "حجوزاتي";
+        ar["Upcoming"] = "القادمة";
+        ar["Past"] = "السابقة";
+        ar["NoUpcomingBookings"] = "لا توجد حجوزات قادمة";
+        ar["NoPastBookings"] = "لا توجد حجوزات سابقة";
+        ar["NoCancelledBookings"] = "لا توجد حجوزات ملغاة";
+        ar["BookingPending"] = "قيد المراجعة";
+        ar["BookingConfirmed"] = "مؤكد";
+        ar["BookingCompleted"] = "مكتمل";
+        ar["BookingCancelled"] = "ملغي";
+        ar["CancelBooking"] = "إلغاء الحجز";
+        ar["ConfirmCancelBooking"] = "هل أنت متأكد من إلغاء هذا الحجز؟";
+        ar["RefundInfo"] = "سيتم استرداد المبلغ خلال 3-5 أيام عمل";
+        ar["ConfirmCancel"] = "تأكيد الإلغاء";
+        ar["WriteReview"] = "قيّم تجربتك";
+        ar["RateYourExperience"] = "قيّم تجربتك";
+        ar["YourComment"] = "تعليقك";
+        ar["ShareExperience"] = "شارك تجربتك مع الآخرين...";
+        ar["SubmitReview"] = "إرسال التقييم";
 
-        // Navigation
-        ["Home"] = "الرئيسية",
-        ["Explore"] = "استكشف",
-        ["Bookings"] = "حجوزاتي",
-        ["Favorites"] = "المفضلة",
-        ["Profile"] = "حسابي",
-        ["Search"] = "البحث",
-        ["Notifications"] = "الإشعارات",
-        ["Messages"] = "الرسائل",
+        // Nafath (Saudi-specific)
+        ar["LoginWithNafath"] = "الدخول بنفاذ";
+        ar["LoginWithEmail"] = "الدخول بالبريد الإلكتروني";
+        ar["ContinueWithNafath"] = "المتابعة بنفاذ";
+        ar["NationalId"] = "رقم الهوية الوطنية";
+        ar["EnterNationalId"] = "أدخل رقم الهوية";
+        ar["SelectNumberInNafathApp"] = "اختر هذا الرقم في تطبيق نفاذ";
+        ar["SecondsRemaining"] = "ثانية متبقية";
+        ar["LoginSuccessful"] = "تم تسجيل الدخول بنجاح";
+        ar["LoginRejected"] = "تم رفض تسجيل الدخول";
 
-        // Auth
-        ["Login"] = "تسجيل الدخول",
-        ["Logout"] = "تسجيل الخروج",
-        ["Register"] = "إنشاء حساب",
-        ["CreateAccount"] = "إنشاء حساب جديد",
-        ["WelcomeBack"] = "مرحباً بعودتك",
-        ["LoginToYourAccount"] = "سجل دخولك للمتابعة",
-        ["Email"] = "البريد الإلكتروني",
-        ["Password"] = "كلمة المرور",
-        ["ConfirmPassword"] = "تأكيد كلمة المرور",
-        ["FullName"] = "الاسم الكامل",
-        ["Phone"] = "رقم الجوال",
-        ["EnterEmail"] = "أدخل بريدك الإلكتروني",
-        ["EnterPassword"] = "أدخل كلمة المرور",
-        ["EnterFullName"] = "أدخل اسمك الكامل",
-        ["ReEnterPassword"] = "أعد إدخال كلمة المرور",
-        ["ForgotPassword"] = "نسيت كلمة المرور؟",
-        ["RememberMe"] = "تذكرني",
-        ["DontHaveAccount"] = "ليس لديك حساب؟",
-        ["AlreadyHaveAccount"] = "لديك حساب بالفعل؟",
-        ["IAccept"] = "أوافق على",
-        ["TermsAndConditions"] = "الشروط والأحكام",
-        ["And"] = "و",
-        ["PrivacyPolicy"] = "سياسة الخصوصية",
-        ["Or"] = "أو",
+        // Auth (Ashare-specific overrides)
+        ar["LoginToYourAccount"] = "سجل دخولك للمتابعة";
+        ar["EnterEmail"] = "أدخل بريدك الإلكتروني";
+        ar["EnterPassword"] = "أدخل كلمة المرور";
+        ar["EnterFullName"] = "أدخل اسمك الكامل";
+        ar["ReEnterPassword"] = "أعد إدخال كلمة المرور";
+        ar["LoginRequired"] = "يجب تسجيل الدخول";
+        ar["LoginToCreateListing"] = "يجب تسجيل الدخول لإنشاء عرض جديد";
 
-        // Nafath
-        ["LoginWithNafath"] = "الدخول بنفاذ",
-        ["LoginWithEmail"] = "الدخول بالبريد الإلكتروني",
-        ["ContinueWithNafath"] = "المتابعة بنفاذ",
-        ["ContinueAsGuest"] = "المتابعة كضيف",
-        ["NationalId"] = "رقم الهوية الوطنية",
-        ["EnterNationalId"] = "أدخل رقم الهوية",
-        ["SelectNumberInNafathApp"] = "اختر هذا الرقم في تطبيق نفاذ",
-        ["SecondsRemaining"] = "ثانية متبقية",
-        ["LoginSuccessful"] = "تم تسجيل الدخول بنجاح",
-        ["LoginRejected"] = "تم رفض تسجيل الدخول",
-        ["SessionExpired"] = "انتهت صلاحية الجلسة",
-        ["TryAgain"] = "حاول مرة أخرى",
+        // Spaces (Ashare-specific)
+        ar["Spaces"] = "المساحات";
+        ar["AllSpaces"] = "كل المساحات";
+        ar["FeaturedSpaces"] = "المساحات المميزة";
+        ar["NewSpaces"] = "أحدث المساحات";
+        ar["NearbySpaces"] = "القريبة منك";
+        ar["NoSpaces"] = "لا توجد مساحات";
 
-        // Authentication Required
-        ["LoginRequired"] = "يجب تسجيل الدخول",
-        ["LoginToCreateListing"] = "يجب تسجيل الدخول لإنشاء عرض جديد",
-
-        // Spaces
-        ["Spaces"] = "المساحات",
-        ["AllSpaces"] = "كل المساحات",
-        ["FeaturedSpaces"] = "المساحات المميزة",
-        ["NewSpaces"] = "أحدث المساحات",
-        ["NearbySpaces"] = "القريبة منك",
-        ["NoSpaces"] = "لا توجد مساحات",
-        ["Featured"] = "مميز",
-        ["New"] = "جديد",
-
-        // Categories
-        ["Categories"] = "الفئات",
-        ["MeetingRooms"] = "قاعات اجتماعات",
-        ["CoWorking"] = "مكاتب مشتركة",
-        ["EventHalls"] = "قاعات فعاليات",
-        ["Studios"] = "استوديوهات",
-        ["Commercial"] = "مساحات تجارية",
-        ["CoLiving"] = "سكن مشترك",
+        // Categories (Ashare-specific)
+        ar["MeetingRooms"] = "قاعات اجتماعات";
+        ar["CoWorking"] = "مكاتب مشتركة";
+        ar["EventHalls"] = "قاعات فعاليات";
+        ar["Studios"] = "استوديوهات";
+        ar["Commercial"] = "مساحات تجارية";
+        ar["CoLiving"] = "سكن مشترك";
 
         // Space Details
-        ["Description"] = "الوصف",
-        ["Amenities"] = "المرافق والخدمات",
-        ["Pricing"] = "الأسعار",
-        ["PerHour"] = "بالساعة",
-        ["PerDay"] = "باليوم",
-        ["PerMonth"] = "بالشهر",
-        ["Capacity"] = "السعة",
-        ["Area"] = "المساحة",
-        ["Person"] = "شخص",
-        ["SquareMeter"] = "م²",
-        ["Rules"] = "القواعد والشروط",
-        ["Owner"] = "مالك المساحة",
-        ["MemberSince"] = "عضو منذ",
-        ["Contact"] = "تواصل",
-        ["Reviews"] = "التقييمات",
-        ["ViewAll"] = "عرض الكل",
-        ["NoReviews"] = "لا توجد تقييمات بعد",
-        ["ViewMap"] = "عرض الخريطة",
+        ar["Amenities"] = "المرافق والخدمات";
+        ar["Pricing"] = "الأسعار";
+        ar["PerHour"] = "بالساعة";
+        ar["PerDay"] = "باليوم";
+        ar["PerMonth"] = "بالشهر";
+        ar["Capacity"] = "السعة";
+        ar["Area"] = "المساحة";
+        ar["Person"] = "شخص";
+        ar["SquareMeter"] = "م²";
+        ar["Rules"] = "القواعد والشروط";
+        ar["Owner"] = "مالك المساحة";
+        ar["MemberSince"] = "عضو منذ";
+        ar["Contact"] = "تواصل";
+        ar["NoReviews"] = "لا توجد تقييمات بعد";
+        ar["ViewMap"] = "عرض الخريطة";
 
         // Booking
-        ["BookNow"] = "احجز الآن",
-        ["BookSpace"] = "احجز المساحة",
-        ["BookingType"] = "نوع الحجز",
-        ["Hourly"] = "بالساعة",
-        ["Daily"] = "باليوم",
-        ["Monthly"] = "بالشهر",
-        ["Date"] = "التاريخ",
-        ["FromTime"] = "من الساعة",
-        ["ToTime"] = "إلى الساعة",
-        ["Guests"] = "عدد الأشخاص",
-        ["Notes"] = "ملاحظات",
-        ["Optional"] = "اختياري",
-        ["Total"] = "المجموع",
-        ["ConfirmBooking"] = "تأكيد الحجز",
-        ["Cancel"] = "إلغاء",
-
-        // Bookings
-        ["MyBookings"] = "حجوزاتي",
-        ["Upcoming"] = "القادمة",
-        ["Past"] = "السابقة",
-        ["Cancelled"] = "الملغاة",
-        ["NoUpcomingBookings"] = "لا توجد حجوزات قادمة",
-        ["NoPastBookings"] = "لا توجد حجوزات سابقة",
-        ["NoCancelledBookings"] = "لا توجد حجوزات ملغاة",
-        ["BookingPending"] = "قيد المراجعة",
-        ["BookingConfirmed"] = "مؤكد",
-        ["BookingCompleted"] = "مكتمل",
-        ["BookingCancelled"] = "ملغي",
-        ["CancelBooking"] = "إلغاء الحجز",
-        ["ConfirmCancelBooking"] = "هل أنت متأكد من إلغاء هذا الحجز؟",
-        ["RefundInfo"] = "سيتم استرداد المبلغ خلال 3-5 أيام عمل",
-        ["ConfirmCancel"] = "تأكيد الإلغاء",
-        ["WriteReview"] = "قيّم تجربتك",
-        ["RateYourExperience"] = "قيّم تجربتك",
-        ["YourComment"] = "تعليقك",
-        ["ShareExperience"] = "شارك تجربتك مع الآخرين...",
-        ["SubmitReview"] = "إرسال التقييم",
+        ar["BookNow"] = "احجز الآن";
+        ar["BookSpace"] = "احجز المساحة";
+        ar["BookingType"] = "نوع الحجز";
+        ar["Hourly"] = "بالساعة";
+        ar["Daily"] = "باليوم";
+        ar["Monthly"] = "بالشهر";
+        ar["FromTime"] = "من الساعة";
+        ar["ToTime"] = "إلى الساعة";
+        ar["Guests"] = "عدد الأشخاص";
+        ar["Notes"] = "ملاحظات";
+        ar["ConfirmBooking"] = "تأكيد الحجز";
 
         // Favorites
-        ["NoFavorites"] = "لا توجد مساحات مفضلة",
-        ["AddFavoritesHint"] = "أضف المساحات التي تعجبك لتجدها بسهولة لاحقاً",
+        ar["NoFavorites"] = "لا توجد مساحات مفضلة";
+        ar["AddFavoritesHint"] = "أضف المساحات التي تعجبك لتجدها بسهولة لاحقاً";
 
         // Search
-        ["SearchSpaces"] = "ابحث عن مساحة...",
-        ["RecentSearches"] = "عمليات البحث الأخيرة",
-        ["ClearAll"] = "مسح الكل",
-        ["PopularCategories"] = "الفئات الشائعة",
-        ["PopularSearches"] = "عمليات بحث شائعة",
-        ["NearMe"] = "قريب مني",
-        ["LowestPrice"] = "الأقل سعراً",
-        ["HighestRated"] = "الأعلى تقييماً",
-        ["Results"] = "نتيجة",
-        ["NoResults"] = "لا توجد نتائج",
-        ["NoResultsFor"] = "لم نجد أي مساحات تطابق",
-        ["NewSearch"] = "بحث جديد",
-        ["Searching"] = "جاري البحث...",
+        ar["SearchSpaces"] = "ابحث عن مساحة...";
+        ar["RecentSearches"] = "عمليات البحث الأخيرة";
+        ar["ClearAll"] = "مسح الكل";
+        ar["PopularCategories"] = "الفئات الشائعة";
+        ar["PopularSearches"] = "عمليات بحث شائعة";
+        ar["NearMe"] = "قريب مني";
+        ar["LowestPrice"] = "الأقل سعراً";
+        ar["HighestRated"] = "الأعلى تقييماً";
+        ar["NoResultsFor"] = "لم نجد أي مساحات تطابق";
+        ar["NewSearch"] = "بحث جديد";
+        ar["Searching"] = "جاري البحث...";
 
         // Filters
-        ["Filters"] = "تصفية النتائج",
-        ["Apply"] = "تطبيق",
-        ["Reset"] = "إعادة تعيين",
-        ["PriceRange"] = "نطاق السعر",
-        ["From"] = "من",
-        ["To"] = "إلى",
-        ["MinRating"] = "الحد الأدنى للتقييم",
-        ["SortBy"] = "ترتيب حسب",
-        ["Newest"] = "الأحدث",
-        ["PriceLowToHigh"] = "السعر: الأقل",
-        ["PriceHighToLow"] = "السعر: الأعلى",
-        ["Rating"] = "التقييم",
+        ar["PriceRange"] = "نطاق السعر";
+        ar["From"] = "من";
+        ar["To"] = "إلى";
+        ar["MinRating"] = "الحد الأدنى للتقييم";
+        ar["Newest"] = "الأحدث";
+        ar["PriceLowToHigh"] = "السعر: الأقل";
+        ar["PriceHighToLow"] = "السعر: الأعلى";
+        ar["Rating"] = "التقييم";
 
-        // Profile
-        ["EditProfile"] = "تعديل الملف الشخصي",
-        ["CompleteYourProfile"] = "أكمل بياناتك",
-        ["WelcomeToAshare"] = "مرحباً بك في عشير",
-        ["PleaseCompleteYourProfile"] = "الرجاء إكمال بياناتك للمتابعة",
-        ["Addresses"] = "عناويني",
-        ["MyAddresses"] = "عناويني",
-        ["PaymentMethods"] = "طرق الدفع",
-        ["Settings"] = "الإعدادات",
-        ["DarkMode"] = "الوضع الداكن",
-        ["Language"] = "اللغة",
-        ["PrivacySecurity"] = "الخصوصية والأمان",
-        ["Help"] = "المساعدة",
-        ["HelpCenter"] = "مركز المساعدة",
-        ["ContactUs"] = "تواصل معنا",
-        ["About"] = "عن عشير",
-        ["Version"] = "الإصدار",
+        // Profile (Ashare-specific overrides)
+        ar["CompleteYourProfile"] = "أكمل بياناتك";
+        ar["WelcomeToAshare"] = "مرحباً بك في عشير";
+        ar["PleaseCompleteYourProfile"] = "الرجاء إكمال بياناتك للمتابعة";
+        ar["Addresses"] = "عناويني";
+        ar["MyAddresses"] = "عناويني";
+        ar["PaymentMethods"] = "طرق الدفع";
+        ar["PrivacySecurity"] = "الخصوصية والأمان";
+        ar["HelpCenter"] = "مركز المساعدة";
+        ar["ContactUs"] = "تواصل معنا";
+        ar["About"] = "عن عشير";
 
         // Profile Edit
-        ["PersonalInfo"] = "البيانات الشخصية",
-        ["ContactInfo"] = "بيانات التواصل",
-        ["AddressInfo"] = "بيانات العنوان",
-        ["AccountSettings"] = "إعدادات الحساب",
-        ["FirstName"] = "الاسم الأول",
-        ["LastName"] = "اسم العائلة",
-        ["DisplayName"] = "الاسم المعروض",
-        ["EnterFirstName"] = "أدخل اسمك الأول",
-        ["EnterLastName"] = "أدخل اسم العائلة",
-        ["EnterDisplayName"] = "أدخل الاسم المعروض",
-        ["DisplayNameHint"] = "هذا الاسم سيظهر للآخرين",
-        ["PhoneNumber"] = "رقم الجوال",
-        ["EnterAddress"] = "أدخل عنوانك",
-        ["Address"] = "العنوان",
-        ["ChangePhoto"] = "تغيير الصورة",
-        ["ChangePassword"] = "تغيير كلمة المرور",
-        ["Verified"] = "موثق",
-        ["VerifyNow"] = "توثيق الآن",
-        ["SaveChanges"] = "حفظ التغييرات",
-        ["Continue"] = "متابعة",
-        ["ProfileUpdated"] = "تم تحديث البيانات بنجاح",
-        ["AvatarUploadFailed"] = "فشل رفع الصورة",
-        ["FirstNameRequired"] = "الاسم الأول مطلوب",
-        ["FullNameRequired"] = "الاسم الكامل مطلوب",
-        ["AuthenticationFailed"] = "فشلت المصادقة",
+        ar["AddressInfo"] = "بيانات العنوان";
+        ar["AccountSettings"] = "إعدادات الحساب";
+        ar["FirstName"] = "الاسم الأول";
+        ar["LastName"] = "اسم العائلة";
+        ar["DisplayName"] = "الاسم المعروض";
+        ar["EnterFirstName"] = "أدخل اسمك الأول";
+        ar["EnterLastName"] = "أدخل اسم العائلة";
+        ar["EnterDisplayName"] = "أدخل الاسم المعروض";
+        ar["DisplayNameHint"] = "هذا الاسم سيظهر للآخرين";
+        ar["PhoneNumber"] = "رقم الجوال";
+        ar["EnterAddress"] = "أدخل عنوانك";
+        ar["Address"] = "العنوان";
+        ar["Verified"] = "موثق";
+        ar["VerifyNow"] = "توثيق الآن";
+        ar["ProfileUpdated"] = "تم تحديث البيانات بنجاح";
+        ar["AvatarUploadFailed"] = "فشل رفع الصورة";
+        ar["FirstNameRequired"] = "الاسم الأول مطلوب";
+        ar["FullNameRequired"] = "الاسم الكامل مطلوب";
+        ar["AuthenticationFailed"] = "فشلت المصادقة";
 
         // Host
-        ["Host"] = "المضيف",
-        ["MySpaces"] = "مساحاتي",
-        ["AddNewSpace"] = "أضف مساحة جديدة",
-        ["Earnings"] = "أرباحي",
-        ["MyEarnings"] = "أرباحي",
-        ["NoSpacesYet"] = "لا توجد مساحات بعد",
-        ["AddYourFirstSpace"] = "أضف مساحتك الأولى وابدأ في استقبال الحجوزات",
-        ["LoginToViewSpaces"] = "سجل دخولك لعرض مساحاتك",
-        ["ConfirmDelete"] = "تأكيد الحذف",
-        ["DeleteSpaceConfirmation"] = "هل أنت متأكد من حذف \"{0}\"؟ لا يمكن التراجع عن هذا الإجراء.",
-        ["Active"] = "نشط",
-        ["Inactive"] = "غير نشط",
-        ["NoLocation"] = "بدون موقع",
-        ["Month"] = "شهر",
-        ["SAR"] = "ر.س",
-        ["Edit"] = "تعديل",
-        ["Delete"] = "حذف",
-        ["Cancel"] = "إلغاء",
+        ar["Host"] = "المضيف";
+        ar["MySpaces"] = "مساحاتي";
+        ar["AddNewSpace"] = "أضف مساحة جديدة";
+        ar["Earnings"] = "أرباحي";
+        ar["MyEarnings"] = "أرباحي";
+        ar["NoSpacesYet"] = "لا توجد مساحات بعد";
+        ar["AddYourFirstSpace"] = "أضف مساحتك الأولى وابدأ في استقبال الحجوزات";
+        ar["LoginToViewSpaces"] = "سجل دخولك لعرض مساحاتك";
+        ar["ConfirmDelete"] = "تأكيد الحذف";
+        ar["DeleteSpaceConfirmation"] = "هل أنت متأكد من حذف \"{0}\"؟ لا يمكن التراجع عن هذا الإجراء.";
+        ar["NoLocation"] = "بدون موقع";
+        ar["SAR"] = "ر.س";
 
         // Subscriptions
-        ["SubscriptionPlans"] = "باقات الاشتراك",
-        ["MySubscription"] = "اشتراكي",
-        ["CurrentPlan"] = "الباقة الحالية",
-        ["ChangePlan"] = "تغيير الباقة",
-        ["ViewPlans"] = "عرض الباقات",
-        ["UpgradePlan"] = "ترقية الباقة",
-        ["Subscribe"] = "اشترك",
-        ["Upgrade"] = "ترقية",
-        ["GetStarted"] = "ابدأ الآن",
-        ["Annual"] = "سنوي",
-        ["Year"] = "سنة",
-        ["Save20Percent"] = "وفر 20%",
-        ["Recommended"] = "موصى به",
-        ["CompareAllFeatures"] = "مقارنة جميع المزايا",
-        ["DaysRemaining"] = "أيام متبقية",
-        ["Days"] = "يوم",
-        ["StartDate"] = "تاريخ البدء",
-        ["EndDate"] = "تاريخ الانتهاء",
+        ar["SubscriptionPlans"] = "باقات الاشتراك";
+        ar["MySubscription"] = "اشتراكي";
+        ar["CurrentPlan"] = "الباقة الحالية";
+        ar["ChangePlan"] = "تغيير الباقة";
+        ar["ViewPlans"] = "عرض الباقات";
+        ar["UpgradePlan"] = "ترقية الباقة";
+        ar["Subscribe"] = "اشترك";
+        ar["Upgrade"] = "ترقية";
+        ar["GetStarted"] = "ابدأ الآن";
+        ar["Annual"] = "سنوي";
+        ar["Save20Percent"] = "وفر 20%";
+        ar["CompareAllFeatures"] = "مقارنة جميع المزايا";
+        ar["DaysRemaining"] = "أيام متبقية";
+        ar["Days"] = "يوم";
+        ar["StartDate"] = "تاريخ البدء";
+        ar["EndDate"] = "تاريخ الانتهاء";
 
         // Plan Features
-        ["UnlimitedListings"] = "عروض غير محدودة",
-        ["MaxListingsFormat"] = "حتى {0} عرض",
-        ["MaxImagesFormat"] = "حتى {0} صورة لكل عرض",
-        ["CommissionFormat"] = "عمولة {0}% لكل عملية",
-        ["UnlimitedStorage"] = "تخزين غير محدود",
-        ["StorageGBFormat"] = "{0} جيجابايت تخزين",
-        ["StorageMBFormat"] = "{0} ميجابايت تخزين",
-        ["VerifiedBadge"] = "شارة التوثيق",
-        ["NoAnalytics"] = "بدون تحليلات",
-        ["BasicAnalytics"] = "تحليلات أساسية",
-        ["AdvancedAnalytics"] = "تحليلات متقدمة",
-        ["FullAnalytics"] = "تحليلات شاملة",
-        ["BasicSupport"] = "دعم أساسي",
-        ["StandardSupport"] = "دعم قياسي",
-        ["PrioritySupport"] = "دعم بأولوية",
-        ["DedicatedSupport"] = "دعم مخصص",
-        ["ApiAccess"] = "الوصول للـ API",
+        ar["UnlimitedListings"] = "عروض غير محدودة";
+        ar["MaxListingsFormat"] = "حتى {0} عرض";
+        ar["MaxImagesFormat"] = "حتى {0} صورة لكل عرض";
+        ar["CommissionFormat"] = "عمولة {0}% لكل عملية";
+        ar["UnlimitedStorage"] = "تخزين غير محدود";
+        ar["StorageGBFormat"] = "{0} جيجابايت تخزين";
+        ar["StorageMBFormat"] = "{0} ميجابايت تخزين";
+        ar["VerifiedBadge"] = "شارة التوثيق";
+        ar["NoAnalytics"] = "بدون تحليلات";
+        ar["BasicAnalytics"] = "تحليلات أساسية";
+        ar["AdvancedAnalytics"] = "تحليلات متقدمة";
+        ar["FullAnalytics"] = "تحليلات شاملة";
+        ar["BasicSupport"] = "دعم أساسي";
+        ar["StandardSupport"] = "دعم قياسي";
+        ar["PrioritySupport"] = "دعم بأولوية";
+        ar["DedicatedSupport"] = "دعم مخصص";
+        ar["ApiAccess"] = "الوصول للـ API";
 
         // Subscription Status
-        ["StatusActive"] = "نشط",
-        ["StatusTrial"] = "فترة تجريبية",
-        ["StatusPastDue"] = "متأخر السداد",
-        ["StatusCancelled"] = "ملغي",
-        ["StatusExpired"] = "منتهي",
-        ["StatusSuspended"] = "موقوف",
-        ["NoActiveSubscription"] = "لا يوجد اشتراك نشط",
-        ["SubscribeToStartHosting"] = "اشترك الآن لبدء عرض مساحاتك",
-        ["SubscriptionExpiringWarning"] = "اشتراكك على وشك الانتهاء",
-        ["RenewNow"] = "جدد الآن",
+        ar["StatusActive"] = "نشط";
+        ar["StatusTrial"] = "فترة تجريبية";
+        ar["StatusPastDue"] = "متأخر السداد";
+        ar["StatusCancelled"] = "ملغي";
+        ar["StatusExpired"] = "منتهي";
+        ar["StatusSuspended"] = "موقوف";
+        ar["NoActiveSubscription"] = "لا يوجد اشتراك نشط";
+        ar["SubscribeToStartHosting"] = "اشترك الآن لبدء عرض مساحاتك";
+        ar["SubscriptionExpiringWarning"] = "اشتراكك على وشك الانتهاء";
+        ar["RenewNow"] = "جدد الآن";
 
         // Usage
-        ["UsageStatistics"] = "إحصائيات الاستخدام",
-        ["Listings"] = "العروض",
-        ["Storage"] = "التخزين",
-        ["FeaturedListings"] = "العروض المميزة",
-        ["TeamMembers"] = "أعضاء الفريق",
-        ["CommissionRate"] = "نسبة العمولة",
-        ["PerTransaction"] = "لكل عملية",
-        ["CommissionNote"] = "يتم خصم العمولة تلقائياً من كل عملية بيع ناجحة",
+        ar["UsageStatistics"] = "إحصائيات الاستخدام";
+        ar["Listings"] = "العروض";
+        ar["Storage"] = "التخزين";
+        ar["FeaturedListings"] = "العروض المميزة";
+        ar["TeamMembers"] = "أعضاء الفريق";
+        ar["CommissionRate"] = "نسبة العمولة";
+        ar["PerTransaction"] = "لكل عملية";
+        ar["CommissionNote"] = "يتم خصم العمولة تلقائياً من كل عملية بيع ناجحة";
 
         // Invoices
-        ["RecentInvoices"] = "آخر الفواتير",
-        ["Invoices"] = "الفواتير",
-        ["BillingSettings"] = "إعدادات الفوترة",
-        ["Paid"] = "مدفوعة",
-        ["Pending"] = "قيد الانتظار",
-        ["Failed"] = "فشلت",
-        ["Refunded"] = "مستردة",
-        ["Draft"] = "مسودة",
-        ["Support"] = "الدعم",
+        ar["RecentInvoices"] = "آخر الفواتير";
+        ar["Invoices"] = "الفواتير";
+        ar["BillingSettings"] = "إعدادات الفوترة";
+        ar["Paid"] = "مدفوعة";
+        ar["Failed"] = "فشلت";
+        ar["Refunded"] = "مستردة";
+        ar["Draft"] = "مسودة";
+        ar["Support"] = "الدعم";
 
         // Chat
-        ["Chat"] = "المحادثات",
-        ["NoChats"] = "لا توجد محادثات",
-        ["StartChat"] = "بدء محادثة",
-        ["StartChatHint"] = "ابدأ محادثة من صفحة أي مساحة",
-        ["TypeMessage"] = "اكتب رسالة...",
-        ["Send"] = "إرسال",
-        ["Online"] = "متصل",
-        ["Offline"] = "غير متصل",
-        ["Typing"] = "يكتب...",
-        ["Now"] = "الآن",
-        ["NoMessagesYet"] = "لا توجد رسائل بعد",
-        ["SendFirstMessage"] = "أرسل أول رسالة لبدء المحادثة",
+        ar["Chat"] = "المحادثات";
+        ar["NoChats"] = "لا توجد محادثات";
+        ar["StartChat"] = "بدء محادثة";
+        ar["StartChatHint"] = "ابدأ محادثة من صفحة أي مساحة";
+        ar["TypeMessage"] = "اكتب رسالة...";
+        ar["Send"] = "إرسال";
+        ar["Online"] = "متصل";
+        ar["Offline"] = "غير متصل";
+        ar["Typing"] = "يكتب...";
+        ar["NoMessagesYet"] = "لا توجد رسائل بعد";
+        ar["SendFirstMessage"] = "أرسل أول رسالة لبدء المحادثة";
 
         // Notifications
-        ["AllNotifications"] = "كل الإشعارات",
-        ["NoNotifications"] = "لا توجد إشعارات",
-        ["MarkAllRead"] = "تحديد الكل كمقروء",
-
-        // Common
-        ["Loading"] = "جاري التحميل...",
-        ["Error"] = "خطأ",
-        ["Success"] = "نجاح",
-        ["Retry"] = "إعادة المحاولة",
-        ["Save"] = "حفظ",
-        ["Delete"] = "حذف",
-        ["Edit"] = "تعديل",
-        ["Back"] = "رجوع",
-        ["Next"] = "التالي",
-        ["Done"] = "تم",
-        ["Close"] = "إغلاق",
-        ["Yes"] = "نعم",
-        ["No"] = "لا",
-        ["OK"] = "موافق",
-        ["SAR"] = "ر.س",
-        ["Hour"] = "ساعة",
-        ["Day"] = "يوم",
-        ["Month"] = "شهر",
+        ar["AllNotifications"] = "كل الإشعارات";
+        ar["NoNotifications"] = "لا توجد إشعارات";
+        ar["MarkAllRead"] = "تحديد الكل كمقروء";
 
         // Payment
-        ["SubscribeNow"] = "اشترك الآن",
-        ["BillingCycle"] = "دورة الفوترة",
-        ["Quarterly"] = "ربع سنوي",
-        ["Subtotal"] = "المجموع الفرعي",
-        ["FreeTrial"] = "فترة تجريبية مجانية",
-        ["VAT"] = "ضريبة القيمة المضافة",
-        ["Processing"] = "جاري المعالجة...",
-        ["StartFreeTrial"] = "ابدأ الفترة التجريبية",
-        ["PayNow"] = "ادفع الآن",
-        ["PaymentSecureNotice"] = "ستتم معالجة الدفع بشكل آمن عبر بوابة الدفع",
-        ["PaymentInitError"] = "تعذر بدء عملية الدفع. يرجى المحاولة مرة أخرى.",
-        ["PaymentConnectionError"] = "حدث خطأ في الاتصال. تحقق من اتصالك بالإنترنت وحاول مرة أخرى.",
-        ["PlanNotFound"] = "الباقة غير موجودة",
-        ["PaymentFailedRetry"] = "فشلت عملية الدفع، يرجى المحاولة مرة أخرى",
-        ["PaymentFailedSelectPlan"] = "فشلت عملية الدفع، اختر باقة للمتابعة",
-    };
+        ar["SubscribeNow"] = "اشترك الآن";
+        ar["BillingCycle"] = "دورة الفوترة";
+        ar["Quarterly"] = "ربع سنوي";
+        ar["FreeTrial"] = "فترة تجريبية مجانية";
+        ar["VAT"] = "ضريبة القيمة المضافة";
+        ar["StartFreeTrial"] = "ابدأ الفترة التجريبية";
+        ar["PayNow"] = "ادفع الآن";
+        ar["PaymentSecureNotice"] = "ستتم معالجة الدفع بشكل آمن عبر بوابة الدفع";
+        ar["PaymentInitError"] = "تعذر بدء عملية الدفع. يرجى المحاولة مرة أخرى.";
+        ar["PaymentConnectionError"] = "حدث خطأ في الاتصال. تحقق من اتصالك بالإنترنت وحاول مرة أخرى.";
+        ar["PlanNotFound"] = "الباقة غير موجودة";
+        ar["PaymentFailedRetry"] = "فشلت عملية الدفع، يرجى المحاولة مرة أخرى";
+        ar["PaymentFailedSelectPlan"] = "فشلت عملية الدفع، اختر باقة للمتابعة";
 
-    // ═══════════════════════════════════════════════════════════════════
-    // English Strings
-    // ═══════════════════════════════════════════════════════════════════
-    private static Dictionary<string, string> GetEnglishStrings() => new()
+        // Reviews
+        ar["Reviews"] = "التقييمات";
+    }
+
+    private static void AddEnglishTranslations(Dictionary<string, string> en)
     {
-        // App
-        ["AppName"] = "Ashare",
-        ["AppTagline"] = "Share Spaces, Share Possibilities",
+        // App (Required)
+        en["AppName"] = "Ashare";
+        en["AppTagline"] = "Share Spaces, Share Possibilities";
 
-        // Navigation
-        ["Home"] = "Home",
-        ["Explore"] = "Explore",
-        ["Bookings"] = "Bookings",
-        ["Favorites"] = "Favorites",
-        ["Profile"] = "Profile",
-        ["Search"] = "Search",
-        ["Notifications"] = "Notifications",
-        ["Messages"] = "Messages",
+        // Bookings (Ashare-specific)
+        en["Bookings"] = "Bookings";
+        en["MyBookings"] = "My Bookings";
+        en["Upcoming"] = "Upcoming";
+        en["Past"] = "Past";
+        en["NoUpcomingBookings"] = "No upcoming bookings";
+        en["NoPastBookings"] = "No past bookings";
+        en["NoCancelledBookings"] = "No cancelled bookings";
+        en["BookingPending"] = "Pending";
+        en["BookingConfirmed"] = "Confirmed";
+        en["BookingCompleted"] = "Completed";
+        en["BookingCancelled"] = "Cancelled";
+        en["CancelBooking"] = "Cancel Booking";
+        en["ConfirmCancelBooking"] = "Are you sure you want to cancel this booking?";
+        en["RefundInfo"] = "Refund will be processed within 3-5 business days";
+        en["ConfirmCancel"] = "Confirm Cancellation";
+        en["WriteReview"] = "Write a Review";
+        en["RateYourExperience"] = "Rate your experience";
+        en["YourComment"] = "Your comment";
+        en["ShareExperience"] = "Share your experience with others...";
+        en["SubmitReview"] = "Submit Review";
 
-        // Auth
-        ["Login"] = "Login",
-        ["Logout"] = "Logout",
-        ["Register"] = "Register",
-        ["CreateAccount"] = "Create Account",
-        ["WelcomeBack"] = "Welcome Back",
-        ["LoginToYourAccount"] = "Login to continue",
-        ["Email"] = "Email",
-        ["Password"] = "Password",
-        ["ConfirmPassword"] = "Confirm Password",
-        ["FullName"] = "Full Name",
-        ["Phone"] = "Phone Number",
-        ["EnterEmail"] = "Enter your email",
-        ["EnterPassword"] = "Enter your password",
-        ["EnterFullName"] = "Enter your full name",
-        ["ReEnterPassword"] = "Re-enter your password",
-        ["ForgotPassword"] = "Forgot Password?",
-        ["RememberMe"] = "Remember Me",
-        ["DontHaveAccount"] = "Don't have an account?",
-        ["AlreadyHaveAccount"] = "Already have an account?",
-        ["IAccept"] = "I accept the",
-        ["TermsAndConditions"] = "Terms & Conditions",
-        ["And"] = "and",
-        ["PrivacyPolicy"] = "Privacy Policy",
-        ["Or"] = "Or",
+        // Nafath (Saudi-specific)
+        en["LoginWithNafath"] = "Login with Nafath";
+        en["LoginWithEmail"] = "Login with Email";
+        en["ContinueWithNafath"] = "Continue with Nafath";
+        en["NationalId"] = "National ID";
+        en["EnterNationalId"] = "Enter your National ID";
+        en["SelectNumberInNafathApp"] = "Select this number in Nafath app";
+        en["SecondsRemaining"] = "seconds remaining";
+        en["LoginSuccessful"] = "Login successful";
+        en["LoginRejected"] = "Login rejected";
 
-        // Nafath
-        ["LoginWithNafath"] = "Login with Nafath",
-        ["LoginWithEmail"] = "Login with Email",
-        ["ContinueWithNafath"] = "Continue with Nafath",
-        ["ContinueAsGuest"] = "Continue as Guest",
-        ["NationalId"] = "National ID",
-        ["EnterNationalId"] = "Enter your National ID",
-        ["SelectNumberInNafathApp"] = "Select this number in Nafath app",
-        ["SecondsRemaining"] = "seconds remaining",
-        ["LoginSuccessful"] = "Login successful",
-        ["LoginRejected"] = "Login rejected",
-        ["SessionExpired"] = "Session expired",
-        ["TryAgain"] = "Try Again",
+        // Auth (Ashare-specific overrides)
+        en["LoginToYourAccount"] = "Login to continue";
+        en["EnterEmail"] = "Enter your email";
+        en["EnterPassword"] = "Enter your password";
+        en["EnterFullName"] = "Enter your full name";
+        en["ReEnterPassword"] = "Re-enter your password";
+        en["LoginRequired"] = "Login Required";
+        en["LoginToCreateListing"] = "Please login to create a listing";
 
-        // Authentication Required
-        ["LoginRequired"] = "Login Required",
-        ["LoginToCreateListing"] = "Please login to create a listing",
+        // Spaces (Ashare-specific)
+        en["Spaces"] = "Spaces";
+        en["AllSpaces"] = "All Spaces";
+        en["FeaturedSpaces"] = "Featured Spaces";
+        en["NewSpaces"] = "New Spaces";
+        en["NearbySpaces"] = "Nearby";
+        en["NoSpaces"] = "No spaces found";
 
-        // Spaces
-        ["Spaces"] = "Spaces",
-        ["AllSpaces"] = "All Spaces",
-        ["FeaturedSpaces"] = "Featured Spaces",
-        ["NewSpaces"] = "New Spaces",
-        ["NearbySpaces"] = "Nearby",
-        ["NoSpaces"] = "No spaces found",
-        ["Featured"] = "Featured",
-        ["New"] = "New",
-
-        // Categories
-        ["Categories"] = "Categories",
-        ["MeetingRooms"] = "Meeting Rooms",
-        ["CoWorking"] = "Co-Working",
-        ["EventHalls"] = "Event Halls",
-        ["Studios"] = "Studios",
-        ["Commercial"] = "Commercial",
-        ["CoLiving"] = "Co-Living",
+        // Categories (Ashare-specific)
+        en["MeetingRooms"] = "Meeting Rooms";
+        en["CoWorking"] = "Co-Working";
+        en["EventHalls"] = "Event Halls";
+        en["Studios"] = "Studios";
+        en["Commercial"] = "Commercial";
+        en["CoLiving"] = "Co-Living";
 
         // Space Details
-        ["Description"] = "Description",
-        ["Amenities"] = "Amenities",
-        ["Pricing"] = "Pricing",
-        ["PerHour"] = "Per Hour",
-        ["PerDay"] = "Per Day",
-        ["PerMonth"] = "Per Month",
-        ["Capacity"] = "Capacity",
-        ["Area"] = "Area",
-        ["Person"] = "person",
-        ["SquareMeter"] = "m²",
-        ["Rules"] = "Rules & Conditions",
-        ["Owner"] = "Space Owner",
-        ["MemberSince"] = "Member since",
-        ["Contact"] = "Contact",
-        ["Reviews"] = "Reviews",
-        ["ViewAll"] = "View All",
-        ["NoReviews"] = "No reviews yet",
-        ["ViewMap"] = "View Map",
+        en["Amenities"] = "Amenities";
+        en["Pricing"] = "Pricing";
+        en["PerHour"] = "Per Hour";
+        en["PerDay"] = "Per Day";
+        en["PerMonth"] = "Per Month";
+        en["Capacity"] = "Capacity";
+        en["Area"] = "Area";
+        en["Person"] = "person";
+        en["SquareMeter"] = "m²";
+        en["Rules"] = "Rules & Conditions";
+        en["Owner"] = "Space Owner";
+        en["MemberSince"] = "Member since";
+        en["Contact"] = "Contact";
+        en["NoReviews"] = "No reviews yet";
+        en["ViewMap"] = "View Map";
 
         // Booking
-        ["BookNow"] = "Book Now",
-        ["BookSpace"] = "Book Space",
-        ["BookingType"] = "Booking Type",
-        ["Hourly"] = "Hourly",
-        ["Daily"] = "Daily",
-        ["Monthly"] = "Monthly",
-        ["Date"] = "Date",
-        ["FromTime"] = "From",
-        ["ToTime"] = "To",
-        ["Guests"] = "Guests",
-        ["Notes"] = "Notes",
-        ["Optional"] = "Optional",
-        ["Total"] = "Total",
-        ["ConfirmBooking"] = "Confirm Booking",
-        ["Cancel"] = "Cancel",
-
-        // Bookings
-        ["MyBookings"] = "My Bookings",
-        ["Upcoming"] = "Upcoming",
-        ["Past"] = "Past",
-        ["Cancelled"] = "Cancelled",
-        ["NoUpcomingBookings"] = "No upcoming bookings",
-        ["NoPastBookings"] = "No past bookings",
-        ["NoCancelledBookings"] = "No cancelled bookings",
-        ["BookingPending"] = "Pending",
-        ["BookingConfirmed"] = "Confirmed",
-        ["BookingCompleted"] = "Completed",
-        ["BookingCancelled"] = "Cancelled",
-        ["CancelBooking"] = "Cancel Booking",
-        ["ConfirmCancelBooking"] = "Are you sure you want to cancel this booking?",
-        ["RefundInfo"] = "Refund will be processed within 3-5 business days",
-        ["ConfirmCancel"] = "Confirm Cancellation",
-        ["WriteReview"] = "Write a Review",
-        ["RateYourExperience"] = "Rate your experience",
-        ["YourComment"] = "Your comment",
-        ["ShareExperience"] = "Share your experience with others...",
-        ["SubmitReview"] = "Submit Review",
+        en["BookNow"] = "Book Now";
+        en["BookSpace"] = "Book Space";
+        en["BookingType"] = "Booking Type";
+        en["Hourly"] = "Hourly";
+        en["Daily"] = "Daily";
+        en["Monthly"] = "Monthly";
+        en["FromTime"] = "From";
+        en["ToTime"] = "To";
+        en["Guests"] = "Guests";
+        en["Notes"] = "Notes";
+        en["ConfirmBooking"] = "Confirm Booking";
 
         // Favorites
-        ["NoFavorites"] = "No favorites yet",
-        ["AddFavoritesHint"] = "Add spaces you like to find them easily later",
+        en["NoFavorites"] = "No favorites yet";
+        en["AddFavoritesHint"] = "Add spaces you like to find them easily later";
 
         // Search
-        ["SearchSpaces"] = "Search for a space...",
-        ["RecentSearches"] = "Recent Searches",
-        ["ClearAll"] = "Clear All",
-        ["PopularCategories"] = "Popular Categories",
-        ["PopularSearches"] = "Popular Searches",
-        ["NearMe"] = "Near Me",
-        ["LowestPrice"] = "Lowest Price",
-        ["HighestRated"] = "Highest Rated",
-        ["Results"] = "results",
-        ["NoResults"] = "No results",
-        ["NoResultsFor"] = "No spaces found matching",
-        ["NewSearch"] = "New Search",
-        ["Searching"] = "Searching...",
+        en["SearchSpaces"] = "Search for a space...";
+        en["RecentSearches"] = "Recent Searches";
+        en["ClearAll"] = "Clear All";
+        en["PopularCategories"] = "Popular Categories";
+        en["PopularSearches"] = "Popular Searches";
+        en["NearMe"] = "Near Me";
+        en["LowestPrice"] = "Lowest Price";
+        en["HighestRated"] = "Highest Rated";
+        en["NoResultsFor"] = "No spaces found matching";
+        en["NewSearch"] = "New Search";
+        en["Searching"] = "Searching...";
 
         // Filters
-        ["Filters"] = "Filters",
-        ["Apply"] = "Apply",
-        ["Reset"] = "Reset",
-        ["PriceRange"] = "Price Range",
-        ["From"] = "From",
-        ["To"] = "To",
-        ["MinRating"] = "Minimum Rating",
-        ["SortBy"] = "Sort By",
-        ["Newest"] = "Newest",
-        ["PriceLowToHigh"] = "Price: Low to High",
-        ["PriceHighToLow"] = "Price: High to Low",
-        ["Rating"] = "Rating",
+        en["PriceRange"] = "Price Range";
+        en["From"] = "From";
+        en["To"] = "To";
+        en["MinRating"] = "Minimum Rating";
+        en["Newest"] = "Newest";
+        en["PriceLowToHigh"] = "Price: Low to High";
+        en["PriceHighToLow"] = "Price: High to Low";
+        en["Rating"] = "Rating";
 
-        // Profile
-        ["EditProfile"] = "Edit Profile",
-        ["CompleteYourProfile"] = "Complete Your Profile",
-        ["WelcomeToAshare"] = "Welcome to Ashare",
-        ["PleaseCompleteYourProfile"] = "Please complete your profile to continue",
-        ["Addresses"] = "My Addresses",
-        ["MyAddresses"] = "My Addresses",
-        ["PaymentMethods"] = "Payment Methods",
-        ["Settings"] = "Settings",
-        ["DarkMode"] = "Dark Mode",
-        ["Language"] = "Language",
-        ["PrivacySecurity"] = "Privacy & Security",
-        ["Help"] = "Help",
-        ["HelpCenter"] = "Help Center",
-        ["ContactUs"] = "Contact Us",
-        ["About"] = "About Ashare",
-        ["Version"] = "Version",
+        // Profile (Ashare-specific overrides)
+        en["CompleteYourProfile"] = "Complete Your Profile";
+        en["WelcomeToAshare"] = "Welcome to Ashare";
+        en["PleaseCompleteYourProfile"] = "Please complete your profile to continue";
+        en["Addresses"] = "My Addresses";
+        en["MyAddresses"] = "My Addresses";
+        en["PaymentMethods"] = "Payment Methods";
+        en["PrivacySecurity"] = "Privacy & Security";
+        en["HelpCenter"] = "Help Center";
+        en["ContactUs"] = "Contact Us";
+        en["About"] = "About Ashare";
 
         // Profile Edit
-        ["PersonalInfo"] = "Personal Info",
-        ["ContactInfo"] = "Contact Info",
-        ["AddressInfo"] = "Address Info",
-        ["AccountSettings"] = "Account Settings",
-        ["FirstName"] = "First Name",
-        ["LastName"] = "Last Name",
-        ["DisplayName"] = "Display Name",
-        ["EnterFirstName"] = "Enter your first name",
-        ["EnterLastName"] = "Enter your last name",
-        ["EnterDisplayName"] = "Enter display name",
-        ["DisplayNameHint"] = "This name will be visible to others",
-        ["PhoneNumber"] = "Phone Number",
-        ["EnterAddress"] = "Enter your address",
-        ["Address"] = "Address",
-        ["ChangePhoto"] = "Change Photo",
-        ["ChangePassword"] = "Change Password",
-        ["Verified"] = "Verified",
-        ["VerifyNow"] = "Verify Now",
-        ["SaveChanges"] = "Save Changes",
-        ["Continue"] = "Continue",
-        ["ProfileUpdated"] = "Profile updated successfully",
-        ["AvatarUploadFailed"] = "Failed to upload avatar",
-        ["FirstNameRequired"] = "First name is required",
-        ["FullNameRequired"] = "Full name is required",
-        ["AuthenticationFailed"] = "Authentication failed",
+        en["AddressInfo"] = "Address Info";
+        en["AccountSettings"] = "Account Settings";
+        en["FirstName"] = "First Name";
+        en["LastName"] = "Last Name";
+        en["DisplayName"] = "Display Name";
+        en["EnterFirstName"] = "Enter your first name";
+        en["EnterLastName"] = "Enter your last name";
+        en["EnterDisplayName"] = "Enter display name";
+        en["DisplayNameHint"] = "This name will be visible to others";
+        en["PhoneNumber"] = "Phone Number";
+        en["EnterAddress"] = "Enter your address";
+        en["Address"] = "Address";
+        en["Verified"] = "Verified";
+        en["VerifyNow"] = "Verify Now";
+        en["ProfileUpdated"] = "Profile updated successfully";
+        en["AvatarUploadFailed"] = "Failed to upload avatar";
+        en["FirstNameRequired"] = "First name is required";
+        en["FullNameRequired"] = "Full name is required";
+        en["AuthenticationFailed"] = "Authentication failed";
 
         // Host
-        ["Host"] = "Host",
-        ["MySpaces"] = "My Spaces",
-        ["AddNewSpace"] = "Add New Space",
-        ["Earnings"] = "Earnings",
-        ["MyEarnings"] = "My Earnings",
-        ["NoSpacesYet"] = "No spaces yet",
-        ["AddYourFirstSpace"] = "Add your first space and start receiving bookings",
-        ["LoginToViewSpaces"] = "Login to view your spaces",
-        ["ConfirmDelete"] = "Confirm Delete",
-        ["DeleteSpaceConfirmation"] = "Are you sure you want to delete \"{0}\"? This action cannot be undone.",
-        ["Active"] = "Active",
-        ["Inactive"] = "Inactive",
-        ["NoLocation"] = "No location",
-        ["Month"] = "month",
-        ["SAR"] = "SAR",
-        ["Edit"] = "Edit",
-        ["Delete"] = "Delete",
-        ["Cancel"] = "Cancel",
+        en["Host"] = "Host";
+        en["MySpaces"] = "My Spaces";
+        en["AddNewSpace"] = "Add New Space";
+        en["Earnings"] = "Earnings";
+        en["MyEarnings"] = "My Earnings";
+        en["NoSpacesYet"] = "No spaces yet";
+        en["AddYourFirstSpace"] = "Add your first space and start receiving bookings";
+        en["LoginToViewSpaces"] = "Login to view your spaces";
+        en["ConfirmDelete"] = "Confirm Delete";
+        en["DeleteSpaceConfirmation"] = "Are you sure you want to delete \"{0}\"? This action cannot be undone.";
+        en["NoLocation"] = "No location";
+        en["SAR"] = "SAR";
 
         // Subscriptions
-        ["SubscriptionPlans"] = "Subscription Plans",
-        ["MySubscription"] = "My Subscription",
-        ["CurrentPlan"] = "Current Plan",
-        ["ChangePlan"] = "Change Plan",
-        ["ViewPlans"] = "View Plans",
-        ["UpgradePlan"] = "Upgrade Plan",
-        ["Subscribe"] = "Subscribe",
-        ["Upgrade"] = "Upgrade",
-        ["GetStarted"] = "Get Started",
-        ["Annual"] = "Annual",
-        ["Year"] = "Year",
-        ["Save20Percent"] = "Save 20%",
-        ["Recommended"] = "Recommended",
-        ["CompareAllFeatures"] = "Compare All Features",
-        ["DaysRemaining"] = "Days Remaining",
-        ["Days"] = "days",
-        ["StartDate"] = "Start Date",
-        ["EndDate"] = "End Date",
+        en["SubscriptionPlans"] = "Subscription Plans";
+        en["MySubscription"] = "My Subscription";
+        en["CurrentPlan"] = "Current Plan";
+        en["ChangePlan"] = "Change Plan";
+        en["ViewPlans"] = "View Plans";
+        en["UpgradePlan"] = "Upgrade Plan";
+        en["Subscribe"] = "Subscribe";
+        en["Upgrade"] = "Upgrade";
+        en["GetStarted"] = "Get Started";
+        en["Annual"] = "Annual";
+        en["Save20Percent"] = "Save 20%";
+        en["CompareAllFeatures"] = "Compare All Features";
+        en["DaysRemaining"] = "Days Remaining";
+        en["Days"] = "days";
+        en["StartDate"] = "Start Date";
+        en["EndDate"] = "End Date";
 
         // Plan Features
-        ["UnlimitedListings"] = "Unlimited Listings",
-        ["MaxListingsFormat"] = "Up to {0} listings",
-        ["MaxImagesFormat"] = "Up to {0} images per listing",
-        ["CommissionFormat"] = "{0}% commission per sale",
-        ["UnlimitedStorage"] = "Unlimited Storage",
-        ["StorageGBFormat"] = "{0} GB Storage",
-        ["StorageMBFormat"] = "{0} MB Storage",
-        ["VerifiedBadge"] = "Verified Badge",
-        ["NoAnalytics"] = "No Analytics",
-        ["BasicAnalytics"] = "Basic Analytics",
-        ["AdvancedAnalytics"] = "Advanced Analytics",
-        ["FullAnalytics"] = "Full Analytics",
-        ["BasicSupport"] = "Basic Support",
-        ["StandardSupport"] = "Standard Support",
-        ["PrioritySupport"] = "Priority Support",
-        ["DedicatedSupport"] = "Dedicated Support",
-        ["ApiAccess"] = "API Access",
+        en["UnlimitedListings"] = "Unlimited Listings";
+        en["MaxListingsFormat"] = "Up to {0} listings";
+        en["MaxImagesFormat"] = "Up to {0} images per listing";
+        en["CommissionFormat"] = "{0}% commission per sale";
+        en["UnlimitedStorage"] = "Unlimited Storage";
+        en["StorageGBFormat"] = "{0} GB Storage";
+        en["StorageMBFormat"] = "{0} MB Storage";
+        en["VerifiedBadge"] = "Verified Badge";
+        en["NoAnalytics"] = "No Analytics";
+        en["BasicAnalytics"] = "Basic Analytics";
+        en["AdvancedAnalytics"] = "Advanced Analytics";
+        en["FullAnalytics"] = "Full Analytics";
+        en["BasicSupport"] = "Basic Support";
+        en["StandardSupport"] = "Standard Support";
+        en["PrioritySupport"] = "Priority Support";
+        en["DedicatedSupport"] = "Dedicated Support";
+        en["ApiAccess"] = "API Access";
 
         // Subscription Status
-        ["StatusActive"] = "Active",
-        ["StatusTrial"] = "Trial",
-        ["StatusPastDue"] = "Past Due",
-        ["StatusCancelled"] = "Cancelled",
-        ["StatusExpired"] = "Expired",
-        ["StatusSuspended"] = "Suspended",
-        ["NoActiveSubscription"] = "No Active Subscription",
-        ["SubscribeToStartHosting"] = "Subscribe to start listing your spaces",
-        ["SubscriptionExpiringWarning"] = "Your subscription is about to expire",
-        ["RenewNow"] = "Renew Now",
+        en["StatusActive"] = "Active";
+        en["StatusTrial"] = "Trial";
+        en["StatusPastDue"] = "Past Due";
+        en["StatusCancelled"] = "Cancelled";
+        en["StatusExpired"] = "Expired";
+        en["StatusSuspended"] = "Suspended";
+        en["NoActiveSubscription"] = "No Active Subscription";
+        en["SubscribeToStartHosting"] = "Subscribe to start listing your spaces";
+        en["SubscriptionExpiringWarning"] = "Your subscription is about to expire";
+        en["RenewNow"] = "Renew Now";
 
         // Usage
-        ["UsageStatistics"] = "Usage Statistics",
-        ["Listings"] = "Listings",
-        ["Storage"] = "Storage",
-        ["FeaturedListings"] = "Featured Listings",
-        ["TeamMembers"] = "Team Members",
-        ["CommissionRate"] = "Commission Rate",
-        ["PerTransaction"] = "per transaction",
-        ["CommissionNote"] = "Commission is automatically deducted from each successful sale",
+        en["UsageStatistics"] = "Usage Statistics";
+        en["Listings"] = "Listings";
+        en["Storage"] = "Storage";
+        en["FeaturedListings"] = "Featured Listings";
+        en["TeamMembers"] = "Team Members";
+        en["CommissionRate"] = "Commission Rate";
+        en["PerTransaction"] = "per transaction";
+        en["CommissionNote"] = "Commission is automatically deducted from each successful sale";
 
         // Invoices
-        ["RecentInvoices"] = "Recent Invoices",
-        ["Invoices"] = "Invoices",
-        ["BillingSettings"] = "Billing Settings",
-        ["Paid"] = "Paid",
-        ["Pending"] = "Pending",
-        ["Failed"] = "Failed",
-        ["Refunded"] = "Refunded",
-        ["Draft"] = "Draft",
-        ["Support"] = "Support",
+        en["RecentInvoices"] = "Recent Invoices";
+        en["Invoices"] = "Invoices";
+        en["BillingSettings"] = "Billing Settings";
+        en["Paid"] = "Paid";
+        en["Failed"] = "Failed";
+        en["Refunded"] = "Refunded";
+        en["Draft"] = "Draft";
+        en["Support"] = "Support";
 
         // Chat
-        ["Chat"] = "Chat",
-        ["NoChats"] = "No chats yet",
-        ["StartChat"] = "Start Chat",
-        ["StartChatHint"] = "Start a conversation from any space page",
-        ["TypeMessage"] = "Type a message...",
-        ["Send"] = "Send",
-        ["Online"] = "Online",
-        ["Offline"] = "Offline",
-        ["Typing"] = "Typing...",
-        ["Now"] = "Now",
-        ["NoMessagesYet"] = "No messages yet",
-        ["SendFirstMessage"] = "Send a message to start the conversation",
+        en["Chat"] = "Chat";
+        en["NoChats"] = "No chats yet";
+        en["StartChat"] = "Start Chat";
+        en["StartChatHint"] = "Start a conversation from any space page";
+        en["TypeMessage"] = "Type a message...";
+        en["Send"] = "Send";
+        en["Online"] = "Online";
+        en["Offline"] = "Offline";
+        en["Typing"] = "Typing...";
+        en["NoMessagesYet"] = "No messages yet";
+        en["SendFirstMessage"] = "Send a message to start the conversation";
 
         // Notifications
-        ["AllNotifications"] = "All Notifications",
-        ["NoNotifications"] = "No notifications",
-        ["MarkAllRead"] = "Mark all as read",
-
-        // Common
-        ["Loading"] = "Loading...",
-        ["Error"] = "Error",
-        ["Success"] = "Success",
-        ["Retry"] = "Retry",
-        ["Save"] = "Save",
-        ["Delete"] = "Delete",
-        ["Edit"] = "Edit",
-        ["Back"] = "Back",
-        ["Next"] = "Next",
-        ["Done"] = "Done",
-        ["Close"] = "Close",
-        ["Yes"] = "Yes",
-        ["No"] = "No",
-        ["OK"] = "OK",
-        ["SAR"] = "SAR",
-        ["Hour"] = "hour",
-        ["Day"] = "day",
-        ["Month"] = "month",
+        en["AllNotifications"] = "All Notifications";
+        en["NoNotifications"] = "No notifications";
+        en["MarkAllRead"] = "Mark all as read";
 
         // Payment
-        ["SubscribeNow"] = "Subscribe Now",
-        ["BillingCycle"] = "Billing Cycle",
-        ["Quarterly"] = "Quarterly",
-        ["Subtotal"] = "Subtotal",
-        ["FreeTrial"] = "Free Trial",
-        ["VAT"] = "VAT",
-        ["Processing"] = "Processing...",
-        ["StartFreeTrial"] = "Start Free Trial",
-        ["PayNow"] = "Pay Now",
-        ["PaymentSecureNotice"] = "Your payment will be securely processed through the payment gateway",
-        ["PaymentInitError"] = "Unable to initialize payment. Please try again.",
-        ["PaymentConnectionError"] = "Connection error. Please check your internet and try again.",
-        ["PlanNotFound"] = "Plan not found",
-        ["PaymentFailedRetry"] = "Payment failed, please try again",
-        ["PaymentFailedSelectPlan"] = "Payment failed, select a plan to continue",
-    };
+        en["SubscribeNow"] = "Subscribe Now";
+        en["BillingCycle"] = "Billing Cycle";
+        en["Quarterly"] = "Quarterly";
+        en["FreeTrial"] = "Free Trial";
+        en["VAT"] = "VAT";
+        en["StartFreeTrial"] = "Start Free Trial";
+        en["PayNow"] = "Pay Now";
+        en["PaymentSecureNotice"] = "Your payment will be securely processed through the payment gateway";
+        en["PaymentInitError"] = "Unable to initialize payment. Please try again.";
+        en["PaymentConnectionError"] = "Connection error. Please check your internet and try again.";
+        en["PlanNotFound"] = "Plan not found";
+        en["PaymentFailedRetry"] = "Payment failed, please try again";
+        en["PaymentFailedSelectPlan"] = "Payment failed, select a plan to continue";
 
-    // ═══════════════════════════════════════════════════════════════════
-    // Urdu Strings
-    // ═══════════════════════════════════════════════════════════════════
-    private static Dictionary<string, string> GetUrduStrings() => new()
+        // Reviews
+        en["Reviews"] = "Reviews";
+    }
+
+    private static void AddUrduTranslations(Dictionary<string, string> ur)
     {
-        // App
-        ["AppName"] = "عشیر",
-        ["AppTagline"] = "جگہیں شیئر کریں، امکانات شیئر کریں",
+        // App (Required)
+        ur["AppName"] = "عشیر";
+        ur["AppTagline"] = "جگہیں شیئر کریں، امکانات شیئر کریں";
 
         // Navigation
-        ["Home"] = "ہوم",
-        ["Explore"] = "دریافت کریں",
-        ["Bookings"] = "میری بکنگز",
-        ["Favorites"] = "پسندیدہ",
-        ["Profile"] = "پروفائل",
-        ["Search"] = "تلاش",
-        ["Notifications"] = "اطلاعات",
-        ["Messages"] = "پیغامات",
+        ur["Home"] = "ہوم";
+        ur["Explore"] = "دریافت کریں";
+        ur["Bookings"] = "میری بکنگز";
+        ur["Favorites"] = "پسندیدہ";
+        ur["Profile"] = "پروفائل";
+        ur["Search"] = "تلاش";
+        ur["Notifications"] = "اطلاعات";
+        ur["Messages"] = "پیغامات";
 
         // Auth
-        ["Login"] = "لاگ ان",
-        ["Logout"] = "لاگ آؤٹ",
-        ["Register"] = "رجسٹر",
-        ["CreateAccount"] = "اکاؤنٹ بنائیں",
-        ["WelcomeBack"] = "خوش آمدید",
-        ["LoginToYourAccount"] = "جاری رکھنے کے لیے لاگ ان کریں",
-        ["Email"] = "ای میل",
-        ["Password"] = "پاس ورڈ",
-        ["ConfirmPassword"] = "پاس ورڈ کی تصدیق",
-        ["FullName"] = "پورا نام",
-        ["Phone"] = "فون نمبر",
-        ["EnterEmail"] = "اپنا ای میل درج کریں",
-        ["EnterPassword"] = "اپنا پاس ورڈ درج کریں",
-        ["EnterFullName"] = "اپنا پورا نام درج کریں",
-        ["ReEnterPassword"] = "پاس ورڈ دوبارہ درج کریں",
-        ["ForgotPassword"] = "پاس ورڈ بھول گئے؟",
-        ["RememberMe"] = "مجھے یاد رکھیں",
-        ["DontHaveAccount"] = "اکاؤنٹ نہیں ہے؟",
-        ["AlreadyHaveAccount"] = "پہلے سے اکاؤنٹ ہے؟",
-        ["Or"] = "یا",
+        ur["Login"] = "لاگ ان";
+        ur["Logout"] = "لاگ آؤٹ";
+        ur["Register"] = "رجسٹر";
+        ur["CreateAccount"] = "اکاؤنٹ بنائیں";
+        ur["WelcomeBack"] = "خوش آمدید";
+        ur["LoginToYourAccount"] = "جاری رکھنے کے لیے لاگ ان کریں";
+        ur["Email"] = "ای میل";
+        ur["Password"] = "پاس ورڈ";
+        ur["ConfirmPassword"] = "پاس ورڈ کی تصدیق";
+        ur["FullName"] = "پورا نام";
+        ur["Phone"] = "فون نمبر";
+        ur["EnterEmail"] = "اپنا ای میل درج کریں";
+        ur["EnterPassword"] = "اپنا پاس ورڈ درج کریں";
+        ur["EnterFullName"] = "اپنا پورا نام درج کریں";
+        ur["ReEnterPassword"] = "پاس ورڈ دوبارہ درج کریں";
+        ur["ForgotPassword"] = "پاس ورڈ بھول گئے؟";
+        ur["RememberMe"] = "مجھے یاد رکھیں";
+        ur["DontHaveAccount"] = "اکاؤنٹ نہیں ہے؟";
+        ur["AlreadyHaveAccount"] = "پہلے سے اکاؤنٹ ہے؟";
+        ur["Or"] = "یا";
 
         // Nafath
-        ["LoginWithNafath"] = "نفاذ سے لاگ ان",
-        ["LoginWithEmail"] = "ای میل سے لاگ ان",
-        ["ContinueWithNafath"] = "نفاذ کے ساتھ جاری رکھیں",
-        ["ContinueAsGuest"] = "مہمان کے طور پر جاری رکھیں",
-        ["NationalId"] = "قومی شناختی نمبر",
-        ["EnterNationalId"] = "اپنا قومی شناختی نمبر درج کریں",
+        ur["LoginWithNafath"] = "نفاذ سے لاگ ان";
+        ur["LoginWithEmail"] = "ای میل سے لاگ ان";
+        ur["ContinueWithNafath"] = "نفاذ کے ساتھ جاری رکھیں";
+        ur["ContinueAsGuest"] = "مہمان کے طور پر جاری رکھیں";
+        ur["NationalId"] = "قومی شناختی نمبر";
+        ur["EnterNationalId"] = "اپنا قومی شناختی نمبر درج کریں";
 
         // Common
-        ["Loading"] = "لوڈ ہو رہا ہے...",
-        ["Error"] = "خرابی",
-        ["Success"] = "کامیابی",
-        ["Save"] = "محفوظ کریں",
-        ["Cancel"] = "منسوخ",
-        ["Delete"] = "حذف کریں",
-        ["Edit"] = "ترمیم",
-        ["Back"] = "واپس",
-        ["Next"] = "اگلا",
-        ["Done"] = "ہو گیا",
-        ["Close"] = "بند کریں",
-        ["Yes"] = "ہاں",
-        ["No"] = "نہیں",
-        ["OK"] = "ٹھیک ہے",
-        ["SAR"] = "ریال",
+        ur["Loading"] = "لوڈ ہو رہا ہے...";
+        ur["Error"] = "خرابی";
+        ur["Success"] = "کامیابی";
+        ur["Save"] = "محفوظ کریں";
+        ur["Cancel"] = "منسوخ";
+        ur["Delete"] = "حذف کریں";
+        ur["Edit"] = "ترمیم";
+        ur["Back"] = "واپس";
+        ur["Next"] = "اگلا";
+        ur["Done"] = "ہو گیا";
+        ur["Close"] = "بند کریں";
+        ur["Yes"] = "ہاں";
+        ur["No"] = "نہیں";
+        ur["OK"] = "ٹھیک ہے";
+        ur["SAR"] = "ریال";
 
         // Categories
-        ["Categories"] = "زمرے",
-        ["MeetingRooms"] = "میٹنگ رومز",
-        ["CoWorking"] = "شیئرڈ آفس",
-        ["EventHalls"] = "ایونٹ ہالز",
-        ["Studios"] = "اسٹوڈیوز",
-        ["Commercial"] = "کمرشل",
-        ["CoLiving"] = "شیئرڈ رہائش",
+        ur["Categories"] = "زمرے";
+        ur["MeetingRooms"] = "میٹنگ رومز";
+        ur["CoWorking"] = "شیئرڈ آفس";
+        ur["EventHalls"] = "ایونٹ ہالز";
+        ur["Studios"] = "اسٹوڈیوز";
+        ur["Commercial"] = "کمرشل";
+        ur["CoLiving"] = "شیئرڈ رہائش";
 
         // Bookings
-        ["BookNow"] = "ابھی بک کریں",
-        ["MyBookings"] = "میری بکنگز",
-        ["Upcoming"] = "آنے والی",
-        ["Past"] = "گزشتہ",
-        ["Cancelled"] = "منسوخ",
+        ur["BookNow"] = "ابھی بک کریں";
+        ur["MyBookings"] = "میری بکنگز";
+        ur["Upcoming"] = "آنے والی";
+        ur["Past"] = "گزشتہ";
+        ur["Cancelled"] = "منسوخ";
 
         // Profile
-        ["Settings"] = "ترتیبات",
-        ["DarkMode"] = "ڈارک موڈ",
-        ["Language"] = "زبان",
-        ["Help"] = "مدد",
-        ["About"] = "عشیر کے بارے میں",
+        ur["Settings"] = "ترتیبات";
+        ur["DarkMode"] = "ڈارک موڈ";
+        ur["Language"] = "زبان";
+        ur["Help"] = "مدد";
+        ur["About"] = "عشیر کے بارے میں";
 
         // Host
-        ["Host"] = "میزبان",
-        ["MySpaces"] = "میری جگہیں",
-        ["AddNewSpace"] = "نئی جگہ شامل کریں",
-        ["NoSpacesYet"] = "ابھی تک کوئی جگہ نہیں",
-        ["AddYourFirstSpace"] = "اپنی پہلی جگہ شامل کریں اور بکنگ حاصل کرنا شروع کریں",
-        ["LoginToViewSpaces"] = "اپنی جگہیں دیکھنے کے لیے لاگ ان کریں",
-        ["ConfirmDelete"] = "حذف کی تصدیق",
-        ["DeleteSpaceConfirmation"] = "کیا آپ واقعی \"{0}\" کو حذف کرنا چاہتے ہیں؟ یہ عمل واپس نہیں ہو سکتا۔",
-        ["Active"] = "فعال",
-        ["Inactive"] = "غیر فعال",
-        ["NoLocation"] = "کوئی مقام نہیں",
-        ["Month"] = "ماہ",
-        ["LoginRequired"] = "لاگ ان درکار ہے",
+        ur["Host"] = "میزبان";
+        ur["MySpaces"] = "میری جگہیں";
+        ur["AddNewSpace"] = "نئی جگہ شامل کریں";
+        ur["NoSpacesYet"] = "ابھی تک کوئی جگہ نہیں";
+        ur["AddYourFirstSpace"] = "اپنی پہلی جگہ شامل کریں اور بکنگ حاصل کرنا شروع کریں";
+        ur["LoginToViewSpaces"] = "اپنی جگہیں دیکھنے کے لیے لاگ ان کریں";
+        ur["ConfirmDelete"] = "حذف کی تصدیق";
+        ur["DeleteSpaceConfirmation"] = "کیا آپ واقعی \"{0}\" کو حذف کرنا چاہتے ہیں؟ یہ عمل واپس نہیں ہو سکتا۔";
+        ur["Active"] = "فعال";
+        ur["Inactive"] = "غیر فعال";
+        ur["NoLocation"] = "کوئی مقام نہیں";
+        ur["Month"] = "ماہ";
+        ur["LoginRequired"] = "لاگ ان درکار ہے";
 
         // Payment
-        ["PaymentFailedRetry"] = "ادائیگی ناکام ہوگئی، براہ کرم دوبارہ کوشش کریں",
-        ["PaymentFailedSelectPlan"] = "ادائیگی ناکام ہوگئی، جاری رکھنے کے لیے پلان منتخب کریں",
-    };
+        ur["PaymentFailedRetry"] = "ادائیگی ناکام ہوگئی، براہ کرم دوبارہ کوشش کریں";
+        ur["PaymentFailedSelectPlan"] = "ادائیگی ناکام ہوگئی، جاری رکھنے کے لیے پلان منتخب کریں";
+    }
 }
