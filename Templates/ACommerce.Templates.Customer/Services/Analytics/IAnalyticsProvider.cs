@@ -1,4 +1,4 @@
-namespace Ashare.Shared.Services.Analytics;
+namespace ACommerce.Templates.Customer.Services.Analytics;
 
 /// <summary>
 /// Unified interface for all analytics providers (Meta, Google, TikTok, Snapchat)

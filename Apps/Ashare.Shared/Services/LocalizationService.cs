@@ -1,61 +1,10 @@
 using System.Globalization;
+using ACommerce.Templates.Customer.Services;
 
 namespace Ashare.Shared.Services;
 
 /// <summary>
-/// واجهة خدمة الترجمة
-/// </summary>
-public interface ILocalizationService
-{
-    /// <summary>
-    /// اللغة الحالية
-    /// </summary>
-    string CurrentLanguage { get; }
-
-    /// <summary>
-    /// اللغات المدعومة
-    /// </summary>
-    IReadOnlyList<LanguageInfo> SupportedLanguages { get; }
-
-    /// <summary>
-    /// هل الاتجاه من اليمين لليسار
-    /// </summary>
-    bool IsRtl { get; }
-
-    /// <summary>
-    /// تغيير اللغة
-    /// </summary>
-    Task SetLanguageAsync(string languageCode);
-
-    /// <summary>
-    /// الحصول على نص مترجم
-    /// </summary>
-    string this[string key] { get; }
-
-    /// <summary>
-    /// الحصول على نص مترجم مع معاملات
-    /// </summary>
-    string Get(string key, params object[] args);
-
-    /// <summary>
-    /// حدث تغيير اللغة
-    /// </summary>
-    event Action? OnLanguageChanged;
-}
-
-/// <summary>
-/// معلومات اللغة
-/// </summary>
-public class LanguageInfo
-{
-    public string Code { get; set; } = string.Empty;
-    public string NativeName { get; set; } = string.Empty;
-    public string EnglishName { get; set; } = string.Empty;
-    public bool IsRtl { get; set; }
-}
-
-/// <summary>
-/// خدمة الترجمة
+/// خدمة الترجمة لـ Ashare مع دعم العربية والإنجليزية والأردية
 /// </summary>
 public class LocalizationService : ILocalizationService
 {

@@ -1,9 +1,9 @@
-using Ashare.Shared.Services.Analytics.Providers;
+using ACommerce.Templates.Customer.Services.Analytics.Providers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace Ashare.Shared.Services.Analytics;
+namespace ACommerce.Templates.Customer.Services.Analytics;
 
 /// <summary>
 /// Extension methods for registering analytics services
@@ -17,19 +17,17 @@ public static class AnalyticsExtensions
     /// <param name="configuration">Configuration with Analytics section</param>
     /// <param name="useMockInDebug">Use Mock provider in DEBUG builds</param>
     /// <returns>Service collection for chaining</returns>
-    public static IServiceCollection AddAshareAnalytics(
+    public static IServiceCollection AddACommerceAnalytics(
         this IServiceCollection services,
         IConfiguration configuration,
         bool useMockInDebug = true)
     {
-        // Bind configuration
         services.Configure<AnalyticsOptions>(
             configuration.GetSection(AnalyticsOptions.SectionName));
 
 #if DEBUG
         if (useMockInDebug)
         {
-            // في وضع التطوير: استخدم Mock provider فقط
             services.AddScoped<MockAnalyticsProvider>();
             services.AddScoped<AnalyticsService>(sp =>
             {
@@ -42,19 +40,16 @@ public static class AnalyticsExtensions
         }
 #endif
 
-        // Register real providers
         services.AddScoped<MetaAnalyticsProvider>();
         services.AddScoped<GoogleAnalyticsProvider>();
         services.AddScoped<TikTokAnalyticsProvider>();
         services.AddScoped<SnapchatAnalyticsProvider>();
 
-        // Register aggregated service
         services.AddScoped<AnalyticsService>(sp =>
         {
             var options = sp.GetRequiredService<IOptions<AnalyticsOptions>>();
             var service = new AnalyticsService(options);
 
-            // Add all providers
             service.AddProvider(sp.GetRequiredService<MetaAnalyticsProvider>());
             service.AddProvider(sp.GetRequiredService<GoogleAnalyticsProvider>());
             service.AddProvider(sp.GetRequiredService<TikTokAnalyticsProvider>());
@@ -68,7 +63,6 @@ public static class AnalyticsExtensions
 
     /// <summary>
     /// Add ONLY mock analytics for testing (no real providers)
-    /// استخدم هذا للاختبار بدون حسابات فعلية
     /// </summary>
     public static IServiceCollection AddMockAnalytics(this IServiceCollection services)
     {

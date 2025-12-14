@@ -1,6 +1,6 @@
 using Microsoft.JSInterop;
 
-namespace Ashare.Shared.Services;
+namespace ACommerce.Templates.Customer.Services;
 
 /// <summary>
 /// Service for handling timezone conversions and date/time formatting.
@@ -60,14 +60,11 @@ public class BrowserTimezoneService : ITimezoneService
 
         try
         {
-            // JavaScript's getTimezoneOffset returns offset in minutes (inverted: UTC = local + offset)
-            // So we negate it to get the correct offset from UTC
             _cachedOffset = await _jsRuntime.InvokeAsync<int>("eval", "new Date().getTimezoneOffset() * -1");
             return _cachedOffset.Value;
         }
         catch
         {
-            // Default to Saudi Arabia timezone (UTC+3 = 180 minutes)
             return 180;
         }
     }
@@ -102,40 +99,33 @@ public class BrowserTimezoneService : ITimezoneService
         var now = await ToLocalTimeAsync(DateTime.UtcNow);
         var diff = now - localTime;
 
-        // Same minute
         if (diff.TotalMinutes < 1)
             return L["Now"];
 
-        // Minutes ago - use short format "5m"
         if (diff.TotalHours < 1)
         {
             var minutes = (int)diff.TotalMinutes;
             return $"{minutes}m";
         }
 
-        // Hours ago - use short format "2h"
         if (diff.TotalDays < 1)
         {
             var hours = (int)diff.TotalHours;
             return $"{hours}h";
         }
 
-        // Yesterday
         if (diff.TotalDays < 2 && localTime.Date == now.AddDays(-1).Date)
             return L["Yesterday"];
 
-        // Days ago (up to a week) - use short format "3d"
         if (diff.TotalDays < 7)
         {
             var days = (int)diff.TotalDays;
             return $"{days}d";
         }
 
-        // This year - show month and day
         if (localTime.Year == now.Year)
             return localTime.ToString("MMM d");
 
-        // Older - show full date
         return localTime.ToString("MMM d, yyyy");
     }
 
@@ -160,7 +150,7 @@ public class BrowserTimezoneService : ITimezoneService
 }
 
 /// <summary>
-/// MAUI-based timezone service using local device time.
+/// Device-based timezone service using local device time.
 /// </summary>
 public class DeviceTimezoneService : ITimezoneService
 {
@@ -210,14 +200,12 @@ public class DeviceTimezoneService : ITimezoneService
         if (diff.TotalMinutes < 1)
             return L["Now"];
 
-        // Minutes ago - use short format "5m"
         if (diff.TotalHours < 1)
         {
             var minutes = (int)diff.TotalMinutes;
             return $"{minutes}m";
         }
 
-        // Hours ago - use short format "2h"
         if (diff.TotalDays < 1)
         {
             var hours = (int)diff.TotalHours;
@@ -227,7 +215,6 @@ public class DeviceTimezoneService : ITimezoneService
         if (diff.TotalDays < 2 && localTime.Date == now.AddDays(-1).Date)
             return L["Yesterday"];
 
-        // Days ago - use short format "3d"
         if (diff.TotalDays < 7)
         {
             var days = (int)diff.TotalDays;

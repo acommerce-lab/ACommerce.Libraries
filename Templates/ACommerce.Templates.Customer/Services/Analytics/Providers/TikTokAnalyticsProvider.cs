@@ -1,31 +1,20 @@
 using Microsoft.JSInterop;
 
-namespace Ashare.Shared.Services.Analytics.Providers;
+namespace ACommerce.Templates.Customer.Services.Analytics.Providers;
 
 /// <summary>
-/// Meta (Facebook/Instagram) Analytics Provider
-/// Uses Facebook Pixel for Web tracking
-///
-/// Setup:
-/// 1. Go to https://business.facebook.com/events_manager
-/// 2. Create a new Pixel under Data Sources
-/// 3. Copy the Pixel ID (15-16 digit number)
-///
-/// For Mobile SDK (MAUI):
-/// 1. Go to https://developers.facebook.com
-/// 2. Create App → Business type
-/// 3. Add iOS/Android platforms with Bundle ID/Package Name
-/// 4. Get App ID and configure in MauiProgram.cs
+/// TikTok Analytics Provider
+/// Uses TikTok Pixel for Web tracking
 /// </summary>
-public class MetaAnalyticsProvider : IAnalyticsProvider
+public class TikTokAnalyticsProvider : IAnalyticsProvider
 {
-    public string ProviderName => "Meta";
+    public string ProviderName => "TikTok";
     public bool IsInitialized { get; private set; }
 
     private readonly IJSRuntime _js;
     private string _pixelId = "";
 
-    public MetaAnalyticsProvider(IJSRuntime js)
+    public TikTokAnalyticsProvider(IJSRuntime js)
     {
         _js = js;
     }
@@ -39,13 +28,13 @@ public class MetaAnalyticsProvider : IAnalyticsProvider
 
         try
         {
-            await _js.InvokeVoidAsync("fbq", "init", _pixelId);
-            await _js.InvokeVoidAsync("fbq", "track", "PageView");
+            await _js.InvokeVoidAsync("ttq.load", _pixelId);
+            await _js.InvokeVoidAsync("ttq.page");
             IsInitialized = true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[Meta Analytics] Init failed: {ex.Message}");
+            Console.WriteLine($"[TikTok Analytics] Init failed: {ex.Message}");
         }
     }
 
@@ -56,9 +45,9 @@ public class MetaAnalyticsProvider : IAnalyticsProvider
         try
         {
             if (parameters != null)
-                await _js.InvokeVoidAsync("fbq", "track", eventName, parameters);
+                await _js.InvokeVoidAsync("ttq.track", eventName, parameters);
             else
-                await _js.InvokeVoidAsync("fbq", "track", eventName);
+                await _js.InvokeVoidAsync("ttq.track", eventName);
         }
         catch { }
     }
@@ -72,24 +61,23 @@ public class MetaAnalyticsProvider : IAnalyticsProvider
             var parameters = new Dictionary<string, object>
             {
                 ["value"] = purchase.Value,
-                ["currency"] = purchase.Currency,
-                ["content_type"] = purchase.ContentType ?? "product",
-                ["order_id"] = purchase.TransactionId
+                ["currency"] = purchase.Currency
             };
 
             if (purchase.Items.Any())
             {
                 parameters["contents"] = purchase.Items.Select(i => new
                 {
-                    id = i.ItemId,
-                    quantity = i.Quantity,
-                    item_price = i.Price
+                    content_id = i.ItemId,
+                    content_name = i.ItemName,
+                    content_category = i.Category ?? "",
+                    price = i.Price,
+                    quantity = i.Quantity
                 }).ToList();
-                parameters["content_ids"] = purchase.Items.Select(i => i.ItemId).ToList();
-                parameters["num_items"] = purchase.Items.Sum(i => i.Quantity);
+                parameters["content_type"] = purchase.ContentType ?? "product";
             }
 
-            await _js.InvokeVoidAsync("fbq", "track", "Purchase", parameters);
+            await _js.InvokeVoidAsync("ttq.track", "CompletePayment", parameters);
         }
         catch { }
     }
@@ -111,7 +99,7 @@ public class MetaAnalyticsProvider : IAnalyticsProvider
                     data[kvp.Key] = kvp.Value;
             }
 
-            await _js.InvokeVoidAsync("fbq", "track", "ViewContent", data);
+            await _js.InvokeVoidAsync("ttq.track", "ViewContent", data);
         }
         catch { }
     }
@@ -124,7 +112,7 @@ public class MetaAnalyticsProvider : IAnalyticsProvider
         {
             var data = new Dictionary<string, object>
             {
-                ["registration_method"] = method
+                ["method"] = method
             };
 
             if (parameters != null)
@@ -133,7 +121,7 @@ public class MetaAnalyticsProvider : IAnalyticsProvider
                     data[kvp.Key] = kvp.Value;
             }
 
-            await _js.InvokeVoidAsync("fbq", "track", "CompleteRegistration", data);
+            await _js.InvokeVoidAsync("ttq.track", "CompleteRegistration", data);
         }
         catch { }
     }
@@ -144,7 +132,7 @@ public class MetaAnalyticsProvider : IAnalyticsProvider
 
         try
         {
-            await _js.InvokeVoidAsync("fbq", "trackCustom", "Login", new { method });
+            await _js.InvokeVoidAsync("ttq.track", "Login", new { method });
         }
         catch { }
     }
@@ -157,7 +145,7 @@ public class MetaAnalyticsProvider : IAnalyticsProvider
         {
             var parameters = new Dictionary<string, object>
             {
-                ["content_ids"] = new[] { content.ContentId },
+                ["content_id"] = content.ContentId,
                 ["content_name"] = content.ContentName,
                 ["content_type"] = content.ContentType,
                 ["currency"] = content.Currency
@@ -169,7 +157,7 @@ public class MetaAnalyticsProvider : IAnalyticsProvider
             if (content.Value.HasValue)
                 parameters["value"] = content.Value.Value;
 
-            await _js.InvokeVoidAsync("fbq", "track", "ViewContent", parameters);
+            await _js.InvokeVoidAsync("ttq.track", "ViewContent", parameters);
         }
         catch { }
     }
@@ -182,7 +170,7 @@ public class MetaAnalyticsProvider : IAnalyticsProvider
         {
             var data = new Dictionary<string, object>
             {
-                ["search_string"] = searchTerm
+                ["query"] = searchTerm
             };
 
             if (parameters != null)
@@ -191,7 +179,7 @@ public class MetaAnalyticsProvider : IAnalyticsProvider
                     data[kvp.Key] = kvp.Value;
             }
 
-            await _js.InvokeVoidAsync("fbq", "track", "Search", data);
+            await _js.InvokeVoidAsync("ttq.track", "Search", data);
         }
         catch { }
     }
@@ -204,7 +192,7 @@ public class MetaAnalyticsProvider : IAnalyticsProvider
         {
             var parameters = new Dictionary<string, object>
             {
-                ["content_ids"] = new[] { content.ContentId },
+                ["content_id"] = content.ContentId,
                 ["content_name"] = content.ContentName,
                 ["content_type"] = content.ContentType,
                 ["currency"] = content.Currency
@@ -213,7 +201,7 @@ public class MetaAnalyticsProvider : IAnalyticsProvider
             if (content.Value.HasValue)
                 parameters["value"] = content.Value.Value;
 
-            await _js.InvokeVoidAsync("fbq", "track", "AddToWishlist", parameters);
+            await _js.InvokeVoidAsync("ttq.track", "AddToWishlist", parameters);
         }
         catch { }
     }
@@ -224,7 +212,7 @@ public class MetaAnalyticsProvider : IAnalyticsProvider
 
         try
         {
-            await _js.InvokeVoidAsync("fbq", "trackCustom", "Share", new
+            await _js.InvokeVoidAsync("ttq.track", "Share", new
             {
                 content_type = contentType,
                 content_id = contentId,
@@ -236,20 +224,17 @@ public class MetaAnalyticsProvider : IAnalyticsProvider
 
     public async Task SetUserIdAsync(string userId)
     {
-        if (!IsInitialized || string.IsNullOrEmpty(_pixelId)) return;
+        if (!IsInitialized) return;
 
         try
         {
-            // Re-init with external_id for advanced matching
-            await _js.InvokeVoidAsync("fbq", "init", _pixelId, new { external_id = userId });
+            await _js.InvokeVoidAsync("ttq.identify", new { external_id = userId });
         }
         catch { }
     }
 
     public Task SetUserPropertiesAsync(Dictionary<string, object> properties)
     {
-        // Facebook Pixel doesn't support custom user properties directly
-        // Use Facebook SDK for mobile for this feature
         return Task.CompletedTask;
     }
 }

@@ -1,13 +1,13 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Ashare.Shared.Services;
+namespace ACommerce.Templates.Customer.Services;
 
 /// <summary>
-/// خدمة إدارة وضع الضيف مع حفظ الحالة في التخزين
+/// Guest mode management service with state persistence
 /// </summary>
 public class GuestModeService
 {
-    private const string GuestModeKey = "ashare_guest_mode";
+    private const string GuestModeKey = "acommerce_guest_mode";
     private readonly IServiceScopeFactory _scopeFactory;
     
     private static bool _isGuestMode;
@@ -20,12 +20,12 @@ public class GuestModeService
     }
 
     /// <summary>
-    /// هل المستخدم في وضع الضيف
+    /// Is user in guest mode
     /// </summary>
     public bool IsGuestMode => _isGuestMode;
 
     /// <summary>
-    /// تحميل حالة الضيف من التخزين (يجب استدعاءها عند بدء التطبيق)
+    /// Load guest state from storage (should be called at app startup)
     /// </summary>
     public async Task InitializeAsync()
     {
@@ -56,7 +56,7 @@ public class GuestModeService
     }
 
     /// <summary>
-    /// تفعيل وضع الضيف
+    /// Enable guest mode
     /// </summary>
     public async Task EnableGuestModeAsync()
     {
@@ -85,7 +85,7 @@ public class GuestModeService
     }
 
     /// <summary>
-    /// تفعيل وضع الضيف (نسخة متزامنة للتوافق)
+    /// Enable guest mode (sync version for compatibility)
     /// </summary>
     public void EnableGuestMode()
     {
@@ -93,7 +93,7 @@ public class GuestModeService
     }
 
     /// <summary>
-    /// إلغاء وضع الضيف
+    /// Disable guest mode
     /// </summary>
     public async Task DisableGuestModeAsync()
     {
@@ -121,7 +121,7 @@ public class GuestModeService
     }
 
     /// <summary>
-    /// إلغاء وضع الضيف (نسخة متزامنة للتوافق)
+    /// Disable guest mode (sync version for compatibility)
     /// </summary>
     public void DisableGuestMode()
     {
@@ -129,7 +129,7 @@ public class GuestModeService
     }
 
     /// <summary>
-    /// حدث تغيير وضع الضيف
+    /// Guest mode changed event
     /// </summary>
     public event Action? OnGuestModeChanged;
 }

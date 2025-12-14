@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace Ashare.Shared.Services.Analytics;
+namespace ACommerce.Templates.Customer.Services.Analytics;
 
 /// <summary>
 /// Unified Analytics Service that aggregates all analytics providers

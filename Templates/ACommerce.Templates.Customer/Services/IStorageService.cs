@@ -1,4 +1,4 @@
-namespace Ashare.Shared.Services;
+namespace ACommerce.Templates.Customer.Services;
 
 /// <summary>
 /// Storage service interface for cross-platform storage

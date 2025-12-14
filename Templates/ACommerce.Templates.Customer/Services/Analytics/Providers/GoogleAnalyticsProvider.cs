@@ -1,24 +1,10 @@
 using Microsoft.JSInterop;
 
-namespace Ashare.Shared.Services.Analytics.Providers;
+namespace ACommerce.Templates.Customer.Services.Analytics.Providers;
 
 /// <summary>
 /// Google Analytics 4 (GA4) Provider
 /// Uses gtag.js for Web tracking
-///
-/// Setup for Web (GA4):
-/// 1. Go to https://analytics.google.com
-/// 2. Create Property → Web
-/// 3. Get Measurement ID (G-XXXXXXXXXX)
-///
-/// Setup for Mobile (Firebase):
-/// 1. Go to https://console.firebase.google.com
-/// 2. Create/Select Project
-/// 3. Add iOS/Android apps
-/// 4. Download GoogleService-Info.plist (iOS) or google-services.json (Android)
-/// 5. Get App IDs from Project Settings → Your Apps
-///
-/// Note: GA4 and Firebase Analytics share the same backend!
 /// </summary>
 public class GoogleAnalyticsProvider : IAnalyticsProvider
 {

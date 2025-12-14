@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using ACommerce.Templates.Customer.Services;
 
 namespace Ashare.Shared.Services;
 

@@ -2,11 +2,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
 
-namespace Ashare.Shared.Services.Analytics;
+namespace ACommerce.Templates.Customer.Services.Analytics;
 
 /// <summary>
 /// Mock Analytics Provider for Testing
-/// يطبع كل الأحداث في Console بدلاً من إرسالها للمنصات
 /// </summary>
 public class MockAnalyticsProvider : IAnalyticsProvider
 {
@@ -115,7 +114,6 @@ public class MockAnalyticsProvider : IAnalyticsProvider
 
         Console.WriteLine(logMessage);
 
-        // Also log to browser console if available
         if (_useConsole && _js != null)
         {
             try
@@ -132,20 +130,14 @@ public class MockAnalyticsProvider : IAnalyticsProvider
 /// </summary>
 public static class MockAnalyticsExtensions
 {
-    /// <summary>
-    /// استخدم هذا في التطوير لاختبار التتبع بدون حسابات فعلية
-    /// </summary>
-    public static IServiceCollection AddMockAnalytics(this IServiceCollection services)
+    public static IServiceCollection AddMockAnalyticsProvider(this IServiceCollection services)
     {
         services.AddScoped<MockAnalyticsProvider>();
         services.AddScoped<AnalyticsService>(sp =>
         {
             var options = sp.GetRequiredService<IOptions<AnalyticsOptions>>();
             var service = new AnalyticsService(options);
-
-            // فقط Mock provider
             service.AddProvider(sp.GetRequiredService<MockAnalyticsProvider>());
-
             return service;
         });
 

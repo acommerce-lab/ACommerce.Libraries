@@ -1,21 +1,10 @@
 using Microsoft.JSInterop;
 
-namespace Ashare.Shared.Services.Analytics.Providers;
+namespace ACommerce.Templates.Customer.Services.Analytics.Providers;
 
 /// <summary>
 /// Snapchat Analytics Provider
 /// Uses Snap Pixel for Web tracking
-///
-/// Setup for Web:
-/// 1. Go to https://ads.snapchat.com
-/// 2. Events Manager → Create Pixel
-/// 3. Get Pixel ID
-///
-/// Setup for Mobile:
-/// 1. Go to https://ads.snapchat.com
-/// 2. Events Manager → Mobile App
-/// 3. Add App with iOS Bundle ID / Android Package Name
-/// 4. Get Snap App ID
 /// </summary>
 public class SnapchatAnalyticsProvider : IAnalyticsProvider
 {
@@ -243,7 +232,6 @@ public class SnapchatAnalyticsProvider : IAnalyticsProvider
 
     public Task SetUserPropertiesAsync(Dictionary<string, object> properties)
     {
-        // Snapchat Pixel doesn't support custom user properties
         return Task.CompletedTask;
     }
 }

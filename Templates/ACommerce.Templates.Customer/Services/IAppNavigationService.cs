@@ -1,4 +1,4 @@
-namespace Ashare.Shared.Services;
+namespace ACommerce.Templates.Customer.Services;
 
 /// <summary>
 /// Navigation service interface for both MAUI and Web platforms
