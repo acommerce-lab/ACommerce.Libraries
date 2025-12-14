@@ -1,0 +1,22 @@
+**********************************************************************
+** Visual Studio 2026 Developer PowerShell v18.3.0-insiders
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+PS C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.App> dotnet restore
+C:\Program Files\dotnet\sdk\10.0.101\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.TargetFrameworkInference.targets(134,5): error NETSDK1208: The target platform identifier android was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.
+
+Restore failed with 1 error(s) in 1.6s
+PS C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.App> dotnet restore
+C:\Program Files\dotnet\sdk\10.0.101\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.TargetFrameworkInference.targets(134,5): error NETSDK1208: The target platform identifier android was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.
+
+Restore failed with 1 error(s) in 1.0s
+PS C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.App> # في مجلد المشروع
+PS C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.App> dotnet restore --force
+>>
+C:\Program Files\dotnet\sdk\10.0.101\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.TargetFrameworkInference.targets(134,5): error NETSDK1208: The target platform identifier android was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.
+
+Restore failed with 1 error(s) in 1.5s
+PS C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.App> # أو في Visual Studio: Clean Solution ثم Rebuild
+>>
+PS C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.App>
+
