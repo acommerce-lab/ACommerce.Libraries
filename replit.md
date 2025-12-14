@@ -165,3 +165,61 @@ Cloud-based file storage for images and media:
 - .NET 9.0 SDK (required)
 - Visual Studio 2022 / VS Code / Rider (recommended)
 - Docker (optional, for databases)
+
+## Analytics & Marketing Events
+
+### Supported Platforms
+- **Meta (Facebook/Instagram)**: Pixel (Web) + SDK (Mobile)
+- **Google Analytics**: GA4 (Web) + Firebase (Mobile)
+- **TikTok**: Pixel (Web) + SDK (Mobile)
+- **Snapchat**: Pixel (Web) + SDK (Mobile)
+
+### Configuration Files
+- **MAUI App**: `Apps/Ashare.App/Services/AnalyticsSettings.cs`
+- **Web App**: `Apps/Ashare.Web/appsettings.json` → Analytics section
+
+### Testing Analytics Locally (Mock Mode)
+
+Test all analytics events without real platform IDs:
+
+1. **Enable Mock Mode** in `Apps/Ashare.App/Services/AnalyticsSettings.cs`:
+   ```csharp
+   public const bool UseMockProvider = true;
+   ```
+
+2. **Run the app** on emulator or device
+
+3. **Watch Output/Logcat** for events:
+   ```
+   🧪 [Analytics] Mock Mode ENABLED
+   [MockAnalytics] 📱 Screen: HomePage
+   [MockAnalytics] 👁️ Content View: مساحة عمل | {"ContentId":"xxx"}
+   [MockAnalytics] 🔍 Search: الرياض
+   [MockAnalytics] 💰 Purchase | {"TransactionId":"xxx","Value":100}
+   ```
+
+4. **Switch to Production** when ready:
+   ```csharp
+   public const bool UseMockProvider = false;
+   ```
+
+### Tracked Events
+
+| Event | Method | Description |
+|-------|--------|-------------|
+| Screen View | `TrackScreenViewAsync()` | Page/screen navigation |
+| Content View | `TrackContentViewAsync()` | Listing/product view |
+| Search | `TrackSearchAsync()` | Search queries |
+| Purchase | `TrackPurchaseAsync()` | Payment completed |
+| Registration | `TrackRegistrationAsync()` | New user signup |
+| Login | `TrackLoginAsync()` | User login |
+| Add to Wishlist | `TrackAddToWishlistAsync()` | Favorites |
+| Share | `TrackShareAsync()` | Content sharing |
+
+### Provider Implementation
+- `IAnalyticsProvider` - Common interface for all providers
+- `MockAnalyticsProvider` - Console logging for testing
+- `MetaAnalyticsProvider` - Facebook/Instagram integration
+- `GoogleAnalyticsProvider` - GA4/Firebase integration
+- `TikTokAnalyticsProvider` - TikTok Events API
+- `SnapchatAnalyticsProvider` - Snapchat Pixel/SDK
