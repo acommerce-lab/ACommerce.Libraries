@@ -1,8 +1,8 @@
-using Ashare.Shared.Services;
+using ACommerce.Templates.Customer.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
-namespace Ashare.Web;
+namespace Ashare.Web.Services;
 
 /// <summary>
 /// Web implementation of navigation service

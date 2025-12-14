@@ -1,5 +1,6 @@
 using Ashare.Shared.Services;
-using Ashare.Shared.Services.Analytics;
+using ACommerce.Templates.Customer.Services;
+using ACommerce.Templates.Customer.Services.Analytics;
 using Ashare.Web.Components;
 using Ashare.Web.Services;
 using ACommerce.Client.Auth;
