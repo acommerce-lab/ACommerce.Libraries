@@ -1,21 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
-		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<RootNamespace>Ashare.Web</RootNamespace>
-	</PropertyGroup>
+        <PropertyGroup>
+                <TargetFramework>net9.0</TargetFramework>
+                <Nullable>enable</Nullable>
+                <ImplicitUsings>enable</ImplicitUsings>
+                <RootNamespace>Ashare.Web</RootNamespace>
+        </PropertyGroup>
 
-	<ItemGroup>
-		<!-- Reference to Shared Library (includes all clients) -->
-		<ProjectReference Include="..\Ashare.Shared\Ashare.Shared.csproj" />
+        <ItemGroup>
+                <!-- Reference to Shared Library (includes all clients) -->
+                <ProjectReference Include="..\Ashare.Shared\Ashare.Shared.csproj" />
 
-		<!-- Service Registry for AddACommerceClientWithServices -->
-		<ProjectReference Include="..\..\libs\backend\integration\ACommerce.ServiceRegistry.Client\ACommerce.ServiceRegistry.Client.csproj" />
+                <!-- Service Registry for AddACommerceClientWithServices -->
+                <ProjectReference Include="..\..\libs\frontend\discovery\ACommerce.ServiceRegistry.Client\ACommerce.ServiceRegistry.Client.csproj" />
 
-		<!-- Payments Client for DI registration -->
-		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Payments\ACommerce.Client.Payments.csproj" />
-	</ItemGroup>
+                <!-- Payments Client for DI registration -->
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Payments\ACommerce.Client.Payments.csproj" />
+        </ItemGroup>
 
 </Project>

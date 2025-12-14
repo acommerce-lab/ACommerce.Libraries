@@ -9,7 +9,7 @@
 
         <ItemGroup>
                 <ProjectReference Include="..\..\core\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
-                <ProjectReference Include="..\..\Infrastructure\ACommerce.ServiceRegistry.Client\ACommerce.ServiceRegistry.Client.csproj" />
+                <ProjectReference Include="..\..\discovery\ACommerce.ServiceRegistry.Client\ACommerce.ServiceRegistry.Client.csproj" />
         </ItemGroup>
 
 </Project>
