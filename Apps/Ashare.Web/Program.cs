@@ -39,7 +39,7 @@ builder.Services.AddScoped<IAppNavigationService, WebNavigationService>();
 builder.Services.AddScoped<SpaceDataService>();
 builder.Services.AddScoped<ITimezoneService, BrowserTimezoneService>();
 builder.Services.AddScoped<IPaymentService, WebPaymentService>();
-builder.Services.AddAshareAnalytics(builder.Configuration);
+builder.Services.AddACommerceAnalytics(builder.Configuration);
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });
 
 var app = builder.Build();
