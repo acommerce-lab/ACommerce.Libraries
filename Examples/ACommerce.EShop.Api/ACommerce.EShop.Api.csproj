@@ -58,6 +58,7 @@
     <ProjectReference Include="..\..\Other\ACommerce.Chats.Core\ACommerce.Chats.Core.csproj" />
     <ProjectReference Include="..\..\Other\ACommerce.Chats.Api\ACommerce.Chats.Api.csproj" />
     <ProjectReference Include="..\..\Other\ACommerce.Realtime.SignalR\ACommerce.Realtime.SignalR.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Realtime.Abstractions\ACommerce.Realtime.Abstractions.csproj" />
 
     <!-- Files -->
     <ProjectReference Include="..\..\libs\backend\files\ACommerce.Files.Storage.Local\ACommerce.Files.Storage.Local.csproj" />
