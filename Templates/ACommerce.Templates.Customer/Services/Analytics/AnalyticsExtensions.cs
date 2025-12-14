@@ -62,6 +62,55 @@ public static class AnalyticsExtensions
     }
 
     /// <summary>
+    /// Add analytics services with manual configuration (for MAUI/Mobile apps)
+    /// </summary>
+    /// <param name="services">Service collection</param>
+    /// <param name="configureOptions">Action to configure analytics options</param>
+    /// <param name="useMockProvider">Use Mock provider instead of real providers</param>
+    /// <returns>Service collection for chaining</returns>
+    public static IServiceCollection AddACommerceAnalytics(
+        this IServiceCollection services,
+        Action<AnalyticsOptions> configureOptions,
+        bool useMockProvider = false)
+    {
+        services.Configure(configureOptions);
+
+        if (useMockProvider)
+        {
+            Console.WriteLine("🧪 [Analytics] Mock Mode ENABLED");
+            services.AddScoped<MockAnalyticsProvider>();
+            services.AddScoped<AnalyticsService>(sp =>
+            {
+                var options = sp.GetRequiredService<IOptions<AnalyticsOptions>>();
+                var service = new AnalyticsService(options);
+                service.AddProvider(sp.GetRequiredService<MockAnalyticsProvider>());
+                return service;
+            });
+            return services;
+        }
+
+        services.AddScoped<MetaAnalyticsProvider>();
+        services.AddScoped<GoogleAnalyticsProvider>();
+        services.AddScoped<TikTokAnalyticsProvider>();
+        services.AddScoped<SnapchatAnalyticsProvider>();
+
+        services.AddScoped<AnalyticsService>(sp =>
+        {
+            var options = sp.GetRequiredService<IOptions<AnalyticsOptions>>();
+            var service = new AnalyticsService(options);
+
+            service.AddProvider(sp.GetRequiredService<MetaAnalyticsProvider>());
+            service.AddProvider(sp.GetRequiredService<GoogleAnalyticsProvider>());
+            service.AddProvider(sp.GetRequiredService<TikTokAnalyticsProvider>());
+            service.AddProvider(sp.GetRequiredService<SnapchatAnalyticsProvider>());
+
+            return service;
+        });
+
+        return services;
+    }
+
+    /// <summary>
     /// Add ONLY mock analytics for testing (no real providers)
     /// </summary>
     public static IServiceCollection AddMockAnalytics(this IServiceCollection services)

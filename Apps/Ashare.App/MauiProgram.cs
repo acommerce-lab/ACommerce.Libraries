@@ -4,7 +4,6 @@ using ACommerce.Client.Auth;
 using ACommerce.Client.Realtime;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Services.Analytics;
-using ACommerce.Templates.Customer.Services.Analytics.Providers;
 using ACommerce.Templates.Customer.Themes;
 using ACommerce.ServiceRegistry.Client.Extensions;
 using Microsoft.Extensions.Logging;
@@ -80,64 +79,38 @@ public static class MauiProgram
         builder.Services.AddSingleton<ITimezoneService, DeviceTimezoneService>();
         builder.Services.AddSingleton<IPaymentService, MauiPaymentService>();
 
-        builder.Services.Configure<AnalyticsOptions>(options =>
+        builder.Services.AddACommerceAnalytics(options =>
         {
             options.Enabled = AnalyticsSettings.IsEnabled || AnalyticsSettings.UseMockProvider;
             options.Meta = new AnalyticsConfig
             {
-                AppId = AnalyticsSettings.UseMockProvider ? "MOCK_META" : AnalyticsSettings.GetMetaAppId(),
+                AppId = AnalyticsSettings.GetMetaAppId(),
                 IosAppId = AnalyticsSettings.MetaIosAppId,
                 AndroidAppId = AnalyticsSettings.MetaAndroidAppId,
                 DebugMode = AnalyticsSettings.DebugMode
             };
             options.Google = new AnalyticsConfig
             {
-                AppId = AnalyticsSettings.UseMockProvider ? "MOCK_GOOGLE" : AnalyticsSettings.GetGoogleAppId(),
+                AppId = AnalyticsSettings.GetGoogleAppId(),
                 IosAppId = AnalyticsSettings.FirebaseIosAppId,
                 AndroidAppId = AnalyticsSettings.FirebaseAndroidAppId,
                 DebugMode = AnalyticsSettings.DebugMode
             };
             options.TikTok = new AnalyticsConfig
             {
-                AppId = AnalyticsSettings.UseMockProvider ? "MOCK_TIKTOK" : AnalyticsSettings.GetTikTokAppId(),
+                AppId = AnalyticsSettings.GetTikTokAppId(),
                 IosAppId = AnalyticsSettings.TikTokIosAppId,
                 AndroidAppId = AnalyticsSettings.TikTokAndroidAppId,
                 DebugMode = AnalyticsSettings.DebugMode
             };
             options.Snapchat = new AnalyticsConfig
             {
-                AppId = AnalyticsSettings.UseMockProvider ? "MOCK_SNAPCHAT" : AnalyticsSettings.GetSnapchatAppId(),
+                AppId = AnalyticsSettings.GetSnapchatAppId(),
                 IosAppId = AnalyticsSettings.SnapchatIosAppId,
                 AndroidAppId = AnalyticsSettings.SnapchatAndroidAppId,
                 DebugMode = AnalyticsSettings.DebugMode
             };
-        });
-
-        builder.Services.AddScoped<MockAnalyticsProvider>();
-        builder.Services.AddScoped<MetaAnalyticsProvider>();
-        builder.Services.AddScoped<GoogleAnalyticsProvider>();
-        builder.Services.AddScoped<TikTokAnalyticsProvider>();
-        builder.Services.AddScoped<SnapchatAnalyticsProvider>();
-        builder.Services.AddScoped<AnalyticsService>(sp =>
-        {
-            var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<AnalyticsOptions>>();
-            var service = new AnalyticsService(options);
-            
-            if (AnalyticsSettings.UseMockProvider)
-            {
-                Console.WriteLine("🧪 [Analytics] Mock Mode ENABLED");
-                service.AddProvider(sp.GetRequiredService<MockAnalyticsProvider>());
-            }
-            else
-            {
-                service.AddProvider(sp.GetRequiredService<MetaAnalyticsProvider>());
-                service.AddProvider(sp.GetRequiredService<GoogleAnalyticsProvider>());
-                service.AddProvider(sp.GetRequiredService<TikTokAnalyticsProvider>());
-                service.AddProvider(sp.GetRequiredService<SnapchatAnalyticsProvider>());
-            }
-            
-            return service;
-        });
+        }, useMockProvider: AnalyticsSettings.UseMockProvider);
 
         builder.Services.AddHttpClient("AshareApi", client =>
         {
