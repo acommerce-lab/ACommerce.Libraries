@@ -1,0 +1,145 @@
+12-14 01:23:48.173 D/EGL_emulation( 6087): app_time_stats: avg=16.83ms min=9.13ms max=32.03ms count=60
+12-14 01:23:49.173 D/EGL_emulation( 6087): app_time_stats: avg=17.20ms min=11.14ms max=34.59ms count=58
+12-14 01:23:50.174 D/EGL_emulation( 6087): app_time_stats: avg=16.91ms min=12.10ms max=32.77ms count=59
+12-14 01:23:51.191 D/EGL_emulation( 6087): app_time_stats: avg=16.92ms min=9.63ms max=35.75ms count=60
+12-14 01:23:52.192 D/EGL_emulation( 6087): app_time_stats: avg=16.91ms min=9.04ms max=30.06ms count=59
+The thread '.NET TP Worker' (4) has exited with code 0 (0x0).
+The thread '.NET TP Worker' (26) has exited with code 0 (0x0).
+The thread '.NET TP Worker' (27) has exited with code 0 (0x0).
+The thread '.NET TP Worker' (13) has exited with code 0 (0x0).
+The thread '.NET TP Worker' (30) has exited with code 0 (0x0).
+12-14 01:23:53.205 D/EGL_emulation( 6087): app_time_stats: avg=16.84ms min=11.77ms max=31.68ms count=60
+12-14 01:23:53.574 I/DOTNET  ( 6087): [AuthInterceptor] Request to /api/CategoryAttributes/categories - Token: eyJhbGciOiJIUzI1NiIs...
+12-14 01:23:53.575 I/DOTNET  ( 6087): [AuthInterceptor] ✅ Authorization header added
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: Start processing HTTP request GET https://ashare-web-130415035604.me-central2.run.app/api/CategoryAttributes/categories
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-web-130415035604.me-central2.run.app/api/CategoryAttributes/categories
+12-14 01:23:53.580 I/DOTNET  ( 6087): [AuthInterceptor] Request to /api/listings - Token: eyJhbGciOiJIUzI1NiIs...
+12-14 01:23:53.580 I/DOTNET  ( 6087): [AuthInterceptor] ✅ Authorization header added
+12-14 01:23:53.582 D/TrafficStats( 6087): tagSocket(244) with statsTag=0xffffffff, statsUid=-1
+12-14 01:23:53.586 D/TrafficStats( 6087): tagSocket(277) with statsTag=0xffffffff, statsUid=-1
+12-14 01:23:53.611 I/DOTNET  ( 6087): [MainLayout] Auth check - Path: https://0.0.0.1/explore, Token: exists, IsGuest: False, IsAuthPage: False, IsProtectedPage: False
+12-14 01:23:53.626 I/AssistStructure( 6087): Flattened final assist data: 2588 bytes, containing 1 windows, 10 views
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: Start processing HTTP request GET https://ashare-web-130415035604.me-central2.run.app/api/listings
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-web-130415035604.me-central2.run.app/api/listings
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 170.4788ms - 404
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: End processing HTTP request after 172.7983ms - 404
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 167.8057ms - 404
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: End processing HTTP request after 174.1178ms - 404
+Exception thrown: 'System.Net.Http.HttpRequestException' in System.Net.Http.dll
+ACommerce.Client.Core.Http.DynamicHttpClient: Error: GET https://ashare-web-130415035604.me-central2.run.app/api/CategoryAttributes/categories failed
+
+System.Net.Http.HttpRequestException: Response status code does not indicate success: 404 (Not Found).
+   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at ACommerce.Client.Core.Http.DynamicHttpClient.<GetAsync>d__5`1[[System.Collections.Generic.List`1[[ACommerce.Client.Categories.CategoryInfoDto, ACommerce.Client.Categories, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].MoveNext() in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Http\DynamicHttpClient.cs:line 49
+Exception thrown: 'System.Net.Http.HttpRequestException' in ACommerce.Client.Core.dll
+Exception thrown: 'System.Net.Http.HttpRequestException' in System.Private.CoreLib.dll
+Exception thrown: 'System.Net.Http.HttpRequestException' in System.Private.CoreLib.dll
+Ashare.Shared.Services.AshareApiService: Error: Error fetching categories
+
+System.Net.Http.HttpRequestException: Response status code does not indicate success: 404 (Not Found).
+   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at ACommerce.Client.Core.Http.DynamicHttpClient.<GetAsync>d__5`1[[System.Collections.Generic.List`1[[ACommerce.Client.Categories.CategoryInfoDto, ACommerce.Client.Categories, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].MoveNext() in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Http\DynamicHttpClient.cs:line 56
+   at ACommerce.Client.Categories.CategoryAttributesClient.GetAvailableCategoriesAsync(CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Categories\CategoryAttributesClient.cs:line 32
+   at Ashare.Shared.Services.AshareApiService.GetCategoriesAsync() in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Shared\Services\AshareApiService.cs:line 65
+Exception thrown: 'System.Net.Http.HttpRequestException' in System.Net.Http.dll
+ACommerce.Client.Core.Http.DynamicHttpClient: Error: GET https://ashare-web-130415035604.me-central2.run.app/api/listings failed
+
+System.Net.Http.HttpRequestException: Response status code does not indicate success: 404 (Not Found).
+   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at ACommerce.Client.Core.Http.DynamicHttpClient.<GetAsync>d__5`1[[System.Collections.Generic.List`1[[ACommerce.Client.ProductListings.ProductListingDto, ACommerce.Client.ProductListings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].MoveNext() in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Http\DynamicHttpClient.cs:line 49
+Exception thrown: 'System.Net.Http.HttpRequestException' in ACommerce.Client.Core.dll
+Exception thrown: 'System.Net.Http.HttpRequestException' in System.Private.CoreLib.dll
+Exception thrown: 'System.Net.Http.HttpRequestException' in System.Private.CoreLib.dll
+Ashare.Shared.Services.AshareApiService: Error: Error fetching all spaces
+
+System.Net.Http.HttpRequestException: Response status code does not indicate success: 404 (Not Found).
+   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at ACommerce.Client.Core.Http.DynamicHttpClient.<GetAsync>d__5`1[[System.Collections.Generic.List`1[[ACommerce.Client.ProductListings.ProductListingDto, ACommerce.Client.ProductListings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].MoveNext() in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Http\DynamicHttpClient.cs:line 56
+   at ACommerce.Client.ProductListings.ProductListingsClient.GetAllAsync(CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.ProductListings\ProductListingsClient.cs:line 11
+   at Ashare.Shared.Services.AshareApiService.GetAllSpacesAsync() in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Shared\Services\AshareApiService.cs:line 171
+12-14 01:23:54.404 D/EGL_emulation( 6087): app_time_stats: avg=33.66ms min=3.28ms max=348.53ms count=32
+The thread '.NET TP Worker' (36) has exited with code 0 (0x0).
+The thread '.NET TP Worker' (37) has exited with code 0 (0x0).
+The thread '.NET TP Worker' (35) has exited with code 0 (0x0).
+12-14 01:24:16.358 I/DOTNET  ( 6087): [AuthInterceptor] Request to /api/CategoryAttributes/categories - Token: eyJhbGciOiJIUzI1NiIs...
+12-14 01:24:16.358 I/DOTNET  ( 6087): [AuthInterceptor] ✅ Authorization header added
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: Start processing HTTP request GET https://ashare-web-130415035604.me-central2.run.app/api/CategoryAttributes/categories
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-web-130415035604.me-central2.run.app/api/CategoryAttributes/categories
+12-14 01:24:16.361 I/DOTNET  ( 6087): [AuthInterceptor] Request to /api/listings/featured - Token: eyJhbGciOiJIUzI1NiIs...
+12-14 01:24:16.362 I/DOTNET  ( 6087): [AuthInterceptor] ✅ Authorization header added
+12-14 01:24:16.363 D/TrafficStats( 6087): tagSocket(239) with statsTag=0xffffffff, statsUid=-1
+12-14 01:24:16.366 I/DOTNET  ( 6087): [AuthInterceptor] Request to /api/listings/new - Token: eyJhbGciOiJIUzI1NiIs...
+12-14 01:24:16.366 I/DOTNET  ( 6087): [AuthInterceptor] ✅ Authorization header added
+12-14 01:24:16.367 D/TrafficStats( 6087): tagSocket(241) with statsTag=0xffffffff, statsUid=-1
+12-14 01:24:16.370 D/TrafficStats( 6087): tagSocket(249) with statsTag=0xffffffff, statsUid=-1
+12-14 01:24:16.385 I/DOTNET  ( 6087): [MainLayout] Auth check - Path: https://0.0.0.1/, Token: exists, IsGuest: False, IsAuthPage: False, IsProtectedPage: False
+12-14 01:24:16.415 D/EGL_emulation( 6087): app_time_stats: avg=1294.70ms min=14.79ms max=21743.88ms count=17
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: Start processing HTTP request GET https://ashare-web-130415035604.me-central2.run.app/api/listings/featured?*
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-web-130415035604.me-central2.run.app/api/listings/featured?*
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: Start processing HTTP request GET https://ashare-web-130415035604.me-central2.run.app/api/listings/new?*
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-web-130415035604.me-central2.run.app/api/listings/new?*
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 165.8745ms - 404
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 179.6017ms - 404
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 189.6086ms - 404
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: End processing HTTP request after 191.8723ms - 404
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: End processing HTTP request after 200.3508ms - 404
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: End processing HTTP request after 218.1976ms - 404
+Exception thrown: 'System.Net.Http.HttpRequestException' in System.Net.Http.dll
+ACommerce.Client.Core.Http.DynamicHttpClient: Error: GET https://ashare-web-130415035604.me-central2.run.app/api/listings/new?limit=10 failed
+
+System.Net.Http.HttpRequestException: Response status code does not indicate success: 404 (Not Found).
+   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at ACommerce.Client.Core.Http.DynamicHttpClient.<GetAsync>d__5`1[[System.Collections.Generic.List`1[[ACommerce.Client.ProductListings.ProductListingDto, ACommerce.Client.ProductListings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].MoveNext() in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Http\DynamicHttpClient.cs:line 49
+Exception thrown: 'System.Net.Http.HttpRequestException' in ACommerce.Client.Core.dll
+Exception thrown: 'System.Net.Http.HttpRequestException' in System.Private.CoreLib.dll
+Exception thrown: 'System.Net.Http.HttpRequestException' in System.Private.CoreLib.dll
+Ashare.Shared.Services.AshareApiService: Error: Error fetching new spaces
+
+System.Net.Http.HttpRequestException: Response status code does not indicate success: 404 (Not Found).
+   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at ACommerce.Client.Core.Http.DynamicHttpClient.<GetAsync>d__5`1[[System.Collections.Generic.List`1[[ACommerce.Client.ProductListings.ProductListingDto, ACommerce.Client.ProductListings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].MoveNext() in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Http\DynamicHttpClient.cs:line 56
+   at ACommerce.Client.ProductListings.ProductListingsClient.GetNewAsync(Int32 limit, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.ProductListings\ProductListingsClient.cs:line 43
+   at Ashare.Shared.Services.AshareApiService.GetNewSpacesAsync() in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Shared\Services\AshareApiService.cs:line 154
+Exception thrown: 'System.Net.Http.HttpRequestException' in System.Net.Http.dll
+ACommerce.Client.Core.Http.DynamicHttpClient: Error: GET https://ashare-web-130415035604.me-central2.run.app/api/CategoryAttributes/categories failed
+
+System.Net.Http.HttpRequestException: Response status code does not indicate success: 404 (Not Found).
+   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at ACommerce.Client.Core.Http.DynamicHttpClient.<GetAsync>d__5`1[[System.Collections.Generic.List`1[[ACommerce.Client.Categories.CategoryInfoDto, ACommerce.Client.Categories, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].MoveNext() in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Http\DynamicHttpClient.cs:line 49
+Exception thrown: 'System.Net.Http.HttpRequestException' in ACommerce.Client.Core.dll
+Exception thrown: 'System.Net.Http.HttpRequestException' in System.Private.CoreLib.dll
+Exception thrown: 'System.Net.Http.HttpRequestException' in System.Private.CoreLib.dll
+Ashare.Shared.Services.AshareApiService: Error: Error fetching categories
+
+System.Net.Http.HttpRequestException: Response status code does not indicate success: 404 (Not Found).
+   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at ACommerce.Client.Core.Http.DynamicHttpClient.<GetAsync>d__5`1[[System.Collections.Generic.List`1[[ACommerce.Client.Categories.CategoryInfoDto, ACommerce.Client.Categories, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].MoveNext() in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Http\DynamicHttpClient.cs:line 56
+   at ACommerce.Client.Categories.CategoryAttributesClient.GetAvailableCategoriesAsync(CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Categories\CategoryAttributesClient.cs:line 32
+   at Ashare.Shared.Services.AshareApiService.GetCategoriesAsync() in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Shared\Services\AshareApiService.cs:line 65
+Exception thrown: 'System.Net.Http.HttpRequestException' in System.Net.Http.dll
+ACommerce.Client.Core.Http.DynamicHttpClient: Error: GET https://ashare-web-130415035604.me-central2.run.app/api/listings/featured?limit=10 failed
+
+System.Net.Http.HttpRequestException: Response status code does not indicate success: 404 (Not Found).
+   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at ACommerce.Client.Core.Http.DynamicHttpClient.<GetAsync>d__5`1[[System.Collections.Generic.List`1[[ACommerce.Client.ProductListings.ProductListingDto, ACommerce.Client.ProductListings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].MoveNext() in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Http\DynamicHttpClient.cs:line 49
+Exception thrown: 'System.Net.Http.HttpRequestException' in ACommerce.Client.Core.dll
+Exception thrown: 'System.Net.Http.HttpRequestException' in System.Private.CoreLib.dll
+Exception thrown: 'System.Net.Http.HttpRequestException' in System.Private.CoreLib.dll
+Ashare.Shared.Services.AshareApiService: Error: Error fetching featured spaces
+
+System.Net.Http.HttpRequestException: Response status code does not indicate success: 404 (Not Found).
+   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at ACommerce.Client.Core.Http.DynamicHttpClient.<GetAsync>d__5`1[[System.Collections.Generic.List`1[[ACommerce.Client.ProductListings.ProductListingDto, ACommerce.Client.ProductListings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].MoveNext() in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.Core\Http\DynamicHttpClient.cs:line 56
+   at ACommerce.Client.ProductListings.ProductListingsClient.GetFeaturedAsync(Int32 limit, CancellationToken cancellationToken) in C:\Users\i\Source\Repos\ACommerce.Libraries\Clients\ACommerce.Client.ProductListings\ProductListingsClient.cs:line 35
+   at Ashare.Shared.Services.AshareApiService.GetFeaturedSpacesAsync() in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Shared\Services\AshareApiService.cs:line 137
+12-14 01:24:17.423 D/EGL_emulation( 6087): app_time_stats: avg=19.51ms min=2.87ms max=276.25ms count=36
+12-14 01:24:18.441 D/EGL_emulation( 6087): app_time_stats: avg=14.05ms min=3.10ms max=23.57ms count=60
+12-14 01:24:19.442 D/EGL_emulation( 6087): app_time_stats: avg=15.65ms min=3.46ms max=65.13ms count=57
+12-14 01:24:20.461 D/EGL_emulation( 6087): app_time_stats: avg=5.05ms min=2.57ms max=32.70ms count=60
+12-14 01:24:21.472 D/EGL_emulation( 6087): app_time_stats: avg=11.51ms min=3.26ms max=32.22ms count=59
+12-14 01:24:22.474 D/EGL_emulation( 6087): app_time_stats: avg=16.66ms min=10.07ms max=23.82ms count=60
+12-14 01:24:23.489 D/EGL_emulation( 6087): app_time_stats: avg=15.65ms min=3.25ms max=39.02ms count=58
+12-14 01:24:24.494 D/EGL_emulation( 6087): app_time_stats: avg=15.97ms min=4.00ms max=32.19ms count=58
+12-14 01:24:25.499 D/EGL_emulation( 6087): app_time_stats: avg=16.51ms min=3.36ms max=33.08ms count=58
+12-14 01:24:26.505 D/EGL_emulation( 6087): app_time_stats: avg=4.42ms min=2.67ms max=10.63ms count=61
+12-14 01:24:27.509 D/EGL_emulation( 6087): app_time_stats: avg=5.65ms min=2.64ms max=20.62ms count=59
