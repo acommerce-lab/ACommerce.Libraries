@@ -1,6 +1,5 @@
 <Project>
   <PropertyGroup>
-    <MSBuildEnableWorkloadResolver>false</MSBuildEnableWorkloadResolver>
-    <SkipWorkloadManifest>true</SkipWorkloadManifest>
+    <!-- Workloads enabled for MAUI projects -->
   </PropertyGroup>
 </Project>
