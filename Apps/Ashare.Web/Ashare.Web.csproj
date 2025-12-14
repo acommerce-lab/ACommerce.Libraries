@@ -12,10 +12,10 @@
 		<ProjectReference Include="..\Ashare.Shared\Ashare.Shared.csproj" />
 
 		<!-- Service Registry for AddACommerceClientWithServices -->
-		<ProjectReference Include="..\..\Infrastructure\ACommerce.ServiceRegistry.Client\ACommerce.ServiceRegistry.Client.csproj" />
+		<ProjectReference Include="..\..\libs\backend\integration\ACommerce.ServiceRegistry.Client\ACommerce.ServiceRegistry.Client.csproj" />
 
 		<!-- Payments Client for DI registration -->
-		<ProjectReference Include="..\..\Clients\ACommerce.Client.Payments\ACommerce.Client.Payments.csproj" />
+		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Payments\ACommerce.Client.Payments.csproj" />
 	</ItemGroup>
 
 </Project>

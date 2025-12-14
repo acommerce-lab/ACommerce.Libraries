@@ -8,7 +8,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
+		<ProjectReference Include="..\..\core\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
 		<ProjectReference Include="..\..\Marketplace\ACommerce.Subscriptions\ACommerce.Subscriptions.csproj" />
 	</ItemGroup>
 
