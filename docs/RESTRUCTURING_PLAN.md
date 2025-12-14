@@ -45,26 +45,136 @@
 
 ## 🎯 الهيكل المستهدف
 
+### خيار 1: التنظيم حسب الوظيفة (Domain-Based) ⭐ مُوصى به
 ```
 ACommerce/
 ├── libs/
 │   ├── backend/
-│   │   ├── core/                    ← SharedKernel, CQRS, Abstractions
-│   │   ├── authentication/          ← JWT, TwoFactor, Identity
-│   │   ├── catalog/                 ← Products, Categories, Listings
-│   │   ├── sales/                   ← Cart, Orders
-│   │   ├── marketplace/             ← Vendors, Commissions
-│   │   ├── payments/                ← Moyasar, Payment Providers
-│   │   ├── shipping/                ← Shipping Providers
-│   │   ├── messaging/               ← SignalR, Notifications
-│   │   ├── files/                   ← Storage Abstractions
-│   │   └── aspnetcore/              ← ASP.NET Core Integration
+│   │   ├── core/                    ← SharedKernel, CQRS, Configuration
+│   │   ├── auth/                    ← JWT, TwoFactor, Identity, Nafath
+│   │   ├── catalog/                 ← Products, Categories, Listings, Attributes
+│   │   ├── sales/                   ← Cart, Orders, Payments
+│   │   ├── marketplace/             ← Vendors, Commissions, Reviews
+│   │   ├── shipping/                ← Providers, Tracking
+│   │   ├── messaging/               ← SignalR, Notifications, Chats
+│   │   ├── files/                   ← Storage, Media
+│   │   └── integration/             ← ASP.NET Core, Swagger
 │   │
 │   └── frontend/
-│       ├── core/                    ← Client.Core, DynamicHttpClient
-│       ├── clients/                 ← All SDK Clients (Auth, Cart, Orders...)
-│       ├── realtime/                ← SignalR Client
-│       └── service-registry/        ← ServiceRegistry.Client
+│       ├── core/                    ← DynamicHttpClient, Interceptors
+│       ├── clients/                 ← Auth, Cart, Orders, Products...
+│       ├── realtime/                ← SignalR Client, Hubs
+│       └── discovery/               ← ServiceRegistry
+│
+```
+
+### خيار 2: التنظيم حسب الطبقة (Layer-Based)
+```
+ACommerce/
+├── libs/
+│   ├── backend/
+│   │   ├── abstractions/            ← كل الـ Interfaces والـ Contracts
+│   │   ├── domain/                  ← Entities, Value Objects, Business Logic
+│   │   ├── infrastructure/          ← EF Core, External Services
+│   │   ├── api/                     ← Controllers, Endpoints
+│   │   └── aspnetcore/              ← Middleware, Filters
+│   │
+│   └── frontend/
+│       ├── abstractions/            ← Interfaces
+│       ├── http/                    ← HTTP Clients
+│       ├── realtime/                ← SignalR
+│       └── storage/                 ← Local Storage, Cache
+│
+```
+
+### المقارنة
+
+| المعيار | حسب الوظيفة | حسب الطبقة |
+|---------|-------------|------------|
+| سهولة الفهم | ✅ أسهل | ⚠️ يحتاج خبرة |
+| الاستقلالية | ✅ كل وحدة مستقلة | ❌ تبعيات متشابكة |
+| إعادة الاستخدام | ✅ سهل | ⚠️ متوسط |
+| التوسع المستقبلي | ✅ سهل | ⚠️ يحتاج تخطيط |
+| CLI/AI Agent | ✅ مناسب جداً | ⚠️ معقد |
+
+**التوصية**: خيار 1 (حسب الوظيفة) لأنه:
+- أسهل للـ CLI في توليد الأكواد
+- أسهل للـ AI Agent في فهم البنية
+- كل مجال عمل مستقل ويمكن نشره كـ NuGet منفصل
+
+---
+
+### الهيكل التفصيلي المُوصى به
+
+```
+ACommerce/
+├── libs/
+│   ├── backend/
+│   │   ├── core/
+│   │   │   ├── ACommerce.SharedKernel.Abstractions
+│   │   │   ├── ACommerce.SharedKernel.CQRS
+│   │   │   ├── ACommerce.SharedKernel.Infrastructure
+│   │   │   └── ACommerce.Configuration
+│   │   │
+│   │   ├── auth/
+│   │   │   ├── ACommerce.Authentication.Abstractions
+│   │   │   ├── ACommerce.Authentication.JWT
+│   │   │   ├── ACommerce.Authentication.TwoFactor.*
+│   │   │   ├── ACommerce.Identity.*
+│   │   │   └── ACommerce.Profiles.*
+│   │   │
+│   │   ├── catalog/
+│   │   │   ├── ACommerce.Catalog.Listings
+│   │   │   └── ACommerce.Catalog.Listings.Api
+│   │   │
+│   │   ├── sales/
+│   │   │   ├── ACommerce.Cart
+│   │   │   ├── ACommerce.Orders
+│   │   │   └── ACommerce.Payments.*
+│   │   │
+│   │   ├── marketplace/
+│   │   │   ├── ACommerce.Vendors
+│   │   │   ├── ACommerce.Commissions
+│   │   │   └── ACommerce.Reviews
+│   │   │
+│   │   ├── messaging/
+│   │   │   ├── ACommerce.Messaging.*
+│   │   │   ├── ACommerce.Notifications.*
+│   │   │   ├── ACommerce.Chats.*
+│   │   │   └── ACommerce.Realtime.*
+│   │   │
+│   │   ├── files/
+│   │   │   └── ACommerce.Files.*
+│   │   │
+│   │   ├── shipping/
+│   │   │   └── ACommerce.Shipping.*
+│   │   │
+│   │   └── integration/
+│   │       └── ACommerce.*.AspNetCore
+│   │
+│   └── frontend/
+│       ├── core/
+│       │   └── ACommerce.Client.Core
+│       │
+│       ├── clients/
+│       │   ├── ACommerce.Client.Auth
+│       │   ├── ACommerce.Client.Cart
+│       │   ├── ACommerce.Client.Orders
+│       │   ├── ACommerce.Client.Products
+│       │   ├── ACommerce.Client.Categories
+│       │   ├── ACommerce.Client.Profiles
+│       │   ├── ACommerce.Client.Payments
+│       │   ├── ACommerce.Client.Vendors
+│       │   ├── ACommerce.Client.Notifications
+│       │   ├── ACommerce.Client.Chats
+│       │   ├── ACommerce.Client.Files
+│       │   └── ACommerce.Client.*
+│       │
+│       ├── realtime/
+│       │   └── ACommerce.Client.Realtime
+│       │
+│       └── discovery/
+│           └── ACommerce.ServiceRegistry.Client
 │
 ├── templates/
 │   ├── core/                        ← Base Template (Analytics, Localization, Auth Pages)
