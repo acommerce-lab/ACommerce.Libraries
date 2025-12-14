@@ -6,6 +6,7 @@ using ACommerce.Client.Auth;
 using ACommerce.Client.Core.Interceptors;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Services.Analytics;
+using ACommerce.Templates.Customer.Services.Localization;
 using ACommerce.ServiceRegistry.Client.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,11 +41,13 @@ builder.Services.AddScoped<SpaceDataService>();
 builder.Services.AddScoped<ITimezoneService, BrowserTimezoneService>();
 builder.Services.AddScoped<IPaymentService, WebPaymentService>();
 builder.Services.AddACommerceAnalytics(builder.Configuration);
+builder.Services.AddLocalizationValidation();
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });
 
 var app = builder.Build();
 
 app.Services.InitializeServiceCache();
+app.Services.ValidateLocalization(app.Environment.IsDevelopment());
 
 if (!app.Environment.IsDevelopment())
 {
