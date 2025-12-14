@@ -107,34 +107,34 @@ try
             Title = "ACommerce E-Shop API",
             Version = "v2.0.0",
             Description = @"
-# 🛒 Complete E-Commerce Backend API
+                # 🛒 Complete E-Commerce Backend API
 
-## ✨ Features:
-- 👤 **Authentication & Authorization** (OpenIddict + JWT)
-- 📦 **Product Catalog** (Attributes, Units, Currencies, Products)
-- 🛍️ **Shopping Cart & Orders**
-- 💳 **Payment Processing**
-- 🚚 **Shipping Management**
-- 👥 **Vendor Marketplace**
-- 💬 **Chat & Real-time Notifications**
-- 📧 **Contact Points Management**
-- 📊 **User Profiles**
+                ## ✨ Features:
+                - 👤 **Authentication & Authorization** (OpenIddict + JWT)
+                - 📦 **Product Catalog** (Attributes, Units, Currencies, Products)
+                - 🛍️ **Shopping Cart & Orders**
+                - 💳 **Payment Processing**
+                - 🚚 **Shipping Management**
+                - 👥 **Vendor Marketplace**
+                - 💬 **Chat & Real-time Notifications**
+                - 📧 **Contact Points Management**
+                - 📊 **User Profiles**
 
-## 🏗️ Architecture:
-- Clean Architecture + DDD
-- CQRS with MediatR
-- Repository Pattern
-- Separation of Concerns
-- Independent Domain Systems
+                ## 🏗️ Architecture:
+                - Clean Architecture + DDD
+                - CQRS with MediatR
+                - Repository Pattern
+                - Separation of Concerns
+                - Independent Domain Systems
 
-## 🔧 Technologies:
-- .NET 9.0
-- Entity Framework Core
-- OpenIddict
-- SignalR
-- AutoMapper
-- FluentValidation
-",
+                ## 🔧 Technologies:
+                - .NET 9.0
+                - Entity Framework Core
+                - OpenIddict
+                - SignalR
+                - AutoMapper
+                - FluentValidation
+                ",
             Contact = new()
             {
                 Name = "ACommerce Team",

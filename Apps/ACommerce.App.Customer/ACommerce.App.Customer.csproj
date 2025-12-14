@@ -67,26 +67,26 @@
                 <ProjectReference Include="..\Ashare.Shared\Ashare.Shared.csproj" />
                 
                 <!-- Reference to Clients -->
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Auth\ACommerce.Client.Auth.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Nafath\ACommerce.Client.Nafath.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Products\ACommerce.Client.Products.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.ProductListings\ACommerce.Client.ProductListings.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Categories\ACommerce.Client.Categories.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Cart\ACommerce.Client.Cart.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Orders\ACommerce.Client.Orders.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Profiles\ACommerce.Client.Profiles.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Vendors\ACommerce.Client.Vendors.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Subscriptions\ACommerce.Client.Subscriptions.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Payments\ACommerce.Client.Payments.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Chats\ACommerce.Client.Chats.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Notifications\ACommerce.Client.Notifications.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Locations\ACommerce.Client.Locations.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Files\ACommerce.Client.Files.csproj" />
-                <ProjectReference Include="..\..\Clients\ACommerce.Client.Realtime\ACommerce.Client.Realtime.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\core\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Auth\ACommerce.Client.Auth.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Nafath\ACommerce.Client.Nafath.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Products\ACommerce.Client.Products.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.ProductListings\ACommerce.Client.ProductListings.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Categories\ACommerce.Client.Categories.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Cart\ACommerce.Client.Cart.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Orders\ACommerce.Client.Orders.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Profiles\ACommerce.Client.Profiles.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Vendors\ACommerce.Client.Vendors.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Subscriptions\ACommerce.Client.Subscriptions.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Payments\ACommerce.Client.Payments.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Chats\ACommerce.Client.Chats.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Notifications\ACommerce.Client.Notifications.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Locations\ACommerce.Client.Locations.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Files\ACommerce.Client.Files.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Realtime\ACommerce.Client.Realtime.csproj" />
                 
                 <!-- Service Registry Client -->
-                <ProjectReference Include="..\..\Infrastructure\ACommerce.ServiceRegistry.Client\ACommerce.ServiceRegistry.Client.csproj" />
+                <ProjectReference Include="..\..\libs\backend\integration\ACommerce.ServiceRegistry.Client\ACommerce.ServiceRegistry.Client.csproj" />
         </ItemGroup>
 
         <!-- Ensure wwwroot files are included -->
