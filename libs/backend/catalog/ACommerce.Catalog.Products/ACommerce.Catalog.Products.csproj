@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>ACommerce.Catalog.Products</PackageId>
+    <Version>2.0.0</Version>
+    <Authors>ACommerce</Authors>
+    <Description># ACommerce.Catalog.Products - Product catalog with flexible attributes, units, and currencies</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ACommerce.Catalog.Attributes\ACommerce.Catalog.Attributes.csproj" />
+    <ProjectReference Include="..\ACommerce.Catalog.Currencies\ACommerce.Catalog.Currencies.csproj" />
+    <ProjectReference Include="..\ACommerce.Catalog.Units\ACommerce.Catalog.Units.csproj" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+</Project>

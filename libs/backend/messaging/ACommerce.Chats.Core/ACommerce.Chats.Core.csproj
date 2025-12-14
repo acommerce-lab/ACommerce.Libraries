@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>ACommerce.Chats.Core</PackageId>
+    <Version>1.0.3</Version>
+    <Authors>ACommerce</Authors>
+    <Description># ACommerce.Chats.Core</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\ACommerce.Chats.Abstractions\ACommerce.Chats.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Core\ACommerce.Realtime.Abstractions\ACommerce.Realtime.Abstractions.csproj" />
+    <ProjectReference Include="..\ACommerce.Realtime.SignalR\ACommerce.Realtime.SignalR.csproj" />
+    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- ? ?? SignalR Hub -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+</Project>

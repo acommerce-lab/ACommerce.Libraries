@@ -1,0 +1,200 @@
+﻿@model dynamic
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>@Model.Title</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: 'Segoe UI', 'Cairo', Tahoma, sans-serif;
+			background-color: #f5f5f5;
+			padding: 20px;
+			line-height: 1.6;
+		}
+
+		.email-container {
+			max-width: 600px;
+			margin: 0 auto;
+			background: white;
+			border-radius: 12px;
+			overflow: hidden;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+		}
+
+		.header {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			color: white;
+			padding: 40px 30px;
+			text-align: center;
+		}
+
+		.header h1 {
+			font-size: 28px;
+			margin-bottom: 10px;
+		}
+
+		.header p {
+			font-size: 14px;
+			opacity: 0.9;
+		}
+
+		.content {
+			padding: 40px 30px;
+		}
+
+		.content p {
+			color: #333;
+			margin-bottom: 20px;
+			font-size: 16px;
+		}
+
+		.notification-type {
+			display: inline-block;
+			padding: 6px 12px;
+			border-radius: 20px;
+			font-size: 12px;
+			font-weight: bold;
+			margin-bottom: 20px;
+		}
+
+		.type-info { background: #d1ecf1; color: #0c5460; }
+		.type-success { background: #d4edda; color: #155724; }
+		.type-warning { background: #fff3cd; color: #856404; }
+		.type-error { background: #f8d7da; color: #721c24; }
+
+		.action-button {
+			display: inline-block;
+			padding: 12px 30px;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			color: white;
+			text-decoration: none;
+			border-radius: 6px;
+			font-weight: bold;
+			margin-top: 20px;
+		}
+
+		.action-button:hover {
+			opacity: 0.9;
+		}
+
+		.image-container {
+			text-align: center;
+			margin: 20px 0;
+		}
+
+		.image-container img {
+			max-width: 100%;
+			border-radius: 8px;
+		}
+
+		.footer {
+			background: #f8f9fa;
+			padding: 30px;
+			text-align: center;
+			border-top: 1px solid #e9ecef;
+		}
+
+		.footer p {
+			color: #6c757d;
+			font-size: 14px;
+			margin-bottom: 10px;
+		}
+
+		.social-links {
+			margin-top: 20px;
+		}
+
+		.social-links a {
+			display: inline-block;
+			margin: 0 10px;
+			color: #667eea;
+			text-decoration: none;
+		}
+
+		.divider {
+			height: 1px;
+			background: #e9ecef;
+			margin: 30px 0;
+		}
+	</style>
+</head>
+<body>
+	<div class="email-container">
+		<!-- Header -->
+		<div class="header">
+			<h1>@Model.Title</h1>
+			<p>@Model.CreatedAt</p>
+		</div>
+
+		<!-- Content -->
+		<div class="content">
+			<!-- Notification Type Badge -->
+			@{
+				var typeClass = Model.Type.ToString().ToLower() switch
+				{
+					"success" => "type-success",
+					"warning" => "type-warning",
+					"error" => "type-error",
+					_ => "type-info"
+				};
+			}
+			<span class="notification-type @typeClass">@Model.Type</span>
+
+			<!-- Message -->
+			<p>@Model.Message</p>
+
+			<!-- Image (if provided) -->
+			@if (!string.IsNullOrEmpty(Model.ImageUrl))
+			{
+				<div class="image-container">
+					<img src="@Model.ImageUrl" alt="صورة الإشعار" />
+				</div>
+			}
+
+			<!-- Action Button (if provided) -->
+			@if (!string.IsNullOrEmpty(Model.ActionUrl))
+			{
+				<div style="text-align: center;">
+					<a href="@Model.ActionUrl" class="action-button">
+						اضغط هنا
+					</a>
+				</div>
+			}
+
+			<div class="divider"></div>
+
+			<!-- Additional Info -->
+			<p style="font-size: 14px; color: #6c757d;">
+				هذا إشعار تلقائي من منصة عشير. إذا كنت تعتقد أنك تلقيت هذا البريد عن طريق الخطأ، يرجى تجاهله.
+			</p>
+		</div>
+
+		<!-- Footer -->
+		<div class="footer">
+			<p><strong>منصة عشير للعقارات</strong></p>
+			<p>المملكة العربية السعودية</p>
+			<p>
+				<a href="mailto:support@ACommerce.sa" style="color: #667eea;">support@ACommerce.sa</a>
+			</p>
+
+			<div class="social-links">
+				<a href="https://twitter.com/ACommerce">تويتر</a> |
+				<a href="https://ACommerce.sa">الموقع</a> |
+				<a href="https://ACommerce.sa/privacy">سياسة الخصوصية</a>
+			</div>
+
+			<p style="margin-top: 20px; font-size: 12px;">
+				© 2025 ACommerce. جميع الحقوق محفوظة.
+			</p>
+		</div>
+	</div>
+</body>
+</html>
