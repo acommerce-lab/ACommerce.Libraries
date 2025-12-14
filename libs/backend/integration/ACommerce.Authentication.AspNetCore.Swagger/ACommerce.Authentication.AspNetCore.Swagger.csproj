@@ -15,7 +15,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="9.0.6" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Authentication\ACommerce.Authentication.Abstractions\ACommerce.Authentication.Abstractions.csproj" />
+    <ProjectReference Include="..\..\auth\ACommerce.Authentication.Abstractions\ACommerce.Authentication.Abstractions.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

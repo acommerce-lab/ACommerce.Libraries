@@ -13,9 +13,9 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.10" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\ACommerce.Messaging.Abstractions\ACommerce.Messaging.Abstractions.csproj" />
-    <ProjectReference Include="..\..\Authentication\ACommerce.Authentication.Abstractions\ACommerce.Authentication.Abstractions.csproj" />
-    <ProjectReference Include="..\..\Authentication\ACommerce.Authentication.Users.Abstractions\ACommerce.Authentication.Users.Abstractions.csproj" />
+    <ProjectReference Include="..\..\auth\ACommerce.Authentication.Abstractions\ACommerce.Authentication.Abstractions.csproj" />
+    <ProjectReference Include="..\..\auth\ACommerce.Authentication.Users.Abstractions\ACommerce.Authentication.Users.Abstractions.csproj" />
+    <ProjectReference Include="..\..\messaging\ACommerce.Messaging.Abstractions\ACommerce.Messaging.Abstractions.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

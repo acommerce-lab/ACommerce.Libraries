@@ -2,7 +2,6 @@
 using ACommerce.Authentication.Abstractions.Contracts;
 using ACommerce.Authentication.TwoFactor.Abstractions;
 using ACommerce.Authentication.TwoFactor.Abstractions.Events;
-using Microsoft.AspNetCore.Session;
 using Microsoft.Extensions.Logging;
 
 namespace ACommerce.Authentication.TwoFactor.Nafath;

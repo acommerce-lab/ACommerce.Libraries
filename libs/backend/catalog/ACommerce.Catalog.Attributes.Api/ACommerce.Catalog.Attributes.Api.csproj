@@ -9,8 +9,8 @@
     <Description># ACommerce.Catalog.Attributes.Api</Description>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\integration\ACommerce.SharedKernel.AspNetCore\ACommerce.SharedKernel.AspNetCore.csproj" />
     <ProjectReference Include="..\ACommerce.Catalog.Attributes\ACommerce.Catalog.Attributes.csproj" />
-    <ProjectReference Include="..\..\AspNetCore\ACommerce.SharedKernel.AspNetCore\ACommerce.SharedKernel.AspNetCore.csproj" />
   </ItemGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />

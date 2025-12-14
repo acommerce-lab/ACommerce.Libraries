@@ -9,8 +9,8 @@
     <Description>Vendor and seller management for multi-vendor marketplace</Description>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\auth\ACommerce.Profiles\ACommerce.Profiles.csproj" />
     <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
-    <ProjectReference Include="..\..\Identity\ACommerce.Profiles\ACommerce.Profiles.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

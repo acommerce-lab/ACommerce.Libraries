@@ -17,7 +17,7 @@
     <PackageReference Include="RazorEngineCore" Version="2024.4.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\ACommerce.Notifications.Abstractions\ACommerce.Notifications.Abstractions.csproj" />
+    <ProjectReference Include="..\ACommerce.Notifications.Abstractions\ACommerce.Notifications.Abstractions.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

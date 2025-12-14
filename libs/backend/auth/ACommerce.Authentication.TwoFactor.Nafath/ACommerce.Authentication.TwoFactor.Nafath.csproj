@@ -12,8 +12,8 @@
     <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.10" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\ACommerce.Messaging.Abstractions\ACommerce.Messaging.Abstractions.csproj" />
-    <ProjectReference Include="..\..\AspNetCore\ACommerce.Authentication.AspNetCore\ACommerce.Authentication.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\integration\ACommerce.SharedKernel.AspNetCore\ACommerce.SharedKernel.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\messaging\ACommerce.Messaging.Abstractions\ACommerce.Messaging.Abstractions.csproj" />
     <ProjectReference Include="..\ACommerce.Authentication.TwoFactor.Abstractions\ACommerce.Authentication.TwoFactor.Abstractions.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">

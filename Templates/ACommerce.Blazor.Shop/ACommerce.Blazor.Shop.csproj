@@ -8,7 +8,6 @@
 
 	<ItemGroup>
 		<!-- ACommerce Client Core (required for IApiClient and extensions) -->
-		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
 
 		<!-- ACommerce Client SDKs -->
 		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Auth\ACommerce.Client.Auth.csproj" />
@@ -21,11 +20,11 @@
 		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Profiles\ACommerce.Client.Profiles.csproj" />
 		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Notifications\ACommerce.Client.Notifications.csproj" />
 		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Files\ACommerce.Client.Files.csproj" />
-		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Realtime\ACommerce.Client.Realtime.csproj" />
 		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Chats\ACommerce.Client.Chats.csproj" />
 		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Vendors\ACommerce.Client.Vendors.csproj" />
 		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.ContactPoints\ACommerce.Client.ContactPoints.csproj" />
 		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Categories\ACommerce.Client.Categories.csproj" />
+		<ProjectReference Include="..\..\libs\frontend\realtime\ACommerce.Client.Realtime\ACommerce.Client.Realtime.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -9,9 +9,9 @@
     <Description># ACommerce.Transactions.Core</Description>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ACommerce.Catalog.Attributes\ACommerce.Catalog.Attributes.csproj" />
-    <ProjectReference Include="..\ACommerce.Catalog.Currencies\ACommerce.Catalog.Currencies.csproj" />
-    <ProjectReference Include="..\ACommerce.Catalog.Units\ACommerce.Catalog.Units.csproj" />
+    <ProjectReference Include="..\..\catalog\ACommerce.Catalog.Attributes\ACommerce.Catalog.Attributes.csproj" />
+    <ProjectReference Include="..\..\catalog\ACommerce.Catalog.Currencies\ACommerce.Catalog.Currencies.csproj" />
+    <ProjectReference Include="..\..\catalog\ACommerce.Catalog.Units\ACommerce.Catalog.Units.csproj" />
     <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
     <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
   </ItemGroup>

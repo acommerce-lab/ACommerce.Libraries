@@ -18,7 +18,7 @@ builder.Services.AddMemoryCache();
 
 var apiBaseUrl = builder.Configuration["HostSettings:BaseUrl"] 
     ?? builder.Configuration["ApiSettings:BaseUrl"] 
-    ?? "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net";
+    ?? "https://ashare-api-130415035604.me-central2.run.app";
 
 Console.WriteLine($"🌐 API Base URL: {apiBaseUrl}");
 
