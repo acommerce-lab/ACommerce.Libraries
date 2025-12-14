@@ -1,0 +1,354 @@
+@page "/host/analytics"
+@using Ashare.Shared.Services
+@inject AnalyticsStore AnalyticsStore
+@inject IAppNavigationService Navigation
+@inject Ashare.Shared.Services.ThemeService ThemeService
+@inject ILocalizationService L
+@implements IDisposable
+
+<div class="ac-page ashare-analytics-dashboard @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
+    @* Header *@
+    <div class="ac-navbar">
+        <button class="ac-navbar-back" @onclick="() => Navigation.NavigateBack()">
+            <i class="bi bi-chevron-@(L.IsRtl ? "right" : "left")"></i>
+        </button>
+        <h1 class="ac-navbar-title">@L["AnalyticsDashboard"]</h1>
+        <button class="ac-navbar-action" @onclick="RefreshData">
+            <i class="bi bi-arrow-clockwise @(_isRefreshing ? "spin" : "")"></i>
+        </button>
+    </div>
+
+    <div class="ashare-analytics-content">
+        @* Summary Cards *@
+        <div class="analytics-summary-grid">
+            <div class="analytics-card primary">
+                <div class="analytics-card-icon">
+                    <i class="bi bi-graph-up"></i>
+                </div>
+                <div class="analytics-card-content">
+                    <span class="analytics-card-value">@_summary.TotalEvents</span>
+                    <span class="analytics-card-label">@L["TotalEvents"]</span>
+                </div>
+            </div>
+
+            <div class="analytics-card success">
+                <div class="analytics-card-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="analytics-card-content">
+                    <span class="analytics-card-value">@_summary.UniqueUsers</span>
+                    <span class="analytics-card-label">@L["UniqueUsers"]</span>
+                </div>
+            </div>
+
+            <div class="analytics-card warning">
+                <div class="analytics-card-icon">
+                    <i class="bi bi-eye"></i>
+                </div>
+                <div class="analytics-card-content">
+                    <span class="analytics-card-value">@_summary.TotalScreenViews</span>
+                    <span class="analytics-card-label">@L["PageViews"]</span>
+                </div>
+            </div>
+
+            <div class="analytics-card info">
+                <div class="analytics-card-icon">
+                    <i class="bi bi-currency-dollar"></i>
+                </div>
+                <div class="analytics-card-content">
+                    <span class="analytics-card-value">@FormatRevenue(_summary.TotalRevenue)</span>
+                    <span class="analytics-card-label">@L["TotalRevenue"]</span>
+                </div>
+            </div>
+        </div>
+
+        @* Quick Stats Row *@
+        <div class="analytics-quick-stats">
+            <div class="quick-stat-item">
+                <i class="bi bi-person-plus"></i>
+                <span class="quick-stat-value">@_summary.TotalRegistrations</span>
+                <span class="quick-stat-label">@L["Registrations"]</span>
+            </div>
+            <div class="quick-stat-item">
+                <i class="bi bi-box-arrow-in-right"></i>
+                <span class="quick-stat-value">@_summary.TotalLogins</span>
+                <span class="quick-stat-label">@L["Logins"]</span>
+            </div>
+            <div class="quick-stat-item">
+                <i class="bi bi-bag-check"></i>
+                <span class="quick-stat-value">@_summary.TotalPurchases</span>
+                <span class="quick-stat-label">@L["Purchases"]</span>
+            </div>
+            <div class="quick-stat-item">
+                <i class="bi bi-search"></i>
+                <span class="quick-stat-value">@_summary.TotalSearches</span>
+                <span class="quick-stat-label">@L["Searches"]</span>
+            </div>
+        </div>
+
+        @* Event Types Distribution *@
+        <div class="analytics-section">
+            <h3 class="analytics-section-title">
+                <i class="bi bi-pie-chart"></i>
+                @L["EventDistribution"]
+            </h3>
+            <div class="event-distribution-grid">
+                @foreach (var evt in _summary.EventCounts.OrderByDescending(x => x.Value).Take(8))
+                {
+                    <div class="event-type-item">
+                        <div class="event-type-bar" style="width: @GetPercentage(evt.Value, _summary.TotalEvents)%"></div>
+                        <div class="event-type-info">
+                            <span class="event-type-name">@GetEventDisplayName(evt.Key)</span>
+                            <span class="event-type-count">@evt.Value</span>
+                        </div>
+                    </div>
+                }
+                @if (!_summary.EventCounts.Any())
+                {
+                    <div class="analytics-empty">
+                        <i class="bi bi-inbox"></i>
+                        <span>@L["NoEventsYet"]</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @* Top Screens *@
+        @if (_summary.TopScreens.Any())
+        {
+            <div class="analytics-section">
+                <h3 class="analytics-section-title">
+                    <i class="bi bi-window"></i>
+                    @L["TopPages"]
+                </h3>
+                <div class="top-items-list">
+                    @foreach (var screen in _summary.TopScreens)
+                    {
+                        <div class="top-item">
+                            <span class="top-item-name">@screen.Key</span>
+                            <span class="top-item-count">@screen.Value @L["Views"]</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @* Top Search Terms *@
+        @if (_summary.TopSearchTerms.Any())
+        {
+            <div class="analytics-section">
+                <h3 class="analytics-section-title">
+                    <i class="bi bi-search"></i>
+                    @L["TopSearchTerms"]
+                </h3>
+                <div class="search-terms-cloud">
+                    @foreach (var term in _summary.TopSearchTerms)
+                    {
+                        <div class="search-term-tag">
+                            <span class="term-text">@term.Key</span>
+                            <span class="term-count">@term.Value</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @* User Engagement *@
+        <div class="analytics-section">
+            <h3 class="analytics-section-title">
+                <i class="bi bi-heart"></i>
+                @L["UserEngagement"]
+            </h3>
+            <div class="engagement-grid">
+                <div class="engagement-item">
+                    <i class="bi bi-building"></i>
+                    <div class="engagement-info">
+                        <span class="engagement-value">@_summary.TotalContentViews</span>
+                        <span class="engagement-label">@L["ListingViews"]</span>
+                    </div>
+                </div>
+                <div class="engagement-item">
+                    <i class="bi bi-heart-fill"></i>
+                    <div class="engagement-info">
+                        <span class="engagement-value">@_summary.TotalWishlistAdds</span>
+                        <span class="engagement-label">@L["Favorites"]</span>
+                    </div>
+                </div>
+                <div class="engagement-item">
+                    <i class="bi bi-share-fill"></i>
+                    <div class="engagement-info">
+                        <span class="engagement-value">@_summary.TotalShares</span>
+                        <span class="engagement-label">@L["Shares"]</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* Recent Events Log *@
+        <div class="analytics-section">
+            <div class="analytics-section-header">
+                <h3 class="analytics-section-title">
+                    <i class="bi bi-list-ul"></i>
+                    @L["RecentEvents"]
+                </h3>
+                <button class="ac-btn ac-btn-sm ac-btn-outline-primary" @onclick="ToggleEventLog">
+                    <i class="bi bi-@(_showEventLog ? "chevron-up" : "chevron-down")"></i>
+                </button>
+            </div>
+
+            @if (_showEventLog)
+            {
+                <div class="events-log">
+                    @foreach (var evt in _recentEvents)
+                    {
+                        <div class="event-log-item">
+                            <div class="event-log-icon @GetEventClass(evt.EventType)">
+                                <i class="bi @GetEventIcon(evt.EventType)"></i>
+                            </div>
+                            <div class="event-log-content">
+                                <span class="event-log-name">@(evt.EventName ?? evt.EventType)</span>
+                                <span class="event-log-time">@evt.Timestamp.ToString("HH:mm:ss")</span>
+                            </div>
+                            @if (evt.Parameters?.Any() == true)
+                            {
+                                <div class="event-log-params">
+                                    @foreach (var param in evt.Parameters.Take(2))
+                                    {
+                                        <span class="event-param">@param.Key: @param.Value</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    @if (!_recentEvents.Any())
+                    {
+                        <div class="analytics-empty">
+                            <i class="bi bi-clock-history"></i>
+                            <span>@L["NoRecentEvents"]</span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        @* Actions *@
+        <div class="analytics-actions">
+            <button class="ac-btn ac-btn-outline-danger" @onclick="ClearData">
+                <i class="bi bi-trash"></i>
+                @L["ClearData"]
+            </button>
+            <button class="ac-btn ac-btn-primary" @onclick='() => Navigation.NavigateTo("/dev/analytics-test")'>
+                <i class="bi bi-lightning"></i>
+                @L["TestEvents"]
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private AnalyticsSummary _summary = new();
+    private List<AnalyticsEvent> _recentEvents = new();
+    private bool _showEventLog = true;
+    private bool _isRefreshing = false;
+    private Timer? _refreshTimer;
+
+    protected override void OnInitialized()
+    {
+        RefreshData();
+        // Auto-refresh every 5 seconds
+        _refreshTimer = new Timer(_ => InvokeAsync(RefreshData), null, 5000, 5000);
+    }
+
+    private async Task RefreshData()
+    {
+        _isRefreshing = true;
+        await InvokeAsync(StateHasChanged);
+
+        await Task.Delay(300); // Visual feedback
+
+        _summary = AnalyticsStore.GetSummary();
+        _recentEvents = AnalyticsStore.GetEvents(20).ToList();
+
+        _isRefreshing = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void ToggleEventLog()
+    {
+        _showEventLog = !_showEventLog;
+    }
+
+    private void ClearData()
+    {
+        AnalyticsStore.Clear();
+        RefreshData();
+    }
+
+    private string FormatRevenue(decimal value)
+    {
+        if (value >= 1000000)
+            return $"{value / 1000000:N1}M";
+        if (value >= 1000)
+            return $"{value / 1000:N1}K";
+        return value.ToString("N0");
+    }
+
+    private int GetPercentage(int value, int total)
+    {
+        if (total == 0) return 0;
+        return Math.Min(100, (int)((double)value / total * 100));
+    }
+
+    private string GetEventDisplayName(string eventType)
+    {
+        return eventType switch
+        {
+            "screen_view" => L["ScreenView"],
+            "search" => L["Search"],
+            "purchase" => L["Purchase"],
+            "registration" => L["Registration"],
+            "login" => L["Login"],
+            "content_view" => L["ContentView"],
+            "add_to_wishlist" => L["AddToWishlist"],
+            "share" => L["Share"],
+            "custom" => L["Custom"],
+            _ => eventType
+        };
+    }
+
+    private string GetEventIcon(string eventType)
+    {
+        return eventType switch
+        {
+            "screen_view" => "bi-eye",
+            "search" => "bi-search",
+            "purchase" => "bi-bag-check",
+            "registration" => "bi-person-plus",
+            "login" => "bi-box-arrow-in-right",
+            "content_view" => "bi-building",
+            "add_to_wishlist" => "bi-heart",
+            "share" => "bi-share",
+            "custom" => "bi-lightning",
+            _ => "bi-circle"
+        };
+    }
+
+    private string GetEventClass(string eventType)
+    {
+        return eventType switch
+        {
+            "purchase" => "event-purchase",
+            "registration" => "event-registration",
+            "login" => "event-login",
+            "content_view" => "event-content",
+            "add_to_wishlist" => "event-wishlist",
+            "share" => "event-share",
+            _ => "event-default"
+        };
+    }
+
+    public void Dispose()
+    {
+        _refreshTimer?.Dispose();
+    }
+}

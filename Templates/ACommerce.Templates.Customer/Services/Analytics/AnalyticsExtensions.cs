@@ -6,6 +6,15 @@ using Microsoft.Extensions.Options;
 namespace ACommerce.Templates.Customer.Services.Analytics;
 
 /// <summary>
+/// Interface for local analytics store (implemented in app-specific projects)
+/// </summary>
+public interface ILocalAnalyticsStore
+{
+    void AddEvent(string eventType, string? eventName, string? userId, Dictionary<string, object>? parameters);
+    void TrackUser(string userId);
+}
+
+/// <summary>
 /// Extension methods for registering analytics services
 /// </summary>
 public static class AnalyticsExtensions
@@ -84,6 +93,20 @@ public static class AnalyticsExtensions
             return service;
         });
 
+        return services;
+    }
+
+    /// <summary>
+    /// Add a local analytics provider to the service collection
+    /// This allows adding custom providers that store events locally for dashboard display
+    /// </summary>
+    /// <typeparam name="TProvider">The provider type implementing IAnalyticsProvider</typeparam>
+    /// <param name="services">Service collection</param>
+    /// <returns>Service collection for chaining</returns>
+    public static IServiceCollection AddLocalAnalyticsProvider<TProvider>(this IServiceCollection services)
+        where TProvider : class, IAnalyticsProvider
+    {
+        services.AddScoped<TProvider>();
         return services;
     }
 }

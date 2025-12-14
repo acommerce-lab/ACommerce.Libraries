@@ -307,6 +307,39 @@ public class LocalizationService : BaseLocalizationService
 
         // Reviews
         ar["Reviews"] = "التقييمات";
+
+        // Analytics Dashboard
+        ar["AnalyticsDashboard"] = "لوحة التحليلات";
+        ar["TotalEvents"] = "إجمالي الأحداث";
+        ar["UniqueUsers"] = "المستخدمين";
+        ar["PageViews"] = "مشاهدات الصفحات";
+        ar["TotalRevenue"] = "إجمالي الإيرادات";
+        ar["Registrations"] = "التسجيلات";
+        ar["Logins"] = "تسجيلات الدخول";
+        ar["Purchases"] = "المشتريات";
+        ar["Searches"] = "عمليات البحث";
+        ar["EventDistribution"] = "توزيع الأحداث";
+        ar["TopPages"] = "أكثر الصفحات زيارة";
+        ar["TopSearchTerms"] = "أكثر عمليات البحث";
+        ar["UserEngagement"] = "تفاعل المستخدمين";
+        ar["ListingViews"] = "مشاهدات العقارات";
+        ar["Favorites"] = "المفضلة";
+        ar["Shares"] = "المشاركات";
+        ar["RecentEvents"] = "آخر الأحداث";
+        ar["ClearData"] = "مسح البيانات";
+        ar["TestEvents"] = "اختبار الأحداث";
+        ar["NoEventsYet"] = "لا توجد أحداث بعد";
+        ar["NoRecentEvents"] = "لا توجد أحداث حديثة";
+        ar["Views"] = "مشاهدة";
+        ar["ScreenView"] = "مشاهدة صفحة";
+        ar["Search"] = "بحث";
+        ar["Purchase"] = "شراء";
+        ar["Registration"] = "تسجيل";
+        ar["Login"] = "دخول";
+        ar["ContentView"] = "مشاهدة محتوى";
+        ar["AddToWishlist"] = "إضافة للمفضلة";
+        ar["Share"] = "مشاركة";
+        ar["Custom"] = "مخصص";
     }
 
     private static void AddEnglishTranslations(Dictionary<string, string> en)
@@ -581,6 +614,39 @@ public class LocalizationService : BaseLocalizationService
 
         // Reviews
         en["Reviews"] = "Reviews";
+
+        // Analytics Dashboard
+        en["AnalyticsDashboard"] = "Analytics Dashboard";
+        en["TotalEvents"] = "Total Events";
+        en["UniqueUsers"] = "Unique Users";
+        en["PageViews"] = "Page Views";
+        en["TotalRevenue"] = "Total Revenue";
+        en["Registrations"] = "Registrations";
+        en["Logins"] = "Logins";
+        en["Purchases"] = "Purchases";
+        en["Searches"] = "Searches";
+        en["EventDistribution"] = "Event Distribution";
+        en["TopPages"] = "Top Pages";
+        en["TopSearchTerms"] = "Top Search Terms";
+        en["UserEngagement"] = "User Engagement";
+        en["ListingViews"] = "Listing Views";
+        en["Favorites"] = "Favorites";
+        en["Shares"] = "Shares";
+        en["RecentEvents"] = "Recent Events";
+        en["ClearData"] = "Clear Data";
+        en["TestEvents"] = "Test Events";
+        en["NoEventsYet"] = "No events yet";
+        en["NoRecentEvents"] = "No recent events";
+        en["Views"] = "views";
+        en["ScreenView"] = "Screen View";
+        en["Search"] = "Search";
+        en["Purchase"] = "Purchase";
+        en["Registration"] = "Registration";
+        en["Login"] = "Login";
+        en["ContentView"] = "Content View";
+        en["AddToWishlist"] = "Add to Wishlist";
+        en["Share"] = "Share";
+        en["Custom"] = "Custom";
     }
 
     private static void AddUrduTranslations(Dictionary<string, string> ur)
