@@ -3,21 +3,6 @@ using ACommerce.Subscriptions.Enums;
 namespace Ashare.Shared.Models;
 
 /// <summary>
-/// نتيجة عملية الدفع
-/// </summary>
-public class PaymentResult
-{
-    public bool Success { get; set; }
-    public bool Cancelled { get; set; }
-    public string? OrderId { get; set; }
-    public string TransactionId { get; set; } = string.Empty;
-    public string? Status { get; set; }
-    public string? Message { get; set; }
-    public string? ErrorCode { get; set; }
-    public Dictionary<string, string> Metadata { get; set; } = new();
-}
-
-/// <summary>
 /// طلب إنشاء دفعة اشتراك
 /// </summary>
 public class CreateSubscriptionPaymentRequest
@@ -60,7 +45,7 @@ public class VerifyPaymentRequest
 public class VerifyPaymentResponse
 {
     public bool Success { get; set; }
-    public string Status { get; set; } = string.Empty; // Pending, Completed, Failed, Cancelled
+    public string Status { get; set; } = string.Empty;
     public Guid? SubscriptionId { get; set; }
     public DateTime? ActivatedAt { get; set; }
     public string? Message { get; set; }

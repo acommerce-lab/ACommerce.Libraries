@@ -222,7 +222,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<ThemeService>();
 
         // Guest Mode Service (allows browsing without login)
-        builder.Services.AddSingleton<GuestModeService>();
+        builder.Services.AddSingleton<ACommerce.Templates.Customer.Services.GuestModeService>();
 
         // Navigation Service (MAUI implementation)
         builder.Services.AddScoped<IAppNavigationService, Ashare.App.Services.AppNavigationService>();
@@ -249,31 +249,31 @@ public static class MauiProgram
         // ضع المعرفات في AnalyticsSettings.cs
         // لاختبار الأحداث محلياً: UseMockProvider = true في AnalyticsSettings.cs
         // ═══════════════════════════════════════════════════════════════════
-        builder.Services.Configure<Ashare.Shared.Services.Analytics.AnalyticsOptions>(options =>
+        builder.Services.Configure<ACommerce.Templates.Customer.Services.Analytics.AnalyticsOptions>(options =>
         {
             options.Enabled = AnalyticsSettings.IsEnabled || AnalyticsSettings.UseMockProvider;
-            options.Meta = new Ashare.Shared.Services.Analytics.AnalyticsConfig
+            options.Meta = new ACommerce.Templates.Customer.Services.Analytics.AnalyticsConfig
             {
                 AppId = AnalyticsSettings.UseMockProvider ? "MOCK_META" : AnalyticsSettings.GetMetaAppId(),
                 IosAppId = AnalyticsSettings.MetaIosAppId,
                 AndroidAppId = AnalyticsSettings.MetaAndroidAppId,
                 DebugMode = AnalyticsSettings.DebugMode
             };
-            options.Google = new Ashare.Shared.Services.Analytics.AnalyticsConfig
+            options.Google = new ACommerce.Templates.Customer.Services.Analytics.AnalyticsConfig
             {
                 AppId = AnalyticsSettings.UseMockProvider ? "MOCK_GOOGLE" : AnalyticsSettings.GetGoogleAppId(),
                 IosAppId = AnalyticsSettings.FirebaseIosAppId,
                 AndroidAppId = AnalyticsSettings.FirebaseAndroidAppId,
                 DebugMode = AnalyticsSettings.DebugMode
             };
-            options.TikTok = new Ashare.Shared.Services.Analytics.AnalyticsConfig
+            options.TikTok = new ACommerce.Templates.Customer.Services.Analytics.AnalyticsConfig
             {
                 AppId = AnalyticsSettings.UseMockProvider ? "MOCK_TIKTOK" : AnalyticsSettings.GetTikTokAppId(),
                 IosAppId = AnalyticsSettings.TikTokIosAppId,
                 AndroidAppId = AnalyticsSettings.TikTokAndroidAppId,
                 DebugMode = AnalyticsSettings.DebugMode
             };
-            options.Snapchat = new Ashare.Shared.Services.Analytics.AnalyticsConfig
+            options.Snapchat = new ACommerce.Templates.Customer.Services.Analytics.AnalyticsConfig
             {
                 AppId = AnalyticsSettings.UseMockProvider ? "MOCK_SNAPCHAT" : AnalyticsSettings.GetSnapchatAppId(),
                 IosAppId = AnalyticsSettings.SnapchatIosAppId,
@@ -283,29 +283,29 @@ public static class MauiProgram
         });
         
         // تسجيل MockAnalyticsProvider للاختبار المحلي
-        builder.Services.AddScoped<Ashare.Shared.Services.Analytics.MockAnalyticsProvider>();
-        builder.Services.AddScoped<Ashare.Shared.Services.Analytics.Providers.MetaAnalyticsProvider>();
-        builder.Services.AddScoped<Ashare.Shared.Services.Analytics.Providers.GoogleAnalyticsProvider>();
-        builder.Services.AddScoped<Ashare.Shared.Services.Analytics.Providers.TikTokAnalyticsProvider>();
-        builder.Services.AddScoped<Ashare.Shared.Services.Analytics.Providers.SnapchatAnalyticsProvider>();
-        builder.Services.AddScoped<Ashare.Shared.Services.Analytics.AnalyticsService>(sp =>
+        builder.Services.AddScoped<ACommerce.Templates.Customer.Services.Analytics.MockAnalyticsProvider>();
+        builder.Services.AddScoped<ACommerce.Templates.Customer.Services.Analytics.Providers.MetaAnalyticsProvider>();
+        builder.Services.AddScoped<ACommerce.Templates.Customer.Services.Analytics.Providers.GoogleAnalyticsProvider>();
+        builder.Services.AddScoped<ACommerce.Templates.Customer.Services.Analytics.Providers.TikTokAnalyticsProvider>();
+        builder.Services.AddScoped<ACommerce.Templates.Customer.Services.Analytics.Providers.SnapchatAnalyticsProvider>();
+        builder.Services.AddScoped<ACommerce.Templates.Customer.Services.Analytics.AnalyticsService>(sp =>
         {
-            var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<Ashare.Shared.Services.Analytics.AnalyticsOptions>>();
-            var service = new Ashare.Shared.Services.Analytics.AnalyticsService(options);
+            var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<ACommerce.Templates.Customer.Services.Analytics.AnalyticsOptions>>();
+            var service = new ACommerce.Templates.Customer.Services.Analytics.AnalyticsService(options);
             
             if (AnalyticsSettings.UseMockProvider)
             {
                 // وضع الاختبار: استخدام MockAnalyticsProvider فقط
                 Console.WriteLine("🧪 [Analytics] Mock Mode ENABLED - جميع الأحداث ستظهر في Console");
-                service.AddProvider(sp.GetRequiredService<Ashare.Shared.Services.Analytics.MockAnalyticsProvider>());
+                service.AddProvider(sp.GetRequiredService<ACommerce.Templates.Customer.Services.Analytics.MockAnalyticsProvider>());
             }
             else
             {
                 // وضع الإنتاج: استخدام جميع المنصات
-                service.AddProvider(sp.GetRequiredService<Ashare.Shared.Services.Analytics.Providers.MetaAnalyticsProvider>());
-                service.AddProvider(sp.GetRequiredService<Ashare.Shared.Services.Analytics.Providers.GoogleAnalyticsProvider>());
-                service.AddProvider(sp.GetRequiredService<Ashare.Shared.Services.Analytics.Providers.TikTokAnalyticsProvider>());
-                service.AddProvider(sp.GetRequiredService<Ashare.Shared.Services.Analytics.Providers.SnapchatAnalyticsProvider>());
+                service.AddProvider(sp.GetRequiredService<ACommerce.Templates.Customer.Services.Analytics.Providers.MetaAnalyticsProvider>());
+                service.AddProvider(sp.GetRequiredService<ACommerce.Templates.Customer.Services.Analytics.Providers.GoogleAnalyticsProvider>());
+                service.AddProvider(sp.GetRequiredService<ACommerce.Templates.Customer.Services.Analytics.Providers.TikTokAnalyticsProvider>());
+                service.AddProvider(sp.GetRequiredService<ACommerce.Templates.Customer.Services.Analytics.Providers.SnapchatAnalyticsProvider>());
             }
             
             return service;

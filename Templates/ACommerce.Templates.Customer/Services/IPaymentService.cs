@@ -35,7 +35,11 @@ public interface IPaymentService
 public class PaymentResult
 {
     public bool Success { get; set; }
+    public bool Cancelled { get; set; }
+    public string? OrderId { get; set; }
     public string? TransactionId { get; set; }
+    public string? Status { get; set; }
+    public string? Message { get; set; }
     public string? ErrorMessage { get; set; }
     public Dictionary<string, string>? AdditionalData { get; set; }
 }

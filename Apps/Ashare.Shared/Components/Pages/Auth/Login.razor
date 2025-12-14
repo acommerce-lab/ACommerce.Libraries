@@ -9,7 +9,7 @@
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
 @inject Ashare.Shared.Services.ThemeService Theme
-@inject Ashare.Shared.Services.GuestModeService GuestMode
+@inject ACommerce.Templates.Customer.Services.GuestModeService GuestMode
 @implements IAsyncDisposable
 
 <div class="ac-page ashare-login-page @(Theme.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
