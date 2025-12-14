@@ -4,6 +4,7 @@ using ACommerce.Client.Auth;
 using ACommerce.Client.Realtime;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Services.Analytics;
+using ACommerce.Templates.Customer.Services.Analytics.Providers;
 using ACommerce.Templates.Customer.Themes;
 using ACommerce.ServiceRegistry.Client.Extensions;
 using Microsoft.Extensions.Logging;
@@ -113,10 +114,10 @@ public static class MauiProgram
         });
 
         builder.Services.AddScoped<MockAnalyticsProvider>();
-        builder.Services.AddScoped<Providers.MetaAnalyticsProvider>();
-        builder.Services.AddScoped<Providers.GoogleAnalyticsProvider>();
-        builder.Services.AddScoped<Providers.TikTokAnalyticsProvider>();
-        builder.Services.AddScoped<Providers.SnapchatAnalyticsProvider>();
+        builder.Services.AddScoped<MetaAnalyticsProvider>();
+        builder.Services.AddScoped<GoogleAnalyticsProvider>();
+        builder.Services.AddScoped<TikTokAnalyticsProvider>();
+        builder.Services.AddScoped<SnapchatAnalyticsProvider>();
         builder.Services.AddScoped<AnalyticsService>(sp =>
         {
             var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<AnalyticsOptions>>();
@@ -129,10 +130,10 @@ public static class MauiProgram
             }
             else
             {
-                service.AddProvider(sp.GetRequiredService<Providers.MetaAnalyticsProvider>());
-                service.AddProvider(sp.GetRequiredService<Providers.GoogleAnalyticsProvider>());
-                service.AddProvider(sp.GetRequiredService<Providers.TikTokAnalyticsProvider>());
-                service.AddProvider(sp.GetRequiredService<Providers.SnapchatAnalyticsProvider>());
+                service.AddProvider(sp.GetRequiredService<MetaAnalyticsProvider>());
+                service.AddProvider(sp.GetRequiredService<GoogleAnalyticsProvider>());
+                service.AddProvider(sp.GetRequiredService<TikTokAnalyticsProvider>());
+                service.AddProvider(sp.GetRequiredService<SnapchatAnalyticsProvider>());
             }
             
             return service;
