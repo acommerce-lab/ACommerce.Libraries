@@ -1,0 +1,187 @@
+@page "/admin-users"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
+@using Ashare.Admin.Services
+@inject AdminApiService ApiService
+@inject AuthService AuthService
+
+<PageTitle>إدارة المشرفين - لوحة تحكم عشير</PageTitle>
+
+<div class="page-header">
+    <h1>إدارة المشرفين</h1>
+    <SfButton CssClass="e-primary" @onclick="ShowCreateDialog">
+        <span class="e-icons e-plus"></span> إضافة مشرف
+    </SfButton>
+</div>
+
+<div class="card">
+    <SfGrid DataSource="@adminUsers" AllowPaging="true" AllowSorting="true">
+        <GridColumns>
+            <GridColumn Field="@nameof(AdminUserDto.FullName)" HeaderText="الاسم" Width="200"></GridColumn>
+            <GridColumn Field="@nameof(AdminUserDto.Email)" HeaderText="البريد الإلكتروني" Width="200"></GridColumn>
+            <GridColumn Field="@nameof(AdminUserDto.RoleName)" HeaderText="الدور" Width="150"></GridColumn>
+            <GridColumn Field="@nameof(AdminUserDto.Status)" HeaderText="الحالة" Width="100">
+                <Template>
+                    @{
+                        var user = (context as AdminUserDto);
+                        <span class="badge @(user?.Status == "نشط" ? "badge-success" : "badge-warning")">
+                            @user?.Status
+                        </span>
+                    }
+                </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(AdminUserDto.LastLoginAt)" HeaderText="آخر دخول" Width="150" Format="yyyy/MM/dd HH:mm"></GridColumn>
+            <GridColumn HeaderText="الإجراءات" Width="150">
+                <Template>
+                    @{
+                        var user = (context as AdminUserDto);
+                        <div class="action-buttons">
+                            <SfButton CssClass="e-flat e-small" @onclick="() => EditUser(user!)">
+                                <span class="e-icons e-edit"></span>
+                            </SfButton>
+                            <SfButton CssClass="e-flat e-small e-danger" @onclick="() => DeleteUser(user!)">
+                                <span class="e-icons e-trash"></span>
+                            </SfButton>
+                        </div>
+                    }
+                </Template>
+            </GridColumn>
+        </GridColumns>
+    </SfGrid>
+</div>
+
+<SfDialog @bind-Visible="@showDialog" Width="500px" IsModal="true" ShowCloseIcon="true">
+    <DialogTemplates>
+        <Header>@(isEditing ? "تعديل مشرف" : "إضافة مشرف جديد")</Header>
+        <Content>
+            <div class="dialog-content">
+                <div class="form-group">
+                    <label>الاسم الكامل</label>
+                    <SfTextBox @bind-Value="@currentUser.FullName" Placeholder="أدخل الاسم"></SfTextBox>
+                </div>
+                <div class="form-group">
+                    <label>البريد الإلكتروني</label>
+                    <SfTextBox @bind-Value="@currentUser.Email" Placeholder="admin@example.com"></SfTextBox>
+                </div>
+                @if (!isEditing)
+                {
+                    <div class="form-group">
+                        <label>كلمة المرور</label>
+                        <SfTextBox @bind-Value="@currentUser.Password" Type="InputType.Password" Placeholder="••••••••"></SfTextBox>
+                    </div>
+                }
+                <div class="form-group">
+                    <label>الدور</label>
+                    <SfDropDownList TValue="string" TItem="RoleOption" DataSource="@roles" @bind-Value="@currentUser.RoleName">
+                        <DropDownListFieldSettings Text="Name" Value="Name"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <SfButton CssClass="e-flat" @onclick="CloseDialog">إلغاء</SfButton>
+            <SfButton CssClass="e-primary" @onclick="SaveUser">حفظ</SfButton>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+@code {
+    private List<AdminUserDto> adminUsers = new();
+    private List<RoleOption> roles = new();
+    private bool showDialog = false;
+    private bool isEditing = false;
+    private AdminUserDto currentUser = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        adminUsers = new List<AdminUserDto>
+        {
+            new() { Id = "1", FullName = "مدير النظام", Email = "admin@ashare.sa", RoleName = "مدير عام", Status = "نشط", LastLoginAt = DateTime.Now },
+            new() { Id = "2", FullName = "أحمد المشرف", Email = "ahmed@ashare.sa", RoleName = "مشرف محتوى", Status = "نشط", LastLoginAt = DateTime.Now.AddHours(-2) },
+            new() { Id = "3", FullName = "سارة الدعم", Email = "sara@ashare.sa", RoleName = "دعم فني", Status = "نشط", LastLoginAt = DateTime.Now.AddDays(-1) },
+        };
+
+        roles = new List<RoleOption>
+        {
+            new() { Id = "1", Name = "مدير عام" },
+            new() { Id = "2", Name = "مشرف محتوى" },
+            new() { Id = "3", Name = "دعم فني" },
+            new() { Id = "4", Name = "محاسب" },
+        };
+    }
+
+    private void ShowCreateDialog()
+    {
+        currentUser = new AdminUserDto();
+        isEditing = false;
+        showDialog = true;
+    }
+
+    private void EditUser(AdminUserDto user)
+    {
+        currentUser = new AdminUserDto
+        {
+            Id = user.Id,
+            FullName = user.FullName,
+            Email = user.Email,
+            RoleName = user.RoleName
+        };
+        isEditing = true;
+        showDialog = true;
+    }
+
+    private async Task DeleteUser(AdminUserDto user)
+    {
+        adminUsers.Remove(user);
+    }
+
+    private async Task SaveUser()
+    {
+        if (isEditing)
+        {
+            var existing = adminUsers.FirstOrDefault(u => u.Id == currentUser.Id);
+            if (existing != null)
+            {
+                existing.FullName = currentUser.FullName;
+                existing.Email = currentUser.Email;
+                existing.RoleName = currentUser.RoleName;
+            }
+        }
+        else
+        {
+            currentUser.Id = Guid.NewGuid().ToString();
+            currentUser.Status = "نشط";
+            currentUser.LastLoginAt = null;
+            adminUsers.Add(currentUser);
+        }
+        CloseDialog();
+    }
+
+    private void CloseDialog()
+    {
+        showDialog = false;
+        currentUser = new AdminUserDto();
+    }
+
+    public class AdminUserDto
+    {
+        public string Id { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string? Password { get; set; }
+        public string RoleName { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public DateTime? LastLoginAt { get; set; }
+    }
+
+    public class RoleOption
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+    }
+}

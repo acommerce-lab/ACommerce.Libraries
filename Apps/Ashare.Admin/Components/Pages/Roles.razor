@@ -1,0 +1,248 @@
+@page "/roles"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
+@using Ashare.Admin.Services
+
+<PageTitle>إدارة الأدوار - لوحة تحكم عشير</PageTitle>
+
+<div class="page-header">
+    <h1>إدارة الأدوار والصلاحيات</h1>
+    <SfButton CssClass="e-primary" @onclick="ShowCreateDialog">
+        <span class="e-icons e-plus"></span> إضافة دور
+    </SfButton>
+</div>
+
+<div class="card">
+    <SfGrid DataSource="@roles" AllowPaging="true" AllowSorting="true">
+        <GridColumns>
+            <GridColumn Field="@nameof(RoleDto.Name)" HeaderText="اسم الدور" Width="200"></GridColumn>
+            <GridColumn Field="@nameof(RoleDto.Description)" HeaderText="الوصف" Width="300"></GridColumn>
+            <GridColumn Field="@nameof(RoleDto.UsersCount)" HeaderText="عدد المستخدمين" Width="150"></GridColumn>
+            <GridColumn Field="@nameof(RoleDto.PermissionsCount)" HeaderText="عدد الصلاحيات" Width="150"></GridColumn>
+            <GridColumn HeaderText="الإجراءات" Width="150">
+                <Template>
+                    @{
+                        var role = (context as RoleDto);
+                        <div class="action-buttons">
+                            <SfButton CssClass="e-flat e-small" @onclick="() => EditRole(role!)">
+                                <span class="e-icons e-edit"></span>
+                            </SfButton>
+                            @if (!role!.IsSystem)
+                            {
+                                <SfButton CssClass="e-flat e-small e-danger" @onclick="() => DeleteRole(role!)">
+                                    <span class="e-icons e-trash"></span>
+                                </SfButton>
+                            }
+                        </div>
+                    }
+                </Template>
+            </GridColumn>
+        </GridColumns>
+    </SfGrid>
+</div>
+
+<SfDialog @bind-Visible="@showDialog" Width="700px" IsModal="true" ShowCloseIcon="true">
+    <DialogTemplates>
+        <Header>@(isEditing ? "تعديل الدور" : "إضافة دور جديد")</Header>
+        <Content>
+            <div class="dialog-content">
+                <div class="form-group">
+                    <label>اسم الدور</label>
+                    <SfTextBox @bind-Value="@currentRole.Name" Placeholder="مثال: مشرف محتوى"></SfTextBox>
+                </div>
+                <div class="form-group">
+                    <label>الوصف</label>
+                    <SfTextBox @bind-Value="@currentRole.Description" Placeholder="وصف مختصر للدور"></SfTextBox>
+                </div>
+                <div class="form-group">
+                    <label>الصلاحيات</label>
+                    <div class="permissions-grid">
+                        @foreach (var module in permissionModules)
+                        {
+                            <div class="permission-module">
+                                <h4>@module.Name</h4>
+                                @foreach (var permission in module.Permissions)
+                                {
+                                    <label class="permission-item">
+                                        <input type="checkbox" 
+                                               checked="@selectedPermissions.Contains(permission.Code)"
+                                               @onchange="() => TogglePermission(permission.Code)" />
+                                        <span>@permission.Name</span>
+                                    </label>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <SfButton CssClass="e-flat" @onclick="CloseDialog">إلغاء</SfButton>
+            <SfButton CssClass="e-primary" @onclick="SaveRole">حفظ</SfButton>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<style>
+    .permissions-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .permission-module {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .permission-module h4 {
+        margin: 0 0 10px 0;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #eee;
+        color: #333;
+        font-size: 0.9rem;
+    }
+
+    .permission-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 0;
+        cursor: pointer;
+        font-size: 0.85rem;
+    }
+
+    .permission-item input {
+        accent-color: #667eea;
+    }
+</style>
+
+@code {
+    private List<RoleDto> roles = new();
+    private List<PermissionModule> permissionModules = new();
+    private HashSet<string> selectedPermissions = new();
+    private bool showDialog = false;
+    private bool isEditing = false;
+    private RoleDto currentRole = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        roles = new List<RoleDto>
+        {
+            new() { Id = "1", Name = "مدير عام", Description = "صلاحيات كاملة على النظام", UsersCount = 1, PermissionsCount = 32, IsSystem = true },
+            new() { Id = "2", Name = "مشرف محتوى", Description = "إدارة الإعلانات والمحتوى", UsersCount = 3, PermissionsCount = 12, IsSystem = false },
+            new() { Id = "3", Name = "دعم فني", Description = "مساعدة العملاء والبائعين", UsersCount = 5, PermissionsCount = 8, IsSystem = false },
+            new() { Id = "4", Name = "محاسب", Description = "إدارة المالية والتقارير", UsersCount = 2, PermissionsCount = 6, IsSystem = false },
+        };
+
+        permissionModules = new List<PermissionModule>
+        {
+            new() { Name = "لوحة التحكم", Permissions = new List<PermissionItem> { new() { Code = "dashboard.view", Name = "عرض لوحة التحكم" } } },
+            new() { Name = "المستخدمين", Permissions = new List<PermissionItem> { new() { Code = "users.view", Name = "عرض" }, new() { Code = "users.create", Name = "إنشاء" }, new() { Code = "users.edit", Name = "تعديل" }, new() { Code = "users.delete", Name = "حذف" } } },
+            new() { Name = "الإعلانات", Permissions = new List<PermissionItem> { new() { Code = "listings.view", Name = "عرض" }, new() { Code = "listings.approve", Name = "موافقة" }, new() { Code = "listings.reject", Name = "رفض" }, new() { Code = "listings.edit", Name = "تعديل" }, new() { Code = "listings.delete", Name = "حذف" } } },
+            new() { Name = "الطلبات", Permissions = new List<PermissionItem> { new() { Code = "orders.view", Name = "عرض" }, new() { Code = "orders.edit", Name = "تعديل" }, new() { Code = "orders.refund", Name = "استرداد" } } },
+            new() { Name = "البائعين", Permissions = new List<PermissionItem> { new() { Code = "vendors.view", Name = "عرض" }, new() { Code = "vendors.approve", Name = "موافقة" }, new() { Code = "vendors.suspend", Name = "تعليق" } } },
+            new() { Name = "التقارير", Permissions = new List<PermissionItem> { new() { Code = "reports.view", Name = "عرض" }, new() { Code = "reports.export", Name = "تصدير" } } },
+            new() { Name = "الإعدادات", Permissions = new List<PermissionItem> { new() { Code = "settings.view", Name = "عرض" }, new() { Code = "settings.edit", Name = "تعديل" } } },
+            new() { Name = "المشرفين", Permissions = new List<PermissionItem> { new() { Code = "admin_users.view", Name = "عرض" }, new() { Code = "admin_users.create", Name = "إنشاء" }, new() { Code = "admin_users.edit", Name = "تعديل" }, new() { Code = "admin_users.delete", Name = "حذف" } } },
+            new() { Name = "الأدوار", Permissions = new List<PermissionItem> { new() { Code = "roles.view", Name = "عرض" }, new() { Code = "roles.create", Name = "إنشاء" }, new() { Code = "roles.edit", Name = "تعديل" }, new() { Code = "roles.delete", Name = "حذف" } } },
+        };
+    }
+
+    private void ShowCreateDialog()
+    {
+        currentRole = new RoleDto();
+        selectedPermissions = new HashSet<string>();
+        isEditing = false;
+        showDialog = true;
+    }
+
+    private void EditRole(RoleDto role)
+    {
+        currentRole = new RoleDto
+        {
+            Id = role.Id,
+            Name = role.Name,
+            Description = role.Description
+        };
+        selectedPermissions = new HashSet<string> { "dashboard.view", "users.view" };
+        isEditing = true;
+        showDialog = true;
+    }
+
+    private async Task DeleteRole(RoleDto role)
+    {
+        roles.Remove(role);
+    }
+
+    private void TogglePermission(string code)
+    {
+        if (selectedPermissions.Contains(code))
+            selectedPermissions.Remove(code);
+        else
+            selectedPermissions.Add(code);
+    }
+
+    private async Task SaveRole()
+    {
+        if (isEditing)
+        {
+            var existing = roles.FirstOrDefault(r => r.Id == currentRole.Id);
+            if (existing != null)
+            {
+                existing.Name = currentRole.Name;
+                existing.Description = currentRole.Description;
+                existing.PermissionsCount = selectedPermissions.Count;
+            }
+        }
+        else
+        {
+            currentRole.Id = Guid.NewGuid().ToString();
+            currentRole.PermissionsCount = selectedPermissions.Count;
+            currentRole.UsersCount = 0;
+            roles.Add(currentRole);
+        }
+        CloseDialog();
+    }
+
+    private void CloseDialog()
+    {
+        showDialog = false;
+        currentRole = new RoleDto();
+        selectedPermissions = new HashSet<string>();
+    }
+
+    public class RoleDto
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public int UsersCount { get; set; }
+        public int PermissionsCount { get; set; }
+        public bool IsSystem { get; set; }
+    }
+
+    public class PermissionModule
+    {
+        public string Name { get; set; } = string.Empty;
+        public List<PermissionItem> Permissions { get; set; } = new();
+    }
+
+    public class PermissionItem
+    {
+        public string Code { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+    }
+}
