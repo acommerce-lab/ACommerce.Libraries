@@ -49,6 +49,7 @@
     <!-- Subscriptions -->
     <ProjectReference Include="..\..\libs\backend\marketplace\ACommerce.Subscriptions\ACommerce.Subscriptions.csproj" />
     <ProjectReference Include="..\..\libs\backend\marketplace\ACommerce.Subscriptions.Api\ACommerce.Subscriptions.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Transactions.Core.Api\ACommerce.Transactions.Core.Api.csproj" />
 
     <!-- Orders & Cart -->
     <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Cart\ACommerce.Cart.csproj" />
