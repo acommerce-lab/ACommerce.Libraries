@@ -1,0 +1,96 @@
+@page "/login"
+@layout EmptyLayout
+@attribute [AllowAnonymous]
+@using Microsoft.AspNetCore.Authorization
+@using Ashare.Admin.Services
+@inject AuthService AuthService
+@inject NavigationManager NavigationManager
+
+<div class="login-container">
+    <div class="login-box">
+        <div class="login-header">
+            <h1>عشير</h1>
+            <p>لوحة تحكم المشرفين</p>
+        </div>
+
+        <EditForm Model="loginModel" OnValidSubmit="HandleLogin" FormName="login">
+            <DataAnnotationsValidator />
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger">
+                    @errorMessage
+                </div>
+            }
+
+            <div class="form-group">
+                <label for="email">البريد الإلكتروني</label>
+                <InputText id="email" @bind-Value="loginModel.Email" class="form-control" placeholder="admin@ashare.sa" />
+                <ValidationMessage For="@(() => loginModel.Email)" />
+            </div>
+
+            <div class="form-group">
+                <label for="password">كلمة المرور</label>
+                <InputText id="password" type="password" @bind-Value="loginModel.Password" class="form-control" placeholder="••••••••" />
+                <ValidationMessage For="@(() => loginModel.Password)" />
+            </div>
+
+            <button type="submit" class="btn-login" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <span class="spinner"></span>
+                    <span>جاري تسجيل الدخول...</span>
+                }
+                else
+                {
+                    <span>تسجيل الدخول</span>
+                }
+            </button>
+        </EditForm>
+
+        <div class="login-footer">
+            <p>بيانات الدخول التجريبية:</p>
+            <code>admin@ashare.sa / Admin@123</code>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginModel loginModel = new();
+    private bool isLoading = false;
+    private string? errorMessage;
+
+    private async Task HandleLogin()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var result = await AuthService.LoginLocalAsync(loginModel.Email, loginModel.Password);
+            
+            if (result.Success)
+            {
+                NavigationManager.NavigateTo("/", true);
+            }
+            else
+            {
+                errorMessage = result.ErrorMessage;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "حدث خطأ غير متوقع";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    public class LoginModel
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+}
