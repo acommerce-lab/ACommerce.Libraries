@@ -20,58 +20,64 @@
 
     <!-- Two-Factor Authentication (Nafath, SMS, Email) -->
     <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.TwoFactor.Nafath\ACommerce.Authentication.TwoFactor.Nafath.csproj" />
-    <ProjectReference Include="..\..\ACommerce.Authentication.TwoFactor.SessionStore.InMemory\ACommerce.Authentication.TwoFactor.SessionStore.InMemory.csproj" />
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.TwoFactor.SessionStore.InMemory\ACommerce.Authentication.TwoFactor.SessionStore.InMemory.csproj" />
     <ProjectReference Include="..\..\libs\backend\integration\ACommerce.Authentication.AspNetCore.NafathWH\ACommerce.Authentication.AspNetCore.NafathWH.csproj" />
-    <ProjectReference Include="..\..\ACommerce.Authentication.Messaging\ACommerce.Authentication.Messaging.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Authentication.Messaging\ACommerce.Authentication.Messaging.csproj" />
 
     <!-- Identity & Profiles -->
     <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Profiles\ACommerce.Profiles.csproj" />
     <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Profiles.Api\ACommerce.Profiles.Api.csproj" />
 
-    <!-- Catalog System (Spaces = Products with Dynamic Attributes) -->
-    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Catalog.Attributes\ACommerce.Catalog.Attributes.csproj" />
-    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Catalog.Attributes.Api\ACommerce.Catalog.Attributes.Api.csproj" />
-    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Catalog.Products\ACommerce.Catalog.Products.csproj" />
-    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Catalog.Products.Api\ACommerce.Catalog.Products.Api.csproj" />
-    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Catalog.Units\ACommerce.Catalog.Units.csproj" />
-    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Catalog.Units.Api\ACommerce.Catalog.Units.Api.csproj" />
-    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Catalog.Currencies\ACommerce.Catalog.Currencies.csproj" />
-    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Catalog.Currencies.Api\ACommerce.Catalog.Currencies.Api.csproj" />
+    <!-- Catalog System -->
+    <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Attributes\ACommerce.Catalog.Attributes.csproj" />
+    <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Attributes.Api\ACommerce.Catalog.Attributes.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Products\ACommerce.Catalog.Products.csproj" />
+    <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Products.Api\ACommerce.Catalog.Products.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Units\ACommerce.Catalog.Units.csproj" />
+    <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Units.Api\ACommerce.Catalog.Units.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Currencies\ACommerce.Catalog.Currencies.csproj" />
+    <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Currencies.Api\ACommerce.Catalog.Currencies.Api.csproj" />
 
-    <!-- Listings (Owners listing their spaces - Multi-vendor pattern) -->
+    <!-- Listings -->
     <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Listings\ACommerce.Catalog.Listings.csproj" />
     <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Listings.Api\ACommerce.Catalog.Listings.Api.csproj" />
 
-    <!-- Marketplace (Vendors = Space Owners) -->
+    <!-- Marketplace -->
     <ProjectReference Include="..\..\libs\backend\marketplace\ACommerce.Vendors\ACommerce.Vendors.csproj" />
     <ProjectReference Include="..\..\libs\backend\marketplace\ACommerce.Vendors.Api\ACommerce.Vendors.Api.csproj" />
 
-    <!-- Subscriptions (Vendor Subscription Plans) -->
+    <!-- Subscriptions -->
     <ProjectReference Include="..\..\libs\backend\marketplace\ACommerce.Subscriptions\ACommerce.Subscriptions.csproj" />
     <ProjectReference Include="..\..\libs\backend\marketplace\ACommerce.Subscriptions.Api\ACommerce.Subscriptions.Api.csproj" />
 
-    <!-- Orders & Cart (Bookings = Orders with time attributes) -->
+    <!-- Orders & Cart -->
     <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Cart\ACommerce.Cart.csproj" />
     <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Orders\ACommerce.Orders.csproj" />
     <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Orders.Api\ACommerce.Orders.Api.csproj" />
 
-    <!-- Transactions & Workflows (Booking states and operations) -->
-    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Transactions.Core\ACommerce.Transactions.Core.csproj" />
-    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Transactions.Core.Api\ACommerce.Transactions.Core.Api.csproj" />
+    <!-- Transactions -->
+    <ProjectReference Include="..\..\Other\ACommerce.Transactions.Core\ACommerce.Transactions.Core.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Transactions.Core.Api\ACommerce.Transactions.Core.Api.csproj" />
 
-    <!-- Locations (Geographic hierarchy for spaces) -->
-    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Locations\ACommerce.Locations.csproj" />
-    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Locations.Api\ACommerce.Locations.Api.csproj" />
+    <!-- Locations -->
+    <ProjectReference Include="..\..\Other\ACommerce.Locations\ACommerce.Locations.csproj" />
+    <ProjectReference Include="..\..\Other\ACommerce.Locations.Api\ACommerce.Locations.Api.csproj" />
 
-    <!-- Notifications & Recipients -->
-    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Notifications.Core\ACommerce.Notifications.Core.csproj" />
-    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Notifications.Recipients\ACommerce.Notifications.Recipients.csproj" />
-    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Notifications.Recipients.Api\ACommerce.Notifications.Recipients.Api.csproj" />
+    <!-- Notifications -->
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notifications.Core\ACommerce.Notifications.Core.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notifications.Recipients\ACommerce.Notifications.Recipients.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notifications.Recipients.Api\ACommerce.Notifications.Recipients.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notifications.Channels.InApp\ACommerce.Notifications.Channels.InApp.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notifications.Messaging\ACommerce.Notifications.Messaging.csproj" />
 
     <!-- Chat & Real-time -->
-    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Chats.Core\ACommerce.Chats.Core.csproj" />
-    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Chats.Api\ACommerce.Chats.Api.csproj" />
-    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Realtime.SignalR\ACommerce.Realtime.SignalR.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Chats.Core\ACommerce.Chats.Core.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Chats.Api\ACommerce.Chats.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Realtime.SignalR\ACommerce.Realtime.SignalR.csproj" />
+
+    <!-- Messaging -->
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Messaging.InMemory\ACommerce.Messaging.InMemory.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Messaging.SignalR.Hub\ACommerce.Messaging.SignalR.Hub.csproj" />
 
     <!-- Reviews -->
     <ProjectReference Include="..\..\Modules\ACommerce.Reviews\ACommerce.Reviews.csproj" />
@@ -89,19 +95,11 @@
     <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Payments.Api\ACommerce.Payments.Api.csproj" />
     <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Payments.Noon\ACommerce.Payments.Noon.csproj" />
 
-    <!-- Service Registry (for development - self-hosting) -->
+    <!-- Service Registry -->
     <ProjectReference Include="..\..\libs\backend\integration\ACommerce.ServiceRegistry.Core\ACommerce.ServiceRegistry.Core.csproj" />
     <ProjectReference Include="..\..\libs\backend\integration\ACommerce.ServiceRegistry.Server\ACommerce.ServiceRegistry.Server.csproj" />
 
-    <!-- Messaging Hub (for development - self-hosting) -->
-    <ProjectReference Include="..\..\ACommerce.Messaging.InMemory\ACommerce.Messaging.InMemory.csproj" />
-    <ProjectReference Include="..\..\ACommerce.Messaging.SignalR.Hub\ACommerce.Messaging.SignalR.Hub.csproj" />
-
-    <!-- InApp Notifications (SignalR) -->
-    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Notifications.Channels.InApp\ACommerce.Notifications.Channels.InApp.csproj" />
-
-    <!-- Notifications Messaging (handles SendNotificationCommand) -->
-    <ProjectReference Include="..\..\ACommerce.Notifications.Messaging\ACommerce.Notifications.Messaging.csproj" />
+    <!-- Shared -->
     <ProjectReference Include="..\Ashare.Shared\Ashare.Shared.csproj" />
   </ItemGroup>
 

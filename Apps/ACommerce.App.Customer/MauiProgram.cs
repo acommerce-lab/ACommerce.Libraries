@@ -187,37 +187,47 @@ public class MauiStorageService : IStorageService
 // ═══════════════════════════════════════════════════════════════════
 public class MauiTokenStorage : ITokenStorage
 {
-    private const string AccessTokenKey = "access_token";
-    private const string RefreshTokenKey = "refresh_token";
+    private const string TokenKey = "auth_token";
+    private const string ExpiresAtKey = "auth_token_expires_at";
 
-    public Task<string?> GetAccessTokenAsync()
+    public Task SaveTokenAsync(string token, DateTime? expiresAt)
     {
-        var token = Preferences.Default.Get<string>(AccessTokenKey, null!);
-        return Task.FromResult(token);
-    }
-
-    public Task<string?> GetRefreshTokenAsync()
-    {
-        var token = Preferences.Default.Get<string>(RefreshTokenKey, null!);
-        return Task.FromResult(token);
-    }
-
-    public Task SetAccessTokenAsync(string token)
-    {
-        Preferences.Default.Set(AccessTokenKey, token);
+        Preferences.Default.Set(TokenKey, token);
+        if (expiresAt.HasValue)
+        {
+            Preferences.Default.Set(ExpiresAtKey, expiresAt.Value.ToString("O"));
+        }
+        else
+        {
+            Preferences.Default.Remove(ExpiresAtKey);
+        }
         return Task.CompletedTask;
     }
 
-    public Task SetRefreshTokenAsync(string token)
+    public Task<(string? Token, DateTime? ExpiresAt)> GetTokenAsync()
     {
-        Preferences.Default.Set(RefreshTokenKey, token);
-        return Task.CompletedTask;
+        var token = Preferences.Default.Get<string>(TokenKey, null!);
+        var expiresAtStr = Preferences.Default.Get<string>(ExpiresAtKey, null!);
+        
+        DateTime? expiresAt = null;
+        if (!string.IsNullOrEmpty(expiresAtStr) && DateTime.TryParse(expiresAtStr, out var parsed))
+        {
+            expiresAt = parsed;
+        }
+        
+        return Task.FromResult((token, expiresAt));
     }
 
-    public Task ClearTokensAsync()
+    public Task<bool> HasTokenAsync()
     {
-        Preferences.Default.Remove(AccessTokenKey);
-        Preferences.Default.Remove(RefreshTokenKey);
+        var token = Preferences.Default.Get<string>(TokenKey, null!);
+        return Task.FromResult(!string.IsNullOrEmpty(token));
+    }
+
+    public Task ClearTokenAsync()
+    {
+        Preferences.Default.Remove(TokenKey);
+        Preferences.Default.Remove(ExpiresAtKey);
         return Task.CompletedTask;
     }
 }
