@@ -17,7 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ACommerce.Messaging.Abstractions\ACommerce.Messaging.Abstractions.csproj" />
     <ProjectReference Include="..\ACommerce.Profiles.Core\ACommerce.Profiles.Core.csproj" />
-    <ProjectReference Include="..\Authentication\ACommerce.Authentication.TwoFactor.Abstractions\ACommerce.Authentication.TwoFactor.Abstractions.csproj" />
+    <ProjectReference Include="..\auth\ACommerce.Authentication.TwoFactor.Abstractions\ACommerce.Authentication.TwoFactor.Abstractions.csproj" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">

@@ -10,7 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
-    <ProjectReference Include="..\..\Authentication\ACommerce.Authentication.Users.Abstractions\ACommerce.Authentication.Users.Abstractions.csproj" />
+    <ProjectReference Include="..\..\auth\ACommerce.Authentication.Users.Abstractions\ACommerce.Authentication.Users.Abstractions.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
