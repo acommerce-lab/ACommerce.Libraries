@@ -1,0 +1,21 @@
+"/src/Apps/Ashare.Api/Ashare.Api.csproj" (default target) (1) ->
+       "/src/libs/backend/admin/ACommerce.Admin.Dashboard/ACommerce.Admin.Dashboard.csproj" (default target) (54:2) ->
+         /src/libs/backend/admin/ACommerce.Admin.Dashboard/Queries/GetRevenueByPeriodQuery.cs(24,53): error CS0103: The name 'OrderStatus' does not exist in the current context [/src/libs/backend/admin/ACommerce.Admin.Dashboard/ACommerce.Admin.Dashboard.csproj]
+         /src/libs/backend/admin/ACommerce.Admin.Dashboard/Queries/GetDashboardStatsQuery.cs(44,86): error CS0103: The name 'OrderStatus' does not exist in the current context [/src/libs/backend/admin/ACommerce.Admin.Dashboard/ACommerce.Admin.Dashboard.csproj]
+         /src/libs/backend/admin/ACommerce.Admin.Dashboard/Queries/GetDashboardStatsQuery.cs(45,88): error CS0103: The name 'OrderStatus' does not exist in the current context [/src/libs/backend/admin/ACommerce.Admin.Dashboard/ACommerce.Admin.Dashboard.csproj]
+         /src/libs/backend/admin/ACommerce.Admin.Dashboard/Queries/GetDashboardStatsQuery.cs(48,53): error CS0103: The name 'OrderStatus' does not exist in the current context [/src/libs/backend/admin/ACommerce.Admin.Dashboard/ACommerce.Admin.Dashboard.csproj]
+         /src/libs/backend/admin/ACommerce.Admin.Dashboard/Queries/GetDashboardStatsQuery.cs(52,53): error CS0103: The name 'OrderStatus' does not exist in the current context [/src/libs/backend/admin/ACommerce.Admin.Dashboard/ACommerce.Admin.Dashboard.csproj]
+       "/src/Apps/Ashare.Api/Ashare.Api.csproj" (default target) (1) ->
+       "/src/libs/backend/admin/ACommerce.Admin.Orders/ACommerce.Admin.Orders.csproj" (default target) (58:2) ->
+         /src/libs/backend/admin/ACommerce.Admin.Orders/DTOs/AdminOrderDto.cs(7,12): error CS0246: The type or namespace name 'OrderStatus' could not be found (are you missing a using directive or an assembly reference?) [/src/libs/backend/admin/ACommerce.Admin.Orders/ACommerce.Admin.Orders.csproj]
+         /src/libs/backend/admin/ACommerce.Admin.Orders/DTOs/AdminOrderDto.cs(38,12): error CS0246: The type or namespace name 'OrderStatus' could not be found (are you missing a using directive or an assembly reference?) [/src/libs/backend/admin/ACommerce.Admin.Orders/ACommerce.Admin.Orders.csproj]
+         /src/libs/backend/admin/ACommerce.Admin.Orders/Queries/GetAdminOrdersQuery.cs(13,22): error CS0246: The type or namespace name 'IBaseAsyncRepository<>' could not be found (are you missing a using directive or an assembly reference?) [/src/libs/backend/admin/ACommerce.Admin.Orders/ACommerce.Admin.Orders.csproj]
+         /src/libs/backend/admin/ACommerce.Admin.Orders/Queries/GetAdminOrdersQuery.cs(15,39): error CS0246: The type or namespace name 'IBaseAsyncRepository<>' could not be found (are you missing a using directive or an assembly reference?) [/src/libs/backend/admin/ACommerce.Admin.Orders/ACommerce.Admin.Orders.csproj]
+    105 Warning(s)
+    26 Error(s)
+Time Elapsed 00:00:23.04
+The command '/bin/sh -c dotnet build "Ashare.Api.csproj" -c Release --no-restore -v normal' returned a non-zero code: 1
+Finished Step #0
+ERROR
+ERROR: build step 0 "gcr.io/cloud-builders/docker" failed: step exited with non-zero status: 1
+

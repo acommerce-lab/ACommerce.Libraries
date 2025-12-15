@@ -10,7 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
-    <ProjectReference Include="..\..\Other\ACommerce.Transactions.Core\ACommerce.Transactions.Core.csproj" />
+    <ProjectReference Include="..\..\other\ACommerce.Transactions.Core\ACommerce.Transactions.Core.csproj" />
     <ProjectReference Include="..\ACommerce.Cart\ACommerce.Cart.csproj" />
     <ProjectReference Include="..\..\marketplace\ACommerce.Vendors\ACommerce.Vendors.csproj" />
   </ItemGroup>
