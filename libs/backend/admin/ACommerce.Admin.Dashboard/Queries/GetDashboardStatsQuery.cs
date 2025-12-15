@@ -43,14 +43,14 @@ public class GetDashboardStatsQueryHandler : IRequestHandler<GetDashboardStatsQu
         
         var totalOrders = await orders.CountAsync(o => !o.IsDeleted, cancellationToken);
         var pendingOrders = await orders.CountAsync(o => !o.IsDeleted && o.Status == OrderStatus.Pending, cancellationToken);
-        var completedOrders = await orders.CountAsync(o => !o.IsDeleted && o.Status == OrderStatus.Completed, cancellationToken);
+        var completedOrders = await orders.CountAsync(o => !o.IsDeleted && o.Status == OrderStatus.Delivered, cancellationToken);
         
         var totalRevenue = await orders
-            .Where(o => !o.IsDeleted && o.Status == OrderStatus.Completed)
+            .Where(o => !o.IsDeleted && o.Status == OrderStatus.Delivered)
             .SumAsync(o => o.Total, cancellationToken);
             
         var monthlyRevenue = await orders
-            .Where(o => !o.IsDeleted && o.Status == OrderStatus.Completed && o.CreatedAt >= monthStart)
+            .Where(o => !o.IsDeleted && o.Status == OrderStatus.Delivered && o.CreatedAt >= monthStart)
             .SumAsync(o => o.Total, cancellationToken);
 
         var activeSubscriptions = await subscriptions

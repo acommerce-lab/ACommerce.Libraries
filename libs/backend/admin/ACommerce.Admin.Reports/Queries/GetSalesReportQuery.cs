@@ -27,7 +27,7 @@ public class GetSalesReportQueryHandler : IRequestHandler<GetSalesReportQuery, S
 
         var orders = await _orderRepository.GetAll()
             .Where(o => o.CreatedAt >= startDate && o.CreatedAt <= endDate)
-            .Where(o => o.Status == OrderStatus.Completed)
+            .Where(o => o.Status == OrderStatus.Delivered)
             .ToListAsync(cancellationToken);
 
         var totalRevenue = orders.Sum(o => o.Total);

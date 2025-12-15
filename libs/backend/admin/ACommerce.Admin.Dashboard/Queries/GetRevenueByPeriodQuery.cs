@@ -22,7 +22,7 @@ public class GetRevenueByPeriodQueryHandler : IRequestHandler<GetRevenueByPeriod
         var startDate = DateTime.UtcNow.Date.AddDays(-request.Days);
         
         var orders = await _dbContext.Set<Order>()
-            .Where(o => !o.IsDeleted && o.Status == OrderStatus.Completed && o.CreatedAt >= startDate)
+            .Where(o => !o.IsDeleted && o.Status == OrderStatus.Delivered && o.CreatedAt >= startDate)
             .ToListAsync(cancellationToken);
 
         var grouped = orders

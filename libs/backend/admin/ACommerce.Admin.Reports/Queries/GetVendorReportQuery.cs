@@ -40,7 +40,7 @@ public class GetVendorReportQueryHandler : IRequestHandler<GetVendorReportQuery,
 
         var orders = await _orderRepository.GetAll()
             .Where(o => o.CreatedAt >= startDate && o.CreatedAt <= endDate)
-            .Where(o => o.Status == OrderStatus.Completed)
+            .Where(o => o.Status == OrderStatus.Delivered)
             .ToListAsync(cancellationToken);
 
         var totalVendorRevenue = orders.Sum(o => o.Total);
