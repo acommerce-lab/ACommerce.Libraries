@@ -223,3 +223,56 @@ Test all analytics events without real platform IDs:
 - `GoogleAnalyticsProvider` - GA4/Firebase integration
 - `TikTokAnalyticsProvider` - TikTok Events API
 - `SnapchatAnalyticsProvider` - Snapchat Pixel/SDK
+
+## Admin Dashboard Roadmap (December 2025)
+
+### Overview
+Building an admin dashboard for Ashare (عشير) to manage the marketplace. The dashboard will be built as a reusable template that can be used for other projects.
+
+### Phase 1: Backend APIs (Current)
+New APIs needed for admin functionality:
+
+| API | Description | Location |
+|-----|-------------|----------|
+| Dashboard Stats | Total users, listings, orders, revenue | `libs/backend/admin/ACommerce.Admin.Dashboard` |
+| Reports | Sales reports, user activity, revenue by period | `libs/backend/admin/ACommerce.Admin.Reports` |
+| Activity Log | Audit trail for admin actions | `libs/backend/admin/ACommerce.Admin.AuditLog` |
+| Banners/Ads | Promotional content management | `libs/backend/marketing/ACommerce.Marketing.Banners` |
+
+Enhanced APIs (add filtering/search):
+- Orders API: Add status filter, date range, vendor filter
+- Users API: Add role filter, status filter, search
+- Listings API: Add approval status, vendor filter
+
+### Phase 2: Admin Template
+Reusable Blazor components for admin dashboards:
+
+| Component | Description |
+|-----------|-------------|
+| `AcSidebar` | Collapsible side navigation |
+| `AcDataTable` | Sortable, filterable, paginated table |
+| `AcStatsCard` | Statistics display card |
+| `AcChart` | Line, bar, pie charts |
+| `AcBreadcrumb` | Navigation breadcrumb |
+| `AcConfirmModal` | Confirmation dialogs |
+
+Location: `Templates/ACommerce.Templates.Admin/`
+
+### Phase 3: Ashare Dashboard
+Specific implementation for Ashare:
+
+| Page | Features |
+|------|----------|
+| Dashboard | Stats overview, recent orders, charts |
+| Users | List, search, activate/deactivate |
+| Listings | Approve/reject, feature, edit |
+| Orders | View, change status, refund |
+| Subscriptions | Manage vendor subscriptions |
+| Reports | Sales, revenue, user growth |
+| Settings | App configuration |
+
+Location: `Apps/Ashare.Admin/`
+
+### Future Phases
+- Phase 4: AI Assistant for SaaS customization
+- Phase 5: AI Development Agent for code generation
