@@ -9,7 +9,7 @@
     <Description>Order management system built on Transactions.Core</Description>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
+    <ProjectReference Include="..\..\core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
     <ProjectReference Include="..\..\Other\ACommerce.Transactions.Core\ACommerce.Transactions.Core.csproj" />
     <ProjectReference Include="..\ACommerce.Cart\ACommerce.Cart.csproj" />
     <ProjectReference Include="..\..\Marketplace\ACommerce.Vendors\ACommerce.Vendors.csproj" />

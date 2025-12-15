@@ -12,7 +12,7 @@
     <ProjectReference Include="..\ACommerce.Chats.Abstractions\ACommerce.Chats.Abstractions.csproj" />
     <ProjectReference Include="..\ACommerce.Realtime.Abstractions\ACommerce.Realtime.Abstractions.csproj" />
     <ProjectReference Include="..\ACommerce.Realtime.SignalR\ACommerce.Realtime.SignalR.csproj" />
-    <ProjectReference Include="..\..\Core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
+    <ProjectReference Include="..\..\core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
   </ItemGroup>
   <ItemGroup>
     <!-- ? ?? SignalR Hub -->

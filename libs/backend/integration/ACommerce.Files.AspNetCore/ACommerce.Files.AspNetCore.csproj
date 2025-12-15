@@ -9,7 +9,7 @@
     <Description>Default description for ACommerce.Files.AspNetCore</Description>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Files\ACommerce.Files.Abstractions\ACommerce.Files.Abstractions.csproj" />
+    <ProjectReference Include="..\..\files\ACommerce.Files.Abstractions\ACommerce.Files.Abstractions.csproj" />
   </ItemGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
