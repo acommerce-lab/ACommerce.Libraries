@@ -56,6 +56,18 @@ using ACommerce.Files.Storage.GoogleCloud.Extensions;
 using Ashare.Api.Middleware;
 using Microsoft.AspNetCore.SignalR;
 
+// Admin Controllers
+using ACommerce.Admin.Dashboard.Api.Controllers;
+using ACommerce.Admin.Orders.Api.Controllers;
+using ACommerce.Admin.Listings.Api.Controllers;
+using ACommerce.Admin.Reports.Api.Controllers;
+using ACommerce.Admin.AuditLog.Api.Controllers;
+using ACommerce.Admin.Dashboard;
+using ACommerce.Admin.Orders;
+using ACommerce.Admin.Listings;
+using ACommerce.Admin.Reports;
+using ACommerce.Admin.AuditLog;
+
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.File("logs/ashare-.txt", rollingInterval: RollingInterval.Day)
@@ -117,7 +129,12 @@ try
         .AddApplicationPart(typeof(ContactPointsController).Assembly)
         .AddApplicationPart(typeof(SubscriptionsController).Assembly)
         .AddApplicationPart(typeof(PaymentsController).Assembly) // Payments
-        .AddApplicationPart(typeof(RegistryController).Assembly); // Service Registry & Discovery
+        .AddApplicationPart(typeof(RegistryController).Assembly) // Service Registry & Discovery
+        .AddApplicationPart(typeof(DashboardController).Assembly) // Admin Dashboard
+        .AddApplicationPart(typeof(AdminOrdersController).Assembly) // Admin Orders
+        .AddApplicationPart(typeof(AdminListingsController).Assembly) // Admin Listings
+        .AddApplicationPart(typeof(ReportsController).Assembly) // Admin Reports
+        .AddApplicationPart(typeof(AuditLogController).Assembly); // Admin Audit Log
 
     builder.Services.AddEndpointsApiExplorer();
 
@@ -216,6 +233,13 @@ try
 
     // Product Services
     builder.Services.AddScoped<IProductService, ProductService>();
+
+    // Admin Services
+    builder.Services.AddAdminDashboard();
+    builder.Services.AddAdminOrders();
+    builder.Services.AddAdminListings();
+    builder.Services.AddAdminReports();
+    builder.Services.AddAdminAuditLog();
 
     // Subscription Services
     builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();

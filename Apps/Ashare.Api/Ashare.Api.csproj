@@ -100,6 +100,18 @@
     <ProjectReference Include="..\..\libs\backend\integration\ACommerce.ServiceRegistry.Core\ACommerce.ServiceRegistry.Core.csproj" />
     <ProjectReference Include="..\..\libs\backend\integration\ACommerce.ServiceRegistry.Server\ACommerce.ServiceRegistry.Server.csproj" />
 
+    <!-- Admin Dashboard & Management -->
+    <ProjectReference Include="..\..\libs\backend\admin\ACommerce.Admin.Dashboard\ACommerce.Admin.Dashboard.csproj" />
+    <ProjectReference Include="..\..\libs\backend\admin\ACommerce.Admin.Dashboard.Api\ACommerce.Admin.Dashboard.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\admin\ACommerce.Admin.Orders\ACommerce.Admin.Orders.csproj" />
+    <ProjectReference Include="..\..\libs\backend\admin\ACommerce.Admin.Orders.Api\ACommerce.Admin.Orders.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\admin\ACommerce.Admin.Listings\ACommerce.Admin.Listings.csproj" />
+    <ProjectReference Include="..\..\libs\backend\admin\ACommerce.Admin.Listings.Api\ACommerce.Admin.Listings.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\admin\ACommerce.Admin.Reports\ACommerce.Admin.Reports.csproj" />
+    <ProjectReference Include="..\..\libs\backend\admin\ACommerce.Admin.Reports.Api\ACommerce.Admin.Reports.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\admin\ACommerce.Admin.AuditLog\ACommerce.Admin.AuditLog.csproj" />
+    <ProjectReference Include="..\..\libs\backend\admin\ACommerce.Admin.AuditLog.Api\ACommerce.Admin.AuditLog.Api.csproj" />
+
     <!-- Shared -->
     <ProjectReference Include="..\Ashare.Shared\Ashare.Shared.csproj" />
   </ItemGroup>

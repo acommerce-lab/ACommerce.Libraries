@@ -233,6 +233,83 @@ public class AuthController : AuthenticationControllerBase
 
     #endregion
 
+    #region Admin Login
+
+    /// <summary>
+    /// تسجيل دخول المشرف
+    /// POST /api/auth/admin/login
+    /// </summary>
+    [HttpPost("admin/login")]
+    public async Task<ActionResult<LoginResponse>> AdminLogin([FromBody] AdminLoginRequest request)
+    {
+        try
+        {
+            // التحقق من بيانات المشرف (بيانات تجريبية للتطوير)
+            var adminCredentials = new Dictionary<string, (string Password, string Name)>
+            {
+                ["admin@ashare.sa"] = ("Admin@123", "مشرف النظام"),
+                ["admin@example.com"] = ("Admin@123", "مشرف تجريبي")
+            };
+
+            if (!adminCredentials.TryGetValue(request.Email.ToLower(), out var credentials) 
+                || credentials.Password != request.Password)
+            {
+                return Unauthorized(new LoginResponse
+                {
+                    Success = false,
+                    Message = "بيانات الدخول غير صحيحة"
+                });
+            }
+
+            // إنشاء token مع Admin role
+            var adminId = Guid.NewGuid();
+            var authResult = await AuthProvider.AuthenticateAsync(new AuthenticationRequest
+            {
+                Identifier = adminId.ToString(),
+                Claims = new Dictionary<string, string>
+                {
+                    [ClaimTypes.NameIdentifier] = adminId.ToString(),
+                    [ClaimTypes.Name] = credentials.Name,
+                    [ClaimTypes.Email] = request.Email,
+                    [ClaimTypes.Role] = "Admin"
+                }
+            });
+
+            if (!authResult.Success)
+            {
+                return BadRequest(new LoginResponse
+                {
+                    Success = false,
+                    Message = "فشل إنشاء الجلسة"
+                });
+            }
+
+            Logger.LogInformation("تسجيل دخول مشرف: {Email}", request.Email);
+
+            return Ok(new LoginResponse
+            {
+                Success = true,
+                Token = authResult.AccessToken ?? "",
+                ProfileId = adminId.ToString(),
+                FullName = credentials.Name,
+                ExpiresAt = authResult.ExpiresAt?.DateTime ?? DateTime.UtcNow.AddDays(1),
+                Message = "تم تسجيل الدخول بنجاح",
+                IsNewUser = false
+            });
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "خطأ في تسجيل دخول المشرف");
+            return BadRequest(new LoginResponse
+            {
+                Success = false,
+                Message = "حدث خطأ"
+            });
+        }
+    }
+
+    #endregion
+
     #region User Info
 
     /// <summary>
@@ -381,6 +458,15 @@ public class TestWebhookRequest
     public string TransactionId { get; set; } = string.Empty;
     public string? NationalId { get; set; }
     public string? Status { get; set; }
+}
+
+/// <summary>
+/// طلب تسجيل دخول المشرف
+/// </summary>
+public class AdminLoginRequest
+{
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
 }
 
 /// <summary>
