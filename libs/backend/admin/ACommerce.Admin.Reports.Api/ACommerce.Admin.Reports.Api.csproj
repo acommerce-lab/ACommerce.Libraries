@@ -12,7 +12,7 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MediatR" Version="12.4.1" />
+    <PackageReference Include="MediatR" Version="13.1.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ACommerce.Admin.Reports\ACommerce.Admin.Reports.csproj" />

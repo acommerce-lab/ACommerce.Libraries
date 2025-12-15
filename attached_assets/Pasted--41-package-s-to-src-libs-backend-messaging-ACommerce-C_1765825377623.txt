@@ -1,0 +1,77 @@
+ 41 package(s) to /src/libs/backend/messaging/ACommerce.Chats.Api/ACommerce.Chats.Api.csproj
+             8 package(s) to /src/libs/backend/messaging/ACommerce.Chats.Abstractions/ACommerce.Chats.Abstractions.csproj
+             18 package(s) to /src/libs/backend/messaging/ACommerce.Messaging.SignalR.Hub/ACommerce.Messaging.SignalR.Hub.csproj
+             31 package(s) to /src/libs/backend/admin/ACommerce.Admin.Reports/ACommerce.Admin.Reports.csproj
+             32 package(s) to /src/libs/backend/admin/ACommerce.Admin.Reports.Api/ACommerce.Admin.Reports.Api.csproj
+             26 package(s) to /src/libs/backend/admin/ACommerce.Admin.Orders/ACommerce.Admin.Orders.csproj
+             26 package(s) to /src/libs/backend/admin/ACommerce.Admin.Listings/ACommerce.Admin.Listings.csproj
+             26 package(s) to /src/libs/backend/admin/ACommerce.Admin.Orders.Api/ACommerce.Admin.Orders.Api.csproj
+             27 package(s) to /src/libs/backend/admin/ACommerce.Admin.Listings.Api/ACommerce.Admin.Listings.Api.csproj
+             33 package(s) to /src/libs/backend/admin/ACommerce.Admin.Dashboard/ACommerce.Admin.Dashboard.csproj
+             20 package(s) to /src/libs/backend/auth/ACommerce.Authentication.JWT/ACommerce.Authentication.JWT.csproj
+             14 package(s) to /src/libs/backend/admin/ACommerce.Admin.AuditLog/ACommerce.Admin.AuditLog.csproj
+             18 package(s) to /src/libs/frontend/clients/ACommerce.Client.Profiles/ACommerce.Client.Profiles.csproj
+             18 package(s) to /src/libs/frontend/clients/ACommerce.Client.Products/ACommerce.Client.Products.csproj
+             18 package(s) to /src/libs/frontend/clients/ACommerce.Client.ProductListings/ACommerce.Client.ProductListings.csproj
+             18 package(s) to /src/libs/frontend/clients/ACommerce.Client.Payments/ACommerce.Client.Payments.csproj
+             18 package(s) to /src/libs/frontend/clients/ACommerce.Client.Orders/ACommerce.Client.Orders.csproj
+             18 package(s) to /src/libs/frontend/clients/ACommerce.Client.Notifications/ACommerce.Client.Notifications.csproj
+             18 package(s) to /src/libs/frontend/clients/ACommerce.Client.Nafath/ACommerce.Client.Nafath.csproj
+             18 package(s) to /src/libs/frontend/clients/ACommerce.Client.Locations/ACommerce.Client.Locations.csproj
+             18 package(s) to /src/libs/frontend/clients/ACommerce.Client.Files/ACommerce.Client.Files.csproj
+             18 package(s) to /src/libs/frontend/clients/ACommerce.Client.ContactPoints/ACommerce.Client.ContactPoints.csproj
+             18 package(s) to /src/libs/frontend/clients/ACommerce.Client.Chats/ACommerce.Client.Chats.csproj
+             27 package(s) to /src/libs/backend/marketplace/ACommerce.Vendors.Api/ACommerce.Vendors.Api.csproj
+             13 package(s) to /src/libs/backend/marketplace/ACommerce.Subscriptions/ACommerce.Subscriptions.csproj
+             13 package(s) to /src/libs/backend/marketplace/ACommerce.Subscriptions.Api/ACommerce.Subscriptions.Api.csproj
+             26 package(s) to /src/libs/backend/integration/ACommerce.SharedKernel.AspNetCore/ACommerce.SharedKernel.AspNetCore.csproj
+             21 package(s) to /src/libs/backend/messaging/ACommerce.Authentication.Messaging/ACommerce.Authentication.Messaging.csproj
+             13 package(s) to /src/libs/backend/integration/ACommerce.ServiceRegistry.Core/ACommerce.ServiceRegistry.Core.csproj
+             4 package(s) to /src/libs/backend/integration/ACommerce.Files.AspNetCore/ACommerce.Files.AspNetCore.csproj
+             7 package(s) to /src/libs/backend/integration/ACommerce.Authentication.AspNetCore/ACommerce.Authentication.AspNetCore.csproj
+             43 package(s) to /src/libs/backend/integration/ACommerce.Authentication.AspNetCore.NafathWH/ACommerce.Authentication.AspNetCore.NafathWH.csproj
+             21 package(s) to /src/libs/backend/integration/ACommerce.ServiceRegistry.Server/ACommerce.ServiceRegistry.Server.csproj
+             25 package(s) to /src/libs/backend/files/ACommerce.Files.Storage.Local/ACommerce.Files.Storage.Local.csproj
+             22 package(s) to /src/libs/backend/files/ACommerce.Files.Storage.GoogleCloud/ACommerce.Files.Storage.GoogleCloud.csproj
+             13 package(s) to /src/libs/backend/core/ACommerce.SharedKernel.CQRS/ACommerce.SharedKernel.CQRS.csproj
+             28 package(s) to /src/libs/backend/catalog/ACommerce.Catalog.Units/ACommerce.Catalog.Units.csproj
+             40 package(s) to /src/libs/backend/catalog/ACommerce.Catalog.Units.Api/ACommerce.Catalog.Units.Api.csproj
+             40 package(s) to /src/libs/backend/catalog/ACommerce.Catalog.Products/ACommerce.Catalog.Products.csproj
+             32 package(s) to /src/libs/backend/catalog/ACommerce.Catalog.Products.Api/ACommerce.Catalog.Products.Api.csproj
+             28 package(s) to /src/libs/frontend/clients/ACommerce.Client.Realtime/ACommerce.Client.Realtime.csproj
+             48 package(s) to /src/Apps/Ashare.Shared/Ashare.Shared.csproj
+             77 package(s) to /src/libs/backend/core/ACommerce.SharedKernel.Infrastructure.EFCores/ACommerce.SharedKernel.Infrastructure.EFCores.csproj
+             80 package(s) to /src/Other/ACommerce.Locations/ACommerce.Locations.csproj
+             80 package(s) to /src/Other/ACommerce.Locations.Api/ACommerce.Locations.Api.csproj
+             257 package(s) to /src/Apps/Ashare.Api/Ashare.Api.csproj
+             113 package(s) to /src/libs/backend/admin/ACommerce.Admin.Dashboard.Api/ACommerce.Admin.Dashboard.Api.csproj
+     1>Done Building Project "/src/Apps/Ashare.Api/Ashare.Api.csproj" (Restore target(s)) -- FAILED.
+Build FAILED.
+       "/src/Apps/Ashare.Api/Ashare.Api.csproj" (Restore target) (1) ->
+       (Restore target) -> 
+         /src/libs/backend/admin/ACommerce.Admin.Reports/ACommerce.Admin.Reports.csproj : error NU1605: Warning As Error: Detected package downgrade: MediatR from 13.1.0 to 12.4.1. Reference the package directly from the project to select a different version.  [/src/Apps/Ashare.Api/Ashare.Api.csproj]
+       /src/libs/backend/admin/ACommerce.Admin.Reports/ACommerce.Admin.Reports.csproj : error NU1605:  ACommerce.Admin.Reports -> ACommerce.Orders -> ACommerce.Cart -> ACommerce.SharedKernel.CQRS -> MediatR (>= 13.1.0)  [/src/Apps/Ashare.Api/Ashare.Api.csproj]
+       /src/libs/backend/admin/ACommerce.Admin.Reports/ACommerce.Admin.Reports.csproj : error NU1605:  ACommerce.Admin.Reports -> MediatR (>= 12.4.1) [/src/Apps/Ashare.Api/Ashare.Api.csproj]
+         /src/libs/backend/admin/ACommerce.Admin.Reports.Api/ACommerce.Admin.Reports.Api.csproj : error NU1605: Warning As Error: Detected package downgrade: MediatR from 13.1.0 to 12.4.1. Reference the package directly from the project to select a different version.  [/src/Apps/Ashare.Api/Ashare.Api.csproj]
+       /src/libs/backend/admin/ACommerce.Admin.Reports.Api/ACommerce.Admin.Reports.Api.csproj : error NU1605:  ACommerce.Admin.Reports.Api -> ACommerce.Admin.Reports -> ACommerce.Orders -> ACommerce.Cart -> ACommerce.SharedKernel.CQRS -> MediatR (>= 13.1.0)  [/src/Apps/Ashare.Api/Ashare.Api.csproj]
+       /src/libs/backend/admin/ACommerce.Admin.Reports.Api/ACommerce.Admin.Reports.Api.csproj : error NU1605:  ACommerce.Admin.Reports.Api -> MediatR (>= 12.4.1) [/src/Apps/Ashare.Api/Ashare.Api.csproj]
+         /src/libs/backend/admin/ACommerce.Admin.Orders/ACommerce.Admin.Orders.csproj : error NU1605: Warning As Error: Detected package downgrade: MediatR from 13.1.0 to 12.4.1. Reference the package directly from the project to select a different version.  [/src/Apps/Ashare.Api/Ashare.Api.csproj]
+       /src/libs/backend/admin/ACommerce.Admin.Orders/ACommerce.Admin.Orders.csproj : error NU1605:  ACommerce.Admin.Orders -> ACommerce.Orders -> ACommerce.Cart -> ACommerce.SharedKernel.CQRS -> MediatR (>= 13.1.0)  [/src/Apps/Ashare.Api/Ashare.Api.csproj]
+       /src/libs/backend/admin/ACommerce.Admin.Orders/ACommerce.Admin.Orders.csproj : error NU1605:  ACommerce.Admin.Orders -> MediatR (>= 12.4.1) [/src/Apps/Ashare.Api/Ashare.Api.csproj]
+         /src/libs/backend/admin/ACommerce.Admin.Orders.Api/ACommerce.Admin.Orders.Api.csproj : error NU1605: Warning As Error: Detected package downgrade: MediatR from 13.1.0 to 12.4.1. Reference the package directly from the project to select a different version.  [/src/Apps/Ashare.Api/Ashare.Api.csproj]
+       /src/libs/backend/admin/ACommerce.Admin.Orders.Api/ACommerce.Admin.Orders.Api.csproj : error NU1605:  ACommerce.Admin.Orders.Api -> ACommerce.Admin.Orders -> ACommerce.Orders -> ACommerce.Cart -> ACommerce.SharedKernel.CQRS -> MediatR (>= 13.1.0)  [/src/Apps/Ashare.Api/Ashare.Api.csproj]
+       /src/libs/backend/admin/ACommerce.Admin.Orders.Api/ACommerce.Admin.Orders.Api.csproj : error NU1605:  ACommerce.Admin.Orders.Api -> MediatR (>= 12.4.1) [/src/Apps/Ashare.Api/Ashare.Api.csproj]
+         /src/libs/backend/admin/ACommerce.Admin.Dashboard/ACommerce.Admin.Dashboard.csproj : error NU1605: Warning As Error: Detected package downgrade: MediatR from 13.1.0 to 12.4.1. Reference the package directly from the project to select a different version.  [/src/Apps/Ashare.Api/Ashare.Api.csproj]
+       /src/libs/backend/admin/ACommerce.Admin.Dashboard/ACommerce.Admin.Dashboard.csproj : error NU1605:  ACommerce.Admin.Dashboard -> ACommerce.Orders -> ACommerce.Cart -> ACommerce.SharedKernel.CQRS -> MediatR (>= 13.1.0)  [/src/Apps/Ashare.Api/Ashare.Api.csproj]
+       /src/libs/backend/admin/ACommerce.Admin.Dashboard/ACommerce.Admin.Dashboard.csproj : error NU1605:  ACommerce.Admin.Dashboard -> MediatR (>= 12.4.1) [/src/Apps/Ashare.Api/Ashare.Api.csproj]
+         /src/libs/backend/admin/ACommerce.Admin.Dashboard.Api/ACommerce.Admin.Dashboard.Api.csproj : error NU1605: Warning As Error: Detected package downgrade: MediatR from 13.1.0 to 12.4.1. Reference the package directly from the project to select a different version.  [/src/Apps/Ashare.Api/Ashare.Api.csproj]
+       /src/libs/backend/admin/ACommerce.Admin.Dashboard.Api/ACommerce.Admin.Dashboard.Api.csproj : error NU1605:  ACommerce.Admin.Dashboard.Api -> ACommerce.Admin.Dashboard -> ACommerce.Orders -> ACommerce.Cart -> ACommerce.SharedKernel.CQRS -> MediatR (>= 13.1.0)  [/src/Apps/Ashare.Api/Ashare.Api.csproj]
+       /src/libs/backend/admin/ACommerce.Admin.Dashboard.Api/ACommerce.Admin.Dashboard.Api.csproj : error NU1605:  ACommerce.Admin.Dashboard.Api -> MediatR (>= 12.4.1) [/src/Apps/Ashare.Api/Ashare.Api.csproj]
+    0 Warning(s)
+    6 Error(s)
+Time Elapsed 00:00:32.14
+The command '/bin/sh -c dotnet restore "Ashare.Api.csproj" --verbosity normal' returned a non-zero code: 1
+Finished Step #0
+ERROR
+ERROR: build step 0 "gcr.io/cloud-builders/docker" failed: step exited with non-zero status: 1
+
