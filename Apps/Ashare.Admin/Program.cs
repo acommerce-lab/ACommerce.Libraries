@@ -13,6 +13,7 @@ builder.Services.AddSyncfusionBlazor();
 builder.Services.AddMemoryCache();
 
 builder.Services.AddScoped<AdminApiService>();
+builder.Services.AddScoped<MarketingAnalyticsService>();
 
 var app = builder.Build();
 

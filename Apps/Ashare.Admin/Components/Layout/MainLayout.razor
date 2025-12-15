@@ -50,6 +50,7 @@
         new() { Title = "العروض", Url = "/listings", Icon = "🏢", IsActive = IsCurrentPage("/listings"), Badge = 23 },
         new() { Title = "الطلبات", Url = "/orders", Icon = "📦", IsActive = IsCurrentPage("/orders") },
         new() { Title = "التقارير", Url = "/reports", Icon = "📈", IsActive = IsCurrentPage("/reports") },
+        new() { Title = "التسويق", Url = "/marketing", Icon = "📣", IsActive = IsCurrentPage("/marketing") },
         new() { Title = "الإعدادات", Url = "/settings", Icon = "⚙️", IsActive = IsCurrentPage("/settings") },
     };
 
@@ -70,6 +71,7 @@
             "/orders" => "إدارة الطلبات",
             "/reports" => "التقارير",
             "/settings" => "الإعدادات",
+            "/marketing" => "تحليلات التسويق",
             _ => "عشير"
         };
     }

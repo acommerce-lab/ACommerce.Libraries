@@ -1,0 +1,202 @@
+@page "/marketing"
+@inject MarketingAnalyticsService AnalyticsService
+
+<div class="marketing-page">
+    <div class="page-header">
+        <div class="search-filters">
+            <SfDateRangePicker TValue="DateTime?" @bind-StartDate="StartDate" @bind-EndDate="EndDate" 
+                               Placeholder="نطاق التاريخ" Width="300px" />
+            <SfButton CssClass="e-primary" OnClick="LoadData">تحديث</SfButton>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon primary">👁️</div>
+            <div class="stat-content">
+                <h3>إجمالي الزيارات</h3>
+                <div class="value">@Data.Totals.TotalVisits.ToString("N0")</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon success">👤</div>
+            <div class="stat-content">
+                <h3>التسجيلات</h3>
+                <div class="value">@Data.Totals.TotalRegistrations.ToString("N0")</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon warning">🛒</div>
+            <div class="stat-content">
+                <h3>عمليات الشراء</h3>
+                <div class="value">@Data.Totals.TotalPurchases.ToString("N0")</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon danger">💰</div>
+            <div class="stat-content">
+                <h3>الإيرادات</h3>
+                <div class="value">@Data.Totals.TotalRevenue.ToString("N0") ر.س</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-grid">
+        <div class="card">
+            <div class="card-header">
+                <h2>الأداء حسب المنصة</h2>
+            </div>
+            <div class="card-body">
+                <SfGrid DataSource="@Data.PlatformStats" AllowSorting="true">
+                    <GridColumns>
+                        <GridColumn HeaderText="المنصة" Width="150">
+                            <Template>
+                                @{
+                                    var item = (context as PlatformStatsDto);
+                                    <span>@item?.PlatformIcon @item?.Platform</span>
+                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(PlatformStatsDto.Visits)" HeaderText="الزيارات" Format="N0" Width="100" />
+                        <GridColumn Field="@nameof(PlatformStatsDto.Registrations)" HeaderText="التسجيلات" Format="N0" Width="100" />
+                        <GridColumn Field="@nameof(PlatformStatsDto.Purchases)" HeaderText="المشتريات" Format="N0" Width="100" />
+                        <GridColumn HeaderText="الإيرادات" Width="120">
+                            <Template>
+                                @{
+                                    var item = (context as PlatformStatsDto);
+                                    <span class="revenue">@item?.Revenue.ToString("N0") ر.س</span>
+                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn HeaderText="التحويل" Width="100">
+                            <Template>
+                                @{
+                                    var item = (context as PlatformStatsDto);
+                                    <span class="conversion">@item?.ConversionRate.ToString("F2")%</span>
+                                }
+                            </Template>
+                        </GridColumn>
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>توزيع الإيرادات</h2>
+            </div>
+            <div class="card-body">
+                <SfAccumulationChart Height="300px">
+                    <AccumulationChartSeriesCollection>
+                        <AccumulationChartSeries DataSource="@Data.PlatformStats" 
+                                                  XName="Platform" 
+                                                  YName="Revenue"
+                                                  InnerRadius="40%">
+                            <AccumulationDataLabelSettings Visible="true" Name="Platform" Position="AccumulationLabelPosition.Outside" />
+                        </AccumulationChartSeries>
+                    </AccumulationChartSeriesCollection>
+                    <AccumulationChartTooltipSettings Enable="true" Format="${point.x}: ${point.y} ر.س" />
+                    <AccumulationChartLegendSettings Visible="true" Position="LegendPosition.Bottom" />
+                </SfAccumulationChart>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top: 24px;">
+        <div class="card-header">
+            <h2>الزيارات والتحويلات اليومية</h2>
+        </div>
+        <div class="card-body">
+            <SfChart Height="350px">
+                <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime" LabelFormat="dd/MM" />
+                <ChartPrimaryYAxis Title="العدد" />
+                <ChartSeriesCollection>
+                    <ChartSeries DataSource="@Data.DailyStats" 
+                                 XName="Date" 
+                                 YName="Visits" 
+                                 Name="الزيارات"
+                                 Type="ChartSeriesType.SplineArea"
+                                 Fill="#2563eb"
+                                 Opacity="0.3">
+                    </ChartSeries>
+                    <ChartSeries DataSource="@Data.DailyStats" 
+                                 XName="Date" 
+                                 YName="Registrations" 
+                                 Name="التسجيلات"
+                                 Type="ChartSeriesType.Spline"
+                                 Fill="#22c55e">
+                        <ChartMarker Visible="true" Height="8" Width="8" />
+                    </ChartSeries>
+                    <ChartSeries DataSource="@Data.DailyStats" 
+                                 XName="Date" 
+                                 YName="Purchases" 
+                                 Name="المشتريات"
+                                 Type="ChartSeriesType.Spline"
+                                 Fill="#f59e0b">
+                        <ChartMarker Visible="true" Height="8" Width="8" />
+                    </ChartSeries>
+                </ChartSeriesCollection>
+                <ChartTooltipSettings Enable="true" />
+                <ChartLegendSettings Visible="true" Position="LegendPosition.Top" />
+            </SfChart>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top: 24px;">
+        <div class="card-header">
+            <h2>أفضل الحملات التسويقية</h2>
+        </div>
+        <div class="card-body">
+            <SfGrid DataSource="@Data.TopCampaigns" AllowSorting="true">
+                <GridColumns>
+                    <GridColumn Field="@nameof(CampaignStatsDto.Campaign)" HeaderText="الحملة" Width="200" />
+                    <GridColumn Field="@nameof(CampaignStatsDto.Platform)" HeaderText="المنصة" Width="120" />
+                    <GridColumn Field="@nameof(CampaignStatsDto.Visits)" HeaderText="الزيارات" Format="N0" Width="100" />
+                    <GridColumn Field="@nameof(CampaignStatsDto.Registrations)" HeaderText="التسجيلات" Format="N0" Width="100" />
+                    <GridColumn Field="@nameof(CampaignStatsDto.Purchases)" HeaderText="المشتريات" Format="N0" Width="100" />
+                    <GridColumn HeaderText="الإيرادات" Width="130">
+                        <Template>
+                            @{
+                                var item = (context as CampaignStatsDto);
+                                <span class="revenue">@item?.Revenue.ToString("N0") ر.س</span>
+                            }
+                        </Template>
+                    </GridColumn>
+                </GridColumns>
+            </SfGrid>
+        </div>
+    </div>
+</div>
+
+<style>
+    .revenue {
+        font-weight: 600;
+        color: #2563eb;
+    }
+    
+    .conversion {
+        font-weight: 600;
+        color: #22c55e;
+    }
+</style>
+
+@code {
+    private DateTime? StartDate { get; set; } = DateTime.Now.AddDays(-30);
+    private DateTime? EndDate { get; set; } = DateTime.Now;
+    private MarketingAnalyticsData Data { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        Data = await AnalyticsService.GetAnalyticsAsync(
+            StartDate ?? DateTime.Now.AddDays(-30), 
+            EndDate ?? DateTime.Now);
+    }
+}
