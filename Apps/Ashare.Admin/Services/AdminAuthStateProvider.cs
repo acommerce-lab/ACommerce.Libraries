@@ -19,14 +19,20 @@ public class AdminAuthStateProvider : AuthenticationStateProvider
     {
         try
         {
-            var token = await _localStorage.GetItemAsStringAsync("admin_token");
-            if (string.IsNullOrEmpty(token))
+            string? token;
+            string? userJson;
+            
+            try
+            {
+                token = await _localStorage.GetItemAsStringAsync("admin_token");
+                userJson = await _localStorage.GetItemAsStringAsync("admin_user");
+            }
+            catch (InvalidOperationException)
             {
                 return new AuthenticationState(_anonymous);
             }
-
-            var userJson = await _localStorage.GetItemAsStringAsync("admin_user");
-            if (string.IsNullOrEmpty(userJson))
+            
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(userJson))
             {
                 return new AuthenticationState(_anonymous);
             }
@@ -95,14 +101,28 @@ public class AdminAuthStateProvider : AuthenticationStateProvider
 
     public async Task<string?> GetTokenAsync()
     {
-        return await _localStorage.GetItemAsStringAsync("admin_token");
+        try
+        {
+            return await _localStorage.GetItemAsStringAsync("admin_token");
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
     }
 
     public async Task<AdminUserInfo?> GetCurrentUserAsync()
     {
-        var userJson = await _localStorage.GetItemAsStringAsync("admin_user");
-        if (string.IsNullOrEmpty(userJson)) return null;
-        return JsonSerializer.Deserialize<AdminUserInfo>(userJson);
+        try
+        {
+            var userJson = await _localStorage.GetItemAsStringAsync("admin_user");
+            if (string.IsNullOrEmpty(userJson)) return null;
+            return JsonSerializer.Deserialize<AdminUserInfo>(userJson);
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
     }
 }
 

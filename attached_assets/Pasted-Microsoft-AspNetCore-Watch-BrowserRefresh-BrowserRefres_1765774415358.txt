@@ -1,0 +1,123 @@
+Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware: Debug: Middleware loaded: DOTNET_MODIFIABLE_ASSEMBLIES=debug, __ASPNETCORE_BROWSER_TOOLS=true
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Collections.NonGeneric.dll'. Symbol loading disabled by Include/Exclude setting.
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Net.Security.dll'. Symbol loading disabled by Include/Exclude setting.
+Microsoft.Hosting.Lifetime: Information: Now listening on: https://localhost:55086
+Microsoft.Hosting.Lifetime: Information: Now listening on: http://localhost:55087
+Microsoft.Hosting.Lifetime: Information: Application started. Press Ctrl+C to shut down.
+Microsoft.Hosting.Lifetime: Information: Hosting environment: Development
+Microsoft.Hosting.Lifetime: Information: Content root path: C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Admin
+Exception thrown: 'System.IO.IOException' in System.Net.Security.dll
+Exception thrown: 'System.IO.IOException' in System.Net.Security.dll
+Exception thrown: 'System.IO.IOException' in System.Private.CoreLib.dll
+Exception thrown: 'System.IO.IOException' in System.Private.CoreLib.dll
+Exception thrown: 'System.IO.IOException' in System.Private.CoreLib.dll
+Exception thrown: 'System.IO.IOException' in System.Private.CoreLib.dll
+Exception thrown: 'System.IO.IOException' in System.Net.Security.dll
+Exception thrown: 'System.IO.IOException' in System.Net.Security.dll
+Exception thrown: 'System.IO.IOException' in System.Private.CoreLib.dll
+Exception thrown: 'System.IO.IOException' in System.Private.CoreLib.dll
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Net.WebSockets.dll'. Symbol loading disabled by Include/Exclude setting.
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Threading.Tasks.dll'. Symbol loading disabled by Include/Exclude setting.
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Net.NameResolution.dll'. Symbol loading disabled by Include/Exclude setting.
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Collections.Immutable.dll'. Symbol loading disabled by Include/Exclude setting.
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App\9.0.11\Microsoft.AspNetCore.Html.Abstractions.dll'. Symbol loading disabled by Include/Exclude setting.
+Exception thrown: 'System.InvalidOperationException' in Microsoft.AspNetCore.Components.Server.dll
+Exception thrown: 'System.InvalidOperationException' in Microsoft.JSInterop.dll
+Exception thrown: 'System.InvalidOperationException' in Blazored.LocalStorage.dll
+Exception thrown: 'System.InvalidOperationException' in System.Private.CoreLib.dll
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Admin\bin\Debug\net9.0\ACommerce.Templates.Admin.dll'. Symbols loaded.
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Admin\bin\Debug\net9.0\Syncfusion.Blazor.Buttons.dll'. Symbol loading disabled by Include/Exclude setting.
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Net.Http.Json.dll'. Symbol loading disabled by Include/Exclude setting.
+Exception thrown: 'System.InvalidOperationException' in Microsoft.AspNetCore.Components.Server.dll
+Exception thrown: 'System.InvalidOperationException' in Microsoft.JSInterop.dll
+Exception thrown: 'System.InvalidOperationException' in Blazored.LocalStorage.dll
+Exception thrown: 'System.InvalidOperationException' in System.Private.CoreLib.dll
+Exception thrown: 'System.InvalidOperationException' in System.Private.CoreLib.dll
+Exception thrown: 'System.InvalidOperationException' in System.Private.CoreLib.dll
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Diagnostics.StackTrace.dll'. Symbol loading disabled by Include/Exclude setting.
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Reflection.Metadata.dll'. Symbol loading disabled by Include/Exclude setting.
+Ashare.Admin.Services.AdminApiService: Error: Error fetching dashboard stats from API
+
+System.InvalidOperationException: JavaScript interop calls cannot be issued at this time. This is because the component is being statically rendered. When prerendering is enabled, JavaScript interop calls can only be performed during the OnAfterRenderAsync lifecycle method.
+   at Microsoft.AspNetCore.Components.Server.Circuits.RemoteJSRuntime.BeginInvokeJS(Int64 asyncHandle, String identifier, String argsJson, JSCallResultType resultType, Int64 targetInstanceId)
+   at Microsoft.JSInterop.JSRuntime.InvokeAsync[TValue](Int64 targetInstanceId, String identifier, CancellationToken cancellationToken, Object[] args)
+   at Microsoft.JSInterop.JSRuntime.InvokeAsync[TValue](String identifier, CancellationToken cancellationToken, Object[] args)
+   at Blazored.LocalStorage.BrowserStorageProvider.GetItemAsync(String key, CancellationToken cancellationToken)
+   at Ashare.Admin.Services.AdminAuthStateProvider.GetTokenAsync() in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Admin\Services\AdminAuthStateProvider.cs:line 98
+   at Ashare.Admin.Services.AdminApiService.SetAuthHeaderAsync() in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Admin\Services\AdminApiService.cs:line 30
+   at Ashare.Admin.Services.AdminApiService.GetDashboardStatsAsync() in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Admin\Services\AdminApiService.cs:line 41
+Exception thrown: 'System.InvalidOperationException' in Microsoft.AspNetCore.Components.Server.dll
+Exception thrown: 'System.InvalidOperationException' in Microsoft.JSInterop.dll
+Exception thrown: 'System.InvalidOperationException' in Blazored.LocalStorage.dll
+Exception thrown: 'System.InvalidOperationException' in System.Private.CoreLib.dll
+Exception thrown: 'System.InvalidOperationException' in System.Private.CoreLib.dll
+Exception thrown: 'System.InvalidOperationException' in System.Private.CoreLib.dll
+Ashare.Admin.Services.AdminApiService: Error: Error fetching recent orders from API
+
+System.InvalidOperationException: JavaScript interop calls cannot be issued at this time. This is because the component is being statically rendered. When prerendering is enabled, JavaScript interop calls can only be performed during the OnAfterRenderAsync lifecycle method.
+   at Microsoft.AspNetCore.Components.Server.Circuits.RemoteJSRuntime.BeginInvokeJS(Int64 asyncHandle, String identifier, String argsJson, JSCallResultType resultType, Int64 targetInstanceId)
+   at Microsoft.JSInterop.JSRuntime.InvokeAsync[TValue](Int64 targetInstanceId, String identifier, CancellationToken cancellationToken, Object[] args)
+   at Microsoft.JSInterop.JSRuntime.InvokeAsync[TValue](String identifier, CancellationToken cancellationToken, Object[] args)
+   at Blazored.LocalStorage.BrowserStorageProvider.GetItemAsync(String key, CancellationToken cancellationToken)
+   at Ashare.Admin.Services.AdminAuthStateProvider.GetTokenAsync() in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Admin\Services\AdminAuthStateProvider.cs:line 98
+   at Ashare.Admin.Services.AdminApiService.SetAuthHeaderAsync() in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Admin\Services\AdminApiService.cs:line 30
+   at Ashare.Admin.Services.AdminApiService.GetRecentOrdersAsync(Int32 count) in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Admin\Services\AdminApiService.cs:line 77
+Exception thrown: 'System.InvalidOperationException' in Microsoft.AspNetCore.Components.Server.dll
+Exception thrown: 'System.InvalidOperationException' in Microsoft.JSInterop.dll
+Exception thrown: 'System.InvalidOperationException' in Blazored.LocalStorage.dll
+Exception thrown: 'System.InvalidOperationException' in System.Private.CoreLib.dll
+Exception thrown: 'System.InvalidOperationException' in System.Private.CoreLib.dll
+Exception thrown: 'System.InvalidOperationException' in System.Private.CoreLib.dll
+Ashare.Admin.Services.AdminApiService: Error: Error fetching sales chart data from API
+
+System.InvalidOperationException: JavaScript interop calls cannot be issued at this time. This is because the component is being statically rendered. When prerendering is enabled, JavaScript interop calls can only be performed during the OnAfterRenderAsync lifecycle method.
+   at Microsoft.AspNetCore.Components.Server.Circuits.RemoteJSRuntime.BeginInvokeJS(Int64 asyncHandle, String identifier, String argsJson, JSCallResultType resultType, Int64 targetInstanceId)
+   at Microsoft.JSInterop.JSRuntime.InvokeAsync[TValue](Int64 targetInstanceId, String identifier, CancellationToken cancellationToken, Object[] args)
+   at Microsoft.JSInterop.JSRuntime.InvokeAsync[TValue](String identifier, CancellationToken cancellationToken, Object[] args)
+   at Blazored.LocalStorage.BrowserStorageProvider.GetItemAsync(String key, CancellationToken cancellationToken)
+   at Ashare.Admin.Services.AdminAuthStateProvider.GetTokenAsync() in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Admin\Services\AdminAuthStateProvider.cs:line 98
+   at Ashare.Admin.Services.AdminApiService.SetAuthHeaderAsync() in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Admin\Services\AdminApiService.cs:line 30
+   at Ashare.Admin.Services.AdminApiService.GetSalesChartDataAsync() in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Admin\Services\AdminApiService.cs:line 110
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Admin\bin\Debug\net9.0\Syncfusion.Blazor.Charts.dll'. Symbol loading disabled by Include/Exclude setting.
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Admin\bin\Debug\net9.0\Syncfusion.Blazor.Data.dll'. Symbol loading disabled by Include/Exclude setting.
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Admin\bin\Debug\net9.0\Syncfusion.Blazor.DataVizCommon.dll'. Symbol loading disabled by Include/Exclude setting.
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Text.RegularExpressions.dll'. Symbol loading disabled by Include/Exclude setting.
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App\9.0.11\Microsoft.AspNetCore.DataProtection.Extensions.dll'. Symbol loading disabled by Include/Exclude setting.
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.IO.Compression.dll'. Symbol loading disabled by Include/Exclude setting.
+Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware: Debug: Response markup is scheduled to include browser refresh script injection.
+Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware: Debug: Response markup was updated to include browser refresh script injection.
+Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserScriptMiddleware: Debug: Script injected: /_framework/aspnetcore-browser-refresh.js
+Exception thrown: 'System.Text.Json.JsonException' in System.Text.Json.dll
+Exception thrown: 'System.Text.Json.JsonException' in System.Text.Json.dll
+Exception thrown: 'System.Text.Json.JsonException' in System.Text.Json.dll
+Exception thrown: 'Microsoft.JSInterop.JSException' in System.Private.CoreLib.dll
+Exception thrown: 'Microsoft.JSInterop.JSException' in System.Private.CoreLib.dll
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Diagnostics.Process.dll'. Symbol loading disabled by Include/Exclude setting.
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Net.NetworkInformation.dll'. Symbol loading disabled by Include/Exclude setting.
+'Ashare.Admin.exe' (CoreCLR: clrhost): Loaded 'C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Admin\bin\Debug\net9.0\Syncfusion.ExcelExport.Net.dll'. Symbol loading disabled by Include/Exclude setting.
+Ashare.Admin.Services.AdminApiService: Warning: Failed to fetch dashboard stats from API: NotFound
+Ashare.Admin.Services.AdminApiService: Warning: Failed to fetch recent orders from API: NotFound
+Ashare.Admin.Services.AdminApiService: Warning: Failed to fetch sales chart data from API
+Exception thrown: 'Microsoft.JSInterop.JSException' in System.Private.CoreLib.dll
+Exception thrown: 'Microsoft.JSInterop.JSException' in System.Private.CoreLib.dll
+Exception thrown: 'Microsoft.JSInterop.JSException' in System.Private.CoreLib.dll
+Exception thrown: 'Microsoft.JSInterop.JSException' in System.Private.CoreLib.dll
+Exception thrown: 'Microsoft.JSInterop.JSException' in System.Private.CoreLib.dll
+Exception thrown: 'Microsoft.JSInterop.JSException' in System.Private.CoreLib.dll
+Exception thrown: 'Microsoft.JSInterop.JSException' in System.Private.CoreLib.dll
+Exception thrown: 'Microsoft.JSInterop.JSException' in System.Private.CoreLib.dll
+Exception thrown: 'Microsoft.JSInterop.JSException' in System.Private.CoreLib.dll
+Exception thrown: 'System.IO.IOException' in System.Private.CoreLib.dll
+Exception thrown: 'System.IO.IOException' in System.Private.CoreLib.dll
+Exception thrown: 'System.IO.IOException' in System.Private.CoreLib.dll
+Exception thrown: 'System.Net.WebSockets.WebSocketException' in System.Net.WebSockets.dll
+Exception thrown: 'System.Net.WebSockets.WebSocketException' in System.Private.CoreLib.dll
+Exception thrown: 'Microsoft.JSInterop.JSDisconnectedException' in Microsoft.AspNetCore.Components.Server.dll
+Exception thrown: 'Microsoft.JSInterop.JSDisconnectedException' in Microsoft.JSInterop.dll
+Exception thrown: 'Microsoft.JSInterop.JSDisconnectedException' in System.Private.CoreLib.dll
+Exception thrown: 'Microsoft.JSInterop.JSDisconnectedException' in System.Private.CoreLib.dll
+Exception thrown: 'Microsoft.JSInterop.JSDisconnectedException' in Microsoft.AspNetCore.Components.Server.dll
+Exception thrown: 'Microsoft.JSInterop.JSDisconnectedException' in Microsoft.JSInterop.dll
+Exception thrown: 'Microsoft.JSInterop.JSDisconnectedException' in System.Private.CoreLib.dll
+Exception thrown: 'Microsoft.JSInterop.JSDisconnectedException' in System.Private.CoreLib.dll
+The program '[5204] Ashare.Admin.exe' has exited with code 4294967295 (0xffffffff).
