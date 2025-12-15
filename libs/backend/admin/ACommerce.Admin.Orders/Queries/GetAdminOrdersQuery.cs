@@ -3,7 +3,6 @@ using ACommerce.Orders.Entities;
 using ACommerce.SharedKernel.Abstractions.Entities;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace ACommerce.Admin.Orders.Queries;
 
@@ -21,7 +20,9 @@ public class GetAdminOrdersQueryHandler : IRequestHandler<GetAdminOrdersQuery, A
     public async Task<AdminOrderListDto> Handle(GetAdminOrdersQuery request, CancellationToken cancellationToken)
     {
         var filter = request.Filter;
-        var query = _repository.GetAll();
+        
+        var allItems = await _repository.ListAllAsync(cancellationToken);
+        var query = allItems.AsQueryable();
 
         if (filter.Status.HasValue)
             query = query.Where(o => o.Status == filter.Status.Value);
@@ -50,7 +51,7 @@ public class GetAdminOrdersQueryHandler : IRequestHandler<GetAdminOrdersQuery, A
             query = query.Where(o => o.Id.ToString().Contains(searchTerm));
         }
 
-        var totalCount = await query.CountAsync(cancellationToken);
+        var totalCount = query.Count();
         var totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
 
         query = filter.OrderBy?.ToLower() switch
@@ -60,7 +61,7 @@ public class GetAdminOrdersQueryHandler : IRequestHandler<GetAdminOrdersQuery, A
             _ => filter.Ascending ? query.OrderBy(o => o.CreatedAt) : query.OrderByDescending(o => o.CreatedAt)
         };
 
-        var items = await query
+        var items = query
             .Skip((filter.Page - 1) * filter.PageSize)
             .Take(filter.PageSize)
             .Select(o => new AdminOrderItemDto
@@ -74,7 +75,7 @@ public class GetAdminOrdersQueryHandler : IRequestHandler<GetAdminOrdersQuery, A
                 CreatedAt = o.CreatedAt,
                 UpdatedAt = o.UpdatedAt
             })
-            .ToListAsync(cancellationToken);
+            .ToList();
 
         return new AdminOrderListDto
         {

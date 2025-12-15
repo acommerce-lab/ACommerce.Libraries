@@ -3,7 +3,6 @@ using ACommerce.Profiles.Entities;
 using ACommerce.SharedKernel.Abstractions.Entities;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace ACommerce.Admin.Reports.Queries;
 
@@ -23,9 +22,10 @@ public class GetUserActivityReportQueryHandler : IRequestHandler<GetUserActivity
         var startDate = request.StartDate ?? DateTime.UtcNow.AddDays(-30);
         var endDate = request.EndDate ?? DateTime.UtcNow;
 
-        var profiles = await _profileRepository.GetAll()
+        var allProfiles = await _profileRepository.ListAllAsync(cancellationToken);
+        var profiles = allProfiles
             .Where(p => p.CreatedAt >= startDate && p.CreatedAt <= endDate)
-            .ToListAsync(cancellationToken);
+            .ToList();
 
         var totalNewUsers = profiles.Count;
 

@@ -1,13 +1,11 @@
 using ACommerce.Orders.Enums;
 using ACommerce.Admin.Reports.DTOs;
 using ACommerce.Catalog.Listings.Entities;
-using ACommerce.Orders;
 using ACommerce.Orders.Entities;
 using ACommerce.SharedKernel.Abstractions.Entities;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using ACommerce.Vendors.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace ACommerce.Admin.Reports.Queries;
 
@@ -34,18 +32,19 @@ public class GetVendorReportQueryHandler : IRequestHandler<GetVendorReportQuery,
         var startDate = request.StartDate ?? DateTime.UtcNow.AddDays(-30);
         var endDate = request.EndDate ?? DateTime.UtcNow;
 
-        var vendors = await _vendorRepository.GetAll().ToListAsync(cancellationToken);
+        var vendors = (await _vendorRepository.ListAllAsync(cancellationToken)).ToList();
         var totalVendors = vendors.Count;
         var activeVendors = vendors.Count(v => v.IsApproved);
 
-        var orders = await _orderRepository.GetAll()
+        var allOrders = await _orderRepository.ListAllAsync(cancellationToken);
+        var orders = allOrders
             .Where(o => o.CreatedAt >= startDate && o.CreatedAt <= endDate)
             .Where(o => o.Status == OrderStatus.Delivered)
-            .ToListAsync(cancellationToken);
+            .ToList();
 
         var totalVendorRevenue = orders.Sum(o => o.Total);
 
-        var listings = await _listingRepository.GetAll().ToListAsync(cancellationToken);
+        var listings = (await _listingRepository.ListAllAsync(cancellationToken)).ToList();
 
         var topVendors = vendors
             .Select(v =>

@@ -3,7 +3,6 @@ using ACommerce.Catalog.Listings.Entities;
 using ACommerce.SharedKernel.Abstractions.Entities;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace ACommerce.Admin.Listings.Queries;
 
@@ -21,7 +20,9 @@ public class GetAdminListingsQueryHandler : IRequestHandler<GetAdminListingsQuer
     public async Task<AdminListingListDto> Handle(GetAdminListingsQuery request, CancellationToken cancellationToken)
     {
         var filter = request.Filter;
-        var query = _repository.GetAll();
+        
+        var allItems = await _repository.ListAllAsync(cancellationToken);
+        var query = allItems.AsQueryable();
 
         if (filter.Status.HasValue)
             query = query.Where(l => l.Status == filter.Status.Value);
@@ -50,7 +51,7 @@ public class GetAdminListingsQueryHandler : IRequestHandler<GetAdminListingsQuer
         if (!string.IsNullOrEmpty(filter.SearchTerm))
             query = query.Where(l => l.Title.Contains(filter.SearchTerm) || (l.Description != null && l.Description.Contains(filter.SearchTerm)));
 
-        var totalCount = await query.CountAsync(cancellationToken);
+        var totalCount = query.Count();
         var totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
 
         query = filter.OrderBy?.ToLower() switch
@@ -61,7 +62,7 @@ public class GetAdminListingsQueryHandler : IRequestHandler<GetAdminListingsQuer
             _ => filter.Ascending ? query.OrderBy(l => l.CreatedAt) : query.OrderByDescending(l => l.CreatedAt)
         };
 
-        var items = await query
+        var items = query
             .Skip((filter.Page - 1) * filter.PageSize)
             .Take(filter.PageSize)
             .Select(l => new AdminListingItemDto
@@ -77,7 +78,7 @@ public class GetAdminListingsQueryHandler : IRequestHandler<GetAdminListingsQuer
                 CreatedAt = l.CreatedAt,
                 UpdatedAt = l.UpdatedAt
             })
-            .ToListAsync(cancellationToken);
+            .ToList();
 
         return new AdminListingListDto
         {

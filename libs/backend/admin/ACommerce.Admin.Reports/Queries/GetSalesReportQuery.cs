@@ -1,11 +1,9 @@
 using ACommerce.Orders.Enums;
 using ACommerce.Admin.Reports.DTOs;
-using ACommerce.Orders;
 using ACommerce.Orders.Entities;
 using ACommerce.SharedKernel.Abstractions.Entities;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace ACommerce.Admin.Reports.Queries;
 
@@ -25,10 +23,11 @@ public class GetSalesReportQueryHandler : IRequestHandler<GetSalesReportQuery, S
         var startDate = request.StartDate ?? DateTime.UtcNow.AddDays(-30);
         var endDate = request.EndDate ?? DateTime.UtcNow;
 
-        var orders = await _orderRepository.GetAll()
+        var allOrders = await _orderRepository.ListAllAsync(cancellationToken);
+        var orders = allOrders
             .Where(o => o.CreatedAt >= startDate && o.CreatedAt <= endDate)
             .Where(o => o.Status == OrderStatus.Delivered)
-            .ToListAsync(cancellationToken);
+            .ToList();
 
         var totalRevenue = orders.Sum(o => o.Total);
         var totalOrders = orders.Count;
