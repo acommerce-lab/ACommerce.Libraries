@@ -2,15 +2,12 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-# Copy everything first (simpler approach to avoid layer limits)
+# Copy everything
 COPY . .
 
-# Restore dependencies
-RUN dotnet restore "Apps/Ashare.Api/Ashare.Api.csproj"
-
-# Build and publish
+# Restore and publish in one step (more reliable)
 WORKDIR "/src/Apps/Ashare.Api"
-RUN dotnet publish "Ashare.Api.csproj" -c Release -o /app/publish --no-restore
+RUN dotnet publish "Ashare.Api.csproj" -c Release -o /app/publish
 
 # Stage 2: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
