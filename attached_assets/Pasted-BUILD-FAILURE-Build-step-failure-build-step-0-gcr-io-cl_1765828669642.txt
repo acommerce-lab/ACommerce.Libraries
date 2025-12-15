@@ -1,0 +1,128 @@
+BUILD FAILURE: Build step failure: build step 0 "gcr.io/cloud-builders/docker" failed: step exited with non-zero status: 1
+ERROR: (gcloud.builds.submit) build 716a1307-1571-4552-a58c-0a08c0f41a66 completed with status "FAILURE"
+PS C:\Users\i\Source\Repos\ACommerce.Libraries> gcloud builds log $(gcloud builds list --limit=1 --format="value(id)") 2>&1 | Select-String -Pattern "error"
+
+Step #0:     0 Error(s)
+
+
+PS C:\Users\i\Source\Repos\ACommerce.Libraries> gcloud builds log $(gcloud builds list --limit=1 --format="value(id)") 2>&1 | Select-String -Pattern "FAILED|failed|Error|ERROR" -Context 0,5
+
+> Step #0:     0 Error(s)
+  Step #0:
+  Step #0: Time Elapsed 00:00:16.91
+  Step #0: Removing intermediate container 686b799a0f16
+  Step #0:  1bbb8e9e63ef
+  Step #0: Step 13/19 : FROM build AS publish
+> Step #2:   Setting IAM policy failed, try "gcloud beta run services add-iam-policy-binding --region=me-central1
+--member=allUsers --role=roles/run.invoker ashare-web"
+  Step #2: Service [ashare-web] revision [ashare-web-00001-wf6] has been deployed and is serving 100 percent of traffic.
+  Step #2: Service URL: https://ashare-web-130415035604.me-central1.run.app
+  Finished Step #2
+  PUSH
+  Pushing me-central1-docker.pkg.dev/ashareapi/ashare/ashare-web:latest
+
+
+PS C:\Users\i\Source\Repos\ACommerce.Libraries> gcloud builds log $(gcloud builds list --limit=1 --format="value(id)") | Select-Object -Last 100
+Step #0: /src/Apps/Ashare.Shared/Components/Pages/Home.razor(184,18): warning CS0414: The field 'Home._isLoadingSpaces' is assigned but its value is never used [/src/Apps/Ashare.Shared/Ashare.Shared.csproj]
+Step #0:   Ashare.Shared -> /src/Apps/Ashare.Shared/bin/Release/net9.0/Ashare.Shared.dll
+Step #0:   Ashare.Web -> /src/Apps/Ashare.Web/bin/Release/net9.0/Ashare.Web.dll
+Step #0:   Ashare.Web -> /app/publish/
+Step #0: Removing intermediate container 7104197a21ee
+Step #0:  10d1c4b1731f
+Step #0: Step 16/19 : FROM base AS final
+Step #0:  1719567a6035
+Step #0: Step 17/19 : WORKDIR /app
+Step #0:  Running in 2cac7adb09f8
+Step #0: Removing intermediate container 2cac7adb09f8
+Step #0:  f69b12a2ad91
+Step #0: Step 18/19 : COPY --from=publish /app/publish .
+Step #0:  e098268860b1
+Step #0: Step 19/19 : ENTRYPOINT ["dotnet", "Ashare.Web.dll"]
+Step #0:  Running in d662082f0821
+Step #0: Removing intermediate container d662082f0821
+Step #0:  fbfaad7da4c0
+Step #0: Successfully built fbfaad7da4c0
+Step #0: Successfully tagged me-central1-docker.pkg.dev/ashareapi/ashare/ashare-web:latest
+Finished Step #0
+Starting Step #1
+Step #1: Already have image (with digest): gcr.io/cloud-builders/docker
+Step #1: The push refers to repository [me-central1-docker.pkg.dev/ashareapi/ashare/ashare-web]
+Step #1: 983249c08078: Preparing
+Step #1: e47e9c41e84b: Preparing
+Step #1: cddf85e2c5e3: Preparing
+Step #1: 06bea495ab8b: Preparing
+Step #1: db7b0b72c301: Preparing
+Step #1: f65c471d7101: Preparing
+Step #1: 5b5f352dfa57: Preparing
+Step #1: abe743884ea0: Preparing
+Step #1: 983249c08078: Pushed
+Step #1: e47e9c41e84b: Pushed
+Step #1: f65c471d7101: Pushed
+Step #1: 06bea495ab8b: Pushed
+Step #1: cddf85e2c5e3: Pushed
+Step #1: 5b5f352dfa57: Pushed
+Step #1: abe743884ea0: Pushed
+Step #1: db7b0b72c301: Pushed
+Step #1: latest: digest: sha256:6bb2d89ea8afe6c58f05d53b60907b9ca6d297d953374df2f230c81bf3e40c8a size: 1998
+Finished Step #1
+Starting Step #2
+Step #2: Pulling image: gcr.io/google.com/cloudsdktool/cloud-sdk
+Step #2: Using default tag: latest
+Step #2: latest: Pulling from google.com/cloudsdktool/cloud-sdk
+Step #2: c8443a297fa4: Already exists
+Step #2: c72f4c7fcf41: Pulling fs layer
+Step #2: 7a7de6358bf5: Pulling fs layer
+Step #2: db6c542046c1: Pulling fs layer
+Step #2: b8080e47d9f7: Pulling fs layer
+Step #2: 4b2eb95d47cb: Pulling fs layer
+Step #2: 4b2eb95d47cb: Download complete
+Step #2: c72f4c7fcf41: Download complete
+Step #2: b8080e47d9f7: Verifying Checksum
+Step #2: b8080e47d9f7: Download complete
+Step #2: c72f4c7fcf41: Pull complete
+Step #2: db6c542046c1: Verifying Checksum
+Step #2: db6c542046c1: Download complete
+Step #2: 7a7de6358bf5: Verifying Checksum
+Step #2: 7a7de6358bf5: Download complete
+Step #2: 7a7de6358bf5: Pull complete
+Step #2: db6c542046c1: Pull complete
+Step #2: b8080e47d9f7: Pull complete
+Step #2: 4b2eb95d47cb: Pull complete
+Step #2: Digest: sha256:5250db5d8ddd7a0b31d58ea5828ddf1918b9785739a3cf990236a0967ca8081d
+Step #2: Status: Downloaded newer image for gcr.io/google.com/cloudsdktool/cloud-sdk:latest
+Step #2: gcr.io/google.com/cloudsdktool/cloud-sdk:latest
+Step #2: Deploying container to Cloud Run service [ashare-web] in project [ashareapi] region [me-central1]
+Step #2: Deploying new service...
+Step #2: Setting IAM Policy......................................warning
+Step #2: Creating Revision.....................................................done
+Step #2: Routing traffic.....done
+Step #2: Completed with warnings:
+Step #2:   Setting IAM policy failed, try "gcloud be
+Step #2:   Setting IAM policy failed, try "gcloud beta run services add-iam-policy-binding --region=me-central1 --member=allUsers --role=roles/run.invoker ashare-web"
+Step #2: Service [ashare-web] revision [ashare-web-00001-wf6] has been deployed and is serving 100 percent of traffic.
+Step #2: Service URL: https://ashare-web-130415035604.me-central1.run.app
+Finished Step #2
+PUSH
+Pushing me-central1-docker.pkg.dev/ashareapi/ashare/ashare-web:latest
+The push refers to repository [me-central1-docker.pkg.dev/ashareapi/ashare/ashare-web]
+983249c08078: Preparing
+e47e9c41e84b: Preparing
+cddf85e2c5e3: Preparing
+06bea495ab8b: Preparing
+db7b0b72c301: Preparing
+f65c471d7101: Preparing
+5b5f352dfa57: Preparing
+abe743884ea0: Preparing
+e47e9c41e84b: Layer already exists
+f65c471d7101: Layer already exists
+abe743884ea0: Layer already exists
+cddf85e2c5e3: Layer already exists
+06bea495ab8b: Layer already exists
+db7b0b72c301: Layer already exists
+5b5f352dfa57: Layer already exists
+983249c08078: Layer already exists
+latest: digest: sha256:6bb2d89ea8afe6c58f05d53b60907b9ca6d297d953374df2f230c81bf3e40c8a size: 1998
+DONE
+-----------------------------------------------------------------------------------------------------------------------------
+PS C:\Users\i\Source\Repos\ACommerce.Libraries>
+
