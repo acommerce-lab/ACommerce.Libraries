@@ -86,7 +86,7 @@
                 <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Realtime\ACommerce.Client.Realtime.csproj" />
                 
                 <!-- Service Registry Client -->
-                <ProjectReference Include="..\..\libs\backend\integration\ACommerce.ServiceRegistry.Client\ACommerce.ServiceRegistry.Client.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\discovery\ACommerce.ServiceRegistry.Client\ACommerce.ServiceRegistry.Client.csproj" />
         </ItemGroup>
 
         <!-- Ensure wwwroot files are included -->
