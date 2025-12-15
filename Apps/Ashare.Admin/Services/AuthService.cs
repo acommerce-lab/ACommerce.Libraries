@@ -23,30 +23,38 @@ public class AuthService
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync("/api/admin/auth/login", new { email, password });
+            var response = await _httpClient.PostAsJsonAsync("/api/auth/admin/login", new { email, password });
             
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<ApiLoginResponse>();
-                if (result?.Success == true && result.Data != null)
+                var result = await response.Content.ReadFromJsonAsync<AdminApiLoginResponse>();
+                if (result?.Success == true && !string.IsNullOrEmpty(result.Token))
                 {
                     var user = new AdminUserInfo
                     {
-                        Id = result.Data.User.Id,
-                        Email = result.Data.User.Email,
-                        FullName = result.Data.User.FullName,
-                        Phone = result.Data.User.Phone,
-                        AvatarUrl = result.Data.User.AvatarUrl,
-                        RoleName = result.Data.User.RoleName,
-                        Permissions = result.Data.User.Permissions ?? new List<string>()
+                        Id = result.ProfileId ?? Guid.NewGuid().ToString(),
+                        Email = email,
+                        FullName = result.FullName ?? "مدير النظام",
+                        RoleName = "مدير عام",
+                        Permissions = new List<string>
+                        {
+                            "dashboard.view",
+                            "users.view", "users.create", "users.edit", "users.delete",
+                            "listings.view", "listings.approve", "listings.reject", "listings.edit", "listings.delete",
+                            "orders.view", "orders.edit", "orders.refund",
+                            "vendors.view", "vendors.approve", "vendors.suspend",
+                            "reports.view", "reports.export",
+                            "settings.view", "settings.edit",
+                            "admin_users.view", "admin_users.create", "admin_users.edit", "admin_users.delete",
+                            "roles.view", "roles.create", "roles.edit", "roles.delete"
+                        }
                     };
 
-                    await _authStateProvider.MarkUserAsAuthenticated(user, result.Data.Token);
+                    await _authStateProvider.MarkUserAsAuthenticated(user, result.Token);
                     return new LoginResult { Success = true };
                 }
             }
 
-            var errorContent = await response.Content.ReadAsStringAsync();
             return new LoginResult 
             { 
                 Success = false, 
@@ -142,4 +150,15 @@ public class ApiUserData
     public string? AvatarUrl { get; set; }
     public string RoleName { get; set; } = string.Empty;
     public List<string>? Permissions { get; set; }
+}
+
+public class AdminApiLoginResponse
+{
+    public bool Success { get; set; }
+    public string? Token { get; set; }
+    public string? ProfileId { get; set; }
+    public string? FullName { get; set; }
+    public DateTime? ExpiresAt { get; set; }
+    public string? Message { get; set; }
+    public bool IsNewUser { get; set; }
 }

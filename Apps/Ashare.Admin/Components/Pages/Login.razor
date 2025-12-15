@@ -67,7 +67,14 @@
 
         try
         {
-            var result = await AuthService.LoginLocalAsync(loginModel.Email, loginModel.Password);
+            // Try API login first, fallback to local
+            var result = await AuthService.LoginAsync(loginModel.Email, loginModel.Password);
+            
+            if (!result.Success)
+            {
+                // Fallback to local auth if API fails
+                result = await AuthService.LoginLocalAsync(loginModel.Email, loginModel.Password);
+            }
             
             if (result.Success)
             {
