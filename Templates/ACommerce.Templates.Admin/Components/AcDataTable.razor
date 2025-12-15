@@ -1,0 +1,56 @@
+@namespace ACommerce.Templates.Admin.Components
+@typeparam TItem
+
+<div class="ac-data-table">
+    @if (!string.IsNullOrEmpty(Title))
+    {
+        <div class="table-header">
+            <h3 class="table-title">@Title</h3>
+            @if (HeaderActions != null)
+            {
+                <div class="table-actions">
+                    @HeaderActions
+                </div>
+            }
+        </div>
+    }
+    
+    <SfGrid TValue="TItem" 
+            DataSource="@Data" 
+            AllowPaging="@AllowPaging" 
+            AllowSorting="@AllowSorting"
+            AllowFiltering="@AllowFiltering"
+            AllowSelection="@AllowSelection"
+            AllowResizing="true"
+            EnableHover="true">
+        <GridPageSettings PageSize="@PageSize" PageSizes="@PageSizes"></GridPageSettings>
+        <GridSelectionSettings Type="@(AllowMultiSelect ? SelectionType.Multiple : SelectionType.Single)"></GridSelectionSettings>
+        <GridEvents TValue="TItem" RowSelected="OnRowSelected"></GridEvents>
+        <GridColumns>
+            @Columns
+        </GridColumns>
+    </SfGrid>
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public IEnumerable<TItem>? Data { get; set; }
+    [Parameter] public RenderFragment? Columns { get; set; }
+    [Parameter] public RenderFragment? HeaderActions { get; set; }
+    [Parameter] public bool AllowPaging { get; set; } = true;
+    [Parameter] public bool AllowSorting { get; set; } = true;
+    [Parameter] public bool AllowFiltering { get; set; } = false;
+    [Parameter] public bool AllowSelection { get; set; } = false;
+    [Parameter] public bool AllowMultiSelect { get; set; } = false;
+    [Parameter] public int PageSize { get; set; } = 20;
+    [Parameter] public bool[] PageSizes { get; set; } = new bool[] { true };
+    [Parameter] public EventCallback<TItem> OnRowClick { get; set; }
+
+    private async Task OnRowSelected(RowSelectEventArgs<TItem> args)
+    {
+        if (args.Data != null)
+        {
+            await OnRowClick.InvokeAsync(args.Data);
+        }
+    }
+}

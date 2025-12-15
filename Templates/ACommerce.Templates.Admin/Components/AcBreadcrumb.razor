@@ -1,0 +1,31 @@
+@namespace ACommerce.Templates.Admin.Components
+
+<nav class="ac-breadcrumb" aria-label="breadcrumb">
+    <ol class="breadcrumb-list">
+        @foreach (var (item, index) in Items.Select((item, i) => (item, i)))
+        {
+            <li class="breadcrumb-item @(index == Items.Count - 1 ? "active" : "")">
+                @if (index < Items.Count - 1 && !string.IsNullOrEmpty(item.Url))
+                {
+                    <a href="@item.Url">@item.Title</a>
+                    <span class="separator">/</span>
+                }
+                else
+                {
+                    <span>@item.Title</span>
+                }
+            </li>
+        }
+    </ol>
+</nav>
+
+@code {
+    [Parameter] public List<BreadcrumbItem> Items { get; set; } = new();
+
+    public class BreadcrumbItem
+    {
+        public string Title { get; set; } = string.Empty;
+        public string? Url { get; set; }
+        public string? Icon { get; set; }
+    }
+}

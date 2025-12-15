@@ -1,0 +1,299 @@
+:root {
+    --ac-primary: #3b82f6;
+    --ac-primary-dark: #2563eb;
+    --ac-success: #10b981;
+    --ac-warning: #f59e0b;
+    --ac-danger: #ef4444;
+    --ac-info: #06b6d4;
+    --ac-sidebar-bg: #1e293b;
+    --ac-sidebar-text: #94a3b8;
+    --ac-sidebar-active: #ffffff;
+    --ac-sidebar-width: 260px;
+    --ac-sidebar-collapsed-width: 70px;
+    --ac-header-height: 64px;
+    --ac-content-bg: #f1f5f9;
+    --ac-card-bg: #ffffff;
+    --ac-border-radius: 8px;
+    --ac-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.ac-admin-layout {
+    display: flex;
+    min-height: 100vh;
+    direction: rtl;
+}
+
+.admin-sidebar {
+    width: var(--ac-sidebar-width);
+    transition: width 0.3s ease;
+}
+
+.sidebar-collapsed .admin-sidebar {
+    width: var(--ac-sidebar-collapsed-width);
+}
+
+.admin-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--ac-content-bg);
+}
+
+.admin-header {
+    height: var(--ac-header-height);
+    background: var(--ac-card-bg);
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    box-shadow: var(--ac-shadow);
+}
+
+.admin-content {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.admin-footer {
+    padding: 16px 24px;
+    background: var(--ac-card-bg);
+    border-top: 1px solid #e2e8f0;
+}
+
+.ac-sidebar {
+    background: var(--ac-sidebar-bg);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: var(--ac-sidebar-text);
+}
+
+.ac-sidebar.collapsed {
+    width: var(--ac-sidebar-collapsed-width);
+}
+
+.sidebar-header {
+    height: var(--ac-header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo-text {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ac-sidebar-active);
+}
+
+.logo-icon {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ac-sidebar-active);
+}
+
+.toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--ac-sidebar-text);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 16px 0;
+    overflow-y: auto;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: var(--ac-sidebar-text);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--ac-sidebar-active);
+}
+
+.nav-item.active {
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--ac-primary);
+    border-right: 3px solid var(--ac-primary);
+}
+
+.nav-icon {
+    font-size: 20px;
+    width: 24px;
+    text-align: center;
+}
+
+.nav-badge {
+    background: var(--ac-danger);
+    color: white;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-right: auto;
+}
+
+.sidebar-footer {
+    padding: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ac-stats-card {
+    background: var(--ac-card-bg);
+    border-radius: var(--ac-border-radius);
+    padding: 24px;
+    display: flex;
+    gap: 16px;
+    box-shadow: var(--ac-shadow);
+}
+
+.stats-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.card-primary .stats-icon { background: rgba(59, 130, 246, 0.1); color: var(--ac-primary); }
+.card-success .stats-icon { background: rgba(16, 185, 129, 0.1); color: var(--ac-success); }
+.card-warning .stats-icon { background: rgba(245, 158, 11, 0.1); color: var(--ac-warning); }
+.card-danger .stats-icon { background: rgba(239, 68, 68, 0.1); color: var(--ac-danger); }
+.card-info .stats-icon { background: rgba(6, 182, 212, 0.1); color: var(--ac-info); }
+
+.stats-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.stats-label {
+    color: #64748b;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.stats-change {
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+.stats-change.positive { color: var(--ac-success); }
+.stats-change.negative { color: var(--ac-danger); }
+
+.ac-breadcrumb {
+    background: transparent;
+}
+
+.breadcrumb-list {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.breadcrumb-item a {
+    color: #64748b;
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    color: var(--ac-primary);
+}
+
+.breadcrumb-item.active {
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.separator {
+    color: #cbd5e1;
+    margin: 0 4px;
+}
+
+.ac-data-table {
+    background: var(--ac-card-bg);
+    border-radius: var(--ac-border-radius);
+    box-shadow: var(--ac-shadow);
+    overflow: hidden;
+}
+
+.table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.table-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.ac-chart {
+    background: var(--ac-card-bg);
+    border-radius: var(--ac-border-radius);
+    box-shadow: var(--ac-shadow);
+    padding: 20px;
+}
+
+.chart-header {
+    margin-bottom: 16px;
+}
+
+.chart-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.chart-subtitle {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.ac-confirm-modal .modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.modal-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.modal-warning .modal-icon { background: rgba(245, 158, 11, 0.1); color: var(--ac-warning); }
+.modal-danger .modal-icon { background: rgba(239, 68, 68, 0.1); color: var(--ac-danger); }
+.modal-success .modal-icon { background: rgba(16, 185, 129, 0.1); color: var(--ac-success); }
+.modal-info .modal-icon { background: rgba(6, 182, 212, 0.1); color: var(--ac-info); }

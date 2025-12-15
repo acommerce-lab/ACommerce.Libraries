@@ -1,0 +1,66 @@
+@namespace ACommerce.Templates.Admin.Components
+
+<div class="ac-sidebar @(IsCollapsed ? "collapsed" : "")">
+    <div class="sidebar-header">
+        <div class="logo">
+            @if (!IsCollapsed)
+            {
+                <span class="logo-text">@Title</span>
+            }
+            else
+            {
+                <span class="logo-icon">@Title?.Substring(0, 1)</span>
+            }
+        </div>
+        <button class="toggle-btn" @onclick="ToggleSidebar">
+            <span class="toggle-icon">@(IsCollapsed ? ">" : "<")</span>
+        </button>
+    </div>
+    
+    <nav class="sidebar-nav">
+        @foreach (var item in MenuItems)
+        {
+            <a href="@item.Url" class="nav-item @(item.IsActive ? "active" : "")">
+                <span class="nav-icon">@item.Icon</span>
+                @if (!IsCollapsed)
+                {
+                    <span class="nav-text">@item.Title</span>
+                    @if (item.Badge > 0)
+                    {
+                        <span class="nav-badge">@item.Badge</span>
+                    }
+                }
+            </a>
+        }
+    </nav>
+    
+    @if (FooterContent != null)
+    {
+        <div class="sidebar-footer">
+            @FooterContent
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; } = "Admin";
+    [Parameter] public List<SidebarMenuItem> MenuItems { get; set; } = new();
+    [Parameter] public bool IsCollapsed { get; set; } = false;
+    [Parameter] public EventCallback<bool> IsCollapsedChanged { get; set; }
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+
+    private async Task ToggleSidebar()
+    {
+        IsCollapsed = !IsCollapsed;
+        await IsCollapsedChanged.InvokeAsync(IsCollapsed);
+    }
+
+    public class SidebarMenuItem
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Url { get; set; } = "#";
+        public string Icon { get; set; } = string.Empty;
+        public bool IsActive { get; set; }
+        public int Badge { get; set; }
+    }
+}

@@ -1,0 +1,40 @@
+@namespace ACommerce.Templates.Admin.Components
+
+<div class="ac-chart">
+    @if (!string.IsNullOrEmpty(Title))
+    {
+        <div class="chart-header">
+            <h3 class="chart-title">@Title</h3>
+            @if (Subtitle != null)
+            {
+                <span class="chart-subtitle">@Subtitle</span>
+            }
+        </div>
+    }
+    
+    <SfChart Title="" Height="@Height" Width="100%">
+        <ChartPrimaryXAxis ValueType="@XAxisType" 
+                           LabelFormat="@XAxisFormat"
+                           Title="@XAxisTitle">
+        </ChartPrimaryXAxis>
+        <ChartPrimaryYAxis LabelFormat="@YAxisFormat"
+                           Title="@YAxisTitle">
+        </ChartPrimaryYAxis>
+        <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+        <ChartLegendSettings Visible="@ShowLegend" Position="LegendPosition.Bottom"></ChartLegendSettings>
+        @ChildContent
+    </SfChart>
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Subtitle { get; set; }
+    [Parameter] public string Height { get; set; } = "350px";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public ValueType XAxisType { get; set; } = ValueType.Category;
+    [Parameter] public string? XAxisFormat { get; set; }
+    [Parameter] public string? XAxisTitle { get; set; }
+    [Parameter] public string? YAxisFormat { get; set; }
+    [Parameter] public string? YAxisTitle { get; set; }
+    [Parameter] public bool ShowLegend { get; set; } = true;
+}

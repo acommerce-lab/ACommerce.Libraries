@@ -1,0 +1,64 @@
+@namespace ACommerce.Templates.Admin.Components
+
+<div class="ac-stats-card @ColorClass">
+    <div class="stats-icon">
+        @Icon
+    </div>
+    <div class="stats-content">
+        <div class="stats-value">@FormattedValue</div>
+        <div class="stats-label">@Label</div>
+        @if (Change != 0)
+        {
+            <div class="stats-change @(Change > 0 ? "positive" : "negative")">
+                <span class="change-icon">@(Change > 0 ? "+" : "")</span>
+                <span class="change-value">@Change.ToString("0.0")%</span>
+                <span class="change-period">@ChangePeriod</span>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; } = string.Empty;
+    [Parameter] public decimal Value { get; set; }
+    [Parameter] public string? Prefix { get; set; }
+    [Parameter] public string? Suffix { get; set; }
+    [Parameter] public string Icon { get; set; } = string.Empty;
+    [Parameter] public StatsCardColor Color { get; set; } = StatsCardColor.Primary;
+    [Parameter] public decimal Change { get; set; }
+    [Parameter] public string ChangePeriod { get; set; } = "vs last period";
+    [Parameter] public string? Format { get; set; }
+
+    private string FormattedValue => $"{Prefix}{FormatValue(Value)}{Suffix}";
+
+    private string ColorClass => Color switch
+    {
+        StatsCardColor.Primary => "card-primary",
+        StatsCardColor.Success => "card-success",
+        StatsCardColor.Warning => "card-warning",
+        StatsCardColor.Danger => "card-danger",
+        StatsCardColor.Info => "card-info",
+        _ => "card-primary"
+    };
+
+    private string FormatValue(decimal value)
+    {
+        if (!string.IsNullOrEmpty(Format))
+            return value.ToString(Format);
+        
+        if (value >= 1000000)
+            return $"{value / 1000000:0.#}M";
+        if (value >= 1000)
+            return $"{value / 1000:0.#}K";
+        return value.ToString("N0");
+    }
+
+    public enum StatsCardColor
+    {
+        Primary,
+        Success,
+        Warning,
+        Danger,
+        Info
+    }
+}

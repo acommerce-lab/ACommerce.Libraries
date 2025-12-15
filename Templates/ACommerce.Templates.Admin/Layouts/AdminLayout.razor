@@ -1,0 +1,50 @@
+@namespace ACommerce.Templates.Admin.Layouts
+
+<div class="ac-admin-layout @(SidebarCollapsed ? "sidebar-collapsed" : "")">
+    <aside class="admin-sidebar">
+        <AcSidebar Title="@Title" 
+                   MenuItems="@MenuItems" 
+                   @bind-IsCollapsed="@SidebarCollapsed">
+            <FooterContent>
+                @SidebarFooter
+            </FooterContent>
+        </AcSidebar>
+    </aside>
+    
+    <div class="admin-main">
+        <header class="admin-header">
+            <div class="header-left">
+                @if (Breadcrumbs?.Any() == true)
+                {
+                    <AcBreadcrumb Items="@Breadcrumbs" />
+                }
+            </div>
+            <div class="header-right">
+                @HeaderContent
+            </div>
+        </header>
+        
+        <main class="admin-content">
+            @Body
+        </main>
+        
+        @if (FooterContent != null)
+        {
+            <footer class="admin-footer">
+                @FooterContent
+            </footer>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Admin";
+    [Parameter] public List<AcSidebar.SidebarMenuItem> MenuItems { get; set; } = new();
+    [Parameter] public List<AcBreadcrumb.BreadcrumbItem>? Breadcrumbs { get; set; }
+    [Parameter] public RenderFragment? Body { get; set; }
+    [Parameter] public RenderFragment? HeaderContent { get; set; }
+    [Parameter] public RenderFragment? SidebarFooter { get; set; }
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+    [Parameter] public bool SidebarCollapsed { get; set; } = false;
+    [Parameter] public EventCallback<bool> SidebarCollapsedChanged { get; set; }
+}

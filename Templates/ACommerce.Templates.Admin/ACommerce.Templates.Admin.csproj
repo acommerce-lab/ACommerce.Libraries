@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PackageId>ACommerce.Templates.Admin</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>ACommerce</Authors>
+    <Description>Reusable Blazor admin dashboard components and layouts</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Syncfusion.Blazor.Grid" Version="27.1.48" />
+    <PackageReference Include="Syncfusion.Blazor.Inputs" Version="27.1.48" />
+    <PackageReference Include="Syncfusion.Blazor.Buttons" Version="27.1.48" />
+    <PackageReference Include="Syncfusion.Blazor.Navigations" Version="27.1.48" />
+    <PackageReference Include="Syncfusion.Blazor.Notifications" Version="27.1.48" />
+    <PackageReference Include="Syncfusion.Blazor.Layouts" Version="27.1.48" />
+    <PackageReference Include="Syncfusion.Blazor.Cards" Version="27.1.48" />
+    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="27.1.48" />
+    <PackageReference Include="Syncfusion.Blazor.Calendars" Version="27.1.48" />
+    <PackageReference Include="Syncfusion.Blazor.Popups" Version="27.1.48" />
+    <PackageReference Include="Syncfusion.Blazor.Spinner" Version="27.1.48" />
+    <PackageReference Include="Syncfusion.Blazor.Charts" Version="27.1.48" />
+    <PackageReference Include="Syncfusion.Blazor.Themes" Version="27.1.48" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+</Project>

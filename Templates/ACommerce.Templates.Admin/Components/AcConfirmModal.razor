@@ -1,0 +1,95 @@
+@namespace ACommerce.Templates.Admin.Components
+
+<SfDialog @bind-Visible="@IsVisible" 
+          Width="400px" 
+          IsModal="true" 
+          ShowCloseIcon="true"
+          CssClass="ac-confirm-modal @TypeClass">
+    <DialogTemplates>
+        <Header>
+            <div class="modal-header">
+                <span class="modal-icon">@Icon</span>
+                <span class="modal-title">@Title</span>
+            </div>
+        </Header>
+        <Content>
+            <div class="modal-content">
+                <p>@Message</p>
+                @if (ChildContent != null)
+                {
+                    @ChildContent
+                }
+            </div>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="@CancelText" 
+                      CssClass="e-flat" 
+                      OnClick="OnCancelClick" />
+        <DialogButton Content="@ConfirmText" 
+                      CssClass="@ConfirmButtonClass" 
+                      IsPrimary="true" 
+                      OnClick="OnConfirmClick" />
+    </DialogButtons>
+</SfDialog>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    [Parameter] public string Title { get; set; } = "Confirm";
+    [Parameter] public string Message { get; set; } = "Are you sure?";
+    [Parameter] public string ConfirmText { get; set; } = "Confirm";
+    [Parameter] public string CancelText { get; set; } = "Cancel";
+    [Parameter] public ModalType Type { get; set; } = ModalType.Warning;
+    [Parameter] public EventCallback OnConfirm { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string Icon => Type switch
+    {
+        ModalType.Info => "i",
+        ModalType.Warning => "!",
+        ModalType.Danger => "X",
+        ModalType.Success => "V",
+        _ => "?"
+    };
+
+    private string TypeClass => Type switch
+    {
+        ModalType.Info => "modal-info",
+        ModalType.Warning => "modal-warning",
+        ModalType.Danger => "modal-danger",
+        ModalType.Success => "modal-success",
+        _ => ""
+    };
+
+    private string ConfirmButtonClass => Type switch
+    {
+        ModalType.Danger => "e-danger",
+        ModalType.Warning => "e-warning",
+        ModalType.Success => "e-success",
+        _ => "e-primary"
+    };
+
+    private async Task OnConfirmClick()
+    {
+        await OnConfirm.InvokeAsync();
+        IsVisible = false;
+        await IsVisibleChanged.InvokeAsync(false);
+    }
+
+    private async Task OnCancelClick()
+    {
+        await OnCancel.InvokeAsync();
+        IsVisible = false;
+        await IsVisibleChanged.InvokeAsync(false);
+    }
+
+    public enum ModalType
+    {
+        Info,
+        Warning,
+        Danger,
+        Success
+    }
+}
