@@ -1,0 +1,167 @@
+@page "/reports"
+@inject AdminApiService ApiService
+
+<div class="reports-page">
+    <div class="page-header">
+        <div class="search-filters">
+            <SfDropDownList TItem="string" TValue="string" Placeholder="نوع التقرير" Width="200px" 
+                            DataSource="@ReportTypes" @bind-Value="SelectedReportType" />
+            <SfDateRangePicker TValue="DateTime?" Placeholder="نطاق التاريخ" Width="300px" />
+            <SfButton CssClass="e-primary" OnClick="GenerateReport">إنشاء التقرير</SfButton>
+            <SfButton CssClass="e-outline" IconCss="e-icons e-download">تصدير PDF</SfButton>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon primary">💵</div>
+            <div class="stat-content">
+                <h3>إجمالي المبيعات</h3>
+                <div class="value">125,000 ر.س</div>
+                <div class="change positive">+15% من الشهر الماضي</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon success">📦</div>
+            <div class="stat-content">
+                <h3>الطلبات المكتملة</h3>
+                <div class="value">387</div>
+                <div class="change positive">+12% من الشهر الماضي</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon warning">👥</div>
+            <div class="stat-content">
+                <h3>مستخدمين جدد</h3>
+                <div class="value">89</div>
+                <div class="change positive">+8% من الشهر الماضي</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon danger">⭐</div>
+            <div class="stat-content">
+                <h3>متوسط التقييم</h3>
+                <div class="value">4.7</div>
+                <div class="change positive">+0.2 من الشهر الماضي</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-grid">
+        <div class="card">
+            <div class="card-header">
+                <h2>📊 المبيعات حسب الشهر</h2>
+            </div>
+            <div class="card-body">
+                <SfChart Height="350px">
+                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" />
+                    <ChartPrimaryYAxis LabelFormat="{value} ر.س" />
+                    <ChartSeriesCollection>
+                        <ChartSeries DataSource="@SalesData" 
+                                     XName="Label" 
+                                     YName="Value" 
+                                     Type="ChartSeriesType.SplineArea"
+                                     Fill="#2563eb"
+                                     Opacity="0.5">
+                            <ChartMarker Visible="true" Height="10" Width="10" />
+                        </ChartSeries>
+                    </ChartSeriesCollection>
+                    <ChartTooltipSettings Enable="true" />
+                </SfChart>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>🏢 العروض حسب الفئة</h2>
+            </div>
+            <div class="card-body">
+                <SfAccumulationChart Height="350px">
+                    <AccumulationChartSeriesCollection>
+                        <AccumulationChartSeries DataSource="@CategoryData" 
+                                                  XName="Label" 
+                                                  YName="Value"
+                                                  InnerRadius="40%">
+                            <AccumulationDataLabelSettings Visible="true" Name="Label" Position="AccumulationLabelPosition.Outside" />
+                        </AccumulationChartSeries>
+                    </AccumulationChartSeriesCollection>
+                    <AccumulationChartTooltipSettings Enable="true" />
+                    <AccumulationChartLegendSettings Visible="true" Position="LegendPosition.Bottom" />
+                </SfAccumulationChart>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top: 24px;">
+        <div class="card-header">
+            <h2>🏆 أفضل البائعين</h2>
+        </div>
+        <div class="card-body">
+            <SfGrid DataSource="@TopVendors" AllowPaging="false">
+                <GridColumns>
+                    <GridColumn Field="Rank" HeaderText="#" Width="60" />
+                    <GridColumn Field="Name" HeaderText="البائع" Width="200" />
+                    <GridColumn Field="TotalSales" HeaderText="إجمالي المبيعات" Width="150" Format="N0" />
+                    <GridColumn Field="OrderCount" HeaderText="عدد الطلبات" Width="120" />
+                    <GridColumn Field="Rating" HeaderText="التقييم" Width="100">
+                        <Template>
+                            @{
+                                var vendor = (context as TopVendorDto);
+                                <span>⭐ @vendor?.Rating</span>
+                            }
+                        </Template>
+                    </GridColumn>
+                </GridColumns>
+            </SfGrid>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string SelectedReportType { get; set; } = "المبيعات";
+    private List<string> ReportTypes = new() { "المبيعات", "المستخدمين", "العروض", "البائعين" };
+
+    private List<ChartDataPoint> SalesData = new()
+    {
+        new() { Label = "يناير", Value = 15000 },
+        new() { Label = "فبراير", Value = 18000 },
+        new() { Label = "مارس", Value = 22000 },
+        new() { Label = "أبريل", Value = 19000 },
+        new() { Label = "مايو", Value = 25000 },
+        new() { Label = "يونيو", Value = 28000 },
+    };
+
+    private List<ChartDataPoint> CategoryData = new()
+    {
+        new() { Label = "مساحات عمل", Value = 35 },
+        new() { Label = "قاعات اجتماعات", Value = 25 },
+        new() { Label = "مكاتب خاصة", Value = 20 },
+        new() { Label = "استوديوهات", Value = 12 },
+        new() { Label = "فعاليات", Value = 8 },
+    };
+
+    private List<TopVendorDto> TopVendors = new()
+    {
+        new() { Rank = 1, Name = "شركة المكاتب الذهبية", TotalSales = 45000, OrderCount = 89, Rating = 4.9 },
+        new() { Rank = 2, Name = "مركز الأعمال المتميز", TotalSales = 38000, OrderCount = 67, Rating = 4.8 },
+        new() { Rank = 3, Name = "مكاتب الخليج", TotalSales = 32000, OrderCount = 54, Rating = 4.7 },
+        new() { Rank = 4, Name = "استوديو الإبداع", TotalSales = 28000, OrderCount = 45, Rating = 4.6 },
+        new() { Rank = 5, Name = "قاعات المملكة", TotalSales = 25000, OrderCount = 42, Rating = 4.5 },
+    };
+
+    private void GenerateReport()
+    {
+    }
+
+    public class TopVendorDto
+    {
+        public int Rank { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public decimal TotalSales { get; set; }
+        public int OrderCount { get; set; }
+        public double Rating { get; set; }
+    }
+}

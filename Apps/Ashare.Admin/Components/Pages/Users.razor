@@ -1,0 +1,109 @@
+@page "/users"
+@inject AdminApiService ApiService
+
+<div class="users-page">
+    <div class="page-header">
+        <div class="search-filters">
+            <SfTextBox Placeholder="بحث بالاسم أو البريد..." @bind-Value="SearchTerm" Width="250px" />
+            <SfDropDownList TItem="string" TValue="string" Placeholder="الحالة" Width="150px" 
+                            DataSource="@StatusOptions" @bind-Value="SelectedStatus" />
+            <SfDropDownList TItem="string" TValue="string" Placeholder="الدور" Width="150px" 
+                            DataSource="@RoleOptions" @bind-Value="SelectedRole" />
+            <SfButton CssClass="e-primary" OnClick="SearchUsers">بحث</SfButton>
+        </div>
+        <SfButton CssClass="e-success" IconCss="e-icons e-plus">إضافة مستخدم</SfButton>
+    </div>
+
+    <div class="card">
+        <SfGrid DataSource="@UserItems" AllowPaging="true" AllowSorting="true">
+            <GridPageSettings PageSize="10" />
+            <GridColumns>
+                <GridColumn Field="@nameof(UserDto.Id)" HeaderText="الرقم" Width="80" />
+                <GridColumn Field="@nameof(UserDto.Name)" HeaderText="الاسم" Width="150" />
+                <GridColumn Field="@nameof(UserDto.Email)" HeaderText="البريد الإلكتروني" Width="200" />
+                <GridColumn Field="@nameof(UserDto.Phone)" HeaderText="الهاتف" Width="130" />
+                <GridColumn Field="@nameof(UserDto.Role)" HeaderText="الدور" Width="100">
+                    <Template>
+                        @{
+                            var user = (context as UserDto);
+                            <span class="role-badge @GetRoleClass(user?.Role)">@user?.Role</span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(UserDto.Status)" HeaderText="الحالة" Width="100">
+                    <Template>
+                        @{
+                            var user = (context as UserDto);
+                            <span class="status-badge @GetStatusClass(user?.Status)">@user?.Status</span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(UserDto.CreatedAt)" HeaderText="تاريخ التسجيل" Width="130" Format="d" />
+                <GridColumn HeaderText="الإجراءات" Width="150">
+                    <Template>
+                        @{
+                            var user = (context as UserDto);
+                            <div class="action-buttons">
+                                <SfButton CssClass="e-flat e-primary" IconCss="e-icons e-eye" Title="عرض" />
+                                <SfButton CssClass="e-flat e-warning" IconCss="e-icons e-edit" Title="تعديل" />
+                                <SfButton CssClass="e-flat e-danger" IconCss="e-icons e-trash" Title="حذف" />
+                            </div>
+                        }
+                    </Template>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </div>
+</div>
+
+<style>
+    .role-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    .role-badge.admin { background: rgba(147, 51, 234, 0.1); color: #9333ea; }
+    .role-badge.vendor { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+    .role-badge.customer { background: rgba(100, 116, 139, 0.1); color: #64748b; }
+    
+    .action-buttons {
+        display: flex;
+        gap: 4px;
+    }
+</style>
+
+@code {
+    private List<UserDto> UserItems { get; set; } = new();
+    private string SearchTerm { get; set; } = string.Empty;
+    private string SelectedStatus { get; set; } = string.Empty;
+    private string SelectedRole { get; set; } = string.Empty;
+
+    private List<string> StatusOptions = new() { "الكل", "نشط", "معلق", "محظور" };
+    private List<string> RoleOptions = new() { "الكل", "عميل", "بائع", "مدير" };
+
+    protected override async Task OnInitializedAsync()
+    {
+        UserItems = await ApiService.GetUsersAsync();
+    }
+
+    private async Task SearchUsers()
+    {
+        UserItems = await ApiService.GetUsersAsync();
+    }
+
+    private string GetStatusClass(string? status) => status switch
+    {
+        "نشط" => "success",
+        "معلق" => "warning",
+        "محظور" => "danger",
+        _ => "primary"
+    };
+
+    private string GetRoleClass(string? role) => role switch
+    {
+        "مدير" => "admin",
+        "بائع" => "vendor",
+        _ => "customer"
+    };
+}

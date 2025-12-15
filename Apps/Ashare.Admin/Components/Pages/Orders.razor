@@ -1,0 +1,115 @@
+@page "/orders"
+@inject AdminApiService ApiService
+
+<div class="orders-page">
+    <div class="page-header">
+        <div class="search-filters">
+            <SfTextBox Placeholder="بحث برقم الطلب..." @bind-Value="SearchTerm" Width="200px" />
+            <SfDropDownList TItem="string" TValue="string" Placeholder="الحالة" Width="150px" 
+                            DataSource="@StatusOptions" @bind-Value="SelectedStatus" />
+            <SfDropDownList TItem="string" TValue="string" Placeholder="حالة الدفع" Width="150px" 
+                            DataSource="@PaymentOptions" @bind-Value="SelectedPayment" />
+            <SfDateRangePicker TValue="DateTime?" Placeholder="نطاق التاريخ" Width="250px" />
+            <SfButton CssClass="e-primary" OnClick="SearchOrders">بحث</SfButton>
+        </div>
+    </div>
+
+    <div class="card">
+        <SfGrid DataSource="@OrderItems" AllowPaging="true" AllowSorting="true">
+            <GridPageSettings PageSize="10" />
+            <GridColumns>
+                <GridColumn Field="@nameof(OrderDto.Id)" HeaderText="رقم الطلب" Width="110" />
+                <GridColumn Field="@nameof(OrderDto.CustomerName)" HeaderText="العميل" Width="140" />
+                <GridColumn Field="@nameof(OrderDto.VendorName)" HeaderText="البائع" Width="140" />
+                <GridColumn Field="@nameof(OrderDto.Total)" HeaderText="المجموع" Width="110">
+                    <Template>
+                        @{
+                            var order = (context as OrderDto);
+                            <span class="order-total">@order?.Total.ToString("N0") ر.س</span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(OrderDto.Status)" HeaderText="الحالة" Width="120">
+                    <Template>
+                        @{
+                            var order = (context as OrderDto);
+                            <span class="status-badge @GetStatusClass(order?.Status)">@order?.Status</span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(OrderDto.PaymentStatus)" HeaderText="الدفع" Width="100">
+                    <Template>
+                        @{
+                            var order = (context as OrderDto);
+                            <span class="status-badge @GetPaymentClass(order?.PaymentStatus)">@order?.PaymentStatus</span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(OrderDto.CreatedAt)" HeaderText="التاريخ" Width="120" Format="d" />
+                <GridColumn HeaderText="الإجراءات" Width="180">
+                    <Template>
+                        @{
+                            var order = (context as OrderDto);
+                            <div class="action-buttons">
+                                <SfButton CssClass="e-flat e-primary" IconCss="e-icons e-eye" Title="التفاصيل" />
+                                <SfButton CssClass="e-flat e-warning" IconCss="e-icons e-edit" Title="تغيير الحالة" />
+                                @if (order?.PaymentStatus == "مدفوع" && order?.Status != "ملغي")
+                                {
+                                    <SfButton CssClass="e-flat e-danger" IconCss="e-icons e-undo" Title="استرداد" />
+                                }
+                            </div>
+                        }
+                    </Template>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </div>
+</div>
+
+<style>
+    .order-total {
+        font-weight: 600;
+        color: #2563eb;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 4px;
+    }
+</style>
+
+@code {
+    private List<OrderDto> OrderItems { get; set; } = new();
+    private string SearchTerm { get; set; } = string.Empty;
+    private string SelectedStatus { get; set; } = string.Empty;
+    private string SelectedPayment { get; set; } = string.Empty;
+
+    private List<string> StatusOptions = new() { "الكل", "جديد", "قيد المعالجة", "قيد التوصيل", "مكتمل", "ملغي" };
+    private List<string> PaymentOptions = new() { "الكل", "معلق", "مدفوع", "مسترد" };
+
+    protected override async Task OnInitializedAsync()
+    {
+        OrderItems = await ApiService.GetOrdersAsync();
+    }
+
+    private async Task SearchOrders()
+    {
+        OrderItems = await ApiService.GetOrdersAsync();
+    }
+
+    private string GetStatusClass(string? status) => status switch
+    {
+        "مكتمل" => "success",
+        "جديد" or "قيد المعالجة" or "قيد التوصيل" => "warning",
+        "ملغي" => "danger",
+        _ => "primary"
+    };
+
+    private string GetPaymentClass(string? status) => status switch
+    {
+        "مدفوع" => "success",
+        "معلق" => "warning",
+        "مسترد" => "danger",
+        _ => "primary"
+    };
+}

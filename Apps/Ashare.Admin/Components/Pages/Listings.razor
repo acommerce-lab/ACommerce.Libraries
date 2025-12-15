@@ -1,0 +1,96 @@
+@page "/listings"
+@inject AdminApiService ApiService
+
+<div class="listings-page">
+    <div class="page-header">
+        <div class="search-filters">
+            <SfTextBox Placeholder="بحث بالعنوان..." @bind-Value="SearchTerm" Width="250px" />
+            <SfDropDownList TItem="string" TValue="string" Placeholder="الحالة" Width="150px" 
+                            DataSource="@StatusOptions" @bind-Value="SelectedStatus" />
+            <SfDropDownList TItem="string" TValue="string" Placeholder="الفئة" Width="150px" 
+                            DataSource="@CategoryOptions" @bind-Value="SelectedCategory" />
+            <SfButton CssClass="e-primary" OnClick="SearchListings">بحث</SfButton>
+        </div>
+    </div>
+
+    <div class="card">
+        <SfGrid DataSource="@ListingItems" AllowPaging="true" AllowSorting="true">
+            <GridPageSettings PageSize="10" />
+            <GridColumns>
+                <GridColumn Field="@nameof(ListingDto.Id)" HeaderText="الرقم" Width="80" />
+                <GridColumn Field="@nameof(ListingDto.Title)" HeaderText="العنوان" Width="200" />
+                <GridColumn Field="@nameof(ListingDto.VendorName)" HeaderText="البائع" Width="150" />
+                <GridColumn Field="@nameof(ListingDto.Category)" HeaderText="الفئة" Width="120" />
+                <GridColumn Field="@nameof(ListingDto.Price)" HeaderText="السعر" Width="100" Format="N0">
+                    <Template>
+                        @{
+                            var listing = (context as ListingDto);
+                            <span>@listing?.Price.ToString("N0") ر.س</span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(ListingDto.Status)" HeaderText="الحالة" Width="120">
+                    <Template>
+                        @{
+                            var listing = (context as ListingDto);
+                            <span class="status-badge @GetStatusClass(listing?.Status)">@listing?.Status</span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(ListingDto.CreatedAt)" HeaderText="تاريخ الإنشاء" Width="130" Format="d" />
+                <GridColumn HeaderText="الإجراءات" Width="200">
+                    <Template>
+                        @{
+                            var listing = (context as ListingDto);
+                            <div class="action-buttons">
+                                <SfButton CssClass="e-flat e-primary" IconCss="e-icons e-eye" Title="عرض" />
+                                @if (listing?.Status == "قيد المراجعة" || listing?.Status == "معلق")
+                                {
+                                    <SfButton CssClass="e-flat e-success" IconCss="e-icons e-check" Title="موافقة" />
+                                    <SfButton CssClass="e-flat e-danger" IconCss="e-icons e-close" Title="رفض" />
+                                }
+                                <SfButton CssClass="e-flat e-warning" IconCss="e-icons e-edit" Title="تعديل" />
+                            </div>
+                        }
+                    </Template>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </div>
+</div>
+
+<style>
+    .action-buttons {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+</style>
+
+@code {
+    private List<ListingDto> ListingItems { get; set; } = new();
+    private string SearchTerm { get; set; } = string.Empty;
+    private string SelectedStatus { get; set; } = string.Empty;
+    private string SelectedCategory { get; set; } = string.Empty;
+
+    private List<string> StatusOptions = new() { "الكل", "نشط", "معلق", "قيد المراجعة", "مرفوض" };
+    private List<string> CategoryOptions = new() { "الكل", "مساحات عمل", "قاعات", "مكاتب", "استوديوهات", "فعاليات" };
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListingItems = await ApiService.GetListingsAsync();
+    }
+
+    private async Task SearchListings()
+    {
+        ListingItems = await ApiService.GetListingsAsync();
+    }
+
+    private string GetStatusClass(string? status) => status switch
+    {
+        "نشط" => "success",
+        "معلق" or "قيد المراجعة" => "warning",
+        "مرفوض" => "danger",
+        _ => "primary"
+    };
+}

@@ -1,0 +1,134 @@
+@page "/settings"
+
+<div class="settings-page">
+    <div class="settings-grid">
+        <div class="card">
+            <div class="card-header">
+                <h2>الإعدادات العامة</h2>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label>اسم التطبيق</label>
+                    <SfTextBox @bind-Value="AppName" Width="100%" />
+                </div>
+                <div class="form-group">
+                    <label>البريد الإلكتروني للدعم</label>
+                    <SfTextBox @bind-Value="SupportEmail" Width="100%" />
+                </div>
+                <div class="form-group">
+                    <label>رقم هاتف الدعم</label>
+                    <SfTextBox @bind-Value="SupportPhone" Width="100%" />
+                </div>
+                <div class="form-group">
+                    <label>العملة الافتراضية</label>
+                    <SfDropDownList TItem="string" TValue="string" @bind-Value="DefaultCurrency" 
+                                    DataSource="@CurrencyOptions" 
+                                    Width="100%" />
+                </div>
+                <SfButton CssClass="e-primary" style="margin-top: 16px;">حفظ التغييرات</SfButton>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>إعدادات الدفع</h2>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label>بوابة الدفع</label>
+                    <SfDropDownList TItem="string" TValue="string" @bind-Value="PaymentGateway" 
+                                    DataSource="@PaymentGatewayOptions" 
+                                    Width="100%" />
+                </div>
+                <div class="form-group">
+                    <label>نسبة العمولة (%)</label>
+                    <SfNumericTextBox TValue="decimal" @bind-Value="CommissionRate" Min="0" Max="50" Step="0.5m" Width="100%" />
+                </div>
+                <div class="form-group">
+                    <SfCheckBox @bind-Checked="AutoPayouts" Label="تحويل تلقائي للبائعين" />
+                </div>
+                <SfButton CssClass="e-primary" style="margin-top: 16px;">حفظ التغييرات</SfButton>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>إعدادات البريد</h2>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label>مزود البريد</label>
+                    <SfDropDownList TItem="string" TValue="string" @bind-Value="EmailProvider" 
+                                    DataSource="@EmailProviderOptions" 
+                                    Width="100%" />
+                </div>
+                <div class="form-group">
+                    <label>البريد المرسل</label>
+                    <SfTextBox @bind-Value="SenderEmail" Width="100%" />
+                </div>
+                <div class="form-group">
+                    <SfCheckBox @bind-Checked="EmailNotifications" Label="تفعيل الإشعارات البريدية" />
+                </div>
+                <SfButton CssClass="e-primary" style="margin-top: 16px;">حفظ التغييرات</SfButton>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>إعدادات الإشعارات</h2>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <SfCheckBox @bind-Checked="NewOrderNotify" Label="إشعار عند طلب جديد" />
+                </div>
+                <div class="form-group">
+                    <SfCheckBox @bind-Checked="NewUserNotify" Label="إشعار عند مستخدم جديد" />
+                </div>
+                <div class="form-group">
+                    <SfCheckBox @bind-Checked="PendingListingNotify" Label="إشعار عند عرض بانتظار الموافقة" />
+                </div>
+                <SfButton CssClass="e-primary" style="margin-top: 16px;">حفظ التغييرات</SfButton>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .settings-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 24px;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #1e293b;
+    }
+</style>
+
+@code {
+    private string AppName { get; set; } = "عشير";
+    private string SupportEmail { get; set; } = "support@ashare.sa";
+    private string SupportPhone { get; set; } = "+966 50 123 4567";
+    private string DefaultCurrency { get; set; } = "SAR";
+    private string PaymentGateway { get; set; } = "Moyasar";
+    private decimal CommissionRate { get; set; } = 5;
+    private string EmailProvider { get; set; } = "SMTP";
+    private string SenderEmail { get; set; } = "noreply@ashare.sa";
+    
+    private bool AutoPayouts { get; set; } = true;
+    private bool EmailNotifications { get; set; } = true;
+    private bool NewOrderNotify { get; set; } = true;
+    private bool NewUserNotify { get; set; } = true;
+    private bool PendingListingNotify { get; set; } = true;
+
+    private List<string> CurrencyOptions = new() { "SAR", "USD", "EUR" };
+    private List<string> PaymentGatewayOptions = new() { "Moyasar", "Stripe", "PayPal" };
+    private List<string> EmailProviderOptions = new() { "SMTP", "SendGrid", "AWS SES" };
+}

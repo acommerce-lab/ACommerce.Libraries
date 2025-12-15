@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <title>لوحة تحكم عشير</title>
+    <link rel="stylesheet" href="_content/Syncfusion.Blazor.Themes/bootstrap5.css" />
+    <link rel="stylesheet" href="_content/ACommerce.Templates.Admin/css/admin-theme.css" />
+    <link rel="stylesheet" href="css/app.css" />
+    <HeadOutlet @rendermode="@RenderModeForComponents" />
+</head>
+<body>
+    <Routes @rendermode="@RenderModeForComponents" />
+    <script src="_framework/blazor.web.js"></script>
+    <script src="_content/Syncfusion.Blazor.Core/scripts/syncfusion-blazor.min.js" type="text/javascript"></script>
+</body>
+</html>
+
+@code {
+    private static IComponentRenderMode RenderModeForComponents => Microsoft.AspNetCore.Components.Web.RenderMode.InteractiveServer;
+}

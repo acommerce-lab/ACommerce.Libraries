@@ -24,7 +24,7 @@
             AllowResizing="true"
             EnableHover="true">
         <GridPageSettings PageSize="@PageSize" PageSizes="@PageSizes"></GridPageSettings>
-        <GridSelectionSettings Type="@(AllowMultiSelect ? SelectionType.Multiple : SelectionType.Single)"></GridSelectionSettings>
+        <GridSelectionSettings Type="@(AllowMultiSelect ? Syncfusion.Blazor.Grids.SelectionType.Multiple : Syncfusion.Blazor.Grids.SelectionType.Single)"></GridSelectionSettings>
         <GridEvents TValue="TItem" RowSelected="OnRowSelected"></GridEvents>
         <GridColumns>
             @Columns

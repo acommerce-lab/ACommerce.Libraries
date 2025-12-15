@@ -1,0 +1,108 @@
+@page "/"
+@inject AdminApiService ApiService
+
+<div class="dashboard-page">
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon primary">👥</div>
+            <div class="stat-content">
+                <h3>إجمالي المستخدمين</h3>
+                <div class="value">@Stats.TotalUsers.ToString("N0")</div>
+                <div class="change positive">+@Stats.NewUsersThisMonth هذا الشهر</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon success">🏢</div>
+            <div class="stat-content">
+                <h3>العروض النشطة</h3>
+                <div class="value">@Stats.TotalListings.ToString("N0")</div>
+                <div class="change warning">@Stats.PendingListings بانتظار الموافقة</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon warning">📦</div>
+            <div class="stat-content">
+                <h3>الطلبات</h3>
+                <div class="value">@Stats.TotalOrders.ToString("N0")</div>
+                <div class="change positive">+@Stats.OrdersThisMonth هذا الشهر</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon danger">💰</div>
+            <div class="stat-content">
+                <h3>إجمالي الإيرادات</h3>
+                <div class="value">@Stats.TotalRevenue.ToString("N0") ر.س</div>
+                <div class="change positive">@Stats.ActiveVendors بائع نشط</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-grid">
+        <div class="card">
+            <div class="card-header">
+                <h2>📈 المبيعات الشهرية</h2>
+            </div>
+            <div class="card-body">
+                <SfChart Height="300px">
+                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" />
+                    <ChartPrimaryYAxis LabelFormat="{value} ر.س" />
+                    <ChartSeriesCollection>
+                        <ChartSeries DataSource="@ChartData" 
+                                     XName="Label" 
+                                     YName="Value" 
+                                     Type="ChartSeriesType.Column"
+                                     Fill="#2563eb">
+                            <ChartCornerRadius TopLeft="4" TopRight="4" />
+                        </ChartSeries>
+                    </ChartSeriesCollection>
+                    <ChartTooltipSettings Enable="true" />
+                </SfChart>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>📦 آخر الطلبات</h2>
+                <a href="/orders" class="view-all">عرض الكل</a>
+            </div>
+            <div class="card-body">
+                @foreach (var order in RecentOrders)
+                {
+                    <div class="order-item">
+                        <div class="order-info">
+                            <span class="order-id">@order.Id</span>
+                            <span class="order-customer">@order.CustomerName</span>
+                        </div>
+                        <div class="order-amount">@order.Amount.ToString("N0") ر.س</div>
+                        <span class="status-badge @GetStatusClass(order.Status)">@order.Status</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private DashboardStats Stats { get; set; } = new();
+    private List<RecentOrder> RecentOrders { get; set; } = new();
+    private List<ChartDataPoint> ChartData { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Stats = await ApiService.GetDashboardStatsAsync();
+        RecentOrders = await ApiService.GetRecentOrdersAsync(5);
+        ChartData = await ApiService.GetSalesChartDataAsync();
+    }
+
+    private string GetStatusClass(string status) => status switch
+    {
+        "مكتمل" => "success",
+        "جديد" => "primary",
+        "قيد التوصيل" or "قيد المعالجة" => "warning",
+        "ملغي" => "danger",
+        _ => "primary"
+    };
+}

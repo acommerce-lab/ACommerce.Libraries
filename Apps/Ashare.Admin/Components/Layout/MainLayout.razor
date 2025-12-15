@@ -1,0 +1,76 @@
+@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+
+<div class="ac-admin-layout @(SidebarCollapsed ? "sidebar-collapsed" : "")">
+    <aside class="admin-sidebar">
+        <AcSidebar Title="عشير" 
+                   MenuItems="@MenuItems" 
+                   @bind-IsCollapsed="@SidebarCollapsed">
+            <FooterContent>
+                <div class="user-info">
+                    <span class="user-avatar">م</span>
+                    @if (!SidebarCollapsed)
+                    {
+                        <span class="user-name">مدير النظام</span>
+                    }
+                </div>
+            </FooterContent>
+        </AcSidebar>
+    </aside>
+    
+    <div class="admin-main">
+        <header class="admin-header">
+            <div class="header-left">
+                <h1 class="page-title">@GetPageTitle()</h1>
+            </div>
+            <div class="header-right">
+                <SfButton CssClass="e-outline" IconCss="e-icons e-bell">
+                    الإشعارات
+                </SfButton>
+            </div>
+        </header>
+        
+        <main class="admin-content">
+            @Body
+        </main>
+        
+        <footer class="admin-footer">
+            <span>© 2025 عشير - جميع الحقوق محفوظة</span>
+        </footer>
+    </div>
+</div>
+
+@code {
+    private bool SidebarCollapsed { get; set; } = false;
+
+    private List<AcSidebar.SidebarMenuItem> MenuItems => new()
+    {
+        new() { Title = "لوحة التحكم", Url = "/", Icon = "📊", IsActive = IsCurrentPage("/") },
+        new() { Title = "المستخدمين", Url = "/users", Icon = "👥", IsActive = IsCurrentPage("/users") },
+        new() { Title = "العروض", Url = "/listings", Icon = "🏢", IsActive = IsCurrentPage("/listings"), Badge = 23 },
+        new() { Title = "الطلبات", Url = "/orders", Icon = "📦", IsActive = IsCurrentPage("/orders") },
+        new() { Title = "التقارير", Url = "/reports", Icon = "📈", IsActive = IsCurrentPage("/reports") },
+        new() { Title = "الإعدادات", Url = "/settings", Icon = "⚙️", IsActive = IsCurrentPage("/settings") },
+    };
+
+    private bool IsCurrentPage(string url)
+    {
+        var currentPath = new Uri(NavigationManager.Uri).AbsolutePath;
+        return currentPath == url || (url != "/" && currentPath.StartsWith(url));
+    }
+
+    private string GetPageTitle()
+    {
+        var currentPath = new Uri(NavigationManager.Uri).AbsolutePath;
+        return currentPath switch
+        {
+            "/" => "لوحة التحكم",
+            "/users" => "إدارة المستخدمين",
+            "/listings" => "إدارة العروض",
+            "/orders" => "إدارة الطلبات",
+            "/reports" => "التقارير",
+            "/settings" => "الإعدادات",
+            _ => "عشير"
+        };
+    }
+}
