@@ -1,0 +1,32 @@
+ACommerce.Catalog.Units -> /src/Other/ACommerce.Catalog.Units/bin/Release/net9.0/ACommerce.Catalog.Units.dll
+  ACommerce.Client.Nafath -> /src/libs/frontend/clients/ACommerce.Client.Nafath/bin/Release/net9.0/ACommerce.Client.Nafath.dll
+  ACommerce.Client.Files -> /src/libs/frontend/clients/ACommerce.Client.Files/bin/Release/net9.0/ACommerce.Client.Files.dll
+  ACommerce.Subscriptions.Api -> /src/libs/backend/marketplace/ACommerce.Subscriptions.Api/bin/Release/net9.0/ACommerce.Subscriptions.Api.dll
+  ACommerce.Client.Products -> /src/libs/frontend/clients/ACommerce.Client.Products/bin/Release/net9.0/ACommerce.Client.Products.dll
+  ACommerce.Client.Auth -> /src/libs/frontend/clients/ACommerce.Client.Auth/bin/Release/net9.0/ACommerce.Client.Auth.dll
+  ACommerce.Realtime.SignalR -> /src/libs/backend/messaging/ACommerce.Realtime.SignalR/bin/Release/net9.0/ACommerce.Realtime.SignalR.dll
+  ACommerce.Notifications.Channels.InApp -> /src/libs/backend/messaging/ACommerce.Notifications.Channels.InApp/bin/Release/net9.0/ACommerce.Notifications.Channels.InApp.dll
+  ACommerce.ServiceRegistry.Server -> /src/libs/backend/integration/ACommerce.ServiceRegistry.Server/bin/Release/net9.0/ACommerce.ServiceRegistry.Server.dll
+  ACommerce.Locations.Api -> /src/Other/ACommerce.Locations.Api/bin/Release/net9.0/ACommerce.Locations.Api.dll
+  ACommerce.Templates.Customer -> /src/Templates/ACommerce.Templates.Customer/bin/Release/net9.0/ACommerce.Templates.Customer.dll
+/src/Apps/Ashare.Shared/Components/Pages/Host/SubscriptionCheckout.razor(49,17): warning RZ10012: Found markup element with unexpected name 'PaymentWebView'. If this is intended to be a component, add a @using directive for its namespace. [/src/Apps/Ashare.Shared/Ashare.Shared.csproj]
+/src/Apps/Ashare.Shared/Services/AshareApiService.cs(351,46): warning CS1998: This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread. [/src/Apps/Ashare.Shared/Ashare.Shared.csproj]
+/src/Apps/Ashare.Shared/Components/Pages/CreateListing.razor(363,30): warning CS8604: Possible null reference argument for parameter 'source' in 'IEnumerable<ListingAttributeDefinition> Enumerable.Select<AttributeDefinitionDto, ListingAttributeDefinition>(IEnumerable<AttributeDefinitionDto> source, Func<AttributeDefinitionDto, ListingAttributeDefinition> selector)'. [/src/Apps/Ashare.Shared/Ashare.Shared.csproj]
+/src/Apps/Ashare.Shared/Components/Pages/SpaceDetails.razor(783,17): warning CS4014: Because this call is not awaited, execution of the current method continues before the call is completed. Consider applying the 'await' operator to the result of the call. [/src/Apps/Ashare.Shared/Ashare.Shared.csproj]
+/src/Apps/Ashare.Shared/Components/Pages/CreateListing.razor(560,24): warning CS1998: This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread. [/src/Apps/Ashare.Shared/Ashare.Shared.csproj]
+/src/Apps/Ashare.Shared/Components/Pages/Explore.razor(133,83): warning CS8602: Dereference of a possibly null reference. [/src/Apps/Ashare.Shared/Ashare.Shared.csproj]
+/src/Apps/Ashare.Shared/Components/Pages/Explore.razor(135,30): warning CS8602: Dereference of a possibly null reference. [/src/Apps/Ashare.Shared/Ashare.Shared.csproj]
+/src/Apps/Ashare.Shared/Components/Pages/Host/SubscriptionCheckout.razor(206,30): warning CS0649: Field 'SubscriptionCheckout._currentSubscription' is never assigned to, and will always have its default value null [/src/Apps/Ashare.Shared/Ashare.Shared.csproj]
+/src/Apps/Ashare.Shared/Components/Pages/Host/SubscriptionPlans.razor(219,34): warning CS0649: Field 'SubscriptionPlans._currentPlan' is never assigned to, and will always have its default value null [/src/Apps/Ashare.Shared/Ashare.Shared.csproj]
+/src/Apps/Ashare.Shared/Components/Pages/Host/SubscriptionPlans.razor(218,30): warning CS0649: Field 'SubscriptionPlans._currentSubscription' is never assigned to, and will always have its default value null [/src/Apps/Ashare.Shared/Ashare.Shared.csproj]
+/src/Apps/Ashare.Shared/Components/Pages/Auth/ProfileEdit.razor(208,18): warning CS0649: Field 'ProfileEdit._emailVerified' is never assigned to, and will always have its default value false [/src/Apps/Ashare.Shared/Ashare.Shared.csproj]
+/src/Apps/Ashare.Shared/Components/Pages/Auth/ProfileEdit.razor(209,18): warning CS0649: Field 'ProfileEdit._phoneVerified' is never assigned to, and will always have its default value false [/src/Apps/Ashare.Shared/Ashare.Shared.csproj]
+/src/Apps/Ashare.Shared/Components/Pages/Home.razor(184,18): warning CS0414: The field 'Home._isLoadingSpaces' is assigned but its value is never used [/src/Apps/Ashare.Shared/Ashare.Shared.csproj]
+/src/Apps/Ashare.Shared/Components/Pages/SpaceDetails.razor(448,18): warning CS0414: The field 'SpaceDetails._isLoading' is assigned but its value is never used [/src/Apps/Ashare.Shared/Ashare.Shared.csproj]
+/src/Apps/Ashare.Shared/Components/Pages/Host/SubscriptionCheckout.razor(203,18): warning CS0414: The field 'SubscriptionCheckout._waitingForPaymentResult' is assigned but its value is never used [/src/Apps/Ashare.Shared/Ashare.Shared.csproj]
+  Ashare.Shared -> /src/Apps/Ashare.Shared/bin/Release/net9.0/Ashare.Shared.dll
+The command '/bin/sh -c dotnet publish "Ashare.Api.csproj" -c Release -o /app/publish /p:GeneratePackageOnBuild=false' returned a non-zero code: 1
+Finished Step #0
+ERROR
+ERROR: build step 0 "gcr.io/cloud-builders/docker" failed: step exited with non-zero status: 1
+
