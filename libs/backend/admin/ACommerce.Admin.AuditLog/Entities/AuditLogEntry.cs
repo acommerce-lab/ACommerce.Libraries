@@ -1,4 +1,5 @@
-using ACommerce.SharedKernel.Abstractions;
+using ACommerce.SharedKernel.Abstractions.Entities;
+using ACommerce.SharedKernel.Abstractions.Repositories;
 
 namespace ACommerce.Admin.AuditLog.Entities;
 

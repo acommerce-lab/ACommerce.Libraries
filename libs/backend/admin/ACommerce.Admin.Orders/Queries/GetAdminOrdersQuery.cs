@@ -1,6 +1,7 @@
 using ACommerce.Admin.Orders.DTOs;
 using ACommerce.Orders.Entities;
-using ACommerce.SharedKernel.Abstractions;
+using ACommerce.SharedKernel.Abstractions.Entities;
+using ACommerce.SharedKernel.Abstractions.Repositories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

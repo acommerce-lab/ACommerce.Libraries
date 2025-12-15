@@ -1,6 +1,7 @@
 using ACommerce.Admin.AuditLog.DTOs;
 using ACommerce.Admin.AuditLog.Entities;
-using ACommerce.SharedKernel.Abstractions;
+using ACommerce.SharedKernel.Abstractions.Entities;
+using ACommerce.SharedKernel.Abstractions.Repositories;
 using MediatR;
 
 namespace ACommerce.Admin.AuditLog.Commands;

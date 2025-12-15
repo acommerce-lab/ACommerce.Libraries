@@ -1,8 +1,10 @@
+using ACommerce.Orders.Enums;
 using ACommerce.Admin.Reports.DTOs;
 using ACommerce.Catalog.Listings.Entities;
 using ACommerce.Orders;
 using ACommerce.Orders.Entities;
-using ACommerce.SharedKernel.Abstractions;
+using ACommerce.SharedKernel.Abstractions.Entities;
+using ACommerce.SharedKernel.Abstractions.Repositories;
 using ACommerce.Vendors.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
