@@ -15,19 +15,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Syncfusion.Blazor.Grid" Version="27.1.48" />
-    <PackageReference Include="Syncfusion.Blazor.Inputs" Version="27.1.48" />
-    <PackageReference Include="Syncfusion.Blazor.Buttons" Version="27.1.48" />
-    <PackageReference Include="Syncfusion.Blazor.Navigations" Version="27.1.48" />
-    <PackageReference Include="Syncfusion.Blazor.Notifications" Version="27.1.48" />
-    <PackageReference Include="Syncfusion.Blazor.Layouts" Version="27.1.48" />
-    <PackageReference Include="Syncfusion.Blazor.Cards" Version="27.1.48" />
-    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="27.1.48" />
-    <PackageReference Include="Syncfusion.Blazor.Calendars" Version="27.1.48" />
-    <PackageReference Include="Syncfusion.Blazor.Popups" Version="27.1.48" />
-    <PackageReference Include="Syncfusion.Blazor.Spinner" Version="27.1.48" />
-    <PackageReference Include="Syncfusion.Blazor.Charts" Version="27.1.48" />
-    <PackageReference Include="Syncfusion.Blazor.Themes" Version="27.1.48" />
+    <PackageReference Include="Syncfusion.Blazor.Grid" Version="31.2.18" />
+    <PackageReference Include="Syncfusion.Blazor.Inputs" Version="31.2.18" />
+    <PackageReference Include="Syncfusion.Blazor.Buttons" Version="31.2.18" />
+    <PackageReference Include="Syncfusion.Blazor.Navigations" Version="31.2.18" />
+    <PackageReference Include="Syncfusion.Blazor.Notifications" Version="31.2.18" />
+    <PackageReference Include="Syncfusion.Blazor.Layouts" Version="31.2.18" />
+    <PackageReference Include="Syncfusion.Blazor.Cards" Version="31.2.18" />
+    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="31.2.18" />
+    <PackageReference Include="Syncfusion.Blazor.Calendars" Version="31.2.18" />
+    <PackageReference Include="Syncfusion.Blazor.Popups" Version="31.2.18" />
+    <PackageReference Include="Syncfusion.Blazor.Spinner" Version="31.2.18" />
+    <PackageReference Include="Syncfusion.Blazor.Charts" Version="31.2.18" />
+    <PackageReference Include="Syncfusion.Blazor.Themes" Version="31.2.18" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
