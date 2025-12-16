@@ -31,6 +31,21 @@
                 <WindowsPackageType>None</WindowsPackageType>
         </PropertyGroup>
 
+        <PropertyGroup Condition="'$(TargetFramework)'=='net9.0-ios'">
+          <ProvisioningType>automatic</ProvisioningType>
+          <CodesignKey>Apple Development: Created via API (K3DG4CZU32)</CodesignKey>
+          <CodesignProvision>VS: com.ashare.spaces Development</CodesignProvision>
+        </PropertyGroup>
+
+
+
+	  <PropertyGroup Condition="'$(TargetFramework)'=='net10.0-ios'">
+		  <CodesignKey>Apple Development: Created via API (55QDWW45MS)</CodesignKey>
+		  <CodesignProvision>VS: com.ashare.ashare Development</CodesignProvision>
+		  <ProvisioningType>automatic</ProvisioningType>
+		  <AutomaticProvision>true</AutomaticProvision>
+	  </PropertyGroup>
+	
         <ItemGroup>
                 <!-- App Icon -->
                 <MauiIcon Include="Resources\AppIcon\appicon.png" Color="#FFFFFF" />
@@ -69,9 +84,7 @@
 
         <!-- Sync CSS from Shared project before build -->
         <Target Name="SyncSharedCss" BeforeTargets="Build">
-                <Copy SourceFiles="..\Ashare.Shared\wwwroot\css\ashare.css"
-                          DestinationFiles="wwwroot\css\ashare.css"
-                          SkipUnchangedFiles="true" />
+                <Copy SourceFiles="..\Ashare.Shared\wwwroot\css\ashare.css" DestinationFiles="wwwroot\css\ashare.css" SkipUnchangedFiles="true" />
                 <Message Text="Synced ashare.css from Ashare.Shared" Importance="high" />
         </Target>
 
