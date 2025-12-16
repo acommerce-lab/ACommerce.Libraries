@@ -1,0 +1,220 @@
+12-16 06:17:47.853 D/EGL_emulation( 7318): app_time_stats: avg=30.68ms min=3.74ms max=287.90ms count=26
+12-16 06:17:47.871 W/monodroid-assembly( 7318): open_from_bundles: failed to load bundled assembly System.Formats.Asn1.dll
+12-16 06:17:47.871 W/monodroid-assembly( 7318): open_from_bundles: the assembly might have been uploaded to the device with FastDev instead
+12-16 06:17:47.871 W/monodroid-assembly( 7318): open_from_bundles: failed to load bundled assembly System.Formats.Asn1.dll
+12-16 06:17:47.871 W/monodroid-assembly( 7318): open_from_bundles: the assembly might have been uploaded to the device with FastDev instead
+12-16 06:17:47.871 W/monodroid-assembly( 7318): open_from_bundles: failed to load bundled assembly System.Formats.Asn1.dll
+12-16 06:17:47.871 W/monodroid-assembly( 7318): open_from_bundles: the assembly might have been uploaded to the device with FastDev instead
+12-16 06:17:47.872 W/monodroid-assembly( 7318): open_from_bundles: failed to load bundled assembly System.Formats.Asn1.dll
+12-16 06:17:47.872 W/monodroid-assembly( 7318): open_from_bundles: the assembly might have been uploaded to the device with FastDev instead
+12-16 06:17:47.905 W/monodroid-assembly( 7318): open_from_bundles: failed to load bundled assembly System.Runtime.Numerics.dll
+12-16 06:17:47.905 W/monodroid-assembly( 7318): open_from_bundles: the assembly might have been uploaded to the device with FastDev instead
+12-16 06:17:47.905 W/monodroid-assembly( 7318): open_from_bundles: failed to load bundled assembly System.Runtime.Numerics.dll
+12-16 06:17:47.905 W/monodroid-assembly( 7318): open_from_bundles: the assembly might have been uploaded to the device with FastDev instead
+12-16 06:17:47.905 W/monodroid-assembly( 7318): open_from_bundles: failed to load bundled assembly System.Runtime.Numerics.dll
+12-16 06:17:47.906 W/monodroid-assembly( 7318): open_from_bundles: the assembly might have been uploaded to the device with FastDev instead
+'Ashare.App.dll' (Mono: Default Domain): Loaded 'C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.App\obj\Debug\net9.0-android\android\assets\x86_64\System.Formats.Asn1.dll'. Symbol loading disabled by Include/Exclude setting.
+'Ashare.App.dll' (Mono: Default Domain): Loaded 'C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.App\obj\Debug\net9.0-android\android\assets\x86_64\System.Runtime.Numerics.dll'. Symbol loading disabled by Include/Exclude setting.
+12-16 06:17:48.866 D/EGL_emulation( 7318): app_time_stats: avg=5.54ms min=3.00ms max=19.19ms count=61
+12-16 06:17:49.168 W/monodroid-assembly( 7318): open_from_bundles: failed to load bundled assembly System.IO.Compression.dll
+12-16 06:17:49.168 W/monodroid-assembly( 7318): open_from_bundles: the assembly might have been uploaded to the device with FastDev instead
+12-16 06:17:49.169 W/monodroid-assembly( 7318): open_from_bundles: failed to load bundled assembly System.IO.Compression.Brotli.dll
+12-16 06:17:49.169 W/monodroid-assembly( 7318): open_from_bundles: the assembly might have been uploaded to the device with FastDev instead
+'Ashare.App.dll' (Mono: Default Domain): Loaded 'C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.App\obj\Debug\net9.0-android\android\assets\x86_64\System.IO.Compression.dll'. Symbol loading disabled by Include/Exclude setting.
+'Ashare.App.dll' (Mono: Default Domain): Loaded 'C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.App\obj\Debug\net9.0-android\android\assets\x86_64\System.IO.Compression.Brotli.dll'. Symbol loading disabled by Include/Exclude setting.
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 1623.9679ms - 200
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: End processing HTTP request after 2431.8102ms - 200
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 1755.5864ms - 200
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: End processing HTTP request after 2479.4401ms - 200
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 1953.1912ms - 200
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 1888.8942ms - 200
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: End processing HTTP request after 2570.548ms - 200
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: End processing HTTP request after 2616.5254ms - 200
+12-16 06:17:49.881 D/EGL_emulation( 7318): app_time_stats: avg=8.59ms min=2.98ms max=83.72ms count=53
+12-16 06:17:50.882 D/EGL_emulation( 7318): app_time_stats: avg=12.16ms min=3.27ms max=27.21ms count=59
+12-16 06:17:51.454 I/DOTNET  ( 7318): [AuthInterceptor] Request to /api/auth/me - Token: eyJhbGciOiJIUzI1NiIs...
+12-16 06:17:51.454 I/DOTNET  ( 7318): [AuthInterceptor] ✅ Authorization header added
+12-16 06:17:51.462 D/TrafficStats( 7318): tagSocket(5) with statsTag=0xffffffff, statsUid=-1
+12-16 06:17:51.500 I/DOTNET  ( 7318): [MainLayout] Auth check - Path: https://0.0.0.1/profile, Token: exists, IsGuest: False, IsAuthPage: False, IsProtectedPage: True
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: Start processing HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/auth/me
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/auth/me
+12-16 06:17:51.825 I/DOTNET  ( 7318): [AuthInterceptor] Request to /api/legalpages - Token: eyJhbGciOiJIUzI1NiIs...
+12-16 06:17:51.825 I/DOTNET  ( 7318): [AuthInterceptor] ✅ Authorization header added
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 234.247ms - 401
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: End processing HTTP request after 236.9407ms - 401
+Exception thrown: 'System.Net.Http.HttpRequestException' in System.Net.Http.dll
+ACommerce.Client.Core.Http.DynamicHttpClient: Error: GET https://ashare-api-130415035604.me-central2.run.app/api/auth/me failed
+
+System.Net.Http.HttpRequestException: Response status code does not indicate success: 401 (Unauthorized).
+   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at ACommerce.Client.Core.Http.DynamicHttpClient.<GetAsync>d__5`1[[ACommerce.Client.Auth.Models.ProfileResponse, ACommerce.Client.Auth, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]].MoveNext() in C:\Users\i\Source\Repos\ACommerce.Libraries\libs\frontend\core\ACommerce.Client.Core\Http\DynamicHttpClient.cs:line 49
+Exception thrown: 'System.Net.Http.HttpRequestException' in ACommerce.Client.Core.dll
+Exception thrown: 'System.Net.Http.HttpRequestException' in System.Private.CoreLib.dll
+Exception thrown: 'System.Net.Http.HttpRequestException' in System.Private.CoreLib.dll
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: Start processing HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+12-16 06:17:51.832 D/TrafficStats( 7318): tagSocket(99) with statsTag=0xffffffff, statsUid=-1
+12-16 06:17:51.897 D/EGL_emulation( 7318): app_time_stats: avg=17.41ms min=3.36ms max=140.79ms count=52
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 228.1397ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 1/3
+12-16 06:17:52.583 D/TrafficStats( 7318): tagSocket(237) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 185.1501ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 2/3
+12-16 06:17:52.897 D/EGL_emulation( 7318): app_time_stats: avg=11.70ms min=2.70ms max=43.62ms count=58
+12-16 06:17:53.785 D/TrafficStats( 7318): tagSocket(236) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+12-16 06:17:53.917 D/EGL_emulation( 7318): app_time_stats: avg=4.70ms min=2.58ms max=19.69ms count=60
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 206.1229ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 3/3
+12-16 06:17:54.932 D/EGL_emulation( 7318): app_time_stats: avg=4.59ms min=2.36ms max=19.80ms count=60
+12-16 06:17:55.942 D/EGL_emulation( 7318): app_time_stats: avg=4.14ms min=2.24ms max=16.21ms count=59
+12-16 06:17:56.002 D/TrafficStats( 7318): tagSocket(234) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+12-16 06:17:56.150 I/m.ashare.spaces( 7318): Explicit concurrent mark compact GC freed 1414KB AllocSpace bytes, 0(0B) LOS objects, 49% free, 5802KB/11MB, paused 484us,1.725ms total 16.442ms
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 212.7872ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 1/3
+12-16 06:17:56.748 D/TrafficStats( 7318): tagSocket(263) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+12-16 06:17:56.947 D/EGL_emulation( 7318): app_time_stats: avg=3.64ms min=2.28ms max=10.94ms count=61
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 189.5726ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 1/3
+12-16 06:17:57.450 D/TrafficStats( 7318): tagSocket(256) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 185.9297ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 2/3
+12-16 06:17:57.964 D/EGL_emulation( 7318): app_time_stats: avg=4.55ms min=2.40ms max=18.10ms count=60
+12-16 06:17:58.638 D/TrafficStats( 7318): tagSocket(108) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 199.9536ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 3/3
+12-16 06:17:58.965 D/EGL_emulation( 7318): app_time_stats: avg=3.06ms min=2.32ms max=4.67ms count=60
+12-16 06:17:59.980 D/EGL_emulation( 7318): app_time_stats: avg=3.22ms min=2.25ms max=11.43ms count=61
+12-16 06:18:00.841 D/TrafficStats( 7318): tagSocket(259) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+12-16 06:18:00.981 D/EGL_emulation( 7318): app_time_stats: avg=3.36ms min=2.34ms max=7.44ms count=59
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 190.1634ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 2/3
+12-16 06:18:01.997 D/EGL_emulation( 7318): app_time_stats: avg=3.09ms min=2.26ms max=5.49ms count=61
+12-16 06:18:02.033 D/TrafficStats( 7318): tagSocket(280) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 225.5786ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 1/3
+12-16 06:18:02.767 D/TrafficStats( 7318): tagSocket(286) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+12-16 06:18:03.013 D/EGL_emulation( 7318): app_time_stats: avg=3.41ms min=2.12ms max=12.24ms count=61
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 188.4086ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 2/3
+12-16 06:18:03.964 D/TrafficStats( 7318): tagSocket(276) with statsTag=0xffffffff, statsUid=-1
+12-16 06:18:04.014 D/EGL_emulation( 7318): app_time_stats: avg=3.11ms min=2.09ms max=6.02ms count=60
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 195.8617ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 3/3
+12-16 06:18:05.015 D/EGL_emulation( 7318): app_time_stats: avg=2.88ms min=2.16ms max=4.62ms count=60
+12-16 06:18:06.033 D/EGL_emulation( 7318): app_time_stats: avg=3.21ms min=2.16ms max=6.70ms count=61
+12-16 06:18:06.160 D/TrafficStats( 7318): tagSocket(278) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 187.0104ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 3/3
+12-16 06:18:07.047 D/EGL_emulation( 7318): app_time_stats: avg=3.26ms min=2.42ms max=5.92ms count=61
+12-16 06:18:08.047 D/EGL_emulation( 7318): app_time_stats: avg=3.90ms min=2.37ms max=11.25ms count=58
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+12-16 06:18:08.370 D/TrafficStats( 7318): tagSocket(248) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 188.6855ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 1/3
+12-16 06:18:09.047 D/EGL_emulation( 7318): app_time_stats: avg=3.68ms min=2.58ms max=12.05ms count=60
+12-16 06:18:09.081 D/TrafficStats( 7318): tagSocket(290) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 187.2372ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 2/3
+12-16 06:18:09.796 I/DOTNET  ( 7318): [AuthInterceptor] Request to /api/CategoryAttributes/categories - Token: eyJhbGciOiJIUzI1NiIs...
+12-16 06:18:09.796 I/DOTNET  ( 7318): [AuthInterceptor] ✅ Authorization header added
+12-16 06:18:09.799 D/TrafficStats( 7318): tagSocket(279) with statsTag=0xffffffff, statsUid=-1
+12-16 06:18:09.799 I/DOTNET  ( 7318): [AuthInterceptor] Request to /api/listings/featured - Token: eyJhbGciOiJIUzI1NiIs...
+12-16 06:18:09.800 I/DOTNET  ( 7318): [AuthInterceptor] ✅ Authorization header added
+12-16 06:18:09.802 D/TrafficStats( 7318): tagSocket(302) with statsTag=0xffffffff, statsUid=-1
+12-16 06:18:09.802 I/DOTNET  ( 7318): [AuthInterceptor] Request to /api/listings/new - Token: eyJhbGciOiJIUzI1NiIs...
+12-16 06:18:09.803 I/DOTNET  ( 7318): [AuthInterceptor] ✅ Authorization header added
+12-16 06:18:09.805 D/TrafficStats( 7318): tagSocket(308) with statsTag=0xffffffff, statsUid=-1
+12-16 06:18:09.823 I/DOTNET  ( 7318): [MainLayout] Auth check - Path: https://0.0.0.1/, Token: exists, IsGuest: False, IsAuthPage: False, IsProtectedPage: False
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: Start processing HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/CategoryAttributes/categories
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/CategoryAttributes/categories
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: Start processing HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/listings/featured?*
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/listings/featured?*
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: Start processing HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/listings/new?*
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/listings/new?*
+12-16 06:18:10.055 D/EGL_emulation( 7318): app_time_stats: avg=5.60ms min=2.25ms max=42.61ms count=59
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 192.2017ms - 200
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: End processing HTTP request after 195.2216ms - 200
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 190.3361ms - 200
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 188.4014ms - 200
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: End processing HTTP request after 201.8117ms - 200
+System.Net.Http.HttpClient.DynamicHttpClient.LogicalHandler: Information: End processing HTTP request after 198.7666ms - 200
+12-16 06:18:10.281 D/TrafficStats( 7318): tagSocket(222) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 178.2652ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 3/3
+12-16 06:18:11.068 D/EGL_emulation( 7318): app_time_stats: avg=5.27ms min=2.95ms max=10.45ms count=61
+12-16 06:18:12.082 D/EGL_emulation( 7318): app_time_stats: avg=13.67ms min=3.58ms max=43.76ms count=58
+12-16 06:18:12.485 D/TrafficStats( 7318): tagSocket(239) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 184.2368ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 1/3
+12-16 06:18:13.098 D/EGL_emulation( 7318): app_time_stats: avg=4.51ms min=3.21ms max=6.99ms count=61
+12-16 06:18:13.199 D/TrafficStats( 7318): tagSocket(305) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 177.622ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 1/3
+12-16 06:18:13.915 D/TrafficStats( 7318): tagSocket(237) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+12-16 06:18:14.115 D/EGL_emulation( 7318): app_time_stats: avg=4.61ms min=3.51ms max=6.27ms count=61
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 338.1744ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 2/3
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 179.995ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 3/3
+12-16 06:18:15.117 D/EGL_emulation( 7318): app_time_stats: avg=4.70ms min=3.52ms max=10.16ms count=60
+12-16 06:18:15.285 D/TrafficStats( 7318): tagSocket(299) with statsTag=0xffffffff, statsUid=-1
+12-16 06:18:16.118 D/EGL_emulation( 7318): app_time_stats: avg=4.87ms min=3.75ms max=7.71ms count=60
+The thread '.NET TP Worker' (12) has exited with code 0 (0x0).
+12-16 06:18:17.133 D/EGL_emulation( 7318): app_time_stats: avg=4.70ms min=3.12ms max=7.81ms count=61
+12-16 06:18:17.486 D/TrafficStats( 7318): tagSocket(235) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 204.0246ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 1/3
+12-16 06:18:18.150 D/EGL_emulation( 7318): app_time_stats: avg=4.78ms min=3.06ms max=8.77ms count=61
+12-16 06:18:18.192 D/TrafficStats( 7318): tagSocket(238) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 173.3367ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 1/3
+12-16 06:18:18.875 D/TrafficStats( 7318): tagSocket(261) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 180.4032ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 2/3
+12-16 06:18:19.170 D/EGL_emulation( 7318): app_time_stats: avg=7.04ms min=3.17ms max=31.74ms count=58
+12-16 06:18:20.057 D/TrafficStats( 7318): tagSocket(313) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+12-16 06:18:20.170 D/EGL_emulation( 7318): app_time_stats: avg=5.99ms min=2.97ms max=47.64ms count=59
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 181.891ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 3/3
+12-16 06:18:21.182 D/EGL_emulation( 7318): app_time_stats: avg=12.38ms min=3.35ms max=22.15ms count=60
+12-16 06:18:22.184 D/EGL_emulation( 7318): app_time_stats: avg=15.20ms min=3.34ms max=22.37ms count=60
+12-16 06:18:22.243 D/TrafficStats( 7318): tagSocket(301) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 184.1374ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 2/3
+12-16 06:18:23.201 D/EGL_emulation( 7318): app_time_stats: avg=8.34ms min=3.21ms max=25.90ms count=60
+12-16 06:18:23.424 D/TrafficStats( 7318): tagSocket(319) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 185.8348ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 1/3
+12-16 06:18:24.115 D/TrafficStats( 7318): tagSocket(316) with statsTag=0xffffffff, statsUid=-1
+12-16 06:18:24.215 D/EGL_emulation( 7318): app_time_stats: avg=14.81ms min=3.17ms max=29.94ms count=58
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 186.0244ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 2/3
+12-16 06:18:25.216 D/EGL_emulation( 7318): app_time_stats: avg=15.41ms min=3.15ms max=37.59ms count=60
+12-16 06:18:25.307 D/TrafficStats( 7318): tagSocket(326) with statsTag=0xffffffff, statsUid=-1
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Sending HTTP request GET https://ashare-api-130415035604.me-central2.run.app/api/legalpages
+System.Net.Http.HttpClient.DynamicHttpClient.ClientHandler: Information: Received HTTP response headers after 183.1185ms - 500
+ACommerce.Client.Core.Interceptors.RetryInterceptor: Warning: Request to /api/legalpages failed with status InternalServerError. Retry 3/3
