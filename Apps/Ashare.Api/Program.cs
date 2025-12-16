@@ -576,9 +576,17 @@ finally
     Log.CloseAndFlush();
 }
 
-// دالة إنشاء الفهارس للأداء الأمثل
+// دالة إنشاء الفهارس للأداء الأمثل - تعمل فقط مع SQLite
 static async Task EnsureIndexesAsync(ApplicationDbContext dbContext)
 {
+    // هذه الأوامر تعمل فقط مع SQLite - تخطي SQL Server و PostgreSQL
+    var providerName = dbContext.Database.ProviderName ?? "";
+    if (!providerName.Contains("Sqlite", StringComparison.OrdinalIgnoreCase))
+    {
+        Log.Information("Skipping index creation - not SQLite database (provider: {Provider})", providerName);
+        return;
+    }
+
     var indexCommands = new[]
     {
         // فهارس جدول ProductListings
