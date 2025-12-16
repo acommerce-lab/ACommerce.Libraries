@@ -87,6 +87,11 @@ _ = typeof(AttributeDefinition).Assembly;
 _ = typeof(AttributeType).Assembly;
 _ = typeof(ACommerce.LegalPages.Entities.LegalPage).Assembly;
 
+// ✅ تسجيل الـ Entities مبكراً قبل بناء DbContext
+// هذا ضروري لأن EntityDiscoveryRegistry يجب أن يحتوي على جميع الـ Entities
+// قبل أول استدعاء لـ ApplicationDbContext.OnModelCreating
+ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.LegalPages.Entities.LegalPage>();
+
 try
 {
     Log.Information("Starting Ashare API - Shared Spaces Platform...");
