@@ -34,6 +34,10 @@ using ACommerce.Authentication.AspNetCore.Services;
 using ACommerce.Authentication.Messaging.Extensions;
 using ACommerce.Notifications.Abstractions.Enums;
 
+// Force load assemblies for CQRS auto-discovery
+using ACommerce.Catalog.Attributes.Entities;
+using ACommerce.Catalog.Attributes.Enums;
+
 // Controllers from libraries
 using ACommerce.Profiles.Api.Controllers;
 using ACommerce.Vendors.Api.Controllers;
@@ -72,6 +76,11 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.File("logs/ashare-.txt", rollingInterval: RollingInterval.Day)
     .CreateLogger();
+
+// Force load assemblies before GetAssemblies() is called
+// This ensures all referenced assemblies are loaded for CQRS auto-discovery
+_ = typeof(AttributeDefinition).Assembly;
+_ = typeof(AttributeType).Assembly;
 
 try
 {
