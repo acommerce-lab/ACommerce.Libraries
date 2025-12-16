@@ -21,6 +21,7 @@ using ACommerce.Client.Vendors;
 using ACommerce.Client.Profiles;
 using ACommerce.Client.Payments;
 using ACommerce.Client.Subscriptions;
+using ACommerce.Client.LegalPages;
 using ACommerce.ServiceRegistry.Client.Extensions;
 using Ashare.Shared.Services;
 using ACommerce.Templates.Customer.Services;
@@ -71,6 +72,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ProductsClient>();
         services.AddScoped<ProductListingsClient>();
         services.AddScoped<OrdersClient>();
+        services.AddScoped<LegalPagesClient>();
 
         return services;
     }

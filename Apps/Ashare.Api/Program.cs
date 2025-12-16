@@ -72,6 +72,10 @@ using ACommerce.Admin.Listings;
 using ACommerce.Admin.Reports;
 using ACommerce.Admin.AuditLog;
 
+// Legal Pages
+using ACommerce.LegalPages.Api.Controllers;
+using ACommerce.LegalPages.Extensions;
+
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.File("logs/ashare-.txt", rollingInterval: RollingInterval.Day)
@@ -81,6 +85,7 @@ Log.Logger = new LoggerConfiguration()
 // This ensures all referenced assemblies are loaded for CQRS auto-discovery
 _ = typeof(AttributeDefinition).Assembly;
 _ = typeof(AttributeType).Assembly;
+_ = typeof(ACommerce.LegalPages.Entities.LegalPage).Assembly;
 
 try
 {
@@ -148,7 +153,8 @@ try
         .AddApplicationPart(typeof(AdminOrdersController).Assembly) // Admin Orders
         .AddApplicationPart(typeof(AdminListingsController).Assembly) // Admin Listings
         .AddApplicationPart(typeof(ReportsController).Assembly) // Admin Reports
-        .AddApplicationPart(typeof(AuditLogController).Assembly); // Admin Audit Log
+        .AddApplicationPart(typeof(AuditLogController).Assembly) // Admin Audit Log
+        .AddApplicationPart(typeof(LegalPagesController).Assembly); // Legal Pages
 
     builder.Services.AddEndpointsApiExplorer();
 
@@ -254,6 +260,9 @@ try
     builder.Services.AddAdminListings();
     builder.Services.AddAdminReports();
     builder.Services.AddAdminAuditLog();
+
+    // Legal Pages
+    builder.Services.AddLegalPages();
 
     // Subscription Services
     builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();

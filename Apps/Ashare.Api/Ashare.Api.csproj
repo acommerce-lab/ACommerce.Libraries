@@ -90,6 +90,9 @@
     <ProjectReference Include="..\..\libs\backend\integration\ACommerce.ServiceRegistry.Core\ACommerce.ServiceRegistry.Core.csproj" />
     <ProjectReference Include="..\..\libs\backend\integration\ACommerce.ServiceRegistry.Server\ACommerce.ServiceRegistry.Server.csproj" />
 
+    <!-- Legal Pages -->
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.LegalPages\ACommerce.LegalPages.csproj" />
+
     <!-- Admin Dashboard & Management -->
     <ProjectReference Include="..\..\libs\backend\admin\ACommerce.Admin.Dashboard.Api\ACommerce.Admin.Dashboard.Api.csproj" />
     <ProjectReference Include="..\..\libs\backend\admin\ACommerce.Admin.Orders.Api\ACommerce.Admin.Orders.Api.csproj" />

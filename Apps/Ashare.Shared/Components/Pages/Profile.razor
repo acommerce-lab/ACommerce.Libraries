@@ -1,9 +1,11 @@
 @page "/profile"
 @using ACommerce.Client.Auth
 @using ACommerce.Client.Profiles
+@using ACommerce.Client.LegalPages
 @inject AshareApiService ApiService
 @inject AuthClient AuthClient
 @inject ProfilesClient ProfilesClient
+@inject LegalPagesClient LegalPagesClient
 @inject IAppNavigationService Navigation
 @inject Ashare.Shared.Services.ThemeService ThemeService
 @inject ILocalizationService L
@@ -101,24 +103,6 @@
                         </div>
                         <i class="bi bi-chevron-left"></i>
                     </button>
-                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/addresses")'>
-                        <div class="ashare-menu-icon">
-                            <i class="bi bi-geo-alt"></i>
-                        </div>
-                        <div class="ashare-menu-content">
-                            <span class="ashare-menu-label">@L["MyAddresses"]</span>
-                        </div>
-                        <i class="bi bi-chevron-left"></i>
-                    </button>
-                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/payments")'>
-                        <div class="ashare-menu-icon">
-                            <i class="bi bi-credit-card"></i>
-                        </div>
-                        <div class="ashare-menu-content">
-                            <span class="ashare-menu-label">@L["PaymentMethods"]</span>
-                        </div>
-                        <i class="bi bi-chevron-left"></i>
-                    </button>
                 </div>
             </div>
 
@@ -145,15 +129,6 @@
                         <div class="ashare-menu-content">
                             <span class="ashare-menu-label">@L["Language"]</span>
                             <span class="ashare-menu-value">@GetCurrentLanguageName()</span>
-                        </div>
-                        <i class="bi bi-chevron-left"></i>
-                    </button>
-                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/privacy")'>
-                        <div class="ashare-menu-icon">
-                            <i class="bi bi-shield-check"></i>
-                        </div>
-                        <div class="ashare-menu-content">
-                            <span class="ashare-menu-label">@L["PrivacySecurity"]</span>
                         </div>
                         <i class="bi bi-chevron-left"></i>
                     </button>
@@ -191,17 +166,30 @@
                         </div>
                         <i class="bi bi-chevron-left"></i>
                     </button>
-                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/host/earnings")'>
-                        <div class="ashare-menu-icon">
-                            <i class="bi bi-wallet2"></i>
-                        </div>
-                        <div class="ashare-menu-content">
-                            <span class="ashare-menu-label">@L["MyEarnings"]</span>
-                        </div>
-                        <i class="bi bi-chevron-left"></i>
-                    </button>
                 </div>
             </div>
+
+            @* Legal Pages Section (Dynamic) *@
+            @if (_legalPages.Any())
+            {
+                <div class="ashare-menu-section">
+                    <h3 class="ashare-menu-title">@L["LegalAndPolicies"]</h3>
+                    <div class="ashare-menu-items">
+                        @foreach (var page in _legalPages)
+                        {
+                            <button class="ashare-menu-item" @onclick="() => OpenLegalPage(page.Url)">
+                                <div class="ashare-menu-icon">
+                                    <i class="bi @page.Icon"></i>
+                                </div>
+                                <div class="ashare-menu-content">
+                                    <span class="ashare-menu-label">@GetLegalPageTitle(page)</span>
+                                </div>
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
 
             @* Support Section *@
             <div class="ashare-menu-section">
@@ -213,15 +201,6 @@
                         </div>
                         <div class="ashare-menu-content">
                             <span class="ashare-menu-label">@L["HelpCenter"]</span>
-                        </div>
-                        <i class="bi bi-chevron-left"></i>
-                    </button>
-                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/support")'>
-                        <div class="ashare-menu-icon">
-                            <i class="bi bi-headset"></i>
-                        </div>
-                        <div class="ashare-menu-content">
-                            <span class="ashare-menu-label">@L["ContactUs"]</span>
                         </div>
                         <i class="bi bi-chevron-left"></i>
                     </button>
@@ -263,10 +242,12 @@
     private int _favoritesCount;
     private int _reviewsCount;
     private int _notificationsCount;
+    private IEnumerable<LegalPageDto> _legalPages = [];
 
     protected override async Task OnInitializedAsync()
     {
         await LoadUserData();
+        await LoadLegalPages();
     }
 
     private async Task LoadUserData()
@@ -275,13 +256,11 @@
 
         try
         {
-            // Check if user is logged in (use async to trigger token initialization)
             var token = await AuthClient.GetTokenAsync();
             _isLoggedIn = !string.IsNullOrEmpty(token);
 
             if (_isLoggedIn)
             {
-                // Get user info from auth (نفاذ)
                 var userInfo = await AuthClient.GetMeAsync();
                 if (userInfo != null)
                 {
@@ -290,7 +269,6 @@
                     _avatarUrl = userInfo.ProfilePictureUrl;
                 }
 
-                // Try to get additional profile data
                 try
                 {
                     var profile = await ProfilesClient.GetMyProfileAsync();
@@ -303,13 +281,11 @@
                 }
                 catch
                 {
-                    // Profile data already loaded from auth
                 }
 
-                // Get stats
                 _bookingsCount = await ApiService.GetBookingsCountAsync();
                 _favoritesCount = ApiService.GetFavorites().Count;
-                _reviewsCount = 0; // TODO: Get from Reviews API
+                _reviewsCount = 0;
                 _notificationsCount = ApiService.GetNotificationsCount();
             }
         }
@@ -321,18 +297,38 @@
         _isLoading = false;
     }
 
+    private async Task LoadLegalPages()
+    {
+        try
+        {
+            _legalPages = await LegalPagesClient.GetActiveAsync();
+        }
+        catch
+        {
+            _legalPages = [];
+        }
+    }
+
     private string GetCurrentLanguageName()
     {
         return L.SupportedLanguages
             .FirstOrDefault(lang => lang.Code == L.CurrentLanguage)?.NativeName ?? "العربية";
     }
 
+    private string GetLegalPageTitle(LegalPageDto page)
+    {
+        return L.CurrentLanguage == "ar" ? page.TitleAr : page.TitleEn;
+    }
+
+    private void OpenLegalPage(string url)
+    {
+        Navigation.NavigateTo(url);
+    }
+
     private async Task Logout()
     {
         await AuthClient.LogoutAsync();
         _isLoggedIn = false;
-        // Clear history and force navigate to welcome/login page
-        // This prevents back button from returning to authenticated pages
         Navigation.NavigateToAndClearHistory("/");
     }
 }

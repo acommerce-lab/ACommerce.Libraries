@@ -1,64 +1,67 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
-	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
-		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<RootNamespace>Ashare.Shared</RootNamespace>
-	</PropertyGroup>
+        <PropertyGroup>
+                <TargetFramework>net9.0</TargetFramework>
+                <Nullable>enable</Nullable>
+                <ImplicitUsings>enable</ImplicitUsings>
+                <RootNamespace>Ashare.Shared</RootNamespace>
+        </PropertyGroup>
 
-	<ItemGroup>
-		<SupportedPlatform Include="browser" />
-	</ItemGroup>
+        <ItemGroup>
+                <SupportedPlatform Include="browser" />
+        </ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.*" />
-	</ItemGroup>
+        <ItemGroup>
+                <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.*" />
+        </ItemGroup>
 
-	<ItemGroup>
-		<!-- Reference to Template Library -->
-		<ProjectReference Include="..\..\Templates\ACommerce.Templates.Customer\ACommerce.Templates.Customer.csproj" />
+        <ItemGroup>
+                <!-- Reference to Template Library -->
+                <ProjectReference Include="..\..\Templates\ACommerce.Templates.Customer\ACommerce.Templates.Customer.csproj" />
 
-		<!-- Reference to Clients -->
-		<ProjectReference Include="..\..\libs\frontend\core\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
-		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Nafath\ACommerce.Client.Nafath.csproj" />
-		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Profiles\ACommerce.Client.Profiles.csproj" />
-		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Locations\ACommerce.Client.Locations.csproj" />
+                <!-- Reference to Clients -->
+                <ProjectReference Include="..\..\libs\frontend\core\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Nafath\ACommerce.Client.Nafath.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Profiles\ACommerce.Client.Profiles.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Locations\ACommerce.Client.Locations.csproj" />
 
-		<!-- Catalog Clients -->
-		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Products\ACommerce.Client.Products.csproj" />
-		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Categories\ACommerce.Client.Categories.csproj" />
-		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.ProductListings\ACommerce.Client.ProductListings.csproj" />
+                <!-- Catalog Clients -->
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Products\ACommerce.Client.Products.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Categories\ACommerce.Client.Categories.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.ProductListings\ACommerce.Client.ProductListings.csproj" />
 
-		<!-- Sales Clients -->
-		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Orders\ACommerce.Client.Orders.csproj" />
-		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Cart\ACommerce.Client.Cart.csproj" />
+                <!-- Sales Clients -->
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Orders\ACommerce.Client.Orders.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Cart\ACommerce.Client.Cart.csproj" />
 
-		<!-- Marketplace Clients -->
-		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Vendors\ACommerce.Client.Vendors.csproj" />
-		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Subscriptions\ACommerce.Client.Subscriptions.csproj" />
-		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Payments\ACommerce.Client.Payments.csproj" />
+                <!-- Marketplace Clients -->
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Vendors\ACommerce.Client.Vendors.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Subscriptions\ACommerce.Client.Subscriptions.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Payments\ACommerce.Client.Payments.csproj" />
 
-		<!-- Communication Clients -->
-		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Chats\ACommerce.Client.Chats.csproj" />
-		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Notifications\ACommerce.Client.Notifications.csproj" />
-		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Realtime\ACommerce.Client.Realtime.csproj" />
-		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.ContactPoints\ACommerce.Client.ContactPoints.csproj" />
+                <!-- Communication Clients -->
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Chats\ACommerce.Client.Chats.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Notifications\ACommerce.Client.Notifications.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Realtime\ACommerce.Client.Realtime.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.ContactPoints\ACommerce.Client.ContactPoints.csproj" />
 
-		<!-- Files Client -->
-		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Files\ACommerce.Client.Files.csproj" />
+                <!-- Files Client -->
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Files\ACommerce.Client.Files.csproj" />
 
-		<!-- Reference to Localization -->
-		<ProjectReference Include="..\..\Modules\ACommerce.Localization\ACommerce.Localization.csproj" />
-	</ItemGroup>
+                <!-- Legal Pages Client -->
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.LegalPages\ACommerce.Client.LegalPages.csproj" />
 
-	<ItemGroup>
-	  <Content Update="wwwroot\images\ashare-icon.svg">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Update="wwwroot\images\ashare-logo.svg">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	</ItemGroup>
+                <!-- Reference to Localization -->
+                <ProjectReference Include="..\..\Modules\ACommerce.Localization\ACommerce.Localization.csproj" />
+        </ItemGroup>
+
+        <ItemGroup>
+          <Content Update="wwwroot\images\ashare-icon.svg">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          </Content>
+          <Content Update="wwwroot\images\ashare-logo.svg">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          </Content>
+        </ItemGroup>
 
 </Project>

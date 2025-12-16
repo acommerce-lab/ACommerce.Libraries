@@ -167,6 +167,7 @@ public class LocalizationService : BaseLocalizationService
         ar["HelpCenter"] = "مركز المساعدة";
         ar["ContactUs"] = "تواصل معنا";
         ar["About"] = "عن عشير";
+        ar["LegalAndPolicies"] = "القانونية والسياسات";
 
         // Profile Edit
         ar["AddressInfo"] = "بيانات العنوان";
@@ -441,6 +442,7 @@ public class LocalizationService : BaseLocalizationService
         en["HelpCenter"] = "Help Center";
         en["ContactUs"] = "Contact Us";
         en["About"] = "About Ashare";
+        en["LegalAndPolicies"] = "Legal & Policies";
 
         // Profile Edit
         en["AddressInfo"] = "Address Info";
