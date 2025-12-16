@@ -36,8 +36,8 @@ public class GetAdminOrdersQueryHandler : IRequestHandler<GetAdminOrdersQuery, A
         if (filter.VendorId.HasValue)
             query = query.Where(o => o.VendorId == filter.VendorId.Value);
 
-        if (filter.CustomerId.HasValue)
-            query = query.Where(o => o.CustomerId == filter.CustomerId.Value);
+        if (!string.IsNullOrEmpty(filter.CustomerId))
+            query = query.Where(o => o.CustomerId == filter.CustomerId);
 
         if (filter.MinTotal.HasValue)
             query = query.Where(o => o.Total >= filter.MinTotal.Value);

@@ -21,7 +21,8 @@ public class GetAuditLogsQueryHandler : IRequestHandler<GetAuditLogsQuery, Audit
     public async Task<AuditLogListDto> Handle(GetAuditLogsQuery request, CancellationToken cancellationToken)
     {
         var filter = request.Filter;
-        var query = _repository.GetAll();
+        var allItems = await _repository.ListAllAsync(cancellationToken);
+        var query = allItems.AsQueryable();
 
         if (filter.StartDate.HasValue)
             query = query.Where(e => e.CreatedAt >= filter.StartDate.Value);

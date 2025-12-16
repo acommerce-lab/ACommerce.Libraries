@@ -9,7 +9,7 @@ public class AdminOrderFilterDto
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     public Guid? VendorId { get; set; }
-    public Guid? CustomerId { get; set; }
+    public string? CustomerId { get; set; }
     public decimal? MinTotal { get; set; }
     public decimal? MaxTotal { get; set; }
     public string? SearchTerm { get; set; }
@@ -32,7 +32,7 @@ public class AdminOrderItemDto
 {
     public Guid Id { get; set; }
     public string? OrderNumber { get; set; }
-    public Guid? CustomerId { get; set; }
+    public string? CustomerId { get; set; }
     public string? CustomerName { get; set; }
     public Guid? VendorId { get; set; }
     public string? VendorName { get; set; }
@@ -40,5 +40,5 @@ public class AdminOrderItemDto
     public decimal Total { get; set; }
     public int ItemCount { get; set; }
     public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 }
