@@ -1,6 +1,7 @@
 using ACommerce.Admin.Orders.DTOs;
 using ACommerce.Admin.Orders.Queries;
 using ACommerce.Orders;
+using ACommerce.Orders.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,7 @@ public class AdminOrdersController : ControllerBase
         [FromQuery] DateTime? startDate,
         [FromQuery] DateTime? endDate,
         [FromQuery] Guid? vendorId,
-        [FromQuery] Guid? customerId,
+        [FromQuery] string? customerId,
         [FromQuery] decimal? minTotal,
         [FromQuery] decimal? maxTotal,
         [FromQuery] string? searchTerm,
