@@ -27,7 +27,6 @@
     <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notifications.Recipients.Api\ACommerce.Notifications.Recipients.Api.csproj" />
 
     <!-- Catalog System -->
-    <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Attributes\ACommerce.Catalog.Attributes.csproj" />
     <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Attributes.Api\ACommerce.Catalog.Attributes.Api.csproj" />
     <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Units\ACommerce.Catalog.Units.csproj" />
     <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Units.Api\ACommerce.Catalog.Units.Api.csproj" />
