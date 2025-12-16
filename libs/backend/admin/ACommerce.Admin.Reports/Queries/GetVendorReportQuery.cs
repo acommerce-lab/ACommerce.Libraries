@@ -5,6 +5,7 @@ using ACommerce.Orders.Entities;
 using ACommerce.SharedKernel.Abstractions.Entities;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using ACommerce.Vendors.Entities;
+using ACommerce.Vendors.Enums;
 using MediatR;
 
 namespace ACommerce.Admin.Reports.Queries;
@@ -34,7 +35,7 @@ public class GetVendorReportQueryHandler : IRequestHandler<GetVendorReportQuery,
 
         var vendors = (await _vendorRepository.ListAllAsync(cancellationToken)).ToList();
         var totalVendors = vendors.Count;
-        var activeVendors = vendors.Count(v => v.IsApproved);
+        var activeVendors = vendors.Count(v => v.Status == VendorStatus.Active);
 
         var allOrders = await _orderRepository.ListAllAsync(cancellationToken);
         var orders = allOrders
@@ -51,16 +52,16 @@ public class GetVendorReportQueryHandler : IRequestHandler<GetVendorReportQuery,
             {
                 var vendorListings = listings.Where(l => l.VendorId == v.Id).ToList();
                 var vendorListingIds = vendorListings.Select(l => l.Id).ToHashSet();
-                var vendorOrders = orders.Where(o => o.Items.Any(i => vendorListingIds.Contains(i.ProductListingId ?? Guid.Empty))).ToList();
+                var vendorOrders = orders.Where(o => o.Items.Any(i => vendorListingIds.Contains(i.ListingId))).ToList();
 
                 return new TopVendorReportDto
                 {
                     VendorId = v.Id,
-                    VendorName = v.Name,
+                    VendorName = v.StoreName,
                     ListingCount = vendorListings.Count,
                     OrderCount = vendorOrders.Count,
                     Revenue = vendorOrders.Sum(o => o.Total),
-                    Rating = 0
+                    Rating = v.Rating ?? 0
                 };
             })
             .OrderByDescending(v => v.Revenue)
