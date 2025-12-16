@@ -10,6 +10,16 @@ The system follows clean architecture principles with CQRS pattern, repository p
 
 Preferred communication style: Simple, everyday language.
 
+## Development Rules (MUST FOLLOW)
+
+### .NET Project Management
+- **ALWAYS add new .csproj files to the solution file** after creating them:
+  ```bash
+  dotnet sln ACommerce.Libraries.sln add path/to/NewProject.csproj
+  ```
+- This applies to ALL new libraries, apps, and test projects
+- Verify with `dotnet sln list` to ensure projects are included
+
 ## System Architecture
 
 ### Core Foundation
