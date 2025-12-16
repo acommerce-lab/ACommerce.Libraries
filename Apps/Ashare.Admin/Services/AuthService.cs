@@ -7,22 +7,20 @@ public class AuthService
 {
     private readonly HttpClient _httpClient;
     private readonly AdminAuthStateProvider _authStateProvider;
-    private readonly IConfiguration _configuration;
+    private readonly ILogger<AuthService> _logger;
 
-    public AuthService(HttpClient httpClient, AdminAuthStateProvider authStateProvider, IConfiguration configuration)
+    public AuthService(HttpClient httpClient, AdminAuthStateProvider authStateProvider, ILogger<AuthService> logger)
     {
         _httpClient = httpClient;
         _authStateProvider = authStateProvider;
-        _configuration = configuration;
-        
-        var baseUrl = _configuration["ApiSettings:BaseUrl"] ?? "https://ashare-api-130415035604.me-central2.run.app";
-        _httpClient.BaseAddress = new Uri(baseUrl);
+        _logger = logger;
     }
 
     public async Task<LoginResult> LoginAsync(string email, string password)
     {
         try
         {
+            _logger.LogInformation("Attempting API login for {Email} to {BaseUrl}", email, _httpClient.BaseAddress);
             var response = await _httpClient.PostAsJsonAsync("/api/auth/admin/login", new { email, password });
             
             if (response.IsSuccessStatusCode)
@@ -63,6 +61,7 @@ public class AuthService
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "API login failed for {Email}: {Message}", email, ex.Message);
             return new LoginResult 
             { 
                 Success = false, 

@@ -18,7 +18,13 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AdminAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<AdminAuthStateProvider>());
-builder.Services.AddScoped<AuthService>();
+builder.Services.AddHttpClient<AuthService>((sp, client) =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var baseUrl = config["ApiSettings:BaseUrl"] ?? "https://ashare-api-130415035604.me-central2.run.app";
+    client.BaseAddress = new Uri(baseUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 builder.Services.AddScoped(sp => new HttpClient());
 
 builder.Services.AddScoped<AdminApiService>();
