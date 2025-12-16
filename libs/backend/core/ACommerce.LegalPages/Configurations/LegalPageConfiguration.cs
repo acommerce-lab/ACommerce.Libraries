@@ -8,8 +8,6 @@ public class LegalPageConfiguration : IEntityTypeConfiguration<LegalPage>
 {
     public void Configure(EntityTypeBuilder<LegalPage> builder)
     {
-        builder.ToTable("LegalPages");
-        
         builder.HasKey(x => x.Id);
         
         builder.Property(x => x.Key)
