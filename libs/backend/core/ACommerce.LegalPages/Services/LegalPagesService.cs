@@ -2,31 +2,51 @@ using ACommerce.LegalPages.Contracts;
 using ACommerce.LegalPages.DTOs;
 using ACommerce.LegalPages.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace ACommerce.LegalPages.Services;
 
-public class LegalPagesService(DbContext dbContext) : ILegalPagesService
+public class LegalPagesService(DbContext dbContext, ILogger<LegalPagesService> logger) : ILegalPagesService
 {
     private DbSet<LegalPage> LegalPages => dbContext.Set<LegalPage>();
 
     public async Task<IEnumerable<LegalPageDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await LegalPages
-            .AsNoTracking()
-            .Where(x => !x.IsDeleted)
-            .OrderBy(x => x.SortOrder)
-            .Select(x => MapToDto(x))
-            .ToListAsync(cancellationToken);
+        try
+        {
+            return await LegalPages
+                .AsNoTracking()
+                .Where(x => !x.IsDeleted)
+                .OrderBy(x => x.SortOrder)
+                .Select(x => MapToDto(x))
+                .ToListAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error getting all legal pages");
+            throw;
+        }
     }
 
     public async Task<IEnumerable<LegalPageDto>> GetActiveAsync(CancellationToken cancellationToken = default)
     {
-        return await LegalPages
-            .AsNoTracking()
-            .Where(x => x.IsActive && !x.IsDeleted)
-            .OrderBy(x => x.SortOrder)
-            .Select(x => MapToDto(x))
-            .ToListAsync(cancellationToken);
+        try
+        {
+            logger.LogInformation("Getting active legal pages...");
+            var result = await LegalPages
+                .AsNoTracking()
+                .Where(x => x.IsActive && !x.IsDeleted)
+                .OrderBy(x => x.SortOrder)
+                .Select(x => MapToDto(x))
+                .ToListAsync(cancellationToken);
+            logger.LogInformation("Found {Count} active legal pages", result.Count);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error getting active legal pages. Table may not exist.");
+            throw;
+        }
     }
 
     public async Task<LegalPageDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
