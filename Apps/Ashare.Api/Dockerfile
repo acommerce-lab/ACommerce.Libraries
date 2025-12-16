@@ -15,8 +15,8 @@ RUN dotnet restore "Ashare.Api.csproj" --verbosity normal
 # Build with more verbose output to see actual errors
 RUN dotnet build "Ashare.Api.csproj" -c Release --no-restore -v normal
 
-# Publish
-RUN dotnet publish "Ashare.Api.csproj" -c Release -o /app/publish --no-build
+# Publish (with all dependencies)
+RUN dotnet publish "Ashare.Api.csproj" -c Release -o /app/publish
 
 # Stage 2: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
