@@ -76,6 +76,9 @@ using ACommerce.Admin.AuditLog;
 using ACommerce.LegalPages.Api.Controllers;
 using ACommerce.LegalPages.Extensions;
 
+// Marketing & Analytics
+using ACommerce.Marketing.MetaConversions.Extensions;
+
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.File("logs/ashare-.txt", rollingInterval: RollingInterval.Day)
@@ -268,6 +271,9 @@ try
 
     // Legal Pages
     builder.Services.AddLegalPages();
+
+    // Meta Conversions API (Facebook Server-Side Events)
+    builder.Services.AddMetaConversions(builder.Configuration);
 
     // Subscription Services
     builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();

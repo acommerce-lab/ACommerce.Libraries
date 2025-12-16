@@ -100,6 +100,9 @@
     <ProjectReference Include="..\..\libs\backend\admin\ACommerce.Admin.Reports.Api\ACommerce.Admin.Reports.Api.csproj" />
     <ProjectReference Include="..\..\libs\backend\admin\ACommerce.Admin.AuditLog.Api\ACommerce.Admin.AuditLog.Api.csproj" />
 
+    <!-- Marketing & Analytics -->
+    <ProjectReference Include="..\..\libs\backend\marketing\ACommerce.Marketing.MetaConversions\ACommerce.Marketing.MetaConversions.csproj" />
+
     <!-- Shared -->
     <ProjectReference Include="..\Ashare.Shared\Ashare.Shared.csproj" />
   </ItemGroup>
