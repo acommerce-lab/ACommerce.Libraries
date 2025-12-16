@@ -52,7 +52,7 @@ public static class AnalyticsSettings
     /// <summary>
     /// Meta Client Token (من Settings → Advanced → Client Token)
     /// </summary>
-    public const string MetaClientToken = ""; // TODO: اطلب من مدير التسويق
+    public const string MetaClientToken = "320279ac98f9fc429151f62c95254987";
 
     // ═══════════════════════════════════════════════════════════════════
     // Google Analytics / Firebase
