@@ -98,6 +98,26 @@ Custom service registry pattern (alternative to API Gateway):
 - **Localization**: Multi-language support with dynamic translations
 - **Accounting System**: 4-dimensional accounting (Account + Currency + Unit + CostCenter)
 - **Transaction Documents**: Configurable document types with operations and workflows
+- **Legal Pages**: Dynamic legal/policy pages management (Privacy Policy, Terms of Service, etc.)
+
+### Entity Discovery Registry (December 2025)
+
+Thread-safe entity registration pattern for deterministic EF Core model building:
+
+- **EntityDiscoveryRegistry**: Static registry in SharedKernel.Abstractions
+- **RegisterEntity<T>()**: Called during service registration (AddXxx extension methods)
+- **ApplicationDbContext**: Consults registry before reflection-based auto-discovery
+- **Use Case**: Ensures module entities are registered before DbContext model is built
+
+Usage example:
+```csharp
+public static IServiceCollection AddLegalPages(this IServiceCollection services)
+{
+    EntityDiscoveryRegistry.RegisterEntity<LegalPage>();
+    services.AddScoped<ILegalPagesService, LegalPagesService>();
+    return services;
+}
+```
 
 ### Client SDKs
 
