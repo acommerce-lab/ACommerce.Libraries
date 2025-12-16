@@ -79,6 +79,11 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
+    // Cloud Run: Use PORT environment variable
+    var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+    Log.Information("🚀 Listening on port {Port}", port);
+
     // Logging
     builder.Host.UseSerilog();
 

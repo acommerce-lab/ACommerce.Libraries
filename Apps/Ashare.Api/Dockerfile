@@ -41,16 +41,16 @@ RUN mkdir -p /app/data /app/logs /app/uploads && \
 USER appuser
 
 # Environment variables
-ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV DOTNET_RUNNING_IN_CONTAINER=true
+ENV PORT=8080
 
 # Expose port
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
+# Health check (disabled - Cloud Run handles this)
+# HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+#     CMD curl -f http://localhost:8080/health || exit 1
 
 # Entry point
 ENTRYPOINT ["dotnet", "Ashare.Api.dll"]
