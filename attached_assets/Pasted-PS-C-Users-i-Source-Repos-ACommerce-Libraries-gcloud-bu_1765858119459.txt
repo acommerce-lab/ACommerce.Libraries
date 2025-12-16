@@ -1,0 +1,68 @@
+PS C:\Users\i\Source\Repos\ACommerce.Libraries> gcloud builds log $(gcloud builds list --limit=1 --format="value(id)") 2>&1 | Select-String -Pattern "error CS"
+
+Step #0:     62>/src/libs/backend/admin/ACommerce.Admin.AuditLog/Entities/AuditLogEntry.cs(6,30): error CS0738:
+'AuditLogEntry' does not implement interface member 'IBaseEntity.UpdatedAt'. 'AuditLogEntry.UpdatedAt' cannot implement
+'IBaseEntity.UpdatedAt' because it does not have the matching return type of 'DateTime?'.
+[/src/libs/backend/admin/ACommerce.Admin.AuditLog/ACommerce.Admin.AuditLog.csproj]
+Step #0:     60>/src/libs/backend/admin/ACommerce.Admin.Listings/Queries/GetAdminListingsQuery.cs(24,33): error CS1061:
+'IBaseAsyncRepository<ProductListing>' does not contain a definition for 'GetAll' and no accessible extension method
+'GetAll' accepting a first argument of type 'IBaseAsyncRepository<ProductListing>' could be found (are you missing a using
+directive or an assembly reference?) [/src/libs/backend/admin/ACommerce.Admin.Listings/ACommerce.Admin.Listings.csproj]
+Step #0:     55>/src/libs/backend/admin/ACommerce.Admin.Orders/Queries/GetAdminOrdersQuery.cs(24,33): error CS1061:
+'IBaseAsyncRepository<Order>' does not contain a definition for 'GetAll' and no accessible extension method 'GetAll'
+accepting a first argument of type 'IBaseAsyncRepository<Order>' could be found (are you missing a using directive or an
+assembly reference?) [/src/libs/backend/admin/ACommerce.Admin.Orders/ACommerce.Admin.Orders.csproj]
+Step #0:     66>/src/libs/backend/admin/ACommerce.Admin.Reports/Queries/GetUserActivityReportQuery.cs(26,49): error CS1061:
+'IBaseAsyncRepository<Profile>' does not contain a definition for 'GetAll' and no accessible extension method 'GetAll'
+accepting a first argument of type 'IBaseAsyncRepository<Profile>' could be found (are you missing a using directive or an
+assembly reference?) [/src/libs/backend/admin/ACommerce.Admin.Reports/ACommerce.Admin.Reports.csproj]
+Step #0:     66>/src/libs/backend/admin/ACommerce.Admin.Reports/Queries/GetSalesReportQuery.cs(28,45): error CS1061:
+'IBaseAsyncRepository<Order>' does not contain a definition for 'GetAll' and no accessible extension method 'GetAll'
+accepting a first argument of type 'IBaseAsyncRepository<Order>' could be found (are you missing a using directive or an
+assembly reference?) [/src/libs/backend/admin/ACommerce.Admin.Reports/ACommerce.Admin.Reports.csproj]
+Step #0:     66>/src/libs/backend/admin/ACommerce.Admin.Reports/Queries/GetVendorReportQuery.cs(37,47): error CS1061:
+'IBaseAsyncRepository<Vendor>' does not contain a definition for 'GetAll' and no accessible extension method 'GetAll'
+accepting a first argument of type 'IBaseAsyncRepository<Vendor>' could be found (are you missing a using directive or an
+assembly reference?) [/src/libs/backend/admin/ACommerce.Admin.Reports/ACommerce.Admin.Reports.csproj]
+Step #0:     66>/src/libs/backend/admin/ACommerce.Admin.Reports/Queries/GetVendorReportQuery.cs(41,45): error CS1061:
+'IBaseAsyncRepository<Order>' does not contain a definition for 'GetAll' and no accessible extension method 'GetAll'
+accepting a first argument of type 'IBaseAsyncRepository<Order>' could be found (are you missing a using directive or an
+assembly reference?) [/src/libs/backend/admin/ACommerce.Admin.Reports/ACommerce.Admin.Reports.csproj]
+Step #0:     66>/src/libs/backend/admin/ACommerce.Admin.Reports/Queries/GetVendorReportQuery.cs(48,49): error CS1061:
+'IBaseAsyncRepository<ProductListing>' does not contain a definition for 'GetAll' and no accessible extension method
+'GetAll' accepting a first argument of type 'IBaseAsyncRepository<ProductListing>' could be found (are you missing a using
+directive or an assembly reference?) [/src/libs/backend/admin/ACommerce.Admin.Reports/ACommerce.Admin.Reports.csproj]
+Step #0:          /src/libs/backend/admin/ACommerce.Admin.AuditLog/Entities/AuditLogEntry.cs(6,30): error CS0738:
+'AuditLogEntry' does not implement interface member 'IBaseEntity.UpdatedAt'. 'AuditLogEntry.UpdatedAt' cannot implement
+'IBaseEntity.UpdatedAt' because it does not have the matching return type of 'DateTime?'.
+[/src/libs/backend/admin/ACommerce.Admin.AuditLog/ACommerce.Admin.AuditLog.csproj]
+Step #0:          /src/libs/backend/admin/ACommerce.Admin.Listings/Queries/GetAdminListingsQuery.cs(24,33): error CS1061:
+'IBaseAsyncRepository<ProductListing>' does not contain a definition for 'GetAll' and no accessible extension method
+'GetAll' accepting a first argument of type 'IBaseAsyncRepository<ProductListing>' could be found (are you missing a using
+directive or an assembly reference?) [/src/libs/backend/admin/ACommerce.Admin.Listings/ACommerce.Admin.Listings.csproj]
+Step #0:          /src/libs/backend/admin/ACommerce.Admin.Orders/Queries/GetAdminOrdersQuery.cs(24,33): error CS1061:
+'IBaseAsyncRepository<Order>' does not contain a definition for 'GetAll' and no accessible extension method 'GetAll'
+accepting a first argument of type 'IBaseAsyncRepository<Order>' could be found (are you missing a using directive or an
+assembly reference?) [/src/libs/backend/admin/ACommerce.Admin.Orders/ACommerce.Admin.Orders.csproj]
+Step #0:          /src/libs/backend/admin/ACommerce.Admin.Reports/Queries/GetUserActivityReportQuery.cs(26,49): error
+CS1061: 'IBaseAsyncRepository<Profile>' does not contain a definition for 'GetAll' and no accessible extension method
+'GetAll' accepting a first argument of type 'IBaseAsyncRepository<Profile>' could be found (are you missing a using directive or an assembly reference?) [/src/libs/backend/admin/ACommerce.Admin.Reports/ACommerce.Admin.Reports.csproj]
+Step #0:          /src/libs/backend/admin/ACommerce.Admin.Reports/Queries/GetSalesReportQuery.cs(28,45): error CS1061:
+'IBaseAsyncRepository<Order>' does not contain a definition for 'GetAll' and no accessible extension method 'GetAll'
+accepting a first argument of type 'IBaseAsyncRepository<Order>' could be found (are you missing a using directive or an
+assembly reference?) [/src/libs/backend/admin/ACommerce.Admin.Reports/ACommerce.Admin.Reports.csproj]
+Step #0:          /src/libs/backend/admin/ACommerce.Admin.Reports/Queries/GetVendorReportQuery.cs(37,47): error CS1061:
+'IBaseAsyncRepository<Vendor>' does not contain a definition for 'GetAll' and no accessible extension method 'GetAll'
+accepting a first argument of type 'IBaseAsyncRepository<Vendor>' could be found (are you missing a using directive or an
+assembly reference?) [/src/libs/backend/admin/ACommerce.Admin.Reports/ACommerce.Admin.Reports.csproj]
+Step #0:          /src/libs/backend/admin/ACommerce.Admin.Reports/Queries/GetVendorReportQuery.cs(41,45): error CS1061:
+'IBaseAsyncRepository<Order>' does not contain a definition for 'GetAll' and no accessible extension method 'GetAll'
+accepting a first argument of type 'IBaseAsyncRepository<Order>' could be found (are you missing a using directive or an
+assembly reference?) [/src/libs/backend/admin/ACommerce.Admin.Reports/ACommerce.Admin.Reports.csproj]
+Step #0:          /src/libs/backend/admin/ACommerce.Admin.Reports/Queries/GetVendorReportQuery.cs(48,49): error CS1061:
+'IBaseAsyncRepository<ProductListing>' does not contain a definition for 'GetAll' and no accessible extension method
+'GetAll' accepting a first argument of type 'IBaseAsyncRepository<ProductListing>' could be found (are you missing a using
+directive or an assembly reference?) [/src/libs/backend/admin/ACommerce.Admin.Reports/ACommerce.Admin.Reports.csproj]
+
+
+PS C:\Users\i\Source\Repos\ACommerce.Libraries>
