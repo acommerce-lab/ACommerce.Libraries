@@ -177,9 +177,9 @@
                     <div class="ashare-menu-items">
                         @foreach (var page in _legalPages)
                         {
-                            <button class="ashare-menu-item" @onclick="() => OpenLegalPage(page.Url)">
+                            <button class="ashare-menu-item" @onclick="@(() => OpenLegalPage(page.Url))">
                                 <div class="ashare-menu-icon">
-                                    <i class="bi @page.Icon"></i>
+                                    <i class="bi @(page.Icon)"></i>
                                 </div>
                                 <div class="ashare-menu-content">
                                     <span class="ashare-menu-label">@GetLegalPageTitle(page)</span>
