@@ -1,29 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Ashare</string>
-    
-    <!-- 
-    ═══════════════════════════════════════════════════════════════════════════
-    Facebook/Meta SDK Configuration
-    Get from: https://developers.facebook.com → My Apps → Settings → Basic
-    ═══════════════════════════════════════════════════════════════════════════
-    -->
-    <string name="facebook_app_id">1775307086509416</string>
-    <string name="facebook_client_token">320279ac98f9fc429151f62c95254987</string>
-    
-    <!--
-    ═══════════════════════════════════════════════════════════════════════════
-    TikTok SDK Configuration
-    Get from: https://ads.tiktok.com → Assets → Events → App Events
-    ═══════════════════════════════════════════════════════════════════════════
-    -->
-    <string name="tiktok_app_id">YOUR_TIKTOK_APP_ID</string>
-    
-    <!--
-    ═══════════════════════════════════════════════════════════════════════════
-    Snapchat SDK Configuration
-    Get from: https://ads.snapchat.com → Events Manager → Mobile App
-    ═══════════════════════════════════════════════════════════════════════════
-    -->
-    <string name="snapchat_client_id">YOUR_SNAPCHAT_CLIENT_ID</string>
 </resources>
