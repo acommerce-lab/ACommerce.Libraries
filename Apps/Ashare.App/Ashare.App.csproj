@@ -22,7 +22,7 @@
 		<ApplicationTitle>عشير - Ashare</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.ashare.spaces</ApplicationId>
+		<ApplicationId>com.ashare.ashare</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.12</ApplicationDisplayVersion>
@@ -41,18 +41,20 @@
 	<PropertyGroup Condition="'$(TargetFramework)'=='net9.0-ios'">
 		<ProvisioningType>manual</ProvisioningType>
 		<CodesignKey>Apple Distribution: SAFQAT ASHEER DIGITAL BORKERAGE CO (CTX2C777UU)</CodesignKey>
-		<CodesignProvision>Ashare Profile C-GPT 2</CodesignProvision>
+		<CodesignProvision>ashare app profile</CodesignProvision>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-ios|AnyCPU'">
 	  <MtouchLink>Full</MtouchLink>
 	  <MtouchDebug>False</MtouchDebug>
 	  <EmbedOnDemandResources>False</EmbedOnDemandResources>
+	  <OptimizePNGs>True</OptimizePNGs>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-ios|AnyCPU'">
 	  <MtouchDebug>False</MtouchDebug>
 	  <EmbedOnDemandResources>False</EmbedOnDemandResources>
+	  <OptimizePNGs>True</OptimizePNGs>
 	</PropertyGroup>
 
 	<ItemGroup>
