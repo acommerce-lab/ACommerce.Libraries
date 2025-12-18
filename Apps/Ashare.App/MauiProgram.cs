@@ -3,6 +3,7 @@ using Ashare.Shared.Services;
 using ACommerce.Client.Auth;
 using ACommerce.Client.Realtime;
 using ACommerce.Templates.Customer.Services;
+using ACommerce.Templates.Customer.Services.Analytics;
 using ACommerce.Templates.Customer.Themes;
 using ACommerce.ServiceRegistry.Client.Extensions;
 using Microsoft.Extensions.Logging;
@@ -77,6 +78,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<SpaceDataService>();
         builder.Services.AddSingleton<ITimezoneService, DeviceTimezoneService>();
         builder.Services.AddSingleton<IPaymentService, MauiPaymentService>();
+
+        builder.Services.AddMockAnalytics();
 
         builder.Services.AddHttpClient("AshareApi", client =>
         {
