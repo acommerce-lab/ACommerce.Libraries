@@ -183,13 +183,13 @@
             catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
                 Console.WriteLine("[Login] ⚠️ Token invalid/expired - clearing token");
-                await TokenManager.ClearTokenAsync();
+                TokenManager.ClearToken();
                 // نستمر لعرض صفحة تسجيل الدخول
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[Login] ⚠️ Token validation failed: {ex.Message} - clearing token");
-                await TokenManager.ClearTokenAsync();
+                TokenManager.ClearToken();
                 // نستمر لعرض صفحة تسجيل الدخول
             }
         }

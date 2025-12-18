@@ -515,7 +515,7 @@
                 catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
                     Console.WriteLine("[MySpaces] Token expired - clearing and redirecting to Nafath");
-                    await TokenManager.ClearTokenAsync();
+                    TokenManager.ClearToken();
                     await GuestMode.DisableGuestModeAsync();
                     _isLoggedIn = false;
                     _isLoading = false;
@@ -526,7 +526,7 @@
             else
             {
                 Console.WriteLine("[MySpaces] No token - clearing and redirecting to Nafath");
-                await TokenManager.ClearTokenAsync();
+                TokenManager.ClearToken();
                 await GuestMode.DisableGuestModeAsync();
                 _isLoading = false;
                 Navigation.NavigateTo("/login", forceLoad: true);
@@ -536,7 +536,7 @@
         catch (Exception ex)
         {
             Console.WriteLine($"[MySpaces] Error loading spaces: {ex.Message}");
-            await TokenManager.ClearTokenAsync();
+            TokenManager.ClearToken();
             await GuestMode.DisableGuestModeAsync();
             _isLoading = false;
             Navigation.NavigateTo("/login", forceLoad: true);

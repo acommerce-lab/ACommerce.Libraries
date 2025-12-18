@@ -266,7 +266,7 @@
                 catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
                     Console.WriteLine("[Profile] Token expired or invalid - clearing token and redirecting to Nafath");
-                    await TokenManager.ClearTokenAsync();
+                    TokenManager.ClearToken();
                     await GuestMode.DisableGuestModeAsync();
                     _isLoggedIn = false;
                     _isLoading = false;
@@ -296,7 +296,7 @@
             else
             {
                 Console.WriteLine("[Profile] No token - clearing and redirecting to Nafath");
-                await TokenManager.ClearTokenAsync();
+                TokenManager.ClearToken();
                 await GuestMode.DisableGuestModeAsync();
                 _isLoading = false;
                 Navigation.NavigateTo("/login", forceLoad: true);
@@ -306,7 +306,7 @@
         catch
         {
             Console.WriteLine("[Profile] Auth check failed - clearing token and redirecting to Nafath");
-            await TokenManager.ClearTokenAsync();
+            TokenManager.ClearToken();
             await GuestMode.DisableGuestModeAsync();
             _isLoggedIn = false;
             _isLoading = false;
