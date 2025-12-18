@@ -3,6 +3,7 @@
 @inject AshareApiService ApiService
 @inject AuthClient AuthClient
 @inject TokenManager TokenManager
+@inject ACommerce.Templates.Customer.Services.GuestModeService GuestMode
 @inject IAppNavigationService Navigation
 @inject Ashare.Shared.Services.ThemeService ThemeService
 @inject ILocalizationService L
@@ -515,9 +516,10 @@
                 {
                     Console.WriteLine("[MySpaces] Token expired - clearing and redirecting to Nafath");
                     await TokenManager.ClearTokenAsync();
+                    await GuestMode.DisableGuestModeAsync();
                     _isLoggedIn = false;
                     _isLoading = false;
-                    Navigation.NavigateTo("/login");
+                    Navigation.NavigateTo("/login", forceLoad: true);
                     return;
                 }
             }
@@ -525,8 +527,9 @@
             {
                 Console.WriteLine("[MySpaces] No token - clearing and redirecting to Nafath");
                 await TokenManager.ClearTokenAsync();
+                await GuestMode.DisableGuestModeAsync();
                 _isLoading = false;
-                Navigation.NavigateTo("/login");
+                Navigation.NavigateTo("/login", forceLoad: true);
                 return;
             }
         }
@@ -534,8 +537,9 @@
         {
             Console.WriteLine($"[MySpaces] Error loading spaces: {ex.Message}");
             await TokenManager.ClearTokenAsync();
+            await GuestMode.DisableGuestModeAsync();
             _isLoading = false;
-            Navigation.NavigateTo("/login");
+            Navigation.NavigateTo("/login", forceLoad: true);
             return;
         }
 
