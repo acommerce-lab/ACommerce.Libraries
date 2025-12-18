@@ -3,15 +3,7 @@ using Android.Runtime;
 
 namespace Ashare.App;
 
-[Application(
-    Label = "عشير - Ashare",
-    Icon = "@mipmap/appicon",
-    RoundIcon = "@mipmap/appicon_round",
-    AllowBackup = true,
-    SupportsRtl = true,
-    UsesCleartextTraffic = true,
-    NetworkSecurityConfig = "@xml/network_security_config"
-)]
+[Application]
 public class MainApplication : MauiApplication
 {
     public MainApplication(IntPtr handle, JniHandleOwnership ownership)

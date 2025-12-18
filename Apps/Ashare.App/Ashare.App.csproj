@@ -24,9 +24,9 @@
                 <!-- App Identifier -->
                 <ApplicationId>com.ashare.ashare</ApplicationId>
 
-		<!-- Versions -->
-		<ApplicationDisplayVersion>1.12</ApplicationDisplayVersion>
-		<ApplicationVersion>12</ApplicationVersion>
+                <!-- Versions -->
+                <ApplicationDisplayVersion>1.12</ApplicationDisplayVersion>
+                <ApplicationVersion>12</ApplicationVersion>
 
                 <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
                 <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
@@ -58,14 +58,16 @@
         </PropertyGroup>
 
         <PropertyGroup Condition="'$(TargetFramework)'=='net9.0-android'">
-          <AndroidLinkMode>SdkOnly</AndroidLinkMode>
+          <AndroidLinkMode>None</AndroidLinkMode>
           <AndroidEnableMultiDex>true</AndroidEnableMultiDex>
+          <AndroidEnableMarshalMethods>false</AndroidEnableMarshalMethods>
         </PropertyGroup>
 
         <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android|AnyCPU'">
-          <AndroidLinkMode>SdkOnly</AndroidLinkMode>
+          <AndroidLinkMode>None</AndroidLinkMode>
           <RunAOTCompilation>false</RunAOTCompilation>
           <PublishTrimmed>false</PublishTrimmed>
+          <AndroidEnableMarshalMethods>false</AndroidEnableMarshalMethods>
         </PropertyGroup>
 
         <ItemGroup>
