@@ -6,6 +6,7 @@
 @inject AuthClient AuthClient
 @inject ProfilesClient ProfilesClient
 @inject LegalPagesClient LegalPagesClient
+@inject TokenManager TokenManager
 @inject IAppNavigationService Navigation
 @inject Ashare.Shared.Services.ThemeService ThemeService
 @inject ILocalizationService L
@@ -263,7 +264,8 @@
                 }
                 catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
-                    Console.WriteLine("[Profile] Token expired or invalid - redirecting to Nafath");
+                    Console.WriteLine("[Profile] Token expired or invalid - clearing token and redirecting to Nafath");
+                    await TokenManager.ClearTokenAsync();
                     _isLoggedIn = false;
                     _isLoading = false;
                     Navigation.NavigateTo("/login");
@@ -291,7 +293,8 @@
             }
             else
             {
-                Console.WriteLine("[Profile] No token - redirecting to Nafath");
+                Console.WriteLine("[Profile] No token - clearing and redirecting to Nafath");
+                await TokenManager.ClearTokenAsync();
                 _isLoading = false;
                 Navigation.NavigateTo("/login");
                 return;
@@ -299,7 +302,8 @@
         }
         catch
         {
-            Console.WriteLine("[Profile] Auth check failed - redirecting to Nafath");
+            Console.WriteLine("[Profile] Auth check failed - clearing token and redirecting to Nafath");
+            await TokenManager.ClearTokenAsync();
             _isLoggedIn = false;
             _isLoading = false;
             Navigation.NavigateTo("/login");

@@ -2,6 +2,7 @@
 @using ACommerce.Client.Auth
 @inject AshareApiService ApiService
 @inject AuthClient AuthClient
+@inject TokenManager TokenManager
 @inject IAppNavigationService Navigation
 @inject Ashare.Shared.Services.ThemeService ThemeService
 @inject ILocalizationService L
@@ -512,7 +513,8 @@
                 }
                 catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
-                    Console.WriteLine("[MySpaces] Token expired - redirecting to Nafath");
+                    Console.WriteLine("[MySpaces] Token expired - clearing and redirecting to Nafath");
+                    await TokenManager.ClearTokenAsync();
                     _isLoggedIn = false;
                     _isLoading = false;
                     Navigation.NavigateTo("/login");
@@ -521,7 +523,8 @@
             }
             else
             {
-                Console.WriteLine("[MySpaces] No token - redirecting to Nafath");
+                Console.WriteLine("[MySpaces] No token - clearing and redirecting to Nafath");
+                await TokenManager.ClearTokenAsync();
                 _isLoading = false;
                 Navigation.NavigateTo("/login");
                 return;
@@ -530,6 +533,7 @@
         catch (Exception ex)
         {
             Console.WriteLine($"[MySpaces] Error loading spaces: {ex.Message}");
+            await TokenManager.ClearTokenAsync();
             _isLoading = false;
             Navigation.NavigateTo("/login");
             return;

@@ -6,6 +6,7 @@
 @inject NafathClient NafathClient
 @inject RealtimeClient RealtimeClient
 @inject TokenManager TokenManager
+@inject AuthClient AuthClient
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
 @inject Ashare.Shared.Services.ThemeService Theme
@@ -164,13 +165,33 @@
         // تهيئة حالة وضع الضيف من التخزين
         await GuestMode.InitializeAsync();
 
-        // التحقق من وجود جلسة نشطة (use async to trigger token initialization)
+        // التحقق من وجود جلسة نشطة وصلاحية التوكن
         var token = await TokenManager.GetTokenAsync();
         if (!string.IsNullOrEmpty(token))
         {
-            Console.WriteLine("[Login] ✅ User already logged in - redirecting to home");
-            Navigation.NavigateTo("/");
-            return;
+            try
+            {
+                // التحقق من صلاحية التوكن عبر استدعاء API
+                var userInfo = await AuthClient.GetMeAsync();
+                if (userInfo != null)
+                {
+                    Console.WriteLine("[Login] ✅ Token valid - redirecting to home");
+                    Navigation.NavigateTo("/");
+                    return;
+                }
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                Console.WriteLine("[Login] ⚠️ Token invalid/expired - clearing token");
+                await TokenManager.ClearTokenAsync();
+                // نستمر لعرض صفحة تسجيل الدخول
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Login] ⚠️ Token validation failed: {ex.Message} - clearing token");
+                await TokenManager.ClearTokenAsync();
+                // نستمر لعرض صفحة تسجيل الدخول
+            }
         }
 
         // ملاحظة: لا نقوم بإعادة التوجيه إذا كان في وضع الضيف
