@@ -1,0 +1,27 @@
+
+2>------ Deploy started: Project: Ashare.App, Configuration: Release Any CPU ------
+2>Starting deploy 'Ashare.App' into the device '‏ iPhone الخاص بـAshare App'...
+2>Deploying 'Ashare.App' into the device '‏ iPhone الخاص بـAshare App'...
+INFO: Deploying Ashare.App on ‏ iPhone الخاص بـAshare App...
+INFO: /Users/ashareapp/Library/Caches/maui/PairToMac/SDKs/dotnet/packs/Microsoft.iOS.Sdk.net9.0_26.0/26.0.9777/tools/bin/mlaunch --devname "‏ iPhone الخاص بـAshare App" --installdev "/Users/ashareapp/Library/Caches/maui/PairToMac/Builds/Ashare.App/ea1fa5a9b4905ed509d4246f8d94ecddf2719432a1a6284e1f0e195c7fa826d0/bin/Release/net9.0-ios/ios-arm64/Ashare.App.app" --install-progress --sdkroot "/Applications/Xcode.app/Contents/Developer" -sdk 0.0
+INFO:        NSURL = file:///Users/ashareapp/Library/Caches/maui/PairToMac/Builds/Ashare.App/ea1fa5a9b4905ed509d4246f8d94ecddf2719432a1a6284e1f0e195c7fa826d0/bin/Release/net9.0-ios/ios-arm64/Ashare.App.app/
+INFO:            NSLocalizedFailureReason = ?? ???? ????? ??? ??????? ????? ?????? ?? ?????.
+INFO:                Failed to install embedded profile for com.ashare.ashare : 0xe800801f (Attempted to install a Beta profile without the proper entitlement.) (MIInstallerErrorDomain error 13 (0x0D))
+INFO:                FunctionName = -[MIInstallableBundle _installEmbeddedProfilesWithError:]
+INFO: 12:29:29  Enabling developer disk image services.
+INFO: 12:29:29  Acquired tunnel connection to device.
+INFO:            NSLocalizedRecoverySuggestion = Failed to install embedded profile for com.ashare.ashare : 0xe800801f (Attempted to install a Beta profile without the proper entitlement.)
+INFO: ERROR: Failed to install the app on the device. (com.apple.dt.CoreDeviceError error 3002 (0xBBA))
+INFO: xcrun devicectl -j /var/folders/c4/zgcfxwn92qx1md8n99f5ncg00000gn/T/tmpGMMM42.tmp device install app --device "‏ iPhone الخاص بـAshare App" /Users/ashareapp/Library/Caches/maui/PairToMac/Builds/Ashare.App/ea1fa5a9b4905ed509d4246f8d94ecddf2719432a1a6284e1f0e195c7fa826d0/bin/Release/net9.0-ios/ios-arm64/Ashare.App.app
+INFO:                LibMISErrorNumber = -402620385
+INFO: 12:29:29  Acquired usage assertion.
+INFO:            ???? ????? "Ashare" (IXUserPresentableErrorDomain error 14 (0x0E))
+INFO:                SourceFileLine = 330
+INFO:                LegacyErrorString = ApplicationVerificationFailed
+INFO:        ----------------------------------------
+INFO:        ----------------------------------------
+2>Deploy failed
+========== Build: 1 succeeded, 0 failed, 23 up-to-date, 0 skipped ==========
+========== Build completed at 12:29 PM and took 12:10.780 minutes ==========
+========== Deploy: 0 succeeded, 1 failed, 0 skipped ==========
+========== Deploy completed at 12:29 PM and took 12:10.780 minutes ==========
