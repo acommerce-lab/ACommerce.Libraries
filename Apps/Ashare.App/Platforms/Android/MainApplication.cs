@@ -3,13 +3,21 @@ using Android.Runtime;
 
 namespace Ashare.App;
 
-[Application]
+[Application(
+    Label = "عشير - Ashare",
+    Icon = "@mipmap/appicon",
+    RoundIcon = "@mipmap/appicon_round",
+    AllowBackup = true,
+    SupportsRtl = true,
+    UsesCleartextTraffic = true,
+    NetworkSecurityConfig = "@xml/network_security_config"
+)]
 public class MainApplication : MauiApplication
 {
-	public MainApplication(IntPtr handle, JniHandleOwnership ownership)
-		: base(handle, ownership)
-	{
-	}
+    public MainApplication(IntPtr handle, JniHandleOwnership ownership)
+        : base(handle, ownership)
+    {
+    }
 
-	protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
+    protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
 }
