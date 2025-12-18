@@ -45,10 +45,12 @@
         </PropertyGroup>
 
         <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-ios|AnyCPU'">
-          <MtouchLink>Full</MtouchLink>
+          <MtouchLink>SdkOnly</MtouchLink>
           <MtouchDebug>False</MtouchDebug>
           <EmbedOnDemandResources>False</EmbedOnDemandResources>
           <OptimizePNGs>True</OptimizePNGs>
+          <EnableSGenConc>false</EnableSGenConc>
+          <UseInterpreter>false</UseInterpreter>
         </PropertyGroup>
 
         <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-ios|AnyCPU'">
