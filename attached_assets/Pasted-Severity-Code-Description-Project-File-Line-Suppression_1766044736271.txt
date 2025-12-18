@@ -1,0 +1,11 @@
+Severity	Code	Description	Project	File	Line	Suppression State
+Error (active)	XAGJS7001	System.NullReferenceException: Object reference not set to an instance of an object.
+   at Java.Interop.Tools.Cecil.CustomAttributeProviderRocks.<GetCustomAttributes>d__3.MoveNext() in /Users/runner/work/1/s/xamarin-android/external/Java.Interop/src/Java.Interop.Tools.Cecil/Java.Interop.Tools.Cecil/CustomAttributeProviderRocks.cs:line 30
+   at System.Linq.Enumerable.SingleOrDefault[TSource](IEnumerable`1 source)
+   at Android.App.ApplicationAttribute.FromCustomAttributeProvider(ICustomAttributeProvider provider, TypeDefinitionCache cache) in /Users/runner/work/1/s/xamarin-android/src/Xamarin.Android.Build.Tasks/Mono.Android/ApplicationAttribute.Partial.cs:line 61
+   at Xamarin.Android.Tasks.ManifestDocument.CreateApplicationElement(XElement manifest, String applicationClass, List`1 subclasses, TypeDefinitionCache cache) in /Users/runner/work/1/s/xamarin-android/src/Xamarin.Android.Build.Tasks/Utilities/ManifestDocument.cs:line 581
+   at Xamarin.Android.Tasks.ManifestDocument.Merge(TaskLoggingHelper log, TypeDefinitionCache cache, List`1 subclasses, String applicationClass, Boolean embed, String bundledWearApplicationName, IEnumerable`1 mergedManifestDocuments) in /Users/runner/work/1/s/xamarin-android/src/Xamarin.Android.Build.Tasks/Utilities/ManifestDocument.cs:line 290
+   at Xamarin.Android.Tasks.GenerateJavaStubs.MergeManifest(NativeCodeGenState codeGenState, Dictionary`2 userAssemblies) in /Users/runner/work/1/s/xamarin-android/src/Xamarin.Android.Build.Tasks/Tasks/GenerateJavaStubs.cs:line 363
+   at Xamarin.Android.Tasks.GenerateJavaStubs.Run(Boolean useMarshalMethods) in /Users/runner/work/1/s/xamarin-android/src/Xamarin.Android.Build.Tasks/Tasks/GenerateJavaStubs.cs:line 270
+   at Xamarin.Android.Tasks.GenerateJavaStubs.RunTask() in /Users/runner/work/1/s/xamarin-android/src/Xamarin.Android.Build.Tasks/Tasks/GenerateJavaStubs.cs:line 102
+   at Microsoft.Android.Build.Tasks.AndroidTask.Execute() in /Users/runner/work/1/s/xamarin-android/external/xamarin-android-tools/src/Microsoft.Android.Build.BaseTasks/AndroidTask.cs:line 25	Ashare.App (net9.0-android)	C:\Program Files\dotnet\packs\Microsoft.Android.Sdk.Windows\35.0.105\tools\Xamarin.Android.Common.targets	1503	
