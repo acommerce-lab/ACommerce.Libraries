@@ -27,16 +27,10 @@
         }
         else if (!_isLoggedIn)
         {
-            <div class="ashare-login-prompt">
-                <div class="ashare-prompt-icon">
-                    <i class="bi bi-person-circle"></i>
-                </div>
-                <h2>@L["LoginRequired"]</h2>
-                <p>@L["LoginToViewSpaces"]</p>
-                <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick='() => Navigation.NavigateTo("/login")'>
-                    <i class="bi bi-box-arrow-in-right"></i>
-                    @L["Login"]
-                </button>
+            @* Redirect to Nafath login *@
+            <div class="ashare-loading">
+                <div class="ac-spinner"></div>
+                <span>@L["RedirectingToLogin"]</span>
             </div>
         }
         else if (_spaces.Count == 0)
@@ -507,17 +501,38 @@
 
             if (_isLoggedIn)
             {
-                var userInfo = await AuthClient.GetMeAsync();
-                if (userInfo != null && Guid.TryParse(userInfo.Id, out var userId))
+                try
                 {
-                    _vendorId = userId;
-                    _spaces = await ApiService.GetMySpacesAsync(_vendorId);
+                    var userInfo = await AuthClient.GetMeAsync();
+                    if (userInfo != null && Guid.TryParse(userInfo.Id, out var userId))
+                    {
+                        _vendorId = userId;
+                        _spaces = await ApiService.GetMySpacesAsync(_vendorId);
+                    }
                 }
+                catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    Console.WriteLine("[MySpaces] Token expired - redirecting to Nafath");
+                    _isLoggedIn = false;
+                    _isLoading = false;
+                    Navigation.NavigateTo("/login");
+                    return;
+                }
+            }
+            else
+            {
+                Console.WriteLine("[MySpaces] No token - redirecting to Nafath");
+                _isLoading = false;
+                Navigation.NavigateTo("/login");
+                return;
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading spaces: {ex.Message}");
+            Console.WriteLine($"[MySpaces] Error loading spaces: {ex.Message}");
+            _isLoading = false;
+            Navigation.NavigateTo("/login");
+            return;
         }
 
         _isLoading = false;

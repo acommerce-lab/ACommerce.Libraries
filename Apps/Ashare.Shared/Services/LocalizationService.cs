@@ -308,6 +308,13 @@ public class LocalizationService : BaseLocalizationService
 
         // Reviews
         ar["Reviews"] = "التقييمات";
+
+        // Common
+        ar["Loading"] = "جاري التحميل...";
+        ar["Login"] = "تسجيل الدخول";
+        ar["Guest"] = "زائر";
+        ar["RedirectingToLogin"] = "جاري التوجيه لتسجيل الدخول...";
+        ar["LoginToAccessProfile"] = "سجل دخولك للوصول لملفك الشخصي";
     }
 
     private static void AddEnglishTranslations(Dictionary<string, string> en)
@@ -583,6 +590,13 @@ public class LocalizationService : BaseLocalizationService
 
         // Reviews
         en["Reviews"] = "Reviews";
+
+        // Common
+        en["Loading"] = "Loading...";
+        en["Login"] = "Login";
+        en["Guest"] = "Guest";
+        en["RedirectingToLogin"] = "Redirecting to login...";
+        en["LoginToAccessProfile"] = "Login to access your profile";
     }
 
     private static void AddUrduTranslations(Dictionary<string, string> ur)

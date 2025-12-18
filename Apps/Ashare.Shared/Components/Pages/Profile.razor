@@ -21,20 +21,10 @@
     }
     else if (!_isLoggedIn)
     {
-        @* Not Logged In - Show Login Prompt *@
-        <div class="ashare-login-prompt">
-            <div class="ashare-login-prompt-icon">
-                <i class="bi bi-person-circle"></i>
-            </div>
-            <h2>@L["WelcomeToAshare"]</h2>
-            <p>@L["LoginToAccessProfile"]</p>
-            <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick='() => Navigation.NavigateTo("/login")'>
-                <i class="bi bi-box-arrow-in-right"></i>
-                @L["Login"]
-            </button>
-            <button class="ac-btn ac-btn-secondary ac-btn-lg" @onclick='() => Navigation.NavigateTo("/register")'>
-                @L["CreateAccount"]
-            </button>
+        @* Not Logged In - Redirect to Nafath login *@
+        <div class="ashare-loading">
+            <div class="ac-spinner"></div>
+            <span>@L["RedirectingToLogin"]</span>
         </div>
     }
     else
@@ -261,12 +251,23 @@
 
             if (_isLoggedIn)
             {
-                var userInfo = await AuthClient.GetMeAsync();
-                if (userInfo != null)
+                try
                 {
-                    _userName = userInfo.FullName ?? L["Guest"];
-                    _phoneNumber = userInfo.PhoneNumber;
-                    _avatarUrl = userInfo.ProfilePictureUrl;
+                    var userInfo = await AuthClient.GetMeAsync();
+                    if (userInfo != null)
+                    {
+                        _userName = userInfo.FullName ?? L["Guest"];
+                        _phoneNumber = userInfo.PhoneNumber;
+                        _avatarUrl = userInfo.ProfilePictureUrl;
+                    }
+                }
+                catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    Console.WriteLine("[Profile] Token expired or invalid - redirecting to Nafath");
+                    _isLoggedIn = false;
+                    _isLoading = false;
+                    Navigation.NavigateTo("/login");
+                    return;
                 }
 
                 try
@@ -288,10 +289,21 @@
                 _reviewsCount = 0;
                 _notificationsCount = ApiService.GetNotificationsCount();
             }
+            else
+            {
+                Console.WriteLine("[Profile] No token - redirecting to Nafath");
+                _isLoading = false;
+                Navigation.NavigateTo("/login");
+                return;
+            }
         }
         catch
         {
+            Console.WriteLine("[Profile] Auth check failed - redirecting to Nafath");
             _isLoggedIn = false;
+            _isLoading = false;
+            Navigation.NavigateTo("/login");
+            return;
         }
 
         _isLoading = false;
