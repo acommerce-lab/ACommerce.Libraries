@@ -21,6 +21,7 @@
     <!-- Two-Factor Authentication (Nafath, SMS, Email) -->
     <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.TwoFactor.Nafath\ACommerce.Authentication.TwoFactor.Nafath.csproj" />
     <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.TwoFactor.SessionStore.InMemory\ACommerce.Authentication.TwoFactor.SessionStore.InMemory.csproj" />
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.TwoFactor.SessionStore.Redis\ACommerce.Authentication.TwoFactor.SessionStore.Redis.csproj" />
     <ProjectReference Include="..\..\libs\backend\integration\ACommerce.Authentication.AspNetCore.NafathWH\ACommerce.Authentication.AspNetCore.NafathWH.csproj" />
     <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Authentication.Messaging\ACommerce.Authentication.Messaging.csproj" />
 

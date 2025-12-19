@@ -7,6 +7,7 @@ using ACommerce.Authentication.JWT;
 using ACommerce.Authentication.Users.Abstractions;
 using ACommerce.Authentication.TwoFactor.Nafath;
 using ACommerce.Authentication.TwoFactor.SessionStore.InMemory;
+using ACommerce.Authentication.TwoFactor.SessionStore.Redis;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using ACommerce.SharedKernel.Infrastructure.EFCore.Repositories;
 using ACommerce.SharedKernel.Infrastructure.EFCore.Factories;
@@ -234,7 +235,21 @@ try
     });
 
     // Two-Factor Authentication (Nafath for Saudi Arabia)
-    builder.Services.AddInMemoryTwoFactorSessionStore(); // Session store for 2FA
+    // استخدام Redis للجلسات في الإنتاج، أو InMemory للتطوير المحلي
+    var redisConnectionString = Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING")
+        ?? builder.Configuration["Redis:TwoFactorSessionStore:ConnectionString"];
+    
+    if (!string.IsNullOrEmpty(redisConnectionString) && redisConnectionString != "localhost:6379")
+    {
+        Log.Information("🔴 Using Redis for 2FA session store");
+        builder.Services.AddRedisTwoFactorSessionStore(builder.Configuration);
+    }
+    else
+    {
+        Log.Information("⚡ Using InMemory for 2FA session store (development mode)");
+        builder.Services.AddInMemoryTwoFactorSessionStore();
+    }
+    
     builder.Services.AddNafathTwoFactor(builder.Configuration); // Nafath provider
 
     // CQRS (MediatR + AutoMapper + FluentValidation)
