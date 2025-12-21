@@ -396,7 +396,7 @@ All configuration is done via environment variables for cloud deployment:
         Service = "ACommerce Marketplace API",
         Version = "1.0.0",
         Timestamp = DateTime.UtcNow
-    }));
+    })).AllowAnonymous();
 
     // =========================================================================
     // DATABASE INITIALIZATION
