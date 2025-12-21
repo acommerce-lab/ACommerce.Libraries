@@ -1,7 +1,6 @@
+using ACommerce.SharedKernel.Infrastructure.EFCores.Context;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ACommerce.Catalog.Infrastructure.Persistence;
 
 namespace ACommerce.Marketplace.GCP.Controllers;
 
