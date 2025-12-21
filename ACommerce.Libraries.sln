@@ -215,6 +215,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ashare.App", "Apps\Ashare.A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ashare.Api", "Apps\Ashare.Api\Ashare.Api.csproj", "{F5A6B7C8-D9E0-1F2A-3B4C-5D6E7F890123}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.Marketplace.GCP", "Apps\ACommerce.Marketplace.GCP\ACommerce.Marketplace.GCP.csproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.Locations", "Other\ACommerce.Locations\ACommerce.Locations.csproj", "{ED945087-F0EF-41EC-B679-B06DDF4E9198}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.Locations.Api", "Other\ACommerce.Locations.Api\ACommerce.Locations.Api.csproj", "{A866D66A-2AC7-A8FD-336A-AEF8EB1D9D00}"
