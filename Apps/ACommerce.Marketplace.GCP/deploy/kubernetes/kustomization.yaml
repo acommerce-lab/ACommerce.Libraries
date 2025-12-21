@@ -1,0 +1,57 @@
+# =============================================================================
+# Kustomization - Base configuration for ACommerce Marketplace
+# =============================================================================
+#
+# Usage:
+#   kubectl apply -k deploy/kubernetes/
+#
+# Or with overlays:
+#   kubectl apply -k deploy/kubernetes/overlays/production/
+#
+# =============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: acommerce-marketplace
+
+# Namespace for all resources
+namespace: acommerce
+
+# Common labels applied to all resources
+commonLabels:
+  app: acommerce-marketplace
+  app.kubernetes.io/name: acommerce-marketplace
+  app.kubernetes.io/part-of: acommerce
+  app.kubernetes.io/managed-by: kustomize
+
+# Resources to include
+resources:
+  - configmap.yaml
+  - secrets.yaml
+  - deployment.yaml
+  - service.yaml
+
+# Images - override in overlays for different environments
+images:
+  - name: gcr.io/PROJECT_ID/acommerce-marketplace
+    newName: gcr.io/PROJECT_ID/acommerce-marketplace
+    newTag: latest
+
+# Config Map Generator (alternative to static configmap.yaml)
+# configMapGenerator:
+#   - name: acommerce-marketplace-config
+#     literals:
+#       - ASPNETCORE_ENVIRONMENT=Production
+#     files:
+#       - appsettings.json
+
+# Secret Generator (for development only - use real secrets in production)
+# secretGenerator:
+#   - name: acommerce-marketplace-secrets
+#     literals:
+#       - JWT__SecretKey=development-only-key
+
+# Patches for customization
+# patches:
+#   - path: patches/replicas.yaml

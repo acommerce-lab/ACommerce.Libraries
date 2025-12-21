@@ -1,0 +1,465 @@
+# =============================================================================
+# ACommerce Marketplace API - GCP Marketplace Schema
+# This file defines the deployment UI shown to customers in GCP Marketplace
+# =============================================================================
+#
+# Documentation: https://cloud.google.com/marketplace/docs/partners/kubernetes/create-app-package
+#
+x-google-marketplace:
+  schemaVersion: v2
+
+  # Application API version
+  applicationApiVersion: v1beta1
+
+  # Published version (update on each release)
+  publishedVersion: "1.0.0"
+  publishedVersionMetadata:
+    releaseNote: |
+      Initial release of ACommerce Marketplace API
+      - Complete e-commerce marketplace backend
+      - Multi-vendor support
+      - Usage-based billing integration
+    releaseTypes:
+      - Feature
+    recommended: true
+
+  # Container images
+  images:
+    '':
+      properties:
+        imageAcommerceMarketplace:
+          type: FULL
+    # Cloud SQL Proxy (optional)
+    cloudsql-proxy:
+      properties:
+        imageCloudsqlProxy:
+          type: FULL
+
+  # Cluster constraints
+  clusterConstraints:
+    resources:
+      - replicas: 2
+        requests:
+          cpu: 200m
+          memory: 512Mi
+        affinity:
+          simpleNodeAffinity:
+            type: REQUIRE_ONE_NODE_PER_REPLICA
+
+# =============================================================================
+# PROPERTIES - Customer Configuration Form
+# =============================================================================
+properties:
+  # ===========================================================================
+  # Basic Configuration
+  # ===========================================================================
+  name:
+    type: string
+    title: Application Name
+    description: Name for this ACommerce deployment
+    x-google-marketplace:
+      type: NAME
+    default: acommerce-marketplace
+    maxLength: 63
+    pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+
+  namespace:
+    type: string
+    title: Kubernetes Namespace
+    description: Namespace where the application will be deployed
+    x-google-marketplace:
+      type: NAMESPACE
+    default: acommerce
+
+  # ===========================================================================
+  # Store Configuration
+  # ===========================================================================
+  storeName:
+    type: string
+    title: Store Name
+    description: Your marketplace/store name (displayed in the application)
+    default: "My E-Commerce Store"
+    minLength: 3
+    maxLength: 100
+
+  storeUrl:
+    type: string
+    title: Store URL
+    description: Public URL where your store will be accessible (e.g., https://store.example.com)
+    default: ""
+    pattern: ^(https?://)?[\w.-]+\.[a-z]{2,}(/.*)?$
+
+  # ===========================================================================
+  # Database Configuration
+  # ===========================================================================
+  databaseType:
+    type: string
+    title: Database Type
+    description: Choose your database provider
+    default: postgresql
+    enum:
+      - postgresql
+      - sqlserver
+    enumNames:
+      - PostgreSQL (Cloud SQL recommended)
+      - SQL Server
+
+  databaseHost:
+    type: string
+    title: Database Host
+    description: |
+      Database server address. For Cloud SQL, use the instance connection name
+      format: project:region:instance (e.g., my-project:us-central1:my-instance)
+    default: ""
+
+  databasePort:
+    type: integer
+    title: Database Port
+    description: Database server port
+    default: 5432
+    minimum: 1
+    maximum: 65535
+
+  databaseName:
+    type: string
+    title: Database Name
+    description: Name of the database to use
+    default: acommerce
+    minLength: 1
+    maxLength: 63
+    pattern: ^[a-zA-Z][a-zA-Z0-9_]*$
+
+  databaseUser:
+    type: string
+    title: Database Username
+    description: Database user for the application
+    default: acommerce
+    minLength: 1
+    maxLength: 63
+
+  databasePassword:
+    type: string
+    title: Database Password
+    description: Password for the database user (minimum 12 characters recommended)
+    x-google-marketplace:
+      type: GENERATED_PASSWORD
+      generatedPassword:
+        length: 24
+        includeSymbols: false
+        base64: false
+
+  useCloudSqlProxy:
+    type: boolean
+    title: Use Cloud SQL Proxy
+    description: |
+      Enable Cloud SQL Proxy sidecar for secure database connectivity.
+      Recommended for Cloud SQL instances.
+    default: true
+
+  cloudSqlConnectionName:
+    type: string
+    title: Cloud SQL Connection Name
+    description: |
+      Cloud SQL instance connection name (format: project:region:instance).
+      Required if using Cloud SQL Proxy.
+    default: ""
+    pattern: ^[a-z][a-z0-9-]*:[a-z0-9-]+:[a-z][a-z0-9-]*$
+
+  # ===========================================================================
+  # Redis Configuration
+  # ===========================================================================
+  enableRedis:
+    type: boolean
+    title: Enable Redis
+    description: |
+      Enable Redis for session storage and caching.
+      Recommended for production deployments.
+    default: true
+
+  redisHost:
+    type: string
+    title: Redis Host
+    description: |
+      Redis server address. For Memorystore, use the private IP.
+      Leave empty to use built-in Redis deployment.
+    default: ""
+
+  redisPort:
+    type: integer
+    title: Redis Port
+    description: Redis server port
+    default: 6379
+    minimum: 1
+    maximum: 65535
+
+  # ===========================================================================
+  # Authentication Configuration
+  # ===========================================================================
+  jwtSecretKey:
+    type: string
+    title: JWT Secret Key
+    description: |
+      Secret key for signing JWT tokens.
+      Minimum 32 characters. Auto-generated if empty.
+    x-google-marketplace:
+      type: GENERATED_PASSWORD
+      generatedPassword:
+        length: 64
+        includeSymbols: false
+        base64: false
+
+  jwtExpirationMinutes:
+    type: integer
+    title: JWT Token Expiration (minutes)
+    description: How long access tokens remain valid
+    default: 60
+    minimum: 5
+    maximum: 1440
+
+  jwtRefreshExpirationDays:
+    type: integer
+    title: Refresh Token Expiration (days)
+    description: How long refresh tokens remain valid
+    default: 7
+    minimum: 1
+    maximum: 30
+
+  # ===========================================================================
+  # File Storage Configuration
+  # ===========================================================================
+  gcsBucketName:
+    type: string
+    title: Google Cloud Storage Bucket
+    description: |
+      GCS bucket name for file uploads (images, documents).
+      The bucket must already exist and be accessible.
+    default: ""
+    pattern: ^[a-z0-9][-a-z0-9._]{1,61}[a-z0-9]$
+
+  # ===========================================================================
+  # Scaling Configuration
+  # ===========================================================================
+  replicas:
+    type: integer
+    title: Initial Replicas
+    description: Number of API server replicas to start with
+    default: 2
+    minimum: 1
+    maximum: 10
+
+  enableAutoscaling:
+    type: boolean
+    title: Enable Autoscaling
+    description: Automatically scale replicas based on CPU/memory usage
+    default: true
+
+  minReplicas:
+    type: integer
+    title: Minimum Replicas
+    description: Minimum number of replicas when autoscaling
+    default: 2
+    minimum: 1
+    maximum: 10
+
+  maxReplicas:
+    type: integer
+    title: Maximum Replicas
+    description: Maximum number of replicas when autoscaling
+    default: 10
+    minimum: 2
+    maximum: 50
+
+  # ===========================================================================
+  # Resource Configuration
+  # ===========================================================================
+  cpuRequest:
+    type: string
+    title: CPU Request
+    description: Minimum CPU allocation per replica
+    default: "100m"
+    pattern: ^[0-9]+m?$
+
+  cpuLimit:
+    type: string
+    title: CPU Limit
+    description: Maximum CPU allocation per replica
+    default: "1000m"
+    pattern: ^[0-9]+m?$
+
+  memoryRequest:
+    type: string
+    title: Memory Request
+    description: Minimum memory allocation per replica
+    default: "256Mi"
+    pattern: ^[0-9]+(Mi|Gi)$
+
+  memoryLimit:
+    type: string
+    title: Memory Limit
+    description: Maximum memory allocation per replica
+    default: "1Gi"
+    pattern: ^[0-9]+(Mi|Gi)$
+
+  # ===========================================================================
+  # Billing Configuration
+  # ===========================================================================
+  enableUsageReporting:
+    type: boolean
+    title: Enable Usage Reporting
+    description: |
+      Enable usage-based billing integration.
+      Required for pay-per-use pricing models.
+    default: true
+
+  # ===========================================================================
+  # Advanced Configuration
+  # ===========================================================================
+  runMigrations:
+    type: boolean
+    title: Run Database Migrations
+    description: Automatically run database migrations on startup
+    default: true
+
+  logLevel:
+    type: string
+    title: Log Level
+    description: Application logging verbosity
+    default: Information
+    enum:
+      - Debug
+      - Information
+      - Warning
+      - Error
+    enumNames:
+      - Debug (verbose)
+      - Information (recommended)
+      - Warning (minimal)
+      - Error (errors only)
+
+  # ===========================================================================
+  # Service Account (Workload Identity)
+  # ===========================================================================
+  serviceAccount:
+    type: string
+    title: Service Account
+    description: Kubernetes service account for the application
+    x-google-marketplace:
+      type: SERVICE_ACCOUNT
+      serviceAccount:
+        description: |
+          Service account for ACommerce Marketplace API.
+          Requires permissions for Cloud SQL, GCS, and Secret Manager.
+        roles:
+          - type: ClusterRole
+            rulesType: PREDEFINED
+            rulesFromRoleName: edit
+          - type: Role
+            rulesType: CUSTOM
+            rules:
+              - apiGroups: [""]
+                resources: ["secrets", "configmaps"]
+                verbs: ["get", "list", "watch", "create", "update", "patch"]
+
+  # ===========================================================================
+  # Reporting Secret (GCP Marketplace Billing)
+  # ===========================================================================
+  reportingSecret:
+    type: string
+    title: Reporting Secret
+    description: Secret for usage reporting to GCP Marketplace
+    x-google-marketplace:
+      type: REPORTING_SECRET
+
+# =============================================================================
+# REQUIRED PROPERTIES
+# =============================================================================
+required:
+  - name
+  - namespace
+  - databaseHost
+  - databaseName
+  - databaseUser
+  - databasePassword
+  - jwtSecretKey
+  - serviceAccount
+  - reportingSecret
+
+# =============================================================================
+# FORM LAYOUT
+# =============================================================================
+form:
+  - widget: help
+    description: |
+      ## ACommerce Marketplace API
+
+      Deploy a complete e-commerce marketplace backend with:
+      - Multi-vendor marketplace support
+      - Product catalog with dynamic attributes
+      - Order management and payments
+      - User authentication and profiles
+
+      ### Prerequisites
+      - A PostgreSQL or SQL Server database (Cloud SQL recommended)
+      - Optional: Redis for session caching (Memorystore recommended)
+      - Optional: GCS bucket for file storage
+
+      ### After Deployment
+      1. Access the API at your configured domain
+      2. The Swagger UI is available at the root URL
+      3. Create your first admin user via the API
+
+  - widget: section
+    title: Store Configuration
+    properties:
+      - storeName
+      - storeUrl
+
+  - widget: section
+    title: Database Configuration
+    properties:
+      - databaseType
+      - databaseHost
+      - databasePort
+      - databaseName
+      - databaseUser
+      - databasePassword
+      - useCloudSqlProxy
+      - cloudSqlConnectionName
+
+  - widget: section
+    title: Caching (Redis)
+    properties:
+      - enableRedis
+      - redisHost
+      - redisPort
+
+  - widget: section
+    title: Authentication
+    properties:
+      - jwtSecretKey
+      - jwtExpirationMinutes
+      - jwtRefreshExpirationDays
+
+  - widget: section
+    title: File Storage
+    properties:
+      - gcsBucketName
+
+  - widget: section
+    title: Scaling & Resources
+    properties:
+      - replicas
+      - enableAutoscaling
+      - minReplicas
+      - maxReplicas
+      - cpuRequest
+      - cpuLimit
+      - memoryRequest
+      - memoryLimit
+
+  - widget: section
+    title: Advanced Settings
+    properties:
+      - runMigrations
+      - logLevel
+      - enableUsageReporting
