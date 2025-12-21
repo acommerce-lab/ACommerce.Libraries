@@ -389,14 +389,7 @@ All configuration is done via environment variables for cloud deployment:
         ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
     });
 
-    // Simple health endpoint for load balancers
-    app.MapGet("/healthz", () => Results.Ok(new
-    {
-        Status = "Healthy",
-        Service = "ACommerce Marketplace API",
-        Version = "1.0.0",
-        Timestamp = DateTime.UtcNow
-    })).AllowAnonymous();
+    // Note: /healthz endpoint is handled by HealthzController
 
     // =========================================================================
     // DATABASE INITIALIZATION
