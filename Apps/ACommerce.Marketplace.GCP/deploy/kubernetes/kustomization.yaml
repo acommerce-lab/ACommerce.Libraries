@@ -31,6 +31,7 @@ resources:
   - secrets.yaml
   - deployment.yaml
   - service.yaml
+  - ingress.yaml
 
 # Images - override in overlays for different environments
 images:

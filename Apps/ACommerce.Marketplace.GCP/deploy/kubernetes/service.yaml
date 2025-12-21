@@ -1,5 +1,14 @@
 # =============================================================================
-# ACommerce Marketplace API - Service
+# ACommerce Marketplace API - Service & Network Policy
+# =============================================================================
+#
+# Note: Ingress, SSL Certificate, and Backend/Frontend configs are in ingress.yaml
+#
+# =============================================================================
+
+---
+# =============================================================================
+# Service (ClusterIP for internal access)
 # =============================================================================
 apiVersion: v1
 kind: Service
@@ -10,9 +19,10 @@ metadata:
     app.kubernetes.io/name: acommerce-marketplace
     app.kubernetes.io/component: api
   annotations:
-    # GCP Cloud Load Balancer annotations
+    # Link to Backend Config (defined in ingress.yaml)
+    cloud.google.com/backend-config: '{"default": "acommerce-marketplace-backend"}'
+    # Enable container-native load balancing (NEG)
     cloud.google.com/neg: '{"ingress": true}'
-    cloud.google.com/backend-config: '{"default": "acommerce-marketplace-backend-config"}'
 spec:
   type: ClusterIP
   selector:
@@ -20,131 +30,12 @@ spec:
   ports:
     - name: http
       port: 80
-      targetPort: http
+      targetPort: 8080
       protocol: TCP
 
 ---
 # =============================================================================
-# Backend Config for GCP Load Balancer
-# =============================================================================
-apiVersion: cloud.google.com/v1
-kind: BackendConfig
-metadata:
-  name: acommerce-marketplace-backend-config
-  labels:
-    app: acommerce-marketplace
-spec:
-  # Health Check Configuration
-  healthCheck:
-    type: HTTP
-    requestPath: /healthz
-    port: 8080
-    checkIntervalSec: 15
-    timeoutSec: 5
-    healthyThreshold: 1
-    unhealthyThreshold: 3
-
-  # Connection Draining
-  connectionDraining:
-    drainingTimeoutSec: 30
-
-  # Session Affinity (optional - for sticky sessions)
-  # sessionAffinity:
-  #   affinityType: "GENERATED_COOKIE"
-  #   affinityCookieTtlSec: 3600
-
-  # Cloud CDN (optional - for static content caching)
-  # cdn:
-  #   enabled: true
-  #   cachePolicy:
-  #     includeHost: true
-  #     includeProtocol: true
-  #     includeQueryString: false
-
-  # Cloud Armor Security Policy (optional)
-  # securityPolicy:
-  #   name: acommerce-security-policy
-
-  # Timeout
-  timeoutSec: 30
-
----
-# =============================================================================
-# Ingress - GKE Ingress with HTTPS
-# =============================================================================
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: acommerce-marketplace-ingress
-  labels:
-    app: acommerce-marketplace
-  annotations:
-    # Use GKE Ingress Controller
-    kubernetes.io/ingress.class: "gce"
-
-    # HTTPS redirect
-    kubernetes.io/ingress.allow-http: "false"
-
-    # Managed SSL Certificate
-    networking.gke.io/managed-certificates: "acommerce-marketplace-cert"
-
-    # Static IP (create with: gcloud compute addresses create acommerce-marketplace-ip --global)
-    kubernetes.io/ingress.global-static-ip-name: "acommerce-marketplace-ip"
-
-    # Frontend Config for HTTPS redirect
-    networking.gke.io/v1beta1.FrontendConfig: "acommerce-marketplace-frontend-config"
-spec:
-  defaultBackend:
-    service:
-      name: acommerce-marketplace
-      port:
-        number: 80
-  rules:
-    - host: api.acommerce.io
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: acommerce-marketplace
-                port:
-                  number: 80
-
----
-# =============================================================================
-# Frontend Config for HTTPS Redirect
-# =============================================================================
-apiVersion: networking.gke.io/v1beta1
-kind: FrontendConfig
-metadata:
-  name: acommerce-marketplace-frontend-config
-  labels:
-    app: acommerce-marketplace
-spec:
-  redirectToHttps:
-    enabled: true
-    responseCodeName: MOVED_PERMANENTLY_DEFAULT
-
----
-# =============================================================================
-# Managed Certificate
-# =============================================================================
-apiVersion: networking.gke.io/v1
-kind: ManagedCertificate
-metadata:
-  name: acommerce-marketplace-cert
-  labels:
-    app: acommerce-marketplace
-spec:
-  domains:
-    - api.acommerce.io
-    # Add additional domains as needed
-    # - api.customer-domain.com
-
----
-# =============================================================================
-# Network Policy - Restrict ingress/egress
+# Network Policy - Restrict ingress/egress traffic
 # =============================================================================
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -152,6 +43,8 @@ metadata:
   name: acommerce-marketplace-network-policy
   labels:
     app: acommerce-marketplace
+    app.kubernetes.io/name: acommerce-marketplace
+    app.kubernetes.io/component: api
 spec:
   podSelector:
     matchLabels:
@@ -159,26 +52,38 @@ spec:
   policyTypes:
     - Ingress
     - Egress
+
+  # Ingress Rules
   ingress:
-    # Allow traffic from Ingress controller
+    # Allow traffic from GKE Ingress controller
     - from:
-        - namespaceSelector:
-            matchLabels:
-              name: ingress-nginx
         - namespaceSelector:
             matchLabels:
               name: gke-system
       ports:
         - protocol: TCP
           port: 8080
-    # Allow traffic from same namespace
+
+    # Allow traffic from same namespace (internal services)
     - from:
         - podSelector: {}
       ports:
         - protocol: TCP
           port: 8080
+
+    # Allow health checks from GCP load balancer
+    - from:
+        - ipBlock:
+            cidr: 35.191.0.0/16  # GCP Health Check ranges
+        - ipBlock:
+            cidr: 130.211.0.0/22
+      ports:
+        - protocol: TCP
+          port: 8080
+
+  # Egress Rules
   egress:
-    # Allow DNS
+    # Allow DNS resolution
     - to:
         - namespaceSelector: {}
       ports:
@@ -186,25 +91,43 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
-    # Allow HTTPS (for external APIs, GCP services)
+
+    # Allow HTTPS (external APIs, GCP services)
     - to:
         - ipBlock:
             cidr: 0.0.0.0/0
       ports:
         - protocol: TCP
           port: 443
-    # Allow PostgreSQL
+
+    # Allow PostgreSQL (Cloud SQL)
     - to:
         - ipBlock:
             cidr: 0.0.0.0/0
       ports:
         - protocol: TCP
           port: 5432
-    # Allow Redis
+
+    # Allow SQL Server
     - to:
-        - podSelector:
-            matchLabels:
-              app: redis
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 1433
+
+    # Allow Redis (Memorystore)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
       ports:
         - protocol: TCP
           port: 6379
+
+    # Allow GCP metadata server (for Workload Identity)
+    - to:
+        - ipBlock:
+            cidr: 169.254.169.254/32
+      ports:
+        - protocol: TCP
+          port: 80
