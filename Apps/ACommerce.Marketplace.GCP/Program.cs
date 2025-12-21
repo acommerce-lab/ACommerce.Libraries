@@ -65,6 +65,7 @@ try
     Log.Information("Listening on port {Port}", port);
 
     // Configure Serilog for GCP Cloud Logging
+    // Note: Cloud Run automatically sends stdout/stderr to Cloud Logging
     builder.Host.UseSerilog((context, services, configuration) =>
     {
         configuration
@@ -72,14 +73,19 @@ try
             .ReadFrom.Services(services)
             .Enrich.FromLogContext()
             .Enrich.WithProperty("ServiceName", "acommerce-marketplace")
-            .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName)
-            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}");
+            .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName);
 
-        // Add Google Cloud Logging in production
+        // Use JSON format in production for better Cloud Logging parsing
         var gcpProjectId = Environment.GetEnvironmentVariable("GCP_PROJECT_ID");
         if (!string.IsNullOrEmpty(gcpProjectId) && !context.HostingEnvironment.IsDevelopment())
         {
-            configuration.WriteTo.GoogleCloudLogging(gcpProjectId);
+            // Structured JSON logging for Cloud Logging
+            configuration.WriteTo.Console(new Serilog.Formatting.Json.JsonFormatter());
+        }
+        else
+        {
+            // Human-readable format for development
+            configuration.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}");
         }
     });
 

@@ -56,10 +56,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Logging -->
+    <!-- Logging (Cloud Run sends stdout to Cloud Logging automatically) -->
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-    <PackageReference Include="Serilog.Sinks.GoogleCloudLogging" Version="5.0.0" />
 
     <!-- Health Checks -->
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="8.0.2" />
