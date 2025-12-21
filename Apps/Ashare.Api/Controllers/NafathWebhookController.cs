@@ -9,13 +9,14 @@ namespace Ashare.Api.Controllers;
 /// يستقبل الاستدعاءات من خدمة نفاذ عند اكتمال المصادقة
 /// </summary>
 [ApiController]
-[Route("api/nafath/webhook")]
+[Route("api/auth")]
 public class NafathWebhookController : NafathWebhookControllerBase
 {
     public NafathWebhookController(
         ITwoFactorAuthenticationProvider nafathProvider,
+        IConfiguration configuration,
         ILogger<NafathWebhookController> logger)
-        : base(nafathProvider, logger)
+        : base(nafathProvider, configuration, logger)
     {
     }
 }
