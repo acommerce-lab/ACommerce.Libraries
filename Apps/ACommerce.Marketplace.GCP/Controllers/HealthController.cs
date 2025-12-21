@@ -22,8 +22,11 @@ public class HealthzController : ControllerBase
 
     /// <summary>
     /// Simple health check endpoint for load balancers
+    /// Note: /healthz may be intercepted by Cloud Run, so we also expose /api/healthz
     /// </summary>
     [HttpGet("/healthz")]
+    [HttpGet("/api/healthz")]
+    [HttpGet("/status")]
     public async Task<IActionResult> Get()
     {
         var dbStatus = "Unknown";
