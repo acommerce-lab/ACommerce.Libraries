@@ -1,0 +1,189 @@
+@namespace Ashare.App.Components
+@using ACommerce.Templates.Customer.Components
+@inject Ashare.Shared.Services.VersionCheckService VersionCheck
+@inject Ashare.Shared.Services.IAppVersionService AppVersion
+@inject ACommerce.Templates.Customer.Services.ILocalizationService L
+
+@* فحص الإصدار عند بدء التطبيق *@
+@* إذا كان الإصدار محظور، يتم عرض شاشة الحظر الكاملة ولا يتم تحميل أي محتوى آخر *@
+
+@if (_isLoading)
+{
+    @* شاشة التحميل أثناء فحص الإصدار *@
+    <div class="ac-startup-loading" dir="rtl">
+        <div class="ac-startup-loading-content">
+            <img src="_content/Ashare.Shared/images/ashare-logo.png" alt="عشير" class="ac-startup-logo" />
+            <div class="ac-startup-spinner"></div>
+            <p class="ac-startup-text">جارٍ التحقق من الإصدار...</p>
+        </div>
+    </div>
+}
+else if (VersionCheck.IsBlocked)
+{
+    @* شاشة الحظر الكاملة - لا يتم عرض أي محتوى آخر *@
+    <div class="ac-version-block-page" dir="@(L.IsRtl ? "rtl" : "ltr")">
+        <AcVersionBlocker
+            IsBlocked="true"
+            Message="@GetBlockerMessage()"
+            CurrentVersion="@AppVersion.Version"
+            LatestVersion="@VersionCheck.LastCheckResult?.LatestVersion?.VersionNumber"
+            ReleaseNotes="@(L.IsRtl ? VersionCheck.LastCheckResult?.LatestVersion?.ReleaseNotesAr : VersionCheck.LastCheckResult?.LatestVersion?.ReleaseNotesEn)"
+            UpdateUrl="@VersionCheck.LastCheckResult?.LatestVersion?.UpdateUrl"
+            StoreUrl="@GetStoreUrl()"
+            SupportEmail="support@ashare.sa"
+            IsArabic="@L.IsRtl"
+            Title="@(L.IsRtl ? "تحديث مطلوب" : "Update Required")"
+            YourVersionLabel="@(L.IsRtl ? "إصدارك الحالي:" : "Your version:")"
+            LatestVersionLabel="@(L.IsRtl ? "أحدث إصدار:" : "Latest version:")"
+            WhatsNewLabel="@(L.IsRtl ? "ما الجديد؟" : "What's New?")"
+            UpdateNowLabel="@(L.IsRtl ? "تحديث الآن" : "Update Now")"
+            OpenStoreLabel="@(L.IsRtl ? "فتح المتجر" : "Open Store")"
+            NeedHelpLabel="@(L.IsRtl ? "تحتاج مساعدة؟" : "Need help?")" />
+    </div>
+}
+else
+{
+    @* التطبيق العادي - الإصدار مدعوم *@
+    @ChildContent
+}
+
+<style>
+    .ac-startup-loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, #345454 0%, #263F3F 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+    }
+
+    .ac-startup-loading-content {
+        text-align: center;
+    }
+
+    .ac-startup-logo {
+        width: 120px;
+        height: auto;
+        margin-bottom: 24px;
+        animation: pulse 2s infinite;
+    }
+
+    .ac-startup-spinner {
+        width: 40px;
+        height: 40px;
+        margin: 0 auto 16px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #F4844C;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    .ac-startup-text {
+        color: white;
+        font-size: 16px;
+        font-family: 'Tajawal', sans-serif;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @@keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+
+    .ac-version-block-page {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 99999;
+        background: #FEE8D6;
+    }
+
+    .ac-version-block-page .ac-version-blocker {
+        position: relative;
+        min-height: 100vh;
+    }
+
+    .ac-version-block-page .ac-version-blocker-overlay {
+        background: linear-gradient(135deg, #345454 0%, #263F3F 100%);
+    }
+</style>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckVersionAsync();
+    }
+
+    private async Task CheckVersionAsync()
+    {
+        try
+        {
+            var currentVersion = AppVersion.Version;
+            var buildNumber = AppVersion.BuildNumber;
+
+            Console.WriteLine($"[AppStartup] 🚀 Checking version {currentVersion} (build {buildNumber})...");
+
+            var result = await VersionCheck.CheckVersionAsync(currentVersion, buildNumber);
+
+            if (result != null)
+            {
+                Console.WriteLine($"[AppStartup] Result - IsSupported: {result.IsSupported}, ForceUpdate: {result.IsForceUpdate}");
+
+                if (VersionCheck.IsBlocked)
+                {
+                    Console.WriteLine("[AppStartup] ⛔ Version BLOCKED - App will not load");
+                }
+                else
+                {
+                    Console.WriteLine("[AppStartup] ✅ Version OK - Loading app");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[AppStartup] ❌ Error checking version: {ex.Message}");
+            // VersionCheckService already handles this by blocking
+        }
+        finally
+        {
+            _isLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private string GetBlockerMessage()
+    {
+        var customMessage = L.IsRtl
+            ? VersionCheck.LastCheckResult?.MessageAr
+            : VersionCheck.LastCheckResult?.MessageEn;
+
+        if (!string.IsNullOrEmpty(customMessage))
+        {
+            return customMessage;
+        }
+
+        return L.IsRtl
+            ? "يجب تحديث التطبيق للاستمرار في استخدامه. يرجى تحميل أحدث إصدار من المتجر."
+            : "You must update the app to continue using it. Please download the latest version from the store.";
+    }
+
+    private string GetStoreUrl()
+    {
+        // رابط موقع عشير الرسمي
+        return VersionCheck.LastCheckResult?.LatestVersion?.UpdateUrl ?? "https://ashare.sa";
+    }
+}

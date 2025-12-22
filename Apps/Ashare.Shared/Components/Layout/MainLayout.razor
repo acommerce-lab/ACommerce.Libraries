@@ -11,27 +11,7 @@
 @inject ILocalizationService L
 @implements IDisposable
 
-@* Version Blocker - يظهر فوق كل شيء إذا كان الإصدار غير مدعوم *@
-@if (VersionCheck.IsBlocked)
-{
-    <AcVersionBlocker
-        IsBlocked="true"
-        Message="@GetBlockerMessage()"
-        CurrentVersion="@CurrentAppVersion"
-        LatestVersion="@VersionCheck.LastCheckResult?.LatestVersion?.VersionNumber"
-        ReleaseNotes="@(L.IsRtl ? VersionCheck.LastCheckResult?.LatestVersion?.ReleaseNotesAr : VersionCheck.LastCheckResult?.LatestVersion?.ReleaseNotesEn)"
-        UpdateUrl="@VersionCheck.LastCheckResult?.LatestVersion?.UpdateUrl"
-        StoreUrl="@GetStoreUrl()"
-        SupportEmail="support@ashare.app"
-        IsArabic="@L.IsRtl"
-        Title="@L["VersionUnsupported"]"
-        YourVersionLabel="@L["YourVersion"]"
-        LatestVersionLabel="@L["LatestVersion"]"
-        WhatsNewLabel="@L["WhatsNew"]"
-        UpdateNowLabel="@L["UpdateNow"]"
-        OpenStoreLabel="@L["OpenStore"]"
-        NeedHelpLabel="@L["NeedHelp"]" />
-}
+@* Version Blocker تم نقله إلى AppStartup.razor للتحقق عند بدء التطبيق *@
 
 <div class="ashare-app @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
     @* Navbar *@
@@ -150,7 +130,7 @@
     {
         // يمكن تحديد المتجر بناءً على المنصة
         // حالياً نعيد رابط عام
-        return VersionCheck.LastCheckResult?.LatestVersion?.UpdateUrl ?? "https://ashare.app";
+        return VersionCheck.LastCheckResult?.LatestVersion?.UpdateUrl ?? "https://ashare.sa";
     }
 
     /// <summary>
