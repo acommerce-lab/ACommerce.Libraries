@@ -1,11 +1,21 @@
 @page "/book/{SpaceId:guid}"
 @using ACommerce.Client.Auth
+@using ACommerce.Templates.Customer.Services
+@using Ashare.Shared.Components.Shared
 @inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
 @inject TokenManager TokenManager
 
 <div class="ac-page ashare-booking-create">
-    @if (_isLoading)
+    @if (_showPayment && !string.IsNullOrEmpty(_paymentUrl))
+    {
+        @* Payment WebView *@
+        <PaymentWebView PaymentUrl="@_paymentUrl"
+                        PaymentId="@_bookingId"
+                        OnPaymentCompleted="HandlePaymentCompleted"
+                        OnPaymentCancelled="HandlePaymentCancelled" />
+    }
+    else if (_isLoading)
     {
         <div class="ashare-loading">
             <div class="ac-spinner"></div>
@@ -53,6 +63,17 @@
             </div>
         </div>
 
+        @* Payment Protection Banner *@
+        <div class="ashare-protection-banner">
+            <div class="ashare-protection-icon">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <div class="ashare-protection-content">
+                <h3>حماية المبلغ</h3>
+                <p>مبلغك محمي بالكامل - لن يتم تحويله للمعلن إلا بعد اتفاق الطرفين، ويمكنك استرداده فوراً في أي وقت</p>
+            </div>
+        </div>
+
         @* Pricing Details *@
         <div class="ashare-booking-section">
             <h2 class="ashare-section-title">تفاصيل السعر</h2>
@@ -78,32 +99,58 @@
                     <span>@GetRequiredAmount() ر.س</span>
                 </div>
             </div>
-
-            <p class="ashare-deposit-note">
-                <i class="bi bi-info-circle"></i>
-                العربون مبلغ مسترد في حال إلغاء الحجز قبل الموافقة من المعلن
-            </p>
         </div>
 
-        @* Booking Terms *@
+        @* How It Works *@
         <div class="ashare-booking-section">
-            <h2 class="ashare-section-title">شروط الحجز</h2>
-            <ul class="ashare-booking-terms">
+            <h2 class="ashare-section-title">
+                <i class="bi bi-question-circle"></i>
+                كيف تعمل الحماية؟
+            </h2>
+            <div class="ashare-steps">
+                <div class="ashare-step">
+                    <div class="ashare-step-number">1</div>
+                    <div class="ashare-step-content">
+                        <h4>ادفع العربون</h4>
+                        <p>ادفع العربون الآن وسيتم حفظه في حسابك المحمي</p>
+                    </div>
+                </div>
+                <div class="ashare-step">
+                    <div class="ashare-step-number">2</div>
+                    <div class="ashare-step-content">
+                        <h4>تواصل مع المعلن</h4>
+                        <p>تواصل مع المعلن واتفق على تفاصيل العقد والمعاينة</p>
+                    </div>
+                </div>
+                <div class="ashare-step">
+                    <div class="ashare-step-number">3</div>
+                    <div class="ashare-step-content">
+                        <h4>أكد الاتفاق أو استرد</h4>
+                        <p>بعد الاتفاق، أكد الحجز ليتم تحويل العربون للمعلن، أو استرده فوراً</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* Important Notes *@
+        <div class="ashare-booking-section ashare-notes-section">
+            <h2 class="ashare-section-title">ملاحظات مهمة</h2>
+            <ul class="ashare-booking-notes">
                 <li>
-                    <i class="bi bi-check-circle"></i>
-                    سيتم إرسال طلب الحجز للمعلن للموافقة
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>العربون <strong>مسترد بالكامل</strong> في حال عدم الاتفاق</span>
                 </li>
                 <li>
-                    <i class="bi bi-check-circle"></i>
-                    يتم خصم العربون فقط بعد موافقة المعلن
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>لا يتم تحويل أي مبلغ للمعلن إلا <strong>بعد تأكيدك</strong></span>
                 </li>
                 <li>
-                    <i class="bi bi-check-circle"></i>
-                    يمكنك إلغاء الطلب قبل الموافقة واسترداد العربون
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>يمكنك <strong>الاسترداد الفوري</strong> بضغطة زر بدون تعقيدات</span>
                 </li>
                 <li>
-                    <i class="bi bi-check-circle"></i>
-                    باقي المبلغ يتم دفعه مباشرة للمعلن
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>باقي الإيجار يتم دفعه <strong>مباشرة للمعلن</strong> عند التسليم</span>
                 </li>
             </ul>
         </div>
@@ -113,7 +160,7 @@
             <label class="ashare-checkbox">
                 <input type="checkbox" @bind="_agreedToTerms" />
                 <span class="ashare-checkbox-mark"></span>
-                <span>أوافق على <a href="/legal/terms" target="_blank">شروط الاستخدام</a> و<a href="/legal/privacy" target="_blank">سياسة الخصوصية</a></span>
+                <span>أوافق على <a href="/legal/terms">شروط الاستخدام</a> و<a href="/legal/privacy">سياسة الخصوصية</a></span>
             </label>
         </div>
 
@@ -129,16 +176,16 @@
         @* Submit Button *@
         <div class="ashare-booking-submit">
             <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
-                    @onclick="SubmitBooking"
+                    @onclick="StartPayment"
                     disabled="@(!_agreedToTerms || _isSubmitting)">
                 @if (_isSubmitting)
                 {
                     <div class="ac-spinner ac-spinner-sm"></div>
-                    <span>جاري إرسال الطلب...</span>
+                    <span>جاري تجهيز الدفع...</span>
                 }
                 else
                 {
-                    <i class="bi bi-credit-card"></i>
+                    <i class="bi bi-shield-lock"></i>
                     <span>دفع العربون @GetRequiredAmount() ر.س</span>
                 }
             </button>
@@ -157,6 +204,11 @@
     private string? _errorMessage;
     private decimal _depositPercentage = 10; // Default 10%, will be fetched from backend
 
+    // Payment state
+    private bool _showPayment;
+    private string? _paymentUrl;
+    private string? _bookingId;
+
     protected override async Task OnInitializedAsync()
     {
         await LoadSpaceAsync();
@@ -170,7 +222,9 @@
             _space = await ApiService.GetSpaceByIdAsync(SpaceId);
 
             // TODO: Fetch deposit percentage from backend settings
-            // _depositPercentage = await ApiService.GetDepositPercentageAsync();
+            // var settings = await SettingsClient.GetAsync("Booking.DepositPercentage");
+            // if (decimal.TryParse(settings?.Value, out var percentage))
+            //     _depositPercentage = percentage;
         }
         catch (Exception ex)
         {
@@ -248,7 +302,7 @@
         return CalculateDeposit();
     }
 
-    private async Task SubmitBooking()
+    private async Task StartPayment()
     {
         if (!_agreedToTerms)
         {
@@ -270,21 +324,31 @@
 
         try
         {
-            // TODO: Create booking request through API
-            // var booking = await ApiService.CreateBookingRequestAsync(SpaceId, CalculateDeposit());
+            // TODO: Create booking and get payment URL from API
+            // var result = await ApiService.CreateBookingWithPaymentAsync(new CreateBookingRequest
+            // {
+            //     SpaceId = SpaceId,
+            //     DepositAmount = CalculateDeposit(),
+            //     TotalPrice = GetPrice(),
+            //     RentType = GetAttribute("rent_type")
+            // });
+            //
+            // if (result.Success && !string.IsNullOrEmpty(result.PaymentUrl))
+            // {
+            //     _bookingId = result.BookingId;
+            //     _paymentUrl = result.PaymentUrl;
+            //     _showPayment = true;
+            // }
 
-            // TODO: Navigate to payment page
-            // Navigation.NavigateTo($"/payment/{booking.Id}");
-
-            // For now, show success message and go back
+            // Temporary: For testing, navigate to payment simulation
             Console.WriteLine($"[BookingCreate] Creating booking for space {SpaceId} with deposit {CalculateDeposit()} SAR");
 
-            // Temporary: Navigate to bookings page
-            Navigation.NavigateTo("/bookings");
+            // For now, show that we need to implement the payment API
+            _errorMessage = "جاري تطوير نظام الدفع - سيتم التفعيل قريباً";
         }
         catch (Exception ex)
         {
-            _errorMessage = "حدث خطأ أثناء إرسال الطلب. حاول مرة أخرى.";
+            _errorMessage = "حدث خطأ أثناء تجهيز الدفع. حاول مرة أخرى.";
             Console.WriteLine($"[BookingCreate] Error: {ex.Message}");
         }
         finally
@@ -294,9 +358,43 @@
         }
     }
 
+    private async Task HandlePaymentCompleted(PaymentResult result)
+    {
+        _showPayment = false;
+
+        if (result.Success)
+        {
+            // Payment successful, navigate to booking confirmation
+            Console.WriteLine($"[BookingCreate] Payment successful: {result.TransactionId}");
+            Navigation.NavigateTo($"/bookings/{_bookingId}?status=success");
+        }
+        else
+        {
+            // Payment failed
+            _errorMessage = result.Message ?? "فشلت عملية الدفع. حاول مرة أخرى.";
+            StateHasChanged();
+        }
+    }
+
+    private void HandlePaymentCancelled()
+    {
+        _showPayment = false;
+        _paymentUrl = null;
+        StateHasChanged();
+    }
+
     private void GoBack()
     {
-        Navigation.NavigateBack();
+        if (_showPayment)
+        {
+            _showPayment = false;
+            _paymentUrl = null;
+            StateHasChanged();
+        }
+        else
+        {
+            Navigation.NavigateBack();
+        }
     }
 }
 
@@ -370,12 +468,64 @@
         gap: var(--ashare-spacing-xs);
     }
 
+    /* Protection Banner */
+    .ashare-protection-banner {
+        display: flex;
+        gap: var(--ashare-spacing-md);
+        padding: var(--ashare-spacing-md);
+        margin: var(--ashare-spacing-md);
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-radius: var(--ashare-radius-lg);
+        color: white;
+    }
+
+    .ashare-protection-icon {
+        width: 48px;
+        height: 48px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .ashare-protection-icon i {
+        font-size: 24px;
+    }
+
+    .ashare-protection-content h3 {
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0 0 var(--ashare-spacing-xs);
+    }
+
+    .ashare-protection-content p {
+        font-size: 13px;
+        margin: 0;
+        opacity: 0.9;
+        line-height: 1.5;
+    }
+
     .ashare-booking-section {
         padding: var(--ashare-spacing-md);
         margin: var(--ashare-spacing-md);
         background: var(--ashare-surface);
         border-radius: var(--ashare-radius-lg);
         box-shadow: var(--ashare-shadow-sm);
+    }
+
+    .ashare-section-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 var(--ashare-spacing-md);
+        display: flex;
+        align-items: center;
+        gap: var(--ashare-spacing-sm);
+    }
+
+    .ashare-section-title i {
+        color: var(--ashare-primary);
     }
 
     .ashare-price-breakdown {
@@ -408,21 +558,51 @@
         margin: var(--ashare-spacing-sm) 0;
     }
 
-    .ashare-deposit-note {
-        font-size: 12px;
-        color: var(--ashare-gray-500);
-        margin: var(--ashare-spacing-md) 0 0;
+    /* Steps */
+    .ashare-steps {
         display: flex;
-        align-items: flex-start;
-        gap: var(--ashare-spacing-xs);
+        flex-direction: column;
+        gap: var(--ashare-spacing-md);
     }
 
-    .ashare-deposit-note i {
+    .ashare-step {
+        display: flex;
+        gap: var(--ashare-spacing-md);
+    }
+
+    .ashare-step-number {
+        width: 32px;
+        height: 32px;
+        background: var(--ashare-primary);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
         flex-shrink: 0;
-        margin-top: 2px;
     }
 
-    .ashare-booking-terms {
+    .ashare-step-content h4 {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 0 0 4px;
+    }
+
+    .ashare-step-content p {
+        font-size: 13px;
+        color: var(--ashare-gray-500);
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    /* Notes */
+    .ashare-notes-section {
+        background: var(--ashare-gray-50);
+    }
+
+    .ashare-booking-notes {
         list-style: none;
         padding: 0;
         margin: 0;
@@ -431,18 +611,22 @@
         gap: var(--ashare-spacing-sm);
     }
 
-    .ashare-booking-terms li {
+    .ashare-booking-notes li {
         display: flex;
         align-items: flex-start;
         gap: var(--ashare-spacing-sm);
         font-size: 14px;
-        color: var(--ashare-gray-600);
+        color: var(--ashare-gray-700);
     }
 
-    .ashare-booking-terms li i {
-        color: var(--ashare-success);
+    .ashare-booking-notes li i {
+        color: #10b981;
         flex-shrink: 0;
         margin-top: 2px;
+    }
+
+    .ashare-booking-notes li strong {
+        color: var(--ashare-primary);
     }
 
     .ashare-booking-agreement {
@@ -462,6 +646,7 @@
         width: 20px;
         height: 20px;
         accent-color: var(--ashare-primary);
+        flex-shrink: 0;
     }
 
     .ashare-checkbox a {
