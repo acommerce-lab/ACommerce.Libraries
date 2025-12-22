@@ -24,14 +24,14 @@ public class MigrationController : ControllerBase
     }
 
     /// <summary>
-    /// ترحيل العروض من النظام القديم
+    /// بذر العروض من البيانات المحفوظة مع تحميل الصور
     /// </summary>
-    [HttpPost("offers")]
-    public async Task<ActionResult<MigrationResult>> MigrateOffers(CancellationToken cancellationToken)
+    [HttpPost("offers/seed")]
+    public async Task<ActionResult<MigrationResult>> SeedOffers(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Starting offers migration via API...");
+        _logger.LogInformation("Starting offers seeding from static data...");
 
-        var result = await _migrationService.MigrateOffersAsync(cancellationToken);
+        var result = await _migrationService.SeedOffersFromStaticDataAsync(cancellationToken);
 
         if (result.IsSuccess)
         {
@@ -42,14 +42,14 @@ public class MigrationController : ControllerBase
     }
 
     /// <summary>
-    /// بذر العروض من البيانات المحفوظة (بدون اتصال بالنظام القديم)
+    /// حذف العروض المرحلة وإعادة بذرها مع تحميل الصور بشكل صحيح
     /// </summary>
-    [HttpPost("offers/seed")]
-    public async Task<ActionResult<MigrationResult>> SeedOffers(CancellationToken cancellationToken)
+    [HttpPost("offers/reseed")]
+    public async Task<ActionResult<MigrationResult>> ReseedOffers(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Starting offers seeding from static data...");
+        _logger.LogInformation("Starting offers delete and reseed with image upload...");
 
-        var result = await _migrationService.SeedOffersFromStaticDataAsync(cancellationToken);
+        var result = await _migrationService.DeleteAndReseedOffersAsync(cancellationToken);
 
         if (result.IsSuccess)
         {

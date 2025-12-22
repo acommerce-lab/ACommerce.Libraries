@@ -1,10 +1,9 @@
-using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using ACommerce.Catalog.Listings.Entities;
 using ACommerce.Catalog.Listings.Enums;
+using ACommerce.Files.Abstractions.Providers;
 using ACommerce.SharedKernel.Abstractions.Repositories;
-using Microsoft.EntityFrameworkCore;
 
 namespace Ashare.Api.Services;
 
@@ -14,57 +13,71 @@ namespace Ashare.Api.Services;
 public class OffersMigrationService
 {
     private readonly IRepositoryFactory _repositoryFactory;
+    private readonly IStorageProvider _storageProvider;
     private readonly HttpClient _httpClient;
     private readonly ILogger<OffersMigrationService> _logger;
+    private readonly IConfiguration _configuration;
 
-    private const string OldApiBaseUrl = "http://ashare-001-site4.mtempurl.com";
-    private const string OldImagesBaseUrl = "http://ashare-001-site4.mtempurl.com/uploads/";
+    // الرابط الصحيح للصور في النظام القديم
+    private const string OldImagesBaseUrl = "http://ashare-001-site4.mtempurl.com/Images/";
 
     public OffersMigrationService(
         IRepositoryFactory repositoryFactory,
+        IStorageProvider storageProvider,
         IHttpClientFactory httpClientFactory,
+        IConfiguration configuration,
         ILogger<OffersMigrationService> logger)
     {
         _repositoryFactory = repositoryFactory;
+        _storageProvider = storageProvider;
         _httpClient = httpClientFactory.CreateClient();
+        _httpClient.Timeout = TimeSpan.FromSeconds(60); // زيادة الوقت لتحميل الصور
+        _configuration = configuration;
         _logger = logger;
     }
 
     /// <summary>
-    /// ترحيل جميع العروض من النظام القديم
+    /// حذف جميع العروض المرحلة وإعادة بذرها
     /// </summary>
-    public async Task<MigrationResult> MigrateOffersAsync(CancellationToken cancellationToken = default)
+    public async Task<MigrationResult> DeleteAndReseedOffersAsync(CancellationToken cancellationToken = default)
     {
         var result = new MigrationResult();
 
         try
         {
-            _logger.LogInformation("Starting offers migration from old system...");
+            _logger.LogInformation("Deleting existing migrated offers...");
 
-            // 1. جلب العروض من API القديم
-            var oldOffers = await FetchOldOffersAsync(cancellationToken);
-            if (oldOffers == null || !oldOffers.Any())
+            // حذف العروض الموجودة من البذر السابق
+            var listingRepo = _repositoryFactory.CreateRepository<ProductListing>();
+            var staticOfferIds = GetStaticOffers().Select(o => o.Id).ToList();
+
+            var allOffers = await listingRepo.ListAllAsync(cancellationToken);
+            var existingOffers = allOffers.Where(x => staticOfferIds.Contains(x.Id)).ToList();
+
+            if (existingOffers.Any())
             {
-                _logger.LogWarning("No offers found in old system");
-                return result;
+                foreach (var offer in existingOffers)
+                {
+                    await listingRepo.DeleteAsync(offer, cancellationToken);
+                }
+                await listingRepo.SaveChangesAsync(cancellationToken);
+                _logger.LogInformation("Deleted {Count} existing offers", existingOffers.Count);
             }
 
-            result.TotalFound = oldOffers.Count;
-            _logger.LogInformation("Found {Count} offers in old system", oldOffers.Count);
-
-            await SaveOffersAsync(oldOffers, result, cancellationToken);
+            // إعادة البذر مع تحميل الصور
+            return await SeedOffersFromStaticDataAsync(cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Migration failed");
-            result.Errors.Add($"Migration failed: {ex.Message}");
+            _logger.LogError(ex, "Delete and reseed failed");
+            result.Errors.Add($"Delete and reseed failed: {ex.Message}");
         }
 
         return result;
     }
 
     /// <summary>
-    /// بذر العروض من البيانات الثابتة (بدون اتصال بالنظام القديم)
+    /// بذر العروض من البيانات الثابتة مع تحميل الصور
     /// </summary>
     public async Task<MigrationResult> SeedOffersFromStaticDataAsync(CancellationToken cancellationToken = default)
     {
@@ -72,12 +85,12 @@ public class OffersMigrationService
 
         try
         {
-            _logger.LogInformation("Starting offers seeding from static data...");
+            _logger.LogInformation("Starting offers seeding from static data with image upload...");
 
             var staticOffers = GetStaticOffers();
             result.TotalFound = staticOffers.Count;
 
-            await SaveOffersAsync(staticOffers, result, cancellationToken);
+            await SaveOffersWithImagesAsync(staticOffers, result, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -89,11 +102,12 @@ public class OffersMigrationService
     }
 
     /// <summary>
-    /// حفظ العروض في قاعدة البيانات
+    /// حفظ العروض مع تحميل الصور
     /// </summary>
-    private async Task SaveOffersAsync(List<OldOfferDto> offers, MigrationResult result, CancellationToken cancellationToken)
+    private async Task SaveOffersWithImagesAsync(List<OldOfferDto> offers, MigrationResult result, CancellationToken cancellationToken)
     {
         var listingRepo = _repositoryFactory.CreateRepository<ProductListing>();
+        var baseUrl = _configuration["HostSettings:BaseUrl"] ?? "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net";
 
         foreach (var oldOffer in offers)
         {
@@ -110,14 +124,37 @@ public class OffersMigrationService
                     continue;
                 }
 
+                // تحميل ورفع الصور
+                var newImageUrls = new List<string>();
+                if (oldOffer.ImageUrls != null)
+                {
+                    foreach (var imageName in oldOffer.ImageUrls)
+                    {
+                        try
+                        {
+                            var newUrl = await DownloadAndUploadImageAsync(imageName, baseUrl, cancellationToken);
+                            if (!string.IsNullOrEmpty(newUrl))
+                            {
+                                newImageUrls.Add(newUrl);
+                                _logger.LogDebug("Uploaded image: {ImageName} -> {NewUrl}", imageName, newUrl);
+                            }
+                        }
+                        catch (Exception imgEx)
+                        {
+                            _logger.LogWarning(imgEx, "Failed to upload image {ImageName} for offer {OfferId}", imageName, oldOffer.Id);
+                            // نستمر حتى لو فشل تحميل صورة واحدة
+                        }
+                    }
+                }
+
                 // تحويل العرض
-                var newListing = MapToProductListing(oldOffer);
+                var newListing = MapToProductListing(oldOffer, newImageUrls);
 
                 // حفظ العرض
                 await listingRepo.AddAsync(newListing, cancellationToken);
                 result.Migrated++;
 
-                _logger.LogDebug("Migrated offer: {Title}", oldOffer.Title);
+                _logger.LogDebug("Migrated offer: {Title} with {ImageCount} images", oldOffer.Title, newImageUrls.Count);
             }
             catch (Exception ex)
             {
@@ -135,29 +172,53 @@ public class OffersMigrationService
     }
 
     /// <summary>
-    /// جلب العروض من API القديم
+    /// تحميل صورة من النظام القديم ورفعها إلى التخزين السحابي
     /// </summary>
-    private async Task<List<OldOfferDto>?> FetchOldOffersAsync(CancellationToken cancellationToken)
+    private async Task<string?> DownloadAndUploadImageAsync(string imageName, string baseUrl, CancellationToken cancellationToken)
     {
-        try
-        {
-            var response = await _httpClient.GetFromJsonAsync<OldOffersResponse>(
-                $"{OldApiBaseUrl}/api/Offers/GetOffers",
-                cancellationToken);
+        // بناء رابط الصورة في النظام القديم
+        var oldImageUrl = $"{OldImagesBaseUrl}{imageName}";
 
-            return response?.Offers;
-        }
-        catch (Exception ex)
+        _logger.LogDebug("Downloading image from: {Url}", oldImageUrl);
+
+        // تحميل الصورة
+        var response = await _httpClient.GetAsync(oldImageUrl, cancellationToken);
+        if (!response.IsSuccessStatusCode)
         {
-            _logger.LogError(ex, "Failed to fetch offers from old API");
+            _logger.LogWarning("Failed to download image {Url}: {StatusCode}", oldImageUrl, response.StatusCode);
             return null;
         }
+
+        // قراءة المحتوى كـ Stream
+        await using var imageStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+
+        // تحديد امتداد الملف
+        var extension = Path.GetExtension(imageName);
+        if (string.IsNullOrEmpty(extension))
+        {
+            extension = ".jpg";
+        }
+
+        // إنشاء اسم فريد للملف
+        var newFileName = $"{Guid.NewGuid()}{extension}";
+
+        // رفع الصورة إلى التخزين السحابي
+        var objectName = await _storageProvider.SaveAsync(
+            imageStream,
+            newFileName,
+            "listings/migrated",
+            cancellationToken);
+
+        // بناء الرابط الجديد
+        var proxyUrl = $"{baseUrl.TrimEnd('/')}/api/media/{objectName}";
+
+        return proxyUrl;
     }
 
     /// <summary>
     /// تحويل العرض القديم إلى ProductListing
     /// </summary>
-    private ProductListing MapToProductListing(OldOfferDto old)
+    private ProductListing MapToProductListing(OldOfferDto old, List<string> imageUrls)
     {
         // بناء AttributesJson
         var attributes = new Dictionary<string, object>
@@ -235,21 +296,6 @@ public class OffersMigrationService
             ["features"] = old.Features ?? new List<string>()
         };
 
-        // بناء قائمة الصور مع URL الكامل
-        var imageUrls = old.ImageUrls?
-            .Select(img => img.StartsWith("http") ? img : $"{OldImagesBaseUrl}{img}")
-            .ToList() ?? new List<string>();
-
-        var videoUrls = old.VideoUrls?
-            .Select(vid => vid.StartsWith("http") ? vid : $"{OldImagesBaseUrl}{vid}")
-            .ToList() ?? new List<string>();
-
-        // إضافة الفيديوهات للـ metadata
-        if (videoUrls.Any())
-        {
-            attributes["video_urls"] = videoUrls;
-        }
-
         return new ProductListing
         {
             Id = old.Id,
@@ -268,7 +314,7 @@ public class OffersMigrationService
             // الفئة (سكني)
             CategoryId = AshareSeedDataService.CategoryIds.Residential,
 
-            // الصور
+            // الصور (من التخزين السحابي الجديد)
             ImagesJson = JsonSerializer.Serialize(imageUrls),
             FeaturedImage = imageUrls.FirstOrDefault(),
 
@@ -744,18 +790,6 @@ public class OffersMigrationService
 
     #region DTOs للنظام القديم
 
-    public class OldOffersResponse
-    {
-        [JsonPropertyName("offers")]
-        public List<OldOfferDto> Offers { get; set; } = new();
-
-        [JsonPropertyName("totalCount")]
-        public int TotalCount { get; set; }
-
-        [JsonPropertyName("pageCount")]
-        public int PageCount { get; set; }
-    }
-
     public class OldOfferDto
     {
         [JsonPropertyName("id")]
@@ -797,9 +831,6 @@ public class OffersMigrationService
         [JsonPropertyName("duration")]
         public int Duration { get; set; }
 
-        [JsonPropertyName("isFavorite")]
-        public bool IsFavorite { get; set; }
-
         [JsonPropertyName("area")]
         public int Area { get; set; }
 
@@ -827,20 +858,8 @@ public class OffersMigrationService
         [JsonPropertyName("longitude")]
         public double? Longitude { get; set; }
 
-        [JsonPropertyName("neighborhoodId")]
-        public Guid? NeighborhoodId { get; set; }
-
-        [JsonPropertyName("cityId")]
-        public Guid? CityId { get; set; }
-
-        [JsonPropertyName("countryId")]
-        public Guid? CountryId { get; set; }
-
         [JsonPropertyName("imageUrls")]
         public List<string>? ImageUrls { get; set; }
-
-        [JsonPropertyName("videoUrls")]
-        public List<string>? VideoUrls { get; set; }
 
         [JsonPropertyName("features")]
         public List<string>? Features { get; set; }
