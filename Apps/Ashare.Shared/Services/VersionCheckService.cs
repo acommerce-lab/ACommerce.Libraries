@@ -1,5 +1,6 @@
 using ACommerce.Client.Versions;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace Ashare.Shared.Services;
 
@@ -87,6 +88,8 @@ public class VersionCheckService
         try
         {
             _logger.LogInformation("Checking version {Version} (build {Build})", currentVersion, buildNumber);
+            Debug.WriteLine("Checking version {Version} (build {Build})", currentVersion, buildNumber);
+            Console.WriteLine("Checking version {Version} (build {Build})", currentVersion, buildNumber);
 
             var request = new VersionCheckRequest
             {
