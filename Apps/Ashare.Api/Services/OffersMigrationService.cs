@@ -19,7 +19,7 @@ public class OffersMigrationService
     private readonly IConfiguration _configuration;
 
     // الرابط الصحيح للصور في النظام القديم
-    private const string OldImagesBaseUrl = "http://ashare-001-site4.mtempurl.com/Images/";
+    private const string OldImagesBaseUrl = "http://ashare-001-site6.mtempurl.com/Images/";
 
     public OffersMigrationService(
         IRepositoryFactory repositoryFactory,
@@ -181,38 +181,52 @@ public class OffersMigrationService
 
         _logger.LogDebug("Downloading image from: {Url}", oldImageUrl);
 
-        // تحميل الصورة
-        var response = await _httpClient.GetAsync(oldImageUrl, cancellationToken);
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            _logger.LogWarning("Failed to download image {Url}: {StatusCode}", oldImageUrl, response.StatusCode);
-            return null;
+            // تحميل الصورة
+            var response = await _httpClient.GetAsync(oldImageUrl, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("Failed to download image {Url}: {StatusCode}", oldImageUrl, response.StatusCode);
+                return null;
+            }
+
+            // قراءة المحتوى كـ Stream
+            await using var imageStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+
+            // نسخ الـ Stream لأنه قد يُستهلك
+            using var memoryStream = new MemoryStream();
+            await imageStream.CopyToAsync(memoryStream, cancellationToken);
+            memoryStream.Position = 0;
+
+            // تحديد امتداد الملف
+            var extension = Path.GetExtension(imageName);
+            if (string.IsNullOrEmpty(extension))
+            {
+                extension = ".jpg";
+            }
+
+            // إنشاء اسم فريد للملف
+            var newFileName = $"{Guid.NewGuid()}{extension}";
+
+            // رفع الصورة إلى التخزين السحابي
+            var objectName = await _storageProvider.SaveAsync(
+                memoryStream,
+                newFileName,
+                "listings/migrated",
+                cancellationToken);
+
+            // بناء الرابط الجديد
+            var proxyUrl = $"{baseUrl.TrimEnd('/')}/api/media/{objectName}";
+
+            return proxyUrl;
         }
-
-        // قراءة المحتوى كـ Stream
-        await using var imageStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-
-        // تحديد امتداد الملف
-        var extension = Path.GetExtension(imageName);
-        if (string.IsNullOrEmpty(extension))
+        catch (Exception ex)
         {
-            extension = ".jpg";
+            // في حالة فشل الرفع لـ GCS، نستخدم الرابط القديم مباشرة
+            _logger.LogWarning(ex, "Failed to upload to GCS, using old URL directly: {Url}", oldImageUrl);
+            return oldImageUrl;
         }
-
-        // إنشاء اسم فريد للملف
-        var newFileName = $"{Guid.NewGuid()}{extension}";
-
-        // رفع الصورة إلى التخزين السحابي
-        var objectName = await _storageProvider.SaveAsync(
-            imageStream,
-            newFileName,
-            "listings/migrated",
-            cancellationToken);
-
-        // بناء الرابط الجديد
-        var proxyUrl = $"{baseUrl.TrimEnd('/')}/api/media/{objectName}";
-
-        return proxyUrl;
     }
 
     /// <summary>
