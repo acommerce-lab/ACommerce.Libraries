@@ -116,8 +116,15 @@
     .legal-page-container {
         display: flex;
         flex-direction: column;
-        height: 100%;
+        height: 100vh;
+        height: 100dvh;
         background: var(--ac-bg-primary);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 100;
     }
 
     .legal-page-header {
@@ -127,6 +134,7 @@
         background: var(--ac-bg-secondary);
         border-bottom: 1px solid var(--ac-border);
         gap: var(--ac-spacing-md);
+        flex-shrink: 0;
     }
 
     .legal-back-btn {
@@ -165,6 +173,7 @@
         flex: 1;
         position: relative;
         overflow: hidden;
+        min-height: 0;
     }
 
     .legal-iframe {
@@ -172,6 +181,7 @@
         height: 100%;
         border: none;
         background: white;
+        display: block;
     }
 
         .legal-iframe.loading {
