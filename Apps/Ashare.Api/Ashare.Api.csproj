@@ -94,6 +94,9 @@
     <!-- Legal Pages -->
     <ProjectReference Include="..\..\libs\backend\core\ACommerce.LegalPages\ACommerce.LegalPages.csproj" />
 
+    <!-- Version Management -->
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.Versions\ACommerce.Versions.csproj" />
+
     <!-- Admin Dashboard & Management -->
     <ProjectReference Include="..\..\libs\backend\admin\ACommerce.Admin.Dashboard.Api\ACommerce.Admin.Dashboard.Api.csproj" />
     <ProjectReference Include="..\..\libs\backend\admin\ACommerce.Admin.Orders.Api\ACommerce.Admin.Orders.Api.csproj" />

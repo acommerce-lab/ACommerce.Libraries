@@ -77,6 +77,10 @@ using ACommerce.Admin.AuditLog;
 using ACommerce.LegalPages.Api.Controllers;
 using ACommerce.LegalPages.Extensions;
 
+// Version Management
+using ACommerce.Versions.Api.Controllers;
+using ACommerce.Versions.Extensions;
+
 // Marketing & Analytics
 using ACommerce.Marketing.MetaConversions.Extensions;
 
@@ -163,7 +167,8 @@ try
         .AddApplicationPart(typeof(AdminListingsController).Assembly) // Admin Listings
         .AddApplicationPart(typeof(ReportsController).Assembly) // Admin Reports
         .AddApplicationPart(typeof(AuditLogController).Assembly) // Admin Audit Log
-        .AddApplicationPart(typeof(LegalPagesController).Assembly); // Legal Pages
+        .AddApplicationPart(typeof(LegalPagesController).Assembly) // Legal Pages
+        .AddApplicationPart(typeof(AppVersionsController).Assembly); // Version Management
 
     builder.Services.AddEndpointsApiExplorer();
 
@@ -286,6 +291,9 @@ try
 
     // Legal Pages
     builder.Services.AddLegalPages();
+
+    // Version Management
+    builder.Services.AddVersioning();
 
     // Meta Conversions API (Facebook Server-Side Events)
     builder.Services.AddMetaConversions(builder.Configuration);
