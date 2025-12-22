@@ -138,24 +138,70 @@
         : ACommerce.Templates.Customer.Components.VersionAlertType.Info;
 
     /// <summary>
-    /// الحصول على إصدار التطبيق من Assembly
+    /// الحصول على إصدار التطبيق
     /// </summary>
     private static string GetCurrentAppVersion()
     {
+#if ANDROID || IOS || MACCATALYST
+        // للتطبيقات المحمولة - استخدم MAUI AppInfo
+        try
+        {
+            return Microsoft.Maui.ApplicationModel.AppInfo.VersionString;
+        }
+        catch
+        {
+            return "1.0";
+        }
+#else
+        // لتطبيقات الويب - استخدم Assembly Version أو الإعدادات
+        try
+        {
+            var assembly = System.Reflection.Assembly.GetEntryAssembly();
+            var version = assembly?.GetName().Version;
+            if (version != null && (version.Major > 1 || version.Minor > 0))
+            {
+                return $"{version.Major}.{version.Minor}";
+            }
+
+            // إذا لم يتم تعيين الإصدار، استخدم القيمة من الإعدادات أو الافتراضية
+            return "1.0";
+        }
+        catch
+        {
+            return "1.0";
+        }
+#endif
+    }
+
+    /// <summary>
+    /// الحصول على رقم البناء
+    /// </summary>
+    private static int GetCurrentBuildNumber()
+    {
+#if ANDROID || IOS || MACCATALYST
+        try
+        {
+            var buildString = Microsoft.Maui.ApplicationModel.AppInfo.BuildString;
+            if (int.TryParse(buildString, out var build))
+            {
+                return build;
+            }
+        }
+        catch { }
+        return 0;
+#else
         try
         {
             var assembly = System.Reflection.Assembly.GetEntryAssembly();
             var version = assembly?.GetName().Version;
             if (version != null)
             {
-                return $"{version.Major}.{version.Minor}";
+                return version.Build;
             }
         }
-        catch
-        {
-            // تجاهل أي أخطاء
-        }
-        return "1.0";
+        catch { }
+        return 0;
+#endif
     }
 
     /// <summary>
@@ -321,9 +367,10 @@
         try
         {
             var currentVersion = CurrentAppVersion;
-            Console.WriteLine($"[VersionCheck] Checking version {currentVersion}...");
+            var buildNumber = GetCurrentBuildNumber();
+            Console.WriteLine($"[VersionCheck] Checking version {currentVersion} (build {buildNumber})...");
 
-            var result = await VersionCheck.CheckVersionAsync(currentVersion);
+            var result = await VersionCheck.CheckVersionAsync(currentVersion, buildNumber);
             _versionChecked = true;
 
             if (result != null)
