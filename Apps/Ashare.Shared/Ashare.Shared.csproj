@@ -33,6 +33,7 @@
                 <!-- Sales Clients -->
                 <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Orders\ACommerce.Client.Orders.csproj" />
                 <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Cart\ACommerce.Client.Cart.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Bookings\ACommerce.Client.Bookings.csproj" />
 
                 <!-- Marketplace Clients -->
                 <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Vendors\ACommerce.Client.Vendors.csproj" />

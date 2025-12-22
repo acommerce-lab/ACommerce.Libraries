@@ -5,6 +5,7 @@ using ACommerce.Client.Categories;
 using ACommerce.Client.Products;
 using ACommerce.Client.ProductListings;
 using ACommerce.Client.Orders;
+using ACommerce.Client.Bookings;
 using ACommerce.Client.Subscriptions;
 using ACommerce.Client.Payments;
 using ACommerce.Client.Core.Http;
@@ -25,6 +26,7 @@ public class AshareApiService
         private readonly ProductsClient _productsClient;
         private readonly ProductListingsClient _listingsClient;
         private readonly OrdersClient _ordersClient;
+        private readonly BookingsClient _bookingsClient;
         private readonly SubscriptionClient _subscriptionClient;
         private readonly PaymentsClient _paymentsClient;
         private readonly ILogger<AshareApiService> _logger;
@@ -37,6 +39,7 @@ public class AshareApiService
                 ProductsClient productsClient,
                 ProductListingsClient listingsClient,
                 OrdersClient ordersClient,
+                BookingsClient bookingsClient,
                 SubscriptionClient subscriptionClient,
                 PaymentsClient paymentsClient,
                 ILogger<AshareApiService> logger)
@@ -46,6 +49,7 @@ public class AshareApiService
                 _productsClient = productsClient;
                 _listingsClient = listingsClient;
                 _ordersClient = ordersClient;
+                _bookingsClient = bookingsClient;
                 _subscriptionClient = subscriptionClient;
                 _paymentsClient = paymentsClient;
                 _logger = logger;
@@ -364,21 +368,29 @@ public class AshareApiService
         }
 
         // ═══════════════════════════════════════════════════════════════════
-        // Bookings (Orders)
+        // Bookings - نظام الحجوزات الجديد
         // ═══════════════════════════════════════════════════════════════════
 
         /// <summary>
         /// الحصول على حجوزات المستخدم
         /// </summary>
-        public async Task<List<BookingItem>> GetBookingsAsync()
+        public async Task<List<BookingItem>> GetBookingsAsync(string? customerId = null)
         {
                 try
                 {
                         var serverBookings = new List<BookingItem>();
                         try
                         {
-                                var result = await _ordersClient.SearchAsync(new OrderSearchRequest());
-                                serverBookings = result?.Items?.Select(MapToBookingItem).ToList() ?? new List<BookingItem>();
+                                PagedBookingResult? result;
+                                if (!string.IsNullOrEmpty(customerId))
+                                {
+                                        result = await _bookingsClient.GetMyBookingsAsync(customerId);
+                                }
+                                else
+                                {
+                                        result = await _bookingsClient.SearchAsync(new BookingSearchRequest());
+                                }
+                                serverBookings = result?.Items?.Select(MapBookingDtoToItem).ToList() ?? new List<BookingItem>();
                         }
                         catch (Exception ex)
                         {
@@ -400,35 +412,52 @@ public class AshareApiService
         }
 
         /// <summary>
-        /// إنشاء حجز جديد
+        /// الحصول على حجوزات المالك (الواردة)
         /// </summary>
-        public async Task<BookingItem?> CreateBookingAsync(Guid spaceId, DateTime date, TimeOnly startTime, TimeOnly endTime)
+        public async Task<List<BookingItem>> GetHostBookingsAsync(Guid hostId)
         {
                 try
                 {
-                        var space = await GetSpaceByIdAsync(spaceId);
-                        if (space == null) return null;
+                        var result = await _bookingsClient.GetHostBookingsAsync(hostId);
+                        return result?.Items?.Select(MapBookingDtoToItem).ToList() ?? new List<BookingItem>();
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"Error fetching host bookings: {ex.Message}");
+                        return new List<BookingItem>();
+                }
+        }
 
-                        // Create order through the API
-                        // Note: The actual order creation depends on the Order API structure
-                        // This is a simplified implementation
+        /// <summary>
+        /// الحصول على حجز بالمعرف
+        /// </summary>
+        public async Task<BookingItem?> GetBookingByIdAsync(Guid bookingId)
+        {
+                try
+                {
+                        var booking = await _bookingsClient.GetByIdAsync(bookingId);
+                        return booking != null ? MapBookingDtoToItem(booking) : null;
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"Error fetching booking: {ex.Message}");
+                        return null;
+                }
+        }
 
-                        var booking = new BookingItem
+        /// <summary>
+        /// إنشاء حجز جديد
+        /// </summary>
+        public async Task<BookingItem?> CreateBookingAsync(CreateBookingRequest request)
+        {
+                try
+                {
+                        var result = await _bookingsClient.CreateAsync(request);
+                        if (result != null)
                         {
-                                Id = Guid.NewGuid(),
-                                SpaceId = spaceId,
-                                SpaceName = space.Name,
-                                SpaceImage = space.Images.FirstOrDefault(),
-                                Date = date,
-                                StartTime = startTime,
-                                EndTime = endTime,
-                                TotalPrice = space.PricePerHour * (decimal)(endTime - startTime).TotalHours,
-                                Currency = space.Currency,
-                                Status = BookingStatus.Pending,
-                                CreatedAt = DateTime.Now
-                        };
-
-                        return booking;
+                                return MapBookingDtoToItem(result);
+                        }
+                        return null;
                 }
                 catch (Exception ex)
                 {
@@ -438,37 +467,157 @@ public class AshareApiService
         }
 
         /// <summary>
-        /// إلغاء حجز
+        /// التحقق من دفع العربون
         /// </summary>
-        public async Task CancelBookingAsync(Guid bookingId)
+        public async Task<bool> VerifyBookingDepositAsync(Guid bookingId, string paymentId, string? transactionId = null)
         {
                 try
                 {
-                        await _ordersClient.CancelAsync(bookingId);
+                        var result = await _bookingsClient.VerifyDepositAsync(bookingId, new VerifyDepositRequest
+                        {
+                                PaymentId = paymentId,
+                                TransactionId = transactionId
+                        });
+                        return result?.Success ?? false;
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"Error verifying booking deposit: {ex.Message}");
+                        return false;
+                }
+        }
+
+        /// <summary>
+        /// تأكيد الحجز (من المالك)
+        /// </summary>
+        public async Task<bool> ConfirmBookingAsync(Guid bookingId, string? hostNotes = null)
+        {
+                try
+                {
+                        var result = await _bookingsClient.ConfirmAsync(bookingId, new ConfirmBookingRequest { HostNotes = hostNotes });
+                        return result?.Success ?? false;
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"Error confirming booking: {ex.Message}");
+                        return false;
+                }
+        }
+
+        /// <summary>
+        /// رفض الحجز (من المالك)
+        /// </summary>
+        public async Task<bool> RejectBookingAsync(Guid bookingId, string reason)
+        {
+                try
+                {
+                        var result = await _bookingsClient.RejectAsync(bookingId, new RejectBookingRequest { Reason = reason });
+                        return result?.Success ?? false;
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"Error rejecting booking: {ex.Message}");
+                        return false;
+                }
+        }
+
+        /// <summary>
+        /// إلغاء حجز
+        /// </summary>
+        public async Task<bool> CancelBookingAsync(Guid bookingId, string reason = "")
+        {
+                try
+                {
+                        var result = await _bookingsClient.CancelAsync(bookingId, new CancelBookingRequest { Reason = reason });
+
+                        // Remove from local bookings if exists
+                        _localBookings.RemoveAll(b => b.Id == bookingId);
+
+                        return result?.Success ?? false;
                 }
                 catch (Exception ex)
                 {
                         Console.WriteLine($"Error cancelling booking: {ex.Message}");
+                        return false;
                 }
         }
 
-        // Local bookings cache for storing newly created bookings
+        /// <summary>
+        /// استرداد العربون
+        /// </summary>
+        public async Task<bool> RefundBookingAsync(Guid bookingId, string reason)
+        {
+                try
+                {
+                        var result = await _bookingsClient.RefundEscrowAsync(bookingId, new RefundEscrowRequest { Reason = reason });
+                        return result?.Success ?? false;
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"Error refunding booking: {ex.Message}");
+                        return false;
+                }
+        }
+
+        // Local bookings cache for storing newly created bookings (before server sync)
         private static readonly List<BookingItem> _localBookings = new();
 
         /// <summary>
-        /// إنشاء حجز محلياً بعد الدفع الناجح
+        /// إنشاء حجز محلياً بعد الدفع الناجح (مؤقت حتى يتم الإرسال للسيرفر)
         /// </summary>
         public void CreateBookingLocally(BookingItem booking)
         {
                 booking.CreatedAt = DateTime.Now;
                 _localBookings.Add(booking);
                 Console.WriteLine($"[AshareApiService] Local booking created: {booking.Id}");
+
+                // TODO: Sync with server when online
+                // _ = SyncLocalBookingsAsync();
         }
 
         /// <summary>
-        /// الحصول على الحجوزات المحلية مع الحجوزات من السيرفر
+        /// تحويل BookingDto إلى BookingItem
         /// </summary>
-        public List<BookingItem> GetLocalBookings() => _localBookings.ToList();
+        private static BookingItem MapBookingDtoToItem(BookingDto dto)
+        {
+                return new BookingItem
+                {
+                        Id = dto.Id,
+                        SpaceId = dto.SpaceId,
+                        SpaceName = dto.SpaceName ?? "",
+                        SpaceImage = dto.SpaceImage,
+                        Date = dto.CheckInDate,
+                        StartTime = TimeOnly.MinValue,
+                        EndTime = TimeOnly.MaxValue,
+                        GuestsCount = dto.GuestsCount,
+                        TotalPrice = dto.TotalPrice,
+                        DepositPaid = dto.DepositAmount,
+                        PaymentId = dto.DepositPaymentId,
+                        Currency = dto.Currency,
+                        Status = MapBookingStatus(dto.Status),
+                        IsReviewed = dto.HasReview,
+                        RentType = dto.RentType,
+                        CreatedAt = dto.CreatedAt
+                };
+        }
+
+        /// <summary>
+        /// تحويل حالة الحجز من string إلى enum
+        /// </summary>
+        private static BookingStatus MapBookingStatus(string? status)
+        {
+                return status?.ToLower() switch
+                {
+                        "pending" => BookingStatus.Pending,
+                        "depositpaid" => BookingStatus.Confirmed, // Deposit paid = waiting for host confirmation
+                        "confirmed" => BookingStatus.Confirmed,
+                        "active" => BookingStatus.Confirmed,
+                        "completed" => BookingStatus.Completed,
+                        "cancelled" => BookingStatus.Cancelled,
+                        "rejected" => BookingStatus.Cancelled,
+                        _ => BookingStatus.Pending
+                };
+        }
 
         // ═══════════════════════════════════════════════════════════════════
         // Stats

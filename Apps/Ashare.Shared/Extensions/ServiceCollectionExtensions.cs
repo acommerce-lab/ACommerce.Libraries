@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using ACommerce.Client.Auth;
 using ACommerce.Client.Nafath;
+using ACommerce.Client.Bookings;
 using ACommerce.Client.Cart.Extensions;
 using ACommerce.Client.Categories;
 using ACommerce.Client.Categories.Extensions;
@@ -73,6 +74,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ProductsClient>();
         services.AddScoped<ProductListingsClient>();
         services.AddScoped<OrdersClient>();
+        services.AddScoped<BookingsClient>();
         services.AddScoped<LegalPagesClient>();
         services.AddScoped<VersionsClient>();
 
