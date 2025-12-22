@@ -18,7 +18,8 @@ public class OffersMigrationService
     private readonly ILogger<OffersMigrationService> _logger;
     private readonly IConfiguration _configuration;
 
-    // الرابط الصحيح للصور في النظام القديم
+    // روابط API القديم
+    private const string OldApiBaseUrl = "http://ashare-001-site4.mtempurl.com";
     private const string OldImagesBaseUrl = "http://ashare-001-site6.mtempurl.com/Images/";
 
     public OffersMigrationService(
@@ -31,7 +32,7 @@ public class OffersMigrationService
         _repositoryFactory = repositoryFactory;
         _storageProvider = storageProvider;
         _httpClient = httpClientFactory.CreateClient();
-        _httpClient.Timeout = TimeSpan.FromSeconds(60); // زيادة الوقت لتحميل الصور
+        _httpClient.Timeout = TimeSpan.FromSeconds(120); // زيادة الوقت لتحميل الصور
         _configuration = configuration;
         _logger = logger;
     }
@@ -77,7 +78,7 @@ public class OffersMigrationService
     }
 
     /// <summary>
-    /// بذر العروض من البيانات الثابتة مع تحميل الصور
+    /// بذر العروض من API القديم مع جلب التفاصيل الكاملة لكل عرض
     /// </summary>
     public async Task<MigrationResult> SeedOffersFromStaticDataAsync(CancellationToken cancellationToken = default)
     {
@@ -85,12 +86,21 @@ public class OffersMigrationService
 
         try
         {
-            _logger.LogInformation("Starting offers seeding from static data with image upload...");
+            _logger.LogInformation("Starting offers seeding from old API with full details...");
 
-            var staticOffers = GetStaticOffers();
-            result.TotalFound = staticOffers.Count;
+            // 1. جلب قائمة العروض من API القديم
+            var offersList = await FetchOffersListAsync(cancellationToken);
+            if (offersList == null || !offersList.Any())
+            {
+                _logger.LogWarning("No offers found in old API, using static data as fallback");
+                offersList = GetStaticOffers();
+            }
 
-            await SaveOffersWithImagesAsync(staticOffers, result, cancellationToken);
+            result.TotalFound = offersList.Count;
+            _logger.LogInformation("Found {Count} offers to migrate", offersList.Count);
+
+            // 2. جلب التفاصيل الكاملة لكل عرض ثم حفظه
+            await SaveOffersWithFullDetailsAsync(offersList, result, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -102,73 +112,177 @@ public class OffersMigrationService
     }
 
     /// <summary>
-    /// حفظ العروض مع تحميل الصور
+    /// جلب قائمة العروض من API القديم
     /// </summary>
-    private async Task SaveOffersWithImagesAsync(List<OldOfferDto> offers, MigrationResult result, CancellationToken cancellationToken)
+    private async Task<List<OldOfferDto>?> FetchOffersListAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var url = $"{OldApiBaseUrl}/api/Offers/GetOffers";
+            _logger.LogInformation("Fetching offers list from: {Url}", url);
+
+            var response = await _httpClient.GetAsync(url, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("Failed to fetch offers list: {StatusCode}", response.StatusCode);
+                return null;
+            }
+
+            var json = await response.Content.ReadAsStringAsync(cancellationToken);
+            var offersResponse = JsonSerializer.Deserialize<OldOffersResponse>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            return offersResponse?.Offers;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to fetch offers list from old API");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// جلب تفاصيل عرض واحد من API القديم
+    /// </summary>
+    private async Task<OldOfferDetailsDto?> FetchOfferDetailsAsync(Guid offerId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var url = $"{OldApiBaseUrl}/api/Offers/GetOfferDetails/{offerId}";
+            _logger.LogDebug("Fetching offer details from: {Url}", url);
+
+            var response = await _httpClient.GetAsync(url, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("Failed to fetch offer details for {Id}: {StatusCode}", offerId, response.StatusCode);
+                return null;
+            }
+
+            var json = await response.Content.ReadAsStringAsync(cancellationToken);
+            return JsonSerializer.Deserialize<OldOfferDetailsDto>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to fetch offer details for {Id}", offerId);
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// حفظ العروض مع جلب التفاصيل الكاملة من API
+    /// </summary>
+    private async Task SaveOffersWithFullDetailsAsync(List<OldOfferDto> offers, MigrationResult result, CancellationToken cancellationToken)
     {
         var listingRepo = _repositoryFactory.CreateRepository<ProductListing>();
-        var baseUrl = _configuration["HostSettings:BaseUrl"] ?? "https://ashareapi-hygabpf3ajfmevfs.canadaeast-01.azurewebsites.net";
+        var baseUrl = _configuration["HostSettings:BaseUrl"] ?? "https://ashare-api-130415035604.me-central2.run.app";
 
-        foreach (var oldOffer in offers)
+        foreach (var offer in offers)
         {
             try
             {
                 // التحقق من عدم وجود العرض مسبقاً
                 var exists = (await listingRepo.ListAllAsync(cancellationToken))
-                    .Any(x => x.Id == oldOffer.Id);
+                    .Any(x => x.Id == offer.Id);
 
                 if (exists)
                 {
-                    _logger.LogDebug("Offer {Id} already exists, skipping", oldOffer.Id);
+                    _logger.LogDebug("Offer {Id} already exists, skipping", offer.Id);
                     result.Skipped++;
                     continue;
                 }
 
-                // تحميل ورفع الصور
+                // جلب التفاصيل الكاملة من API
+                var details = await FetchOfferDetailsAsync(offer.Id, cancellationToken);
+
+                // الحصول على قائمة الصور
+                var imageNames = details?.ImageUrls ?? offer.ImageUrls ?? new List<string>();
+                var videoNames = details?.VideoUrls ?? new List<string>();
+
+                _logger.LogInformation("Migrating offer {Id}: {Title} with {ImageCount} images",
+                    offer.Id, offer.Title, imageNames.Count);
+
+                // تحميل ورفع جميع الصور
                 var newImageUrls = new List<string>();
-                if (oldOffer.ImageUrls != null)
+                foreach (var imageName in imageNames)
                 {
-                    foreach (var imageName in oldOffer.ImageUrls)
+                    try
                     {
-                        try
+                        var newUrl = await DownloadAndUploadImageAsync(imageName, baseUrl, cancellationToken);
+                        if (!string.IsNullOrEmpty(newUrl))
                         {
-                            var newUrl = await DownloadAndUploadImageAsync(imageName, baseUrl, cancellationToken);
-                            if (!string.IsNullOrEmpty(newUrl))
-                            {
-                                newImageUrls.Add(newUrl);
-                                _logger.LogDebug("Uploaded image: {ImageName} -> {NewUrl}", imageName, newUrl);
-                            }
+                            newImageUrls.Add(newUrl);
+                            _logger.LogDebug("Uploaded image {Index}/{Total}: {ImageName}",
+                                newImageUrls.Count, imageNames.Count, imageName);
                         }
-                        catch (Exception imgEx)
-                        {
-                            _logger.LogWarning(imgEx, "Failed to upload image {ImageName} for offer {OfferId}", imageName, oldOffer.Id);
-                            // نستمر حتى لو فشل تحميل صورة واحدة
-                        }
+                    }
+                    catch (Exception imgEx)
+                    {
+                        _logger.LogWarning(imgEx, "Failed to upload image {ImageName}", imageName);
                     }
                 }
 
-                // تحويل العرض
-                var newListing = MapToProductListing(oldOffer, newImageUrls);
+                // استخدام البيانات من التفاصيل إذا كانت متوفرة
+                var offerData = details != null ? MapDetailsToOffer(details) : offer;
+
+                // تحويل العرض مع الصور الجديدة
+                var newListing = MapToProductListing(offerData, newImageUrls);
 
                 // حفظ العرض
                 await listingRepo.AddAsync(newListing, cancellationToken);
                 result.Migrated++;
 
-                _logger.LogDebug("Migrated offer: {Title} with {ImageCount} images", oldOffer.Title, newImageUrls.Count);
+                _logger.LogInformation("✅ Migrated offer: {Title} with {ImageCount} images", offer.Title, newImageUrls.Count);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to migrate offer {Id}: {Title}", oldOffer.Id, oldOffer.Title);
+                _logger.LogError(ex, "Failed to migrate offer {Id}: {Title}", offer.Id, offer.Title);
                 result.Failed++;
-                result.Errors.Add($"{oldOffer.Id}: {ex.Message}");
+                result.Errors.Add($"{offer.Id}: {ex.Message}");
             }
         }
-
-        //await listingRepo.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation(
             "Migration completed. Total: {Total}, Migrated: {Migrated}, Skipped: {Skipped}, Failed: {Failed}",
             result.TotalFound, result.Migrated, result.Skipped, result.Failed);
+    }
+
+    /// <summary>
+    /// تحويل تفاصيل العرض إلى DTO القياسي
+    /// </summary>
+    private static OldOfferDto MapDetailsToOffer(OldOfferDetailsDto details)
+    {
+        return new OldOfferDto
+        {
+            Id = details.Id,
+            Title = details.Title,
+            Description = details.Description,
+            Price = details.Price,
+            IsActive = details.IsActive,
+            OfferTypeName = details.OfferTypeName,
+            UnitTypeName = details.UnitTypeName,
+            FloorName = details.FloorName,
+            PropertyTypeName = details.PropertyTypeName,
+            RentalTypeName = details.RentalTypeName,
+            TimeUnitName = details.TimeUnitName,
+            BillType = details.BillType,
+            Duration = details.Duration,
+            Area = details.Area,
+            RoomCount = details.RoomCount,
+            BathroomCount = details.BathroomCount,
+            IsPhoneAllowed = details.IsPhoneAllowed,
+            IsWhatsappAllowed = details.IsWhatsappAllowed,
+            IsMessagingAllowed = details.IsMessagingAllowed,
+            LocationDescription = details.LocationDescription,
+            Latitude = details.Latitude,
+            Longitude = details.Longitude,
+            ImageUrls = details.ImageUrls,
+            Features = details.Features
+        };
     }
 
     /// <summary>
@@ -877,6 +991,105 @@ public class OffersMigrationService
 
         [JsonPropertyName("features")]
         public List<string>? Features { get; set; }
+    }
+
+    /// <summary>
+    /// استجابة قائمة العروض من API القديم
+    /// </summary>
+    public class OldOffersResponse
+    {
+        [JsonPropertyName("offers")]
+        public List<OldOfferDto> Offers { get; set; } = new();
+
+        [JsonPropertyName("totalCount")]
+        public int TotalCount { get; set; }
+
+        [JsonPropertyName("pageCount")]
+        public int PageCount { get; set; }
+    }
+
+    /// <summary>
+    /// تفاصيل العرض من API القديم (تحتوي على جميع الصور)
+    /// </summary>
+    public class OldOfferDetailsDto
+    {
+        [JsonPropertyName("id")]
+        public Guid Id { get; set; }
+
+        [JsonPropertyName("title")]
+        public string Title { get; set; } = string.Empty;
+
+        [JsonPropertyName("description")]
+        public string? Description { get; set; }
+
+        [JsonPropertyName("price")]
+        public decimal Price { get; set; }
+
+        [JsonPropertyName("isActive")]
+        public bool IsActive { get; set; }
+
+        [JsonPropertyName("offerTypeName")]
+        public string? OfferTypeName { get; set; }
+
+        [JsonPropertyName("unitTypeName")]
+        public string? UnitTypeName { get; set; }
+
+        [JsonPropertyName("floorName")]
+        public string? FloorName { get; set; }
+
+        [JsonPropertyName("propertyTypeName")]
+        public string? PropertyTypeName { get; set; }
+
+        [JsonPropertyName("rentalTypeName")]
+        public string? RentalTypeName { get; set; }
+
+        [JsonPropertyName("timeUnitName")]
+        public string? TimeUnitName { get; set; }
+
+        [JsonPropertyName("billType")]
+        public int BillType { get; set; }
+
+        [JsonPropertyName("duration")]
+        public int Duration { get; set; }
+
+        [JsonPropertyName("ownerId")]
+        public Guid OwnerId { get; set; }
+
+        [JsonPropertyName("area")]
+        public int Area { get; set; }
+
+        [JsonPropertyName("roomCount")]
+        public int RoomCount { get; set; }
+
+        [JsonPropertyName("bathroomCount")]
+        public int BathroomCount { get; set; }
+
+        [JsonPropertyName("isPhoneAllowed")]
+        public bool IsPhoneAllowed { get; set; }
+
+        [JsonPropertyName("isWhatsappAllowed")]
+        public bool IsWhatsappAllowed { get; set; }
+
+        [JsonPropertyName("isMessagingAllowed")]
+        public bool IsMessagingAllowed { get; set; }
+
+        [JsonPropertyName("locationDescription")]
+        public string? LocationDescription { get; set; }
+
+        [JsonPropertyName("latitude")]
+        public double? Latitude { get; set; }
+
+        [JsonPropertyName("longitude")]
+        public double? Longitude { get; set; }
+
+        [JsonPropertyName("imageUrls")]
+        public List<string> ImageUrls { get; set; } = new();
+
+        [JsonPropertyName("videoUrls")]
+        public List<string> VideoUrls { get; set; } = new();
+
+        [JsonPropertyName("features")]
+        public List<string> Features { get; set; } = new();
     }
 
     #endregion
