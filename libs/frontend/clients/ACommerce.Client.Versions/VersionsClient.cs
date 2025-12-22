@@ -150,11 +150,11 @@ public sealed class VersionsClient(IApiClient httpClient)
     /// <summary>
     /// حذف إصدار
     /// </summary>
-    public async Task<bool> DeleteAsync(
+    public async Task DeleteAsync(
         Guid id,
         CancellationToken cancellationToken = default)
     {
-        return await httpClient.DeleteAsync(ServiceName, $"/api/versions/{id}", cancellationToken);
+        await httpClient.DeleteAsync(ServiceName, $"/api/versions/{id}", cancellationToken);
     }
 
     #endregion
