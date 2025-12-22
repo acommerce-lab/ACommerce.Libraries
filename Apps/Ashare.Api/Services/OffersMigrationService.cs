@@ -93,15 +93,15 @@ public class OffersMigrationService
     /// </summary>
     private async Task SaveOffersAsync(List<OldOfferDto> offers, MigrationResult result, CancellationToken cancellationToken)
     {
-        var listingRepo = _repositoryFactory.Create<ProductListing>();
+        var listingRepo = _repositoryFactory.CreateRepository<ProductListing>();
 
         foreach (var oldOffer in offers)
         {
             try
             {
                 // التحقق من عدم وجود العرض مسبقاً
-                var exists = await listingRepo.Query()
-                    .AnyAsync(x => x.Id == oldOffer.Id, cancellationToken);
+                var exists = (await listingRepo.ListAllAsync(cancellationToken))
+                    .Any(x => x.Id == oldOffer.Id);
 
                 if (exists)
                 {
@@ -127,7 +127,7 @@ public class OffersMigrationService
             }
         }
 
-        await listingRepo.SaveChangesAsync(cancellationToken);
+        //await listingRepo.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation(
             "Migration completed. Total: {Total}, Migrated: {Migrated}, Skipped: {Skipped}, Failed: {Failed}",
@@ -257,7 +257,7 @@ public class OffersMigrationService
             Description = old.Description,
             Price = old.Price,
             IsActive = old.IsActive,
-            Status = old.IsActive ? ListingStatus.Active : ListingStatus.Inactive,
+            Status = old.IsActive ? ListingStatus.Active : ListingStatus.Draft,
 
             // الموقع
             Latitude = old.Latitude,
