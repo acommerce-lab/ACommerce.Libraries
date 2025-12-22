@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 
 namespace ACommerce.Client.Core.Http;
@@ -27,7 +28,8 @@ public sealed class StaticHttpClient : IApiClient
 		_jsonOptions = new JsonSerializerOptions
 		{
 			PropertyNameCaseInsensitive = true,
-			PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+			PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+			Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
 		};
 	}
 
