@@ -1,4 +1,5 @@
 @inherits LayoutComponentBase
+@using ACommerce.Templates.Customer.Components
 @inject Ashare.Shared.Services.ThemeService ThemeService
 @inject IAppNavigationService Navigation
 @inject AshareApiService ApiService
@@ -12,7 +13,7 @@
 @* Version Blocker - يظهر فوق كل شيء إذا كان الإصدار غير مدعوم *@
 @if (VersionCheck.IsBlocked)
 {
-    <ACommerce.Templates.Customer.Components.AcVersionBlocker
+    <AcVersionBlocker
         IsBlocked="true"
         Message="@GetBlockerMessage()"
         CurrentVersion="@CurrentAppVersion"
@@ -60,8 +61,8 @@
     @* Version Alert - تنبيه للإصدارات المتقادمة أو المتوفر لها تحديث *@
     @if (!VersionCheck.IsBlocked && !_versionAlertDismissed && (VersionCheck.HasWarning || VersionCheck.UpdateAvailable))
     {
-        <ACommerce.Templates.Customer.Components.AcVersionAlert
-            AlertType="@(VersionCheck.HasWarning ? ACommerce.Templates.Customer.Components.VersionAlertType.Warning : ACommerce.Templates.Customer.Components.VersionAlertType.Info)"
+        <AcVersionAlert
+            AlertType="@(VersionCheck.HasWarning ? VersionAlertType.Warning : VersionAlertType.Info)"
             Message="@GetVersionAlertMessage()"
             EndOfSupportDate="@VersionCheck.LastCheckResult?.EndOfSupportDate"
             UpdateUrl="@GetStoreUrl()"
