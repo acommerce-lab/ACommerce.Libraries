@@ -374,13 +374,28 @@ public class AshareApiService
         {
                 try
                 {
-                        var result = await _ordersClient.SearchAsync(new OrderSearchRequest());
-                        return result?.Items?.Select(MapToBookingItem).ToList() ?? new List<BookingItem>();
+                        var serverBookings = new List<BookingItem>();
+                        try
+                        {
+                                var result = await _ordersClient.SearchAsync(new OrderSearchRequest());
+                                serverBookings = result?.Items?.Select(MapToBookingItem).ToList() ?? new List<BookingItem>();
+                        }
+                        catch (Exception ex)
+                        {
+                                Console.WriteLine($"Error fetching server bookings: {ex.Message}");
+                        }
+
+                        // Merge with local bookings (avoid duplicates)
+                        var localBookings = _localBookings.Where(lb =>
+                                !serverBookings.Any(sb => sb.Id == lb.Id)).ToList();
+
+                        var allBookings = serverBookings.Concat(localBookings).OrderByDescending(b => b.CreatedAt).ToList();
+                        return allBookings;
                 }
                 catch (Exception ex)
                 {
                         Console.WriteLine($"Error fetching bookings: {ex.Message}");
-                        return new List<BookingItem>();
+                        return _localBookings.ToList();
                 }
         }
 
@@ -436,6 +451,24 @@ public class AshareApiService
                         Console.WriteLine($"Error cancelling booking: {ex.Message}");
                 }
         }
+
+        // Local bookings cache for storing newly created bookings
+        private static readonly List<BookingItem> _localBookings = new();
+
+        /// <summary>
+        /// إنشاء حجز محلياً بعد الدفع الناجح
+        /// </summary>
+        public void CreateBookingLocally(BookingItem booking)
+        {
+                booking.CreatedAt = DateTime.Now;
+                _localBookings.Add(booking);
+                Console.WriteLine($"[AshareApiService] Local booking created: {booking.Id}");
+        }
+
+        /// <summary>
+        /// الحصول على الحجوزات المحلية مع الحجوزات من السيرفر
+        /// </summary>
+        public List<BookingItem> GetLocalBookings() => _localBookings.ToList();
 
         // ═══════════════════════════════════════════════════════════════════
         // Stats

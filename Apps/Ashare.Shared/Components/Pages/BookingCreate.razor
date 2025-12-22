@@ -396,7 +396,11 @@
                         if (verifyResult?.Success == true)
                         {
                             Console.WriteLine("[BookingCreate] Payment verified successfully!");
-                            Navigation.NavigateTo($"/bookings/{_bookingId}?status=success");
+
+                            // Create the booking in local storage/backend
+                            await CreateLocalBookingAsync();
+
+                            Navigation.NavigateTo("/bookings?new=true");
                             return;
                         }
                         else
@@ -406,7 +410,8 @@
                     }
                     else if (result.Success)
                     {
-                        Navigation.NavigateTo($"/bookings/{_bookingId}?status=success");
+                        await CreateLocalBookingAsync();
+                        Navigation.NavigateTo("/bookings?new=true");
                         return;
                     }
                     else
@@ -503,7 +508,8 @@
 
                         if (isSuccess)
                         {
-                            Navigation.NavigateTo($"/bookings/{_bookingId}?status=success");
+                            await CreateLocalBookingAsync();
+                            Navigation.NavigateTo("/bookings?new=true");
                         }
                         else
                         {
@@ -523,6 +529,46 @@
     private void GoBack()
     {
         Navigation.NavigateBack();
+    }
+
+    private Task CreateLocalBookingAsync()
+    {
+        try
+        {
+            if (_space == null) return Task.CompletedTask;
+
+            Console.WriteLine($"[BookingCreate] Creating local booking for space {SpaceId}");
+
+            // Create booking item in the local data service
+            var booking = new BookingItem
+            {
+                Id = Guid.TryParse(_bookingId, out var bid) ? bid : Guid.NewGuid(),
+                SpaceId = SpaceId,
+                SpaceName = _space.Name ?? "عقار",
+                SpaceImage = _space.Images.FirstOrDefault() ?? "",
+                Date = DateTime.Today,
+                StartTime = TimeOnly.MinValue,
+                EndTime = TimeOnly.MaxValue,
+                GuestsCount = 1,
+                TotalPrice = GetPrice(),
+                DepositPaid = CalculateDeposit(),
+                PaymentId = _paymentId,
+                Status = BookingStatus.Pending,
+                IsReviewed = false,
+                RentType = GetAttribute("rent_type")
+            };
+
+            // Store in local data service (this will be synced with backend)
+            ApiService.CreateBookingLocally(booking);
+
+            Console.WriteLine($"[BookingCreate] Booking created: {booking.Id}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[BookingCreate] Error creating local booking: {ex.Message}");
+        }
+
+        return Task.CompletedTask;
     }
 
     public async ValueTask DisposeAsync()

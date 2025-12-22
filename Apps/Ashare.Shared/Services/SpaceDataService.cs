@@ -455,6 +455,11 @@ public class BookingItem
     public string? Notes { get; set; }
     public bool IsReviewed { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    // Payment-related properties
+    public decimal DepositPaid { get; set; }
+    public string? PaymentId { get; set; }
+    public string? RentType { get; set; }
 }
 
 public class SpaceReview
