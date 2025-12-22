@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Templates\ACommerce.Templates.Admin\ACommerce.Templates.Admin.csproj" />
+    <ProjectReference Include="..\..\libs\frontend\core\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
+    <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Versions\ACommerce.Client.Versions.csproj" />
   </ItemGroup>
 
   <ItemGroup>

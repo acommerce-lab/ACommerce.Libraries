@@ -1,0 +1,628 @@
+@page "/versions"
+@using ACommerce.Client.Versions
+@inject VersionsClient VersionsClient
+@inject IJSRuntime JSRuntime
+
+<div class="versions-page">
+    <div class="page-header">
+        <h1>إدارة الإصدارات</h1>
+        <SfButton CssClass="e-success" IconCss="e-icons e-plus" OnClick="ShowCreateModal">إضافة إصدار</SfButton>
+    </div>
+
+    <div class="filters-bar">
+        <SfDropDownList TItem="string" TValue="string" Placeholder="التطبيق" Width="200px"
+                        DataSource="@ApplicationOptions" @bind-Value="SelectedApplication"
+                        ShowClearButton="true">
+        </SfDropDownList>
+        <SfDropDownList TItem="StatusOption" TValue="string" Placeholder="الحالة" Width="180px"
+                        DataSource="@StatusOptions" @bind-Value="SelectedStatus"
+                        ShowClearButton="true">
+            <DropDownListFieldSettings Text="Text" Value="Value" />
+        </SfDropDownList>
+        <SfButton CssClass="e-primary" IconCss="e-icons e-search" OnClick="LoadVersions">بحث</SfButton>
+        <SfButton CssClass="e-flat" IconCss="e-icons e-refresh" OnClick="ClearFilters">مسح</SfButton>
+    </div>
+
+    <div class="card">
+        <SfGrid @ref="Grid" DataSource="@Versions" AllowPaging="true" AllowSorting="true">
+            <GridPageSettings PageSize="15" />
+            <GridColumns>
+                <GridColumn Field="@nameof(AppVersionDto.ApplicationCode)" HeaderText="التطبيق" Width="120" />
+                <GridColumn Field="@nameof(AppVersionDto.ApplicationNameAr)" HeaderText="اسم التطبيق" Width="150" />
+                <GridColumn Field="@nameof(AppVersionDto.VersionNumber)" HeaderText="الإصدار" Width="100">
+                    <Template>
+                        @{
+                            var version = (context as AppVersionDto);
+                            <span class="version-number">@version?.VersionNumber</span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(AppVersionDto.BuildNumber)" HeaderText="البناء" Width="80" TextAlign="TextAlign.Center" />
+                <GridColumn Field="@nameof(AppVersionDto.Status)" HeaderText="الحالة" Width="130">
+                    <Template>
+                        @{
+                            var version = (context as AppVersionDto);
+                            <span class="status-badge @GetStatusClass(version?.Status ?? VersionStatus.Development)">
+                                @GetStatusText(version?.Status ?? VersionStatus.Development)
+                            </span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(AppVersionDto.ReleaseDate)" HeaderText="تاريخ الإصدار" Width="120" Format="d" />
+                <GridColumn Field="@nameof(AppVersionDto.EndOfSupportDate)" HeaderText="انتهاء الدعم" Width="120" Format="d" />
+                <GridColumn Field="@nameof(AppVersionDto.IsActive)" HeaderText="نشط" Width="80" TextAlign="TextAlign.Center">
+                    <Template>
+                        @{
+                            var version = (context as AppVersionDto);
+                            <span class="active-badge @(version?.IsActive == true ? "active" : "inactive")">
+                                @(version?.IsActive == true ? "نعم" : "لا")
+                            </span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(AppVersionDto.IsForceUpdate)" HeaderText="إجباري" Width="80" TextAlign="TextAlign.Center">
+                    <Template>
+                        @{
+                            var version = (context as AppVersionDto);
+                            @if (version?.IsForceUpdate == true)
+                            {
+                                <i class="e-icons e-circle-check" style="color: var(--e-success);" title="تحديث إجباري"></i>
+                            }
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn HeaderText="الإجراءات" Width="180" TextAlign="TextAlign.Center">
+                    <Template>
+                        @{
+                            var version = (context as AppVersionDto);
+                            <div class="action-buttons">
+                                <SfButton CssClass="e-flat e-primary" IconCss="e-icons e-edit" Title="تعديل"
+                                          OnClick="@(() => ShowEditModal(version!))" />
+                                <SfButton CssClass="e-flat e-info" IconCss="e-icons e-exchange" Title="تغيير الحالة"
+                                          OnClick="@(() => ShowStatusModal(version!))" />
+                                <SfButton CssClass="e-flat @(version?.IsActive == true ? "e-warning" : "e-success")"
+                                          IconCss="@(version?.IsActive == true ? "e-icons e-eye-slash" : "e-icons e-eye")"
+                                          Title="@(version?.IsActive == true ? "تعطيل" : "تفعيل")"
+                                          OnClick="@(() => ToggleActive(version!))" />
+                                <SfButton CssClass="e-flat e-danger" IconCss="e-icons e-trash" Title="حذف"
+                                          OnClick="@(() => ShowDeleteConfirm(version!))" />
+                            </div>
+                        }
+                    </Template>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </div>
+</div>
+
+@* Create/Edit Modal *@
+<SfDialog @bind-Visible="IsModalVisible" Width="600px" IsModal="true" ShowCloseIcon="true"
+          Header="@(IsEditMode ? "تعديل الإصدار" : "إضافة إصدار جديد")">
+    <DialogTemplates>
+        <Content>
+            <div class="form-container">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>كود التطبيق <span class="required">*</span></label>
+                        <SfTextBox @bind-Value="EditModel.ApplicationCode" Enabled="@(!IsEditMode)" />
+                    </div>
+                    <div class="form-group">
+                        <label>رقم الإصدار <span class="required">*</span></label>
+                        <SfTextBox @bind-Value="EditModel.VersionNumber" Enabled="@(!IsEditMode)" Placeholder="1.0.0" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>اسم التطبيق (عربي)</label>
+                        <SfTextBox @bind-Value="EditModel.ApplicationNameAr" />
+                    </div>
+                    <div class="form-group">
+                        <label>اسم التطبيق (إنجليزي)</label>
+                        <SfTextBox @bind-Value="EditModel.ApplicationNameEn" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>رقم البناء</label>
+                        <SfNumericTextBox TValue="int" @bind-Value="EditModel.BuildNumber" Min="1" />
+                    </div>
+                    <div class="form-group">
+                        <label>الحالة</label>
+                        <SfDropDownList TItem="StatusOption" TValue="VersionStatus" @bind-Value="EditModel.Status"
+                                        DataSource="@StatusOptionsEnum">
+                            <DropDownListFieldSettings Text="Text" Value="Value" />
+                        </SfDropDownList>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>تاريخ الإصدار</label>
+                        <SfDatePicker TValue="DateTime" @bind-Value="EditModel.ReleaseDate" />
+                    </div>
+                    <div class="form-group">
+                        <label>تاريخ انتهاء الدعم</label>
+                        <SfDatePicker TValue="DateTime?" @bind-Value="EditModel.EndOfSupportDate" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>رابط التحديث</label>
+                        <SfTextBox @bind-Value="EditModel.UpdateUrl" Placeholder="https://..." />
+                    </div>
+                    <div class="form-group">
+                        <label>رابط التنزيل</label>
+                        <SfTextBox @bind-Value="EditModel.DownloadUrl" Placeholder="https://..." />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label>ملاحظات الإصدار (عربي)</label>
+                        <SfTextBox @bind-Value="EditModel.ReleaseNotesAr" Multiline="true" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label>ملاحظات الإصدار (إنجليزي)</label>
+                        <SfTextBox @bind-Value="EditModel.ReleaseNotesEn" Multiline="true" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>أقل إصدار مدعوم</label>
+                        <SfTextBox @bind-Value="EditModel.MinimumSupportedVersion" Placeholder="1.0.0" />
+                    </div>
+                </div>
+                <div class="form-row checkboxes">
+                    <SfCheckBox @bind-Checked="EditModel.IsForceUpdate" Label="تحديث إجباري" />
+                    <SfCheckBox @bind-Checked="EditModel.IsActive" Label="نشط" />
+                </div>
+            </div>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="إلغاء" OnClick="CloseModal" />
+        <DialogButton Content="@(IsEditMode ? "تحديث" : "إنشاء")" CssClass="e-primary" OnClick="SaveVersion" IsPrimary="true" />
+    </DialogButtons>
+</SfDialog>
+
+@* Status Change Modal *@
+<SfDialog @bind-Visible="IsStatusModalVisible" Width="400px" IsModal="true" ShowCloseIcon="true"
+          Header="تغيير حالة الإصدار">
+    <DialogTemplates>
+        <Content>
+            <div class="form-container">
+                <p>تغيير حالة الإصدار <strong>@SelectedVersion?.VersionNumber</strong></p>
+                <div class="form-group">
+                    <label>الحالة الجديدة</label>
+                    <SfDropDownList TItem="StatusOption" TValue="VersionStatus" @bind-Value="NewStatus"
+                                    DataSource="@StatusOptionsEnum">
+                        <DropDownListFieldSettings Text="Text" Value="Value" />
+                    </SfDropDownList>
+                </div>
+            </div>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="إلغاء" OnClick="CloseStatusModal" />
+        <DialogButton Content="تغيير" CssClass="e-primary" OnClick="ChangeStatus" IsPrimary="true" />
+    </DialogButtons>
+</SfDialog>
+
+@* Delete Confirm Modal *@
+<SfDialog @bind-Visible="IsDeleteModalVisible" Width="400px" IsModal="true" ShowCloseIcon="true"
+          Header="تأكيد الحذف">
+    <DialogTemplates>
+        <Content>
+            <div class="delete-confirm">
+                <i class="e-icons e-circle-remove" style="font-size: 48px; color: var(--e-danger);"></i>
+                <p>هل أنت متأكد من حذف الإصدار <strong>@SelectedVersion?.VersionNumber</strong>؟</p>
+                <p class="warning-text">هذا الإجراء لا يمكن التراجع عنه.</p>
+            </div>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="إلغاء" OnClick="CloseDeleteModal" />
+        <DialogButton Content="حذف" CssClass="e-danger" OnClick="DeleteVersion" />
+    </DialogButtons>
+</SfDialog>
+
+<style>
+    .versions-page {
+        padding: 24px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .filters-bar {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+
+    .card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        padding: 16px;
+    }
+
+    .version-number {
+        font-family: monospace;
+        font-weight: 600;
+        background: #f1f5f9;
+        padding: 2px 8px;
+        border-radius: 4px;
+    }
+
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .status-badge.development { background: #e0e7ff; color: #4338ca; }
+    .status-badge.latest { background: #dcfce7; color: #16a34a; }
+    .status-badge.supported { background: #dbeafe; color: #2563eb; }
+    .status-badge.deprecated { background: #fef3c7; color: #d97706; }
+    .status-badge.unsupported { background: #fee2e2; color: #dc2626; }
+
+    .active-badge {
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .active-badge.active { background: #dcfce7; color: #16a34a; }
+    .active-badge.inactive { background: #f1f5f9; color: #64748b; }
+
+    .action-buttons {
+        display: flex;
+        gap: 4px;
+        justify-content: center;
+    }
+
+    .form-container {
+        padding: 16px 0;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .form-group {
+        flex: 1;
+    }
+
+    .form-group.full-width {
+        flex: 1 1 100%;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #1e293b;
+    }
+
+    .form-group .required {
+        color: #dc2626;
+    }
+
+    .form-row.checkboxes {
+        gap: 24px;
+    }
+
+    .delete-confirm {
+        text-align: center;
+        padding: 16px;
+    }
+
+    .delete-confirm p {
+        margin: 16px 0 8px;
+    }
+
+    .warning-text {
+        color: #64748b;
+        font-size: 0.875rem;
+    }
+</style>
+
+@code {
+    private SfGrid<AppVersionDto>? Grid;
+    private List<AppVersionDto> Versions { get; set; } = new();
+    private List<string> ApplicationOptions { get; set; } = new();
+
+    private string? SelectedApplication { get; set; }
+    private string? SelectedStatus { get; set; }
+
+    private bool IsModalVisible { get; set; }
+    private bool IsStatusModalVisible { get; set; }
+    private bool IsDeleteModalVisible { get; set; }
+    private bool IsEditMode { get; set; }
+
+    private AppVersionDto? SelectedVersion { get; set; }
+    private VersionEditModel EditModel { get; set; } = new();
+    private VersionStatus NewStatus { get; set; }
+
+    private List<StatusOption> StatusOptions => new()
+    {
+        new("الكل", ""),
+        new("تطوير", "0"),
+        new("أحدث", "1"),
+        new("مدعوم", "2"),
+        new("متوقف", "3"),
+        new("غير مدعوم", "4")
+    };
+
+    private List<StatusOptionEnum> StatusOptionsEnum => new()
+    {
+        new("تطوير", VersionStatus.Development),
+        new("أحدث", VersionStatus.Latest),
+        new("مدعوم", VersionStatus.Supported),
+        new("متوقف", VersionStatus.Deprecated),
+        new("غير مدعوم", VersionStatus.Unsupported)
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadVersions();
+        await LoadApplications();
+    }
+
+    private async Task LoadVersions()
+    {
+        try
+        {
+            if (!string.IsNullOrEmpty(SelectedApplication))
+            {
+                Versions = (await VersionsClient.GetByApplicationAsync(SelectedApplication))?.ToList() ?? new();
+            }
+            else
+            {
+                Versions = (await VersionsClient.GetAllAsync())?.ToList() ?? new();
+            }
+
+            if (!string.IsNullOrEmpty(SelectedStatus) && int.TryParse(SelectedStatus, out var status))
+            {
+                Versions = Versions.Where(v => (int)v.Status == status).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading versions: {ex.Message}");
+        }
+    }
+
+    private async Task LoadApplications()
+    {
+        try
+        {
+            ApplicationOptions = (await VersionsClient.GetApplicationsAsync())?.ToList() ?? new();
+        }
+        catch
+        {
+            ApplicationOptions = new();
+        }
+    }
+
+    private async Task ClearFilters()
+    {
+        SelectedApplication = null;
+        SelectedStatus = null;
+        await LoadVersions();
+    }
+
+    private void ShowCreateModal()
+    {
+        IsEditMode = false;
+        EditModel = new VersionEditModel
+        {
+            ReleaseDate = DateTime.UtcNow,
+            Status = VersionStatus.Development,
+            IsActive = true
+        };
+        IsModalVisible = true;
+    }
+
+    private void ShowEditModal(AppVersionDto version)
+    {
+        IsEditMode = true;
+        SelectedVersion = version;
+        EditModel = new VersionEditModel
+        {
+            Id = version.Id,
+            ApplicationCode = version.ApplicationCode,
+            ApplicationNameAr = version.ApplicationNameAr,
+            ApplicationNameEn = version.ApplicationNameEn,
+            VersionNumber = version.VersionNumber,
+            BuildNumber = version.BuildNumber,
+            Status = version.Status,
+            ReleaseDate = version.ReleaseDate,
+            EndOfSupportDate = version.EndOfSupportDate,
+            ReleaseNotesAr = version.ReleaseNotesAr,
+            ReleaseNotesEn = version.ReleaseNotesEn,
+            UpdateUrl = version.UpdateUrl,
+            DownloadUrl = version.DownloadUrl,
+            IsForceUpdate = version.IsForceUpdate,
+            MinimumSupportedVersion = version.MinimumSupportedVersion,
+            IsActive = version.IsActive
+        };
+        IsModalVisible = true;
+    }
+
+    private void ShowStatusModal(AppVersionDto version)
+    {
+        SelectedVersion = version;
+        NewStatus = version.Status;
+        IsStatusModalVisible = true;
+    }
+
+    private void ShowDeleteConfirm(AppVersionDto version)
+    {
+        SelectedVersion = version;
+        IsDeleteModalVisible = true;
+    }
+
+    private void CloseModal() => IsModalVisible = false;
+    private void CloseStatusModal() => IsStatusModalVisible = false;
+    private void CloseDeleteModal() => IsDeleteModalVisible = false;
+
+    private async Task SaveVersion()
+    {
+        try
+        {
+            if (IsEditMode && SelectedVersion != null)
+            {
+                var request = new UpdateAppVersionRequest
+                {
+                    ApplicationNameAr = EditModel.ApplicationNameAr,
+                    ApplicationNameEn = EditModel.ApplicationNameEn,
+                    Status = EditModel.Status,
+                    EndOfSupportDate = EditModel.EndOfSupportDate,
+                    ReleaseNotesAr = EditModel.ReleaseNotesAr,
+                    ReleaseNotesEn = EditModel.ReleaseNotesEn,
+                    UpdateUrl = EditModel.UpdateUrl,
+                    DownloadUrl = EditModel.DownloadUrl,
+                    IsForceUpdate = EditModel.IsForceUpdate,
+                    MinimumSupportedVersion = EditModel.MinimumSupportedVersion,
+                    IsActive = EditModel.IsActive
+                };
+                await VersionsClient.UpdateAsync(SelectedVersion.Id, request);
+            }
+            else
+            {
+                var request = new CreateAppVersionRequest
+                {
+                    ApplicationCode = EditModel.ApplicationCode,
+                    ApplicationNameAr = EditModel.ApplicationNameAr,
+                    ApplicationNameEn = EditModel.ApplicationNameEn,
+                    VersionNumber = EditModel.VersionNumber,
+                    BuildNumber = EditModel.BuildNumber,
+                    Status = EditModel.Status,
+                    ReleaseDate = EditModel.ReleaseDate,
+                    EndOfSupportDate = EditModel.EndOfSupportDate,
+                    ReleaseNotesAr = EditModel.ReleaseNotesAr,
+                    ReleaseNotesEn = EditModel.ReleaseNotesEn,
+                    UpdateUrl = EditModel.UpdateUrl,
+                    DownloadUrl = EditModel.DownloadUrl,
+                    IsForceUpdate = EditModel.IsForceUpdate,
+                    MinimumSupportedVersion = EditModel.MinimumSupportedVersion,
+                    IsActive = EditModel.IsActive
+                };
+                await VersionsClient.CreateAsync(request);
+            }
+
+            CloseModal();
+            await LoadVersions();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving version: {ex.Message}");
+        }
+    }
+
+    private async Task ChangeStatus()
+    {
+        if (SelectedVersion == null) return;
+
+        try
+        {
+            await VersionsClient.ChangeStatusAsync(SelectedVersion.Id, NewStatus);
+            CloseStatusModal();
+            await LoadVersions();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error changing status: {ex.Message}");
+        }
+    }
+
+    private async Task ToggleActive(AppVersionDto version)
+    {
+        try
+        {
+            await VersionsClient.ToggleActiveAsync(version.Id);
+            await LoadVersions();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error toggling active: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteVersion()
+    {
+        if (SelectedVersion == null) return;
+
+        try
+        {
+            await VersionsClient.DeleteAsync(SelectedVersion.Id);
+            CloseDeleteModal();
+            await LoadVersions();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting version: {ex.Message}");
+        }
+    }
+
+    private string GetStatusClass(VersionStatus status) => status switch
+    {
+        VersionStatus.Development => "development",
+        VersionStatus.Latest => "latest",
+        VersionStatus.Supported => "supported",
+        VersionStatus.Deprecated => "deprecated",
+        VersionStatus.Unsupported => "unsupported",
+        _ => "development"
+    };
+
+    private string GetStatusText(VersionStatus status) => status switch
+    {
+        VersionStatus.Development => "تطوير",
+        VersionStatus.Latest => "أحدث",
+        VersionStatus.Supported => "مدعوم",
+        VersionStatus.Deprecated => "متوقف",
+        VersionStatus.Unsupported => "غير مدعوم",
+        _ => "غير معروف"
+    };
+
+    private record StatusOption(string Text, string Value);
+    private record StatusOptionEnum(string Text, VersionStatus Value);
+
+    private class VersionEditModel
+    {
+        public Guid Id { get; set; }
+        public string ApplicationCode { get; set; } = string.Empty;
+        public string ApplicationNameAr { get; set; } = string.Empty;
+        public string ApplicationNameEn { get; set; } = string.Empty;
+        public string VersionNumber { get; set; } = string.Empty;
+        public int BuildNumber { get; set; } = 1;
+        public VersionStatus Status { get; set; }
+        public DateTime ReleaseDate { get; set; } = DateTime.UtcNow;
+        public DateTime? EndOfSupportDate { get; set; }
+        public string? ReleaseNotesAr { get; set; }
+        public string? ReleaseNotesEn { get; set; }
+        public string? UpdateUrl { get; set; }
+        public string? DownloadUrl { get; set; }
+        public bool IsForceUpdate { get; set; }
+        public string? MinimumSupportedVersion { get; set; }
+        public bool IsActive { get; set; } = true;
+    }
+}

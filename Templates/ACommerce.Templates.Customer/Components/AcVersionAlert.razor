@@ -1,0 +1,108 @@
+@namespace ACommerce.Templates.Customer.Components
+
+@if (IsVisible)
+{
+    <div class="ac-version-alert ac-version-alert-@AlertType.ToString().ToLower() @(IsClosing ? "ac-version-alert-closing" : "")">
+        <div class="ac-version-alert-icon">
+            <i class="bi @GetIcon()"></i>
+        </div>
+        <div class="ac-version-alert-content">
+            <div class="ac-version-alert-message">@Message</div>
+            @if (ShowEndDate && EndOfSupportDate.HasValue)
+            {
+                <div class="ac-version-alert-date">
+                    @(IsArabic ? "تاريخ الإيقاف:" : "End of support:") @EndOfSupportDate.Value.ToString("yyyy/MM/dd")
+                </div>
+            }
+        </div>
+        <div class="ac-version-alert-actions">
+            @if (!string.IsNullOrEmpty(UpdateUrl))
+            {
+                <a href="@UpdateUrl" class="ac-version-alert-btn ac-version-alert-btn-primary" target="_blank">
+                    @(IsArabic ? "تحديث الآن" : "Update Now")
+                </a>
+            }
+            @if (ShowDismiss)
+            {
+                <button class="ac-version-alert-btn ac-version-alert-btn-dismiss" @onclick="Dismiss">
+                    @(IsArabic ? "لاحقاً" : "Later")
+                </button>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// نوع التنبيه
+    /// </summary>
+    [Parameter] public VersionAlertType AlertType { get; set; } = VersionAlertType.Info;
+
+    /// <summary>
+    /// الرسالة
+    /// </summary>
+    [Parameter] public string Message { get; set; } = string.Empty;
+
+    /// <summary>
+    /// رابط التحديث
+    /// </summary>
+    [Parameter] public string? UpdateUrl { get; set; }
+
+    /// <summary>
+    /// تاريخ انتهاء الدعم
+    /// </summary>
+    [Parameter] public DateTime? EndOfSupportDate { get; set; }
+
+    /// <summary>
+    /// إظهار تاريخ الإيقاف
+    /// </summary>
+    [Parameter] public bool ShowEndDate { get; set; } = true;
+
+    /// <summary>
+    /// إظهار زر التأجيل
+    /// </summary>
+    [Parameter] public bool ShowDismiss { get; set; } = true;
+
+    /// <summary>
+    /// هل اللغة العربية؟
+    /// </summary>
+    [Parameter] public bool IsArabic { get; set; } = true;
+
+    /// <summary>
+    /// حدث عند الإغلاق
+    /// </summary>
+    [Parameter] public EventCallback OnDismiss { get; set; }
+
+    private bool IsVisible { get; set; } = true;
+    private bool IsClosing { get; set; }
+
+    private string GetIcon() => AlertType switch
+    {
+        VersionAlertType.Info => "bi-info-circle-fill",
+        VersionAlertType.Warning => "bi-exclamation-triangle-fill",
+        VersionAlertType.Critical => "bi-exclamation-circle-fill",
+        _ => "bi-info-circle-fill"
+    };
+
+    private async Task Dismiss()
+    {
+        IsClosing = true;
+        StateHasChanged();
+        await Task.Delay(300);
+        IsVisible = false;
+        await OnDismiss.InvokeAsync();
+    }
+
+    public void Show()
+    {
+        IsVisible = true;
+        IsClosing = false;
+        StateHasChanged();
+    }
+
+    public void Hide()
+    {
+        IsVisible = false;
+        StateHasChanged();
+    }
+}

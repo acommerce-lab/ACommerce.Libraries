@@ -39,6 +39,9 @@
     <ProjectReference Include="..\..\libs\backend\marketplace\ACommerce.Vendors.Api\ACommerce.Vendors.Api.csproj" />
     <ProjectReference Include="..\..\libs\backend\marketplace\ACommerce.Subscriptions.Api\ACommerce.Subscriptions.Api.csproj" />
 
+    <!-- Version Management -->
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.Versions\ACommerce.Versions.csproj" />
+
     <!-- Sales (Orders, Cart, Payments) -->
     <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Cart\ACommerce.Cart.csproj" />
     <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Orders.Api\ACommerce.Orders.Api.csproj" />

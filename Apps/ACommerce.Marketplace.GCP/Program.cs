@@ -31,6 +31,8 @@ using ACommerce.Orders.Api.Controllers;
 using ACommerce.Transactions.Core.Api.Controllers;
 using ACommerce.Subscriptions.Api.Controllers;
 using ACommerce.Payments.Api.Controllers;
+using ACommerce.Versions.Api.Controllers;
+using ACommerce.Versions.Extensions;
 
 // Force load assemblies for CQRS auto-discovery
 using ACommerce.Catalog.Attributes.Entities;
@@ -128,7 +130,8 @@ try
         .AddApplicationPart(typeof(OrdersController).Assembly)
         .AddApplicationPart(typeof(DocumentTypesController).Assembly)
         .AddApplicationPart(typeof(SubscriptionsController).Assembly)
-        .AddApplicationPart(typeof(PaymentsController).Assembly);
+        .AddApplicationPart(typeof(PaymentsController).Assembly)
+        .AddApplicationPart(typeof(AppVersionsController).Assembly);
 
     builder.Services.AddEndpointsApiExplorer();
 
@@ -221,6 +224,7 @@ try
     // =========================================================================
     builder.Services.AddScoped<IProductService, ProductService>();
     builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+    builder.Services.AddVersioning(); // App version management
 
     // Google Cloud Storage
     builder.Services.AddGoogleCloudStorage(builder.Configuration);
