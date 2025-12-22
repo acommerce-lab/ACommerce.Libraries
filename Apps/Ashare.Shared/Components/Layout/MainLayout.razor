@@ -133,9 +133,9 @@
     /// <summary>
     /// نوع التنبيه الحالي
     /// </summary>
-    private VersionAlertType CurrentAlertType => VersionCheck.HasWarning
-        ? VersionAlertType.Warning
-        : VersionAlertType.Info;
+    private ACommerce.Templates.Customer.Components.VersionAlertType CurrentAlertType => VersionCheck.HasWarning
+        ? ACommerce.Templates.Customer.Components.VersionAlertType.Warning
+        : ACommerce.Templates.Customer.Components.VersionAlertType.Info;
 
     /// <summary>
     /// الحصول على إصدار التطبيق من Assembly
