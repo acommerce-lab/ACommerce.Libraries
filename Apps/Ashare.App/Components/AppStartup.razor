@@ -21,25 +21,62 @@
 }
 else if (VersionCheck.IsBlocked)
 {
-    @* شاشة الحظر الكاملة - لا يتم عرض أي محتوى آخر *@
-    <div class="ac-version-block-page" dir="@(L.IsRtl ? "rtl" : "ltr")">
-        <AcVersionBlocker
-            IsBlocked="true"
-            Message="@GetBlockerMessage()"
-            CurrentVersion="@AppVersion.Version"
-            LatestVersion="@VersionCheck.LastCheckResult?.LatestVersion?.VersionNumber"
-            ReleaseNotes="@(L.IsRtl ? VersionCheck.LastCheckResult?.LatestVersion?.ReleaseNotesAr : VersionCheck.LastCheckResult?.LatestVersion?.ReleaseNotesEn)"
-            UpdateUrl="@VersionCheck.LastCheckResult?.LatestVersion?.UpdateUrl"
-            StoreUrl="@GetStoreUrl()"
-            SupportEmail="support@ashare.sa"
-            IsArabic="@L.IsRtl"
-            Title="@(L.IsRtl ? "تحديث مطلوب" : "Update Required")"
-            YourVersionLabel="@(L.IsRtl ? "إصدارك الحالي:" : "Your version:")"
-            LatestVersionLabel="@(L.IsRtl ? "أحدث إصدار:" : "Latest version:")"
-            WhatsNewLabel="@(L.IsRtl ? "ما الجديد؟" : "What's New?")"
-            UpdateNowLabel="@(L.IsRtl ? "تحديث الآن" : "Update Now")"
-            OpenStoreLabel="@(L.IsRtl ? "فتح المتجر" : "Open Store")"
-            NeedHelpLabel="@(L.IsRtl ? "تحتاج مساعدة؟" : "Need help?")" />
+    @* شاشة الحظر الكاملة بتصميم عشير *@
+    <div class="ashare-update-page" dir="rtl">
+        <div class="ashare-update-header">
+            <img src="_content/Ashare.Shared/images/ashare-logo.png" alt="عشير" class="ashare-update-logo" />
+        </div>
+
+        <div class="ashare-update-content">
+            <div class="ashare-update-icon">
+                <i class="bi bi-arrow-up-circle-fill"></i>
+            </div>
+
+            <h1 class="ashare-update-title">تحديث مطلوب</h1>
+
+            <p class="ashare-update-message">@GetBlockerMessage()</p>
+
+            <div class="ashare-update-version-info">
+                <div class="ashare-update-version-item">
+                    <span class="ashare-update-version-label">إصدارك الحالي</span>
+                    <span class="ashare-update-version-value ashare-update-version-old">@AppVersion.Version</span>
+                </div>
+                @if (!string.IsNullOrEmpty(VersionCheck.LastCheckResult?.LatestVersion?.VersionNumber))
+                {
+                    <div class="ashare-update-version-item">
+                        <span class="ashare-update-version-label">أحدث إصدار</span>
+                        <span class="ashare-update-version-value ashare-update-version-new">@VersionCheck.LastCheckResult?.LatestVersion?.VersionNumber</span>
+                    </div>
+                }
+            </div>
+
+            @{
+                var releaseNotes = VersionCheck.LastCheckResult?.LatestVersion?.ReleaseNotesAr;
+            }
+            @if (!string.IsNullOrEmpty(releaseNotes))
+            {
+                <div class="ashare-update-notes">
+                    <h3><i class="bi bi-stars"></i> ما الجديد؟</h3>
+                    <p>@releaseNotes</p>
+                </div>
+            }
+
+            <div class="ashare-update-actions">
+                <a href="@GetStoreUrl()" class="ashare-update-btn ashare-update-btn-primary" target="_blank">
+                    <i class="bi bi-download"></i>
+                    تحديث الآن
+                </a>
+            </div>
+
+            <div class="ashare-update-support">
+                <p>تحتاج مساعدة؟</p>
+                <a href="mailto:support@ashare.sa">support@ashare.sa</a>
+            </div>
+        </div>
+
+        <div class="ashare-update-footer">
+            <p>عشير - منصة حجز المساحات</p>
+        </div>
     </div>
 }
 else
@@ -49,6 +86,7 @@ else
 }
 
 <style>
+    /* شاشة التحميل */
     .ac-startup-loading {
         position: fixed;
         top: 0;
@@ -98,23 +136,201 @@ else
         50% { opacity: 0.7; }
     }
 
-    .ac-version-block-page {
+    /* صفحة التحديث المطلوب */
+    .ashare-update-page {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
         z-index: 99999;
-        background: #FEE8D6;
+        background: linear-gradient(180deg, #345454 0%, #263F3F 100%);
+        display: flex;
+        flex-direction: column;
+        font-family: 'Tajawal', -apple-system, BlinkMacSystemFont, sans-serif;
+        overflow-y: auto;
     }
 
-    .ac-version-block-page .ac-version-blocker {
-        position: relative;
-        min-height: 100vh;
+    .ashare-update-header {
+        padding: 40px 24px 20px;
+        text-align: center;
     }
 
-    .ac-version-block-page .ac-version-blocker-overlay {
-        background: linear-gradient(135deg, #345454 0%, #263F3F 100%);
+    .ashare-update-logo {
+        width: 80px;
+        height: auto;
+    }
+
+    .ashare-update-content {
+        flex: 1;
+        background: #FFFFFF;
+        border-radius: 32px 32px 0 0;
+        padding: 32px 24px 40px;
+        text-align: center;
+    }
+
+    .ashare-update-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        background: linear-gradient(135deg, #F4844C 0%, #E67339 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 24px rgba(244, 132, 76, 0.3);
+    }
+
+    .ashare-update-icon i {
+        font-size: 40px;
+        color: white;
+    }
+
+    .ashare-update-title {
+        font-size: 26px;
+        font-weight: 700;
+        color: #345454;
+        margin: 0 0 12px;
+    }
+
+    .ashare-update-message {
+        font-size: 15px;
+        color: #666;
+        line-height: 1.7;
+        margin: 0 0 24px;
+        max-width: 320px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .ashare-update-version-info {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        margin-bottom: 24px;
+        padding: 16px;
+        background: #F8F9FA;
+        border-radius: 16px;
+    }
+
+    .ashare-update-version-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .ashare-update-version-label {
+        font-size: 12px;
+        color: #888;
+    }
+
+    .ashare-update-version-value {
+        font-size: 18px;
+        font-weight: 700;
+        padding: 6px 16px;
+        border-radius: 20px;
+    }
+
+    .ashare-update-version-old {
+        background: #FEE2E2;
+        color: #DC2626;
+    }
+
+    .ashare-update-version-new {
+        background: #D1FAE5;
+        color: #059669;
+    }
+
+    .ashare-update-notes {
+        background: #FEF3E7;
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 24px;
+        text-align: right;
+    }
+
+    .ashare-update-notes h3 {
+        font-size: 14px;
+        font-weight: 600;
+        color: #F4844C;
+        margin: 0 0 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .ashare-update-notes p {
+        font-size: 14px;
+        color: #666;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .ashare-update-actions {
+        margin-bottom: 24px;
+    }
+
+    .ashare-update-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 16px 40px;
+        border-radius: 16px;
+        font-size: 17px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .ashare-update-btn-primary {
+        background: linear-gradient(135deg, #F4844C 0%, #E67339 100%);
+        color: white;
+        box-shadow: 0 8px 24px rgba(244, 132, 76, 0.3);
+    }
+
+    .ashare-update-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px rgba(244, 132, 76, 0.4);
+    }
+
+    .ashare-update-btn-primary:active {
+        transform: translateY(0);
+    }
+
+    .ashare-update-btn i {
+        font-size: 20px;
+    }
+
+    .ashare-update-support {
+        padding-top: 16px;
+        border-top: 1px solid #E5E7EB;
+    }
+
+    .ashare-update-support p {
+        font-size: 13px;
+        color: #888;
+        margin: 0 0 6px;
+    }
+
+    .ashare-update-support a {
+        font-size: 14px;
+        color: #345454;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .ashare-update-footer {
+        padding: 16px;
+        text-align: center;
+        background: #FFFFFF;
+    }
+
+    .ashare-update-footer p {
+        font-size: 12px;
+        color: #999;
+        margin: 0;
     }
 </style>
 
