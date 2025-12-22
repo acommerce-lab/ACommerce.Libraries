@@ -101,6 +101,8 @@
 		<ProjectReference Include="..\Ashare.Shared\Ashare.Shared.csproj" />
 		<!-- Payments Client for DI registration -->
 		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Payments\ACommerce.Client.Payments.csproj" />
+		<!-- Versions Client for AppStartup version check -->
+		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Versions\ACommerce.Client.Versions.csproj" />
 	</ItemGroup>
 
 	<!-- Ensure wwwroot files are included -->
