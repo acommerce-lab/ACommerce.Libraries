@@ -322,6 +322,9 @@ try
     // Ashare Seed Service
     builder.Services.AddScoped<AshareSeedDataService>();
 
+    // Offers Migration Service (لترحيل العروض من النظام القديم)
+    builder.Services.AddScoped<OffersMigrationService>();
+
     // Cache Warm-up Service - DISABLED for debugging
     // builder.Services.AddHostedService<CacheWarmupService>();
 
