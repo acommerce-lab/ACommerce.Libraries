@@ -5,8 +5,24 @@
 @inject ACommerce.Client.Auth.TokenManager TokenManager
 @inject ACommerce.Client.Auth.AuthClient AuthClient
 @inject ACommerce.Templates.Customer.Services.GuestModeService GuestMode
+@inject Ashare.Shared.Services.VersionCheckService VersionCheck
 @inject ILocalizationService L
 @implements IDisposable
+
+@* Version Blocker - يظهر فوق كل شيء إذا كان الإصدار غير مدعوم *@
+@if (VersionCheck.IsBlocked)
+{
+    <ACommerce.Templates.Customer.Components.AcVersionBlocker
+        IsBlocked="true"
+        Message="@(L.IsRtl ? VersionCheck.LastCheckResult?.MessageAr : VersionCheck.LastCheckResult?.MessageEn)"
+        CurrentVersion="@CurrentAppVersion"
+        LatestVersion="@VersionCheck.LastCheckResult?.LatestVersion?.VersionNumber"
+        ReleaseNotes="@(L.IsRtl ? VersionCheck.LastCheckResult?.LatestVersion?.ReleaseNotesAr : VersionCheck.LastCheckResult?.LatestVersion?.ReleaseNotesEn)"
+        UpdateUrl="@VersionCheck.LastCheckResult?.LatestVersion?.UpdateUrl"
+        StoreUrl="@GetStoreUrl()"
+        SupportEmail="support@ashare.app"
+        IsArabic="@L.IsRtl" />
+}
 
 <div class="ashare-app @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
     @* Navbar *@
@@ -32,6 +48,18 @@
                 </div>
             </div>
         </nav>
+    }
+
+    @* Version Alert - تنبيه للإصدارات المتقادمة أو المتوفر لها تحديث *@
+    @if (!VersionCheck.IsBlocked && !_versionAlertDismissed && (VersionCheck.HasWarning || VersionCheck.UpdateAvailable))
+    {
+        <ACommerce.Templates.Customer.Components.AcVersionAlert
+            AlertType="@(VersionCheck.HasWarning ? ACommerce.Templates.Customer.Components.VersionAlertType.Warning : ACommerce.Templates.Customer.Components.VersionAlertType.Info)"
+            Message="@GetVersionAlertMessage()"
+            EndOfSupportDate="@VersionCheck.LastCheckResult?.EndOfSupportDate"
+            UpdateUrl="@GetStoreUrl()"
+            IsArabic="@L.IsRtl"
+            OnDismiss="@HandleVersionAlertDismiss" />
     }
 
     @* Main Content *@
@@ -83,6 +111,75 @@
     private string? _lastCheckedPath;
     private static bool _bookingsCountLoaded;
     private static int _cachedBookingsCount;
+    private static bool _versionChecked;
+    private bool _versionAlertDismissed;
+
+    /// <summary>
+    /// إصدار التطبيق الحالي
+    /// </summary>
+    private string CurrentAppVersion => GetCurrentAppVersion();
+
+    /// <summary>
+    /// الحصول على إصدار التطبيق من Assembly
+    /// </summary>
+    private static string GetCurrentAppVersion()
+    {
+        try
+        {
+            var assembly = System.Reflection.Assembly.GetEntryAssembly();
+            var version = assembly?.GetName().Version;
+            if (version != null)
+            {
+                return $"{version.Major}.{version.Minor}";
+            }
+        }
+        catch
+        {
+            // تجاهل أي أخطاء
+        }
+        return "1.0";
+    }
+
+    /// <summary>
+    /// الحصول على رابط المتجر المناسب (App Store أو Play Store)
+    /// </summary>
+    private string GetStoreUrl()
+    {
+        // يمكن تحديد المتجر بناءً على المنصة
+        // حالياً نعيد رابط عام
+        return VersionCheck.LastCheckResult?.LatestVersion?.UpdateUrl ?? "https://ashare.app";
+    }
+
+    /// <summary>
+    /// الحصول على رسالة تنبيه الإصدار
+    /// </summary>
+    private string GetVersionAlertMessage()
+    {
+        if (VersionCheck.HasWarning)
+        {
+            return L.IsRtl
+                ? VersionCheck.LastCheckResult?.MessageAr ?? "هذا الإصدار سينتهي دعمه قريباً. يرجى التحديث."
+                : VersionCheck.LastCheckResult?.MessageEn ?? "This version will be deprecated soon. Please update.";
+        }
+
+        if (VersionCheck.UpdateAvailable)
+        {
+            return L.IsRtl
+                ? "يتوفر إصدار جديد من التطبيق. قم بالتحديث للحصول على أحدث الميزات."
+                : "A new version is available. Update to get the latest features.";
+        }
+
+        return "";
+    }
+
+    /// <summary>
+    /// إغلاق تنبيه الإصدار
+    /// </summary>
+    private void HandleVersionAlertDismiss()
+    {
+        _versionAlertDismissed = true;
+        StateHasChanged();
+    }
 
     private bool IsAuthPage
     {
@@ -146,10 +243,10 @@
     {
         // الاشتراك في حدث تغيير اللغة
         L.OnLanguageChanged += HandleLanguageChanged;
-        
+
         // تحميل عدد الإشعارات (متزامن)
         NotificationCount = ApiService.GetNotificationsCount();
-        
+
         // استخدام القيمة المخزنة مباشرة إذا تم تحميلها سابقاً
         if (_bookingsCountLoaded)
         {
@@ -160,8 +257,57 @@
             // تحميل عدد الحجوزات في الخلفية (مرة واحدة فقط)
             _ = LoadBookingsCountAsync();
         }
-        
+
+        // فحص إصدار التطبيق (مرة واحدة فقط)
+        if (!_versionChecked)
+        {
+            _ = CheckVersionAsync();
+        }
+
         return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// فحص إصدار التطبيق والتحقق من أنه مدعوم
+    /// </summary>
+    private async Task CheckVersionAsync()
+    {
+        if (_versionChecked) return;
+
+        try
+        {
+            var currentVersion = CurrentAppVersion;
+            Console.WriteLine($"[VersionCheck] Checking version {currentVersion}...");
+
+            var result = await VersionCheck.CheckVersionAsync(currentVersion);
+            _versionChecked = true;
+
+            if (result != null)
+            {
+                Console.WriteLine($"[VersionCheck] Result - IsSupported: {result.IsSupported}, Status: {result.CurrentStatus}, ForceUpdate: {result.IsForceUpdate}");
+
+                if (VersionCheck.IsBlocked)
+                {
+                    Console.WriteLine("[VersionCheck] ⛔ Version is BLOCKED - App will be locked");
+                    await InvokeAsync(StateHasChanged);
+                }
+                else if (VersionCheck.HasWarning)
+                {
+                    Console.WriteLine($"[VersionCheck] ⚠️ Version is DEPRECATED - End of support: {result.EndOfSupportDate}");
+                    await InvokeAsync(StateHasChanged);
+                }
+                else if (VersionCheck.UpdateAvailable)
+                {
+                    Console.WriteLine($"[VersionCheck] ℹ️ Update available - Latest: {result.LatestVersion?.VersionNumber}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[VersionCheck] Error: {ex.Message}");
+            // في حالة الخطأ، نسمح بالمتابعة
+            _versionChecked = true;
+        }
     }
     
     private void HandleLanguageChanged()
