@@ -24,7 +24,7 @@
     </div>
 
     <div class="card">
-        <SfGrid @ref="Grid" DataSource="@Versions" AllowPaging="true" AllowSorting="true">
+        <SfGrid @ref="Grid" DataSource="@VersionsList" AllowPaging="true" AllowSorting="true">
             <GridPageSettings PageSize="15" />
             <GridColumns>
                 <GridColumn Field="@nameof(AppVersionDto.ApplicationCode)" HeaderText="التطبيق" Width="120" />
@@ -80,7 +80,7 @@
                                           OnClick="@(() => ShowEditModal(version!))" />
                                 <SfButton CssClass="e-flat e-info" IconCss="e-icons e-exchange" Title="تغيير الحالة"
                                           OnClick="@(() => ShowStatusModal(version!))" />
-                                <SfButton CssClass="e-flat @(version?.IsActive == true ? "e-warning" : "e-success")"
+                                <SfButton CssClass="@GetToggleButtonClass(version)"
                                           IconCss="@(version?.IsActive == true ? "e-icons e-eye-slash" : "e-icons e-eye")"
                                           Title="@(version?.IsActive == true ? "تعطيل" : "تفعيل")"
                                           OnClick="@(() => ToggleActive(version!))" />
@@ -128,7 +128,7 @@
                     </div>
                     <div class="form-group">
                         <label>الحالة</label>
-                        <SfDropDownList TItem="StatusOption" TValue="VersionStatus" @bind-Value="EditModel.Status"
+                        <SfDropDownList TItem="StatusOptionEnum" TValue="VersionStatus" @bind-Value="EditModel.Status"
                                         DataSource="@StatusOptionsEnum">
                             <DropDownListFieldSettings Text="Text" Value="Value" />
                         </SfDropDownList>
@@ -194,7 +194,7 @@
                 <p>تغيير حالة الإصدار <strong>@SelectedVersion?.VersionNumber</strong></p>
                 <div class="form-group">
                     <label>الحالة الجديدة</label>
-                    <SfDropDownList TItem="StatusOption" TValue="VersionStatus" @bind-Value="NewStatus"
+                    <SfDropDownList TItem="StatusOptionEnum" TValue="VersionStatus" @bind-Value="NewStatus"
                                     DataSource="@StatusOptionsEnum">
                         <DropDownListFieldSettings Text="Text" Value="Value" />
                     </SfDropDownList>
@@ -346,7 +346,7 @@
 
 @code {
     private SfGrid<AppVersionDto>? Grid;
-    private List<AppVersionDto> Versions { get; set; } = new();
+    private List<AppVersionDto> VersionsList { get; set; } = new();
     private List<string> ApplicationOptions { get; set; } = new();
 
     private string? SelectedApplication { get; set; }
@@ -392,16 +392,16 @@
         {
             if (!string.IsNullOrEmpty(SelectedApplication))
             {
-                Versions = (await VersionsClient.GetByApplicationAsync(SelectedApplication))?.ToList() ?? new();
+                VersionsList = (await VersionsClient.GetByApplicationAsync(SelectedApplication))?.ToList() ?? new();
             }
             else
             {
-                Versions = (await VersionsClient.GetAllAsync())?.ToList() ?? new();
+                VersionsList = (await VersionsClient.GetAllAsync())?.ToList() ?? new();
             }
 
             if (!string.IsNullOrEmpty(SelectedStatus) && int.TryParse(SelectedStatus, out var status))
             {
-                Versions = Versions.Where(v => (int)v.Status == status).ToList();
+                VersionsList = VersionsList.Where(v => (int)v.Status == status).ToList();
             }
         }
         catch (Exception ex)
@@ -602,6 +602,9 @@
         VersionStatus.Unsupported => "غير مدعوم",
         _ => "غير معروف"
     };
+
+    private string GetToggleButtonClass(AppVersionDto? version) =>
+        version?.IsActive == true ? "e-flat e-warning" : "e-flat e-success";
 
     private record StatusOption(string Text, string Value);
     private record StatusOptionEnum(string Text, VersionStatus Value);
