@@ -313,8 +313,8 @@
 
     private string GetPaymentReturnUrl()
     {
-        var baseUri = NavigationManager.BaseUri.TrimEnd('/');
-        return $"{baseUri}/booking/payment/callback";
+        // Use ashare.app as the return URL host (backend configured)
+        return "https://ashare.app/host/payment/callback";
     }
 
     private async Task StartPayment()
@@ -369,8 +369,8 @@
                     // Connect to SignalR for payment notifications (as fallback)
                     await ConnectAndSubscribeToPayment(_paymentId);
 
-                    // Open payment in WebView
-                    var result = await PaymentService.OpenPaymentInAppAsync(_paymentUrl, "/booking/payment/callback");
+                    // Open payment in WebView (use same callback pattern as backend)
+                    var result = await PaymentService.OpenPaymentInAppAsync(_paymentUrl, "/host/payment/callback");
 
                     Console.WriteLine($"[BookingCreate] Payment callback: Status={result.Status}, OrderId={result.OrderId}");
 
