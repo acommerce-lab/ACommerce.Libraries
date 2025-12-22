@@ -62,7 +62,7 @@
     @if (!VersionCheck.IsBlocked && !_versionAlertDismissed && (VersionCheck.HasWarning || VersionCheck.UpdateAvailable))
     {
         <AcVersionAlert
-            AlertType="@(VersionCheck.HasWarning ? VersionAlertType.Warning : VersionAlertType.Info)"
+            AlertType="@CurrentAlertType"
             Message="@GetVersionAlertMessage()"
             EndOfSupportDate="@VersionCheck.LastCheckResult?.EndOfSupportDate"
             UpdateUrl="@GetStoreUrl()"
@@ -129,6 +129,13 @@
     /// إصدار التطبيق الحالي
     /// </summary>
     private string CurrentAppVersion => GetCurrentAppVersion();
+
+    /// <summary>
+    /// نوع التنبيه الحالي
+    /// </summary>
+    private VersionAlertType CurrentAlertType => VersionCheck.HasWarning
+        ? VersionAlertType.Warning
+        : VersionAlertType.Info;
 
     /// <summary>
     /// الحصول على إصدار التطبيق من Assembly
