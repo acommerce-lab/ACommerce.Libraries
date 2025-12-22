@@ -559,6 +559,46 @@ public class AshareApiService
                 }
         }
 
+        /// <summary>
+        /// إنشاء حجز جديد في الباك اند بعد الدفع
+        /// </summary>
+        public async Task<BookingItem?> CreateBookingAsync(Guid spaceId, decimal totalPrice, decimal depositAmount, string rentType, string? paymentId = null, string? notes = null)
+        {
+                try
+                {
+                        Console.WriteLine($"[AshareApiService] Creating booking in backend for space {spaceId}");
+
+                        var request = new CreateBookingRequest
+                        {
+                                SpaceId = spaceId,
+                                TotalPrice = totalPrice,
+                                DepositPercentage = totalPrice > 0 ? (depositAmount / totalPrice) * 100 : 10,
+                                RentType = rentType ?? "Monthly",
+                                CheckInDate = DateTime.Today,
+                                CheckOutDate = DateTime.Today.AddMonths(1), // Default to 1 month
+                                CustomerNotes = notes,
+                                GuestsCount = 1,
+                                PaymentId = paymentId
+                        };
+
+                        var result = await _bookingsClient.CreateAsync(request);
+
+                        if (result != null)
+                        {
+                                Console.WriteLine($"[AshareApiService] Booking created in backend: {result.Id}");
+                                return MapBookingDtoToItem(result);
+                        }
+
+                        Console.WriteLine("[AshareApiService] Failed to create booking in backend - null response");
+                        return null;
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"[AshareApiService] Error creating booking in backend: {ex.Message}");
+                        return null;
+                }
+        }
+
         // Local bookings cache for storing newly created bookings (before server sync)
         private static readonly List<BookingItem> _localBookings = new();
 

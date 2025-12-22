@@ -398,7 +398,7 @@
                             Console.WriteLine("[BookingCreate] Payment verified successfully!");
 
                             // Create the booking in local storage/backend
-                            await CreateLocalBookingAsync();
+                            await CreateBookingInBackendAsync();
 
                             Navigation.NavigateTo("/bookings?new=true");
                             return;
@@ -410,7 +410,7 @@
                     }
                     else if (result.Success)
                     {
-                        await CreateLocalBookingAsync();
+                        await CreateBookingInBackendAsync();
                         Navigation.NavigateTo("/bookings?new=true");
                         return;
                     }
@@ -508,7 +508,7 @@
 
                         if (isSuccess)
                         {
-                            await CreateLocalBookingAsync();
+                            await CreateBookingInBackendAsync();
                             Navigation.NavigateTo("/bookings?new=true");
                         }
                         else
@@ -531,44 +531,56 @@
         Navigation.NavigateBack();
     }
 
-    private Task CreateLocalBookingAsync()
+    private async Task CreateBookingInBackendAsync()
     {
         try
         {
-            if (_space == null) return Task.CompletedTask;
+            if (_space == null) return;
 
-            Console.WriteLine($"[BookingCreate] Creating local booking for space {SpaceId}");
+            Console.WriteLine($"[BookingCreate] Creating booking in backend for space {SpaceId}");
 
-            // Create booking item in the local data service
-            var booking = new BookingItem
+            // Create booking in backend via API
+            var booking = await ApiService.CreateBookingAsync(
+                spaceId: SpaceId,
+                totalPrice: GetPrice(),
+                depositAmount: CalculateDeposit(),
+                rentType: GetAttribute("rent_type"),
+                paymentId: _paymentId
+            );
+
+            if (booking != null)
             {
-                Id = Guid.TryParse(_bookingId, out var bid) ? bid : Guid.NewGuid(),
-                SpaceId = SpaceId,
-                SpaceName = _space.Name ?? "عقار",
-                SpaceImage = _space.Images.FirstOrDefault() ?? "",
-                Date = DateTime.Today,
-                StartTime = TimeOnly.MinValue,
-                EndTime = TimeOnly.MaxValue,
-                GuestsCount = 1,
-                TotalPrice = GetPrice(),
-                DepositPaid = CalculateDeposit(),
-                PaymentId = _paymentId,
-                Status = BookingStatus.Pending,
-                IsReviewed = false,
-                RentType = GetAttribute("rent_type")
-            };
+                Console.WriteLine($"[BookingCreate] Booking created in backend: {booking.Id}");
+            }
+            else
+            {
+                Console.WriteLine("[BookingCreate] Failed to create booking in backend - saving locally as fallback");
 
-            // Store in local data service (this will be synced with backend)
-            ApiService.CreateBookingLocally(booking);
-
-            Console.WriteLine($"[BookingCreate] Booking created: {booking.Id}");
+                // Fallback to local storage if API fails
+                var localBooking = new BookingItem
+                {
+                    Id = Guid.TryParse(_bookingId, out var bid) ? bid : Guid.NewGuid(),
+                    SpaceId = SpaceId,
+                    SpaceName = _space.Name ?? "عقار",
+                    SpaceImage = _space.Images.FirstOrDefault() ?? "",
+                    Date = DateTime.Today,
+                    StartTime = TimeOnly.MinValue,
+                    EndTime = TimeOnly.MaxValue,
+                    GuestsCount = 1,
+                    TotalPrice = GetPrice(),
+                    DepositPaid = CalculateDeposit(),
+                    PaymentId = _paymentId,
+                    Status = BookingStatus.Pending,
+                    IsReviewed = false,
+                    RentType = GetAttribute("rent_type")
+                };
+                ApiService.CreateBookingLocally(localBooking);
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[BookingCreate] Error creating local booking: {ex.Message}");
+            Console.WriteLine($"[BookingCreate] Error creating booking: {ex.Message}");
         }
-
-        return Task.CompletedTask;
     }
 
     public async ValueTask DisposeAsync()
