@@ -78,6 +78,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<SpaceDataService>();
         builder.Services.AddSingleton<ITimezoneService, DeviceTimezoneService>();
         builder.Services.AddSingleton<IPaymentService, MauiPaymentService>();
+        builder.Services.AddSingleton<IAppVersionService, AppVersionService>();
 
         builder.Services.AddMockAnalytics();
 

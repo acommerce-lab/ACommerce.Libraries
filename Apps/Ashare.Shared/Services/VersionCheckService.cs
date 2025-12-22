@@ -110,14 +110,19 @@ public class VersionCheckService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to check version - assuming supported");
-            // في حالة فشل الفحص، نفترض أن الإصدار مدعوم
+            _logger.LogError(ex, "Failed to check version - BLOCKING app for security");
+            Console.WriteLine($"[VersionCheckService] ⛔ API call failed: {ex.Message} - BLOCKING app");
+
+            // في حالة فشل الفحص، نحظر التطبيق لأسباب أمنية
+            // يجب أن يتم التحقق من الإصدار بنجاح للسماح بالاستخدام
             LastCheckResult = new VersionCheckResult
             {
-                IsSupported = true,
+                IsSupported = false,
                 UpdateAvailable = false,
-                IsForceUpdate = false,
-                CurrentStatus = VersionStatus.Supported
+                IsForceUpdate = true, // إجبار التحديث = حظر
+                CurrentStatus = VersionStatus.Unsupported,
+                MessageAr = "تعذر التحقق من إصدار التطبيق. يرجى التأكد من اتصالك بالإنترنت والمحاولة مرة أخرى.",
+                MessageEn = "Unable to verify app version. Please check your internet connection and try again."
             };
             HasChecked = true;
             return LastCheckResult;

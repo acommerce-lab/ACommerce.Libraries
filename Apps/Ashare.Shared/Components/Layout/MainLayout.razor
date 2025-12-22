@@ -7,6 +7,7 @@
 @inject ACommerce.Client.Auth.AuthClient AuthClient
 @inject ACommerce.Templates.Customer.Services.GuestModeService GuestMode
 @inject Ashare.Shared.Services.VersionCheckService VersionCheck
+@inject Ashare.Shared.Services.IAppVersionService AppVersion
 @inject ILocalizationService L
 @implements IDisposable
 
@@ -126,9 +127,14 @@
     private bool _versionAlertDismissed;
 
     /// <summary>
-    /// إصدار التطبيق الحالي
+    /// إصدار التطبيق الحالي (من IAppVersionService)
     /// </summary>
-    private string CurrentAppVersion => GetCurrentAppVersion();
+    private string CurrentAppVersion => AppVersion.Version;
+
+    /// <summary>
+    /// رقم البناء الحالي (من IAppVersionService)
+    /// </summary>
+    private int CurrentBuildNumber => AppVersion.BuildNumber;
 
     /// <summary>
     /// نوع التنبيه الحالي
@@ -136,73 +142,6 @@
     private ACommerce.Templates.Customer.Components.VersionAlertType CurrentAlertType => VersionCheck.HasWarning
         ? ACommerce.Templates.Customer.Components.VersionAlertType.Warning
         : ACommerce.Templates.Customer.Components.VersionAlertType.Info;
-
-    /// <summary>
-    /// الحصول على إصدار التطبيق
-    /// </summary>
-    private static string GetCurrentAppVersion()
-    {
-#if ANDROID || IOS || MACCATALYST
-        // للتطبيقات المحمولة - استخدم MAUI AppInfo
-        try
-        {
-            return Microsoft.Maui.ApplicationModel.AppInfo.VersionString;
-        }
-        catch
-        {
-            return "1.0";
-        }
-#else
-        // لتطبيقات الويب - استخدم Assembly Version أو الإعدادات
-        try
-        {
-            var assembly = System.Reflection.Assembly.GetEntryAssembly();
-            var version = assembly?.GetName().Version;
-            if (version != null && (version.Major > 1 || version.Minor > 0))
-            {
-                return $"{version.Major}.{version.Minor}";
-            }
-
-            // إذا لم يتم تعيين الإصدار، استخدم القيمة من الإعدادات أو الافتراضية
-            return "1.0";
-        }
-        catch
-        {
-            return "1.0";
-        }
-#endif
-    }
-
-    /// <summary>
-    /// الحصول على رقم البناء
-    /// </summary>
-    private static int GetCurrentBuildNumber()
-    {
-#if ANDROID || IOS || MACCATALYST
-        try
-        {
-            var buildString = Microsoft.Maui.ApplicationModel.AppInfo.BuildString;
-            if (int.TryParse(buildString, out var build))
-            {
-                return build;
-            }
-        }
-        catch { }
-        return 0;
-#else
-        try
-        {
-            var assembly = System.Reflection.Assembly.GetEntryAssembly();
-            var version = assembly?.GetName().Version;
-            if (version != null)
-            {
-                return version.Build;
-            }
-        }
-        catch { }
-        return 0;
-#endif
-    }
 
     /// <summary>
     /// الحصول على رابط المتجر المناسب (App Store أو Play Store)
@@ -369,7 +308,7 @@
         try
         {
             var currentVersion = CurrentAppVersion;
-            var buildNumber = GetCurrentBuildNumber();
+            var buildNumber = CurrentBuildNumber;
             Console.WriteLine($"[VersionCheck] Checking version {currentVersion} (build {buildNumber})...");
 
             var result = await VersionCheck.CheckVersionAsync(currentVersion, buildNumber);
