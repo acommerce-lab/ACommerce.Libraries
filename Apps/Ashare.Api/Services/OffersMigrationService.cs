@@ -19,7 +19,7 @@ public class OffersMigrationService
     private readonly IConfiguration _configuration;
 
     // الرابط الصحيح للصور في النظام القديم
-    private const string OldImagesBaseUrl = "http://ashare-001-site4.mtempurl.com/Images/";
+    private const string OldImagesBaseUrl = "http://ashare-001-site6.mtempurl.com/Images/";
 
     public OffersMigrationService(
         IRepositoryFactory repositoryFactory,
@@ -60,7 +60,7 @@ public class OffersMigrationService
                 {
                     await listingRepo.DeleteAsync(offer, cancellationToken);
                 }
-                await listingRepo.SaveChangesAsync(cancellationToken);
+                //await listingRepo.SaveChangesAsync(cancellationToken);
                 _logger.LogInformation("Deleted {Count} existing offers", existingOffers.Count);
             }
 
