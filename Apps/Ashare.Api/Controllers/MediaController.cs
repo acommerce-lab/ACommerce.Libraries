@@ -185,7 +185,7 @@ public class MediaController : ControllerBase
         }
 
         var objectName = $"{directory}/{fileName}";
-        
+
         try
         {
             var stream = await _storageProvider.GetAsync(objectName, cancellationToken);
@@ -200,6 +200,40 @@ public class MediaController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to get file: {ObjectName}", objectName);
+            return NotFound();
+        }
+    }
+
+    /// <summary>
+    /// جلب صورة من مسار متداخل (مثل listings/migrated/file.jpg)
+    /// </summary>
+    [HttpGet("{directory}/{subDirectory}/{fileName}")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<IActionResult> GetNestedImage(string directory, string subDirectory, string fileName, CancellationToken cancellationToken = default)
+    {
+        if (!AllowedDirectories.Contains(directory))
+        {
+            return NotFound();
+        }
+
+        var objectName = $"{directory}/{subDirectory}/{fileName}";
+
+        try
+        {
+            _logger.LogDebug("Getting nested image: {ObjectName}", objectName);
+            var stream = await _storageProvider.GetAsync(objectName, cancellationToken);
+            if (stream == null)
+            {
+                _logger.LogWarning("Image not found in GCS: {ObjectName}", objectName);
+                return NotFound();
+            }
+
+            var contentType = GetContentType(fileName);
+            return File(stream, contentType);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get nested file: {ObjectName}", objectName);
             return NotFound();
         }
     }
