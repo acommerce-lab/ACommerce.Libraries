@@ -10,15 +10,11 @@
             </div>
 
             <h1 class="ac-version-blocker-title">
-                @(IsArabic ? "إصدار غير مدعوم" : "Unsupported Version")
+                @TitleText
             </h1>
 
             <p class="ac-version-blocker-message">
-                @(string.IsNullOrEmpty(Message)
-                    ? (IsArabic
-                        ? "إصدارك الحالي غير مدعوم. يجب التحديث للاستمرار في استخدام التطبيق."
-                        : "Your current version is no longer supported. Please update to continue using the app.")
-                    : Message)
+                @(string.IsNullOrEmpty(Message) ? DefaultMessage : Message)
             </p>
 
             @if (!string.IsNullOrEmpty(CurrentVersion) || !string.IsNullOrEmpty(LatestVersion))
@@ -27,14 +23,14 @@
                     @if (!string.IsNullOrEmpty(CurrentVersion))
                     {
                         <div class="ac-version-blocker-version">
-                            <span class="ac-version-blocker-version-label">@(IsArabic ? "إصدارك:" : "Your version:")</span>
+                            <span class="ac-version-blocker-version-label">@YourVersionText</span>
                             <span class="ac-version-blocker-version-value ac-version-old">@CurrentVersion</span>
                         </div>
                     }
                     @if (!string.IsNullOrEmpty(LatestVersion))
                     {
                         <div class="ac-version-blocker-version">
-                            <span class="ac-version-blocker-version-label">@(IsArabic ? "أحدث إصدار:" : "Latest version:")</span>
+                            <span class="ac-version-blocker-version-label">@LatestVersionText</span>
                             <span class="ac-version-blocker-version-value ac-version-new">@LatestVersion</span>
                         </div>
                     }
@@ -44,7 +40,7 @@
             @if (!string.IsNullOrEmpty(ReleaseNotes))
             {
                 <div class="ac-version-blocker-notes">
-                    <h3>@(IsArabic ? "ما الجديد؟" : "What's New?")</h3>
+                    <h3>@WhatsNewText</h3>
                     <p>@ReleaseNotes</p>
                 </div>
             }
@@ -54,7 +50,7 @@
                 {
                     <a href="@UpdateUrl" class="ac-version-blocker-btn ac-version-blocker-btn-primary" target="_blank">
                         <i class="bi bi-download"></i>
-                        @(IsArabic ? "تحديث الآن" : "Update Now")
+                        @UpdateNowText
                     </a>
                 }
 
@@ -62,7 +58,7 @@
                 {
                     <a href="@StoreUrl" class="ac-version-blocker-btn ac-version-blocker-btn-secondary" target="_blank">
                         <i class="bi bi-shop"></i>
-                        @(IsArabic ? "فتح المتجر" : "Open Store")
+                        @OpenStoreText
                     </a>
                 }
             </div>
@@ -70,14 +66,14 @@
             @if (!string.IsNullOrEmpty(SupportEmail) || !string.IsNullOrEmpty(SupportUrl))
             {
                 <div class="ac-version-blocker-support">
-                    <p>@(IsArabic ? "تحتاج مساعدة؟" : "Need help?")</p>
+                    <p>@NeedHelpText</p>
                     @if (!string.IsNullOrEmpty(SupportEmail))
                     {
                         <a href="mailto:@SupportEmail">@SupportEmail</a>
                     }
                     @if (!string.IsNullOrEmpty(SupportUrl))
                     {
-                        <a href="@SupportUrl" target="_blank">@(IsArabic ? "تواصل معنا" : "Contact us")</a>
+                        <a href="@SupportUrl" target="_blank">@ContactUsText</a>
                     }
                 </div>
             }
@@ -135,6 +131,62 @@
     /// هل اللغة العربية؟
     /// </summary>
     [Parameter] public bool IsArabic { get; set; } = true;
+
+    // ===== نصوص قابلة للترجمة (اختياري) =====
+
+    /// <summary>
+    /// عنوان الشاشة
+    /// </summary>
+    [Parameter] public string? Title { get; set; }
+
+    /// <summary>
+    /// نص "إصدارك:"
+    /// </summary>
+    [Parameter] public string? YourVersionLabel { get; set; }
+
+    /// <summary>
+    /// نص "أحدث إصدار:"
+    /// </summary>
+    [Parameter] public string? LatestVersionLabel { get; set; }
+
+    /// <summary>
+    /// نص "ما الجديد؟"
+    /// </summary>
+    [Parameter] public string? WhatsNewLabel { get; set; }
+
+    /// <summary>
+    /// نص "تحديث الآن"
+    /// </summary>
+    [Parameter] public string? UpdateNowLabel { get; set; }
+
+    /// <summary>
+    /// نص "فتح المتجر"
+    /// </summary>
+    [Parameter] public string? OpenStoreLabel { get; set; }
+
+    /// <summary>
+    /// نص "تحتاج مساعدة؟"
+    /// </summary>
+    [Parameter] public string? NeedHelpLabel { get; set; }
+
+    /// <summary>
+    /// نص "تواصل معنا"
+    /// </summary>
+    [Parameter] public string? ContactUsLabel { get; set; }
+
+    // ===== الخصائص المحسوبة مع القيم الافتراضية =====
+
+    private string TitleText => Title ?? (IsArabic ? "إصدار غير مدعوم" : "Unsupported Version");
+    private string DefaultMessage => IsArabic
+        ? "إصدارك الحالي غير مدعوم. يجب التحديث للاستمرار في استخدام التطبيق."
+        : "Your current version is no longer supported. Please update to continue using the app.";
+    private string YourVersionText => YourVersionLabel ?? (IsArabic ? "إصدارك:" : "Your version:");
+    private string LatestVersionText => LatestVersionLabel ?? (IsArabic ? "أحدث إصدار:" : "Latest version:");
+    private string WhatsNewText => WhatsNewLabel ?? (IsArabic ? "ما الجديد؟" : "What's New?");
+    private string UpdateNowText => UpdateNowLabel ?? (IsArabic ? "تحديث الآن" : "Update Now");
+    private string OpenStoreText => OpenStoreLabel ?? (IsArabic ? "فتح المتجر" : "Open Store");
+    private string NeedHelpText => NeedHelpLabel ?? (IsArabic ? "تحتاج مساعدة؟" : "Need help?");
+    private string ContactUsText => ContactUsLabel ?? (IsArabic ? "تواصل معنا" : "Contact us");
 
     public void Block()
     {

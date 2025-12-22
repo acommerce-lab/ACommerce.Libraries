@@ -11,7 +11,7 @@
             @if (ShowEndDate && EndOfSupportDate.HasValue)
             {
                 <div class="ac-version-alert-date">
-                    @(IsArabic ? "تاريخ الإيقاف:" : "End of support:") @EndOfSupportDate.Value.ToString("yyyy/MM/dd")
+                    @EndOfSupportText @EndOfSupportDate.Value.ToString("yyyy/MM/dd")
                 </div>
             }
         </div>
@@ -19,13 +19,13 @@
             @if (!string.IsNullOrEmpty(UpdateUrl))
             {
                 <a href="@UpdateUrl" class="ac-version-alert-btn ac-version-alert-btn-primary" target="_blank">
-                    @(IsArabic ? "تحديث الآن" : "Update Now")
+                    @UpdateNowText
                 </a>
             }
             @if (ShowDismiss)
             {
                 <button class="ac-version-alert-btn ac-version-alert-btn-dismiss" @onclick="Dismiss">
-                    @(IsArabic ? "لاحقاً" : "Later")
+                    @LaterText
                 </button>
             }
         </div>
@@ -72,6 +72,29 @@
     /// حدث عند الإغلاق
     /// </summary>
     [Parameter] public EventCallback OnDismiss { get; set; }
+
+    // ===== نصوص قابلة للترجمة (اختياري) =====
+
+    /// <summary>
+    /// نص "تاريخ الإيقاف:"
+    /// </summary>
+    [Parameter] public string? EndOfSupportLabel { get; set; }
+
+    /// <summary>
+    /// نص "تحديث الآن"
+    /// </summary>
+    [Parameter] public string? UpdateNowLabel { get; set; }
+
+    /// <summary>
+    /// نص "لاحقاً"
+    /// </summary>
+    [Parameter] public string? LaterLabel { get; set; }
+
+    // ===== الخصائص المحسوبة مع القيم الافتراضية =====
+
+    private string EndOfSupportText => EndOfSupportLabel ?? (IsArabic ? "تاريخ الإيقاف:" : "End of support:");
+    private string UpdateNowText => UpdateNowLabel ?? (IsArabic ? "تحديث الآن" : "Update Now");
+    private string LaterText => LaterLabel ?? (IsArabic ? "لاحقاً" : "Later");
 
     private bool IsVisible { get; set; } = true;
     private bool IsClosing { get; set; }

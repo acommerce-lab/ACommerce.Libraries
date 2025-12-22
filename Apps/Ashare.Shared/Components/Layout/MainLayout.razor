@@ -14,14 +14,21 @@
 {
     <ACommerce.Templates.Customer.Components.AcVersionBlocker
         IsBlocked="true"
-        Message="@(L.IsRtl ? VersionCheck.LastCheckResult?.MessageAr : VersionCheck.LastCheckResult?.MessageEn)"
+        Message="@GetBlockerMessage()"
         CurrentVersion="@CurrentAppVersion"
         LatestVersion="@VersionCheck.LastCheckResult?.LatestVersion?.VersionNumber"
         ReleaseNotes="@(L.IsRtl ? VersionCheck.LastCheckResult?.LatestVersion?.ReleaseNotesAr : VersionCheck.LastCheckResult?.LatestVersion?.ReleaseNotesEn)"
         UpdateUrl="@VersionCheck.LastCheckResult?.LatestVersion?.UpdateUrl"
         StoreUrl="@GetStoreUrl()"
         SupportEmail="support@ashare.app"
-        IsArabic="@L.IsRtl" />
+        IsArabic="@L.IsRtl"
+        Title="@L["VersionUnsupported"]"
+        YourVersionLabel="@L["YourVersion"]"
+        LatestVersionLabel="@L["LatestVersion"]"
+        WhatsNewLabel="@L["WhatsNew"]"
+        UpdateNowLabel="@L["UpdateNow"]"
+        OpenStoreLabel="@L["OpenStore"]"
+        NeedHelpLabel="@L["NeedHelp"]" />
 }
 
 <div class="ashare-app @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
@@ -59,7 +66,10 @@
             EndOfSupportDate="@VersionCheck.LastCheckResult?.EndOfSupportDate"
             UpdateUrl="@GetStoreUrl()"
             IsArabic="@L.IsRtl"
-            OnDismiss="@HandleVersionAlertDismiss" />
+            OnDismiss="@HandleVersionAlertDismiss"
+            EndOfSupportLabel="@L["EndOfSupport"]"
+            UpdateNowLabel="@L["UpdateNow"]"
+            LaterLabel="@L["Later"]" />
     }
 
     @* Main Content *@
@@ -151,22 +161,48 @@
     }
 
     /// <summary>
+    /// الحصول على رسالة شاشة الحظر
+    /// </summary>
+    private string GetBlockerMessage()
+    {
+        // أولاً نحاول استخدام الرسالة المخصصة من الـ API
+        var customMessage = L.IsRtl
+            ? VersionCheck.LastCheckResult?.MessageAr
+            : VersionCheck.LastCheckResult?.MessageEn;
+
+        if (!string.IsNullOrEmpty(customMessage))
+        {
+            return customMessage;
+        }
+
+        // إذا لم توجد رسالة مخصصة، نستخدم الترجمة
+        return L["VersionUnsupportedMessage"];
+    }
+
+    /// <summary>
     /// الحصول على رسالة تنبيه الإصدار
     /// </summary>
     private string GetVersionAlertMessage()
     {
+        // أولاً نحاول استخدام الرسالة المخصصة من الـ API
+        var customMessage = L.IsRtl
+            ? VersionCheck.LastCheckResult?.MessageAr
+            : VersionCheck.LastCheckResult?.MessageEn;
+
+        if (!string.IsNullOrEmpty(customMessage))
+        {
+            return customMessage;
+        }
+
+        // إذا لم توجد رسالة مخصصة، نستخدم الترجمة
         if (VersionCheck.HasWarning)
         {
-            return L.IsRtl
-                ? VersionCheck.LastCheckResult?.MessageAr ?? "هذا الإصدار سينتهي دعمه قريباً. يرجى التحديث."
-                : VersionCheck.LastCheckResult?.MessageEn ?? "This version will be deprecated soon. Please update.";
+            return L["VersionDeprecatedMessage"];
         }
 
         if (VersionCheck.UpdateAvailable)
         {
-            return L.IsRtl
-                ? "يتوفر إصدار جديد من التطبيق. قم بالتحديث للحصول على أحدث الميزات."
-                : "A new version is available. Update to get the latest features.";
+            return L["VersionUpdateAvailable"];
         }
 
         return "";
