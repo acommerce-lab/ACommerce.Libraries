@@ -50,6 +50,9 @@
     <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Cart\ACommerce.Cart.csproj" />
     <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Orders.Api\ACommerce.Orders.Api.csproj" />
 
+    <!-- Bookings -->
+    <ProjectReference Include="..\..\libs\backend\marketplace\ACommerce.Bookings.Api\ACommerce.Bookings.Api.csproj" />
+
     <!-- Transactions -->
     <!--<ProjectReference Include="..\..\Other\ACommerce.Transactions.Core\ACommerce.Transactions.Core.csproj" />
     <ProjectReference Include="..\..\Other\ACommerce.Transactions.Core.Api\ACommerce.Transactions.Core.Api.csproj" />-->

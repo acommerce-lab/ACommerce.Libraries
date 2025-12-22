@@ -81,6 +81,9 @@ using ACommerce.LegalPages.Extensions;
 using ACommerce.Versions.Api.Controllers;
 using ACommerce.Versions.Extensions;
 
+// Bookings
+using ACommerce.Bookings.Api.Controllers;
+
 // Marketing & Analytics
 using ACommerce.Marketing.MetaConversions.Extensions;
 
@@ -99,6 +102,8 @@ _ = typeof(ACommerce.LegalPages.Entities.LegalPage).Assembly;
 // هذا ضروري لأن EntityDiscoveryRegistry يجب أن يحتوي على جميع الـ Entities
 // قبل أول استدعاء لـ ApplicationDbContext.OnModelCreating
 ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.LegalPages.Entities.LegalPage>();
+ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Bookings.Entities.Booking>();
+ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Bookings.Entities.BookingStatusHistory>();
 
 try
 {
@@ -168,7 +173,8 @@ try
         .AddApplicationPart(typeof(ReportsController).Assembly) // Admin Reports
         .AddApplicationPart(typeof(AuditLogController).Assembly) // Admin Audit Log
         .AddApplicationPart(typeof(LegalPagesController).Assembly) // Legal Pages
-        .AddApplicationPart(typeof(AppVersionsController).Assembly); // Version Management
+        .AddApplicationPart(typeof(AppVersionsController).Assembly) // Version Management
+        .AddApplicationPart(typeof(BookingsController).Assembly); // Bookings
 
     builder.Services.AddEndpointsApiExplorer();
 
