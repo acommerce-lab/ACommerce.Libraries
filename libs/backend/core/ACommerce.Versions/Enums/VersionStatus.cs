@@ -1,8 +1,11 @@
+using System.Text.Json.Serialization;
+
 namespace ACommerce.Versions.Enums;
 
 /// <summary>
 /// حالة دعم الإصدار
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum VersionStatus
 {
     /// <summary>
