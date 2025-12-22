@@ -315,6 +315,9 @@ public class LocalizationService : BaseLocalizationService
         ar["Guest"] = "زائر";
         ar["RedirectingToLogin"] = "جاري التوجيه لتسجيل الدخول...";
         ar["LoginToAccessProfile"] = "سجل دخولك للوصول لملفك الشخصي";
+        ar["Retry"] = "إعادة المحاولة";
+        ar["PageNotFound"] = "الصفحة غير موجودة";
+        ar["ErrorLoadingPage"] = "حدث خطأ أثناء تحميل الصفحة";
 
         // Version Management
         ar["VersionUnsupported"] = "إصدار غير مدعوم";
@@ -611,6 +614,9 @@ public class LocalizationService : BaseLocalizationService
         en["Guest"] = "Guest";
         en["RedirectingToLogin"] = "Redirecting to login...";
         en["LoginToAccessProfile"] = "Login to access your profile";
+        en["Retry"] = "Retry";
+        en["PageNotFound"] = "Page not found";
+        en["ErrorLoadingPage"] = "Error loading page";
 
         // Version Management
         en["VersionUnsupported"] = "Unsupported Version";
@@ -689,6 +695,9 @@ public class LocalizationService : BaseLocalizationService
         ur["No"] = "نہیں";
         ur["OK"] = "ٹھیک ہے";
         ur["SAR"] = "ریال";
+        ur["Retry"] = "دوبارہ کوشش کریں";
+        ur["PageNotFound"] = "صفحہ نہیں ملا";
+        ur["ErrorLoadingPage"] = "صفحہ لوڈ کرنے میں خرابی";
 
         // Categories
         ur["Categories"] = "زمرے";

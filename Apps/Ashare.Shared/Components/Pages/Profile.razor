@@ -169,7 +169,7 @@
                     <div class="ashare-menu-items">
                         @foreach (var page in _legalPages)
                         {
-                            <button class="ashare-menu-item" @onclick="@(() => OpenLegalPage(page.Url))">
+                            <button class="ashare-menu-item" @onclick="@(() => OpenLegalPage(page.Key))">
                                 <div class="ashare-menu-icon">
                                     <i class="bi @(page.Icon)"></i>
                                 </div>
@@ -340,9 +340,9 @@
         return L.CurrentLanguage == "ar" ? page.TitleAr : page.TitleEn;
     }
 
-    private void OpenLegalPage(string url)
+    private void OpenLegalPage(string key)
     {
-        Navigation.NavigateTo(url);
+        Navigation.NavigateTo($"/legal/{key}");
     }
 
     private async Task Logout()
