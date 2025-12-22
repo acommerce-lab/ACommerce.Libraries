@@ -799,23 +799,23 @@ public class AshareApiService
         {
                 try
                 {
-                        // إنشاء طلب الحجز والدفع
-                        var bookingId = Guid.NewGuid().ToString();
+                        // إنشاء معرف الحجز
+                        var bookingId = Guid.NewGuid();
 
                         // إنشاء عملية الدفع
-                        var paymentResponse = await _paymentsClient.InitiatePaymentAsync(new ACommerce.Client.Payments.InitiatePaymentRequest
+                        var paymentResponse = await _paymentsClient.CreatePaymentAsync(new CreatePaymentRequest
                         {
+                                OrderId = bookingId,
                                 Amount = request.DepositAmount,
                                 Currency = "SAR",
-                                Description = $"عربون حجز عقار",
-                                ReturnUrl = request.ReturnUrl ?? "",
+                                PaymentMethod = "CreditCard",
                                 Metadata = new Dictionary<string, string>
                                 {
-                                        { "booking_id", bookingId },
                                         { "space_id", request.SpaceId.ToString() },
                                         { "type", "booking_deposit" },
                                         { "total_price", request.TotalPrice.ToString() },
-                                        { "rent_type", request.RentType ?? "monthly" }
+                                        { "rent_type", request.RentType ?? "monthly" },
+                                        { "return_url", request.ReturnUrl ?? "" }
                                 }
                         });
 
@@ -831,7 +831,7 @@ public class AshareApiService
                         return new CreateBookingPaymentResponse
                         {
                                 Success = true,
-                                BookingId = bookingId,
+                                BookingId = bookingId.ToString(),
                                 PaymentId = paymentResponse.PaymentId,
                                 PaymentUrl = paymentResponse.PaymentUrl,
                                 Amount = request.DepositAmount,

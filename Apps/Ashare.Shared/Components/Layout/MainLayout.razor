@@ -296,11 +296,13 @@
         get
         {
             var pageName = RouteData?.PageType?.Name;
-            if (pageName is "ChatRoom")
+            if (pageName is "ChatRoom" or "SpaceDetails" or "BookingCreate")
                 return true;
 
             var currentPath = Navigation.CurrentUri?.ToLowerInvariant() ?? "";
-            return currentPath.Contains("/chat/");
+            return currentPath.Contains("/chat/") ||
+                   currentPath.Contains("/space/") ||
+                   currentPath.Contains("/book/");
         }
     }
 
