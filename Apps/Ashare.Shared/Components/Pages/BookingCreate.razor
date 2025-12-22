@@ -1,0 +1,529 @@
+@page "/book/{SpaceId:guid}"
+@using ACommerce.Client.Auth
+@inject AshareApiService ApiService
+@inject IAppNavigationService Navigation
+@inject TokenManager TokenManager
+
+<div class="ac-page ashare-booking-create">
+    @if (_isLoading)
+    {
+        <div class="ashare-loading">
+            <div class="ac-spinner"></div>
+            <span>جاري التحميل...</span>
+        </div>
+    }
+    else if (_space == null)
+    {
+        <div class="ashare-error-state">
+            <i class="bi bi-exclamation-circle"></i>
+            <h2>العرض غير موجود</h2>
+            <button class="ac-btn ac-btn-primary" @onclick="GoBack">العودة</button>
+        </div>
+    }
+    else
+    {
+        @* Header *@
+        <div class="ashare-booking-header">
+            <button class="ashare-back-btn" @onclick="GoBack">
+                <i class="bi bi-arrow-right"></i>
+            </button>
+            <h1>حجز العقار</h1>
+        </div>
+
+        @* Space Summary *@
+        <div class="ashare-booking-space-card">
+            <div class="ashare-booking-space-image">
+                @if (_space.Images.Any())
+                {
+                    <img src="@_space.Images.First()" alt="@_space.Name" />
+                }
+                else
+                {
+                    <div class="ashare-space-no-image">
+                        <i class="bi bi-building"></i>
+                    </div>
+                }
+            </div>
+            <div class="ashare-booking-space-info">
+                <h3>@_space.Name</h3>
+                <p class="ashare-booking-space-location">
+                    <i class="bi bi-geo-alt"></i>
+                    @GetLocationDisplay()
+                </p>
+            </div>
+        </div>
+
+        @* Pricing Details *@
+        <div class="ashare-booking-section">
+            <h2 class="ashare-section-title">تفاصيل السعر</h2>
+
+            <div class="ashare-price-breakdown">
+                <div class="ashare-price-row">
+                    <span>إيجار @GetRentTypeLabel()</span>
+                    <span>@GetPrice() ر.س</span>
+                </div>
+
+                @if (_depositPercentage > 0)
+                {
+                    <div class="ashare-price-row deposit">
+                        <span>العربون (@_depositPercentage%)</span>
+                        <span>@CalculateDeposit() ر.س</span>
+                    </div>
+                }
+
+                <div class="ashare-price-divider"></div>
+
+                <div class="ashare-price-row total">
+                    <span>المبلغ المطلوب الآن</span>
+                    <span>@GetRequiredAmount() ر.س</span>
+                </div>
+            </div>
+
+            <p class="ashare-deposit-note">
+                <i class="bi bi-info-circle"></i>
+                العربون مبلغ مسترد في حال إلغاء الحجز قبل الموافقة من المعلن
+            </p>
+        </div>
+
+        @* Booking Terms *@
+        <div class="ashare-booking-section">
+            <h2 class="ashare-section-title">شروط الحجز</h2>
+            <ul class="ashare-booking-terms">
+                <li>
+                    <i class="bi bi-check-circle"></i>
+                    سيتم إرسال طلب الحجز للمعلن للموافقة
+                </li>
+                <li>
+                    <i class="bi bi-check-circle"></i>
+                    يتم خصم العربون فقط بعد موافقة المعلن
+                </li>
+                <li>
+                    <i class="bi bi-check-circle"></i>
+                    يمكنك إلغاء الطلب قبل الموافقة واسترداد العربون
+                </li>
+                <li>
+                    <i class="bi bi-check-circle"></i>
+                    باقي المبلغ يتم دفعه مباشرة للمعلن
+                </li>
+            </ul>
+        </div>
+
+        @* Agreement *@
+        <div class="ashare-booking-agreement">
+            <label class="ashare-checkbox">
+                <input type="checkbox" @bind="_agreedToTerms" />
+                <span class="ashare-checkbox-mark"></span>
+                <span>أوافق على <a href="/legal/terms" target="_blank">شروط الاستخدام</a> و<a href="/legal/privacy" target="_blank">سياسة الخصوصية</a></span>
+            </label>
+        </div>
+
+        @* Error Message *@
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="ashare-booking-error">
+                <i class="bi bi-exclamation-triangle"></i>
+                @_errorMessage
+            </div>
+        }
+
+        @* Submit Button *@
+        <div class="ashare-booking-submit">
+            <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
+                    @onclick="SubmitBooking"
+                    disabled="@(!_agreedToTerms || _isSubmitting)">
+                @if (_isSubmitting)
+                {
+                    <div class="ac-spinner ac-spinner-sm"></div>
+                    <span>جاري إرسال الطلب...</span>
+                }
+                else
+                {
+                    <i class="bi bi-credit-card"></i>
+                    <span>دفع العربون @GetRequiredAmount() ر.س</span>
+                }
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid SpaceId { get; set; }
+
+    private SpaceItem? _space;
+    private bool _isLoading = true;
+    private bool _isSubmitting;
+    private bool _agreedToTerms;
+    private string? _errorMessage;
+    private decimal _depositPercentage = 10; // Default 10%, will be fetched from backend
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSpaceAsync();
+    }
+
+    private async Task LoadSpaceAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            _space = await ApiService.GetSpaceByIdAsync(SpaceId);
+
+            // TODO: Fetch deposit percentage from backend settings
+            // _depositPercentage = await ApiService.GetDepositPercentageAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[BookingCreate] Error loading space: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private string GetLocationDisplay()
+    {
+        var parts = new List<string>();
+
+        if (HasAttribute("district"))
+            parts.Add(GetAttribute("district"));
+        else if (!string.IsNullOrEmpty(_space?.Location))
+            parts.Add(_space.Location);
+
+        if (HasAttribute("city"))
+            parts.Add(GetAttribute("city"));
+        else if (!string.IsNullOrEmpty(_space?.City))
+            parts.Add(_space.City);
+
+        return parts.Any() ? string.Join("، ", parts) : "غير محدد";
+    }
+
+    private bool HasAttribute(string key)
+    {
+        return _space?.Attributes?.ContainsKey(key) == true &&
+               _space.Attributes[key] != null &&
+               !string.IsNullOrEmpty(_space.Attributes[key].ToString());
+    }
+
+    private string GetAttribute(string key)
+    {
+        if (_space?.Attributes?.TryGetValue(key, out var value) == true && value != null)
+        {
+            return value.ToString() ?? "";
+        }
+        return "";
+    }
+
+    private string GetRentTypeLabel()
+    {
+        if (!HasAttribute("rent_type")) return "شهري";
+
+        return GetAttribute("rent_type").ToLower() switch
+        {
+            "monthly" => "شهري",
+            "yearly" or "annual" => "سنوي",
+            "daily" => "يومي",
+            "weekly" => "أسبوعي",
+            _ => "شهري"
+        };
+    }
+
+    private decimal GetPrice()
+    {
+        if (HasAttribute("price") && decimal.TryParse(GetAttribute("price"), out var price))
+        {
+            return price;
+        }
+        return _space?.PricePerHour ?? 0;
+    }
+
+    private decimal CalculateDeposit()
+    {
+        return Math.Round(GetPrice() * _depositPercentage / 100, 2);
+    }
+
+    private decimal GetRequiredAmount()
+    {
+        return CalculateDeposit();
+    }
+
+    private async Task SubmitBooking()
+    {
+        if (!_agreedToTerms)
+        {
+            _errorMessage = "يجب الموافقة على الشروط والأحكام";
+            return;
+        }
+
+        // Check if user is logged in
+        var userId = TokenManager.GetUserIdFromToken();
+        if (string.IsNullOrEmpty(userId))
+        {
+            Navigation.NavigateTo("/login?returnUrl=/book/" + SpaceId);
+            return;
+        }
+
+        _isSubmitting = true;
+        _errorMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            // TODO: Create booking request through API
+            // var booking = await ApiService.CreateBookingRequestAsync(SpaceId, CalculateDeposit());
+
+            // TODO: Navigate to payment page
+            // Navigation.NavigateTo($"/payment/{booking.Id}");
+
+            // For now, show success message and go back
+            Console.WriteLine($"[BookingCreate] Creating booking for space {SpaceId} with deposit {CalculateDeposit()} SAR");
+
+            // Temporary: Navigate to bookings page
+            Navigation.NavigateTo("/bookings");
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = "حدث خطأ أثناء إرسال الطلب. حاول مرة أخرى.";
+            Console.WriteLine($"[BookingCreate] Error: {ex.Message}");
+        }
+        finally
+        {
+            _isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateBack();
+    }
+}
+
+<style>
+    .ashare-booking-create {
+        padding-bottom: 100px;
+    }
+
+    .ashare-booking-header {
+        display: flex;
+        align-items: center;
+        gap: var(--ashare-spacing-md);
+        padding: var(--ashare-spacing-md);
+        background: var(--ashare-surface);
+        border-bottom: 1px solid var(--ashare-gray-200);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .ashare-booking-header h1 {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .ashare-booking-space-card {
+        display: flex;
+        gap: var(--ashare-spacing-md);
+        padding: var(--ashare-spacing-md);
+        background: var(--ashare-surface);
+        margin: var(--ashare-spacing-md);
+        border-radius: var(--ashare-radius-lg);
+        box-shadow: var(--ashare-shadow-sm);
+    }
+
+    .ashare-booking-space-image {
+        width: 80px;
+        height: 80px;
+        border-radius: var(--ashare-radius-md);
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .ashare-booking-space-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .ashare-booking-space-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .ashare-booking-space-info h3 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 var(--ashare-spacing-xs);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .ashare-booking-space-location {
+        font-size: 14px;
+        color: var(--ashare-gray-500);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: var(--ashare-spacing-xs);
+    }
+
+    .ashare-booking-section {
+        padding: var(--ashare-spacing-md);
+        margin: var(--ashare-spacing-md);
+        background: var(--ashare-surface);
+        border-radius: var(--ashare-radius-lg);
+        box-shadow: var(--ashare-shadow-sm);
+    }
+
+    .ashare-price-breakdown {
+        display: flex;
+        flex-direction: column;
+        gap: var(--ashare-spacing-sm);
+    }
+
+    .ashare-price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+    }
+
+    .ashare-price-row.deposit {
+        color: var(--ashare-secondary);
+        font-weight: 500;
+    }
+
+    .ashare-price-row.total {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--ashare-primary);
+    }
+
+    .ashare-price-divider {
+        height: 1px;
+        background: var(--ashare-gray-200);
+        margin: var(--ashare-spacing-sm) 0;
+    }
+
+    .ashare-deposit-note {
+        font-size: 12px;
+        color: var(--ashare-gray-500);
+        margin: var(--ashare-spacing-md) 0 0;
+        display: flex;
+        align-items: flex-start;
+        gap: var(--ashare-spacing-xs);
+    }
+
+    .ashare-deposit-note i {
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .ashare-booking-terms {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--ashare-spacing-sm);
+    }
+
+    .ashare-booking-terms li {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--ashare-spacing-sm);
+        font-size: 14px;
+        color: var(--ashare-gray-600);
+    }
+
+    .ashare-booking-terms li i {
+        color: var(--ashare-success);
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .ashare-booking-agreement {
+        padding: var(--ashare-spacing-md);
+        margin: var(--ashare-spacing-md);
+    }
+
+    .ashare-checkbox {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--ashare-spacing-sm);
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .ashare-checkbox input {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--ashare-primary);
+    }
+
+    .ashare-checkbox a {
+        color: var(--ashare-primary);
+        text-decoration: underline;
+    }
+
+    .ashare-booking-error {
+        display: flex;
+        align-items: center;
+        gap: var(--ashare-spacing-sm);
+        padding: var(--ashare-spacing-md);
+        margin: var(--ashare-spacing-md);
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        border-radius: var(--ashare-radius-md);
+        font-size: 14px;
+    }
+
+    .ashare-booking-submit {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: var(--ashare-spacing-md);
+        padding-bottom: calc(var(--ashare-spacing-md) + var(--safe-area-bottom));
+        background: var(--ashare-surface);
+        border-top: 1px solid var(--ashare-gray-200);
+    }
+
+    .ac-btn-block {
+        width: 100%;
+    }
+
+    .ashare-error-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 60vh;
+        gap: var(--ashare-spacing-md);
+        text-align: center;
+        padding: var(--ashare-spacing-xl);
+    }
+
+    .ashare-error-state i {
+        font-size: 48px;
+        color: var(--ashare-gray-400);
+    }
+
+    .ashare-error-state h2 {
+        font-size: 18px;
+        color: var(--ashare-gray-600);
+        margin: 0;
+    }
+
+    /* Tablet+ */
+    @@media (min-width: 768px) {
+        .ashare-booking-submit {
+            max-width: 430px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    }
+</style>
