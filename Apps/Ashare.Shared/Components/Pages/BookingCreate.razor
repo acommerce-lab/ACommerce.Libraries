@@ -562,32 +562,14 @@
             }
             else
             {
-                Console.WriteLine("[BookingCreate] Failed to create booking in backend - saving locally as fallback");
-
-                // Fallback to local storage if API fails
-                var localBooking = new BookingItem
-                {
-                    Id = Guid.TryParse(_bookingId, out var bid) ? bid : Guid.NewGuid(),
-                    SpaceId = SpaceId,
-                    SpaceName = _space.Name ?? "عقار",
-                    SpaceImage = _space.Images.FirstOrDefault() ?? "",
-                    Date = DateTime.Today,
-                    StartTime = TimeOnly.MinValue,
-                    EndTime = TimeOnly.MaxValue,
-                    GuestsCount = 1,
-                    TotalPrice = GetPrice(),
-                    DepositPaid = CalculateDeposit(),
-                    PaymentId = _paymentId,
-                    Status = BookingStatus.Pending,
-                    IsReviewed = false,
-                    RentType = GetAttribute("rent_type")
-                };
-                ApiService.CreateBookingLocally(localBooking);
+                Console.WriteLine("[BookingCreate] Failed to create booking in backend");
+                _errorMessage = "فشل في حفظ الحجز. يرجى التواصل مع الدعم.";
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[BookingCreate] Error creating booking: {ex.Message}");
+            _errorMessage = "حدث خطأ أثناء حفظ الحجز. يرجى المحاولة مرة أخرى.";
         }
     }
 
