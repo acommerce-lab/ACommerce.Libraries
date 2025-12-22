@@ -29,7 +29,7 @@ public sealed class StaticHttpClient : IApiClient
 		{
 			PropertyNameCaseInsensitive = true,
 			PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-			Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+			Converters = { new JsonStringEnumConverter() }
 		};
 	}
 
