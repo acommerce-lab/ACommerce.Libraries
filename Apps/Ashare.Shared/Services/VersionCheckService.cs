@@ -88,8 +88,8 @@ public class VersionCheckService
         try
         {
             _logger.LogInformation("Checking version {Version} (build {Build})", currentVersion, buildNumber);
-            Debug.WriteLine("Checking version {Version} (build {Build})", currentVersion, buildNumber);
-            Console.WriteLine("Checking version {Version} (build {Build})", currentVersion, buildNumber);
+            //Debug.WriteLine("Checking version {Version} (build {Build})", currentVersion, buildNumber);
+            //Console.WriteLine("Checking version {Version} (build {Build})", currentVersion, buildNumber);
 
             var request = new VersionCheckRequest
             {
