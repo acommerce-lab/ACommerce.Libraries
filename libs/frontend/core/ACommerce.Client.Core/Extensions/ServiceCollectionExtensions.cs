@@ -92,12 +92,25 @@ public static class ServiceCollectionExtensions
         var options = new StaticClientOptions();
         configureOptions?.Invoke(options);
 
-        // HttpClient باسم ثابت
-        services.AddHttpClient("ACommerceApi", client =>
+        // تسجيل TokenProvider إذا كان Authentication مفعلاً
+        if (options.EnableAuthentication && options.TokenProvider != null)
+        {
+            services.AddSingleton<ITokenProvider>(options.TokenProvider);
+            services.AddTransient<AuthenticationInterceptor>();
+        }
+
+        // HttpClient باسم ثابت مع Interceptors
+        var httpClientBuilder = services.AddHttpClient("ACommerceApi", client =>
         {
             client.BaseAddress = new Uri(baseUrl);
             client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
         });
+
+        // إضافة Authentication Interceptor
+        if (options.EnableAuthentication && options.TokenProvider != null)
+        {
+            httpClientBuilder.AddHttpMessageHandler<AuthenticationInterceptor>();
+        }
 
         // تسجيل StaticHttpClient كـ IApiClient
         services.AddScoped<IApiClient>(sp =>
@@ -251,4 +264,14 @@ public class StaticClientOptions
         /// Timeout بالثواني (افتراضياً: 30)
         /// </summary>
         public int TimeoutSeconds { get; set; } = 30;
+
+        /// <summary>
+        /// تفعيل Authentication تلقائي؟ (افتراضياً: false)
+        /// </summary>
+        public bool EnableAuthentication { get; set; } = false;
+
+        /// <summary>
+        /// Token Provider للـ Authentication
+        /// </summary>
+        public Func<IServiceProvider, ITokenProvider>? TokenProvider { get; set; }
 }

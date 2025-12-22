@@ -21,6 +21,10 @@ builder.Services.AddMemoryCache();
 
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
+
+// Token Provider - Singleton للاستخدام مع HTTP Client
+builder.Services.AddSingleton<AdminTokenProvider>();
+
 builder.Services.AddScoped<AdminAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<AdminAuthStateProvider>());
 builder.Services.AddHttpClient<AuthService>((sp, client) =>
@@ -30,8 +34,12 @@ builder.Services.AddHttpClient<AuthService>((sp, client) =>
 });
 builder.Services.AddScoped(sp => new HttpClient());
 
-// ACommerce Client SDK
-builder.Services.AddACommerceStaticClient(apiBaseUrl);
+// ACommerce Client SDK مع Authentication
+builder.Services.AddACommerceStaticClient(apiBaseUrl, options =>
+{
+    options.EnableAuthentication = true;
+    options.TokenProvider = sp => sp.GetRequiredService<AdminTokenProvider>();
+});
 builder.Services.AddScoped<VersionsClient>();
 
 builder.Services.AddScoped<AdminApiService>();
