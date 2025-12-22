@@ -327,9 +327,11 @@ public sealed class BookingDto
 public sealed class CreateBookingRequest
 {
     public Guid SpaceId { get; set; }
+    public string? CustomerId { get; set; }
+    public Guid? HostId { get; set; }
     public DateTime CheckInDate { get; set; }
     public DateTime CheckOutDate { get; set; }
-    public string RentType { get; set; } = "Monthly";
+    public int RentType { get; set; } = 1; // Monthly=1, Daily=2, Hourly=3
     public decimal TotalPrice { get; set; }
     public decimal? DepositPercentage { get; set; }
     public string? CustomerNotes { get; set; }

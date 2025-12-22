@@ -539,12 +539,20 @@
 
             Console.WriteLine($"[BookingCreate] Creating booking in backend for space {SpaceId}");
 
+            // Get current user ID
+            var customerId = TokenManager.GetUserIdFromToken();
+            var hostId = _space.OwnerId;
+
+            Console.WriteLine($"[BookingCreate] CustomerId: {customerId}, HostId: {hostId}");
+
             // Create booking in backend via API
             var booking = await ApiService.CreateBookingAsync(
                 spaceId: SpaceId,
                 totalPrice: GetPrice(),
                 depositAmount: CalculateDeposit(),
                 rentType: GetAttribute("rent_type"),
+                customerId: customerId,
+                hostId: hostId,
                 paymentId: _paymentId
             );
 

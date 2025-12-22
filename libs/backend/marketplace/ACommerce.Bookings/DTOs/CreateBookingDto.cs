@@ -13,6 +13,16 @@ public class CreateBookingDto
     public Guid SpaceId { get; set; }
 
     /// <summary>
+    /// معرف المستأجر
+    /// </summary>
+    public string? CustomerId { get; set; }
+
+    /// <summary>
+    /// معرف المالك
+    /// </summary>
+    public Guid? HostId { get; set; }
+
+    /// <summary>
     /// تاريخ بدء الإيجار
     /// </summary>
     public DateTime CheckInDate { get; set; }

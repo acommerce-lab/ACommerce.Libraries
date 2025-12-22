@@ -562,24 +562,38 @@ public class AshareApiService
         /// <summary>
         /// إنشاء حجز جديد في الباك اند بعد الدفع
         /// </summary>
-        public async Task<BookingItem?> CreateBookingAsync(Guid spaceId, decimal totalPrice, decimal depositAmount, string rentType, string? paymentId = null, string? notes = null)
+        public async Task<BookingItem?> CreateBookingAsync(Guid spaceId, decimal totalPrice, decimal depositAmount, string rentType, string? customerId = null, Guid? hostId = null, string? paymentId = null, string? notes = null)
         {
                 try
                 {
                         Console.WriteLine($"[AshareApiService] Creating booking in backend for space {spaceId}");
 
+                        // Convert rentType string to int enum value
+                        var rentTypeValue = rentType?.ToLower() switch
+                        {
+                                "monthly" => 1,
+                                "daily" => 2,
+                                "hourly" => 3,
+                                "yearly" or "annual" => 1, // Treat yearly as monthly for now
+                                _ => 1 // Default to monthly
+                        };
+
                         var request = new CreateBookingRequest
                         {
                                 SpaceId = spaceId,
+                                CustomerId = customerId,
+                                HostId = hostId,
                                 TotalPrice = totalPrice,
                                 DepositPercentage = totalPrice > 0 ? (depositAmount / totalPrice) * 100 : 10,
-                                RentType = rentType ?? "Monthly",
+                                RentType = rentTypeValue,
                                 CheckInDate = DateTime.Today,
                                 CheckOutDate = DateTime.Today.AddMonths(1), // Default to 1 month
                                 CustomerNotes = notes,
                                 GuestsCount = 1,
                                 PaymentId = paymentId
                         };
+
+                        Console.WriteLine($"[AshareApiService] Booking request: CustomerId={customerId}, HostId={hostId}, RentType={rentTypeValue}");
 
                         var result = await _bookingsClient.CreateAsync(request);
 
