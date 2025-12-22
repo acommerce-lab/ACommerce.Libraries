@@ -12,9 +12,34 @@ public class VersionCheckService
     private readonly ILogger<VersionCheckService> _logger;
 
     /// <summary>
-    /// كود التطبيق (Ashare)
+    /// كود تطبيق الموبايل
     /// </summary>
-    public const string ApplicationCode = "Ashare";
+    public const string MobileAppCode = "ashare-mobile";
+
+    /// <summary>
+    /// كود تطبيق الويب
+    /// </summary>
+    public const string WebAppCode = "ashare-web";
+
+    /// <summary>
+    /// كود التطبيق الحالي (يتم تحديده حسب المنصة)
+    /// </summary>
+    public string ApplicationCode { get; }
+
+    /// <summary>
+    /// تحديد المنصة تلقائياً
+    /// </summary>
+    private static bool IsMobilePlatform
+    {
+        get
+        {
+#if ANDROID || IOS || MACCATALYST
+            return true;
+#else
+            return false;
+#endif
+        }
+    }
 
     /// <summary>
     /// نتيجة آخر فحص
@@ -45,6 +70,7 @@ public class VersionCheckService
     {
         _versionsClient = versionsClient;
         _logger = logger;
+        ApplicationCode = IsMobilePlatform ? MobileAppCode : WebAppCode;
     }
 
     /// <summary>
