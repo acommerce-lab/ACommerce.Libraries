@@ -789,6 +789,128 @@ public class AshareApiService
         }
 
         // ═══════════════════════════════════════════════════════════════════
+        // Booking Payment - دفع عربون الحجز
+        // ═══════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// إنشاء دفعة حجز (عربون)
+        /// </summary>
+        public async Task<CreateBookingPaymentResponse?> CreateBookingPaymentAsync(CreateBookingPaymentRequest request)
+        {
+                try
+                {
+                        // إنشاء طلب الحجز والدفع
+                        var bookingId = Guid.NewGuid().ToString();
+
+                        // إنشاء عملية الدفع
+                        var paymentResponse = await _paymentsClient.InitiatePaymentAsync(new ACommerce.Client.Payments.InitiatePaymentRequest
+                        {
+                                Amount = request.DepositAmount,
+                                Currency = "SAR",
+                                Description = $"عربون حجز عقار",
+                                ReturnUrl = request.ReturnUrl ?? "",
+                                Metadata = new Dictionary<string, string>
+                                {
+                                        { "booking_id", bookingId },
+                                        { "space_id", request.SpaceId.ToString() },
+                                        { "type", "booking_deposit" },
+                                        { "total_price", request.TotalPrice.ToString() },
+                                        { "rent_type", request.RentType ?? "monthly" }
+                                }
+                        });
+
+                        if (paymentResponse == null || string.IsNullOrEmpty(paymentResponse.PaymentUrl))
+                        {
+                                return new CreateBookingPaymentResponse
+                                {
+                                        Success = false,
+                                        Message = "فشل في إنشاء عملية الدفع"
+                                };
+                        }
+
+                        return new CreateBookingPaymentResponse
+                        {
+                                Success = true,
+                                BookingId = bookingId,
+                                PaymentId = paymentResponse.PaymentId,
+                                PaymentUrl = paymentResponse.PaymentUrl,
+                                Amount = request.DepositAmount,
+                                Currency = "SAR"
+                        };
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"Error creating booking payment: {ex.Message}");
+                        return new CreateBookingPaymentResponse
+                        {
+                                Success = false,
+                                Message = ex.Message
+                        };
+                }
+        }
+
+        /// <summary>
+        /// التحقق من حالة دفع الحجز
+        /// </summary>
+        public async Task<VerifyPaymentResponse?> VerifyBookingPaymentAsync(VerifyPaymentRequest request)
+        {
+                try
+                {
+                        var payment = await _paymentsClient.GetPaymentStatusAsync(request.PaymentId);
+
+                        if (payment == null)
+                        {
+                                return new VerifyPaymentResponse
+                                {
+                                        Success = false,
+                                        Status = "NotFound",
+                                        Message = "لم يتم العثور على عملية الدفع"
+                                };
+                        }
+
+                        var isCompleted = payment.Status.ToLower() switch
+                        {
+                                "completed" => true,
+                                "captured" => true,
+                                "success" => true,
+                                _ => false
+                        };
+
+                        if (isCompleted)
+                        {
+                                // TODO: تفعيل الحجز في قاعدة البيانات
+                                Console.WriteLine($"[VerifyBookingPayment] ✅ Payment completed for booking");
+
+                                return new VerifyPaymentResponse
+                                {
+                                        Success = true,
+                                        Status = "Completed",
+                                        BookingId = payment.OrderId,
+                                        ActivatedAt = DateTime.Now,
+                                        Message = "تم دفع العربون بنجاح"
+                                };
+                        }
+
+                        return new VerifyPaymentResponse
+                        {
+                                Success = false,
+                                Status = payment.Status,
+                                Message = GetPaymentStatusMessage(payment.Status)
+                        };
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"Error verifying booking payment: {ex.Message}");
+                        return new VerifyPaymentResponse
+                        {
+                                Success = false,
+                                Status = "Error",
+                                Message = ex.Message
+                        };
+                }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
         // Mapping Helpers
         // ═══════════════════════════════════════════════════════════════════
 

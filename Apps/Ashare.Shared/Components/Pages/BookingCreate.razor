@@ -1,21 +1,19 @@
 @page "/book/{SpaceId:guid}"
 @using ACommerce.Client.Auth
+@using ACommerce.Client.Realtime
 @using ACommerce.Templates.Customer.Services
-@using Ashare.Shared.Components.Shared
+@using Ashare.Shared.Models
+@using System.Text.Json
 @inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
 @inject TokenManager TokenManager
+@inject IPaymentService PaymentService
+@inject NavigationManager NavigationManager
+@inject RealtimeClient RealtimeClient
+@implements IAsyncDisposable
 
 <div class="ac-page ashare-booking-create">
-    @if (_showPayment && !string.IsNullOrEmpty(_paymentUrl))
-    {
-        @* Payment WebView *@
-        <PaymentWebView PaymentUrl="@_paymentUrl"
-                        PaymentId="@_bookingId"
-                        OnPaymentCompleted="HandlePaymentCompleted"
-                        OnPaymentCancelled="HandlePaymentCancelled" />
-    }
-    else if (_isLoading)
+    @if (_isLoading)
     {
         <div class="ashare-loading">
             <div class="ac-spinner"></div>
@@ -169,7 +167,10 @@
         {
             <div class="ashare-booking-error">
                 <i class="bi bi-exclamation-triangle"></i>
-                @_errorMessage
+                <span>@_errorMessage</span>
+                <button class="ashare-error-dismiss" @onclick="() => _errorMessage = null">
+                    <i class="bi bi-x"></i>
+                </button>
             </div>
         }
 
@@ -205,9 +206,13 @@
     private decimal _depositPercentage = 10; // Default 10%, will be fetched from backend
 
     // Payment state
-    private bool _showPayment;
     private string? _paymentUrl;
+    private string? _paymentId;
     private string? _bookingId;
+
+    // SignalR for payment notifications
+    private IDisposable? _notificationSubscription;
+    private bool _isConnectedToSignalR;
 
     protected override async Task OnInitializedAsync()
     {
@@ -221,10 +226,14 @@
         {
             _space = await ApiService.GetSpaceByIdAsync(SpaceId);
 
-            // TODO: Fetch deposit percentage from backend settings
-            // var settings = await SettingsClient.GetAsync("Booking.DepositPercentage");
-            // if (decimal.TryParse(settings?.Value, out var percentage))
-            //     _depositPercentage = percentage;
+            // Get deposit percentage from space attributes or use default
+            if (_space?.Attributes?.TryGetValue("deposit_percentage", out var depPercent) == true)
+            {
+                if (decimal.TryParse(depPercent?.ToString(), out var percentage))
+                {
+                    _depositPercentage = percentage;
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -302,6 +311,12 @@
         return CalculateDeposit();
     }
 
+    private string GetPaymentReturnUrl()
+    {
+        var baseUri = NavigationManager.BaseUri.TrimEnd('/');
+        return $"{baseUri}/booking/payment/callback";
+    }
+
     private async Task StartPayment()
     {
         if (!_agreedToTerms)
@@ -324,32 +339,110 @@
 
         try
         {
-            // TODO: Create booking and get payment URL from API
-            // var result = await ApiService.CreateBookingWithPaymentAsync(new CreateBookingRequest
-            // {
-            //     SpaceId = SpaceId,
-            //     DepositAmount = CalculateDeposit(),
-            //     TotalPrice = GetPrice(),
-            //     RentType = GetAttribute("rent_type")
-            // });
-            //
-            // if (result.Success && !string.IsNullOrEmpty(result.PaymentUrl))
-            // {
-            //     _bookingId = result.BookingId;
-            //     _paymentUrl = result.PaymentUrl;
-            //     _showPayment = true;
-            // }
+            var returnUrl = GetPaymentReturnUrl();
+            Console.WriteLine($"[BookingCreate] Creating booking payment with returnUrl: {returnUrl}");
 
-            // Temporary: For testing, navigate to payment simulation
-            Console.WriteLine($"[BookingCreate] Creating booking for space {SpaceId} with deposit {CalculateDeposit()} SAR");
+            // Create booking and get payment URL
+            var response = await ApiService.CreateBookingPaymentAsync(new CreateBookingPaymentRequest
+            {
+                SpaceId = SpaceId,
+                DepositAmount = CalculateDeposit(),
+                TotalPrice = GetPrice(),
+                RentType = GetAttribute("rent_type"),
+                ReturnUrl = returnUrl
+            });
 
-            // For now, show that we need to implement the payment API
-            _errorMessage = "جاري تطوير نظام الدفع - سيتم التفعيل قريباً";
+            Console.WriteLine($"[BookingCreate] Response: Success={response?.Success}, PaymentUrl={response?.PaymentUrl?.Substring(0, Math.Min(50, response?.PaymentUrl?.Length ?? 0))}...");
+
+            if (response != null && !string.IsNullOrEmpty(response.PaymentUrl))
+            {
+                _paymentUrl = response.PaymentUrl;
+                _paymentId = response.PaymentId;
+                _bookingId = response.BookingId;
+                Console.WriteLine($"[BookingCreate] PaymentId: {_paymentId}, BookingId: {_bookingId}");
+
+                // Check if in-app payment is supported
+                if (PaymentService.SupportsInAppPayment)
+                {
+                    Console.WriteLine("[BookingCreate] Using in-app WebView payment");
+
+                    // Connect to SignalR for payment notifications (as fallback)
+                    await ConnectAndSubscribeToPayment(_paymentId);
+
+                    // Open payment in WebView
+                    var result = await PaymentService.OpenPaymentInAppAsync(_paymentUrl, "/booking/payment/callback");
+
+                    Console.WriteLine($"[BookingCreate] Payment callback: Status={result.Status}, OrderId={result.OrderId}");
+
+                    if (result.Cancelled)
+                    {
+                        _errorMessage = null;
+                        Console.WriteLine("[BookingCreate] Payment cancelled by user");
+                    }
+                    else if (result.Status == "pending_verification" && !string.IsNullOrEmpty(result.OrderId))
+                    {
+                        // Verify payment via API
+                        Console.WriteLine($"[BookingCreate] Verifying payment via API for orderId: {result.OrderId}");
+
+                        var verifyResult = await ApiService.VerifyBookingPaymentAsync(new VerifyPaymentRequest
+                        {
+                            PaymentId = _paymentId ?? result.OrderId,
+                            OrderId = result.OrderId,
+                            TransactionId = result.TransactionId
+                        });
+
+                        Console.WriteLine($"[BookingCreate] Verification result: Success={verifyResult?.Success}");
+
+                        if (verifyResult?.Success == true)
+                        {
+                            Console.WriteLine("[BookingCreate] Payment verified successfully!");
+                            Navigation.NavigateTo($"/bookings/{_bookingId}?status=success");
+                            return;
+                        }
+                        else
+                        {
+                            _errorMessage = verifyResult?.Message ?? "فشل التحقق من الدفع";
+                        }
+                    }
+                    else if (result.Success)
+                    {
+                        Navigation.NavigateTo($"/bookings/{_bookingId}?status=success");
+                        return;
+                    }
+                    else
+                    {
+                        _errorMessage = result.Message ?? "فشلت عملية الدفع";
+                    }
+                }
+                else
+                {
+                    // Fallback: Open in external browser with SignalR
+                    Console.WriteLine("[BookingCreate] Using external browser payment");
+
+                    await ConnectAndSubscribeToPayment(_paymentId);
+
+                    var success = await PaymentService.OpenPaymentPageAsync(_paymentUrl);
+                    if (success)
+                    {
+                        Console.WriteLine("[BookingCreate] Payment page opened - waiting for SignalR notification");
+                        // Stay on page and wait for SignalR notification
+                    }
+                    else
+                    {
+                        _errorMessage = "تعذر فتح صفحة الدفع";
+                    }
+                }
+            }
+            else
+            {
+                _errorMessage = response?.Message ?? "فشل في إنشاء طلب الدفع";
+                Console.WriteLine($"[BookingCreate] Error: {_errorMessage}");
+            }
         }
         catch (Exception ex)
         {
             _errorMessage = "حدث خطأ أثناء تجهيز الدفع. حاول مرة أخرى.";
-            Console.WriteLine($"[BookingCreate] Error: {ex.Message}");
+            Console.WriteLine($"[BookingCreate] Exception: {ex.Message}");
         }
         finally
         {
@@ -358,42 +451,94 @@
         }
     }
 
-    private async Task HandlePaymentCompleted(PaymentResult result)
+    private async Task ConnectAndSubscribeToPayment(string? paymentId)
     {
-        _showPayment = false;
+        if (string.IsNullOrEmpty(paymentId)) return;
 
-        if (result.Success)
+        try
         {
-            // Payment successful, navigate to booking confirmation
-            Console.WriteLine($"[BookingCreate] Payment successful: {result.TransactionId}");
-            Navigation.NavigateTo($"/bookings/{_bookingId}?status=success");
+            if (!_isConnectedToSignalR)
+            {
+                Console.WriteLine("[BookingCreate] Connecting to SignalR...");
+                await RealtimeClient.ConnectAsync(serviceName: "Ashare", hubPath: "/hubs/notifications");
+                _isConnectedToSignalR = true;
+                Console.WriteLine("[BookingCreate] Connected to SignalR");
+
+                _notificationSubscription = RealtimeClient.On<string, JsonElement>("ReceiveMessage", HandlePaymentMessage);
+            }
+
+            Console.WriteLine($"[BookingCreate] Subscribing to payment notifications for {paymentId}...");
+            await RealtimeClient.SendAsync("SubscribeToPayment", paymentId);
+            Console.WriteLine($"[BookingCreate] Subscribed to payment_{paymentId}");
         }
-        else
+        catch (Exception ex)
         {
-            // Payment failed
-            _errorMessage = result.Message ?? "فشلت عملية الدفع. حاول مرة أخرى.";
-            StateHasChanged();
+            Console.WriteLine($"[BookingCreate] SignalR connection failed: {ex.Message}");
         }
     }
 
-    private void HandlePaymentCancelled()
+    private void HandlePaymentMessage(string method, JsonElement data)
     {
-        _showPayment = false;
-        _paymentUrl = null;
-        StateHasChanged();
+        Console.WriteLine($"[BookingCreate] ReceiveMessage: method={method}");
+
+        if (method == "PaymentSuccess" || method == "PaymentFailed")
+        {
+            var isSuccess = method == "PaymentSuccess";
+            Console.WriteLine($"[BookingCreate] Payment result received: {method}");
+
+            try
+            {
+                var orderId = data.TryGetProperty("OrderId", out var orderIdProp) ? orderIdProp.GetString() : null;
+                var message = data.TryGetProperty("Message", out var msgProp) ? msgProp.GetString() : null;
+
+                if (!string.IsNullOrEmpty(_paymentId) && orderId == _paymentId)
+                {
+                    InvokeAsync(async () =>
+                    {
+                        if (_isConnectedToSignalR && !string.IsNullOrEmpty(_paymentId))
+                        {
+                            try { await RealtimeClient.SendAsync("UnsubscribeFromPayment", _paymentId); }
+                            catch { /* ignore */ }
+                        }
+
+                        if (isSuccess)
+                        {
+                            Navigation.NavigateTo($"/bookings/{_bookingId}?status=success");
+                        }
+                        else
+                        {
+                            _errorMessage = message ?? "فشلت عملية الدفع";
+                            StateHasChanged();
+                        }
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[BookingCreate] Error parsing payment result: {ex.Message}");
+            }
+        }
     }
 
     private void GoBack()
     {
-        if (_showPayment)
+        Navigation.NavigateBack();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _notificationSubscription?.Dispose();
+
+        if (_isConnectedToSignalR && !string.IsNullOrEmpty(_paymentId))
         {
-            _showPayment = false;
-            _paymentUrl = null;
-            StateHasChanged();
+            try { await RealtimeClient.SendAsync("UnsubscribeFromPayment", _paymentId); }
+            catch { /* ignore */ }
         }
-        else
+
+        if (_isConnectedToSignalR)
         {
-            Navigation.NavigateBack();
+            try { await RealtimeClient.DisconnectAsync(); }
+            catch { /* ignore */ }
         }
     }
 }
@@ -664,6 +809,24 @@
         color: #ef4444;
         border-radius: var(--ashare-radius-md);
         font-size: 14px;
+    }
+
+    .ashare-booking-error span {
+        flex: 1;
+    }
+
+    .ashare-error-dismiss {
+        background: none;
+        border: none;
+        color: #ef4444;
+        cursor: pointer;
+        padding: 4px;
+        display: flex;
+        opacity: 0.7;
+    }
+
+    .ashare-error-dismiss:hover {
+        opacity: 1;
     }
 
     .ashare-booking-submit {
