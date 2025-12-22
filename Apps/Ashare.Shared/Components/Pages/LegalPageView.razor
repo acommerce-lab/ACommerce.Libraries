@@ -1,11 +1,10 @@
 @page "/legal/{Key}"
 @using ACommerce.Client.LegalPages
-@using ACommerce.Client.LegalPages.Dtos
-@using Ashare.Shared.Services
+@using ACommerce.Templates.Customer.Services
 
 @inject LegalPagesClient LegalPagesClient
 @inject NavigationManager Navigation
-@inject IAppLocalization L
+@inject ILocalizationService L
 
 <div class="legal-page-container">
     @* Header with back button *@
