@@ -39,8 +39,8 @@
         </nav>
     }
 
-    @* Version Alert - تنبيه للإصدارات المتقادمة أو المتوفر لها تحديث *@
-    @if (!VersionCheck.IsBlocked && !_versionAlertDismissed && (VersionCheck.HasWarning || VersionCheck.UpdateAvailable))
+    @* Version Alert - تنبيه للإصدارات غير الأحدث *@
+    @if (ShouldShowVersionAlert)
     {
         <AcVersionAlert
             AlertType="@CurrentAlertType"
@@ -117,11 +117,30 @@
     private int CurrentBuildNumber => AppVersion.BuildNumber;
 
     /// <summary>
+    /// هل يجب إظهار تنبيه الإصدار (في كل الحالات ماعدا الإصدار الأحدث أو المحظور)
+    /// </summary>
+    private bool ShouldShowVersionAlert =>
+        !VersionCheck.IsBlocked &&
+        !_versionAlertDismissed &&
+        VersionCheck.LastCheckResult != null &&
+        VersionCheck.LastCheckResult.CurrentStatus != ACommerce.Client.Versions.VersionStatus.Latest;
+
+    /// <summary>
     /// نوع التنبيه الحالي
     /// </summary>
-    private ACommerce.Templates.Customer.Components.VersionAlertType CurrentAlertType => VersionCheck.HasWarning
-        ? ACommerce.Templates.Customer.Components.VersionAlertType.Warning
-        : ACommerce.Templates.Customer.Components.VersionAlertType.Info;
+    private ACommerce.Templates.Customer.Components.VersionAlertType CurrentAlertType
+    {
+        get
+        {
+            var status = VersionCheck.LastCheckResult?.CurrentStatus;
+            return status switch
+            {
+                ACommerce.Client.Versions.VersionStatus.Deprecated => ACommerce.Templates.Customer.Components.VersionAlertType.Warning,
+                ACommerce.Client.Versions.VersionStatus.Unsupported => ACommerce.Templates.Customer.Components.VersionAlertType.Critical,
+                _ => ACommerce.Templates.Customer.Components.VersionAlertType.Info
+            };
+        }
+    }
 
     /// <summary>
     /// الحصول على رابط المتجر المناسب (App Store أو Play Store)
@@ -167,18 +186,16 @@
             return customMessage;
         }
 
-        // إذا لم توجد رسالة مخصصة، نستخدم الترجمة
-        if (VersionCheck.HasWarning)
+        // إذا لم توجد رسالة مخصصة، نستخدم الترجمة بناءً على الحالة
+        var status = VersionCheck.LastCheckResult?.CurrentStatus;
+        return status switch
         {
-            return L["VersionDeprecatedMessage"];
-        }
-
-        if (VersionCheck.UpdateAvailable)
-        {
-            return L["VersionUpdateAvailable"];
-        }
-
-        return "";
+            ACommerce.Client.Versions.VersionStatus.Deprecated => L["VersionDeprecatedMessage"],
+            ACommerce.Client.Versions.VersionStatus.Unsupported => L["VersionUnsupportedMessage"],
+            ACommerce.Client.Versions.VersionStatus.Supported => L["VersionUpdateAvailable"],
+            ACommerce.Client.Versions.VersionStatus.Development => L["VersionUpdateAvailable"],
+            _ => L["VersionUpdateAvailable"]
+        };
     }
 
     /// <summary>
@@ -297,21 +314,23 @@
             if (result != null)
             {
                 Console.WriteLine($"[VersionCheck] Result - IsSupported: {result.IsSupported}, Status: {result.CurrentStatus}, ForceUpdate: {result.IsForceUpdate}");
+                Console.WriteLine($"[VersionCheck] ShouldShowVersionAlert: {ShouldShowVersionAlert}, IsBlocked: {VersionCheck.IsBlocked}, Dismissed: {_versionAlertDismissed}");
 
                 if (VersionCheck.IsBlocked)
                 {
                     Console.WriteLine("[VersionCheck] ⛔ Version is BLOCKED - App will be locked");
-                    await InvokeAsync(StateHasChanged);
                 }
-                else if (VersionCheck.HasWarning)
+                else if (result.CurrentStatus != ACommerce.Client.Versions.VersionStatus.Latest)
                 {
-                    Console.WriteLine($"[VersionCheck] ⚠️ Version is DEPRECATED - End of support: {result.EndOfSupportDate}");
-                    await InvokeAsync(StateHasChanged);
+                    Console.WriteLine($"[VersionCheck] 📢 Alert will be shown - Status: {result.CurrentStatus}, AlertType: {CurrentAlertType}");
                 }
-                else if (VersionCheck.UpdateAvailable)
+                else
                 {
-                    Console.WriteLine($"[VersionCheck] ℹ️ Update available - Latest: {result.LatestVersion?.VersionNumber}");
+                    Console.WriteLine("[VersionCheck] ✅ Version is LATEST - No alert needed");
                 }
+
+                // Always update state to ensure alert is shown
+                await InvokeAsync(StateHasChanged);
             }
         }
         catch (Exception ex)
