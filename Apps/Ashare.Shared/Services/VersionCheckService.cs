@@ -53,19 +53,26 @@ public class VersionCheckService
     public bool HasChecked { get; private set; }
 
     /// <summary>
-    /// هل الإصدار محظور (غير مدعوم)؟
+    /// هل الإصدار محظور؟
+    /// يتم الحظر إذا كانت الحالة "غير مدعوم" أو إذا كان التحديث إجبارياً
     /// </summary>
-    public bool IsBlocked => LastCheckResult?.IsSupported == false && LastCheckResult?.IsForceUpdate == true;
+    public bool IsBlocked =>
+        LastCheckResult?.CurrentStatus == VersionStatus.Unsupported ||
+        LastCheckResult?.IsForceUpdate == true;
 
     /// <summary>
     /// هل يوجد تحذير (إصدار على وشك الانتهاء)؟
+    /// يظهر فقط للإصدارات Deprecated وعندما لا يكون محظوراً
     /// </summary>
-    public bool HasWarning => LastCheckResult?.CurrentStatus == VersionStatus.Deprecated;
+    public bool HasWarning =>
+        !IsBlocked && LastCheckResult?.CurrentStatus == VersionStatus.Deprecated;
 
     /// <summary>
     /// هل يوجد تحديث متاح؟
+    /// يظهر فقط للإصدارات المدعومة عندما يكون هناك إصدار أحدث
     /// </summary>
-    public bool UpdateAvailable => LastCheckResult?.UpdateAvailable == true;
+    public bool UpdateAvailable =>
+        !IsBlocked && !HasWarning && LastCheckResult?.UpdateAvailable == true;
 
     public VersionCheckService(VersionsClient versionsClient, ILogger<VersionCheckService> logger)
     {
