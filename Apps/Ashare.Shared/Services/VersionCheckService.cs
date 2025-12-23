@@ -34,11 +34,10 @@ public class VersionCheckService
     {
         get
         {
-            // Runtime detection - works in shared projects
-            var platform = DeviceInfo.Current.Platform;
-            return platform == DevicePlatform.Android ||
-                   platform == DevicePlatform.iOS ||
-                   platform == DevicePlatform.MacCatalyst;
+            // Runtime detection using .NET OperatingSystem class
+            return OperatingSystem.IsAndroid() ||
+                   OperatingSystem.IsIOS() ||
+                   OperatingSystem.IsMacCatalyst();
         }
     }
 
