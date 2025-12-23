@@ -353,6 +353,7 @@ else
             var buildNumber = AppVersion.BuildNumber;
 
             Console.WriteLine($"[AppStartup] 🚀 Checking version {currentVersion} (build {buildNumber})...");
+            Console.WriteLine($"[AppStartup] 📱 ApplicationCode: {VersionCheck.ApplicationCode}");
 
             var result = await VersionCheck.CheckVersionAsync(currentVersion, buildNumber);
 
