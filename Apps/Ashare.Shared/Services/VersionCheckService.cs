@@ -73,11 +73,13 @@ public class VersionCheckService
     public bool UpdateAvailable =>
         !IsBlocked && !HasWarning && LastCheckResult?.UpdateAvailable == true;
 
-    public VersionCheckService(VersionsClient versionsClient, ILogger<VersionCheckService> logger)
+    public VersionCheckService(VersionsClient versionsClient, ILogger<VersionCheckService> logger, string? applicationCode = null)
     {
         _versionsClient = versionsClient;
         _logger = logger;
-        ApplicationCode = IsMobilePlatform ? MobileAppCode : WebAppCode;
+        // استخدام الكود الممرر، أو الكشف التلقائي
+        ApplicationCode = applicationCode ?? (IsMobilePlatform ? MobileAppCode : WebAppCode);
+        _logger.LogInformation("VersionCheckService initialized with ApplicationCode: {Code}", ApplicationCode);
     }
 
     /// <summary>

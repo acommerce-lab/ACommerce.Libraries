@@ -72,6 +72,15 @@ public static class MauiProgram
 #endif
 
         builder.Services.AddAshareServices();
+
+        // Override VersionCheckService registration with explicit mobile app code
+        // This is needed because OperatingSystem.IsAndroid() doesn't work correctly in Blazor Hybrid
+        builder.Services.AddScoped<Ashare.Shared.Services.VersionCheckService>(sp =>
+            new Ashare.Shared.Services.VersionCheckService(
+                sp.GetRequiredService<ACommerce.Client.Versions.VersionsClient>(),
+                sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<Ashare.Shared.Services.VersionCheckService>>(),
+                Ashare.Shared.Services.VersionCheckService.MobileAppCode));
+
         builder.Services.AddSingleton<ThemeService>();
         builder.Services.AddSingleton<GuestModeService>();
         builder.Services.AddScoped<IAppNavigationService, AppNavigationService>();
