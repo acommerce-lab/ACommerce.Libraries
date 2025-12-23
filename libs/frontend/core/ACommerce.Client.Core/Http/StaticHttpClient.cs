@@ -28,8 +28,7 @@ public sealed class StaticHttpClient : IApiClient
 		_jsonOptions = new JsonSerializerOptions
 		{
 			PropertyNameCaseInsensitive = true,
-			PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-			Converters = { new JsonStringEnumConverter() }
+			PropertyNamingPolicy = JsonNamingPolicy.CamelCase
 		};
 	}
 

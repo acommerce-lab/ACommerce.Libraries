@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using ACommerce.Client.Core.Http;
 
 namespace ACommerce.Client.Versions;
