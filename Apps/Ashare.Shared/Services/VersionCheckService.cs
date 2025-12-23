@@ -28,17 +28,17 @@ public class VersionCheckService
     public string ApplicationCode { get; }
 
     /// <summary>
-    /// تحديد المنصة تلقائياً
+    /// تحديد المنصة تلقائياً باستخدام Runtime Detection
     /// </summary>
     private static bool IsMobilePlatform
     {
         get
         {
-#if ANDROID || IOS || MACCATALYST
-            return true;
-#else
-            return false;
-#endif
+            // Runtime detection - works in shared projects
+            var platform = DeviceInfo.Current.Platform;
+            return platform == DevicePlatform.Android ||
+                   platform == DevicePlatform.iOS ||
+                   platform == DevicePlatform.MacCatalyst;
         }
     }
 
