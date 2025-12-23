@@ -97,6 +97,7 @@ Log.Logger = new LoggerConfiguration()
 _ = typeof(AttributeDefinition).Assembly;
 _ = typeof(AttributeType).Assembly;
 _ = typeof(ACommerce.LegalPages.Entities.LegalPage).Assembly;
+_ = typeof(ACommerce.Versions.Entities.AppVersion).Assembly;
 
 // ✅ تسجيل الـ Entities مبكراً قبل بناء DbContext
 // هذا ضروري لأن EntityDiscoveryRegistry يجب أن يحتوي على جميع الـ Entities
@@ -104,6 +105,7 @@ _ = typeof(ACommerce.LegalPages.Entities.LegalPage).Assembly;
 ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.LegalPages.Entities.LegalPage>();
 ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Bookings.Entities.Booking>();
 ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Bookings.Entities.BookingStatusHistory>();
+ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Versions.Entities.AppVersion>();
 
 try
 {
