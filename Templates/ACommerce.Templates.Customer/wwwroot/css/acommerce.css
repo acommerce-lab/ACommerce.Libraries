@@ -3116,9 +3116,12 @@ a:hover {
 	align-items: center;
 	gap: var(--ac-space-md);
 	padding: var(--ac-space-md) var(--ac-space-lg);
-	border-radius: var(--ac-radius-md);
-	margin-bottom: var(--ac-space-md);
+	border-radius: var(--ac-radius-lg);
+	margin: var(--ac-space-md);
 	animation: ac-slideDown 0.3s ease;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	position: relative;
+	z-index: 100;
 }
 
 @keyframes ac-slideDown {
@@ -3198,15 +3201,18 @@ a:hover {
 .ac-version-alert-btn {
 	display: inline-flex;
 	align-items: center;
+	justify-content: center;
 	gap: var(--ac-space-xs);
-	padding: var(--ac-space-xs) var(--ac-space-md);
-	border-radius: var(--ac-radius-md);
+	padding: var(--ac-space-sm) var(--ac-space-lg);
+	border-radius: var(--ac-radius-full);
 	font-size: var(--ac-font-sm);
-	font-weight: var(--ac-font-medium);
+	font-weight: var(--ac-font-semibold);
 	text-decoration: none;
 	transition: all 0.2s ease;
 	border: none;
 	cursor: pointer;
+	min-width: 100px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .ac-version-alert-info .ac-version-alert-btn {
@@ -3236,31 +3242,60 @@ a:hover {
 	background: #DC2626;
 }
 
-.ac-version-alert-dismiss {
-	background: transparent;
-	border: none;
-	padding: var(--ac-space-xs);
-	cursor: pointer;
-	opacity: 0.6;
-	transition: opacity 0.2s ease;
-	font-size: var(--ac-font-lg);
+.ac-version-alert-btn-dismiss {
+	background: rgba(0, 0, 0, 0.1) !important;
+	color: inherit !important;
+	box-shadow: none !important;
+	min-width: 80px;
 }
 
-.ac-version-alert-dismiss:hover {
-	opacity: 1;
+.ac-version-alert-btn-dismiss:hover {
+	background: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Animation for closing */
+.ac-version-alert-closing {
+	animation: ac-slideUp 0.3s ease forwards;
+}
+
+@keyframes ac-slideUp {
+	from {
+		opacity: 1;
+		transform: translateY(0);
+	}
+	to {
+		opacity: 0;
+		transform: translateY(-20px);
+	}
 }
 
 /* Responsive */
 @media (max-width: 640px) {
 	.ac-version-alert {
 		flex-direction: column;
-		align-items: flex-start;
-		text-align: start;
+		align-items: stretch;
+		text-align: center;
+		gap: var(--ac-space-sm);
+		padding: var(--ac-space-md);
+	}
+
+	.ac-version-alert-icon {
+		display: none;
+	}
+
+	.ac-version-alert-content {
+		align-items: center;
 	}
 
 	.ac-version-alert-actions {
 		width: 100%;
-		justify-content: flex-end;
+		justify-content: center;
+		gap: var(--ac-space-md);
+	}
+
+	.ac-version-alert-btn {
+		flex: 1;
+		max-width: 150px;
 	}
 }
 
