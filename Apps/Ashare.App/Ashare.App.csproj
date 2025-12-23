@@ -99,6 +99,8 @@
 	<ItemGroup>
 		<!-- Reference to Shared Library (contains all pages, components, services) -->
 		<ProjectReference Include="..\Ashare.Shared\Ashare.Shared.csproj" />
+		<!-- Templates Customer for CSS styles -->
+		<ProjectReference Include="..\..\Templates\ACommerce.Templates.Customer\ACommerce.Templates.Customer.csproj" />
 		<!-- Payments Client for DI registration -->
 		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Payments\ACommerce.Client.Payments.csproj" />
 		<!-- Versions Client for AppStartup version check -->
