@@ -108,10 +108,21 @@ public class AppVersionService(DbContext dbContext, ILogger<AppVersionService> l
 
     public async Task<VersionCheckResult> CheckVersionAsync(VersionCheckRequest request, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Checking version for {ApplicationCode} v{Version}",
-            request.ApplicationCode, request.CurrentVersion);
+        logger.LogInformation("Checking version for {ApplicationCode} v{Version} (exact: '{ExactVersion}')",
+            request.ApplicationCode, request.CurrentVersion, request.CurrentVersion);
 
         var result = new VersionCheckResult();
+
+        // تسجيل جميع الإصدارات المتاحة للتشخيص
+        var allVersions = await AppVersions
+            .AsNoTracking()
+            .Where(x => x.ApplicationCode == request.ApplicationCode)
+            .Select(x => new { x.VersionNumber, x.IsDeleted, x.Status, x.IsActive })
+            .ToListAsync(cancellationToken);
+
+        logger.LogInformation("Available versions for {AppCode}: {Versions}",
+            request.ApplicationCode,
+            string.Join(", ", allVersions.Select(v => $"'{v.VersionNumber}' (deleted={v.IsDeleted}, status={v.Status}, active={v.IsActive})")));
 
         // الحصول على الإصدار الحالي
         var currentVersion = await AppVersions
@@ -120,6 +131,8 @@ public class AppVersionService(DbContext dbContext, ILogger<AppVersionService> l
                 x.ApplicationCode == request.ApplicationCode &&
                 x.VersionNumber == request.CurrentVersion &&
                 !x.IsDeleted, cancellationToken);
+
+        logger.LogInformation("Version lookup result: {Found}", currentVersion is not null ? "FOUND" : "NOT FOUND");
 
         // الحصول على أحدث إصدار
         var latestVersion = await AppVersions
