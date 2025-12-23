@@ -3,31 +3,40 @@
 @if (IsVisible)
 {
     <div class="ac-version-alert ac-version-alert-@AlertType.ToString().ToLower() @(IsClosing ? "ac-version-alert-closing" : "")">
-        <div class="ac-version-alert-icon">
-            <i class="bi @GetIcon()"></i>
-        </div>
-        <div class="ac-version-alert-content">
-            <div class="ac-version-alert-message">@Message</div>
-            @if (ShowEndDate && EndOfSupportDate.HasValue)
-            {
-                <div class="ac-version-alert-date">
-                    @EndOfSupportText @EndOfSupportDate.Value.ToString("yyyy/MM/dd")
+        <div class="ac-version-alert-inner">
+            <div class="ac-version-alert-header">
+                <div class="ac-version-alert-icon">
+                    <i class="bi @GetIcon()"></i>
                 </div>
-            }
-        </div>
-        <div class="ac-version-alert-actions">
-            @if (!string.IsNullOrEmpty(UpdateUrl))
-            {
-                <a href="@UpdateUrl" class="ac-version-alert-btn ac-version-alert-btn-primary" target="_blank">
-                    @UpdateNowText
-                </a>
-            }
-            @if (ShowDismiss)
-            {
-                <button class="ac-version-alert-btn ac-version-alert-btn-dismiss" @onclick="Dismiss">
-                    @LaterText
-                </button>
-            }
+                <div class="ac-version-alert-title">@GetTitle()</div>
+            </div>
+
+            <div class="ac-version-alert-body">
+                <p class="ac-version-alert-message">@Message</p>
+                @if (ShowEndDate && EndOfSupportDate.HasValue)
+                {
+                    <p class="ac-version-alert-date">
+                        <i class="bi bi-calendar3"></i>
+                        @EndOfSupportText @EndOfSupportDate.Value.ToString("yyyy/MM/dd")
+                    </p>
+                }
+            </div>
+
+            <div class="ac-version-alert-actions">
+                @if (!string.IsNullOrEmpty(UpdateUrl))
+                {
+                    <a href="@UpdateUrl" class="ac-version-alert-btn ac-version-alert-btn-primary" target="_blank">
+                        <i class="bi bi-download"></i>
+                        @UpdateNowText
+                    </a>
+                }
+                @if (ShowDismiss)
+                {
+                    <button class="ac-version-alert-btn ac-version-alert-btn-secondary" @onclick="Dismiss">
+                        @LaterText
+                    </button>
+                }
+            </div>
         </div>
     </div>
 }
@@ -101,10 +110,18 @@
 
     private string GetIcon() => AlertType switch
     {
-        VersionAlertType.Info => "bi-info-circle-fill",
+        VersionAlertType.Info => "bi-arrow-up-circle-fill",
         VersionAlertType.Warning => "bi-exclamation-triangle-fill",
-        VersionAlertType.Critical => "bi-exclamation-circle-fill",
-        _ => "bi-info-circle-fill"
+        VersionAlertType.Critical => "bi-exclamation-octagon-fill",
+        _ => "bi-arrow-up-circle-fill"
+    };
+
+    private string GetTitle() => AlertType switch
+    {
+        VersionAlertType.Info => IsArabic ? "تحديث متوفر" : "Update Available",
+        VersionAlertType.Warning => IsArabic ? "تحديث مطلوب" : "Update Required",
+        VersionAlertType.Critical => IsArabic ? "تحديث إلزامي" : "Critical Update",
+        _ => IsArabic ? "تحديث متوفر" : "Update Available"
     };
 
     private async Task Dismiss()

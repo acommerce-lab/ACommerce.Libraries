@@ -3108,194 +3108,196 @@ a:hover {
 }
 
 /* ==========================================================================
-   Version Alert - تنبيه الإصدار
+   Version Alert - تنبيه الإصدار (تصميم جديد)
    ========================================================================== */
 
 .ac-version-alert {
+	margin: var(--ac-space-md);
+	border-radius: 16px;
+	overflow: hidden;
+	animation: ac-alertSlideIn 0.4s ease;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.ac-version-alert-inner {
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.ac-version-alert-header {
 	display: flex;
 	align-items: center;
-	gap: var(--ac-space-md);
-	padding: var(--ac-space-md) var(--ac-space-lg);
-	border-radius: var(--ac-radius-lg);
-	margin: var(--ac-space-md);
-	animation: ac-slideDown 0.3s ease;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-	position: relative;
-	z-index: 100;
-}
-
-@keyframes ac-slideDown {
-	from {
-		opacity: 0;
-		transform: translateY(-10px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
-}
-
-/* Info Alert - معلومة */
-.ac-version-alert-info {
-	background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
-	border: 1px solid #93C5FD;
-	color: #1E40AF;
-}
-
-.ac-version-alert-info .ac-version-alert-icon {
-	color: var(--ac-info);
-}
-
-/* Warning Alert - تحذير */
-.ac-version-alert-warning {
-	background: linear-gradient(135deg, #FFFBEB, #FEF3C7);
-	border: 1px solid #FCD34D;
-	color: #92400E;
-}
-
-.ac-version-alert-warning .ac-version-alert-icon {
-	color: var(--ac-warning);
-}
-
-/* Critical Alert - خطر */
-.ac-version-alert-critical {
-	background: linear-gradient(135deg, #FEF2F2, #FEE2E2);
-	border: 1px solid #FCA5A5;
-	color: #991B1B;
-}
-
-.ac-version-alert-critical .ac-version-alert-icon {
-	color: var(--ac-error);
+	gap: 12px;
 }
 
 .ac-version-alert-icon {
-	font-size: var(--ac-font-xl);
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 22px;
 	flex-shrink: 0;
 }
 
-.ac-version-alert-content {
-	flex: 1;
+.ac-version-alert-title {
+	font-size: 18px;
+	font-weight: 700;
+}
+
+.ac-version-alert-body {
 	display: flex;
 	flex-direction: column;
-	gap: var(--ac-space-xs);
+	gap: 8px;
 }
 
 .ac-version-alert-message {
-	font-size: var(--ac-font-sm);
-	font-weight: var(--ac-font-medium);
+	font-size: 14px;
+	line-height: 1.6;
 	margin: 0;
+	opacity: 0.9;
 }
 
 .ac-version-alert-date {
-	font-size: var(--ac-font-xs);
-	opacity: 0.8;
+	font-size: 12px;
+	opacity: 0.7;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0;
 }
 
 .ac-version-alert-actions {
 	display: flex;
-	align-items: center;
-	gap: var(--ac-space-sm);
-	flex-shrink: 0;
+	gap: 12px;
+	margin-top: 4px;
 }
 
 .ac-version-alert-btn {
+	flex: 1;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: var(--ac-space-xs);
-	padding: var(--ac-space-sm) var(--ac-space-lg);
-	border-radius: var(--ac-radius-full);
-	font-size: var(--ac-font-sm);
-	font-weight: var(--ac-font-semibold);
+	gap: 8px;
+	padding: 12px 20px;
+	border-radius: 12px;
+	font-size: 14px;
+	font-weight: 600;
 	text-decoration: none;
 	transition: all 0.2s ease;
 	border: none;
 	cursor: pointer;
-	min-width: 100px;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.ac-version-alert-info .ac-version-alert-btn {
-	background: var(--ac-info);
+.ac-version-alert-btn-primary {
+	color: white;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ac-version-alert-btn-primary:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.ac-version-alert-btn-secondary {
+	background: rgba(255, 255, 255, 0.2);
+	backdrop-filter: blur(4px);
+}
+
+.ac-version-alert-btn-secondary:hover {
+	background: rgba(255, 255, 255, 0.3);
+}
+
+/* Info Alert - معلومة (أزرق) */
+.ac-version-alert-info {
+	background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
 	color: white;
 }
 
-.ac-version-alert-info .ac-version-alert-btn:hover {
-	background: #2563EB;
-}
-
-.ac-version-alert-warning .ac-version-alert-btn {
-	background: var(--ac-warning);
+.ac-version-alert-info .ac-version-alert-icon {
+	background: rgba(255, 255, 255, 0.2);
 	color: white;
 }
 
-.ac-version-alert-warning .ac-version-alert-btn:hover {
-	background: var(--ac-accent-dark);
+.ac-version-alert-info .ac-version-alert-btn-primary {
+	background: white;
+	color: #1D4ED8;
 }
 
-.ac-version-alert-critical .ac-version-alert-btn {
-	background: var(--ac-error);
+.ac-version-alert-info .ac-version-alert-btn-secondary {
+	color: white;
+	border: 1.5px solid rgba(255, 255, 255, 0.4);
+}
+
+/* Warning Alert - تحذير (برتقالي) */
+.ac-version-alert-warning {
+	background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
 	color: white;
 }
 
-.ac-version-alert-critical .ac-version-alert-btn:hover {
-	background: #DC2626;
+.ac-version-alert-warning .ac-version-alert-icon {
+	background: rgba(255, 255, 255, 0.2);
+	color: white;
 }
 
-.ac-version-alert-btn-dismiss {
-	background: rgba(0, 0, 0, 0.1) !important;
-	color: inherit !important;
-	box-shadow: none !important;
-	min-width: 80px;
+.ac-version-alert-warning .ac-version-alert-btn-primary {
+	background: white;
+	color: #D97706;
 }
 
-.ac-version-alert-btn-dismiss:hover {
-	background: rgba(0, 0, 0, 0.2) !important;
+.ac-version-alert-warning .ac-version-alert-btn-secondary {
+	color: white;
+	border: 1.5px solid rgba(255, 255, 255, 0.4);
 }
 
-/* Animation for closing */
+/* Critical Alert - خطر (أحمر) */
+.ac-version-alert-critical {
+	background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+	color: white;
+}
+
+.ac-version-alert-critical .ac-version-alert-icon {
+	background: rgba(255, 255, 255, 0.2);
+	color: white;
+}
+
+.ac-version-alert-critical .ac-version-alert-btn-primary {
+	background: white;
+	color: #DC2626;
+}
+
+.ac-version-alert-critical .ac-version-alert-btn-secondary {
+	color: white;
+	border: 1.5px solid rgba(255, 255, 255, 0.4);
+}
+
+/* Animations */
+@keyframes ac-alertSlideIn {
+	from {
+		opacity: 0;
+		transform: translateY(-20px) scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
 .ac-version-alert-closing {
-	animation: ac-slideUp 0.3s ease forwards;
+	animation: ac-alertSlideOut 0.3s ease forwards;
 }
 
-@keyframes ac-slideUp {
+@keyframes ac-alertSlideOut {
 	from {
 		opacity: 1;
-		transform: translateY(0);
+		transform: translateY(0) scale(1);
 	}
 	to {
 		opacity: 0;
-		transform: translateY(-20px);
-	}
-}
-
-/* Responsive */
-@media (max-width: 640px) {
-	.ac-version-alert {
-		flex-direction: column;
-		align-items: stretch;
-		text-align: center;
-		gap: var(--ac-space-sm);
-		padding: var(--ac-space-md);
-	}
-
-	.ac-version-alert-icon {
-		display: none;
-	}
-
-	.ac-version-alert-content {
-		align-items: center;
-	}
-
-	.ac-version-alert-actions {
-		width: 100%;
-		justify-content: center;
-		gap: var(--ac-space-md);
-	}
-
-	.ac-version-alert-btn {
-		flex: 1;
-		max-width: 150px;
+		transform: translateY(-20px) scale(0.95);
 	}
 }
 
