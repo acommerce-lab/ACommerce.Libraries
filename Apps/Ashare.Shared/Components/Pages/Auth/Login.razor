@@ -220,16 +220,21 @@
 
     private void HandleReceiveMessage(string method, JsonElement data)
     {
-        Console.WriteLine($"[Login] 📨 ReceiveMessage: method={method}");
+        Console.WriteLine($"[Login] 📨 ReceiveMessage: method={method}, data={data.GetRawText()}");
 
         // تصفية الإشعارات فقط
         if (method == "ReceiveNotification")
         {
+            Console.WriteLine($"[Login] 🔔 Got ReceiveNotification!");
             HandleNotification(data);
         }
         else if (method == "AuthSubscribed")
         {
             Console.WriteLine($"[Login] ✅ AuthSubscribed confirmed: {data.GetRawText()}");
+        }
+        else
+        {
+            Console.WriteLine($"[Login] ⚠️ Unknown method: {method}");
         }
     }
 
