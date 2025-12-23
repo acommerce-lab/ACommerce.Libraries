@@ -15,7 +15,7 @@ public static class ApiSettings
     /// - true = استخدام الباك اند المحلي (localhost)
     /// - false = استخدام الباك اند الإنتاجي (Google Cloud)
     /// </summary>
-    public const bool UseLocalApi = false;  // ← غيّر هذا للتبديل
+    public const bool UseLocalApi = true;  // ← غيّر هذا للتبديل
 
     // ═══════════════════════════════════════════════════════════════════════════
     // 📍 عناوين الـ API
@@ -29,12 +29,12 @@ public static class ApiSettings
     /// <summary>
     /// Development URL for Android Emulator (10.0.2.2 maps to host's localhost)
     /// </summary>
-    public const string AndroidEmulatorUrl = "https://ashare-api-130415035604.me-central2.run.app";
+    public const string AndroidEmulatorUrl = "http://10.0.2.2:8080";
 
     /// <summary>
     /// Development URL for Windows/Desktop
     /// </summary>
-    public const string LocalhostUrl = "https://ashare-api-130415035604.me-central2.run.app";
+    public const string LocalhostUrl = "http://localhost:8080";
 
     // ═══════════════════════════════════════════════════════════════════════════
     // 🎯 الـ URL المستخدم
