@@ -166,6 +166,7 @@ public sealed class VersionsClient(IApiClient httpClient)
 /// <summary>
 /// حالة دعم الإصدار
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum VersionStatus
 {
     Development = 0,
