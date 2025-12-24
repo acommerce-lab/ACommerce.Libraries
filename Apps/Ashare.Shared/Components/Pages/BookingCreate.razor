@@ -280,25 +280,65 @@
 
     private string GetRentTypeLabel()
     {
-        if (!HasAttribute("rent_type")) return "شهري";
-
-        return GetAttribute("rent_type").ToLower() switch
+        // أولاً: التحقق من time_unit (ما يرسله الباك اند)
+        if (HasAttribute("time_unit"))
         {
-            "monthly" => "شهري",
-            "yearly" or "annual" => "سنوي",
-            "daily" => "يومي",
-            "weekly" => "أسبوعي",
-            _ => "شهري"
-        };
+            return GetAttribute("time_unit").ToLower() switch
+            {
+                "month" or "monthly" => "شهري",
+                "year" or "yearly" or "annual" => "سنوي",
+                "day" or "daily" => "يومي",
+                "week" or "weekly" => "أسبوعي",
+                "hour" or "hourly" => "بالساعة",
+                _ => "شهري"
+            };
+        }
+
+        // ثانياً: التحقق من rent_type
+        if (HasAttribute("rent_type"))
+        {
+            return GetAttribute("rent_type").ToLower() switch
+            {
+                "month" or "monthly" => "شهري",
+                "year" or "yearly" or "annual" => "سنوي",
+                "day" or "daily" => "يومي",
+                "week" or "weekly" => "أسبوعي",
+                "hour" or "hourly" => "بالساعة",
+                _ => "شهري"
+            };
+        }
+
+        return "شهري";
     }
 
     private decimal GetPrice()
     {
-        if (HasAttribute("price") && decimal.TryParse(GetAttribute("price"), out var price))
+        // أولاً: محاولة الحصول على السعر من الخصائص
+        if (HasAttribute("price") && decimal.TryParse(GetAttribute("price"), out var attrPrice))
         {
-            return price;
+            return attrPrice;
         }
-        return _space?.PricePerHour ?? 0;
+
+        // ثانياً: استخدام السعر من SpaceItem (أول سعر غير صفري)
+        if (_space != null)
+        {
+            // إرجاع السعر الفعلي المُعين حسب نوع الإيجار
+            if (_space.PricePerMonth > 0) return _space.PricePerMonth;
+            if (_space.PricePerDay > 0) return _space.PricePerDay;
+            if (_space.PricePerHour > 0) return _space.PricePerHour;
+        }
+
+        return 0;
+    }
+
+    private string GetTimeUnit()
+    {
+        // الحصول على وحدة الوقت من time_unit أو rent_type
+        if (HasAttribute("time_unit"))
+            return GetAttribute("time_unit");
+        if (HasAttribute("rent_type"))
+            return GetAttribute("rent_type");
+        return "month"; // افتراضي
     }
 
     private decimal CalculateDeposit()
@@ -348,7 +388,7 @@
                 SpaceId = SpaceId,
                 DepositAmount = CalculateDeposit(),
                 TotalPrice = GetPrice(),
-                RentType = GetAttribute("rent_type"),
+                RentType = GetTimeUnit(),
                 ReturnUrl = returnUrl
             });
 
