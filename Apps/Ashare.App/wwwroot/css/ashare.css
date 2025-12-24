@@ -2624,6 +2624,55 @@ h1, h2, h3, .ashare-logo-text {
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
+/* Listing Stats Section */
+.ashare-listing-stats {
+    margin-bottom: var(--ashare-spacing-lg);
+}
+
+.ashare-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--ashare-spacing-md);
+}
+
+.ashare-stat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--ashare-spacing-md);
+    background-color: var(--ashare-gray-50);
+    border-radius: var(--ashare-radius-md);
+    text-align: center;
+    gap: var(--ashare-spacing-xs);
+}
+
+.ashare-stat-card i {
+    font-size: 24px;
+    color: var(--ashare-primary);
+}
+
+.ashare-stat-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ashare-gray-900);
+}
+
+.ashare-stat-label {
+    font-size: 11px;
+    color: var(--ashare-gray-500);
+}
+
+.ashare-stat-available i,
+.ashare-stat-available .ashare-stat-value {
+    color: var(--ashare-success);
+}
+
+.ashare-stat-unavailable i,
+.ashare-stat-unavailable .ashare-stat-value {
+    color: var(--ashare-danger);
+}
+
 /* Owner Card */
 .ashare-owner-card {
     display: flex;
