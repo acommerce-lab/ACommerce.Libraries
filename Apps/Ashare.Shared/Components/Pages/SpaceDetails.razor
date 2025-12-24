@@ -168,13 +168,12 @@
             }
 
             @* Pricing *@
-            @if (HasAttribute("price"))
+            @if (HasPrice())
             {
                 <div class="ashare-section">
                     <h2 class="ashare-section-title">السعر</h2>
                     <div class="ashare-pricing-display">
-                        <span class="ashare-price-amount">@GetAttribute("price") ر.س</span>
-                        <span class="ashare-price-period">/ @GetRentTypeLabel()</span>
+                        <span class="ashare-price-amount">@GetPriceDisplay()</span>
                     </div>
                 </div>
             }
@@ -368,10 +367,9 @@
         {
             <div class="ashare-booking-bar">
                 <div class="ashare-booking-price">
-                    @if (HasAttribute("price"))
+                    @if (HasPrice())
                     {
-                        <span class="ashare-booking-amount">@GetAttribute("price") ر.س</span>
-                        <span class="ashare-booking-period">/ @GetRentTypeLabel()</span>
+                        <span class="ashare-booking-amount">@GetPriceDisplay()</span>
                     }
                 </div>
                 <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="StartBooking">
@@ -567,6 +565,54 @@
         return _space.DisplayPrice;
     }
 
+    /// <summary>
+    /// التحقق من وجود سعر (من الخصائص أو من SpaceItem)
+    /// </summary>
+    private bool HasPrice()
+    {
+        // التحقق من وجود السعر في الخصائص
+        if (HasAttribute("price")) return true;
+
+        // التحقق من وجود السعر في SpaceItem
+        return _space != null && (_space.PricePerHour > 0 || _space.PricePerDay > 0 || _space.PricePerMonth > 0);
+    }
+
+    /// <summary>
+    /// الحصول على عرض السعر مع وحدة الوقت
+    /// </summary>
+    private string GetPriceDisplay()
+    {
+        if (_space == null) return "";
+
+        // أولاً: استخدام السعر من الخصائص إن وجد
+        if (HasAttribute("price"))
+        {
+            var price = GetAttribute("price");
+
+            // تحديد وحدة الوقت
+            var timeUnit = "شهر"; // افتراضي
+            if (HasAttribute("time_unit"))
+            {
+                timeUnit = TranslateTimeUnit(GetAttribute("time_unit"));
+            }
+            else if (HasAttribute("rent_type"))
+            {
+                timeUnit = TranslateTimeUnit(GetAttribute("rent_type"));
+            }
+            else if (HasAttribute("duration") && HasAttribute("time_unit"))
+            {
+                var duration = GetAttribute("duration");
+                timeUnit = TranslateTimeUnit(GetAttribute("time_unit"));
+                return $"{price} ر.س / {duration} {timeUnit}";
+            }
+
+            return $"{price} ر.س / {timeUnit}";
+        }
+
+        // ثانياً: استخدام DisplayPrice من SpaceItem
+        return _space.DisplayPrice;
+    }
+
     // ═══════════════════════════════════════════════════════════════════
     // Property Details Builder
     // ═══════════════════════════════════════════════════════════════════
@@ -574,23 +620,41 @@
     // الخصائص المعروفة مع ترجماتها
     private static readonly Dictionary<string, string> _knownAttributeLabels = new()
     {
+        // Property info
         ["property_type"] = "نوع العقار",
+        ["unit_type"] = "نوع الوحدة",
         ["area"] = "المساحة",
         ["rooms_count"] = "عدد الغرف",
+        ["rooms"] = "عدد الغرف",
         ["bathrooms_count"] = "عدد الحمامات",
+        ["bathrooms"] = "عدد الحمامات",
         ["floor_number"] = "الطابق",
+        ["floor"] = "الطابق",
         ["building_age"] = "عمر المبنى",
         ["furnished"] = "مفروش",
+
+        // Location
         ["city"] = "المدينة",
         ["district"] = "الحي",
         ["street"] = "الشارع",
+
+        // Rental info
         ["rent_type"] = "نوع الإيجار",
+        ["rental_type"] = "نوع الإيجار",
+        ["time_unit"] = "وحدة الوقت",
+        ["duration"] = "المدة",
+        ["bill_type"] = "نوع الفاتورة",
         ["price"] = "السعر",
+
+        // Additional
         ["description"] = "الوصف",
         ["capacity"] = "السعة",
         ["beds_count"] = "عدد الأسرّة",
+        ["beds"] = "عدد الأسرّة",
         ["living_rooms_count"] = "عدد الصالات",
+        ["living_rooms"] = "عدد الصالات",
         ["kitchen_count"] = "عدد المطابخ",
+        ["kitchens"] = "عدد المطابخ",
         ["parking_spaces"] = "مواقف السيارات",
         ["facade"] = "الواجهة",
         ["view"] = "الإطلالة",
@@ -604,7 +668,8 @@
         ["max_stay"] = "أقصى مدة إقامة",
         ["deposit"] = "مبلغ التأمين",
         ["available_from"] = "متاح من",
-        ["contact_phone"] = "رقم التواصل"
+        ["contact_phone"] = "رقم التواصل",
+        ["features"] = "المميزات"
     };
 
     // الخصائص المنطقية (مرافق) - يجب تجاهلها في قسم التفاصيل
@@ -761,7 +826,11 @@
                     ? knownLabel
                     : FormatAttributeKey(attr.Key);
 
-                details.Add((label, attr.Value.ToString() ?? ""));
+                // ترجمة القيمة
+                var rawValue = attr.Value.ToString() ?? "";
+                var translatedValue = TranslateAttributeValue(attr.Key, rawValue);
+
+                details.Add((label, translatedValue));
             }
         }
 
@@ -781,6 +850,120 @@
         // تحويل snake_case إلى نص قابل للقراءة
         return key.Replace("_", " ").Replace("-", " ");
     }
+
+    /// <summary>
+    /// ترجمة القيم الإنجليزية الشائعة إلى العربية
+    /// </summary>
+    private string TranslateAttributeValue(string key, string value)
+    {
+        if (string.IsNullOrEmpty(value)) return value;
+
+        var lowerValue = value.ToLower().Trim();
+
+        // ترجمة القيم حسب نوع الخاصية
+        return key?.ToLower() switch
+        {
+            "floor" => TranslateFloor(lowerValue),
+            "unit_type" => TranslateUnitType(lowerValue),
+            "rental_type" or "rent_type" => TranslateRentalType(lowerValue),
+            "bill_type" => TranslateBillType(lowerValue),
+            "time_unit" => TranslateTimeUnit(lowerValue),
+            "furnished" => TranslateFurnished(lowerValue),
+            "gender" => TranslateGender(lowerValue),
+            _ => TranslateCommonValue(lowerValue) ?? value
+        };
+    }
+
+    private string TranslateFloor(string value) => value switch
+    {
+        "ground" => "الأرضي",
+        "first" => "الأول",
+        "second" => "الثاني",
+        "third" => "الثالث",
+        "fourth" => "الرابع",
+        "fifth" => "الخامس",
+        "sixth" => "السادس",
+        "seventh" => "السابع",
+        "eighth" => "الثامن",
+        "ninth" => "التاسع",
+        "tenth" => "العاشر",
+        "basement" => "القبو",
+        "roof" => "السطح",
+        _ => value
+    };
+
+    private string TranslateUnitType(string value) => value switch
+    {
+        "room" => "غرفة",
+        "apartment" => "شقة",
+        "villa" => "فيلا",
+        "studio" => "استوديو",
+        "duplex" => "دوبلكس",
+        "floor" => "دور كامل",
+        "building" => "عمارة",
+        "office" => "مكتب",
+        "shop" => "محل",
+        _ => value
+    };
+
+    private string TranslateRentalType(string value) => value switch
+    {
+        "shared" => "مشترك",
+        "private" => "خاص",
+        "full" => "كامل",
+        "partial" => "جزئي",
+        _ => TranslateRentType(value)
+    };
+
+    private string TranslateBillType(string value) => value switch
+    {
+        "included" => "شامل",
+        "excluded" or "separate" => "منفصل",
+        "offer" => "عرض",
+        "fixed" => "ثابت",
+        "variable" => "متغير",
+        _ => value
+    };
+
+    private string TranslateTimeUnit(string value) => value switch
+    {
+        "hour" or "hourly" => "ساعة",
+        "day" or "daily" => "يوم",
+        "week" or "weekly" => "أسبوع",
+        "month" or "monthly" => "شهر",
+        "year" or "yearly" or "annual" => "سنة",
+        _ => value
+    };
+
+    private string? TranslateCommonValue(string value) => value switch
+    {
+        // Yes/No
+        "yes" => "نعم",
+        "no" => "لا",
+        "true" => "نعم",
+        "false" => "لا",
+
+        // Common values
+        "available" => "متاح",
+        "unavailable" or "not available" => "غير متاح",
+        "new" => "جديد",
+        "used" => "مستعمل",
+        "excellent" => "ممتاز",
+        "good" => "جيد",
+        "fair" => "مقبول",
+
+        // Directions
+        "north" => "شمال",
+        "south" => "جنوب",
+        "east" => "شرق",
+        "west" => "غرب",
+        "northeast" => "شمال شرق",
+        "northwest" => "شمال غرب",
+        "southeast" => "جنوب شرق",
+        "southwest" => "جنوب غرب",
+
+        _ => null
+    };
 
     private string GetRelativeDate(DateTime date)
     {
