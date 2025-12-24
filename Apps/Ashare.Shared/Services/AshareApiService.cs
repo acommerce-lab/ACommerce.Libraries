@@ -1201,6 +1201,13 @@ public class AshareApiService
                                 break;
                 }
 
+                // إضافة السعر الأصلي إلى الخصائص للاستخدام في صفحة الحجز
+                var attributes = dto.Attributes ?? new Dictionary<string, object>();
+                if (!attributes.ContainsKey("price"))
+                {
+                        attributes["price"] = dto.Price;
+                }
+
                 return new SpaceItem
                 {
                         Id = dto.Id,
@@ -1223,7 +1230,7 @@ public class AshareApiService
                         Rating = dto.AverageRating,
                         ReviewsCount = dto.RatingsCount,
                         ViewCount = dto.ViewCount,
-                        Attributes = dto.Attributes,
+                        Attributes = attributes,
                         CreatedAt = dto.CreatedAt,
                         // ربط المالك من بيانات البائع
                         OwnerId = dto.VendorId,
