@@ -248,6 +248,45 @@
                 </div>
             }
 
+            @* Listing Stats *@
+            <div class="ashare-section ashare-listing-stats">
+                <h2 class="ashare-section-title">إحصائيات الإعلان</h2>
+                <div class="ashare-stats-grid">
+                    @if (_space.ViewCount > 0)
+                    {
+                        <div class="ashare-stat-card">
+                            <i class="bi bi-eye"></i>
+                            <span class="ashare-stat-value">@_space.ViewCount</span>
+                            <span class="ashare-stat-label">مشاهدة</span>
+                        </div>
+                    }
+                    @if (_space.CreatedAt != default)
+                    {
+                        <div class="ashare-stat-card">
+                            <i class="bi bi-calendar-plus"></i>
+                            <span class="ashare-stat-value">@GetRelativeDate(_space.CreatedAt)</span>
+                            <span class="ashare-stat-label">تاريخ الإضافة</span>
+                        </div>
+                    }
+                    @if (_space.IsAvailable)
+                    {
+                        <div class="ashare-stat-card ashare-stat-available">
+                            <i class="bi bi-check-circle"></i>
+                            <span class="ashare-stat-value">متاح</span>
+                            <span class="ashare-stat-label">الحالة</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="ashare-stat-card ashare-stat-unavailable">
+                            <i class="bi bi-x-circle"></i>
+                            <span class="ashare-stat-value">غير متاح</span>
+                            <span class="ashare-stat-label">الحالة</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
             @* Owner Info *@
             <div class="ashare-section ashare-owner-section">
                 <h2 class="ashare-section-title">مالك المساحة</h2>
@@ -532,47 +571,232 @@
     // Property Details Builder
     // ═══════════════════════════════════════════════════════════════════
 
+    // الخصائص المعروفة مع ترجماتها
+    private static readonly Dictionary<string, string> _knownAttributeLabels = new()
+    {
+        ["property_type"] = "نوع العقار",
+        ["area"] = "المساحة",
+        ["rooms_count"] = "عدد الغرف",
+        ["bathrooms_count"] = "عدد الحمامات",
+        ["floor_number"] = "الطابق",
+        ["building_age"] = "عمر المبنى",
+        ["furnished"] = "مفروش",
+        ["city"] = "المدينة",
+        ["district"] = "الحي",
+        ["street"] = "الشارع",
+        ["rent_type"] = "نوع الإيجار",
+        ["price"] = "السعر",
+        ["description"] = "الوصف",
+        ["capacity"] = "السعة",
+        ["beds_count"] = "عدد الأسرّة",
+        ["living_rooms_count"] = "عدد الصالات",
+        ["kitchen_count"] = "عدد المطابخ",
+        ["parking_spaces"] = "مواقف السيارات",
+        ["facade"] = "الواجهة",
+        ["view"] = "الإطلالة",
+        ["electricity"] = "الكهرباء",
+        ["water"] = "المياه",
+        ["gas"] = "الغاز",
+        ["internet"] = "الإنترنت",
+        ["gender"] = "الجنس",
+        ["nationality"] = "الجنسية",
+        ["min_stay"] = "أقل مدة إقامة",
+        ["max_stay"] = "أقصى مدة إقامة",
+        ["deposit"] = "مبلغ التأمين",
+        ["available_from"] = "متاح من",
+        ["contact_phone"] = "رقم التواصل"
+    };
+
+    // الخصائص المنطقية (مرافق) - يجب تجاهلها في قسم التفاصيل
+    private static readonly HashSet<string> _booleanAmenityKeys = new()
+    {
+        "has_wifi", "wifi", "has_parking", "parking", "has_ac", "ac",
+        "has_elevator", "elevator", "has_kitchen", "kitchen", "has_pool", "pool",
+        "has_gym", "gym", "has_security", "security", "has_garden", "garden",
+        "has_balcony", "balcony", "has_storage", "storage", "has_maid_room", "maid_room",
+        "has_driver_room", "driver_room", "is_phone_allowed", "is_whatsapp_allowed",
+        "is_messaging_allowed"
+    };
+
     private List<(string Label, string Value)> GetPropertyDetails()
     {
         var details = new List<(string Label, string Value)>();
+        var processedKeys = new HashSet<string>();
 
+        // أولاً: عرض الخصائص المعروفة بالترتيب المحدد
         if (HasAttribute("property_type"))
+        {
             details.Add(("نوع العقار", TranslatePropertyType(GetAttribute("property_type"))));
+            processedKeys.Add("property_type");
+        }
 
         if (HasAttribute("area"))
+        {
             details.Add(("المساحة", $"{GetAttribute("area")} م²"));
+            processedKeys.Add("area");
+        }
 
         if (HasAttribute("rooms_count"))
+        {
             details.Add(("عدد الغرف", GetAttribute("rooms_count")));
+            processedKeys.Add("rooms_count");
+        }
 
         if (HasAttribute("bathrooms_count"))
+        {
             details.Add(("عدد الحمامات", GetAttribute("bathrooms_count")));
+            processedKeys.Add("bathrooms_count");
+        }
+
+        if (HasAttribute("beds_count"))
+        {
+            details.Add(("عدد الأسرّة", GetAttribute("beds_count")));
+            processedKeys.Add("beds_count");
+        }
+
+        if (HasAttribute("living_rooms_count"))
+        {
+            details.Add(("عدد الصالات", GetAttribute("living_rooms_count")));
+            processedKeys.Add("living_rooms_count");
+        }
 
         if (HasAttribute("floor_number"))
+        {
             details.Add(("الطابق", GetAttribute("floor_number")));
+            processedKeys.Add("floor_number");
+        }
 
         if (HasAttribute("building_age"))
+        {
             details.Add(("عمر المبنى", $"{GetAttribute("building_age")} سنة"));
+            processedKeys.Add("building_age");
+        }
 
         if (HasAttribute("furnished"))
+        {
             details.Add(("مفروش", TranslateFurnished(GetAttribute("furnished"))));
+            processedKeys.Add("furnished");
+        }
 
         if (HasAttribute("city"))
+        {
             details.Add(("المدينة", TranslateCity(GetAttribute("city"))));
+            processedKeys.Add("city");
+        }
 
         if (HasAttribute("district"))
+        {
             details.Add(("الحي", GetAttribute("district")));
+            processedKeys.Add("district");
+        }
 
         if (HasAttribute("street"))
+        {
             details.Add(("الشارع", GetAttribute("street")));
+            processedKeys.Add("street");
+        }
+
+        if (HasAttribute("gender"))
+        {
+            details.Add(("الجنس", TranslateGender(GetAttribute("gender"))));
+            processedKeys.Add("gender");
+        }
+
+        if (HasAttribute("nationality"))
+        {
+            details.Add(("الجنسية", GetAttribute("nationality")));
+            processedKeys.Add("nationality");
+        }
+
+        if (HasAttribute("min_stay"))
+        {
+            details.Add(("أقل مدة إقامة", GetAttribute("min_stay")));
+            processedKeys.Add("min_stay");
+        }
+
+        if (HasAttribute("max_stay"))
+        {
+            details.Add(("أقصى مدة إقامة", GetAttribute("max_stay")));
+            processedKeys.Add("max_stay");
+        }
+
+        if (HasAttribute("deposit"))
+        {
+            details.Add(("مبلغ التأمين", $"{GetAttribute("deposit")} ر.س"));
+            processedKeys.Add("deposit");
+        }
+
+        if (HasAttribute("available_from"))
+        {
+            details.Add(("متاح من", GetAttribute("available_from")));
+            processedKeys.Add("available_from");
+        }
 
         if (HasAttribute("rent_type"))
+        {
             details.Add(("نوع الإيجار", TranslateRentType(GetAttribute("rent_type"))));
+            processedKeys.Add("rent_type");
+        }
 
         if (HasAttribute("price"))
+        {
             details.Add(("السعر", $"{GetAttribute("price")} ر.س"));
+            processedKeys.Add("price");
+        }
+
+        // ثانياً: عرض أي خصائص إضافية غير معروفة (ديناميكياً)
+        if (_space?.Attributes != null)
+        {
+            foreach (var attr in _space.Attributes)
+            {
+                // تجاهل الخصائص التي تمت معالجتها، والمرافق، والوصف
+                if (processedKeys.Contains(attr.Key) ||
+                    _booleanAmenityKeys.Contains(attr.Key) ||
+                    attr.Key == "description" ||
+                    attr.Value == null ||
+                    string.IsNullOrEmpty(attr.Value.ToString()))
+                    continue;
+
+                var label = _knownAttributeLabels.TryGetValue(attr.Key, out var knownLabel)
+                    ? knownLabel
+                    : FormatAttributeKey(attr.Key);
+
+                details.Add((label, attr.Value.ToString() ?? ""));
+            }
+        }
 
         return details;
+    }
+
+    private string TranslateGender(string gender) => gender?.ToLower() switch
+    {
+        "male" => "ذكور فقط",
+        "female" => "إناث فقط",
+        "any" or "both" => "الجنسين",
+        _ => gender ?? ""
+    };
+
+    private string FormatAttributeKey(string key)
+    {
+        // تحويل snake_case إلى نص قابل للقراءة
+        return key.Replace("_", " ").Replace("-", " ");
+    }
+
+    private string GetRelativeDate(DateTime date)
+    {
+        var diff = DateTime.Now - date;
+
+        if (diff.TotalDays < 1)
+            return "اليوم";
+        if (diff.TotalDays < 2)
+            return "أمس";
+        if (diff.TotalDays < 7)
+            return $"منذ {(int)diff.TotalDays} أيام";
+        if (diff.TotalDays < 30)
+            return $"منذ {(int)(diff.TotalDays / 7)} أسابيع";
+        if (diff.TotalDays < 365)
+            return $"منذ {(int)(diff.TotalDays / 30)} أشهر";
+        return date.ToString("yyyy/MM/dd");
     }
 
     // ═══════════════════════════════════════════════════════════════════

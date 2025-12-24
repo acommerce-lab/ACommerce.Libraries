@@ -1168,6 +1168,36 @@ public class AshareApiService
         /// </summary>
         private static SpaceItem MapListingToSpaceItem(ProductListingDto dto)
         {
+                // استخراج نوع الإيجار من الخصائص
+                var rentType = "monthly"; // القيمة الافتراضية
+                if (dto.Attributes?.TryGetValue("rent_type", out var rentTypeValue) == true && rentTypeValue != null)
+                {
+                        rentType = rentTypeValue.ToString()?.ToLower() ?? "monthly";
+                }
+
+                // تعيين الأسعار بناءً على نوع الإيجار
+                decimal pricePerHour = 0, pricePerDay = 0, pricePerMonth = 0;
+                switch (rentType)
+                {
+                        case "hourly":
+                                pricePerHour = dto.Price;
+                                break;
+                        case "daily":
+                                pricePerDay = dto.Price;
+                                break;
+                        case "weekly":
+                                pricePerDay = dto.Price / 7; // تحويل للعرض اليومي
+                                break;
+                        case "yearly":
+                        case "annual":
+                                pricePerMonth = dto.Price / 12; // تحويل للعرض الشهري
+                                break;
+                        case "monthly":
+                        default:
+                                pricePerMonth = dto.Price;
+                                break;
+                }
+
                 return new SpaceItem
                 {
                         Id = dto.Id,
@@ -1176,9 +1206,9 @@ public class AshareApiService
                         Description = dto.Description ?? string.Empty,
                         CategoryId = dto.CategoryId,
                         CategoryName = dto.CategoryName,
-                        PricePerHour = dto.Price,
-                        PricePerDay = dto.Price * 8,
-                        PricePerMonth = dto.Price * 30,
+                        PricePerHour = pricePerHour,
+                        PricePerDay = pricePerDay,
+                        PricePerMonth = pricePerMonth,
                         Currency = dto.Currency,
                         Images = dto.Images.Any() ? dto.Images : (dto.FeaturedImage != null ? new List<string> { dto.FeaturedImage } : new List<string>()),
                         Location = dto.Address,

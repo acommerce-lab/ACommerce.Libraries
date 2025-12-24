@@ -432,11 +432,37 @@ public class SpaceItem
     /// </summary>
     public Dictionary<string, object> Attributes { get; set; } = new();
 
-    public string DisplayPrice => PricePerHour > 0
-        ? $"{PricePerHour:N0} {Currency}/ساعة"
-        : PricePerDay > 0
-            ? $"{PricePerDay:N0} {Currency}/يوم"
-            : $"{PricePerMonth:N0} {Currency}/شهر";
+    public string DisplayPrice
+    {
+        get
+        {
+            // أولاً: التحقق من rent_type في الخصائص
+            if (Attributes?.TryGetValue("rent_type", out var rentTypeObj) == true && rentTypeObj != null)
+            {
+                var rentType = rentTypeObj.ToString()?.ToLower();
+                var price = Attributes.TryGetValue("price", out var priceObj) && priceObj != null
+                    ? decimal.TryParse(priceObj.ToString(), out var p) ? p : 0
+                    : PricePerMonth > 0 ? PricePerMonth : PricePerDay > 0 ? PricePerDay : PricePerHour;
+
+                return rentType switch
+                {
+                    "hourly" => $"{price:N0} {Currency}/ساعة",
+                    "daily" => $"{price:N0} {Currency}/يوم",
+                    "weekly" => $"{price:N0} {Currency}/أسبوع",
+                    "monthly" => $"{price:N0} {Currency}/شهر",
+                    "yearly" or "annual" => $"{price:N0} {Currency}/سنة",
+                    _ => $"{price:N0} {Currency}/شهر"
+                };
+            }
+
+            // ثانياً: الطريقة التقليدية بناءً على الأسعار المعينة
+            if (PricePerHour > 0)
+                return $"{PricePerHour:N0} {Currency}/ساعة";
+            if (PricePerDay > 0)
+                return $"{PricePerDay:N0} {Currency}/يوم";
+            return $"{PricePerMonth:N0} {Currency}/شهر";
+        }
+    }
 }
 
 public class BookingItem
