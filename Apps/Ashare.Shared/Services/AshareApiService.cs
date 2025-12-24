@@ -1168,31 +1168,34 @@ public class AshareApiService
         /// </summary>
         private static SpaceItem MapListingToSpaceItem(ProductListingDto dto)
         {
-                // استخراج نوع الإيجار من الخصائص
-                var rentType = "monthly"; // القيمة الافتراضية
-                if (dto.Attributes?.TryGetValue("rent_type", out var rentTypeValue) == true && rentTypeValue != null)
+                // استخراج نوع الإيجار من الخصائص - يدعم كلاً من time_unit و rent_type
+                var rentType = "month"; // القيمة الافتراضية
+                if (dto.Attributes?.TryGetValue("time_unit", out var timeUnitValue) == true && timeUnitValue != null)
                 {
-                        rentType = rentTypeValue.ToString()?.ToLower() ?? "monthly";
+                        rentType = timeUnitValue.ToString()?.ToLower() ?? "month";
+                }
+                else if (dto.Attributes?.TryGetValue("rent_type", out var rentTypeValue) == true && rentTypeValue != null)
+                {
+                        rentType = rentTypeValue.ToString()?.ToLower() ?? "month";
                 }
 
                 // تعيين الأسعار بناءً على نوع الإيجار
                 decimal pricePerHour = 0, pricePerDay = 0, pricePerMonth = 0;
                 switch (rentType)
                 {
-                        case "hourly":
+                        case "hour" or "hourly":
                                 pricePerHour = dto.Price;
                                 break;
-                        case "daily":
+                        case "day" or "daily":
                                 pricePerDay = dto.Price;
                                 break;
-                        case "weekly":
+                        case "week" or "weekly":
                                 pricePerDay = dto.Price / 7; // تحويل للعرض اليومي
                                 break;
-                        case "yearly":
-                        case "annual":
+                        case "year" or "yearly" or "annual":
                                 pricePerMonth = dto.Price / 12; // تحويل للعرض الشهري
                                 break;
-                        case "monthly":
+                        case "month" or "monthly":
                         default:
                                 pricePerMonth = dto.Price;
                                 break;

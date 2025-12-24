@@ -436,21 +436,30 @@ public class SpaceItem
     {
         get
         {
-            // أولاً: التحقق من rent_type في الخصائص
-            if (Attributes?.TryGetValue("rent_type", out var rentTypeObj) == true && rentTypeObj != null)
+            // أولاً: التحقق من time_unit أو rent_type في الخصائص
+            string? timeUnit = null;
+            if (Attributes?.TryGetValue("time_unit", out var timeUnitObj) == true && timeUnitObj != null)
             {
-                var rentType = rentTypeObj.ToString()?.ToLower();
-                var price = Attributes.TryGetValue("price", out var priceObj) && priceObj != null
+                timeUnit = timeUnitObj.ToString()?.ToLower();
+            }
+            else if (Attributes?.TryGetValue("rent_type", out var rentTypeObj) == true && rentTypeObj != null)
+            {
+                timeUnit = rentTypeObj.ToString()?.ToLower();
+            }
+
+            if (!string.IsNullOrEmpty(timeUnit))
+            {
+                var price = Attributes!.TryGetValue("price", out var priceObj) && priceObj != null
                     ? decimal.TryParse(priceObj.ToString(), out var p) ? p : 0
                     : PricePerMonth > 0 ? PricePerMonth : PricePerDay > 0 ? PricePerDay : PricePerHour;
 
-                return rentType switch
+                return timeUnit switch
                 {
-                    "hourly" => $"{price:N0} {Currency}/ساعة",
-                    "daily" => $"{price:N0} {Currency}/يوم",
-                    "weekly" => $"{price:N0} {Currency}/أسبوع",
-                    "monthly" => $"{price:N0} {Currency}/شهر",
-                    "yearly" or "annual" => $"{price:N0} {Currency}/سنة",
+                    "hour" or "hourly" => $"{price:N0} {Currency}/ساعة",
+                    "day" or "daily" => $"{price:N0} {Currency}/يوم",
+                    "week" or "weekly" => $"{price:N0} {Currency}/أسبوع",
+                    "month" or "monthly" => $"{price:N0} {Currency}/شهر",
+                    "year" or "yearly" or "annual" => $"{price:N0} {Currency}/سنة",
                     _ => $"{price:N0} {Currency}/شهر"
                 };
             }
