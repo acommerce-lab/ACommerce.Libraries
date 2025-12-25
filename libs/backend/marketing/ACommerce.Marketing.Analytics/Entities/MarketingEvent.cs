@@ -34,5 +34,7 @@ public enum MarketingEventType
     Login = 9,
     Share = 10,
     Lead = 11,
-    Contact = 12
+    Contact = 12,
+    Schedule = 13,
+    AddPaymentInfo = 14
 }

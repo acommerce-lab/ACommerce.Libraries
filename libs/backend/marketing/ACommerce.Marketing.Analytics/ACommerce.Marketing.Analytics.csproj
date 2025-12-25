@@ -9,8 +9,16 @@
     <Description>Marketing analytics and attribution tracking for marketplace</Description>
   </PropertyGroup>
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="MediatR" Version="12.4.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ACommerce.Marketing.MetaConversions\ACommerce.Marketing.MetaConversions.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
