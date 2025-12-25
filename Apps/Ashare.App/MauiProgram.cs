@@ -53,7 +53,7 @@ public static class MauiProgram
         Console.WriteLine($"[MauiProgram] 🌐 API Base URL: {apiBaseUrl}");
 
         builder.Services.AddSingleton<IStorageService, MauiStorageService>();
-        builder.Services.AddSingleton<ITokenStorage, TokenStorageService>();
+        builder.Services.AddSingleton<ITokenStorage, StorageBackedTokenStorage>();
         builder.Services.AddSingleton<TokenManager>();
 
         builder.Services.AddAshareClients(apiBaseUrl, options =>

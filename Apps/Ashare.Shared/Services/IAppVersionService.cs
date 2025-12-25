@@ -1,33 +1,14 @@
+// Re-export from ACommerce.Templates.Customer for backward compatibility
+// New code should use ACommerce.Templates.Customer.Services.IAppVersionService directly
+global using IAppVersionService = ACommerce.Templates.Customer.Services.IAppVersionService;
+
 namespace Ashare.Shared.Services;
 
 /// <summary>
-/// واجهة للحصول على معلومات إصدار التطبيق
-/// يتم تنفيذها بشكل مختلف في كل منصة (MAUI, Web, etc.)
+/// هذا الملف يعيد تصدير IAppVersionService من Templates.Customer للتوافق العكسي
+/// الكود الجديد يجب أن يستخدم ACommerce.Templates.Customer.Services.IAppVersionService مباشرة
 /// </summary>
-public interface IAppVersionService
+public static class AppVersionServiceAliases
 {
-    /// <summary>
-    /// رقم الإصدار (مثل "1.0.0")
-    /// </summary>
-    string Version { get; }
-
-    /// <summary>
-    /// رقم البناء (مثل "1" أو "100")
-    /// </summary>
-    string Build { get; }
-
-    /// <summary>
-    /// رقم البناء كعدد صحيح
-    /// </summary>
-    int BuildNumber { get; }
-
-    /// <summary>
-    /// اسم الحزمة (مثل "com.ashare.ashare")
-    /// </summary>
-    string PackageName { get; }
-
-    /// <summary>
-    /// هل هذا تطبيق موبايل (MAUI)؟
-    /// </summary>
-    bool IsMobileApp { get; }
+    // Aliases are defined via global using above
 }

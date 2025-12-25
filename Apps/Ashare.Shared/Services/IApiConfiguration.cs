@@ -1,63 +1,15 @@
+// Re-export from ACommerce.Client.Core for backward compatibility
+// New code should use ACommerce.Client.Core.Configuration namespace directly
+global using IApiConfiguration = ACommerce.Client.Core.Configuration.IApiConfiguration;
+global using AppPlatform = ACommerce.Client.Core.Configuration.AppPlatform;
+
 namespace Ashare.Shared.Services;
 
 /// <summary>
-/// واجهة إعدادات API الموحدة لجميع المنصات
+/// هذا الملف يعيد تصدير IApiConfiguration و AppPlatform من Client.Core للتوافق العكسي
+/// الكود الجديد يجب أن يستخدم ACommerce.Client.Core.Configuration مباشرة
 /// </summary>
-public interface IApiConfiguration
+public static class ApiConfigurationInterfaceAliases
 {
-    /// <summary>
-    /// عنوان API الأساسي
-    /// </summary>
-    string BaseUrl { get; }
-
-    /// <summary>
-    /// عنوان API كـ Uri
-    /// </summary>
-    Uri BaseUri { get; }
-
-    /// <summary>
-    /// هل نستخدم البيئة المحلية؟
-    /// </summary>
-    bool IsLocalEnvironment { get; }
-
-    /// <summary>
-    /// نوع المنصة الحالية
-    /// </summary>
-    AppPlatform Platform { get; }
-}
-
-/// <summary>
-/// أنواع المنصات المدعومة
-/// </summary>
-public enum AppPlatform
-{
-    /// <summary>
-    /// تطبيق ويب (Blazor Server/WebAssembly)
-    /// </summary>
-    Web,
-
-    /// <summary>
-    /// تطبيق أندرويد (MAUI)
-    /// </summary>
-    Android,
-
-    /// <summary>
-    /// تطبيق iOS (MAUI)
-    /// </summary>
-    iOS,
-
-    /// <summary>
-    /// تطبيق Windows (MAUI/WinUI)
-    /// </summary>
-    Windows,
-
-    /// <summary>
-    /// تطبيق macOS (MAUI)
-    /// </summary>
-    MacOS,
-
-    /// <summary>
-    /// غير محدد
-    /// </summary>
-    Unknown
+    // Aliases are defined via global using above
 }

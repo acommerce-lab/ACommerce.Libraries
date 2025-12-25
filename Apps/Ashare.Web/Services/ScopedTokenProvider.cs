@@ -1,5 +1,5 @@
 using ACommerce.Client.Core.Interceptors;
-using Ashare.Shared.Services;
+using ACommerce.Client.Auth;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ashare.Web.Services;
@@ -29,7 +29,7 @@ public class ScopedTokenProvider : ITokenProvider
         {
             if (!_eventSubscribed)
             {
-                TokenStorageService.OnTokenChanged += OnTokenChanged;
+                StorageBackedTokenStorage.OnTokenChanged += OnTokenChanged;
                 _eventSubscribed = true;
                 Console.WriteLine("[ScopedTokenProvider] Subscribed to TokenStorageService.OnTokenChanged");
             }

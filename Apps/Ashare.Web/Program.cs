@@ -23,7 +23,7 @@ var apiBaseUrl = builder.Configuration["HostSettings:BaseUrl"]
 Console.WriteLine($"🌐 API Base URL: {apiBaseUrl}");
 
 builder.Services.AddScoped<IStorageService, BrowserStorageService>();
-builder.Services.AddScoped<ITokenStorage, TokenStorageService>();
+builder.Services.AddScoped<ITokenStorage, StorageBackedTokenStorage>();
 builder.Services.AddScoped<TokenManager>();
 builder.Services.AddSingleton<ScopedTokenProvider>();
 builder.Services.AddSingleton<ITokenProvider>(sp => sp.GetRequiredService<ScopedTokenProvider>());
