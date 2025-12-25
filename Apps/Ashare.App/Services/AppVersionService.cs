@@ -1,4 +1,4 @@
-using Ashare.Shared.Services;
+using ACommerce.Templates.Customer.Services;
 using Microsoft.Maui.ApplicationModel;
 
 namespace Ashare.App.Services;

@@ -86,7 +86,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ILocalizationService, LocalizationService>();
         services.AddScoped<AshareApiService>();
         services.AddScoped<PendingListingService>();
-        services.AddScoped<VersionCheckService>();
+        services.AddScoped<Services.VersionCheckService>();
 
         return services;
     }

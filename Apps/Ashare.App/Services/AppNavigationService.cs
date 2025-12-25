@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Components;
-using Ashare.Shared.Services;
+using ACommerce.Templates.Customer.Services;
 
 namespace Ashare.App.Services;
 

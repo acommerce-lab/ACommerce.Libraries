@@ -2,6 +2,7 @@ using Ashare.Shared.Extensions;
 using Ashare.Shared.Services;
 using ACommerce.Client.Auth;
 using ACommerce.Client.Realtime;
+using ACommerce.Client.Core.Storage;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Services.Analytics;
 using ACommerce.Templates.Customer.Themes;
