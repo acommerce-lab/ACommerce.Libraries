@@ -1,3 +1,4 @@
+using ACommerce.Client.Core.Configuration;
 using Ashare.Shared.Services;
 
 namespace Ashare.App.Services;
