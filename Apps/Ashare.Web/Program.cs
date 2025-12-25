@@ -40,6 +40,7 @@ builder.Services.AddScoped<IAppNavigationService, WebNavigationService>();
 builder.Services.AddScoped<SpaceDataService>();
 builder.Services.AddScoped<ITimezoneService, BrowserTimezoneService>();
 builder.Services.AddScoped<IPaymentService, WebPaymentService>();
+builder.Services.AddSingleton<IAppVersionService, WebAppVersionService>();
 builder.Services.AddACommerceAnalytics(builder.Configuration);
 builder.Services.AddLocalizationValidation();
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });

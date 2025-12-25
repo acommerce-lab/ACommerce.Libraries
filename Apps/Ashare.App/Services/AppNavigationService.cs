@@ -1,54 +1,22 @@
 using Microsoft.AspNetCore.Components;
-using ACommerce.Templates.Customer.Services;
+using Ashare.Shared.Services;
 
 namespace Ashare.App.Services;
 
 /// <summary>
 /// MAUI implementation of navigation service
 /// </summary>
-public class AppNavigationService : IAppNavigationService
+public class AppNavigationService : BaseNavigationService
 {
-    private readonly NavigationManager _navigationManager;
-    private readonly Stack<string> _history = new();
-
     public AppNavigationService(NavigationManager navigationManager)
+        : base(navigationManager)
     {
-        _navigationManager = navigationManager;
-    }
-
-    public string CurrentUri => _navigationManager.Uri;
-
-    public void NavigateTo(string uri, bool forceLoad = false)
-    {
-        _history.Push(_navigationManager.Uri);
-        _navigationManager.NavigateTo(uri, forceLoad);
-    }
-
-    public void NavigateBack()
-    {
-        if (_history.Count > 0)
-        {
-            var previousUri = _history.Pop();
-            _navigationManager.NavigateTo(previousUri);
-        }
-        else
-        {
-            _navigationManager.NavigateTo("/");
-        }
-    }
-
-    public void NavigateToAndClearHistory(string uri)
-    {
-        // Clear all navigation history to prevent back button returning to authenticated pages
-        _history.Clear();
-        // Navigate with force reload to ensure fresh state
-        _navigationManager.NavigateTo(uri, forceLoad: true);
     }
 
     /// <summary>
     /// Open location in native maps app using MAUI Essentials
     /// </summary>
-    public async Task OpenMapAsync(double latitude, double longitude, string? label = null)
+    public override async Task OpenMapAsync(double latitude, double longitude, string? label = null)
     {
         try
         {
@@ -85,7 +53,7 @@ public class AppNavigationService : IAppNavigationService
     /// <summary>
     /// Open external URL using MAUI Browser (more reliable for web URLs)
     /// </summary>
-    public async Task OpenExternalAsync(string url)
+    public override async Task OpenExternalAsync(string url)
     {
         try
         {
