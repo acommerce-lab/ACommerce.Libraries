@@ -70,4 +70,10 @@ public class BrowserStorageService : IStorageService
             Console.WriteLine($"[BrowserStorageService] RemoveAsync({key}) error: {ex.Message}");
         }
     }
+
+    public async Task<bool> ContainsKeyAsync(string key)
+    {
+        var value = await GetAsync(key);
+        return value != null;
+    }
 }

@@ -45,4 +45,10 @@ public class MauiStorageService : IStorageService
         }
         return Task.CompletedTask;
     }
+
+    public async Task<bool> ContainsKeyAsync(string key)
+    {
+        var value = await GetAsync(key);
+        return value != null;
+    }
 }
