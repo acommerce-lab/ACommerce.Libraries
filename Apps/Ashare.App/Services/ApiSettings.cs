@@ -1,4 +1,5 @@
 using Ashare.Shared.Services;
+using AshareApiConfig = Ashare.Shared.Services.ApiConfiguration;
 
 namespace Ashare.App.Services;
 
@@ -26,17 +27,17 @@ public static class ApiSettings
     /// <summary>
     /// Production API URL (Google Cloud Run - Dammam)
     /// </summary>
-    public const string ProductionUrl = ApiConfiguration.DefaultProductionUrl;
+    public const string ProductionUrl = AshareApiConfig.DefaultProductionUrl;
 
     /// <summary>
     /// Development URL for Android Emulator (10.0.2.2 maps to host's localhost)
     /// </summary>
-    public const string AndroidEmulatorUrl = ApiConfiguration.DefaultAndroidEmulatorUrl;
+    public const string AndroidEmulatorUrl = AshareApiConfig.DefaultAndroidEmulatorUrl;
 
     /// <summary>
     /// Development URL for Windows/Desktop
     /// </summary>
-    public const string LocalhostUrl = ApiConfiguration.DefaultLocalhostUrl;
+    public const string LocalhostUrl = AshareApiConfig.DefaultLocalhostUrl;
 
     // ═══════════════════════════════════════════════════════════════════════════
     // 🎯 الإعدادات المشتركة
@@ -50,7 +51,7 @@ public static class ApiSettings
     public static void Initialize()
     {
         var platform = GetCurrentPlatform();
-        _configuration = new ApiConfiguration(platform, UseLocalApi);
+        _configuration = new AshareApiConfig(platform, UseLocalApi);
     }
 
     /// <summary>
