@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using ACommerce.Authentication.Abstractions;
 using ACommerce.Authentication.AspNetCore.Controllers;
+using ACommerce.Marketing.Analytics.Services;
 using ACommerce.Profiles.Entities;
 using ACommerce.Profiles.Enums;
 using ACommerce.SharedKernel.Abstractions.Repositories;
@@ -19,17 +20,20 @@ public class AuthController : AuthenticationControllerBase
 {
     private readonly IBaseAsyncRepository<Profile> _profileRepository;
     private readonly DbContext _dbContext;
+    private readonly IMarketingEventTracker _marketingTracker;
 
     public AuthController(
         IAuthenticationProvider authProvider,
         ITwoFactorAuthenticationProvider twoFactorProvider,
         IBaseAsyncRepository<Profile> profileRepository,
         DbContext dbContext,
+        IMarketingEventTracker marketingTracker,
         ILogger<AuthController> logger)
         : base(authProvider, twoFactorProvider, logger)
     {
         _profileRepository = profileRepository;
         _dbContext = dbContext;
+        _marketingTracker = marketingTracker;
     }
 
     #region Nafath Authentication
@@ -160,6 +164,43 @@ public class AuthController : AuthenticationControllerBase
                     Message = "فشل إنشاء الجلسة"
                 });
             }
+
+            // تتبع الحدث التسويقي
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var userContext = new UserTrackingContext
+                    {
+                        UserId = profile.Id.ToString(),
+                        Phone = profile.PhoneNumber,
+                        FirstName = profile.FullName,
+                        IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                        UserAgent = Request.Headers.UserAgent.ToString()
+                    };
+
+                    if (isNewUser)
+                    {
+                        await _marketingTracker.TrackRegistrationAsync(new RegistrationTrackingRequest
+                        {
+                            Method = "nafath",
+                            User = userContext
+                        });
+                    }
+                    else
+                    {
+                        await _marketingTracker.TrackLoginAsync(new LoginTrackingRequest
+                        {
+                            Method = "nafath",
+                            User = userContext
+                        });
+                    }
+                }
+                catch (Exception trackEx)
+                {
+                    Logger.LogWarning(trackEx, "فشل تتبع حدث المصادقة");
+                }
+            });
 
             return Ok(new LoginResponse
             {

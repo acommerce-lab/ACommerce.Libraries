@@ -86,6 +86,9 @@ using ACommerce.Bookings.Api.Controllers;
 
 // Marketing & Analytics
 using ACommerce.Marketing.MetaConversions.Extensions;
+using ACommerce.Marketing.Analytics.Extensions;
+using ACommerce.Marketing.Analytics.Services;
+using ACommerce.Marketing.Analytics.Controllers;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -176,7 +179,8 @@ try
         .AddApplicationPart(typeof(AuditLogController).Assembly) // Admin Audit Log
         .AddApplicationPart(typeof(LegalPagesController).Assembly) // Legal Pages
         .AddApplicationPart(typeof(AppVersionsController).Assembly) // Version Management
-        .AddApplicationPart(typeof(BookingsController).Assembly); // Bookings
+        .AddApplicationPart(typeof(BookingsController).Assembly) // Bookings
+        .AddApplicationPart(typeof(MarketingStatsController).Assembly); // Marketing Analytics
 
     builder.Services.AddEndpointsApiExplorer();
 
@@ -305,6 +309,9 @@ try
 
     // Meta Conversions API (Facebook Server-Side Events)
     builder.Services.AddMetaConversions(builder.Configuration);
+
+    // Marketing Analytics (Local Storage + Meta CAPI Integration)
+    builder.Services.AddMarketingAnalytics();
 
     // Subscription Services
     builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();

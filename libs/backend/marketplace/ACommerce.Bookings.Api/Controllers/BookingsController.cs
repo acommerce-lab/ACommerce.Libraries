@@ -1,11 +1,14 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using ACommerce.Bookings.Entities;
 using ACommerce.Bookings.DTOs;
 using ACommerce.Bookings.Enums;
+using ACommerce.Marketing.Analytics.Services;
 using ACommerce.SharedKernel.AspNetCore.Controllers;
 using ACommerce.SharedKernel.Abstractions.Queries;
+using ACommerce.SharedKernel.Abstractions.Repositories;
 using ACommerce.SharedKernel.CQRS.Queries;
 
 namespace ACommerce.Bookings.Api.Controllers;
@@ -15,9 +18,15 @@ namespace ACommerce.Bookings.Api.Controllers;
 /// </summary>
 public class BookingsController(
     IMediator mediator,
+    IMarketingEventTracker marketingTracker,
+    IBaseAsyncRepository<Booking> bookingRepository,
+    IHttpContextAccessor httpContextAccessor,
     ILogger<BookingsController> logger)
     : BaseCrudController<Booking, CreateBookingDto, UpdateBookingDto, BookingResponseDto, UpdateBookingDto>(mediator, logger)
 {
+    private readonly IMarketingEventTracker _marketingTracker = marketingTracker;
+    private readonly IBaseAsyncRepository<Booking> _bookingRepository = bookingRepository;
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
     /// <summary>
     /// الحصول على حجوزات المستأجر
     /// </summary>
@@ -156,13 +165,50 @@ public class BookingsController(
     {
         try
         {
+            // جلب الحجز من قاعدة البيانات
+            var booking = await _bookingRepository.GetByIdAsync(id);
+            if (booking == null)
+            {
+                return NotFound(new { success = false, message = "الحجز غير موجود" });
+            }
+
             // TODO: Implement confirmation logic
-            // 1. Get booking and verify status is DepositPaid
+            // 1. Verify status is DepositPaid
             // 2. Verify caller is the host
             // 3. Update status to Confirmed
             // 4. Send notification to customer
 
             _logger.LogInformation("Confirming booking {BookingId}", id);
+
+            // تتبع حدث الشراء (Purchase) عند تأكيد الحجز
+            var ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+            var userAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString();
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _marketingTracker.TrackPurchaseAsync(new PurchaseTrackingRequest
+                    {
+                        TransactionId = id.ToString(),
+                        Value = booking.TotalPrice,
+                        Currency = booking.Currency,
+                        ContentName = booking.SpaceName,
+                        ContentIds = new[] { booking.SpaceId.ToString() },
+                        ContentType = "booking",
+                        User = new UserTrackingContext
+                        {
+                            UserId = booking.CustomerId,
+                            IpAddress = ipAddress,
+                            UserAgent = userAgent
+                        }
+                    });
+                }
+                catch (Exception trackEx)
+                {
+                    _logger.LogWarning(trackEx, "فشل تتبع حدث تأكيد الحجز");
+                }
+            });
 
             return Ok(new { success = true, message = "تم تأكيد الحجز بنجاح" });
         }

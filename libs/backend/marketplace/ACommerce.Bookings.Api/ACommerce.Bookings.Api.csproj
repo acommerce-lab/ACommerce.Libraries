@@ -15,6 +15,7 @@
     <ProjectReference Include="..\ACommerce.Bookings\ACommerce.Bookings.csproj" />
     <ProjectReference Include="..\..\integration\ACommerce.SharedKernel.AspNetCore\ACommerce.SharedKernel.AspNetCore.csproj" />
     <ProjectReference Include="..\..\core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
+    <ProjectReference Include="..\..\marketing\ACommerce.Marketing.Analytics\ACommerce.Marketing.Analytics.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
