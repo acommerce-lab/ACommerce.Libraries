@@ -2,6 +2,7 @@ using HamtramckHardware.Shared.Extensions;
 using HamtramckHardware.Shared.Services;
 using HamtramckHardware.Web.Services;
 using ACommerce.Client.Auth;
+using ACommerce.Client.Core.Interceptors;
 using ACommerce.Client.Core.Storage;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Themes;
@@ -38,10 +39,14 @@ builder.Services.AddScoped<IStorageService, BrowserStorageService>();
 builder.Services.AddScoped<ITokenStorage, StorageBackedTokenStorage>();
 builder.Services.AddScoped<TokenManager>();
 
+// ScopedTokenProvider for HttpClient handlers (singleton wrapper for scoped TokenManager)
+builder.Services.AddSingleton<ScopedTokenProvider>();
+builder.Services.AddSingleton<ITokenProvider>(sp => sp.GetRequiredService<ScopedTokenProvider>());
+
 // API Clients
 builder.Services.AddHamtramckClients(apiConfig.BaseUrl, options =>
 {
-    options.TokenProvider = sp => sp.GetRequiredService<TokenManager>();
+    options.TokenProvider = sp => sp.GetRequiredService<ScopedTokenProvider>();
 });
 
 // App Services
