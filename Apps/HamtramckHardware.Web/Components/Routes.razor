@@ -1,12 +1,12 @@
-<Router AppAssembly="typeof(Program).Assembly"
-        AdditionalAssemblies="new[] { typeof(HamtramckHardware.Shared._Imports).Assembly }">
+<Router AppAssembly="@typeof(Program).Assembly"
+        AdditionalAssemblies="@(new[] { typeof(HamtramckHardware.Shared._Imports).Assembly })">
     <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(HamtramckHardware.Shared.Components.Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(HamtramckHardware.Shared.Components.Layout.MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
     <NotFound>
         <PageTitle>Not Found</PageTitle>
-        <LayoutView Layout="typeof(HamtramckHardware.Shared.Components.Layout.MainLayout)">
+        <LayoutView Layout="@typeof(HamtramckHardware.Shared.Components.Layout.MainLayout)">
             <div class="hh-card" style="text-align: center; padding: 40px; margin: 20px;">
                 <i class="bi bi-emoji-frown" style="font-size: 4rem; color: var(--hh-text-secondary);"></i>
                 <h2 style="margin-top: 16px;">Page Not Found</h2>
