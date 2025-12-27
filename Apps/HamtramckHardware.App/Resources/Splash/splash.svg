@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background (will be set via MauiSplashScreen Color) -->
+  <!-- Tools Icon -->
+  <g transform="translate(156, 156) scale(0.78)" fill="#FFFFFF">
+    <!-- Hammer -->
+    <path d="M32 96h64v256H32V96z"/>
+    <path d="M16 32h96v48H16V32z"/>
+    <!-- Wrench -->
+    <path d="M160 160c0-26.5 21.5-48 48-48c18.5 0 34.6 10.4 42.6 25.7l33.4-19.3c-15.4-26.7-44.4-44.7-76-44.7c-49.6 0-89.9 40.3-89.9 89.9s40.3 89.9 89.9 89.9c31.6 0 60.6-18 76-44.7l-33.4-19.3c-8 15.3-24.1 25.7-42.6 25.7c-26.5 0-48-21.5-48-48z"/>
+  </g>
+</svg>
