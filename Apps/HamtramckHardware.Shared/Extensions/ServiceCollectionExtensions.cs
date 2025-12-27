@@ -4,7 +4,6 @@ using ACommerce.Client.Cart.Extensions;
 using ACommerce.Client.Categories;
 using ACommerce.Client.Categories.Extensions;
 using ACommerce.Client.Core.Extensions;
-using ACommerce.Client.Core.Interceptors;
 using ACommerce.Client.Orders;
 using ACommerce.Client.Orders.Extensions;
 using ACommerce.Client.Payments;
@@ -20,6 +19,9 @@ namespace HamtramckHardware.Shared.Extensions;
 
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// Add Hamtramck Hardware API clients
+    /// </summary>
     public static IServiceCollection AddHamtramckClients(
         this IServiceCollection services,
         string apiBaseUrl,
@@ -61,6 +63,9 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>
+    /// Add Hamtramck Hardware services
+    /// </summary>
     public static IServiceCollection AddHamtramckServices(this IServiceCollection services)
     {
         services.AddScoped<ILocalizationService, LocalizationService>();
@@ -68,12 +73,4 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
-}
-
-public class ClientOptions
-{
-    public int TimeoutSeconds { get; set; } = 30;
-    public bool EnableAuthentication { get; set; } = true;
-    public bool BypassSslValidation { get; set; } = false;
-    public Func<IServiceProvider, ITokenProvider>? TokenProvider { get; set; }
 }
