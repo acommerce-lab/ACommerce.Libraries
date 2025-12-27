@@ -194,8 +194,13 @@ public class MetaConversionsService : IMetaConversionsService
                 return result;
             }
 
+            _logger.LogError("[MetaConversions] Error Response: {Content}", content);
             var error = JsonSerializer.Deserialize<ConversionErrorResponse>(content);
-            _logger.LogError("[MetaConversions] Error: {Message}", error?.Error?.Message);
+            _logger.LogError("[MetaConversions] Error: {Message}, Code: {Code}, Type: {Type}, Subcode: {Subcode}",
+                error?.Error?.Message,
+                error?.Error?.Code,
+                error?.Error?.Type,
+                error?.Error?.ErrorSubcode);
             return null;
         }
         catch (Exception ex)
