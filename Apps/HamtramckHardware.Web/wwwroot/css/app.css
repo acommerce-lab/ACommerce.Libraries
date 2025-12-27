@@ -1,0 +1,72 @@
+/* Hamtramck Hardware Web App Styles */
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--hh-font-family, 'Roboto', sans-serif);
+}
+
+/* Fix for Blazor validation */
+.validation-message {
+    color: var(--hh-error);
+    font-size: 0.75rem;
+    margin-top: 4px;
+}
+
+.invalid {
+    border-color: var(--hh-error) !important;
+}
+
+/* Loading indicator */
+.loading-progress {
+    position: relative;
+    display: block;
+    width: 8rem;
+    height: 8rem;
+    margin: 20vh auto 1rem auto;
+}
+
+.loading-progress circle {
+    fill: none;
+    stroke: var(--hh-primary, #E65100);
+    stroke-width: 0.6rem;
+    transform-origin: 50% 50%;
+    transform: rotate(-90deg);
+}
+
+.loading-progress circle:last-child {
+    stroke: var(--hh-border, #E0E0E0);
+    stroke-dasharray: calc(3.14 * 8rem);
+    stroke-dashoffset: calc(3.14 * 8rem);
+}
+
+.loading-progress-text {
+    position: absolute;
+    text-align: center;
+    font-weight: bold;
+    inset: calc(20vh + 3.25rem) 0 auto 0;
+}
+
+.loading-progress-text::after {
+    content: "Loading...";
+}
+
+/* Error UI */
+#blazor-error-ui {
+    background: var(--hh-error);
+    color: white;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    text-align: center;
+    display: none;
+    z-index: 9999;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 1rem;
+}
