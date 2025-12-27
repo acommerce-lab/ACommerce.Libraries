@@ -1,0 +1,89 @@
+@page "/categories"
+@inject ILocalizationService L
+@inject IAppNavigationService Navigation
+@inject CategoriesClient CategoriesClient
+
+<div class="hh-page-content">
+    <h1 class="hh-page-title">Shop by Category</h1>
+
+    <div class="hh-categories-grid">
+        @foreach (var category in _categories)
+        {
+            <div class="hh-category-card" @onclick="() => OpenCategory(category.Code)">
+                <div class="hh-category-card-icon" style="background-color: @category.Color;">
+                    <i class="@category.Icon"></i>
+                </div>
+                <div class="hh-category-card-info">
+                    <h3>@category.Name</h3>
+                    <p>@category.Description</p>
+                </div>
+                <i class="bi bi-chevron-right hh-category-arrow"></i>
+            </div>
+        }
+    </div>
+
+    <!-- Store Services Section -->
+    <div class="hh-section-header" style="margin-top: 24px;">
+        <span class="hh-section-title">Our Services</span>
+    </div>
+
+    <div class="hh-services-grid">
+        <div class="hh-service-card">
+            <i class="bi bi-scissors"></i>
+            <span>Key Cutting</span>
+        </div>
+        <div class="hh-service-card">
+            <i class="bi bi-droplet"></i>
+            <span>Pipe Threading</span>
+        </div>
+        <div class="hh-service-card">
+            <i class="bi bi-palette"></i>
+            <span>Paint Mixing</span>
+        </div>
+        <div class="hh-service-card">
+            <i class="bi bi-truck"></i>
+            <span>Delivery</span>
+        </div>
+        <div class="hh-service-card">
+            <i class="bi bi-tools"></i>
+            <span>Tool Rental</span>
+        </div>
+        <div class="hh-service-card">
+            <i class="bi bi-window"></i>
+            <span>Glass Cutting</span>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<CategoryInfo> _categories = new();
+
+    protected override void OnInitialized()
+    {
+        _categories = GetCategories();
+    }
+
+    private List<CategoryInfo> GetCategories()
+    {
+        return new List<CategoryInfo>
+        {
+            new("plumbing", "Plumbing", "bi bi-droplet", "#2196F3", "Pipes, fittings, faucets & fixtures"),
+            new("electrical", "Electrical", "bi bi-lightning-charge", "#FFC107", "Wire, outlets, switches & breakers"),
+            new("tools", "Tools", "bi bi-tools", "#E65100", "Power tools, hand tools & accessories"),
+            new("lawn", "Lawn & Garden", "bi bi-flower1", "#4CAF50", "Mowers, trimmers & outdoor supplies"),
+            new("paint", "Paint", "bi bi-palette", "#9C27B0", "Interior, exterior & stains"),
+            new("lumber", "Lumber", "bi bi-box", "#795548", "Boards, plywood & treated lumber"),
+            new("flooring", "Flooring", "bi bi-grid-3x3", "#607D8B", "Tile, vinyl, hardwood & carpet"),
+            new("hardware", "Hardware", "bi bi-nut", "#455A64", "Fasteners, hinges, locks & more"),
+            new("heating", "Heating & Cooling", "bi bi-thermometer-half", "#F44336", "HVAC supplies & accessories"),
+            new("cleaning", "Cleaning Supplies", "bi bi-droplet-half", "#00BCD4", "Cleaners, mops & buckets"),
+        };
+    }
+
+    private void OpenCategory(string code)
+    {
+        Navigation.NavigateTo($"/products?category={code}");
+    }
+
+    private record CategoryInfo(string Code, string Name, string Icon, string Color, string Description);
+}

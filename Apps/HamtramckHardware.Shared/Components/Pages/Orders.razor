@@ -1,0 +1,207 @@
+@page "/orders"
+@inject ILocalizationService L
+@inject IAppNavigationService Navigation
+@inject OrdersClient OrdersClient
+@inject TokenManager TokenManager
+
+<div class="hh-page-content">
+    <h1 class="hh-page-title">
+        <i class="bi bi-box-seam"></i> My Orders
+    </h1>
+
+    @if (!_isLoggedIn)
+    {
+        <div class="hh-empty-state">
+            <i class="bi bi-person-lock"></i>
+            <h2>Sign In Required</h2>
+            <p>Please sign in to view your order history.</p>
+            <button class="hh-btn hh-btn-primary" @onclick="GoToLogin">
+                <i class="bi bi-box-arrow-in-right"></i> Sign In
+            </button>
+        </div>
+    }
+    else if (_isLoading)
+    {
+        <div class="hh-loading-container">
+            <div class="hh-spinner"></div>
+            <p>Loading your orders...</p>
+        </div>
+    }
+    else if (!_orders.Any())
+    {
+        <div class="hh-empty-state">
+            <i class="bi bi-bag-x"></i>
+            <h2>No Orders Yet</h2>
+            <p>You haven't placed any orders yet.</p>
+            <button class="hh-btn hh-btn-primary" @onclick="GoShopping">
+                <i class="bi bi-bag"></i> Start Shopping
+            </button>
+        </div>
+    }
+    else
+    {
+        <!-- Order Tabs -->
+        <div class="hh-order-tabs">
+            <button class="hh-tab @(_selectedTab == "all" ? "active" : "")" @onclick='() => SelectTab("all")'>
+                All
+            </button>
+            <button class="hh-tab @(_selectedTab == "pending" ? "active" : "")" @onclick='() => SelectTab("pending")'>
+                Pending
+            </button>
+            <button class="hh-tab @(_selectedTab == "shipped" ? "active" : "")" @onclick='() => SelectTab("shipped")'>
+                Shipped
+            </button>
+            <button class="hh-tab @(_selectedTab == "delivered" ? "active" : "")" @onclick='() => SelectTab("delivered")'>
+                Delivered
+            </button>
+        </div>
+
+        <!-- Orders List -->
+        <div class="hh-orders-list">
+            @foreach (var order in FilteredOrders)
+            {
+                <div class="hh-order-card hh-card">
+                    <div class="hh-order-header">
+                        <div>
+                            <span class="hh-order-number">Order #@order.OrderNumber</span>
+                            <span class="hh-order-date">@order.Date.ToString("MMM dd, yyyy")</span>
+                        </div>
+                        <span class="hh-order-status @order.Status.ToLower()">
+                            @GetStatusIcon(order.Status)
+                            @order.Status
+                        </span>
+                    </div>
+
+                    <div class="hh-order-items">
+                        @foreach (var item in order.Items.Take(3))
+                        {
+                            <div class="hh-order-item">
+                                <img src="@(item.ImageUrl ?? "/images/placeholder-product.png")"
+                                     alt="@item.Name"
+                                     class="hh-order-item-image" />
+                                <div class="hh-order-item-info">
+                                    <span class="hh-order-item-name">@item.Name</span>
+                                    <span class="hh-order-item-qty">Qty: @item.Quantity</span>
+                                </div>
+                            </div>
+                        }
+                        @if (order.Items.Count > 3)
+                        {
+                            <div class="hh-order-more-items">
+                                +@(order.Items.Count - 3) more items
+                            </div>
+                        }
+                    </div>
+
+                    <div class="hh-order-footer">
+                        <div class="hh-order-total">
+                            <span>Total:</span>
+                            <span class="hh-order-amount">$@order.Total.ToString("0.00")</span>
+                        </div>
+                        <button class="hh-btn hh-btn-secondary hh-btn-sm" @onclick="() => ViewOrder(order.Id)">
+                            View Details <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private bool _isLoading = true;
+    private bool _isLoggedIn = false;
+    private string _selectedTab = "all";
+    private List<OrderModel> _orders = new();
+
+    private IEnumerable<OrderModel> FilteredOrders => _selectedTab == "all"
+        ? _orders
+        : _orders.Where(o => o.Status.Equals(_selectedTab, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await TokenManager.GetTokenAsync();
+        _isLoggedIn = !string.IsNullOrEmpty(token);
+
+        if (_isLoggedIn)
+        {
+            await LoadOrders();
+        }
+        else
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadOrders()
+    {
+        try
+        {
+            _isLoading = true;
+
+            // Simulate API call
+            await Task.Delay(300);
+
+            // Mock orders data
+            _orders = new List<OrderModel>
+            {
+                new(Guid.NewGuid(), "HH-2024-001", DateTime.Now.AddDays(-2), "Shipped", 174.98m,
+                    new List<OrderItemModel>
+                    {
+                        new("DeWalt 20V MAX Cordless Drill", 1, "/images/products/drill.jpg"),
+                        new("Copper Pipe Fittings Set", 2, "/images/products/fittings.jpg"),
+                    }),
+                new(Guid.NewGuid(), "HH-2024-002", DateTime.Now.AddDays(-10), "Delivered", 89.97m,
+                    new List<OrderItemModel>
+                    {
+                        new("LED Shop Light 4ft", 1, "/images/products/light.jpg"),
+                        new("Electrical Wire 100ft", 1, "/images/products/wire.jpg"),
+                    }),
+            };
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading orders: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void SelectTab(string tab)
+    {
+        _selectedTab = tab;
+    }
+
+    private string GetStatusIcon(string status)
+    {
+        return status.ToLower() switch
+        {
+            "pending" => "<i class='bi bi-clock'></i>",
+            "processing" => "<i class='bi bi-gear'></i>",
+            "shipped" => "<i class='bi bi-truck'></i>",
+            "delivered" => "<i class='bi bi-check-circle'></i>",
+            "cancelled" => "<i class='bi bi-x-circle'></i>",
+            _ => "<i class='bi bi-circle'></i>"
+        };
+    }
+
+    private void ViewOrder(Guid orderId)
+    {
+        Navigation.NavigateTo($"/order/{orderId}");
+    }
+
+    private void GoToLogin()
+    {
+        Navigation.NavigateTo("/login");
+    }
+
+    private void GoShopping()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private record OrderModel(Guid Id, string OrderNumber, DateTime Date, string Status, decimal Total, List<OrderItemModel> Items);
+    private record OrderItemModel(string Name, int Quantity, string? ImageUrl);
+}

@@ -1,0 +1,249 @@
+@page "/search"
+@inject ILocalizationService L
+@inject IAppNavigationService Navigation
+@inject ProductsClient ProductsClient
+
+<div class="hh-page-content hh-search-page">
+    <!-- Search Input -->
+    <div class="hh-search-container">
+        <div class="hh-search-input-wrapper">
+            <i class="bi bi-search"></i>
+            <input type="text"
+                   class="hh-search-input"
+                   placeholder="Search tools, plumbing, electrical..."
+                   @bind="_searchQuery"
+                   @bind:event="oninput"
+                   @onkeyup="HandleKeyUp"
+                   autofocus />
+            @if (!string.IsNullOrEmpty(_searchQuery))
+            {
+                <button class="hh-search-clear" @onclick="ClearSearch">
+                    <i class="bi bi-x-circle-fill"></i>
+                </button>
+            }
+        </div>
+        <button class="hh-btn hh-btn-primary" @onclick="PerformSearch" disabled="@(string.IsNullOrWhiteSpace(_searchQuery))">
+            Search
+        </button>
+    </div>
+
+    @if (!_hasSearched)
+    {
+        <!-- Recent Searches -->
+        @if (_recentSearches.Any())
+        {
+            <div class="hh-search-section">
+                <div class="hh-section-header">
+                    <span class="hh-section-title">Recent Searches</span>
+                    <button class="hh-link-btn" @onclick="ClearRecentSearches">Clear</button>
+                </div>
+                <div class="hh-recent-searches">
+                    @foreach (var search in _recentSearches)
+                    {
+                        <div class="hh-recent-item" @onclick="() => SearchFromRecent(search)">
+                            <i class="bi bi-clock-history"></i>
+                            <span>@search</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Popular Searches -->
+        <div class="hh-search-section">
+            <h3 class="hh-section-title">Popular Searches</h3>
+            <div class="hh-popular-tags">
+                @foreach (var tag in _popularSearches)
+                {
+                    <button class="hh-search-tag" @onclick="() => SearchFromRecent(tag)">
+                        @tag
+                    </button>
+                }
+            </div>
+        </div>
+
+        <!-- Browse by Department -->
+        <div class="hh-search-section">
+            <h3 class="hh-section-title">Browse Departments</h3>
+            <div class="hh-department-list">
+                @foreach (var dept in _departments)
+                {
+                    <div class="hh-department-item" @onclick="() => BrowseDepartment(dept.Code)">
+                        <i class="@dept.Icon"></i>
+                        <span>@dept.Name</span>
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else if (_isSearching)
+    {
+        <div class="hh-loading-container">
+            <div class="hh-spinner"></div>
+            <p>Searching...</p>
+        </div>
+    }
+    else if (!_searchResults.Any())
+    {
+        <div class="hh-empty-state">
+            <i class="bi bi-search"></i>
+            <h2>No Results Found</h2>
+            <p>We couldn't find anything for "@_searchQuery"</p>
+            <div class="hh-search-suggestions">
+                <p>Try:</p>
+                <ul>
+                    <li>Checking your spelling</li>
+                    <li>Using more general terms</li>
+                    <li>Browsing our categories</li>
+                </ul>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Search Results -->
+        <div class="hh-search-results">
+            <p class="hh-results-count">@_searchResults.Count results for "@_searchQuery"</p>
+
+            <div class="hh-products-grid">
+                @foreach (var product in _searchResults)
+                {
+                    <div class="hh-product-card" @onclick="() => ViewProduct(product.Id)">
+                        <img src="@(product.ImageUrl ?? "/images/placeholder-product.png")"
+                             alt="@product.Name"
+                             class="hh-product-image" />
+                        <div class="hh-product-info">
+                            <div class="hh-product-name">@product.Name</div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="hh-product-price">$@product.Price.ToString("0.00")</span>
+                                @if (product.OriginalPrice.HasValue && product.OriginalPrice > product.Price)
+                                {
+                                    <span class="hh-product-original-price">$@product.OriginalPrice.Value.ToString("0.00")</span>
+                                }
+                            </div>
+                            <span class="hh-stock-badge @(product.InStock ? "in-stock" : "out-of-stock")">
+                                @(product.InStock ? L["InStock"] : L["OutOfStock"])
+                            </span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private string _searchQuery = "";
+    private bool _hasSearched = false;
+    private bool _isSearching = false;
+    private List<ProductItem> _searchResults = new();
+    private List<string> _recentSearches = new() { "drill", "pvc pipe", "electrical tape" };
+    private List<string> _popularSearches = new() { "DeWalt", "Milwaukee", "copper fitting", "LED lights", "paint brush", "wood screws" };
+    private List<DepartmentItem> _departments = new();
+
+    protected override void OnInitialized()
+    {
+        _departments = new List<DepartmentItem>
+        {
+            new("plumbing", "Plumbing", "bi bi-droplet"),
+            new("electrical", "Electrical", "bi bi-lightning-charge"),
+            new("tools", "Tools", "bi bi-tools"),
+            new("lawn", "Lawn & Garden", "bi bi-flower1"),
+            new("paint", "Paint", "bi bi-palette"),
+            new("lumber", "Lumber", "bi bi-box"),
+        };
+    }
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(_searchQuery))
+        {
+            await PerformSearch();
+        }
+    }
+
+    private async Task PerformSearch()
+    {
+        if (string.IsNullOrWhiteSpace(_searchQuery)) return;
+
+        _isSearching = true;
+        _hasSearched = true;
+        StateHasChanged();
+
+        try
+        {
+            // Simulate API call
+            await Task.Delay(500);
+
+            // Add to recent searches
+            if (!_recentSearches.Contains(_searchQuery, StringComparer.OrdinalIgnoreCase))
+            {
+                _recentSearches.Insert(0, _searchQuery);
+                if (_recentSearches.Count > 5)
+                    _recentSearches = _recentSearches.Take(5).ToList();
+            }
+
+            // Mock search results based on query
+            _searchResults = GetMockSearchResults(_searchQuery);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Search error: {ex.Message}");
+        }
+        finally
+        {
+            _isSearching = false;
+        }
+    }
+
+    private List<ProductItem> GetMockSearchResults(string query)
+    {
+        var allProducts = new List<ProductItem>
+        {
+            new(Guid.NewGuid(), "DeWalt 20V MAX Cordless Drill", 149.99m, null, true, "/images/products/drill.jpg"),
+            new(Guid.NewGuid(), "Copper Pipe Fittings Set", 24.99m, 29.99m, true, "/images/products/fittings.jpg"),
+            new(Guid.NewGuid(), "LED Shop Light 4ft", 39.99m, null, true, "/images/products/light.jpg"),
+            new(Guid.NewGuid(), "Milwaukee Hammer Drill", 299.99m, 349.99m, true, "/images/products/hammer-drill.jpg"),
+            new(Guid.NewGuid(), "PVC Pipe 10ft Bundle", 18.99m, null, true, "/images/products/pvc.jpg"),
+            new(Guid.NewGuid(), "Electrical Wire 100ft", 45.99m, null, true, "/images/products/wire.jpg"),
+            new(Guid.NewGuid(), "Socket Wrench Set 40pc", 79.99m, 99.99m, true, "/images/products/socket-set.jpg"),
+            new(Guid.NewGuid(), "Garden Hose 50ft", 29.99m, null, false, "/images/products/hose.jpg"),
+        };
+
+        return allProducts
+            .Where(p => p.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    private void SearchFromRecent(string query)
+    {
+        _searchQuery = query;
+        _ = PerformSearch();
+    }
+
+    private void ClearSearch()
+    {
+        _searchQuery = "";
+        _hasSearched = false;
+        _searchResults.Clear();
+    }
+
+    private void ClearRecentSearches()
+    {
+        _recentSearches.Clear();
+    }
+
+    private void BrowseDepartment(string code)
+    {
+        Navigation.NavigateTo($"/products?category={code}");
+    }
+
+    private void ViewProduct(Guid id)
+    {
+        Navigation.NavigateTo($"/product/{id}");
+    }
+
+    private record ProductItem(Guid Id, string Name, decimal Price, decimal? OriginalPrice, bool InStock, string? ImageUrl);
+    private record DepartmentItem(string Code, string Name, string Icon);
+}

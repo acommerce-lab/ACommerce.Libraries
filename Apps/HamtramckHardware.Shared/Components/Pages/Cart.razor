@@ -1,0 +1,215 @@
+@page "/cart"
+@inject ILocalizationService L
+@inject IAppNavigationService Navigation
+@inject CartClient CartClient
+
+<div class="hh-page-content">
+    <h1 class="hh-page-title">
+        <i class="bi bi-cart3"></i> Shopping Cart
+        @if (_cartItems.Any())
+        {
+            <span class="hh-cart-item-count">(@_cartItems.Count @(_cartItems.Count == 1 ? "item" : "items"))</span>
+        }
+    </h1>
+
+    @if (_isLoading)
+    {
+        <div class="hh-loading-container">
+            <div class="hh-spinner"></div>
+            <p>Loading your cart...</p>
+        </div>
+    }
+    else if (!_cartItems.Any())
+    {
+        <div class="hh-empty-state">
+            <i class="bi bi-cart-x"></i>
+            <h2>Your Cart is Empty</h2>
+            <p>Looks like you haven't added any items yet.</p>
+            <button class="hh-btn hh-btn-primary" @onclick="GoShopping">
+                <i class="bi bi-bag"></i> Start Shopping
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="hh-cart-content">
+            <!-- Cart Items -->
+            <div class="hh-cart-items">
+                @foreach (var item in _cartItems)
+                {
+                    <div class="hh-cart-item">
+                        <img src="@(item.ImageUrl ?? "/images/placeholder-product.png")"
+                             alt="@item.Name"
+                             class="hh-cart-item-image" />
+                        <div class="hh-cart-item-details">
+                            <h3 class="hh-cart-item-name">@item.Name</h3>
+                            @if (!string.IsNullOrEmpty(item.Variant))
+                            {
+                                <p class="hh-cart-item-variant">@item.Variant</p>
+                            }
+                            <div class="hh-cart-item-price">$@item.Price.ToString("0.00")</div>
+                        </div>
+                        <div class="hh-cart-item-actions">
+                            <div class="hh-quantity-control">
+                                <button class="hh-qty-btn" @onclick="() => UpdateQuantity(item.Id, item.Quantity - 1)" disabled="@(item.Quantity <= 1)">
+                                    <i class="bi bi-dash"></i>
+                                </button>
+                                <span class="hh-qty-value">@item.Quantity</span>
+                                <button class="hh-qty-btn" @onclick="() => UpdateQuantity(item.Id, item.Quantity + 1)">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
+                            <button class="hh-remove-btn" @onclick="() => RemoveItem(item.Id)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Order Summary -->
+            <div class="hh-cart-summary hh-card">
+                <h3>Order Summary</h3>
+
+                <div class="hh-summary-row">
+                    <span>Subtotal</span>
+                    <span>$@_subtotal.ToString("0.00")</span>
+                </div>
+
+                @if (_discount > 0)
+                {
+                    <div class="hh-summary-row hh-discount">
+                        <span>Discount</span>
+                        <span>-$@_discount.ToString("0.00")</span>
+                    </div>
+                }
+
+                <div class="hh-summary-row">
+                    <span>Estimated Tax</span>
+                    <span>$@_tax.ToString("0.00")</span>
+                </div>
+
+                <div class="hh-summary-row">
+                    <span>Shipping</span>
+                    <span>@(_subtotal >= 50 ? "FREE" : "$5.99")</span>
+                </div>
+
+                @if (_subtotal < 50)
+                {
+                    <div class="hh-free-shipping-notice">
+                        <i class="bi bi-truck"></i>
+                        Add $@((50 - _subtotal).ToString("0.00")) more for FREE shipping!
+                    </div>
+                }
+
+                <hr />
+
+                <div class="hh-summary-row hh-total">
+                    <span>Total</span>
+                    <span>$@_total.ToString("0.00")</span>
+                </div>
+
+                <button class="hh-btn hh-btn-primary hh-btn-block" @onclick="Checkout">
+                    <i class="bi bi-lock"></i> Proceed to Checkout
+                </button>
+
+                <div class="hh-payment-methods">
+                    <span>We accept:</span>
+                    <i class="bi bi-credit-card"></i>
+                    <i class="bi bi-paypal"></i>
+                    <i class="bi bi-wallet2"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Continue Shopping -->
+        <div class="hh-continue-shopping">
+            <a href="/" @onclick:preventDefault @onclick="GoShopping">
+                <i class="bi bi-arrow-left"></i> Continue Shopping
+            </a>
+        </div>
+    }
+</div>
+
+@code {
+    private bool _isLoading = true;
+    private List<CartItemModel> _cartItems = new();
+    private decimal _subtotal = 0;
+    private decimal _discount = 0;
+    private decimal _tax = 0;
+    private decimal _shipping = 0;
+    private decimal _total = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCart();
+    }
+
+    private async Task LoadCart()
+    {
+        try
+        {
+            _isLoading = true;
+
+            // Simulate API call - in production this would call CartClient
+            await Task.Delay(300);
+
+            // Mock cart data
+            _cartItems = new List<CartItemModel>
+            {
+                new(Guid.NewGuid(), "DeWalt 20V MAX Cordless Drill", 149.99m, 1, "/images/products/drill.jpg", null),
+                new(Guid.NewGuid(), "Copper Pipe Fittings Set", 24.99m, 2, "/images/products/fittings.jpg", "1/2 inch"),
+            };
+
+            CalculateTotals();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading cart: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void CalculateTotals()
+    {
+        _subtotal = _cartItems.Sum(i => i.Price * i.Quantity);
+        _tax = _subtotal * 0.06m; // Michigan sales tax
+        _shipping = _subtotal >= 50 ? 0 : 5.99m;
+        _total = _subtotal + _tax + _shipping - _discount;
+    }
+
+    private async Task UpdateQuantity(Guid itemId, int newQuantity)
+    {
+        if (newQuantity < 1) return;
+
+        var item = _cartItems.FirstOrDefault(i => i.Id == itemId);
+        if (item != null)
+        {
+            _cartItems = _cartItems.Select(i => i.Id == itemId
+                ? i with { Quantity = newQuantity }
+                : i).ToList();
+            CalculateTotals();
+        }
+    }
+
+    private async Task RemoveItem(Guid itemId)
+    {
+        _cartItems = _cartItems.Where(i => i.Id != itemId).ToList();
+        CalculateTotals();
+    }
+
+    private void GoShopping()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private void Checkout()
+    {
+        Navigation.NavigateTo("/checkout");
+    }
+
+    private record CartItemModel(Guid Id, string Name, decimal Price, int Quantity, string? ImageUrl, string? Variant);
+}
