@@ -135,27 +135,26 @@ public class LocalizationService : ILocalizationService
     public string CurrentLanguage => "en";
     public bool IsRtl => false;
 
-    public string this[string key] => GetString(key);
-
-    public string GetString(string key)
+    public IReadOnlyList<LanguageInfo> SupportedLanguages => new List<LanguageInfo>
     {
-        return _translations.TryGetValue(key, out var value) ? value : key;
-    }
+        new() { Code = "en", NativeName = "English", EnglishName = "English", IsRtl = false }
+    };
 
-    public string GetString(string key, params object[] args)
+    public event Action? OnLanguageChanged;
+
+    public string this[string key] => Get(key);
+
+    public string Get(string key, params object[] args)
     {
-        var template = GetString(key);
-        return string.Format(template, args);
+        if (!_translations.TryGetValue(key, out var template))
+            template = key;
+
+        return args.Length > 0 ? string.Format(template, args) : template;
     }
 
     public Task SetLanguageAsync(string language)
     {
-        // English only for now
-        return Task.CompletedTask;
-    }
-
-    public Task InitializeAsync()
-    {
+        // English only for now - no change needed
         return Task.CompletedTask;
     }
 }

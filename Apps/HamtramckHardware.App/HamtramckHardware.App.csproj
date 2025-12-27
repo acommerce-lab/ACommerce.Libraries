@@ -58,11 +58,11 @@
 		<!-- Splash Screen -->
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#E65100" BaseSize="128,128" />
 
-		<!-- Images -->
-		<MauiImage Include="Resources\Images\*" />
+		<!-- Images (exclude txt files) -->
+		<MauiImage Include="Resources\Images\*" Exclude="Resources\Images\*.txt" />
 
-		<!-- Custom Fonts -->
-		<MauiFont Include="Resources\Fonts\*" />
+		<!-- Custom Fonts (exclude txt files) -->
+		<MauiFont Include="Resources\Fonts\*" Exclude="Resources\Fonts\*.txt" />
 
 		<!-- Raw Assets -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />

@@ -4,6 +4,7 @@ using ACommerce.Client.Cart.Extensions;
 using ACommerce.Client.Categories;
 using ACommerce.Client.Categories.Extensions;
 using ACommerce.Client.Core.Extensions;
+using ACommerce.Client.Core.Interceptors;
 using ACommerce.Client.Orders;
 using ACommerce.Client.Orders.Extensions;
 using ACommerce.Client.Payments;
