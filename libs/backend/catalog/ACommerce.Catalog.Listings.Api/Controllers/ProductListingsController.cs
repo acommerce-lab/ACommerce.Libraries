@@ -666,9 +666,12 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(ProductListingResponseDto), 200)]
         [ProducesResponseType(404)]
-        public override async Task<ActionResult<ProductListingResponseDto>> GetById(Guid id)
+        public override async Task<ActionResult<ProductListingResponseDto>> GetById(
+                Guid id,
+                [FromQuery] List<string>? includes = null,
+                [FromQuery] bool includeDeleted = false)
         {
-                var result = await base.GetById(id);
+                var result = await base.GetById(id, includes, includeDeleted);
 
                 // Track ViewContent event if marketing tracker is available
                 if (result.Result is OkObjectResult okResult && okResult.Value is ProductListingResponseDto listing)
