@@ -63,6 +63,7 @@ app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.MapRazorComponents<HamtramckHardware.Web.Components.App>()
-    .AddInteractiveServerRenderMode();
+    .AddInteractiveServerRenderMode()
+    .AddAdditionalAssemblies(typeof(HamtramckHardware.Shared._Imports).Assembly);
 
 app.Run();
