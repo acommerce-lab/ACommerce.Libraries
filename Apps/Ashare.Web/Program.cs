@@ -8,6 +8,7 @@ using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Services.Analytics;
 using ACommerce.Templates.Customer.Services.Localization;
 using ACommerce.ServiceRegistry.Client.Extensions;
+using ACommerce.Client.Core.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 

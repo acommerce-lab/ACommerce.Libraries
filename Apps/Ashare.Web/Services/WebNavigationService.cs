@@ -1,3 +1,4 @@
+using ACommerce.Templates.Customer.Services;
 using Ashare.Shared.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;

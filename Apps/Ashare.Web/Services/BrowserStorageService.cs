@@ -1,3 +1,4 @@
+using ACommerce.Client.Core.Storage;
 using ACommerce.Templates.Customer.Services;
 using Microsoft.JSInterop;
 
