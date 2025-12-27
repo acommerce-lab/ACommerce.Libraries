@@ -102,6 +102,9 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                                 var items = result.Items?.ToList() ?? new List<ProductListingResponseDto>();
                                 if (_cacheEnabled) _cache.Set(cacheKey, items, CacheDuration);
 
+                                // Track browse event
+                                await TrackSearchEventAsync(null, items.Count);
+
                                 return Ok(items);
                         }
                         finally
@@ -711,7 +714,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
         /// </summary>
         private async Task TrackSearchEventAsync(string? searchTerm, int resultsCount)
         {
-                if (_marketingTracker == null || string.IsNullOrEmpty(searchTerm))
+                if (_marketingTracker == null)
                         return;
 
                 try
@@ -719,7 +722,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                         await _marketingTracker.TrackSearchAsync(new SearchTrackingRequest
                         {
-                                SearchQuery = searchTerm,
+                                SearchQuery = string.IsNullOrEmpty(searchTerm) ? "[browse]" : searchTerm,
                                 ResultsCount = resultsCount,
                                 User = new UserTrackingContext
                                 {
