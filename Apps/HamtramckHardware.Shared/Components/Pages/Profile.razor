@@ -182,7 +182,7 @@
             await LoadProfile();
         }
 
-        _appVersion = VersionService.GetCurrentVersion();
+        _appVersion = VersionService.Version;
     }
 
     private async Task LoadProfile()
@@ -216,9 +216,9 @@
         Navigation.NavigateTo("tel:+13133652400");
     }
 
-    private async Task SignOut()
+    private void SignOut()
     {
-        await TokenManager.ClearTokenAsync();
+        TokenManager.ClearToken();
         _isLoggedIn = false;
         _user = null;
         Navigation.NavigateTo("/");
