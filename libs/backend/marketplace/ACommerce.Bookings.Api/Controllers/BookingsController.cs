@@ -181,34 +181,28 @@ public class BookingsController(
             _logger.LogInformation("Confirming booking {BookingId}", id);
 
             // تتبع حدث الشراء (Purchase) عند تأكيد الحجز
-            var ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
-            var userAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString();
-
-            _ = Task.Run(async () =>
+            try
             {
-                try
+                await _marketingTracker.TrackPurchaseAsync(new PurchaseTrackingRequest
                 {
-                    await _marketingTracker.TrackPurchaseAsync(new PurchaseTrackingRequest
+                    TransactionId = id.ToString(),
+                    Value = booking.TotalPrice,
+                    Currency = booking.Currency,
+                    ContentName = booking.SpaceName,
+                    ContentIds = new[] { booking.SpaceId.ToString() },
+                    ContentType = "booking",
+                    User = new UserTrackingContext
                     {
-                        TransactionId = id.ToString(),
-                        Value = booking.TotalPrice,
-                        Currency = booking.Currency,
-                        ContentName = booking.SpaceName,
-                        ContentIds = new[] { booking.SpaceId.ToString() },
-                        ContentType = "booking",
-                        User = new UserTrackingContext
-                        {
-                            UserId = booking.CustomerId,
-                            IpAddress = ipAddress,
-                            UserAgent = userAgent
-                        }
-                    });
-                }
-                catch (Exception trackEx)
-                {
-                    _logger.LogWarning(trackEx, "فشل تتبع حدث تأكيد الحجز");
-                }
-            });
+                        UserId = booking.CustomerId,
+                        IpAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                        UserAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
+                    }
+                });
+            }
+            catch (Exception trackEx)
+            {
+                _logger.LogWarning(trackEx, "فشل تتبع حدث تأكيد الحجز");
+            }
 
             return Ok(new { success = true, message = "تم تأكيد الحجز بنجاح" });
         }

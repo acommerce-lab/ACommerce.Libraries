@@ -1,7 +1,10 @@
+using ACommerce.Marketing.Analytics.Services;
 using ACommerce.Subscriptions.DTOs;
 using ACommerce.Subscriptions.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace ACommerce.Subscriptions.Api.Controllers;
 
@@ -13,10 +16,20 @@ namespace ACommerce.Subscriptions.Api.Controllers;
 public class SubscriptionsController : ControllerBase
 {
     private readonly ISubscriptionService _subscriptionService;
+    private readonly IMarketingEventTracker _marketingTracker;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ILogger<SubscriptionsController> _logger;
 
-    public SubscriptionsController(ISubscriptionService subscriptionService)
+    public SubscriptionsController(
+        ISubscriptionService subscriptionService,
+        IMarketingEventTracker marketingTracker,
+        IHttpContextAccessor httpContextAccessor,
+        ILogger<SubscriptionsController> logger)
     {
         _subscriptionService = subscriptionService;
+        _marketingTracker = marketingTracker;
+        _httpContextAccessor = httpContextAccessor;
+        _logger = logger;
     }
 
     #region Plans - الباقات
@@ -168,6 +181,32 @@ public class SubscriptionsController : ControllerBase
     {
         var subscription = await _subscriptionService.ActivateSubscriptionAsync(subscriptionId, request?.PaymentId, ct);
         if (subscription == null) return NotFound();
+
+        // تتبع حدث الشراء (Purchase) عند تفعيل الاشتراك
+        try
+        {
+            var vendorId = GetCurrentUserId();
+            await _marketingTracker.TrackPurchaseAsync(new PurchaseTrackingRequest
+            {
+                TransactionId = subscriptionId.ToString(),
+                Value = subscription.Price,
+                Currency = subscription.Currency,
+                ContentName = subscription.Plan?.Name ?? "Subscription",
+                ContentIds = new[] { subscription.PlanId.ToString() },
+                ContentType = "subscription",
+                User = new UserTrackingContext
+                {
+                    UserId = vendorId.ToString(),
+                    IpAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    UserAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "فشل تتبع حدث تفعيل الاشتراك");
+        }
+
         return Ok(subscription);
     }
 
