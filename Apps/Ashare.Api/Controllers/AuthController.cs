@@ -165,42 +165,39 @@ public class AuthController : AuthenticationControllerBase
                 });
             }
 
-            // تتبع الحدث التسويقي
-            _ = Task.Run(async () =>
+            // تتبع الحدث التسويقي (synchronously to avoid ObjectDisposedException)
+            try
             {
-                try
+                var userContext = new UserTrackingContext
                 {
-                    var userContext = new UserTrackingContext
-                    {
-                        UserId = profile.Id.ToString(),
-                        Phone = profile.PhoneNumber,
-                        FirstName = profile.FullName,
-                        IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
-                        UserAgent = Request.Headers.UserAgent.ToString()
-                    };
+                    UserId = profile.Id.ToString(),
+                    Phone = profile.PhoneNumber,
+                    FirstName = profile.FullName,
+                    IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    UserAgent = Request.Headers.UserAgent.ToString()
+                };
 
-                    if (isNewUser)
-                    {
-                        await _marketingTracker.TrackRegistrationAsync(new RegistrationTrackingRequest
-                        {
-                            Method = "nafath",
-                            User = userContext
-                        });
-                    }
-                    else
-                    {
-                        await _marketingTracker.TrackLoginAsync(new LoginTrackingRequest
-                        {
-                            Method = "nafath",
-                            User = userContext
-                        });
-                    }
-                }
-                catch (Exception trackEx)
+                if (isNewUser)
                 {
-                    Logger.LogWarning(trackEx, "فشل تتبع حدث المصادقة");
+                    await _marketingTracker.TrackRegistrationAsync(new RegistrationTrackingRequest
+                    {
+                        Method = "nafath",
+                        User = userContext
+                    });
                 }
-            });
+                else
+                {
+                    await _marketingTracker.TrackLoginAsync(new LoginTrackingRequest
+                    {
+                        Method = "nafath",
+                        User = userContext
+                    });
+                }
+            }
+            catch (Exception trackEx)
+            {
+                Logger.LogWarning(trackEx, "فشل تتبع حدث المصادقة");
+            }
 
             return Ok(new LoginResponse
             {
