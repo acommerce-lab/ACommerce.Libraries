@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using ACommerce.Payments.Abstractions.Contracts;
 using ACommerce.Payments.Abstractions.Models;
 using ACommerce.Payments.Abstractions.Enums;
+using ACommerce.Marketing.Analytics.Services;
 
 namespace ACommerce.Payments.Api.Controllers;
 
@@ -13,13 +15,19 @@ namespace ACommerce.Payments.Api.Controllers;
 public class PaymentsController : ControllerBase
 {
     private readonly IPaymentProvider _paymentProvider;
+    private readonly IMarketingEventTracker _marketingTracker;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<PaymentsController> _logger;
 
     public PaymentsController(
         IPaymentProvider paymentProvider,
+        IMarketingEventTracker marketingTracker,
+        IHttpContextAccessor httpContextAccessor,
         ILogger<PaymentsController> logger)
     {
         _paymentProvider = paymentProvider;
+        _marketingTracker = marketingTracker;
+        _httpContextAccessor = httpContextAccessor;
         _logger = logger;
     }
 
@@ -68,6 +76,32 @@ public class PaymentsController : ControllerBase
 
             _logger.LogInformation("Payment created successfully. TransactionId: {TransactionId}, PaymentUrl: {PaymentUrl}",
                 result.TransactionId, result.PaymentUrl);
+
+            // 🧪 تتبع حدث الشراء مؤقتاً عند إنشاء الدفع (للتصحيح - سيُنقل لاحقاً لما بعد اكتمال الدفع)
+            try
+            {
+                _logger.LogInformation("📊 Sending Purchase event to Meta CAPI...");
+                await _marketingTracker.TrackPurchaseAsync(new PurchaseTrackingRequest
+                {
+                    TransactionId = result.TransactionId,
+                    Value = request.Amount,
+                    Currency = request.Currency,
+                    ContentName = $"Payment for order {request.OrderId}",
+                    ContentIds = new[] { request.OrderId.ToString() },
+                    ContentType = "payment",
+                    User = new UserTrackingContext
+                    {
+                        UserId = userId,
+                        IpAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                        UserAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
+                    }
+                });
+                _logger.LogInformation("✅ Purchase event sent to Meta CAPI successfully");
+            }
+            catch (Exception trackEx)
+            {
+                _logger.LogWarning(trackEx, "⚠️ Failed to send purchase event to Meta CAPI");
+            }
 
             return Ok(new PaymentResponse
             {
