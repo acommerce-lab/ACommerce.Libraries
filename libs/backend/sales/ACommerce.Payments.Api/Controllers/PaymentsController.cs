@@ -77,32 +77,6 @@ public class PaymentsController : ControllerBase
             _logger.LogInformation("Payment created successfully. TransactionId: {TransactionId}, PaymentUrl: {PaymentUrl}",
                 result.TransactionId, result.PaymentUrl);
 
-            // 🧪 تتبع حدث الشراء مؤقتاً عند إنشاء الدفع (للتصحيح - سيُنقل لاحقاً لما بعد اكتمال الدفع)
-            try
-            {
-                _logger.LogInformation("📊 Sending Purchase event to Meta CAPI...");
-                await _marketingTracker.TrackPurchaseAsync(new PurchaseTrackingRequest
-                {
-                    TransactionId = result.TransactionId,
-                    Value = request.Amount,
-                    Currency = request.Currency,
-                    ContentName = $"Payment for order {request.OrderId}",
-                    ContentIds = new[] { request.OrderId.ToString() },
-                    ContentType = "payment",
-                    User = new UserTrackingContext
-                    {
-                        UserId = userId,
-                        IpAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                        UserAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
-                    }
-                });
-                _logger.LogInformation("✅ Purchase event sent to Meta CAPI successfully");
-            }
-            catch (Exception trackEx)
-            {
-                _logger.LogWarning(trackEx, "⚠️ Failed to send purchase event to Meta CAPI");
-            }
-
             return Ok(new PaymentResponse
             {
                 Success = true,
@@ -138,10 +112,39 @@ public class PaymentsController : ControllerBase
         {
             var result = await _paymentProvider.GetPaymentStatusAsync(paymentId, cancellationToken);
 
+            // إرسال حدث الشراء عند اكتمال الدفع بنجاح
+            if (result.Success && result.Status == PaymentStatus.Completed)
+            {
+                var userId = User.FindFirst("sub")?.Value ??
+                             User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ??
+                             "anonymous";
+
+                _logger.LogInformation("📊 Payment completed! Queuing purchase event for {PaymentId}", paymentId);
+
+                // إرسال للطابور الخلفي (لا يحجب)
+                await _marketingTracker.TrackPurchaseAsync(new PurchaseTrackingRequest
+                {
+                    TransactionId = paymentId,
+                    Value = result.Amount ?? 0,
+                    Currency = result.Currency ?? "SAR",
+                    ContentName = $"Payment {paymentId}",
+                    ContentIds = new[] { result.OrderId ?? paymentId },
+                    ContentType = "payment",
+                    User = new UserTrackingContext
+                    {
+                        UserId = userId,
+                        IpAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                        UserAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
+                    }
+                });
+            }
+
             return Ok(new PaymentResponse
             {
                 Success = result.Success,
                 PaymentId = result.TransactionId,
+                Amount = result.Amount ?? 0,
+                Currency = result.Currency ?? string.Empty,
                 Status = result.Status.ToString(),
                 Message = result.ErrorMessage
             });
