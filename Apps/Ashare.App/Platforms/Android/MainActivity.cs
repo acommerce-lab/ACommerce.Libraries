@@ -23,13 +23,13 @@ namespace Ashare.App;
     new[] { Intent.ActionView },
     Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable },
     DataScheme = "https",
-    DataHost = "ashare.app",
+    DataHost = "ashare.sa",
     AutoVerify = true)]
 [IntentFilter(
     new[] { Intent.ActionView },
     Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable },
     DataScheme = "https",
-    DataHost = "www.ashare.app",
+    DataHost = "www.ashare.sa",
     AutoVerify = true)]
 
 // HTTP fallback for testing
@@ -37,7 +37,7 @@ namespace Ashare.App;
     new[] { Intent.ActionView },
     Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable },
     DataScheme = "http",
-    DataHost = "ashare.app")]
+    DataHost = "ashare.sa")]
 public class MainActivity : MauiAppCompatActivity
 {
     protected override void OnCreate(Bundle? savedInstanceState)
