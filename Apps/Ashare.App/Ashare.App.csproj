@@ -42,6 +42,7 @@
 		<ProvisioningType>manual</ProvisioningType>
 		<CodesignKey>Apple Distribution: SAFQAT ASHEER DIGITAL BORKERAGE CO (CTX2C777UU)</CodesignKey>
 		<CodesignProvision>ashare app profile</CodesignProvision>
+		<CodesignEntitlements>Platforms\iOS\Entitlements.plist</CodesignEntitlements>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-ios|AnyCPU'">
