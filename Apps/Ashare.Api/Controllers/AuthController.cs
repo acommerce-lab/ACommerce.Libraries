@@ -166,6 +166,9 @@ public class AuthController : AuthenticationControllerBase
             }
 
             // تتبع الحدث التسويقي
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+            var userAgent = Request.Headers.UserAgent.ToString();
+
             _ = Task.Run(async () =>
             {
                 try
@@ -175,8 +178,8 @@ public class AuthController : AuthenticationControllerBase
                         UserId = profile.Id.ToString(),
                         Phone = profile.PhoneNumber,
                         FirstName = profile.FullName,
-                        IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
-                        UserAgent = Request.Headers.UserAgent.ToString()
+                        IpAddress = ipAddress,
+                        UserAgent = userAgent
                     };
 
                     if (isNewUser)
