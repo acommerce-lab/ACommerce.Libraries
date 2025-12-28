@@ -46,11 +46,15 @@ public class BackgroundMarketingEventTracker : IMarketingEventTracker
     {
         _logger.LogInformation("📊 [Marketing] Queuing purchase event: {TransactionId}, Value: {Value} {Currency}",
             request.TransactionId, request.Value, request.Currency);
-        _queue.Enqueue(new MarketingQueueItem
+
+        var item = new MarketingQueueItem
         {
             EventType = MarketingEventType.Purchase,
             Request = request
-        });
+        };
+        _queue.Enqueue(item);
+
+        _logger.LogInformation("✅ [Marketing] Purchase event queued successfully at {Time}", item.EnqueuedAt);
         return Task.CompletedTask;
     }
 

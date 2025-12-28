@@ -29,11 +29,11 @@ public class MarketingEventQueue : IMarketingEventQueue
     {
         if (!_channel.Writer.TryWrite(item))
         {
-            _logger.LogWarning("[MarketingQueue] Failed to enqueue {EventType} event", item.EventType);
+            _logger.LogError("[MarketingQueue] ❌ Failed to enqueue {EventType} event - queue full or closed", item.EventType);
             return;
         }
 
-        _logger.LogDebug("[MarketingQueue] Enqueued {EventType} event", item.EventType);
+        _logger.LogInformation("[MarketingQueue] 📥 Enqueued {EventType} event", item.EventType);
     }
 
     public async ValueTask<MarketingQueueItem> DequeueAsync(CancellationToken cancellationToken)

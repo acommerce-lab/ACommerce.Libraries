@@ -55,7 +55,7 @@ public class MarketingEventBackgroundService : BackgroundService
     private async Task ProcessItemAsync(MarketingQueueItem item, CancellationToken cancellationToken)
     {
         var processingTime = DateTime.UtcNow - item.EnqueuedAt;
-        _logger.LogDebug("[MarketingBackgroundService] Processing {EventType} event (queued {Ms}ms ago)",
+        _logger.LogInformation("🔄 [MarketingBackgroundService] Processing {EventType} event (queued {Ms}ms ago)",
             item.EventType, processingTime.TotalMilliseconds);
 
         // نحتاج scope جديد لأن الخدمات scoped
@@ -70,7 +70,7 @@ public class MarketingEventBackgroundService : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "⚠️ [MarketingBackgroundService] Failed to process {EventType} event",
+            _logger.LogError(ex, "❌ [MarketingBackgroundService] Failed to process {EventType} event",
                 item.EventType);
         }
     }
