@@ -186,6 +186,15 @@ public class SubscriptionsController : ControllerBase
         try
         {
             var vendorId = GetCurrentUserId();
+
+            // Create user context with attribution data from headers
+            var userContext = AttributionHeaderReader.CreateFromRequest(
+                _httpContextAccessor.HttpContext!,
+                vendorId.ToString());
+
+            _logger.LogInformation("📊 Subscription activated! Attribution: Fbc={Fbc}, Fbp={Fbp}",
+                userContext.Fbc ?? "(none)", userContext.Fbp ?? "(none)");
+
             await _marketingTracker.TrackPurchaseAsync(new PurchaseTrackingRequest
             {
                 TransactionId = subscriptionId.ToString(),
@@ -194,12 +203,7 @@ public class SubscriptionsController : ControllerBase
                 ContentName = subscription.Plan?.Name ?? "Subscription",
                 ContentIds = new[] { subscription.PlanId.ToString() },
                 ContentType = "subscription",
-                User = new UserTrackingContext
-                {
-                    UserId = vendorId.ToString(),
-                    IpAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    UserAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
-                }
+                User = userContext
             });
         }
         catch (Exception ex)

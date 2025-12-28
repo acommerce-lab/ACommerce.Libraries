@@ -200,6 +200,12 @@ public static class ServiceCollectionExtensions
             });
         }
 
+        // إضافة Custom Handlers
+        foreach (var handlerFactory in options.CustomHandlers)
+        {
+            httpClientBuilder.AddHttpMessageHandler(handlerFactory);
+        }
+
         // تسجيل IApiClient
         services.AddScoped<IApiClient>(sp => sp.GetRequiredService<DynamicHttpClient>());
 
@@ -253,6 +259,20 @@ public class ClientOptions
         /// يسمح بالاتصال بخوادم تستخدم شهادات ذاتية
         /// </summary>
         public bool BypassSslValidation { get; set; } = false;
+
+        /// <summary>
+        /// Custom DelegatingHandlers to add to the HTTP pipeline
+        /// </summary>
+        public List<Func<IServiceProvider, DelegatingHandler>> CustomHandlers { get; } = new();
+
+        /// <summary>
+        /// Add a custom handler to the HTTP pipeline
+        /// </summary>
+        public ClientOptions AddHandler<THandler>() where THandler : DelegatingHandler
+        {
+            CustomHandlers.Add(sp => sp.GetRequiredService<THandler>());
+            return this;
+        }
 }
 
 /// <summary>

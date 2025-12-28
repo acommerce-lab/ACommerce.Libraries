@@ -183,6 +183,14 @@ public class BookingsController(
             // تتبع حدث الشراء (Purchase) عند تأكيد الحجز
             try
             {
+                // Create user context with attribution data from headers
+                var userContext = AttributionHeaderReader.CreateFromRequest(
+                    _httpContextAccessor.HttpContext!,
+                    booking.CustomerId);
+
+                _logger.LogInformation("📊 Booking confirmed! Attribution: Fbc={Fbc}, Fbp={Fbp}",
+                    userContext.Fbc ?? "(none)", userContext.Fbp ?? "(none)");
+
                 await _marketingTracker.TrackPurchaseAsync(new PurchaseTrackingRequest
                 {
                     TransactionId = id.ToString(),
@@ -191,12 +199,7 @@ public class BookingsController(
                     ContentName = booking.SpaceName,
                     ContentIds = new[] { booking.SpaceId.ToString() },
                     ContentType = "booking",
-                    User = new UserTrackingContext
-                    {
-                        UserId = booking.CustomerId,
-                        IpAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                        UserAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
-                    }
+                    User = userContext
                 });
             }
             catch (Exception trackEx)

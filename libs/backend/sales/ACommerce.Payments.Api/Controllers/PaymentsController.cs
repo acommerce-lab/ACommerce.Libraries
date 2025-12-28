@@ -121,6 +121,14 @@ public class PaymentsController : ControllerBase
 
                 _logger.LogInformation("📊 Payment completed! Queuing purchase event for {PaymentId}", paymentId);
 
+                // Create user context with attribution data from headers
+                var userContext = AttributionHeaderReader.CreateFromRequest(
+                    _httpContextAccessor.HttpContext!,
+                    userId);
+
+                _logger.LogInformation("📊 Attribution data: Fbc={Fbc}, Fbp={Fbp}",
+                    userContext.Fbc ?? "(none)", userContext.Fbp ?? "(none)");
+
                 // إرسال للطابور الخلفي (لا يحجب)
                 await _marketingTracker.TrackPurchaseAsync(new PurchaseTrackingRequest
                 {
@@ -130,12 +138,7 @@ public class PaymentsController : ControllerBase
                     ContentName = $"Payment {paymentId}",
                     ContentIds = new[] { result.OrderId ?? paymentId },
                     ContentType = "payment",
-                    User = new UserTrackingContext
-                    {
-                        UserId = userId,
-                        IpAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                        UserAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
-                    }
+                    User = userContext
                 });
             }
 

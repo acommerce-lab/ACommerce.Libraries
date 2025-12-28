@@ -64,6 +64,8 @@ public static class MauiProgram
 #if DEBUG
             options.BypassSslValidation = true;
 #endif
+            // Add attribution interceptor to send marketing data with each request
+            options.AddHandler<AttributionInterceptor>();
         });
 
 #if DEBUG
@@ -95,6 +97,9 @@ public static class MauiProgram
 
         // Attribution Capture Service - for marketing campaign tracking
         builder.Services.AddSingleton<IAttributionCaptureService, AttributionCaptureService>();
+
+        // Attribution Interceptor - adds attribution headers to all HTTP requests
+        builder.Services.AddTransient<AttributionInterceptor>();
 
         // Tracking Permission Service (ATT for iOS 14.5+)
 #if IOS
