@@ -127,6 +127,9 @@ try
     // Memory Cache (required by ACommerce libraries)
     builder.Services.AddMemoryCache();
 
+    // HttpContextAccessor (required for IHttpContextAccessor injection in controllers)
+    builder.Services.AddHttpContextAccessor();
+
     // CORS
     builder.Services.AddCors(options =>
     {
