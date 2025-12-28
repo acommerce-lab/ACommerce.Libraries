@@ -89,8 +89,8 @@ public static class ApiSettings
                 if (DeviceInfo.Platform == DevicePlatform.Android)
                 {
                     // ملاحظة: تم التعديل لاستخدام الإنتاج مؤقتاً
-                    //return AndroidEmulatorUrl;
-                    return ProductionUrl;
+                    return AndroidEmulatorUrl;
+                    //return ProductionUrl;
                 }
                 else if (DeviceInfo.Platform == DevicePlatform.WinUI)
                 {

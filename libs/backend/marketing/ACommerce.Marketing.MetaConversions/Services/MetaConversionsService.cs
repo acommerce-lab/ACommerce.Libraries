@@ -185,8 +185,10 @@ public class MetaConversionsService : IMetaConversionsService
             _logger.LogError("[MetaConversions] Error: {Message}, Code: {Code}, Type: {Type}, Subcode: {Subcode}",
                 error?.Error?.Message,
                 error?.Error?.Code,
-                error?.Error?.Type,
-                error?.Error?.ErrorSubcode);
+                error?.Error?.Type
+                //,
+                //error?.Error?.ErrorSubcode
+                );
             return null;
         }
         catch (Exception ex)
