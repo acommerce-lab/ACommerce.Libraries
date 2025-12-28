@@ -8,7 +8,7 @@ namespace ACommerce.Marketing.Analytics.Services;
 /// تنفيذ خدمة تتبع الأحداث التسويقية
 /// تخزن الأحداث محلياً وترسلها إلى Meta CAPI
 /// </summary>
-public class MarketingEventTracker : IMarketingEventTracker
+public class MarketingEventTracker : IMarketingEventTracker, IMarketingEventProcessor
 {
     private readonly IAttributionService _attributionService;
     private readonly IMetaConversionsService _metaService;
@@ -22,6 +22,46 @@ public class MarketingEventTracker : IMarketingEventTracker
         _attributionService = attributionService;
         _metaService = metaService;
         _logger = logger;
+    }
+
+    /// <summary>
+    /// معالجة حدث من الطابور
+    /// </summary>
+    public async Task ProcessEventAsync(MarketingQueueItem item, CancellationToken cancellationToken = default)
+    {
+        switch (item.EventType)
+        {
+            case MarketingEventType.Registration:
+                await TrackRegistrationAsync((RegistrationTrackingRequest)item.Request);
+                break;
+            case MarketingEventType.Login:
+                await TrackLoginAsync((LoginTrackingRequest)item.Request);
+                break;
+            case MarketingEventType.Purchase:
+                await TrackPurchaseAsync((PurchaseTrackingRequest)item.Request);
+                break;
+            case MarketingEventType.ContentView:
+                await TrackViewContentAsync((ViewContentTrackingRequest)item.Request);
+                break;
+            case MarketingEventType.Search:
+                await TrackSearchAsync((SearchTrackingRequest)item.Request);
+                break;
+            case MarketingEventType.AddToWishlist:
+                await TrackAddToWishlistAsync((WishlistTrackingRequest)item.Request);
+                break;
+            case MarketingEventType.InitiateCheckout:
+                await TrackInitiateCheckoutAsync((CheckoutTrackingRequest)item.Request);
+                break;
+            case MarketingEventType.Lead:
+                await TrackLeadAsync((LeadTrackingRequest)item.Request);
+                break;
+            case MarketingEventType.PageView:
+                await TrackCustomEventAsync((CustomTrackingRequest)item.Request);
+                break;
+            default:
+                _logger.LogWarning("[Marketing] Unknown event type: {EventType}", item.EventType);
+                break;
+        }
     }
 
     public async Task TrackRegistrationAsync(RegistrationTrackingRequest request)
