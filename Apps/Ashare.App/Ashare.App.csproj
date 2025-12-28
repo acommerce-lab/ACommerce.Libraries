@@ -103,6 +103,12 @@
 		<ProjectReference Include="..\..\Templates\ACommerce.Templates.Customer\ACommerce.Templates.Customer.csproj" />
 		<!-- Core for IStorageService -->
 		<ProjectReference Include="..\..\libs\frontend\core\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
+		<!-- Auth for TokenManager, ITokenStorage -->
+		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Auth\ACommerce.Client.Auth.csproj" />
+		<!-- Realtime for SignalR -->
+		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Realtime\ACommerce.Client.Realtime.csproj" />
+		<!-- ServiceRegistry for service discovery -->
+		<ProjectReference Include="..\..\libs\frontend\discovery\ACommerce.ServiceRegistry.Client\ACommerce.ServiceRegistry.Client.csproj" />
 		<!-- Payments Client for DI registration -->
 		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Payments\ACommerce.Client.Payments.csproj" />
 		<!-- Versions Client for AppStartup version check -->
