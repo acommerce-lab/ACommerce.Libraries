@@ -1,4 +1,5 @@
 using Android.Webkit;
+using Java.Interop;
 using Microsoft.Maui.Handlers;
 using Microsoft.Maui.Platform;
 using AWebView = Android.Webkit.WebView;
