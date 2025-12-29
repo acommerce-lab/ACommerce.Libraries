@@ -65,15 +65,15 @@ public class PaymentWebChromeClient : WebChromeClient
     /// <summary>
     /// Handle new window requests (popup-based 3DS verification)
     /// </summary>
-    public override bool OnCreateWindow(AWebView? view, bool isDialog, bool isUserGesture, Android.OS.Message? resultMsg)
+    public override bool OnCreateWindow(AWebView? view, bool isDialog, bool isUserGesture, global::Android.OS.Message? resultMsg)
     {
         Console.WriteLine($"[PaymentWebView] OnCreateWindow: isDialog={isDialog}, isUserGesture={isUserGesture}");
 
         if (view == null || resultMsg == null)
             return false;
 
-        // Get the hit test result to get the URL
-        var hitTestResult = view.HitTestResult;
+        // Get the URL from hit test result
+        var hitTestResult = view.GetHitTestResult();
         var url = hitTestResult?.Extra;
 
         Console.WriteLine($"[PaymentWebView] New window URL: {url}");
@@ -85,14 +85,13 @@ public class PaymentWebChromeClient : WebChromeClient
         newWebView.Settings.MixedContentMode = MixedContentHandling.AlwaysAllow;
 
         // Set up the transport
-        var transport = (WebView.WebViewTransport?)resultMsg.Obj;
+        var transport = resultMsg.Obj?.JavaCast<AWebView.WebViewTransport>();
         if (transport != null)
         {
             transport.WebView = newWebView;
             resultMsg.SendToTarget();
 
-            // Load the popup in the parent WebView instead of a new window
-            // This keeps everything in the same context
+            // Set WebViewClient to handle navigation in popup
             newWebView.SetWebViewClient(new PopupWebViewClient(_parentWebView));
         }
 
