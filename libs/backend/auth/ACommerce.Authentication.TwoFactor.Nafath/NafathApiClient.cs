@@ -40,11 +40,6 @@ public class NafathApiClient : INafathApiClient
         var isTestMode = mode == "test";
         var testNationalId = _configuration[$"{NafathOptions.SectionName}:TestNationalId"] ?? "2507643761";
 
-        // 🔍 Debug logging
-        _logger.LogInformation(
-            "[Nafath] Config: Mode='{Mode}', IsTestMode={IsTestMode}, TestNationalId='{TestNationalId}', InputNationalId='{InputNationalId}', Match={Match}",
-            mode, isTestMode, testNationalId, nationalId, nationalId == testNationalId);
-
         // ✅ وضع الاختبار + رقم الهوية المحدد للاختبار فقط → محاكاة (لمراجعي متاجر التطبيقات)
         if (isTestMode && nationalId == testNationalId)
         {
@@ -86,7 +81,7 @@ public class NafathApiClient : INafathApiClient
                 transactionId);
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"check-status/{transactionId}");
-            request.Headers.Add("X-Authorization", _configuration[$"{NafathOptions.SectionName}:ApiKey"]);
+            request.Headers.Add("X-Authorization", _configuration[$"{NafathOptions.SectionName}:WebhookSecret"]);
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
 
@@ -165,7 +160,7 @@ public class NafathApiClient : INafathApiClient
                 Content = JsonContent.Create(new { national_id = nationalId })
             };
 
-            request.Headers.Add("X-Authorization", _configuration[$"{NafathOptions.SectionName}:ApiKey"]);
+            request.Headers.Add("X-Authorization", _configuration[$"{NafathOptions.SectionName}:WebhookSecret"]);
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
 
