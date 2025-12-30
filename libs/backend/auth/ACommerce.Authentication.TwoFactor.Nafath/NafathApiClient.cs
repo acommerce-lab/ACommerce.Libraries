@@ -38,14 +38,15 @@ public class NafathApiClient : INafathApiClient
     {
         var mode = _configuration[$"{NafathOptions.SectionName}:Mode"]?.ToLower();
         var isTestMode = mode == "test";
+        var testNationalId = _configuration[$"{NafathOptions.SectionName}:TestNationalId"] ?? "2507643761";
 
-        // ✅ وضع الاختبار → محاكاة لأي رقم هوية
-        if (isTestMode)
+        // ✅ وضع الاختبار + رقم الهوية المحدد للاختبار فقط → محاكاة (لمراجعي متاجر التطبيقات)
+        if (isTestMode && nationalId == testNationalId)
         {
             return await HandleTestModeInitiation(nationalId, cancellationToken);
         }
 
-        // ✅ وضع الإنتاج → نفاذ الحقيقي
+        // ✅ أي حالة أخرى → نفاذ الحقيقي
         return await HandleProductionModeInitiation(nationalId, cancellationToken);
     }
 
