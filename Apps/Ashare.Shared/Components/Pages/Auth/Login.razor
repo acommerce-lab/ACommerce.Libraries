@@ -209,22 +209,41 @@
     {
         if (firstRender)
         {
-            // تسجيل مستمع للعودة للتطبيق (visibility change)
-            _dotNetRef = DotNetObjectReference.Create(this);
-            await JS.InvokeVoidAsync("eval", @"
-                window.ashareLoginVisibilityHandler = function(dotNetRef) {
-                    document.addEventListener('visibilitychange', function() {
-                        if (document.visibilityState === 'visible') {
-                            dotNetRef.invokeMethodAsync('OnAppResumed');
-                        }
-                    });
-                    // للتطبيقات الموبايل - resume event
-                    document.addEventListener('resume', function() {
-                        dotNetRef.invokeMethodAsync('OnAppResumed');
-                    });
-                };
-                window.ashareLoginVisibilityHandler(" + "arguments[0]" + @");
-            ", _dotNetRef);
+            try
+            {
+                // تسجيل مستمع للعودة للتطبيق (visibility change)
+                _dotNetRef = DotNetObjectReference.Create(this);
+
+                // تسجيل الدالة في window
+                await JS.InvokeVoidAsync("eval", @"
+                    if (!window.ashareLoginVisibilitySetup) {
+                        window.ashareLoginVisibilitySetup = true;
+                        window.ashareLoginDotNetRef = null;
+                        window.ashareSetupVisibilityHandler = function(dotNetRef) {
+                            window.ashareLoginDotNetRef = dotNetRef;
+                        };
+                        document.addEventListener('visibilitychange', function() {
+                            if (document.visibilityState === 'visible' && window.ashareLoginDotNetRef) {
+                                window.ashareLoginDotNetRef.invokeMethodAsync('OnAppResumed');
+                            }
+                        });
+                        document.addEventListener('resume', function() {
+                            if (window.ashareLoginDotNetRef) {
+                                window.ashareLoginDotNetRef.invokeMethodAsync('OnAppResumed');
+                            }
+                        });
+                    }
+                ");
+
+                // تمرير DotNetRef للدالة
+                await JS.InvokeVoidAsync("ashareSetupVisibilityHandler", _dotNetRef);
+                Console.WriteLine("[Login] Visibility handler registered");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Login] Failed to setup visibility handler: {ex.Message}");
+                // نتجاهل الخطأ - الـ polling سيعمل كبديل
+            }
         }
     }
 
