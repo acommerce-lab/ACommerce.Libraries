@@ -11,6 +11,7 @@
 @inject ILocalizationService L
 @inject Ashare.Shared.Services.ThemeService Theme
 @inject ACommerce.Templates.Customer.Services.GuestModeService GuestMode
+@inject IJSRuntime JS
 @implements IAsyncDisposable
 
 <div class="ac-page ashare-login-page @(Theme.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
@@ -159,6 +160,9 @@
     private System.Timers.Timer? _timer;
     private IDisposable? _notificationSubscription;
     private bool _isConnectedToSignalR;
+    private int _pollCounter = 0; // عداد للـ polling
+    private const int PollIntervalSeconds = 5; // فحص كل 5 ثواني
+    private DotNetObjectReference<Login>? _dotNetRef;
 
     protected override async Task OnInitializedAsync()
     {
@@ -199,6 +203,44 @@
         Console.WriteLine($"[Login] Page loaded - GuestMode: {GuestMode.IsGuestMode}");
 
         await ConnectToNotifications();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // تسجيل مستمع للعودة للتطبيق (visibility change)
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("eval", @"
+                window.ashareLoginVisibilityHandler = function(dotNetRef) {
+                    document.addEventListener('visibilitychange', function() {
+                        if (document.visibilityState === 'visible') {
+                            dotNetRef.invokeMethodAsync('OnAppResumed');
+                        }
+                    });
+                    // للتطبيقات الموبايل - resume event
+                    document.addEventListener('resume', function() {
+                        dotNetRef.invokeMethodAsync('OnAppResumed');
+                    });
+                };
+                window.ashareLoginVisibilityHandler(" + "arguments[0]" + @");
+            ", _dotNetRef);
+        }
+    }
+
+    /// <summary>
+    /// يُستدعى عند العودة للتطبيق/الصفحة - للتحقق من حالة المصادقة
+    /// </summary>
+    [JSInvokable]
+    public async Task OnAppResumed()
+    {
+        Console.WriteLine("[Login] 📱 App resumed - checking auth status");
+
+        // التحقق فقط إذا كان هناك جلسة نفاذ نشطة
+        if (_nafathResult != null && !_nafathCompleted && !_nafathExpired && !_nafathFailed)
+        {
+            await CheckNafathStatusAsync();
+        }
     }
 
     private async Task ConnectToNotifications()
@@ -296,42 +338,9 @@
 
                 if (title?.Contains("بنجاح") == true || title?.Contains("success") == true)
                 {
-                    Console.WriteLine("[Login] 🎉 Authentication SUCCESS - completing flow");
-                    // نجاح المصادقة
-                    InvokeAsync(async () =>
-                    {
-                        _nafathCompleted = true;
-                        _timer?.Stop();
-                        StateHasChanged();
-
-                        // إكمال المصادقة والحصول على التوكن
-                        var result = await NafathClient.CompleteAsync(_nafathResult!.TransactionId!);
-                        if (result?.Success == true && !string.IsNullOrEmpty(result.Token))
-                        {
-                            // حفظ التوكن
-                            TokenManager.SetToken(result.Token, result.ExpiresAt);
-                            Console.WriteLine("[Login] ✅ Token saved to TokenManager");
-
-                            // إلغاء وضع الضيف بعد تسجيل الدخول بنجاح
-                            await GuestMode.DisableGuestModeAsync();
-                            Console.WriteLine("[Login] ✅ Guest mode disabled");
-
-                            if (result.IsNewUser)
-                            {
-                                Console.WriteLine("[Login] ✅ NEW USER - navigating to profile edit");
-                                Navigation.NavigateTo("/profile/edit?new=true");
-                            }
-                            else
-                            {
-                                Console.WriteLine("[Login] ✅ Existing user - navigating to home");
-                                Navigation.NavigateTo("/");
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine($"[Login] ❌ CompleteAsync failed: {result?.Message}");
-                        }
-                    });
+                    Console.WriteLine("[Login] 🎉 Authentication SUCCESS via SignalR - completing flow");
+                    // نجاح المصادقة - استخدام الـ method المشترك
+                    _ = CompleteAuthenticationAsync();
                 }
                 else
                 {
@@ -419,18 +428,140 @@
     private void StartCountdown()
     {
         _timer?.Dispose();
+        _pollCounter = 0;
         _timer = new System.Timers.Timer(1000);
         _timer.Elapsed += async (s, e) =>
         {
             _countdown--;
+            _pollCounter++;
+
             if (_countdown <= 0)
             {
                 _timer?.Stop();
                 _nafathExpired = true;
+                await InvokeAsync(StateHasChanged);
+                return;
             }
+
+            // Polling كل 5 ثواني كاحتياط لـ SignalR
+            if (_pollCounter >= PollIntervalSeconds)
+            {
+                _pollCounter = 0;
+                await CheckNafathStatusAsync();
+            }
+
             await InvokeAsync(StateHasChanged);
         };
         _timer.Start();
+    }
+
+    /// <summary>
+    /// التحقق من حالة المصادقة من الخدمة الخلفية (polling)
+    /// </summary>
+    private async Task CheckNafathStatusAsync()
+    {
+        if (_nafathResult?.TransactionId == null || _nafathCompleted || _nafathExpired || _nafathFailed)
+            return;
+
+        try
+        {
+            Console.WriteLine($"[Login] 🔄 Polling status for {_nafathResult.TransactionId}");
+            var status = await NafathClient.CheckStatusAsync(_nafathResult.TransactionId);
+
+            if (status == null)
+            {
+                Console.WriteLine("[Login] ⚠️ Status check returned null");
+                return;
+            }
+
+            Console.WriteLine($"[Login] 📊 Status: {status.Status}");
+
+            switch (status.Status?.ToLower())
+            {
+                case "completed":
+                    // تم التحقق بنجاح!
+                    Console.WriteLine("[Login] 🎉 Authentication completed via polling!");
+                    await CompleteAuthenticationAsync();
+                    break;
+
+                case "expired":
+                    // انتهت الصلاحية
+                    await InvokeAsync(() =>
+                    {
+                        _nafathExpired = true;
+                        _timer?.Stop();
+                        StateHasChanged();
+                    });
+                    break;
+
+                case "rejected":
+                case "failed":
+                case "cancelled":
+                    // فشلت أو رُفضت
+                    await InvokeAsync(() =>
+                    {
+                        _nafathFailed = true;
+                        _nafathFailReason = status.Message;
+                        _timer?.Stop();
+                        StateHasChanged();
+                    });
+                    break;
+
+                // pending - نستمر في الانتظار
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Login] ⚠️ Status check failed: {ex.Message}");
+            // نتجاهل الخطأ ونستمر في المحاولة
+        }
+    }
+
+    /// <summary>
+    /// إكمال المصادقة بعد التحقق من النجاح
+    /// </summary>
+    private async Task CompleteAuthenticationAsync()
+    {
+        if (_nafathCompleted) return; // تجنب التكرار
+
+        await InvokeAsync(async () =>
+        {
+            _nafathCompleted = true;
+            _timer?.Stop();
+            StateHasChanged();
+
+            // إكمال المصادقة والحصول على التوكن
+            var result = await NafathClient.CompleteAsync(_nafathResult!.TransactionId!);
+            if (result?.Success == true && !string.IsNullOrEmpty(result.Token))
+            {
+                // حفظ التوكن
+                TokenManager.SetToken(result.Token, result.ExpiresAt);
+                Console.WriteLine("[Login] ✅ Token saved to TokenManager");
+
+                // إلغاء وضع الضيف بعد تسجيل الدخول بنجاح
+                await GuestMode.DisableGuestModeAsync();
+                Console.WriteLine("[Login] ✅ Guest mode disabled");
+
+                if (result.IsNewUser)
+                {
+                    Console.WriteLine("[Login] ✅ NEW USER - navigating to profile edit");
+                    Navigation.NavigateTo("/profile/edit?new=true");
+                }
+                else
+                {
+                    Console.WriteLine("[Login] ✅ Existing user - navigating to home");
+                    Navigation.NavigateTo("/");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"[Login] ❌ CompleteAsync failed: {result?.Message}");
+                _nafathCompleted = false;
+                _nafathFailed = true;
+                _nafathFailReason = result?.Message ?? "فشل إكمال المصادقة";
+                StateHasChanged();
+            }
+        });
     }
 
 
@@ -473,6 +604,7 @@
     {
         _timer?.Dispose();
         _notificationSubscription?.Dispose();
+        _dotNetRef?.Dispose();
 
         if (_isConnectedToSignalR)
         {
