@@ -38,15 +38,14 @@ public class NafathApiClient : INafathApiClient
     {
         var mode = _configuration[$"{NafathOptions.SectionName}:Mode"]?.ToLower();
         var isTestMode = mode == "test";
-        var testNationalId = _configuration[$"{NafathOptions.SectionName}:TestNationalId"] ?? "2507643761";
 
-        // ✅ وضع الاختبار + رقم الهوية المحدد فقط → محاكاة
-        if (isTestMode && nationalId == testNationalId)
+        // ✅ وضع الاختبار → محاكاة لأي رقم هوية
+        if (isTestMode)
         {
             return await HandleTestModeInitiation(nationalId, cancellationToken);
         }
 
-        // ✅ أي حالة أخرى → نفاذ الحقيقي
+        // ✅ وضع الإنتاج → نفاذ الحقيقي
         return await HandleProductionModeInitiation(nationalId, cancellationToken);
     }
 
@@ -81,7 +80,7 @@ public class NafathApiClient : INafathApiClient
                 transactionId);
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"check-status/{transactionId}");
-            request.Headers.Add("X-Authorization", _configuration[$"{NafathOptions.SectionName}:WebhookSecret"]);
+            request.Headers.Add("X-Authorization", _configuration[$"{NafathOptions.SectionName}:ApiKey"]);
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
 
@@ -160,7 +159,7 @@ public class NafathApiClient : INafathApiClient
                 Content = JsonContent.Create(new { national_id = nationalId })
             };
 
-            request.Headers.Add("X-Authorization", _configuration[$"{NafathOptions.SectionName}:WebhookSecret"]);
+            request.Headers.Add("X-Authorization", _configuration[$"{NafathOptions.SectionName}:ApiKey"]);
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
 
