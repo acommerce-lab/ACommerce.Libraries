@@ -54,11 +54,9 @@ public class GoogleConversionsService : IGoogleConversionsService
 
     public async Task<bool> TrackViewContentAsync(GoogleViewContentEventRequest request)
     {
-        var eventParams = new Dictionary<string, object>();
-
-        if (request.Items?.Any() != true)
+        var eventParams = new Dictionary<string, object>
         {
-            eventParams["items"] = new List<Dictionary<string, object?>>
+            ["items"] = new List<Dictionary<string, object?>>
             {
                 new()
                 {
@@ -67,8 +65,8 @@ public class GoogleConversionsService : IGoogleConversionsService
                     ["item_category"] = request.Category,
                     ["price"] = request.Value ?? 0
                 }
-            };
-        }
+            }
+        };
 
         return await SendEventAsync("view_item", eventParams, request.User);
     }
