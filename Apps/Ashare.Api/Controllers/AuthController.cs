@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using ACommerce.Authentication.Abstractions;
 using ACommerce.Authentication.AspNetCore.Controllers;
-using ACommerce.Authentication.TwoFactor.Abstractions;
 using ACommerce.Marketing.Analytics.Services;
 using ACommerce.Profiles.Entities;
 using ACommerce.Profiles.Enums;
@@ -22,7 +21,6 @@ public class AuthController : AuthenticationControllerBase
     private readonly IBaseAsyncRepository<Profile> _profileRepository;
     private readonly DbContext _dbContext;
     private readonly IMarketingEventTracker _marketingTracker;
-    private readonly ITwoFactorSessionStore _sessionStore;
 
     public AuthController(
         IAuthenticationProvider authProvider,
@@ -30,14 +28,12 @@ public class AuthController : AuthenticationControllerBase
         IBaseAsyncRepository<Profile> profileRepository,
         DbContext dbContext,
         IMarketingEventTracker marketingTracker,
-        ITwoFactorSessionStore sessionStore,
         ILogger<AuthController> logger)
         : base(authProvider, twoFactorProvider, logger)
     {
         _profileRepository = profileRepository;
         _dbContext = dbContext;
         _marketingTracker = marketingTracker;
-        _sessionStore = sessionStore;
     }
 
     #region Nafath Authentication
@@ -91,48 +87,61 @@ public class AuthController : AuthenticationControllerBase
     /// <summary>
     /// التحقق من حالة المصادقة (polling)
     /// GET /api/auth/nafath/status?transactionId=xxx
+    /// يحاول التحقق من الجلسة ثم يعود للحالة الافتراضية إذا فشل
     /// </summary>
     [HttpGet("nafath/status")]
-    public async Task<ActionResult<NafathStatusResponse>> CheckNafathStatus([FromQuery] string transactionId)
+    public async Task<ActionResult<NafathStatusResponse>> CheckNafathStatus(
+        [FromQuery] string transactionId,
+        [FromServices] ACommerce.Authentication.TwoFactor.Abstractions.ITwoFactorSessionStore? sessionStore = null)
     {
         try
         {
-            // التحقق من حالة الجلسة الفعلية من مخزن الجلسات
-            var session = await _sessionStore.GetSessionAsync(transactionId);
-
-            if (session == null)
+            // محاولة التحقق من الجلسة إذا كان session store متوفر
+            if (sessionStore != null)
             {
+                var session = await sessionStore.GetSessionAsync(transactionId);
+
+                if (session == null)
+                {
+                    return Ok(new NafathStatusResponse
+                    {
+                        TransactionId = transactionId,
+                        Status = "expired",
+                        Message = "انتهت صلاحية الجلسة أو غير موجودة"
+                    });
+                }
+
+                var (status, message) = session.Status switch
+                {
+                    ACommerce.Authentication.TwoFactor.Abstractions.TwoFactorSessionStatus.Pending => ("pending", "في انتظار اختيار الرقم في تطبيق نفاذ"),
+                    ACommerce.Authentication.TwoFactor.Abstractions.TwoFactorSessionStatus.Verified => ("completed", "تم التحقق بنجاح"),
+                    ACommerce.Authentication.TwoFactor.Abstractions.TwoFactorSessionStatus.Expired => ("expired", "انتهت صلاحية الجلسة"),
+                    ACommerce.Authentication.TwoFactor.Abstractions.TwoFactorSessionStatus.Cancelled => ("rejected", "تم إلغاء المصادقة"),
+                    ACommerce.Authentication.TwoFactor.Abstractions.TwoFactorSessionStatus.Failed => ("rejected", "فشلت المصادقة"),
+                    _ => ("pending", "في انتظار اختيار الرقم في تطبيق نفاذ")
+                };
+
+                // التحقق من انتهاء الصلاحية
+                if (session.ExpiresAt < DateTimeOffset.UtcNow && session.Status == ACommerce.Authentication.TwoFactor.Abstractions.TwoFactorSessionStatus.Pending)
+                {
+                    status = "expired";
+                    message = "انتهت صلاحية الجلسة";
+                }
+
                 return Ok(new NafathStatusResponse
                 {
                     TransactionId = transactionId,
-                    Status = "expired",
-                    Message = "انتهت صلاحية الجلسة أو غير موجودة"
+                    Status = status,
+                    Message = message
                 });
             }
 
-            // تحويل حالة الجلسة إلى نص
-            var (status, message) = session.Status switch
-            {
-                TwoFactorSessionStatus.Pending => ("pending", "في انتظار اختيار الرقم في تطبيق نفاذ"),
-                TwoFactorSessionStatus.Verified => ("completed", "تم التحقق بنجاح"),
-                TwoFactorSessionStatus.Expired => ("expired", "انتهت صلاحية الجلسة"),
-                TwoFactorSessionStatus.Cancelled => ("rejected", "تم إلغاء المصادقة"),
-                TwoFactorSessionStatus.Failed => ("rejected", "فشلت المصادقة"),
-                _ => ("pending", "في انتظار اختيار الرقم في تطبيق نفاذ")
-            };
-
-            // التحقق من انتهاء الصلاحية
-            if (session.ExpiresAt < DateTimeOffset.UtcNow && session.Status == TwoFactorSessionStatus.Pending)
-            {
-                status = "expired";
-                message = "انتهت صلاحية الجلسة";
-            }
-
+            // إذا لم يتوفر session store، نرجع pending
             return Ok(new NafathStatusResponse
             {
                 TransactionId = transactionId,
-                Status = status,
-                Message = message
+                Status = "pending",
+                Message = "في انتظار اختيار الرقم في تطبيق نفاذ"
             });
         }
         catch (Exception ex)
