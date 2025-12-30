@@ -81,7 +81,7 @@ public class NafathApiClient : INafathApiClient
                 transactionId);
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"check-status/{transactionId}");
-            request.Headers.Add("X-Authorization", _configuration[$"{NafathOptions.SectionName}:ApiKey"]);
+            request.Headers.Add("X-Authorization", _configuration[$"{NafathOptions.SectionName}:WebhookSecret"]);
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
 
@@ -160,7 +160,7 @@ public class NafathApiClient : INafathApiClient
                 Content = JsonContent.Create(new { national_id = nationalId })
             };
 
-            request.Headers.Add("X-Authorization", _configuration[$"{NafathOptions.SectionName}:ApiKey"]);
+            request.Headers.Add("X-Authorization", _configuration[$"{NafathOptions.SectionName}:WebhookSecret"]);
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
 
