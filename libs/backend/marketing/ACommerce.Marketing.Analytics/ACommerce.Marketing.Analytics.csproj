@@ -19,6 +19,10 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ACommerce.Marketing.MetaConversions\ACommerce.Marketing.MetaConversions.csproj" />
+    <ProjectReference Include="..\ACommerce.Marketing.GoogleConversions\ACommerce.Marketing.GoogleConversions.csproj" />
+    <ProjectReference Include="..\ACommerce.Marketing.TikTokConversions\ACommerce.Marketing.TikTokConversions.csproj" />
+    <ProjectReference Include="..\ACommerce.Marketing.SnapchatConversions\ACommerce.Marketing.SnapchatConversions.csproj" />
+    <ProjectReference Include="..\ACommerce.Marketing.TwitterConversions\ACommerce.Marketing.TwitterConversions.csproj" />
     <ProjectReference Include="..\..\core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">

@@ -79,6 +79,26 @@ public class UserTrackingContext
     /// Facebook Browser ID (من cookie _fbp)
     /// </summary>
     public string? Fbp { get; set; }
+    /// <summary>
+    /// Google Click ID (من URL parameter gclid)
+    /// </summary>
+    public string? Gclid { get; set; }
+    /// <summary>
+    /// TikTok Click ID (من URL parameter ttclid)
+    /// </summary>
+    public string? Ttclid { get; set; }
+    /// <summary>
+    /// TikTok Pixel ID (من cookie _ttp)
+    /// </summary>
+    public string? Ttp { get; set; }
+    /// <summary>
+    /// Snapchat Click ID (من URL parameter ScCid)
+    /// </summary>
+    public string? ScClickId { get; set; }
+    /// <summary>
+    /// Twitter/X Click ID (من URL parameter twclid)
+    /// </summary>
+    public string? Twclid { get; set; }
 }
 
 public class RegistrationTrackingRequest

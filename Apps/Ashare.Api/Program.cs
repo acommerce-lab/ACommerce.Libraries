@@ -313,8 +313,8 @@ try
     // Meta Conversions API (Facebook Server-Side Events)
     builder.Services.AddMetaConversions(builder.Configuration);
 
-    // Marketing Analytics (Local Storage + Meta CAPI Integration)
-    builder.Services.AddMarketingAnalytics();
+    // Marketing Analytics (Local Storage + Multi-Platform CAPI Integration)
+    builder.Services.AddMarketingAnalytics(builder.Configuration);
 
     // Subscription Services
     builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
