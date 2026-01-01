@@ -1,13 +1,15 @@
 @page "/notifications"
 @using ACommerce.Client.Notifications
+@using ACommerce.Templates.Customer.Components
 @inject NotificationsClient NotificationsClient
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
+@inject ACommerce.Templates.Customer.Services.GuestModeService GuestMode
 
 <div class="ac-page ashare-notifications-page">
     <div class="ac-page-header">
         <h1>@L["Notifications"]</h1>
-        @if (_notifications?.Any(n => !n.IsRead) == true)
+        @if (!GuestMode.IsGuestMode && _notifications?.Any(n => !n.IsRead) == true)
         {
             <button class="ashare-mark-all-btn" @onclick="MarkAllAsRead">
                 @L["MarkAllRead"]
@@ -15,7 +17,15 @@
         }
     </div>
 
-    @if (_isLoading)
+    @if (GuestMode.IsGuestMode)
+    {
+        <LoginRequiredState
+            Icon="bi-bell"
+            Title="@L["Notifications"]"
+            Description="@L["LoginRequiredDescription"]"
+            ReturnUrl="/notifications" />
+    }
+    else if (_isLoading)
     {
         <div class="ashare-loading">
             <div class="ac-spinner"></div>
@@ -60,6 +70,12 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (GuestMode.IsGuestMode)
+        {
+            _isLoading = false;
+            return;
+        }
+
         try
         {
             _notifications = (await NotificationsClient.GetMyNotificationsAsync())?

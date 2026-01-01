@@ -1,6 +1,7 @@
 @page "/profile/edit"
 @using ACommerce.Client.Auth
 @using ACommerce.Client.Profiles
+@using ACommerce.Templates.Customer.Components
 @using Microsoft.AspNetCore.Components.Forms
 @inject AuthClient AuthClient
 @inject ProfilesClient ProfilesClient
@@ -8,8 +9,28 @@
 @inject ILocalizationService L
 @inject Ashare.Shared.Services.ThemeService Theme
 @inject NavigationManager NavManager
+@inject ACommerce.Templates.Customer.Services.GuestModeService GuestMode
 
 <div class="ac-page ashare-profile-edit-page @(Theme.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
+    @if (GuestMode.IsGuestMode)
+    {
+        @* Header for Guest Mode *@
+        <div class="ashare-profile-edit-header">
+            <button class="ashare-back-btn" @onclick="() => Navigation.NavigateBack()">
+                <i class="bi bi-arrow-right"></i>
+            </button>
+            <h1>@L["EditProfile"]</h1>
+            <div style="width: 40px"></div>
+        </div>
+
+        <LoginRequiredState
+            Icon="bi-person"
+            Title="@L["EditProfile"]"
+            Description="@L["LoginRequiredDescription"]"
+            ReturnUrl="/profile/edit" />
+    }
+    else
+    {
     @* Header *@
     <div class="ashare-profile-edit-header">
         @if (!_isNewUser)
@@ -189,6 +210,7 @@
                 }
             </button>
         </div>
+    }
     }
 </div>
 

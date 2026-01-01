@@ -82,6 +82,7 @@ public class LocalizationService : BaseLocalizationService
         ar["EnterFullName"] = "أدخل اسمك الكامل";
         ar["ReEnterPassword"] = "أعد إدخال كلمة المرور";
         ar["LoginRequired"] = "يجب تسجيل الدخول";
+        ar["LoginRequiredDescription"] = "سجل دخولك للوصول لهذا المحتوى";
         ar["LoginToCreateListing"] = "يجب تسجيل الدخول لإنشاء عرض جديد";
 
         // Spaces (Ashare-specific)
@@ -381,6 +382,7 @@ public class LocalizationService : BaseLocalizationService
         en["EnterFullName"] = "Enter your full name";
         en["ReEnterPassword"] = "Re-enter your password";
         en["LoginRequired"] = "Login Required";
+        en["LoginRequiredDescription"] = "Please login to access this content";
         en["LoginToCreateListing"] = "Please login to create a listing";
 
         // Spaces (Ashare-specific)

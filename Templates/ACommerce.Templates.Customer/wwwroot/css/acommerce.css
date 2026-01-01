@@ -3514,3 +3514,116 @@ a:hover {
 		gap: var(--ac-space-md);
 	}
 }
+
+/* ==========================================================================
+   Login Required State
+   ========================================================================== */
+.login-required-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: 60vh;
+	padding: var(--ac-space-xl);
+	text-align: center;
+}
+
+.login-required-content {
+	max-width: 320px;
+}
+
+.login-required-icon {
+	width: 80px;
+	height: 80px;
+	margin: 0 auto var(--ac-space-lg);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--ac-surface-alt);
+	border-radius: 50%;
+	color: var(--ac-text-muted);
+	font-size: 2.5rem;
+}
+
+.login-required-title {
+	font-size: var(--ac-font-xl);
+	font-weight: var(--ac-font-bold);
+	color: var(--ac-text);
+	margin: 0 0 var(--ac-space-sm);
+}
+
+.login-required-description {
+	font-size: var(--ac-font-base);
+	color: var(--ac-text-secondary);
+	margin: 0 0 var(--ac-space-lg);
+	line-height: var(--ac-leading-relaxed);
+}
+
+.login-required-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--ac-space-sm);
+	min-width: 180px;
+}
+
+/* Guest Profile Header */
+.guest-profile-header {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: var(--ac-space-xl) var(--ac-space-lg);
+	background: linear-gradient(135deg, var(--ac-primary), var(--ac-primary-dark));
+	color: white;
+	text-align: center;
+}
+
+.guest-profile-avatar {
+	width: 80px;
+	height: 80px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.2);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: var(--ac-space-md);
+	overflow: hidden;
+}
+
+.guest-profile-avatar img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.guest-profile-name {
+	font-size: var(--ac-font-lg);
+	font-weight: var(--ac-font-bold);
+	margin: 0 0 var(--ac-space-xs);
+}
+
+.guest-profile-subtitle {
+	font-size: var(--ac-font-sm);
+	opacity: 0.9;
+	margin: 0;
+}
+
+.guest-login-btn {
+	margin-top: var(--ac-space-md);
+	background: white;
+	color: var(--ac-primary);
+	border: none;
+	padding: var(--ac-space-sm) var(--ac-space-lg);
+	border-radius: var(--ac-radius-full);
+	font-weight: var(--ac-font-semibold);
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	gap: var(--ac-space-xs);
+	transition: all 0.2s ease;
+}
+
+.guest-login-btn:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--ac-shadow-md);
+}
