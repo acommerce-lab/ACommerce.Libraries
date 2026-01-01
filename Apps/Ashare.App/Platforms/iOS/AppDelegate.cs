@@ -1,6 +1,5 @@
 using Foundation;
 using UIKit;
-using Ashare.App.Services.Attribution;
 
 namespace Ashare.App;
 
@@ -42,7 +41,7 @@ public class AppDelegate : MauiUIApplicationDelegate
     }
 
     /// <summary>
-    /// Handle deep link and capture attribution data
+    /// Handle deep link
     /// </summary>
     private void HandleDeepLink(string? url)
     {
@@ -52,24 +51,6 @@ public class AppDelegate : MauiUIApplicationDelegate
         try
         {
             System.Diagnostics.Debug.WriteLine($"[DeepLink iOS] Received: {url}");
-
-            // Get attribution service and capture data
-            var attributionService = IPlatformApplication.Current?.Services.GetService<IAttributionCaptureService>();
-            if (attributionService != null)
-            {
-                // Fire and forget - don't block UI
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        await attributionService.CaptureFromUrlAsync(url);
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"[DeepLink iOS] Error capturing: {ex.Message}");
-                    }
-                });
-            }
 
             // Navigate to the deep link path
             if (Uri.TryCreate(url, UriKind.Absolute, out var uri))

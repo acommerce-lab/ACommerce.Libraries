@@ -2,7 +2,6 @@ using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
-using Ashare.App.Services.Attribution;
 
 namespace Ashare.App;
 
@@ -69,24 +68,6 @@ public class MainActivity : MauiAppCompatActivity
         {
             var url = uri.ToString();
             System.Diagnostics.Debug.WriteLine($"[DeepLink] Received: {url}");
-
-            // Get attribution service and capture data
-            var attributionService = IPlatformApplication.Current?.Services.GetService<IAttributionCaptureService>();
-            if (attributionService != null && !string.IsNullOrEmpty(url))
-            {
-                // Fire and forget - don't block UI
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        await attributionService.CaptureFromUrlAsync(url);
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"[DeepLink] Error capturing: {ex.Message}");
-                    }
-                });
-            }
 
             // Navigate to the deep link path
             var path = uri.Path;
