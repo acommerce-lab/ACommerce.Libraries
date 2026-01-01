@@ -427,13 +427,9 @@
         // لا يوجد توكن
         if (isGuest)
         {
-            if (IsProtectedPage)
-            {
-                // ضيف يحاول الوصول لصفحة محمية - توجيه لصفحة الدخول
-                Console.WriteLine("[Auth] Guest trying to access protected page - redirecting to login");
-                Navigation.NavigateTo("/login");
-            }
-            // إذا كان ضيف ويريد الوصول لصفحة عامة - نسمح له
+            // الضيف يمكنه الوصول لجميع الصفحات
+            // الصفحات المحمية ستعرض واجهة "تسجيل الدخول مطلوب" بدلاً من إعادة التوجيه
+            return;
         }
         else
         {
