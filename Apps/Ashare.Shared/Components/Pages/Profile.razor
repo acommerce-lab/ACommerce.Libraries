@@ -337,12 +337,27 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // في وضع الضيف، لا نحتاج لتحميل بيانات المستخدم
+        if (GuestMode.IsGuestMode)
+        {
+            _isLoading = false;
+            await LoadLegalPages();
+            return;
+        }
+
         await LoadUserData();
         await LoadLegalPages();
     }
 
     private async Task LoadUserData()
     {
+        // لا تحميل في وضع الضيف
+        if (GuestMode.IsGuestMode)
+        {
+            _isLoading = false;
+            return;
+        }
+
         _isLoading = true;
 
         try
@@ -394,9 +409,7 @@
             }
             else
             {
-                Console.WriteLine("[Profile] No token - clearing and redirecting to Nafath");
-                TokenManager.ClearToken();
-                await GuestMode.DisableGuestModeAsync();
+                Console.WriteLine("[Profile] No token - redirecting to Nafath");
                 _isLoading = false;
                 Navigation.NavigateTo("/login", forceLoad: true);
                 return;
@@ -404,9 +417,7 @@
         }
         catch
         {
-            Console.WriteLine("[Profile] Auth check failed - clearing token and redirecting to Nafath");
-            TokenManager.ClearToken();
-            await GuestMode.DisableGuestModeAsync();
+            Console.WriteLine("[Profile] Auth check failed - redirecting to Nafath");
             _isLoggedIn = false;
             _isLoading = false;
             Navigation.NavigateTo("/login", forceLoad: true);

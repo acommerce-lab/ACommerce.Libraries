@@ -237,6 +237,13 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // في وضع الضيف، لا نحتاج لتحميل بيانات البروفايل
+        if (GuestMode.IsGuestMode)
+        {
+            _isLoading = false;
+            return;
+        }
+
         // التحقق من معامل new في الرابط (بدون استخدام WebUtilities للتوافق مع MAUI)
         try
         {
@@ -254,6 +261,13 @@
 
     private async Task LoadProfile()
     {
+        // لا تحميل في وضع الضيف
+        if (GuestMode.IsGuestMode)
+        {
+            _isLoading = false;
+            return;
+        }
+
         _isLoading = true;
 
         try
