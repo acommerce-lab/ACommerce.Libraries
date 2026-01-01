@@ -9,7 +9,6 @@ using ACommerce.Templates.Customer.Themes;
 using ACommerce.ServiceRegistry.Client.Extensions;
 using Microsoft.Extensions.Logging;
 using Ashare.App.Services;
-using Ashare.App.Services.Attribution;
 using ThemeService = Ashare.Shared.Services.ThemeService;
 
 namespace Ashare.App;
@@ -71,8 +70,6 @@ public static class MauiProgram
 #if DEBUG
             options.BypassSslValidation = true;
 #endif
-            // Add attribution interceptor to send marketing data with each request
-            options.AddHandler<AttributionInterceptor>();
         });
 
 #if DEBUG
@@ -101,19 +98,6 @@ public static class MauiProgram
         builder.Services.AddSingleton<IAppVersionService, AppVersionService>();
 
         builder.Services.AddMockAnalytics();
-
-        // Attribution Capture Service - for marketing campaign tracking
-        builder.Services.AddSingleton<IAttributionCaptureService, AttributionCaptureService>();
-
-        // Attribution Interceptor - adds attribution headers to all HTTP requests
-        builder.Services.AddTransient<AttributionInterceptor>();
-
-        // Tracking Permission Service (ATT for iOS 14.5+)
-#if IOS
-        builder.Services.AddSingleton<ITrackingPermissionService, Ashare.App.Platforms.iOS.Services.TrackingPermissionService>();
-#else
-        builder.Services.AddSingleton<ITrackingPermissionService, DefaultTrackingPermissionService>();
-#endif
 
         builder.Services.AddHttpClient("AshareApi", client =>
         {
