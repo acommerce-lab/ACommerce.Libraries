@@ -1,6 +1,5 @@
 @page "/notifications"
 @using ACommerce.Client.Notifications
-@using ACommerce.Templates.Customer.Components
 @inject NotificationsClient NotificationsClient
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
@@ -19,11 +18,15 @@
 
     @if (GuestMode.IsGuestMode)
     {
-        <LoginRequiredState
-            Icon="bi-bell"
-            Title="@L["Notifications"]"
-            Description="@L["LoginRequiredDescription"]"
-            ReturnUrl="/notifications" />
+        <div class="ashare-empty-state">
+            <i class="bi bi-bell"></i>
+            <h3>@L["LoginRequired"]</h3>
+            <p>@L["LoginRequiredDescription"]</p>
+            <button class="ac-btn ac-btn-primary" @onclick='() => Navigation.NavigateTo("/login?returnUrl=/notifications")'>
+                <i class="bi bi-box-arrow-in-right"></i>
+                @L["Login"]
+            </button>
+        </div>
     }
     else if (_isLoading)
     {

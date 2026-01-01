@@ -1,5 +1,4 @@
 @page "/favorites"
-@using ACommerce.Templates.Customer.Components
 @inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
@@ -16,11 +15,15 @@
 
     @if (GuestMode.IsGuestMode)
     {
-        <LoginRequiredState
-            Icon="bi-heart"
-            Title="@L["Favorites"]"
-            Description="@L["LoginRequiredDescription"]"
-            ReturnUrl="/favorites" />
+        <div class="ashare-empty-state">
+            <i class="bi bi-heart"></i>
+            <h3>@L["LoginRequired"]</h3>
+            <p>@L["LoginRequiredDescription"]</p>
+            <button class="ac-btn ac-btn-primary" @onclick='() => Navigation.NavigateTo("/login?returnUrl=/favorites")'>
+                <i class="bi bi-box-arrow-in-right"></i>
+                @L["Login"]
+            </button>
+        </div>
     }
     else if (_favoriteSpaces?.Any() == true)
     {

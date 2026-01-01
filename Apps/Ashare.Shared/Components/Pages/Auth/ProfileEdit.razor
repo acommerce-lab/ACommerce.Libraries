@@ -1,7 +1,6 @@
 @page "/profile/edit"
 @using ACommerce.Client.Auth
 @using ACommerce.Client.Profiles
-@using ACommerce.Templates.Customer.Components
 @using Microsoft.AspNetCore.Components.Forms
 @inject AuthClient AuthClient
 @inject ProfilesClient ProfilesClient
@@ -23,11 +22,15 @@
             <div style="width: 40px"></div>
         </div>
 
-        <LoginRequiredState
-            Icon="bi-person"
-            Title="@L["EditProfile"]"
-            Description="@L["LoginRequiredDescription"]"
-            ReturnUrl="/profile/edit" />
+        <div class="ashare-empty-state">
+            <i class="bi bi-person"></i>
+            <h3>@L["LoginRequired"]</h3>
+            <p>@L["LoginRequiredDescription"]</p>
+            <button class="ac-btn ac-btn-primary" @onclick='() => Navigation.NavigateTo("/login?returnUrl=/profile/edit")'>
+                <i class="bi bi-box-arrow-in-right"></i>
+                @L["Login"]
+            </button>
+        </div>
     }
     else
     {
