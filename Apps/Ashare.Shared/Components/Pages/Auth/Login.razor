@@ -161,8 +161,9 @@
     private IDisposable? _notificationSubscription;
     private bool _isConnectedToSignalR;
     private int _pollCounter = 0; // عداد للـ polling
-    private const int PollIntervalSeconds = 5; // فحص كل 5 ثواني
+    private const int PollIntervalSeconds = 30; // فحص كل 30 ثانية (تعزيزي بجانب SignalR)
     private DotNetObjectReference<Login>? _dotNetRef;
+    private bool _isCheckingStatus = false; // منع التداخل في فحص الحالة
 
     protected override async Task OnInitializedAsync()
     {
@@ -248,17 +249,54 @@
     }
 
     /// <summary>
-    /// يُستدعى عند العودة للتطبيق/الصفحة - للتحقق من حالة المصادقة
+    /// يُستدعى عند العودة للتطبيق/الصفحة - للتحقق من حالة المصادقة وإعادة الاتصال
     /// </summary>
     [JSInvokable]
     public async Task OnAppResumed()
     {
-        Console.WriteLine("[Login] 📱 App resumed - checking auth status");
+        Console.WriteLine("[Login] 📱 App resumed - checking auth status and reconnecting");
 
         // التحقق فقط إذا كان هناك جلسة نفاذ نشطة
         if (_nafathResult != null && !_nafathCompleted && !_nafathExpired && !_nafathFailed)
         {
+            // 1. إعادة الاتصال بـ SignalR إذا انقطع
+            await ReconnectSignalRAsync();
+
+            // 2. فحص الحالة من الخدمة الخلفية فوراً
             await CheckNafathStatusAsync();
+        }
+    }
+
+    /// <summary>
+    /// إعادة الاتصال بـ SignalR وإعادة الاشتراك في إشعارات المصادقة
+    /// </summary>
+    private async Task ReconnectSignalRAsync()
+    {
+        try
+        {
+            if (!RealtimeClient.IsConnected)
+            {
+                Console.WriteLine("[Login] 🔄 SignalR disconnected - reconnecting...");
+                await RealtimeClient.EnsureConnectedAsync();
+                _isConnectedToSignalR = true;
+
+                // إعادة الاشتراك في الأحداث
+                _notificationSubscription?.Dispose();
+                _notificationSubscription = RealtimeClient.On<string, JsonElement>("ReceiveMessage", HandleReceiveMessage);
+                Console.WriteLine("[Login] ✅ SignalR reconnected");
+            }
+
+            // إعادة الاشتراك في إشعارات المصادقة
+            if (!string.IsNullOrEmpty(_nationalId))
+            {
+                await RealtimeClient.SendAsync("SubscribeToAuth", _nationalId);
+                Console.WriteLine($"[Login] ✅ Re-subscribed to auth notifications for {_nationalId}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Login] ⚠️ Failed to reconnect SignalR: {ex.Message}");
+            // نستمر - سنعتمد على polling
         }
     }
 
@@ -457,12 +495,21 @@
             if (_countdown <= 0)
             {
                 _timer?.Stop();
-                _nafathExpired = true;
-                await InvokeAsync(StateHasChanged);
+
+                // فحص الحالة قبل إظهار رسالة انتهاء الوقت
+                Console.WriteLine("[Login] ⏰ Timer expired - final status check before showing expired");
+                await CheckNafathStatusAsync(isFinalCheck: true);
+
+                // إذا لم يكتمل التحقق بعد الفحص النهائي، نعرض رسالة الانتهاء
+                if (!_nafathCompleted && !_nafathFailed)
+                {
+                    _nafathExpired = true;
+                    await InvokeAsync(StateHasChanged);
+                }
                 return;
             }
 
-            // Polling كل 5 ثواني كاحتياط لـ SignalR
+            // Polling كل 30 ثانية كتعزيز لـ SignalR
             if (_pollCounter >= PollIntervalSeconds)
             {
                 _pollCounter = 0;
@@ -477,14 +524,24 @@
     /// <summary>
     /// التحقق من حالة المصادقة من الخدمة الخلفية (polling)
     /// </summary>
-    private async Task CheckNafathStatusAsync()
+    /// <param name="isFinalCheck">هل هذا الفحص النهائي قبل انتهاء الوقت؟</param>
+    private async Task CheckNafathStatusAsync(bool isFinalCheck = false)
     {
         if (_nafathResult?.TransactionId == null || _nafathCompleted || _nafathExpired || _nafathFailed)
             return;
 
+        // منع التداخل في فحص الحالة
+        if (_isCheckingStatus)
+        {
+            Console.WriteLine("[Login] ⏳ Status check already in progress - skipping");
+            return;
+        }
+
+        _isCheckingStatus = true;
+
         try
         {
-            Console.WriteLine($"[Login] 🔄 Polling status for {_nafathResult.TransactionId}");
+            Console.WriteLine($"[Login] 🔄 Polling status for {_nafathResult.TransactionId} (final={isFinalCheck})");
             var status = await NafathClient.CheckStatusAsync(_nafathResult.TransactionId);
 
             if (status == null)
@@ -527,12 +584,22 @@
                     break;
 
                 // pending - نستمر في الانتظار
+                default:
+                    if (isFinalCheck)
+                    {
+                        Console.WriteLine("[Login] ⏰ Final check: still pending");
+                    }
+                    break;
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[Login] ⚠️ Status check failed: {ex.Message}");
             // نتجاهل الخطأ ونستمر في المحاولة
+        }
+        finally
+        {
+            _isCheckingStatus = false;
         }
     }
 
