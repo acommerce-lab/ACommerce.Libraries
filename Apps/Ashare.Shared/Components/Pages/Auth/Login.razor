@@ -3,15 +3,16 @@
 @using ACommerce.Client.Realtime
 @using ACommerce.Client.Auth
 @using System.Text.Json
+@using Ashare.Shared.Services
 @inject NafathClient NafathClient
 @inject RealtimeClient RealtimeClient
 @inject TokenManager TokenManager
 @inject AuthClient AuthClient
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
-@inject Ashare.Shared.Services.ThemeService Theme
+@inject ThemeService Theme
 @inject ACommerce.Templates.Customer.Services.GuestModeService GuestMode
-@inject IJSRuntime JS
+@inject IAppLifecycleService AppLifecycle
 @implements IAsyncDisposable
 
 <div class="ac-page ashare-login-page @(Theme.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
@@ -162,11 +163,14 @@
     private bool _isConnectedToSignalR;
     private int _pollCounter = 0; // عداد للـ polling
     private const int PollIntervalSeconds = 30; // فحص كل 30 ثانية (تعزيزي بجانب SignalR)
-    private DotNetObjectReference<Login>? _dotNetRef;
     private bool _isCheckingStatus = false; // منع التداخل في فحص الحالة
 
     protected override async Task OnInitializedAsync()
     {
+        // الاشتراك في أحداث دورة حياة التطبيق (MAUI Lifecycle)
+        AppLifecycle.AppResumed += OnAppResumedAsync;
+        Console.WriteLine("[Login] ✅ Subscribed to MAUI AppLifecycle.AppResumed");
+
         // تهيئة حالة وضع الضيف من التخزين
         await GuestMode.InitializeAsync();
 
@@ -206,53 +210,10 @@
         await ConnectToNotifications();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            try
-            {
-                // تسجيل مستمع للعودة للتطبيق (visibility change)
-                _dotNetRef = DotNetObjectReference.Create(this);
-
-                // تسجيل الدالة في window
-                await JS.InvokeVoidAsync("eval", @"
-                    if (!window.ashareLoginVisibilitySetup) {
-                        window.ashareLoginVisibilitySetup = true;
-                        window.ashareLoginDotNetRef = null;
-                        window.ashareSetupVisibilityHandler = function(dotNetRef) {
-                            window.ashareLoginDotNetRef = dotNetRef;
-                        };
-                        document.addEventListener('visibilitychange', function() {
-                            if (document.visibilityState === 'visible' && window.ashareLoginDotNetRef) {
-                                window.ashareLoginDotNetRef.invokeMethodAsync('OnAppResumed');
-                            }
-                        });
-                        document.addEventListener('resume', function() {
-                            if (window.ashareLoginDotNetRef) {
-                                window.ashareLoginDotNetRef.invokeMethodAsync('OnAppResumed');
-                            }
-                        });
-                    }
-                ");
-
-                // تمرير DotNetRef للدالة
-                await JS.InvokeVoidAsync("ashareSetupVisibilityHandler", _dotNetRef);
-                Console.WriteLine("[Login] Visibility handler registered");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Login] Failed to setup visibility handler: {ex.Message}");
-                // نتجاهل الخطأ - الـ polling سيعمل كبديل
-            }
-        }
-    }
-
     /// <summary>
-    /// يُستدعى عند العودة للتطبيق/الصفحة - للتحقق من حالة المصادقة وإعادة الاتصال
+    /// يُستدعى عند العودة للتطبيق من الخلفية (MAUI Lifecycle)
     /// </summary>
-    [JSInvokable]
-    public async Task OnAppResumed()
+    private async Task OnAppResumedAsync()
     {
         Console.WriteLine("[Login] 📱 App resumed - checking auth status and reconnecting");
 
@@ -688,9 +649,11 @@
 
     public async ValueTask DisposeAsync()
     {
+        // إلغاء الاشتراك من أحداث دورة حياة التطبيق
+        AppLifecycle.AppResumed -= OnAppResumedAsync;
+
         _timer?.Dispose();
         _notificationSubscription?.Dispose();
-        _dotNetRef?.Dispose();
 
         if (_isConnectedToSignalR)
         {

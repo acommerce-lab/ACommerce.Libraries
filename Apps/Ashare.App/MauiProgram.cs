@@ -96,6 +96,9 @@ public static class MauiProgram
         builder.Services.AddSingleton<ITimezoneService, DeviceTimezoneService>();
         builder.Services.AddSingleton<IPaymentService, MauiPaymentService>();
         builder.Services.AddSingleton<IAppVersionService, AppVersionService>();
+        builder.Services.AddSingleton<AppLifecycleService>();
+        builder.Services.AddSingleton<Ashare.Shared.Services.IAppLifecycleService>(sp =>
+            sp.GetRequiredService<AppLifecycleService>());
 
         builder.Services.AddMockAnalytics();
 
