@@ -64,9 +64,15 @@ public static class MauiProgram
         builder.Services.AddSingleton<ITokenStorage, StorageBackedTokenStorage>();
         builder.Services.AddSingleton<TokenManager>();
 
+        // تسجيل خدمة موافقة التتبع أولاً (يجب أن تكون قبل AddAshareClients)
+        builder.Services.AddSingleton<ITrackingConsentService, TrackingConsentService>();
+        builder.Services.AddTransient<TrackingConsentInterceptor>();
+
         builder.Services.AddAshareClients(apiBaseUrl, options =>
         {
             options.TokenProvider = sp => sp.GetRequiredService<TokenManager>();
+            // إضافة interceptor موافقة التتبع لإرسال الهيدر مع كل طلب
+            options.AddHandler<TrackingConsentInterceptor>();
 #if DEBUG
             options.BypassSslValidation = true;
 #endif

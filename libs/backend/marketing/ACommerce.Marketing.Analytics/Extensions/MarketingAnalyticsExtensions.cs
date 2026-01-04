@@ -17,6 +17,8 @@ public static class MarketingAnalyticsExtensions
     public static IServiceCollection AddMarketingAnalytics(this IServiceCollection services, IConfiguration configuration)
     {
         // خدمات أساسية
+        services.AddHttpContextAccessor();
+        services.AddScoped<ITrackingConsentReader, TrackingConsentReader>();
         services.AddScoped<IAttributionService, AttributionService>();
         services.AddScoped<IMarketingStatsService, MarketingStatsService>();
 
@@ -47,6 +49,8 @@ public static class MarketingAnalyticsExtensions
     /// </summary>
     public static IServiceCollection AddMarketingAnalyticsSync(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddHttpContextAccessor();
+        services.AddScoped<ITrackingConsentReader, TrackingConsentReader>();
         services.AddScoped<IAttributionService, AttributionService>();
         services.AddScoped<IMarketingStatsService, MarketingStatsService>();
         services.AddScoped<IMarketingEventTracker, MarketingEventTracker>();

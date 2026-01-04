@@ -15,6 +15,7 @@ namespace ACommerce.Marketing.Analytics.Services;
 /// <summary>
 /// تنفيذ خدمة تتبع الأحداث التسويقية
 /// تخزن الأحداث محلياً وترسلها إلى جميع منصات الإعلانات
+/// تحترم موافقة المستخدم على التتبع (ATT على iOS)
 /// </summary>
 public class MarketingEventTracker : IMarketingEventTracker, IMarketingEventProcessor
 {
@@ -24,6 +25,7 @@ public class MarketingEventTracker : IMarketingEventTracker, IMarketingEventProc
     private readonly ITikTokConversionsService _tiktokService;
     private readonly ISnapchatConversionsService _snapchatService;
     private readonly ITwitterConversionsService _twitterService;
+    private readonly ITrackingConsentReader _consentReader;
     private readonly ILogger<MarketingEventTracker> _logger;
 
     public MarketingEventTracker(
@@ -33,6 +35,7 @@ public class MarketingEventTracker : IMarketingEventTracker, IMarketingEventProc
         ITikTokConversionsService tiktokService,
         ISnapchatConversionsService snapchatService,
         ITwitterConversionsService twitterService,
+        ITrackingConsentReader consentReader,
         ILogger<MarketingEventTracker> logger)
     {
         _attributionService = attributionService;
@@ -41,6 +44,7 @@ public class MarketingEventTracker : IMarketingEventTracker, IMarketingEventProc
         _tiktokService = tiktokService;
         _snapchatService = snapchatService;
         _twitterService = twitterService;
+        _consentReader = consentReader;
         _logger = logger;
     }
 
@@ -602,6 +606,13 @@ public class MarketingEventTracker : IMarketingEventTracker, IMarketingEventProc
         Func<Task<bool>> twitterTask,
         string eventName)
     {
+        // التحقق من موافقة المستخدم على التتبع
+        if (!_consentReader.IsTrackingAllowed())
+        {
+            _logger.LogDebug("[Marketing] {Event} - skipped: user did not consent to tracking", eventName);
+            return;
+        }
+
         var tasks = new List<(string Platform, Task<bool> Task)>
         {
             ("Meta", SafeExecuteAsync(metaTask)),

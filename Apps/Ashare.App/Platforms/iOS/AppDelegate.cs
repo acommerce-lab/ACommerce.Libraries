@@ -1,4 +1,5 @@
 using Ashare.App.Services;
+using Ashare.Shared.Services;
 using Foundation;
 using UIKit;
 
@@ -30,7 +31,35 @@ public class AppDelegate : MauiUIApplicationDelegate
             }
         });
 
+        // طلب إذن التتبع (ATT) بعد تأخير قصير
+        RequestTrackingAuthorizationAsync();
+
         return result;
+    }
+
+    /// <summary>
+    /// طلب إذن التتبع من المستخدم (App Tracking Transparency)
+    /// يُعرض بعد تأخير قصير لضمان تحميل واجهة التطبيق
+    /// </summary>
+    private async void RequestTrackingAuthorizationAsync()
+    {
+        try
+        {
+            // تأخير قصير لضمان ظهور واجهة التطبيق أولاً
+            await Task.Delay(1500);
+
+            var trackingService = IPlatformApplication.Current?.Services.GetService<ITrackingConsentService>();
+            if (trackingService != null && !trackingService.HasRequestedConsent)
+            {
+                System.Diagnostics.Debug.WriteLine("[ATT] Requesting tracking authorization...");
+                var status = await trackingService.RequestConsentAsync();
+                System.Diagnostics.Debug.WriteLine($"[ATT] Authorization status: {status}");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ATT] Error requesting authorization: {ex.Message}");
+        }
     }
 
     /// <summary>

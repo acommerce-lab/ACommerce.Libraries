@@ -43,5 +43,8 @@
 			</array>
 		</dict>
 	</array>
+	<!-- App Tracking Transparency -->
+	<key>NSUserTrackingUsageDescription</key>
+	<string>نستخدم معرّفك لتحسين تجربة الإعلانات وقياس فعالية الحملات التسويقية. لن نشارك بياناتك مع أطراف ثالثة بدون موافقتك.</string>
 </dict>
 </plist>
