@@ -1,0 +1,425 @@
+2026-01-03 00:20:31.633 +03:00 [INF] Starting Ashare API - Shared Spaces Platform...
+2026-01-03 00:20:32.045 +03:00 [INF] 🚀 Listening on port 8080
+2026-01-03 00:20:32.859 +03:00 [INF] ⚡ Using InMemory for 2FA session store (development mode)
+2026-01-03 00:20:36.269 +03:00 [INF] Using SQL Server database
+2026-01-03 00:20:36.336 +03:00 [INF] Ensuring database is created...
+2026-01-03 00:20:36.876 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.878 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.ServiceRegistry.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.880 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Profiles.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.881 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.882 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Profiles, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.882 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Vendors.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.883 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Vendors, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.884 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Products.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.925 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Listings.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.927 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Attributes.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.936 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Units.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.950 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Currencies.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.959 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Orders.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.961 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Orders, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.962 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Transactions.Core.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.963 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Transactions.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.964 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Locations.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.965 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Chats.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.967 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Chats.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.968 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Chats.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.969 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Recipients.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.970 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Recipients, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.971 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Subscriptions.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.972 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Payments.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.973 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.ServiceRegistry.Server, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.975 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Admin.Dashboard.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.976 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Admin.Orders.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.977 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Admin.Listings.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.979 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Admin.Reports.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.980 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Admin.AuditLog.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.989 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Bookings.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.991 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Bookings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.992 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Marketing.Analytics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.993 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.Infrastructure.EFCores, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.995 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.JWT, Version=1.0.4.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.996 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Users.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.997 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.ServiceRegistry.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.998 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Messaging.InMemory, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:36.999 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Messaging.SignalR.Hub, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.000 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.001 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Channels.InApp, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.002 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Messaging, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.003 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.004 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.005 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Messaging, Version=1.0.1.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.007 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.009 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.TwoFactor.SessionStore.InMemory, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.010 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.TwoFactor.Nafath, Version=1.0.11.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.012 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.CQRS, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.013 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Realtime.SignalR, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.014 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Realtime.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.025 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Admin.Dashboard, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.027 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Admin.Orders, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.027 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Admin.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.028 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Admin.Reports, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.029 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Admin.AuditLog, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.030 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Marketing.MetaConversions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.055 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.Storage.GoogleCloud, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.056 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Payments.Noon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.057 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.TwoFactor.SessionStore.Redis, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.058 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.AspNetCore.NafathWH, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.059 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.AspNetCore.Swagger, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.061 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Cart, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.062 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.063 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Messaging.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.064 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.TwoFactor.Abstractions, Version=1.0.5.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.065 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Auth, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.066 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Bookings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.066 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Cart, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.067 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Categories, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.069 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Chats, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.070 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.ContactPoints, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.071 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.072 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Files, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.073 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.LegalPages, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.074 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Locations, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.075 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Nafath, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.076 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Notifications, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.077 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Orders, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.078 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Payments, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.079 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.ProductListings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.080 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Products, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.081 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Profiles, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.082 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Realtime, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.083 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Subscriptions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.085 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Vendors, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.086 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Client.Versions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.087 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.088 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.Storage.Local, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.089 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Localization, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.090 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Locations.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.091 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Marketing.GoogleConversions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.093 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Marketing.SnapchatConversions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.094 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Marketing.TikTokConversions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.095 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Marketing.TwitterConversions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.096 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Payments.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.097 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Reviews, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.098 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.ServiceRegistry.Client, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.108 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Templates.Customer, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-01-03 00:20:37.244 +03:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2026-01-03 00:20:37.317 +03:00 [WRN] No store type was specified for the decimal property 'DepositAmount' on entity type 'Booking'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.318 +03:00 [WRN] No store type was specified for the decimal property 'DepositPercentage' on entity type 'Booking'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.319 +03:00 [WRN] No store type was specified for the decimal property 'EscrowReleasedAmount' on entity type 'Booking'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.320 +03:00 [WRN] No store type was specified for the decimal property 'TotalPrice' on entity type 'Booking'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.321 +03:00 [WRN] No store type was specified for the decimal property 'DiscountAmount' on entity type 'Cart'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.322 +03:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'CartItem'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.323 +03:00 [WRN] No store type was specified for the decimal property 'ConversionFactor' on entity type 'AttributeValueRelationship'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.324 +03:00 [WRN] No store type was specified for the decimal property 'InverseRate' on entity type 'ExchangeRate'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.325 +03:00 [WRN] No store type was specified for the decimal property 'CompareAtPrice' on entity type 'ProductListing'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.326 +03:00 [WRN] No store type was specified for the decimal property 'Cost' on entity type 'ProductListing'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.327 +03:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'ProductListing'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.328 +03:00 [WRN] No store type was specified for the decimal property 'Rating' on entity type 'ProductListing'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.329 +03:00 [WRN] No store type was specified for the decimal property 'LowStockThreshold' on entity type 'ProductInventory'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.330 +03:00 [WRN] No store type was specified for the decimal property 'QuantityInStock' on entity type 'ProductInventory'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.330 +03:00 [WRN] No store type was specified for the decimal property 'QuantityReserved' on entity type 'ProductInventory'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.331 +03:00 [WRN] No store type was specified for the decimal property 'Revenue' on entity type 'DailyMarketingStats'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.332 +03:00 [WRN] No store type was specified for the decimal property 'Value' on entity type 'MarketingEvent'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.333 +03:00 [WRN] No store type was specified for the decimal property 'DiscountAmount' on entity type 'Order'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.334 +03:00 [WRN] No store type was specified for the decimal property 'ShippingCost' on entity type 'Order'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.334 +03:00 [WRN] No store type was specified for the decimal property 'Subtotal' on entity type 'Order'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.335 +03:00 [WRN] No store type was specified for the decimal property 'TaxAmount' on entity type 'Order'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.337 +03:00 [WRN] No store type was specified for the decimal property 'Total' on entity type 'Order'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.338 +03:00 [WRN] No store type was specified for the decimal property 'CommissionAmount' on entity type 'OrderItem'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.339 +03:00 [WRN] No store type was specified for the decimal property 'ItemDiscount' on entity type 'OrderItem'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.340 +03:00 [WRN] No store type was specified for the decimal property 'UnitPrice' on entity type 'OrderItem'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.341 +03:00 [WRN] No store type was specified for the decimal property 'VendorAmount' on entity type 'OrderItem'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.343 +03:00 [WRN] No store type was specified for the decimal property 'AdditionalFee' on entity type 'Vendor'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.344 +03:00 [WRN] No store type was specified for the decimal property 'AvailableBalance' on entity type 'Vendor'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.344 +03:00 [WRN] No store type was specified for the decimal property 'CommissionValue' on entity type 'Vendor'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.345 +03:00 [WRN] No store type was specified for the decimal property 'MinimumPayout' on entity type 'Vendor'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.346 +03:00 [WRN] No store type was specified for the decimal property 'PendingBalance' on entity type 'Vendor'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.347 +03:00 [WRN] No store type was specified for the decimal property 'Rating' on entity type 'Vendor'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-01-03 00:20:37.894 +03:00 [INF] Executed DbCommand (40ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-01-03 00:20:37.946 +03:00 [INF] Executed DbCommand (38ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+
+IF EXISTS
+    (SELECT *
+     FROM [sys].[objects] o
+     WHERE [o].[type] = 'U'
+     AND [o].[is_ms_shipped] = 0
+     AND NOT EXISTS (SELECT *
+         FROM [sys].[extended_properties] AS [ep]
+         WHERE [ep].[major_id] = [o].[object_id]
+             AND [ep].[minor_id] = 0
+             AND [ep].[class] = 1
+             AND [ep].[name] = N'microsoft_database_tools_support'
+    )
+)
+SELECT 1 ELSE SELECT 0
+2026-01-03 00:20:37.950 +03:00 [INF] Ensuring indexes exist...
+2026-01-03 00:20:37.952 +03:00 [INF] Skipping index creation - not SQLite database (provider: Microsoft.EntityFrameworkCore.SqlServer)
+2026-01-03 00:20:37.953 +03:00 [INF] Seeding initial data...
+2026-01-03 00:20:37.954 +03:00 [INF] Seeding offers from old system...
+2026-01-03 00:20:37.954 +03:00 [INF] Database ready with seed data!
+2026-01-03 00:20:37.955 +03:00 [INF] Warming up EF Core and AutoMapper...
+2026-01-03 00:20:38.147 +03:00 [WRN] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+2026-01-03 00:20:38.298 +03:00 [INF] Executed DbCommand (34ms) [Parameters=[@__p_0='1'], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(@__p_0) [p].[Id], [p].[Address], [p].[AttributesJson], [p].[CategoryId], [p].[City], [p].[CompareAtPrice], [p].[Condition], [p].[Cost], [p].[CreatedAt], [p].[Currency], [p].[CurrencyId], [p].[Description], [p].[EndsAt], [p].[FeaturedImage], [p].[ImagesJson], [p].[IsActive], [p].[IsDeleted], [p].[IsFeatured], [p].[IsNew], [p].[Latitude], [p].[Longitude], [p].[LowStockThreshold], [p].[Price], [p].[ProcessingTime], [p].[ProductId], [p].[QuantityAvailable], [p].[QuantityReserved], [p].[Rating], [p].[ReviewCount], [p].[StartsAt], [p].[Status], [p].[Title], [p].[TotalSales], [p].[UpdatedAt], [p].[VendorId], [p].[VendorNotes], [p].[VendorSku], [p].[ViewCount]
+FROM [ProductListing] AS [p]
+2026-01-03 00:20:38.671 +03:00 [WRN] You do not have a valid license key for the Lucky Penny software AutoMapper. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2026-01-03 00:20:38.672 +03:00 [INF] Warm-up completed in 716ms
+2026-01-03 00:20:38.677 +03:00 [INF] 🌐 Host URLs configured: API=http://localhost:3000, Web=http://localhost:5000
+2026-01-03 00:20:38.681 +03:00 [INF] ✅ Service registered: Ashare vv1 at http://localhost:3000 (ID: c4844cc1-145f-4498-922e-bc52e8f73e42)
+2026-01-03 00:20:38.682 +03:00 [INF] ✅ Service registered: Marketplace vv1 at http://localhost:3000 (ID: 5e417842-3fc2-4891-a435-54314b05a49a)
+2026-01-03 00:20:38.683 +03:00 [INF] ✅ Service registered: Payments vv1 at http://localhost:3000 (ID: 30d76256-945f-4e0e-9197-739dfafa45b2)
+2026-01-03 00:20:38.684 +03:00 [INF] Ashare/Marketplace/Payments services registered in Service Registry at http://localhost:3000
+2026-01-03 00:20:38.685 +03:00 [INF] Ashare API started successfully!
+2026-01-03 00:20:38.685 +03:00 [INF] Swagger UI available at: http://localhost:3000
+2026-01-03 00:20:38.695 +03:00 [INF] User profile is available. Using 'C:\Users\i\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-01-03 00:20:38.749 +03:00 [INF] [Notify Messaging] 🎧 Starting notification messaging handler
+2026-01-03 00:20:38.757 +03:00 [INF] [MarketingBackgroundService] Started processing marketing events queue
+2026-01-03 00:20:38.757 +03:00 [INF] [Ashare] Subscribed to topic 'notify.commands.send'
+2026-01-03 00:20:38.759 +03:00 [INF] [Notify Messaging] ✅ Notification messaging handler started
+2026-01-03 00:20:38.759 +03:00 [INF] [Auth Messaging] 🎧 Starting handler with channels: InApp
+2026-01-03 00:20:38.760 +03:00 [INF] [Ashare] Subscribed to topic 'auth.events.authentication.twofactorsucceeded'
+2026-01-03 00:20:38.761 +03:00 [INF] [Ashare] Subscribed to topic 'auth.events.authentication.twofactorfailed'
+2026-01-03 00:20:38.762 +03:00 [INF] [Ashare] Subscribed to topic 'auth.events.authentication.twofactorexpired'
+2026-01-03 00:20:38.763 +03:00 [INF] [Auth Messaging] ✅ Handler started
+2026-01-03 00:20:38.895 +03:00 [INF] Now listening on: http://0.0.0.0:8080
+2026-01-03 00:20:38.989 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-01-03 00:20:38.990 +03:00 [INF] Hosting environment: Development
+2026-01-03 00:20:38.991 +03:00 [INF] Content root path: C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\Ashare.Api
+2026-01-03 00:23:41.469 +03:00 [INF] Request starting HTTP/1.1 POST http://10.0.2.2:8080/api/versions/check - application/json; charset=utf-8 null
+2026-01-03 00:23:41.569 +03:00 [WRN] Failed to determine the https port for redirect.
+2026-01-03 00:23:41.612 +03:00 [INF] Executing endpoint 'ACommerce.Versions.Api.Controllers.AppVersionsController.CheckVersion (ACommerce.Versions)'
+2026-01-03 00:23:41.627 +03:00 [INF] Route matched with {action = "CheckVersion", controller = "AppVersions"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[ACommerce.Versions.DTOs.VersionCheckResult]] CheckVersion(ACommerce.Versions.DTOs.VersionCheckRequest, System.Threading.CancellationToken) on controller ACommerce.Versions.Api.Controllers.AppVersionsController (ACommerce.Versions).
+2026-01-03 00:23:41.629 +03:00 [INF] Using SQL Server database
+2026-01-03 00:23:41.656 +03:00 [INF] Checking version for ashare-mobile v1.202 (exact: '1.202')
+2026-01-03 00:23:41.718 +03:00 [INF] Executed DbCommand (17ms) [Parameters=[@__request_ApplicationCode_0='ashare-mobile' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[VersionNumber], [a].[IsDeleted], [a].[Status], [a].[IsActive]
+FROM [AppVersions] AS [a]
+WHERE [a].[IsDeleted] = CAST(0 AS bit) AND [a].[ApplicationCode] = @__request_ApplicationCode_0
+2026-01-03 00:23:41.722 +03:00 [INF] Available versions for ashare-mobile: '1.15' (deleted=False, status=Deprecated, active=True), '1.202' (deleted=False, status=Latest, active=True), '1.203' (deleted=False, status=Latest, active=True), '1.14' (deleted=False, status=Unsupported, active=True)
+2026-01-03 00:23:41.762 +03:00 [INF] Executed DbCommand (26ms) [Parameters=[@__request_ApplicationCode_0='ashare-mobile' (Size = 100), @__request_CurrentVersion_1='1.202' (Size = 50)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ApplicationCode], [a].[ApplicationNameAr], [a].[ApplicationNameEn], [a].[BuildNumber], [a].[CreatedAt], [a].[DeprecationStartDate], [a].[DownloadUrl], [a].[EndOfSupportDate], [a].[IsActive], [a].[IsDeleted], [a].[IsForceUpdate], [a].[Metadata], [a].[MinimumSupportedVersion], [a].[ReleaseDate], [a].[ReleaseNotesAr], [a].[ReleaseNotesEn], [a].[Status], [a].[UpdateUrl], [a].[UpdatedAt], [a].[VersionNumber]
+FROM [AppVersions] AS [a]
+WHERE [a].[IsDeleted] = CAST(0 AS bit) AND [a].[ApplicationCode] = @__request_ApplicationCode_0 AND [a].[VersionNumber] = @__request_CurrentVersion_1 AND [a].[IsDeleted] = CAST(0 AS bit)
+2026-01-03 00:23:41.765 +03:00 [INF] Version lookup result: FOUND
+2026-01-03 00:23:41.797 +03:00 [INF] Executed DbCommand (16ms) [Parameters=[@__request_ApplicationCode_0='ashare-mobile' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ApplicationCode], [a].[ApplicationNameAr], [a].[ApplicationNameEn], [a].[BuildNumber], [a].[CreatedAt], [a].[DeprecationStartDate], [a].[DownloadUrl], [a].[EndOfSupportDate], [a].[IsActive], [a].[IsDeleted], [a].[IsForceUpdate], [a].[Metadata], [a].[MinimumSupportedVersion], [a].[ReleaseDate], [a].[ReleaseNotesAr], [a].[ReleaseNotesEn], [a].[Status], [a].[UpdateUrl], [a].[UpdatedAt], [a].[VersionNumber]
+FROM [AppVersions] AS [a]
+WHERE [a].[IsDeleted] = CAST(0 AS bit) AND [a].[ApplicationCode] = @__request_ApplicationCode_0 AND [a].[Status] = 1 AND [a].[IsActive] = CAST(1 AS bit) AND [a].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [a].[ReleaseDate] DESC
+2026-01-03 00:23:41.804 +03:00 [INF] Executing OkObjectResult, writing value of type 'ACommerce.Versions.DTOs.VersionCheckResult'.
+2026-01-03 00:23:41.826 +03:00 [INF] Executed action ACommerce.Versions.Api.Controllers.AppVersionsController.CheckVersion (ACommerce.Versions) in 194.7601ms
+2026-01-03 00:23:41.830 +03:00 [INF] Executed endpoint 'ACommerce.Versions.Api.Controllers.AppVersionsController.CheckVersion (ACommerce.Versions)'
+2026-01-03 00:23:41.837 +03:00 [INF] Request finished HTTP/1.1 POST http://10.0.2.2:8080/api/versions/check - 200 null application/json; charset=utf-8 368.8561ms
+2026-01-03 00:23:42.755 +03:00 [INF] Request starting HTTP/1.1 POST http://10.0.2.2:8080/api/versions/check - application/json; charset=utf-8 null
+2026-01-03 00:23:42.761 +03:00 [INF] Executing endpoint 'ACommerce.Versions.Api.Controllers.AppVersionsController.CheckVersion (ACommerce.Versions)'
+2026-01-03 00:23:42.763 +03:00 [INF] Route matched with {action = "CheckVersion", controller = "AppVersions"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[ACommerce.Versions.DTOs.VersionCheckResult]] CheckVersion(ACommerce.Versions.DTOs.VersionCheckRequest, System.Threading.CancellationToken) on controller ACommerce.Versions.Api.Controllers.AppVersionsController (ACommerce.Versions).
+2026-01-03 00:23:42.766 +03:00 [INF] Using SQL Server database
+2026-01-03 00:23:42.768 +03:00 [INF] Checking version for ashare-mobile v1.202 (exact: '1.202')
+2026-01-03 00:23:42.779 +03:00 [INF] Request starting HTTP/1.1 GET http://10.0.2.2:8080/api/CategoryAttributes/categories - null null
+2026-01-03 00:23:42.780 +03:00 [INF] Request starting HTTP/1.1 GET http://10.0.2.2:8080/api/listings/featured?limit=10 - null null
+2026-01-03 00:23:42.784 +03:00 [INF] Executing endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+2026-01-03 00:23:42.787 +03:00 [INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+2026-01-03 00:23:42.788 +03:00 [INF] Route matched with {action = "GetAvailableCategories", controller = "CategoryAttributes"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult] GetAvailableCategories() on controller Ashare.Api.Controllers.CategoryAttributesController (Ashare.Api).
+2026-01-03 00:23:42.791 +03:00 [INF] Route matched with {action = "GetFeatured", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetFeatured(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+2026-01-03 00:23:42.792 +03:00 [INF] Using SQL Server database
+2026-01-03 00:23:42.793 +03:00 [INF] Request starting HTTP/1.1 POST http://10.0.2.2:8080/api/bookings/search - application/json; charset=utf-8 null
+2026-01-03 00:23:42.796 +03:00 [INF] Executing endpoint 'ACommerce.Bookings.Api.Controllers.BookingsController.Search (ACommerce.Bookings.Api)'
+2026-01-03 00:23:42.796 +03:00 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2026-01-03 00:23:42.799 +03:00 [INF] ProductListings cache is DISABLED
+2026-01-03 00:23:42.800 +03:00 [INF] Route matched with {action = "Search", controller = "Bookings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[ACommerce.SharedKernel.Abstractions.Queries.PagedResult`1[ACommerce.Bookings.DTOs.BookingResponseDto]]] Search(ACommerce.SharedKernel.Abstractions.Queries.SmartSearchRequest) on controller ACommerce.Bookings.Api.Controllers.BookingsController (ACommerce.Bookings.Api).
+2026-01-03 00:23:42.801 +03:00 [INF] Using SQL Server database
+2026-01-03 00:23:42.838 +03:00 [INF] [START] SmartSearchQuery`2 (dc6797e8-8156-49f2-851c-e2a956ecc310)
+2026-01-03 00:23:42.842 +03:00 [INF] Using SQL Server database
+2026-01-03 00:23:42.863 +03:00 [INF] [START] SmartSearchQuery`2 (2a835bec-af0f-4930-b0e6-68addc04ed9a)
+2026-01-03 00:23:42.864 +03:00 [INF] Request starting HTTP/1.1 GET http://10.0.2.2:8080/api/listings/new?limit=10 - null null
+2026-01-03 00:23:42.869 +03:00 [INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+2026-01-03 00:23:42.872 +03:00 [INF] Route matched with {action = "GetNew", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetNew(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+2026-01-03 00:23:42.874 +03:00 [INF] ProductListings cache is DISABLED
+2026-01-03 00:23:42.876 +03:00 [INF] [START] SmartSearchQuery`2 (dff333fb-afe3-444f-a459-d4023937e728)
+2026-01-03 00:23:42.877 +03:00 [INF] Using SQL Server database
+2026-01-03 00:23:42.879 +03:00 [INF] Executed DbCommand (16ms) [Parameters=[@__request_ApplicationCode_0='ashare-mobile' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[VersionNumber], [a].[IsDeleted], [a].[Status], [a].[IsActive]
+FROM [AppVersions] AS [a]
+WHERE [a].[IsDeleted] = CAST(0 AS bit) AND [a].[ApplicationCode] = @__request_ApplicationCode_0
+2026-01-03 00:23:42.881 +03:00 [INF] Available versions for ashare-mobile: '1.15' (deleted=False, status=Deprecated, active=True), '1.202' (deleted=False, status=Latest, active=True), '1.203' (deleted=False, status=Latest, active=True), '1.14' (deleted=False, status=Unsupported, active=True)
+2026-01-03 00:23:42.881 +03:00 [INF] Executed DbCommand (17ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[CreatedAt], [p].[Description], [p].[Icon], [p].[Image], [p].[IsActive], [p].[IsDeleted], [p].[Name], [p].[ParentCategoryId], [p].[ProductId], [p].[Slug], [p].[SortOrder], [p].[UpdatedAt]
+FROM [ProductCategory] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit) AND [p].[IsActive] = CAST(1 AS bit)
+2026-01-03 00:23:42.887 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[<>f__AnonymousType5`6[[System.Guid, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], Ashare.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-01-03 00:23:42.890 +03:00 [INF] Executed action Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api) in 100.3692ms
+2026-01-03 00:23:42.891 +03:00 [INF] Executed endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+2026-01-03 00:23:42.892 +03:00 [INF] Request finished HTTP/1.1 GET http://10.0.2.2:8080/api/CategoryAttributes/categories - 200 null application/json; charset=utf-8 113.7941ms
+2026-01-03 00:23:42.907 +03:00 [INF] Executed DbCommand (23ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [ProductListing] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit) AND [p].[IsActive] = CAST(1 AS bit) AND [p].[Status] = 3
+2026-01-03 00:23:42.907 +03:00 [INF] Executed DbCommand (22ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [ProductListing] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit) AND [p].[IsActive] = CAST(1 AS bit) AND [p].[Status] = 3
+2026-01-03 00:23:42.907 +03:00 [INF] Executed DbCommand (23ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [Booking] AS [b]
+WHERE [b].[IsDeleted] = CAST(0 AS bit)
+2026-01-03 00:23:42.907 +03:00 [INF] Executed DbCommand (24ms) [Parameters=[@__request_ApplicationCode_0='ashare-mobile' (Size = 100), @__request_CurrentVersion_1='1.202' (Size = 50)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ApplicationCode], [a].[ApplicationNameAr], [a].[ApplicationNameEn], [a].[BuildNumber], [a].[CreatedAt], [a].[DeprecationStartDate], [a].[DownloadUrl], [a].[EndOfSupportDate], [a].[IsActive], [a].[IsDeleted], [a].[IsForceUpdate], [a].[Metadata], [a].[MinimumSupportedVersion], [a].[ReleaseDate], [a].[ReleaseNotesAr], [a].[ReleaseNotesEn], [a].[Status], [a].[UpdateUrl], [a].[UpdatedAt], [a].[VersionNumber]
+FROM [AppVersions] AS [a]
+WHERE [a].[IsDeleted] = CAST(0 AS bit) AND [a].[ApplicationCode] = @__request_ApplicationCode_0 AND [a].[VersionNumber] = @__request_CurrentVersion_1 AND [a].[IsDeleted] = CAST(0 AS bit)
+2026-01-03 00:23:42.918 +03:00 [INF] Version lookup result: FOUND
+2026-01-03 00:23:42.938 +03:00 [INF] Executed DbCommand (19ms) [Parameters=[@__request_ApplicationCode_0='ashare-mobile' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ApplicationCode], [a].[ApplicationNameAr], [a].[ApplicationNameEn], [a].[BuildNumber], [a].[CreatedAt], [a].[DeprecationStartDate], [a].[DownloadUrl], [a].[EndOfSupportDate], [a].[IsActive], [a].[IsDeleted], [a].[IsForceUpdate], [a].[Metadata], [a].[MinimumSupportedVersion], [a].[ReleaseDate], [a].[ReleaseNotesAr], [a].[ReleaseNotesEn], [a].[Status], [a].[UpdateUrl], [a].[UpdatedAt], [a].[VersionNumber]
+FROM [AppVersions] AS [a]
+WHERE [a].[IsDeleted] = CAST(0 AS bit) AND [a].[ApplicationCode] = @__request_ApplicationCode_0 AND [a].[Status] = 1 AND [a].[IsActive] = CAST(1 AS bit) AND [a].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [a].[ReleaseDate] DESC
+2026-01-03 00:23:42.941 +03:00 [INF] Executing OkObjectResult, writing value of type 'ACommerce.Versions.DTOs.VersionCheckResult'.
+2026-01-03 00:23:42.943 +03:00 [INF] Executed action ACommerce.Versions.Api.Controllers.AppVersionsController.CheckVersion (ACommerce.Versions) in 178.7295ms
+2026-01-03 00:23:42.944 +03:00 [INF] Executed endpoint 'ACommerce.Versions.Api.Controllers.AppVersionsController.CheckVersion (ACommerce.Versions)'
+2026-01-03 00:23:42.945 +03:00 [INF] Request finished HTTP/1.1 POST http://10.0.2.2:8080/api/versions/check - 200 null application/json; charset=utf-8 190.3867ms
+2026-01-03 00:23:42.961 +03:00 [INF] Executed DbCommand (28ms) [Parameters=[@__p_0='0', @__p_1='20'], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[CancellationReason], [b].[CancelledAt], [b].[CancelledBy], [b].[CheckInDate], [b].[CheckOutDate], [b].[ConfirmedAt], [b].[CreatedAt], [b].[Currency], [b].[CustomerId], [b].[CustomerNotes], [b].[DepositAmount], [b].[DepositPaidAt], [b].[DepositPaymentId], [b].[DepositPercentage], [b].[EscrowReleasedAmount], [b].[EscrowReleasedAt], [b].[EscrowStatus], [b].[FinalPaymentAt], [b].[FinalPaymentId], [b].[GuestsCount], [b].[HostId], [b].[HostNotes], [b].[InternalNotes], [b].[IsDeleted], [b].[RejectedAt], [b].[RejectionReason], [b].[RentType], [b].[ReviewId], [b].[SpaceId], [b].[SpaceImage], [b].[SpaceLocation], [b].[SpaceName], [b].[Status], [b].[TotalPrice], [b].[UpdatedAt]
+FROM [Booking] AS [b]
+WHERE [b].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [b].[CreatedAt] DESC
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+2026-01-03 00:23:42.965 +03:00 [INF] Executed DbCommand (29ms) [Parameters=[@__p_0='0', @__p_1='10'], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[Address], [p].[AttributesJson], [p].[CategoryId], [p].[City], [p].[CompareAtPrice], [p].[Condition], [p].[Cost], [p].[CreatedAt], [p].[Currency], [p].[CurrencyId], [p].[Description], [p].[EndsAt], [p].[FeaturedImage], [p].[ImagesJson], [p].[IsActive], [p].[IsDeleted], [p].[IsFeatured], [p].[IsNew], [p].[Latitude], [p].[Longitude], [p].[LowStockThreshold], [p].[Price], [p].[ProcessingTime], [p].[ProductId], [p].[QuantityAvailable], [p].[QuantityReserved], [p].[Rating], [p].[ReviewCount], [p].[StartsAt], [p].[Status], [p].[Title], [p].[TotalSales], [p].[UpdatedAt], [p].[VendorId], [p].[VendorNotes], [p].[VendorSku], [p].[ViewCount]
+FROM [ProductListing] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit) AND [p].[IsActive] = CAST(1 AS bit) AND [p].[Status] = 3
+ORDER BY [p].[CreatedAt] DESC
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+2026-01-03 00:23:42.966 +03:00 [INF] Executed DbCommand (30ms) [Parameters=[@__p_0='0', @__p_1='10'], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[Address], [p].[AttributesJson], [p].[CategoryId], [p].[City], [p].[CompareAtPrice], [p].[Condition], [p].[Cost], [p].[CreatedAt], [p].[Currency], [p].[CurrencyId], [p].[Description], [p].[EndsAt], [p].[FeaturedImage], [p].[ImagesJson], [p].[IsActive], [p].[IsDeleted], [p].[IsFeatured], [p].[IsNew], [p].[Latitude], [p].[Longitude], [p].[LowStockThreshold], [p].[Price], [p].[ProcessingTime], [p].[ProductId], [p].[QuantityAvailable], [p].[QuantityReserved], [p].[Rating], [p].[ReviewCount], [p].[StartsAt], [p].[Status], [p].[Title], [p].[TotalSales], [p].[UpdatedAt], [p].[VendorId], [p].[VendorNotes], [p].[VendorSku], [p].[ViewCount]
+FROM [ProductListing] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit) AND [p].[IsActive] = CAST(1 AS bit) AND [p].[Status] = 3
+ORDER BY [p].[ViewCount] DESC
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+2026-01-03 00:23:42.978 +03:00 [INF] Found 1 Booking items, returned page 1 with 1 items
+2026-01-03 00:23:42.979 +03:00 [INF] [END] SmartSearchQuery`2 (2a835bec-af0f-4930-b0e6-68addc04ed9a) completed in 114ms
+2026-01-03 00:23:42.981 +03:00 [INF] Executing OkObjectResult, writing value of type 'ACommerce.SharedKernel.Abstractions.Queries.PagedResult`1[[ACommerce.Bookings.DTOs.BookingResponseDto, ACommerce.Bookings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-01-03 00:23:42.995 +03:00 [INF] Found 16 ProductListing items, returned page 1 with 10 items
+2026-01-03 00:23:42.995 +03:00 [INF] Found 16 ProductListing items, returned page 1 with 10 items
+2026-01-03 00:23:42.996 +03:00 [INF] [END] SmartSearchQuery`2 (dff333fb-afe3-444f-a459-d4023937e728) completed in 119ms
+2026-01-03 00:23:42.998 +03:00 [INF] [END] SmartSearchQuery`2 (dc6797e8-8156-49f2-851c-e2a956ecc310) completed in 158ms
+2026-01-03 00:23:42.998 +03:00 [INF] Executed action ACommerce.Bookings.Api.Controllers.BookingsController.Search (ACommerce.Bookings.Api) in 197.1734ms
+2026-01-03 00:23:42.999 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto, ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-01-03 00:23:43.000 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto, ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-01-03 00:23:43.002 +03:00 [INF] Executed endpoint 'ACommerce.Bookings.Api.Controllers.BookingsController.Search (ACommerce.Bookings.Api)'
+2026-01-03 00:23:43.005 +03:00 [INF] Request finished HTTP/1.1 POST http://10.0.2.2:8080/api/bookings/search - 200 null application/json; charset=utf-8 211.6108ms
+2026-01-03 00:23:43.026 +03:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api) in 152.8921ms
+2026-01-03 00:23:43.026 +03:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api) in 233.2188ms
+2026-01-03 00:23:43.027 +03:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+2026-01-03 00:23:43.028 +03:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+2026-01-03 00:23:43.029 +03:00 [INF] Request finished HTTP/1.1 GET http://10.0.2.2:8080/api/listings/new?limit=10 - 200 null application/json; charset=utf-8 165.4659ms
+2026-01-03 00:23:43.030 +03:00 [INF] Request finished HTTP/1.1 GET http://10.0.2.2:8080/api/listings/featured?limit=10 - 200 null application/json; charset=utf-8 249.9835ms
+2026-01-03 00:23:47.818 +03:00 [INF] Request starting HTTP/1.1 GET http://10.0.2.2:8080/api/legalpages - null null
+2026-01-03 00:23:47.820 +03:00 [INF] Executing endpoint 'ACommerce.LegalPages.Api.Controllers.LegalPagesController.GetActive (ACommerce.LegalPages)'
+2026-01-03 00:23:47.824 +03:00 [INF] Route matched with {action = "GetActive", controller = "LegalPages"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.IEnumerable`1[ACommerce.LegalPages.DTOs.LegalPageDto]]] GetActive(System.Threading.CancellationToken) on controller ACommerce.LegalPages.Api.Controllers.LegalPagesController (ACommerce.LegalPages).
+2026-01-03 00:23:47.826 +03:00 [INF] Using SQL Server database
+2026-01-03 00:23:47.830 +03:00 [INF] Getting active legal pages...
+2026-01-03 00:23:47.864 +03:00 [INF] Executed DbCommand (20ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [l].[Id], [l].[CreatedAt], [l].[Icon], [l].[IsActive], [l].[IsDeleted], [l].[Key], [l].[SortOrder], [l].[TitleAr], [l].[TitleEn], [l].[UpdatedAt], [l].[Url]
+FROM [LegalPage] AS [l]
+WHERE [l].[IsDeleted] = CAST(0 AS bit) AND [l].[IsActive] = CAST(1 AS bit) AND [l].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [l].[SortOrder]
+2026-01-03 00:23:47.867 +03:00 [INF] Found 5 active legal pages
+2026-01-03 00:23:47.867 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.LegalPages.DTOs.LegalPageDto, ACommerce.LegalPages, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-01-03 00:23:47.870 +03:00 [INF] Executed action ACommerce.LegalPages.Api.Controllers.LegalPagesController.GetActive (ACommerce.LegalPages) in 43.6614ms
+2026-01-03 00:23:47.871 +03:00 [INF] Executed endpoint 'ACommerce.LegalPages.Api.Controllers.LegalPagesController.GetActive (ACommerce.LegalPages)'
+2026-01-03 00:23:47.872 +03:00 [INF] Request finished HTTP/1.1 GET http://10.0.2.2:8080/api/legalpages - 200 null application/json; charset=utf-8 53.7727ms
+2026-01-03 00:23:50.322 +03:00 [INF] Request starting HTTP/1.1 GET http://10.0.2.2:8080/api/legalpages/key/privacy-policy - null null
+2026-01-03 00:23:50.324 +03:00 [INF] Executing endpoint 'ACommerce.LegalPages.Api.Controllers.LegalPagesController.GetByKey (ACommerce.LegalPages)'
+2026-01-03 00:23:50.328 +03:00 [INF] Route matched with {action = "GetByKey", controller = "LegalPages"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[ACommerce.LegalPages.DTOs.LegalPageDto]] GetByKey(System.String, System.Threading.CancellationToken) on controller ACommerce.LegalPages.Api.Controllers.LegalPagesController (ACommerce.LegalPages).
+2026-01-03 00:23:50.329 +03:00 [INF] Using SQL Server database
+2026-01-03 00:23:50.363 +03:00 [INF] Executed DbCommand (26ms) [Parameters=[@__key_0='privacy-policy' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [l].[Id], [l].[CreatedAt], [l].[Icon], [l].[IsActive], [l].[IsDeleted], [l].[Key], [l].[SortOrder], [l].[TitleAr], [l].[TitleEn], [l].[UpdatedAt], [l].[Url]
+FROM [LegalPage] AS [l]
+WHERE [l].[IsDeleted] = CAST(0 AS bit) AND [l].[Key] = @__key_0 AND [l].[IsDeleted] = CAST(0 AS bit)
+2026-01-03 00:23:50.366 +03:00 [INF] Executing OkObjectResult, writing value of type 'ACommerce.LegalPages.DTOs.LegalPageDto'.
+2026-01-03 00:23:50.366 +03:00 [INF] Executed action ACommerce.LegalPages.Api.Controllers.LegalPagesController.GetByKey (ACommerce.LegalPages) in 37.0864ms
+2026-01-03 00:23:50.367 +03:00 [INF] Executed endpoint 'ACommerce.LegalPages.Api.Controllers.LegalPagesController.GetByKey (ACommerce.LegalPages)'
+2026-01-03 00:23:50.368 +03:00 [INF] Request finished HTTP/1.1 GET http://10.0.2.2:8080/api/legalpages/key/privacy-policy - 200 null application/json; charset=utf-8 45.3331ms
+2026-01-03 00:24:05.342 +03:00 [INF] Request starting HTTP/1.1 GET http://10.0.2.2:8080/api/listings/new?limit=10 - null null
+2026-01-03 00:24:05.344 +03:00 [INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+2026-01-03 00:24:05.345 +03:00 [INF] Route matched with {action = "GetNew", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetNew(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+2026-01-03 00:24:05.347 +03:00 [INF] ProductListings cache is DISABLED
+2026-01-03 00:24:05.348 +03:00 [INF] [START] SmartSearchQuery`2 (f044fb50-fe5a-47a6-93f3-3897cad9a51d)
+2026-01-03 00:24:05.351 +03:00 [INF] Using SQL Server database
+2026-01-03 00:24:05.366 +03:00 [INF] Executed DbCommand (14ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [ProductListing] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit) AND [p].[IsActive] = CAST(1 AS bit) AND [p].[Status] = 3
+2026-01-03 00:24:05.390 +03:00 [INF] Executed DbCommand (21ms) [Parameters=[@__p_0='0', @__p_1='10'], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[Address], [p].[AttributesJson], [p].[CategoryId], [p].[City], [p].[CompareAtPrice], [p].[Condition], [p].[Cost], [p].[CreatedAt], [p].[Currency], [p].[CurrencyId], [p].[Description], [p].[EndsAt], [p].[FeaturedImage], [p].[ImagesJson], [p].[IsActive], [p].[IsDeleted], [p].[IsFeatured], [p].[IsNew], [p].[Latitude], [p].[Longitude], [p].[LowStockThreshold], [p].[Price], [p].[ProcessingTime], [p].[ProductId], [p].[QuantityAvailable], [p].[QuantityReserved], [p].[Rating], [p].[ReviewCount], [p].[StartsAt], [p].[Status], [p].[Title], [p].[TotalSales], [p].[UpdatedAt], [p].[VendorId], [p].[VendorNotes], [p].[VendorSku], [p].[ViewCount]
+FROM [ProductListing] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit) AND [p].[IsActive] = CAST(1 AS bit) AND [p].[Status] = 3
+ORDER BY [p].[CreatedAt] DESC
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+2026-01-03 00:24:05.410 +03:00 [INF] Found 16 ProductListing items, returned page 1 with 10 items
+2026-01-03 00:24:05.411 +03:00 [INF] [END] SmartSearchQuery`2 (f044fb50-fe5a-47a6-93f3-3897cad9a51d) completed in 62ms
+2026-01-03 00:24:05.412 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto, ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-01-03 00:24:05.415 +03:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api) in 68.173ms
+2026-01-03 00:24:05.416 +03:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetNew (ACommerce.Catalog.Listings.Api)'
+2026-01-03 00:24:05.417 +03:00 [INF] Request finished HTTP/1.1 GET http://10.0.2.2:8080/api/listings/new?limit=10 - 200 null application/json; charset=utf-8 74.941ms
+2026-01-03 00:24:05.448 +03:00 [INF] Request starting HTTP/1.1 GET http://10.0.2.2:8080/api/CategoryAttributes/categories - null null
+2026-01-03 00:24:05.450 +03:00 [INF] Executing endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+2026-01-03 00:24:05.451 +03:00 [INF] Route matched with {action = "GetAvailableCategories", controller = "CategoryAttributes"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult] GetAvailableCategories() on controller Ashare.Api.Controllers.CategoryAttributesController (Ashare.Api).
+2026-01-03 00:24:05.453 +03:00 [INF] Request starting HTTP/1.1 GET http://10.0.2.2:8080/api/listings/featured?limit=10 - null null
+2026-01-03 00:24:05.455 +03:00 [INF] Using SQL Server database
+2026-01-03 00:24:05.488 +03:00 [INF] Executing endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+2026-01-03 00:24:05.488 +03:00 [INF] Route matched with {action = "GetFeatured", controller = "ProductListings"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.List`1[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto]]] GetFeatured(Int32) on controller ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController (ACommerce.Catalog.Listings.Api).
+2026-01-03 00:24:05.490 +03:00 [INF] ProductListings cache is DISABLED
+2026-01-03 00:24:05.490 +03:00 [INF] [START] SmartSearchQuery`2 (afb8e3fd-62b5-42cb-bbdb-f3156839d73c)
+2026-01-03 00:24:05.491 +03:00 [INF] Using SQL Server database
+2026-01-03 00:24:05.505 +03:00 [INF] Executed DbCommand (17ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[CreatedAt], [p].[Description], [p].[Icon], [p].[Image], [p].[IsActive], [p].[IsDeleted], [p].[Name], [p].[ParentCategoryId], [p].[ProductId], [p].[Slug], [p].[SortOrder], [p].[UpdatedAt]
+FROM [ProductCategory] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit) AND [p].[IsActive] = CAST(1 AS bit)
+2026-01-03 00:24:05.507 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[<>f__AnonymousType5`6[[System.Guid, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], Ashare.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-01-03 00:24:05.509 +03:00 [INF] Executed action Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api) in 56.1046ms
+2026-01-03 00:24:05.509 +03:00 [INF] Executed DbCommand (17ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM [ProductListing] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit) AND [p].[IsActive] = CAST(1 AS bit) AND [p].[Status] = 3
+2026-01-03 00:24:05.510 +03:00 [INF] Executed endpoint 'Ashare.Api.Controllers.CategoryAttributesController.GetAvailableCategories (Ashare.Api)'
+2026-01-03 00:24:05.512 +03:00 [INF] Request finished HTTP/1.1 GET http://10.0.2.2:8080/api/CategoryAttributes/categories - 200 null application/json; charset=utf-8 64.1955ms
+2026-01-03 00:24:05.575 +03:00 [INF] Executed DbCommand (63ms) [Parameters=[@__p_0='0', @__p_1='10'], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[Id], [p].[Address], [p].[AttributesJson], [p].[CategoryId], [p].[City], [p].[CompareAtPrice], [p].[Condition], [p].[Cost], [p].[CreatedAt], [p].[Currency], [p].[CurrencyId], [p].[Description], [p].[EndsAt], [p].[FeaturedImage], [p].[ImagesJson], [p].[IsActive], [p].[IsDeleted], [p].[IsFeatured], [p].[IsNew], [p].[Latitude], [p].[Longitude], [p].[LowStockThreshold], [p].[Price], [p].[ProcessingTime], [p].[ProductId], [p].[QuantityAvailable], [p].[QuantityReserved], [p].[Rating], [p].[ReviewCount], [p].[StartsAt], [p].[Status], [p].[Title], [p].[TotalSales], [p].[UpdatedAt], [p].[VendorId], [p].[VendorNotes], [p].[VendorSku], [p].[ViewCount]
+FROM [ProductListing] AS [p]
+WHERE [p].[IsDeleted] = CAST(0 AS bit) AND [p].[IsActive] = CAST(1 AS bit) AND [p].[Status] = 3
+ORDER BY [p].[ViewCount] DESC
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+2026-01-03 00:24:05.590 +03:00 [INF] Found 16 ProductListing items, returned page 1 with 10 items
+2026-01-03 00:24:05.592 +03:00 [INF] [END] SmartSearchQuery`2 (afb8e3fd-62b5-42cb-bbdb-f3156839d73c) completed in 100ms
+2026-01-03 00:24:05.593 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.Catalog.Listings.DTOs.ProductListingResponseDto, ACommerce.Catalog.Listings, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-01-03 00:24:05.595 +03:00 [INF] Executed action ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api) in 105.1218ms
+2026-01-03 00:24:05.596 +03:00 [INF] Executed endpoint 'ACommerce.Catalog.Listings.Api.Controllers.ProductListingsController.GetFeatured (ACommerce.Catalog.Listings.Api)'
+2026-01-03 00:24:05.596 +03:00 [INF] Request finished HTTP/1.1 GET http://10.0.2.2:8080/api/listings/featured?limit=10 - 200 null application/json; charset=utf-8 143.8218ms
+2026-01-03 00:24:06.561 +03:00 [INF] Request starting HTTP/1.1 GET http://10.0.2.2:8080/api/legalpages - null null
+2026-01-03 00:24:06.563 +03:00 [INF] Executing endpoint 'ACommerce.LegalPages.Api.Controllers.LegalPagesController.GetActive (ACommerce.LegalPages)'
+2026-01-03 00:24:06.563 +03:00 [INF] Route matched with {action = "GetActive", controller = "LegalPages"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Collections.Generic.IEnumerable`1[ACommerce.LegalPages.DTOs.LegalPageDto]]] GetActive(System.Threading.CancellationToken) on controller ACommerce.LegalPages.Api.Controllers.LegalPagesController (ACommerce.LegalPages).
+2026-01-03 00:24:06.566 +03:00 [INF] Using SQL Server database
+2026-01-03 00:24:06.567 +03:00 [INF] Getting active legal pages...
+2026-01-03 00:24:06.593 +03:00 [INF] Executed DbCommand (24ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [l].[Id], [l].[CreatedAt], [l].[Icon], [l].[IsActive], [l].[IsDeleted], [l].[Key], [l].[SortOrder], [l].[TitleAr], [l].[TitleEn], [l].[UpdatedAt], [l].[Url]
+FROM [LegalPage] AS [l]
+WHERE [l].[IsDeleted] = CAST(0 AS bit) AND [l].[IsActive] = CAST(1 AS bit) AND [l].[IsDeleted] = CAST(0 AS bit)
+ORDER BY [l].[SortOrder]
+2026-01-03 00:24:06.595 +03:00 [INF] Found 5 active legal pages
+2026-01-03 00:24:06.596 +03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[ACommerce.LegalPages.DTOs.LegalPageDto, ACommerce.LegalPages, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-01-03 00:24:06.597 +03:00 [INF] Executed action ACommerce.LegalPages.Api.Controllers.LegalPagesController.GetActive (ACommerce.LegalPages) in 32.1121ms
+2026-01-03 00:24:06.599 +03:00 [INF] Executed endpoint 'ACommerce.LegalPages.Api.Controllers.LegalPagesController.GetActive (ACommerce.LegalPages)'
+2026-01-03 00:24:06.600 +03:00 [INF] Request finished HTTP/1.1 GET http://10.0.2.2:8080/api/legalpages - 200 null application/json; charset=utf-8 39.1866ms
+2026-01-03 00:24:08.786 +03:00 [INF] Request starting HTTP/1.1 GET http://10.0.2.2:8080/api/legalpages/key/contact-us - null null
+2026-01-03 00:24:08.788 +03:00 [INF] Executing endpoint 'ACommerce.LegalPages.Api.Controllers.LegalPagesController.GetByKey (ACommerce.LegalPages)'
+2026-01-03 00:24:08.789 +03:00 [INF] Route matched with {action = "GetByKey", controller = "LegalPages"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[ACommerce.LegalPages.DTOs.LegalPageDto]] GetByKey(System.String, System.Threading.CancellationToken) on controller ACommerce.LegalPages.Api.Controllers.LegalPagesController (ACommerce.LegalPages).
+2026-01-03 00:24:08.791 +03:00 [INF] Using SQL Server database
+2026-01-03 00:24:08.814 +03:00 [INF] Executed DbCommand (22ms) [Parameters=[@__key_0='contact-us' (Size = 100)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [l].[Id], [l].[CreatedAt], [l].[Icon], [l].[IsActive], [l].[IsDeleted], [l].[Key], [l].[SortOrder], [l].[TitleAr], [l].[TitleEn], [l].[UpdatedAt], [l].[Url]
+FROM [LegalPage] AS [l]
+WHERE [l].[IsDeleted] = CAST(0 AS bit) AND [l].[Key] = @__key_0 AND [l].[IsDeleted] = CAST(0 AS bit)
+2026-01-03 00:24:08.816 +03:00 [INF] Executing OkObjectResult, writing value of type 'ACommerce.LegalPages.DTOs.LegalPageDto'.
+2026-01-03 00:24:08.817 +03:00 [INF] Executed action ACommerce.LegalPages.Api.Controllers.LegalPagesController.GetByKey (ACommerce.LegalPages) in 26.5236ms
+2026-01-03 00:24:08.818 +03:00 [INF] Executed endpoint 'ACommerce.LegalPages.Api.Controllers.LegalPagesController.GetByKey (ACommerce.LegalPages)'
+2026-01-03 00:24:08.819 +03:00 [INF] Request finished HTTP/1.1 GET http://10.0.2.2:8080/api/legalpages/key/contact-us - 200 null application/json; charset=utf-8 32.9973ms
