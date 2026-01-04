@@ -1,3 +1,4 @@
+using Ashare.App.Services;
 using Foundation;
 using UIKit;
 
@@ -7,6 +8,30 @@ namespace Ashare.App;
 public class AppDelegate : MauiUIApplicationDelegate
 {
     protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
+
+    public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
+    {
+        var result = base.FinishedLaunching(application, launchOptions);
+
+        // تهيئة خدمة الإسناد
+        Task.Run(async () =>
+        {
+            try
+            {
+                var attributionService = IPlatformApplication.Current?.Services.GetService<IAttributionCaptureService>();
+                if (attributionService != null)
+                {
+                    await attributionService.InitializeAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Attribution iOS] Init error: {ex.Message}");
+            }
+        });
+
+        return result;
+    }
 
     /// <summary>
     /// Handle Universal Links (iOS 9+)
@@ -41,7 +66,7 @@ public class AppDelegate : MauiUIApplicationDelegate
     }
 
     /// <summary>
-    /// Handle deep link
+    /// Handle deep link and capture attribution
     /// </summary>
     private void HandleDeepLink(string? url)
     {
@@ -51,6 +76,23 @@ public class AppDelegate : MauiUIApplicationDelegate
         try
         {
             System.Diagnostics.Debug.WriteLine($"[DeepLink iOS] Received: {url}");
+
+            // التقاط بيانات الإسناد
+            Task.Run(async () =>
+            {
+                try
+                {
+                    var attributionService = IPlatformApplication.Current?.Services.GetService<IAttributionCaptureService>();
+                    if (attributionService != null)
+                    {
+                        await attributionService.CaptureFromDeepLinkAsync(url);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[Attribution iOS] Capture error: {ex.Message}");
+                }
+            });
 
             // Navigate to the deep link path
             if (Uri.TryCreate(url, UriKind.Absolute, out var uri))

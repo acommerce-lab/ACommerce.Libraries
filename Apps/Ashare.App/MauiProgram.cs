@@ -100,6 +100,9 @@ public static class MauiProgram
         builder.Services.AddSingleton<Ashare.Shared.Services.IAppLifecycleService>(sp =>
             sp.GetRequiredService<AppLifecycleService>());
 
+        // Attribution Capture Service (for deep link tracking)
+        builder.Services.AddSingleton<IAttributionCaptureService, AttributionCaptureService>();
+
         builder.Services.AddMockAnalytics();
 
         builder.Services.AddHttpClient("AshareApi", client =>

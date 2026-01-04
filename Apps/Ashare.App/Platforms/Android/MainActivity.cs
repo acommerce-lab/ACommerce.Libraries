@@ -2,6 +2,7 @@ using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
+using Ashare.App.Services;
 
 namespace Ashare.App;
 
@@ -43,6 +44,23 @@ public class MainActivity : MauiAppCompatActivity
     {
         base.OnCreate(savedInstanceState);
 
+        // تهيئة خدمة الإسناد
+        Task.Run(async () =>
+        {
+            try
+            {
+                var attributionService = IPlatformApplication.Current?.Services.GetService<IAttributionCaptureService>();
+                if (attributionService != null)
+                {
+                    await attributionService.InitializeAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Attribution Android] Init error: {ex.Message}");
+            }
+        });
+
         // Handle deep link on app launch
         HandleDeepLink(Intent);
     }
@@ -67,7 +85,24 @@ public class MainActivity : MauiAppCompatActivity
         try
         {
             var url = uri.ToString();
-            System.Diagnostics.Debug.WriteLine($"[DeepLink] Received: {url}");
+            System.Diagnostics.Debug.WriteLine($"[DeepLink Android] Received: {url}");
+
+            // التقاط بيانات الإسناد
+            Task.Run(async () =>
+            {
+                try
+                {
+                    var attributionService = IPlatformApplication.Current?.Services.GetService<IAttributionCaptureService>();
+                    if (attributionService != null && !string.IsNullOrEmpty(url))
+                    {
+                        await attributionService.CaptureFromDeepLinkAsync(url);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[Attribution Android] Capture error: {ex.Message}");
+                }
+            });
 
             // Navigate to the deep link path
             var path = uri.Path;
@@ -82,7 +117,7 @@ public class MainActivity : MauiAppCompatActivity
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[DeepLink] Error handling: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[DeepLink Android] Error handling: {ex.Message}");
         }
     }
 }
