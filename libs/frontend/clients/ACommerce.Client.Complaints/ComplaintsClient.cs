@@ -15,7 +15,7 @@ public sealed class ComplaintsClient(IApiClient httpClient)
 		CreateComplaintRequest request,
 		CancellationToken cancellationToken = default)
 	{
-		return await httpClient.PostAsync<ComplaintResponse>(
+		return await httpClient.PostAsync<CreateComplaintRequest, ComplaintResponse>(
 			ServiceName,
 			"/api/complaints",
 			request,
@@ -75,7 +75,7 @@ public sealed class ComplaintsClient(IApiClient httpClient)
 		UpdateComplaintRequest request,
 		CancellationToken cancellationToken = default)
 	{
-		return await httpClient.PutAsync<ComplaintResponse>(
+		return await httpClient.PutAsync<UpdateComplaintRequest, ComplaintResponse>(
 			ServiceName,
 			$"/api/complaints/{id}",
 			request,
@@ -166,10 +166,11 @@ public sealed class ComplaintsClient(IApiClient httpClient)
 		List<string>? attachments = null,
 		CancellationToken cancellationToken = default)
 	{
-		return await httpClient.PostAsync<ComplaintReplyResponse>(
+		var request = new CreateReplyRequest { Message = message, Attachments = attachments };
+		return await httpClient.PostAsync<CreateReplyRequest, ComplaintReplyResponse>(
 			ServiceName,
 			$"/api/complaints/{complaintId}/replies",
-			new { message, attachments },
+			request,
 			cancellationToken);
 	}
 
@@ -211,6 +212,12 @@ public sealed class UpdateComplaintRequest
 {
 	public string? Title { get; set; }
 	public string? Description { get; set; }
+	public List<string>? Attachments { get; set; }
+}
+
+public sealed class CreateReplyRequest
+{
+	public required string Message { get; set; }
 	public List<string>? Attachments { get; set; }
 }
 
