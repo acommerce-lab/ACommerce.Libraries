@@ -9,7 +9,13 @@
     <Description>Complaints and suggestions module - tickets system for customer support</Description>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.Abstractions\ACommerce.Authentication.Abstractions.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

@@ -90,6 +90,10 @@ using ACommerce.Marketing.Analytics.Extensions;
 using ACommerce.Marketing.Analytics.Services;
 using ACommerce.Marketing.Analytics.Controllers;
 
+// Complaints & Support
+using ACommerce.Complaints.Api.Controllers;
+using ACommerce.Complaints.Extensions;
+
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.File("logs/ashare-.txt", rollingInterval: RollingInterval.Day)
@@ -109,6 +113,8 @@ ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEnt
 ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Bookings.Entities.Booking>();
 ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Bookings.Entities.BookingStatusHistory>();
 ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Versions.Entities.AppVersion>();
+ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Complaints.Entities.Complaint>();
+ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Complaints.Entities.ComplaintReply>();
 
 try
 {
@@ -183,7 +189,8 @@ try
         .AddApplicationPart(typeof(LegalPagesController).Assembly) // Legal Pages
         .AddApplicationPart(typeof(AppVersionsController).Assembly) // Version Management
         .AddApplicationPart(typeof(BookingsController).Assembly) // Bookings
-        .AddApplicationPart(typeof(MarketingStatsController).Assembly); // Marketing Analytics
+        .AddApplicationPart(typeof(MarketingStatsController).Assembly) // Marketing Analytics
+        .AddApplicationPart(typeof(ComplaintsController).Assembly); // Complaints & Support
 
     builder.Services.AddEndpointsApiExplorer();
 
@@ -309,6 +316,9 @@ try
 
     // Version Management
     builder.Services.AddVersioning();
+
+    // Complaints & Support
+    builder.Services.AddComplaintsModule();
 
     // Meta Conversions API (Facebook Server-Side Events)
     builder.Services.AddMetaConversions(builder.Configuration);
