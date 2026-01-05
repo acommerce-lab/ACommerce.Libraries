@@ -121,7 +121,7 @@
                 <div class="ashare-form-section">
                     <label class="ashare-form-label">@L["ComplaintType"] <span class="required">*</span></label>
                     <div class="ashare-type-selector">
-                        @foreach (var type in _complaintTypes)
+                        @foreach (var type in GetComplaintTypes())
                         {
                             <button type="button"
                                     class="ashare-type-btn @(_selectedType == type.Value ? "selected" : "")"
@@ -137,7 +137,7 @@
                 <div class="ashare-form-section">
                     <label class="ashare-form-label">@L["Category"]</label>
                     <select class="ashare-select" @bind="_selectedCategory">
-                        @foreach (var category in _categories)
+                        @foreach (var category in GetCategories())
                         {
                             <option value="@category.Value">@category.Label</option>
                         }
@@ -557,22 +557,22 @@
     private string? _titleError;
     private string? _descriptionError;
 
-    private readonly List<(string Value, string Label, string Icon)> _complaintTypes =
+    private List<(string Value, string Label, string Icon)> GetComplaintTypes() =>
     [
-        ("Complaint", "شكوى", "bi-exclamation-triangle"),
-        ("Suggestion", "اقتراح", "bi-lightbulb"),
-        ("Inquiry", "استفسار", "bi-question-circle"),
-        ("Refund", "استرداد", "bi-arrow-counterclockwise")
+        ("Complaint", L["Complaint"], "bi-exclamation-triangle"),
+        ("Suggestion", L["Suggestion"], "bi-lightbulb"),
+        ("Inquiry", L["Inquiry"], "bi-question-circle"),
+        ("Refund", L["Refund"], "bi-arrow-counterclockwise")
     ];
 
-    private readonly List<(string Value, string Label)> _categories =
+    private List<(string Value, string Label)> GetCategories() =>
     [
-        ("Other", "أخرى"),
-        ("Order", "الحجوزات"),
-        ("Product", "المساحات"),
-        ("Payment", "الدفع"),
-        ("Account", "الحساب"),
-        ("Technical", "مشكلة تقنية")
+        ("Other", L["CategoryOther"]),
+        ("Order", L["Bookings"]),
+        ("Product", L["Spaces"]),
+        ("Payment", L["Payment"]),
+        ("Account", L["Account"]),
+        ("Technical", L["Technical"])
     ];
 
     protected override async Task OnInitializedAsync()
