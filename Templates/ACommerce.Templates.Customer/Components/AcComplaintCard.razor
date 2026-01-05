@@ -1,0 +1,149 @@
+@namespace ACommerce.Templates.Customer.Components
+
+<div class="ac-complaint-card @StatusClass @Class" @onclick="HandleClick">
+    <div class="ac-complaint-card-header">
+        <div class="ac-complaint-card-info">
+            <span class="ac-complaint-ticket">@TicketNumber</span>
+            <span class="ac-complaint-type @TypeClass">
+                <i class="bi @TypeIcon"></i>
+                @TypeLabel
+            </span>
+        </div>
+        <div class="ac-complaint-card-status">
+            <AcBadge Text="@StatusLabel" Variant="@StatusBadgeVariant" />
+            @if (!string.IsNullOrEmpty(Priority) && Priority != "Medium")
+            {
+                <AcBadge Text="@PriorityLabel" Variant="@PriorityBadgeVariant" Size="BadgeSize.Small" />
+            }
+        </div>
+    </div>
+
+    <div class="ac-complaint-card-body">
+        <h4 class="ac-complaint-title">@Title</h4>
+        @if (!string.IsNullOrEmpty(Description))
+        {
+            <p class="ac-complaint-description">@TruncatedDescription</p>
+        }
+    </div>
+
+    <div class="ac-complaint-card-footer">
+        <div class="ac-complaint-meta">
+            <span class="ac-complaint-date">
+                <i class="bi bi-calendar3"></i>
+                @CreatedAt.ToString("dd/MM/yyyy")
+            </span>
+            @if (RepliesCount > 0)
+            {
+                <span class="ac-complaint-replies">
+                    <i class="bi bi-chat-dots"></i>
+                    @RepliesCount رد
+                </span>
+            }
+        </div>
+        @if (ShowActions)
+        {
+            <div class="ac-complaint-actions">
+                <button class="ac-btn ac-btn-sm ac-btn-ghost" @onclick="HandleViewClick" @onclick:stopPropagation="true">
+                    <i class="bi bi-eye"></i>
+                    عرض
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    [Parameter] public string TicketNumber { get; set; } = "";
+    [Parameter] public string Type { get; set; } = "Complaint";
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public string Status { get; set; } = "Open";
+    [Parameter] public string Priority { get; set; } = "Medium";
+    [Parameter] public DateTime CreatedAt { get; set; }
+    [Parameter] public int RepliesCount { get; set; }
+    [Parameter] public bool ShowActions { get; set; } = true;
+    [Parameter] public bool Clickable { get; set; } = true;
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public EventCallback<Guid> OnClick { get; set; }
+    [Parameter] public EventCallback<Guid> OnView { get; set; }
+
+    private string TruncatedDescription =>
+        Description?.Length > 100 ? Description[..100] + "..." : Description ?? "";
+
+    private string StatusClass => $"ac-complaint-status-{Status.ToLower()}";
+
+    private string TypeClass => Type switch
+    {
+        "Complaint" => "ac-type-complaint",
+        "Suggestion" => "ac-type-suggestion",
+        "Inquiry" => "ac-type-inquiry",
+        "Refund" => "ac-type-refund",
+        _ => ""
+    };
+
+    private string TypeIcon => Type switch
+    {
+        "Complaint" => "bi-exclamation-triangle",
+        "Suggestion" => "bi-lightbulb",
+        "Inquiry" => "bi-question-circle",
+        "Refund" => "bi-arrow-counterclockwise",
+        _ => "bi-ticket"
+    };
+
+    private string TypeLabel => Type switch
+    {
+        "Complaint" => "شكوى",
+        "Suggestion" => "اقتراح",
+        "Inquiry" => "استفسار",
+        "Refund" => "استرداد",
+        _ => Type
+    };
+
+    private string StatusLabel => Status switch
+    {
+        "Open" => "مفتوح",
+        "InProgress" => "قيد المعالجة",
+        "Resolved" => "تم الحل",
+        "Closed" => "مغلق",
+        _ => Status
+    };
+
+    private BadgeVariant StatusBadgeVariant => Status switch
+    {
+        "Open" => BadgeVariant.Info,
+        "InProgress" => BadgeVariant.Warning,
+        "Resolved" => BadgeVariant.Success,
+        "Closed" => BadgeVariant.Secondary,
+        _ => BadgeVariant.Default
+    };
+
+    private string PriorityLabel => Priority switch
+    {
+        "Low" => "منخفضة",
+        "High" => "عالية",
+        "Urgent" => "عاجل",
+        _ => Priority
+    };
+
+    private BadgeVariant PriorityBadgeVariant => Priority switch
+    {
+        "Low" => BadgeVariant.Secondary,
+        "High" => BadgeVariant.Warning,
+        "Urgent" => BadgeVariant.Danger,
+        _ => BadgeVariant.Default
+    };
+
+    private async Task HandleClick()
+    {
+        if (Clickable)
+        {
+            await OnClick.InvokeAsync(Id);
+        }
+    }
+
+    private async Task HandleViewClick()
+    {
+        await OnView.InvokeAsync(Id);
+    }
+}
