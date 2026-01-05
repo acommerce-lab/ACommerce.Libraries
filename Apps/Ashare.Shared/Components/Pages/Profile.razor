@@ -187,6 +187,19 @@
             <div class="ashare-menu-section">
                 <h3 class="ashare-menu-title">@L["Help"]</h3>
                 <div class="ashare-menu-items">
+                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/complaints")'>
+                        <div class="ashare-menu-icon">
+                            <i class="bi bi-chat-square-text"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["ComplaintsAndSuggestions"]</span>
+                            @if (_complaintsCount > 0)
+                            {
+                                <span class="ashare-menu-badge">@_complaintsCount</span>
+                            }
+                        </div>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
                     <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/help")'>
                         <div class="ashare-menu-icon">
                             <i class="bi bi-question-circle"></i>
@@ -234,6 +247,7 @@
     private int _favoritesCount;
     private int _reviewsCount;
     private int _notificationsCount;
+    private int _complaintsCount;
     private IEnumerable<LegalPageDto> _legalPages = [];
 
     protected override async Task OnInitializedAsync()
