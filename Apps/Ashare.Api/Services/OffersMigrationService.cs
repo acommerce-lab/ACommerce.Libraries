@@ -344,6 +344,14 @@ public class OffersMigrationService
     }
 
     /// <summary>
+    /// الحصول على رقم الترخيص الافتراضي من التهيئة
+    /// </summary>
+    private string GetDefaultLicenseNumber()
+    {
+        return _configuration["Listings:DefaultLicenseNumber"] ?? "7200000000";
+    }
+
+    /// <summary>
     /// تحويل العرض القديم إلى ProductListing
     /// </summary>
     private ProductListing MapToProductListing(OldOfferDto old, List<string> imageUrls)
@@ -421,7 +429,12 @@ public class OffersMigrationService
             ["is_messaging_allowed"] = old.IsMessagingAllowed,
 
             // المميزات
-            ["features"] = old.Features ?? new List<string>()
+            ["features"] = old.Features ?? new List<string>(),
+
+            // رقم الترخيص - العروض السكنية تتطلب ترخيص
+            ["license_number"] = GetDefaultLicenseNumber(),
+            ["requires_license"] = true,
+            ["has_owner_license"] = false // العروض المرحلة تستخدم الترخيص الافتراضي
         };
 
         return new ProductListing

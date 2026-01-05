@@ -72,6 +72,24 @@
                 }
             </div>
 
+            @* رقم الترخيص - عرض بارز *@
+            @if (GetBoolAttribute("requires_license") && HasAttribute("license_number"))
+            {
+                <div class="ashare-license-badge">
+                    <div class="ashare-license-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div class="ashare-license-info">
+                        <span class="ashare-license-label">رقم الترخيص</span>
+                        <span class="ashare-license-number">@GetAttribute("license_number")</span>
+                        @if (!GetBoolAttribute("has_owner_license"))
+                        {
+                            <span class="ashare-license-note">ترخيص المنصة</span>
+                        }
+                    </div>
+                </div>
+            }
+
             @* Main Attributes - Quick Stats *@
             <div class="ashare-space-stats">
                 @if (HasAttribute("property_type"))

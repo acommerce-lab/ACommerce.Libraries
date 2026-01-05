@@ -2353,6 +2353,55 @@ h1, h2, h3, .ashare-logo-text {
     margin-right: auto;
 }
 
+/* رقم الترخيص */
+.ashare-license-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--ashare-spacing-md);
+    padding: var(--ashare-spacing-md);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-radius: var(--ashare-radius-md);
+    margin-bottom: var(--ashare-spacing-lg);
+    color: white;
+}
+
+.ashare-license-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: var(--ashare-radius-sm);
+}
+
+.ashare-license-icon i {
+    font-size: 24px;
+}
+
+.ashare-license-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ashare-license-label {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.ashare-license-number {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.ashare-license-note {
+    font-size: 11px;
+    opacity: 0.8;
+    font-style: italic;
+}
+
 .ashare-space-stats {
     display: flex;
     gap: var(--ashare-spacing-lg);
