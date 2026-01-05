@@ -334,6 +334,80 @@ public class LocalizationService : BaseLocalizationService
         ar["OpenStore"] = "فتح المتجر";
         ar["NeedHelp"] = "تحتاج مساعدة؟";
         ar["Later"] = "لاحقاً";
+
+        // Complaints & Support
+        ar["Complaints"] = "الشكاوى والاقتراحات";
+        ar["MyComplaints"] = "شكاواي";
+        ar["NewComplaint"] = "شكوى جديدة";
+        ar["SubmitComplaint"] = "إرسال الشكوى";
+        ar["ComplaintSubmitted"] = "تم إرسال الشكوى بنجاح";
+        ar["ComplaintUpdated"] = "تم تحديث الشكوى";
+        ar["ComplaintClosed"] = "تم إغلاق الشكوى";
+        ar["ComplaintReopened"] = "تم إعادة فتح الشكوى";
+        ar["NoComplaints"] = "لا توجد شكاوى";
+        ar["NoComplaintsHint"] = "لم تقم بإرسال أي شكاوى بعد";
+        ar["TicketNumber"] = "رقم التذكرة";
+        ar["ComplaintType"] = "نوع الطلب";
+        ar["ComplaintTitle"] = "العنوان";
+        ar["ComplaintDescription"] = "تفاصيل الشكوى";
+        ar["ComplaintCategory"] = "التصنيف";
+        ar["ComplaintPriority"] = "الأولوية";
+        ar["ComplaintStatus"] = "الحالة";
+        ar["ComplaintAttachments"] = "المرفقات";
+        ar["AddAttachment"] = "إضافة مرفق";
+        ar["RelatedOrder"] = "الطلب المرتبط";
+        ar["SelectOrder"] = "اختر الطلب (اختياري)";
+
+        // Complaint Types
+        ar["TypeComplaint"] = "شكوى";
+        ar["TypeSuggestion"] = "اقتراح";
+        ar["TypeInquiry"] = "استفسار";
+        ar["TypeRefund"] = "طلب استرداد";
+
+        // Complaint Status
+        ar["StatusOpen"] = "مفتوح";
+        ar["StatusInProgress"] = "قيد المعالجة";
+        ar["StatusResolved"] = "تم الحل";
+        ar["StatusClosed"] = "مغلق";
+
+        // Complaint Priority
+        ar["PriorityLow"] = "منخفضة";
+        ar["PriorityMedium"] = "متوسطة";
+        ar["PriorityHigh"] = "عالية";
+        ar["PriorityUrgent"] = "عاجل";
+
+        // Complaint Categories
+        ar["CategoryOrder"] = "الطلبات";
+        ar["CategoryProduct"] = "المنتجات";
+        ar["CategoryShipping"] = "الشحن والتوصيل";
+        ar["CategoryPayment"] = "الدفع والفواتير";
+        ar["CategoryAccount"] = "الحساب";
+        ar["CategoryOther"] = "أخرى";
+
+        // Complaint Details
+        ar["ComplaintDetails"] = "تفاصيل الشكوى";
+        ar["Replies"] = "الردود";
+        ar["WriteReply"] = "اكتب رداً...";
+        ar["SendReply"] = "إرسال";
+        ar["NoReplies"] = "لا توجد ردود بعد";
+        ar["StaffReply"] = "رد الدعم الفني";
+        ar["YourReply"] = "ردك";
+        ar["CloseComplaint"] = "إغلاق الشكوى";
+        ar["ReopenComplaint"] = "إعادة فتح الشكوى";
+        ar["RateService"] = "قيّم الخدمة";
+        ar["HowWasOurService"] = "كيف كانت خدمتنا؟";
+        ar["YourFeedback"] = "ملاحظاتك";
+        ar["SubmitRating"] = "إرسال التقييم";
+        ar["ThankYouForFeedback"] = "شكراً لك على ملاحظاتك";
+        ar["DeleteComplaint"] = "حذف الشكوى";
+        ar["DeleteComplaintConfirm"] = "هل أنت متأكد من حذف هذه الشكوى؟";
+
+        // Complaint Form Validation
+        ar["TitleRequired"] = "العنوان مطلوب";
+        ar["DescriptionRequired"] = "الوصف مطلوب";
+        ar["TypeRequired"] = "نوع الطلب مطلوب";
+        ar["CategoryRequired"] = "التصنيف مطلوب";
+        ar["DescriptionMinLength"] = "الوصف يجب أن يكون 10 أحرف على الأقل";
     }
 
     private static void AddEnglishTranslations(Dictionary<string, string> en)
@@ -634,6 +708,80 @@ public class LocalizationService : BaseLocalizationService
         en["OpenStore"] = "Open Store";
         en["NeedHelp"] = "Need help?";
         en["Later"] = "Later";
+
+        // Complaints & Support
+        en["Complaints"] = "Complaints & Suggestions";
+        en["MyComplaints"] = "My Complaints";
+        en["NewComplaint"] = "New Complaint";
+        en["SubmitComplaint"] = "Submit Complaint";
+        en["ComplaintSubmitted"] = "Complaint submitted successfully";
+        en["ComplaintUpdated"] = "Complaint updated";
+        en["ComplaintClosed"] = "Complaint closed";
+        en["ComplaintReopened"] = "Complaint reopened";
+        en["NoComplaints"] = "No complaints";
+        en["NoComplaintsHint"] = "You haven't submitted any complaints yet";
+        en["TicketNumber"] = "Ticket Number";
+        en["ComplaintType"] = "Request Type";
+        en["ComplaintTitle"] = "Title";
+        en["ComplaintDescription"] = "Description";
+        en["ComplaintCategory"] = "Category";
+        en["ComplaintPriority"] = "Priority";
+        en["ComplaintStatus"] = "Status";
+        en["ComplaintAttachments"] = "Attachments";
+        en["AddAttachment"] = "Add Attachment";
+        en["RelatedOrder"] = "Related Order";
+        en["SelectOrder"] = "Select Order (Optional)";
+
+        // Complaint Types
+        en["TypeComplaint"] = "Complaint";
+        en["TypeSuggestion"] = "Suggestion";
+        en["TypeInquiry"] = "Inquiry";
+        en["TypeRefund"] = "Refund Request";
+
+        // Complaint Status
+        en["StatusOpen"] = "Open";
+        en["StatusInProgress"] = "In Progress";
+        en["StatusResolved"] = "Resolved";
+        en["StatusClosed"] = "Closed";
+
+        // Complaint Priority
+        en["PriorityLow"] = "Low";
+        en["PriorityMedium"] = "Medium";
+        en["PriorityHigh"] = "High";
+        en["PriorityUrgent"] = "Urgent";
+
+        // Complaint Categories
+        en["CategoryOrder"] = "Orders";
+        en["CategoryProduct"] = "Products";
+        en["CategoryShipping"] = "Shipping & Delivery";
+        en["CategoryPayment"] = "Payment & Billing";
+        en["CategoryAccount"] = "Account";
+        en["CategoryOther"] = "Other";
+
+        // Complaint Details
+        en["ComplaintDetails"] = "Complaint Details";
+        en["Replies"] = "Replies";
+        en["WriteReply"] = "Write a reply...";
+        en["SendReply"] = "Send";
+        en["NoReplies"] = "No replies yet";
+        en["StaffReply"] = "Support Reply";
+        en["YourReply"] = "Your Reply";
+        en["CloseComplaint"] = "Close Complaint";
+        en["ReopenComplaint"] = "Reopen Complaint";
+        en["RateService"] = "Rate Service";
+        en["HowWasOurService"] = "How was our service?";
+        en["YourFeedback"] = "Your Feedback";
+        en["SubmitRating"] = "Submit Rating";
+        en["ThankYouForFeedback"] = "Thank you for your feedback";
+        en["DeleteComplaint"] = "Delete Complaint";
+        en["DeleteComplaintConfirm"] = "Are you sure you want to delete this complaint?";
+
+        // Complaint Form Validation
+        en["TitleRequired"] = "Title is required";
+        en["DescriptionRequired"] = "Description is required";
+        en["TypeRequired"] = "Request type is required";
+        en["CategoryRequired"] = "Category is required";
+        en["DescriptionMinLength"] = "Description must be at least 10 characters";
     }
 
     private static void AddUrduTranslations(Dictionary<string, string> ur)
@@ -757,5 +905,31 @@ public class LocalizationService : BaseLocalizationService
         ur["OpenStore"] = "اسٹور کھولیں";
         ur["NeedHelp"] = "مدد چاہیے؟";
         ur["Later"] = "بعد میں";
+
+        // Complaints & Support
+        ur["Complaints"] = "شکایات اور تجاویز";
+        ur["MyComplaints"] = "میری شکایات";
+        ur["NewComplaint"] = "نئی شکایت";
+        ur["SubmitComplaint"] = "شکایت جمع کرائیں";
+        ur["ComplaintSubmitted"] = "شکایت کامیابی سے جمع ہو گئی";
+        ur["NoComplaints"] = "کوئی شکایت نہیں";
+        ur["NoComplaintsHint"] = "آپ نے ابھی تک کوئی شکایت جمع نہیں کرائی";
+        ur["TicketNumber"] = "ٹکٹ نمبر";
+        ur["ComplaintType"] = "درخواست کی قسم";
+        ur["ComplaintTitle"] = "عنوان";
+        ur["ComplaintDescription"] = "تفصیل";
+        ur["ComplaintCategory"] = "زمرہ";
+
+        // Complaint Types
+        ur["TypeComplaint"] = "شکایت";
+        ur["TypeSuggestion"] = "تجویز";
+        ur["TypeInquiry"] = "استفسار";
+        ur["TypeRefund"] = "رقم واپسی کی درخواست";
+
+        // Complaint Status
+        ur["StatusOpen"] = "کھلا";
+        ur["StatusInProgress"] = "جاری";
+        ur["StatusResolved"] = "حل ہو گیا";
+        ur["StatusClosed"] = "بند";
     }
 }

@@ -111,6 +111,9 @@
     <ProjectReference Include="..\..\libs\backend\marketing\ACommerce.Marketing.MetaConversions\ACommerce.Marketing.MetaConversions.csproj" />
     <ProjectReference Include="..\..\libs\backend\marketing\ACommerce.Marketing.Analytics\ACommerce.Marketing.Analytics.csproj" />
 
+    <!-- Complaints & Support -->
+    <ProjectReference Include="..\..\Modules\ACommerce.Complaints\ACommerce.Complaints.csproj" />
+
     <!-- Shared -->
     <ProjectReference Include="..\Ashare.Shared\Ashare.Shared.csproj" />
   </ItemGroup>
