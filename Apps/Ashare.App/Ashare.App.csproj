@@ -25,8 +25,8 @@
 		<ApplicationId>com.ashare.ashare</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>1.204</ApplicationDisplayVersion>
-		<ApplicationVersion>204</ApplicationVersion>
+		<ApplicationDisplayVersion>1.205</ApplicationDisplayVersion>
+		<ApplicationVersion>205</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
@@ -41,7 +41,7 @@
 	<PropertyGroup Condition="'$(TargetFramework)'=='net9.0-ios'">
 		<ProvisioningType>manual</ProvisioningType>
 		<CodesignKey>Apple Distribution: SAFQAT ASHEER DIGITAL BORKERAGE CO (CTX2C777UU)</CodesignKey>
-		<CodesignProvision>ashare app profile</CodesignProvision>
+		<CodesignProvision>With Associated Domains</CodesignProvision>
 		<CodesignEntitlements>Platforms\iOS\Entitlements.plist</CodesignEntitlements>
 	</PropertyGroup>
 

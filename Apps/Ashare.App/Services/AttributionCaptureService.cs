@@ -37,10 +37,10 @@ public class AttributionCaptureService : IAttributionCaptureService
     /// </summary>
     public async Task InitializeAsync()
     {
-        SessionId = await _storage.GetAsync<string>(SessionIdKey) ?? Guid.NewGuid().ToString("N");
+        SessionId = await _storage.GetAsync(SessionIdKey) ?? Guid.NewGuid().ToString("N");
         await _storage.SetAsync(SessionIdKey, SessionId);
 
-        LastClickId = await _storage.GetAsync<string>(LastClickIdKey);
+        LastClickId = await _storage.GetAsync(LastClickIdKey);
 
         Console.WriteLine($"[Attribution] Initialized with SessionId: {SessionId}");
     }
