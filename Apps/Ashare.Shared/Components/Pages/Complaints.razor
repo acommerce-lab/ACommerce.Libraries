@@ -1,0 +1,759 @@
+@page "/complaints"
+@using ACommerce.Client.Auth
+@using ACommerce.Client.Complaints
+@inject AuthClient AuthClient
+@inject ComplaintsClient ComplaintsClient
+@inject TokenManager TokenManager
+@inject ACommerce.Templates.Customer.Services.GuestModeService GuestMode
+@inject IAppNavigationService Navigation
+@inject Ashare.Shared.Services.ThemeService ThemeService
+@inject ILocalizationService L
+
+<div class="ac-page ashare-complaints-page @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
+
+    @* Header *@
+    <div class="ashare-page-header">
+        <button class="ashare-back-btn" @onclick="GoBack">
+            <i class="bi bi-arrow-right"></i>
+        </button>
+        <h1 class="ashare-page-title">@L["ComplaintsAndSuggestions"]</h1>
+        <div class="ashare-header-spacer"></div>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="ashare-loading">
+            <div class="ac-spinner"></div>
+            <span>@L["Loading"]</span>
+        </div>
+    }
+    else if (!_isLoggedIn)
+    {
+        <div class="ashare-loading">
+            <div class="ac-spinner"></div>
+            <span>@L["RedirectingToLogin"]</span>
+        </div>
+    }
+    else
+    {
+        @* Tab Navigation *@
+        <div class="ashare-tabs">
+            <button class="ashare-tab @(_activeTab == "list" ? "active" : "")" @onclick='() => SetActiveTab("list")'>
+                <i class="bi bi-list-ul"></i>
+                @L["MyComplaints"]
+            </button>
+            <button class="ashare-tab @(_activeTab == "new" ? "active" : "")" @onclick='() => SetActiveTab("new")'>
+                <i class="bi bi-plus-circle"></i>
+                @L["NewComplaint"]
+            </button>
+        </div>
+
+        @if (_activeTab == "list")
+        {
+            @* Filter Tabs *@
+            <div class="ashare-filter-tabs">
+                <button class="ashare-filter-tab @(_statusFilter == null ? "active" : "")" @onclick="() => FilterByStatus(null)">
+                    @L["All"]
+                </button>
+                <button class="ashare-filter-tab @(_statusFilter == "Open" ? "active" : "")" @onclick='() => FilterByStatus("Open")'>
+                    @L["Open"]
+                </button>
+                <button class="ashare-filter-tab @(_statusFilter == "InProgress" ? "active" : "")" @onclick='() => FilterByStatus("InProgress")'>
+                    @L["InProgress"]
+                </button>
+                <button class="ashare-filter-tab @(_statusFilter == "Closed" ? "active" : "")" @onclick='() => FilterByStatus("Closed")'>
+                    @L["Closed"]
+                </button>
+            </div>
+
+            @* Complaints List *@
+            <div class="ashare-complaints-list">
+                @if (_complaints == null || !_complaints.Any())
+                {
+                    <AcEmptyState Icon="bi-chat-square-text"
+                                  Title="@L["NoComplaints"]"
+                                  Description="@L["NoComplaintsDescription"]"
+                                  ActionText="@L["SubmitComplaint"]"
+                                  OnAction="() => SetActiveTab(\"new\")" />
+                }
+                else
+                {
+                    @foreach (var complaint in _filteredComplaints)
+                    {
+                        <div class="ashare-complaint-card" @onclick="() => ViewComplaint(complaint.Id)">
+                            <div class="ashare-complaint-header">
+                                <span class="ashare-ticket-number">#@complaint.TicketNumber</span>
+                                <span class="ashare-complaint-status @GetStatusClass(complaint.Status)">
+                                    @GetStatusLabel(complaint.Status)
+                                </span>
+                            </div>
+                            <div class="ashare-complaint-body">
+                                <div class="ashare-complaint-type">
+                                    <i class="bi @GetTypeIcon(complaint.Type)"></i>
+                                    <span>@GetTypeLabel(complaint.Type)</span>
+                                </div>
+                                <h3 class="ashare-complaint-title">@complaint.Title</h3>
+                                <p class="ashare-complaint-date">
+                                    <i class="bi bi-calendar3"></i>
+                                    @complaint.CreatedAt.ToString("dd/MM/yyyy")
+                                </p>
+                            </div>
+                            <div class="ashare-complaint-footer">
+                                @if (complaint.RepliesCount > 0)
+                                {
+                                    <span class="ashare-replies-count">
+                                        <i class="bi bi-chat-dots"></i>
+                                        @complaint.RepliesCount @L["Replies"]
+                                    </span>
+                                }
+                                <i class="bi bi-chevron-left"></i>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        }
+        else if (_activeTab == "new")
+        {
+            @* New Complaint Form *@
+            <div class="ashare-new-complaint">
+                @* Type Selection *@
+                <div class="ashare-form-section">
+                    <label class="ashare-form-label">@L["ComplaintType"] <span class="required">*</span></label>
+                    <div class="ashare-type-selector">
+                        @foreach (var type in _complaintTypes)
+                        {
+                            <button type="button"
+                                    class="ashare-type-btn @(_selectedType == type.Value ? "selected" : "")"
+                                    @onclick="() => SelectType(type.Value)">
+                                <i class="bi @type.Icon"></i>
+                                <span>@type.Label</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                @* Category *@
+                <div class="ashare-form-section">
+                    <label class="ashare-form-label">@L["Category"]</label>
+                    <select class="ashare-select" @bind="_selectedCategory">
+                        @foreach (var category in _categories)
+                        {
+                            <option value="@category.Value">@category.Label</option>
+                        }
+                    </select>
+                </div>
+
+                @* Title *@
+                <div class="ashare-form-section">
+                    <label class="ashare-form-label">@L["Title"] <span class="required">*</span></label>
+                    <input type="text"
+                           class="ashare-input @(!string.IsNullOrEmpty(_titleError) ? "error" : "")"
+                           placeholder="@L["ComplaintTitlePlaceholder"]"
+                           @bind="_title" />
+                    @if (!string.IsNullOrEmpty(_titleError))
+                    {
+                        <span class="ashare-error">@_titleError</span>
+                    }
+                </div>
+
+                @* Description *@
+                <div class="ashare-form-section">
+                    <label class="ashare-form-label">@L["Description"] <span class="required">*</span></label>
+                    <textarea class="ashare-textarea @(!string.IsNullOrEmpty(_descriptionError) ? "error" : "")"
+                              placeholder="@L["ComplaintDescriptionPlaceholder"]"
+                              rows="5"
+                              @bind="_description"></textarea>
+                    @if (!string.IsNullOrEmpty(_descriptionError))
+                    {
+                        <span class="ashare-error">@_descriptionError</span>
+                    }
+                </div>
+
+                @* Submit Button *@
+                <div class="ashare-form-actions">
+                    <button class="ashare-btn ashare-btn-primary" @onclick="SubmitComplaint" disabled="@_isSubmitting">
+                        @if (_isSubmitting)
+                        {
+                            <div class="ac-spinner-sm"></div>
+                            <span>@L["Submitting"]</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-send"></i>
+                            <span>@L["Submit"]</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<style>
+    .ashare-complaints-page {
+        min-height: 100vh;
+        background: var(--ac-bg-secondary);
+        padding-bottom: 100px;
+    }
+
+    .ashare-page-header {
+        display: flex;
+        align-items: center;
+        padding: 16px;
+        background: var(--ac-bg-primary);
+        border-bottom: 1px solid var(--ac-border);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .ashare-back-btn {
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: var(--ac-bg-secondary);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: var(--ac-text-primary);
+        cursor: pointer;
+    }
+
+    .ashare-page-title {
+        flex: 1;
+        text-align: center;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .ashare-header-spacer {
+        width: 40px;
+    }
+
+    .ashare-tabs {
+        display: flex;
+        background: var(--ac-bg-primary);
+        padding: 8px;
+        gap: 8px;
+        border-bottom: 1px solid var(--ac-border);
+    }
+
+    .ashare-tab {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        background: transparent;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--ac-text-secondary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+
+    .ashare-tab.active {
+        background: var(--ac-primary);
+        color: white;
+    }
+
+    .ashare-filter-tabs {
+        display: flex;
+        padding: 12px 16px;
+        gap: 8px;
+        overflow-x: auto;
+        background: var(--ac-bg-primary);
+    }
+
+    .ashare-filter-tab {
+        padding: 8px 16px;
+        border: 1px solid var(--ac-border);
+        background: var(--ac-bg-primary);
+        border-radius: 20px;
+        font-size: 0.85rem;
+        color: var(--ac-text-secondary);
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.2s;
+    }
+
+    .ashare-filter-tab.active {
+        background: var(--ac-primary);
+        border-color: var(--ac-primary);
+        color: white;
+    }
+
+    .ashare-complaints-list {
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .ashare-complaint-card {
+        background: var(--ac-bg-primary);
+        border-radius: 16px;
+        padding: 16px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .ashare-complaint-card:active {
+        transform: scale(0.98);
+    }
+
+    .ashare-complaint-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .ashare-ticket-number {
+        font-size: 0.85rem;
+        color: var(--ac-text-tertiary);
+        font-family: monospace;
+    }
+
+    .ashare-complaint-status {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .ashare-complaint-status.status-open {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .ashare-complaint-status.status-inprogress {
+        background: #fff3e0;
+        color: #f57c00;
+    }
+
+    .ashare-complaint-status.status-resolved {
+        background: #e8f5e9;
+        color: #388e3c;
+    }
+
+    .ashare-complaint-status.status-closed {
+        background: #f5f5f5;
+        color: #757575;
+    }
+
+    .ashare-complaint-type {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.8rem;
+        color: var(--ac-primary);
+        margin-bottom: 8px;
+    }
+
+    .ashare-complaint-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+        color: var(--ac-text-primary);
+    }
+
+    .ashare-complaint-date {
+        font-size: 0.8rem;
+        color: var(--ac-text-tertiary);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 0;
+    }
+
+    .ashare-complaint-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--ac-border);
+    }
+
+    .ashare-replies-count {
+        font-size: 0.8rem;
+        color: var(--ac-text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* New Complaint Form */
+    .ashare-new-complaint {
+        padding: 16px;
+    }
+
+    .ashare-form-section {
+        margin-bottom: 20px;
+    }
+
+    .ashare-form-label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: var(--ac-text-primary);
+    }
+
+    .ashare-form-label .required {
+        color: #f44336;
+    }
+
+    .ashare-type-selector {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .ashare-type-btn {
+        padding: 16px;
+        border: 2px solid var(--ac-border);
+        background: var(--ac-bg-primary);
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .ashare-type-btn i {
+        font-size: 1.5rem;
+        color: var(--ac-text-secondary);
+    }
+
+    .ashare-type-btn span {
+        font-size: 0.85rem;
+        color: var(--ac-text-secondary);
+    }
+
+    .ashare-type-btn.selected {
+        border-color: var(--ac-primary);
+        background: rgba(var(--ac-primary-rgb), 0.1);
+    }
+
+    .ashare-type-btn.selected i,
+    .ashare-type-btn.selected span {
+        color: var(--ac-primary);
+    }
+
+    .ashare-select,
+    .ashare-input,
+    .ashare-textarea {
+        width: 100%;
+        padding: 14px 16px;
+        border: 1px solid var(--ac-border);
+        border-radius: 12px;
+        font-size: 1rem;
+        background: var(--ac-bg-primary);
+        color: var(--ac-text-primary);
+    }
+
+    .ashare-input.error,
+    .ashare-textarea.error {
+        border-color: #f44336;
+    }
+
+    .ashare-error {
+        display: block;
+        color: #f44336;
+        font-size: 0.8rem;
+        margin-top: 6px;
+    }
+
+    .ashare-textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .ashare-form-actions {
+        margin-top: 24px;
+    }
+
+    .ashare-btn {
+        width: 100%;
+        padding: 16px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+
+    .ashare-btn-primary {
+        background: var(--ac-primary);
+        color: white;
+    }
+
+    .ashare-btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .ac-spinner-sm {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Dark mode */
+    .ac-dark .ashare-complaint-status.status-open {
+        background: rgba(25, 118, 210, 0.2);
+    }
+    .ac-dark .ashare-complaint-status.status-inprogress {
+        background: rgba(245, 124, 0, 0.2);
+    }
+    .ac-dark .ashare-complaint-status.status-resolved {
+        background: rgba(56, 142, 60, 0.2);
+    }
+    .ac-dark .ashare-complaint-status.status-closed {
+        background: rgba(117, 117, 117, 0.2);
+    }
+</style>
+
+@code {
+    private bool _isLoading = true;
+    private bool _isLoggedIn;
+    private bool _isSubmitting;
+    private string _activeTab = "list";
+    private string? _statusFilter;
+
+    private List<ComplaintSummary>? _complaints;
+    private IEnumerable<ComplaintSummary> _filteredComplaints => _complaints?
+        .Where(c => _statusFilter == null || c.Status == _statusFilter)
+        .OrderByDescending(c => c.CreatedAt) ?? [];
+
+    // Form fields
+    private string _selectedType = "Complaint";
+    private string _selectedCategory = "Other";
+    private string _title = "";
+    private string _description = "";
+    private string? _titleError;
+    private string? _descriptionError;
+
+    private readonly List<(string Value, string Label, string Icon)> _complaintTypes =
+    [
+        ("Complaint", "شكوى", "bi-exclamation-triangle"),
+        ("Suggestion", "اقتراح", "bi-lightbulb"),
+        ("Inquiry", "استفسار", "bi-question-circle"),
+        ("Refund", "استرداد", "bi-arrow-counterclockwise")
+    ];
+
+    private readonly List<(string Value, string Label)> _categories =
+    [
+        ("Other", "أخرى"),
+        ("Order", "الحجوزات"),
+        ("Product", "المساحات"),
+        ("Payment", "الدفع"),
+        ("Account", "الحساب"),
+        ("Technical", "مشكلة تقنية")
+    ];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckAuthAndLoad();
+    }
+
+    private async Task CheckAuthAndLoad()
+    {
+        _isLoading = true;
+
+        try
+        {
+            var token = await AuthClient.GetTokenAsync();
+            _isLoggedIn = !string.IsNullOrEmpty(token);
+
+            if (!_isLoggedIn)
+            {
+                Navigation.NavigateTo("/login", forceLoad: true);
+                return;
+            }
+
+            try
+            {
+                var userInfo = await AuthClient.GetMeAsync();
+                if (userInfo == null)
+                {
+                    TokenManager.ClearToken();
+                    await GuestMode.DisableGuestModeAsync();
+                    Navigation.NavigateTo("/login", forceLoad: true);
+                    return;
+                }
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                TokenManager.ClearToken();
+                await GuestMode.DisableGuestModeAsync();
+                Navigation.NavigateTo("/login", forceLoad: true);
+                return;
+            }
+
+            await LoadComplaints();
+        }
+        catch
+        {
+            TokenManager.ClearToken();
+            await GuestMode.DisableGuestModeAsync();
+            Navigation.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+
+        _isLoading = false;
+    }
+
+    private async Task LoadComplaints()
+    {
+        try
+        {
+            _complaints = await ComplaintsClient.GetMyComplaintsAsync();
+        }
+        catch
+        {
+            _complaints = [];
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/profile");
+    }
+
+    private void SetActiveTab(string tab)
+    {
+        _activeTab = tab;
+        ClearForm();
+    }
+
+    private void FilterByStatus(string? status)
+    {
+        _statusFilter = status;
+    }
+
+    private void SelectType(string type)
+    {
+        _selectedType = type;
+    }
+
+    private void ViewComplaint(Guid id)
+    {
+        Navigation.NavigateTo($"/complaints/{id}");
+    }
+
+    private async Task SubmitComplaint()
+    {
+        _titleError = null;
+        _descriptionError = null;
+
+        if (string.IsNullOrWhiteSpace(_title))
+        {
+            _titleError = L["TitleRequired"];
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_description))
+        {
+            _descriptionError = L["DescriptionRequired"];
+            return;
+        }
+
+        _isSubmitting = true;
+
+        try
+        {
+            var request = new CreateComplaintRequest
+            {
+                Type = _selectedType,
+                Category = _selectedCategory,
+                Title = _title,
+                Description = _description
+            };
+
+            var result = await ComplaintsClient.CreateComplaintAsync(request);
+
+            if (result != null)
+            {
+                ClearForm();
+                await LoadComplaints();
+                _activeTab = "list";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating complaint: {ex.Message}");
+        }
+
+        _isSubmitting = false;
+    }
+
+    private void ClearForm()
+    {
+        _selectedType = "Complaint";
+        _selectedCategory = "Other";
+        _title = "";
+        _description = "";
+        _titleError = null;
+        _descriptionError = null;
+    }
+
+    private string GetStatusClass(string status) => status.ToLower() switch
+    {
+        "open" => "status-open",
+        "inprogress" => "status-inprogress",
+        "resolved" => "status-resolved",
+        "closed" => "status-closed",
+        _ => ""
+    };
+
+    private string GetStatusLabel(string status) => status switch
+    {
+        "Open" => L["Open"],
+        "InProgress" => L["InProgress"],
+        "Resolved" => L["Resolved"],
+        "Closed" => L["Closed"],
+        _ => status
+    };
+
+    private string GetTypeIcon(string type) => type switch
+    {
+        "Complaint" => "bi-exclamation-triangle",
+        "Suggestion" => "bi-lightbulb",
+        "Inquiry" => "bi-question-circle",
+        "Refund" => "bi-arrow-counterclockwise",
+        _ => "bi-ticket"
+    };
+
+    private string GetTypeLabel(string type) => type switch
+    {
+        "Complaint" => L["Complaint"],
+        "Suggestion" => L["Suggestion"],
+        "Inquiry" => L["Inquiry"],
+        "Refund" => L["Refund"],
+        _ => type
+    };
+}
