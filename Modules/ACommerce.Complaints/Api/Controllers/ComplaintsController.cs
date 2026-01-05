@@ -1,4 +1,4 @@
-using ACommerce.Authentication.Abstractions;
+using System.Security.Claims;
 using ACommerce.Complaints.DTOs;
 using ACommerce.Complaints.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -9,16 +9,21 @@ namespace ACommerce.Complaints.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class ComplaintsController(
-    IComplaintsService complaintsService,
-    ICurrentUserService currentUserService) : ControllerBase
+public class ComplaintsController(IComplaintsService complaintsService) : ControllerBase
 {
+    #region Helper Methods
+
+    private string? GetCurrentUserId() => User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    private string GetCurrentUserName() => User.FindFirst(ClaimTypes.Name)?.Value ?? "مستخدم";
+
+    #endregion
+
     #region Complaints
 
     [HttpPost]
     public async Task<ActionResult<ComplaintResponseDto>> Create([FromBody] CreateComplaintDto request, CancellationToken cancellationToken = default)
     {
-        var userId = currentUserService.UserId;
+        var userId = GetCurrentUserId();
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
@@ -33,7 +38,7 @@ public class ComplaintsController(
         if (result == null) return NotFound();
 
         // التحقق من أن المستخدم هو صاحب الشكوى
-        var userId = currentUserService.UserId;
+        var userId = GetCurrentUserId();
         if (result.UserId != userId)
             return Forbid();
 
@@ -46,7 +51,7 @@ public class ComplaintsController(
         var result = await complaintsService.GetByTicketNumberAsync(ticketNumber, cancellationToken);
         if (result == null) return NotFound();
 
-        var userId = currentUserService.UserId;
+        var userId = GetCurrentUserId();
         if (result.UserId != userId)
             return Forbid();
 
@@ -60,7 +65,7 @@ public class ComplaintsController(
         [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
-        var userId = currentUserService.UserId;
+        var userId = GetCurrentUserId();
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
@@ -71,7 +76,7 @@ public class ComplaintsController(
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<ComplaintResponseDto>> Update(Guid id, [FromBody] UpdateComplaintDto request, CancellationToken cancellationToken = default)
     {
-        var userId = currentUserService.UserId;
+        var userId = GetCurrentUserId();
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
@@ -84,7 +89,7 @@ public class ComplaintsController(
     [HttpPost("{id:guid}/close")]
     public async Task<IActionResult> Close(Guid id, [FromBody] CloseComplaintDto? request = null, CancellationToken cancellationToken = default)
     {
-        var userId = currentUserService.UserId;
+        var userId = GetCurrentUserId();
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
@@ -97,7 +102,7 @@ public class ComplaintsController(
     [HttpPost("{id:guid}/reopen")]
     public async Task<IActionResult> Reopen(Guid id, CancellationToken cancellationToken = default)
     {
-        var userId = currentUserService.UserId;
+        var userId = GetCurrentUserId();
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
@@ -110,7 +115,7 @@ public class ComplaintsController(
     [HttpPost("{id:guid}/rate")]
     public async Task<IActionResult> Rate(Guid id, [FromBody] RateComplaintDto request, CancellationToken cancellationToken = default)
     {
-        var userId = currentUserService.UserId;
+        var userId = GetCurrentUserId();
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
@@ -123,7 +128,7 @@ public class ComplaintsController(
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
     {
-        var userId = currentUserService.UserId;
+        var userId = GetCurrentUserId();
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
@@ -144,7 +149,7 @@ public class ComplaintsController(
         var complaint = await complaintsService.GetByIdAsync(complaintId, cancellationToken);
         if (complaint == null) return NotFound();
 
-        var userId = currentUserService.UserId;
+        var userId = GetCurrentUserId();
         if (complaint.UserId != userId)
             return Forbid();
 
@@ -159,8 +164,8 @@ public class ComplaintsController(
         var complaint = await complaintsService.GetByIdAsync(complaintId, cancellationToken);
         if (complaint == null) return NotFound();
 
-        var userId = currentUserService.UserId;
-        var userName = currentUserService.UserName ?? "مستخدم";
+        var userId = GetCurrentUserId();
+        var userName = GetCurrentUserName();
 
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
@@ -179,7 +184,7 @@ public class ComplaintsController(
     [HttpGet("me/stats")]
     public async Task<ActionResult<ComplaintStatsDto>> GetMyStats(CancellationToken cancellationToken = default)
     {
-        var userId = currentUserService.UserId;
+        var userId = GetCurrentUserId();
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
