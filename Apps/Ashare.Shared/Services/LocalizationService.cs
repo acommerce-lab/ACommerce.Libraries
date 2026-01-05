@@ -402,6 +402,42 @@ public class LocalizationService : BaseLocalizationService
         ar["DeleteComplaint"] = "حذف الشكوى";
         ar["DeleteComplaintConfirm"] = "هل أنت متأكد من حذف هذه الشكوى؟";
 
+        // Complaint Page UI
+        ar["ComplaintsAndSuggestions"] = "الشكاوى والاقتراحات";
+        ar["All"] = "الكل";
+        ar["Open"] = "مفتوح";
+        ar["InProgress"] = "قيد المعالجة";
+        ar["Resolved"] = "تم الحل";
+        ar["Closed"] = "مغلق";
+        ar["NoComplaintsDescription"] = "لم تقم بإرسال أي شكاوى أو اقتراحات بعد";
+        ar["ComplaintTitlePlaceholder"] = "اكتب عنوان موجز للمشكلة...";
+        ar["ComplaintDescriptionPlaceholder"] = "اشرح المشكلة أو الاقتراح بالتفصيل...";
+        ar["Submitting"] = "جاري الإرسال...";
+        ar["Submit"] = "إرسال";
+        ar["Complaint"] = "شكوى";
+        ar["Suggestion"] = "اقتراح";
+        ar["Inquiry"] = "استفسار";
+        ar["Refund"] = "طلب استرداد";
+        ar["ComplaintNotFound"] = "الشكوى غير موجودة";
+        ar["ComplaintNotFoundDescription"] = "لم يتم العثور على هذه الشكوى أو ليس لديك صلاحية عرضها";
+        ar["BackToComplaints"] = "العودة للشكاوى";
+        ar["AssignedTo"] = "مسؤول المتابعة";
+        ar["RateOurService"] = "قيّم خدمتنا";
+        ar["YourRating"] = "تقييمك";
+        ar["Conversation"] = "المحادثة";
+        ar["NoRepliesYet"] = "لا توجد ردود بعد";
+        ar["WriteReplyPlaceholder"] = "اكتب ردك هنا...";
+        ar["CategoryTechnical"] = "مشكلة تقنية";
+        ar["CategoryBookings"] = "الحجوزات";
+        ar["CategorySpaces"] = "المساحات";
+        ar["Technical"] = "تقنية";
+        ar["Bookings"] = "الحجوزات";
+        ar["Spaces"] = "المساحات";
+        ar["Other"] = "أخرى";
+        ar["Category"] = "التصنيف";
+        ar["Title"] = "العنوان";
+        ar["Description"] = "الوصف";
+
         // Complaint Form Validation
         ar["TitleRequired"] = "العنوان مطلوب";
         ar["DescriptionRequired"] = "الوصف مطلوب";
@@ -775,6 +811,42 @@ public class LocalizationService : BaseLocalizationService
         en["ThankYouForFeedback"] = "Thank you for your feedback";
         en["DeleteComplaint"] = "Delete Complaint";
         en["DeleteComplaintConfirm"] = "Are you sure you want to delete this complaint?";
+
+        // Complaint Page UI
+        en["ComplaintsAndSuggestions"] = "Complaints & Suggestions";
+        en["All"] = "All";
+        en["Open"] = "Open";
+        en["InProgress"] = "In Progress";
+        en["Resolved"] = "Resolved";
+        en["Closed"] = "Closed";
+        en["NoComplaintsDescription"] = "You haven't submitted any complaints or suggestions yet";
+        en["ComplaintTitlePlaceholder"] = "Write a brief title for the issue...";
+        en["ComplaintDescriptionPlaceholder"] = "Describe the issue or suggestion in detail...";
+        en["Submitting"] = "Submitting...";
+        en["Submit"] = "Submit";
+        en["Complaint"] = "Complaint";
+        en["Suggestion"] = "Suggestion";
+        en["Inquiry"] = "Inquiry";
+        en["Refund"] = "Refund Request";
+        en["ComplaintNotFound"] = "Complaint Not Found";
+        en["ComplaintNotFoundDescription"] = "This complaint was not found or you don't have permission to view it";
+        en["BackToComplaints"] = "Back to Complaints";
+        en["AssignedTo"] = "Assigned To";
+        en["RateOurService"] = "Rate Our Service";
+        en["YourRating"] = "Your Rating";
+        en["Conversation"] = "Conversation";
+        en["NoRepliesYet"] = "No replies yet";
+        en["WriteReplyPlaceholder"] = "Write your reply here...";
+        en["CategoryTechnical"] = "Technical Issue";
+        en["CategoryBookings"] = "Bookings";
+        en["CategorySpaces"] = "Spaces";
+        en["Technical"] = "Technical";
+        en["Bookings"] = "Bookings";
+        en["Spaces"] = "Spaces";
+        en["Other"] = "Other";
+        en["Category"] = "Category";
+        en["Title"] = "Title";
+        en["Description"] = "Description";
 
         // Complaint Form Validation
         en["TitleRequired"] = "Title is required";
