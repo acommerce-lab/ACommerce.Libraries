@@ -74,7 +74,7 @@
                                   Title="@L["NoComplaints"]"
                                   Description="@L["NoComplaintsDescription"]"
                                   ActionText="@L["SubmitComplaint"]"
-                                  OnAction="() => SetActiveTab(\"new\")" />
+                                  OnAction="@(() => SetActiveTab("new"))" />
                 }
                 else
                 {
@@ -545,9 +545,9 @@
     private string? _statusFilter;
 
     private List<ComplaintSummary>? _complaints;
-    private IEnumerable<ComplaintSummary> _filteredComplaints => _complaints?
+    private List<ComplaintSummary> _filteredComplaints => _complaints?
         .Where(c => _statusFilter == null || c.Status == _statusFilter)
-        .OrderByDescending(c => c.CreatedAt) ?? [];
+        .OrderByDescending(c => c.CreatedAt).ToList() ?? [];
 
     // Form fields
     private string _selectedType = "Complaint";

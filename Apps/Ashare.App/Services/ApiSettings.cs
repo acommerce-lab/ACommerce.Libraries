@@ -20,7 +20,7 @@ public static class ApiSettings
     /// - false = استخدام الباك اند الإنتاجي (Google Cloud)
     /// </summary>
 #if DEBUG
-    public const bool UseLocalApi = false;  // ← للتطوير فقط
+    public const bool UseLocalApi = true;  // ← للتطوير فقط
 #else
     public const bool UseLocalApi = false; // ← للإنتاج
 #endif
