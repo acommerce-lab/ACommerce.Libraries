@@ -15,7 +15,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
-    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.Abstractions\ACommerce.Authentication.Abstractions.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
