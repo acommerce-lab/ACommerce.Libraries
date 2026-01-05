@@ -151,6 +151,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.Shipping.Mock", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.Reviews", "Modules\ACommerce.Reviews\ACommerce.Reviews.csproj", "{BA7823A8-8F5C-4FB2-9E38-C00F05A9BE68}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.Complaints", "Modules\ACommerce.Complaints\ACommerce.Complaints.csproj", "{C1D2E3F4-A5B6-7C8D-9E0F-1A2B3C4D5E6F}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.Localization", "Modules\ACommerce.Localization\ACommerce.Localization.csproj", "{E18E4DD2-D223-43DA-8AC1-147AFD5921EC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.Configuration", "libs\backend\core\ACommerce.Configuration\ACommerce.Configuration.csproj", "{D60CEB46-F771-4F48-BCD4-318D39B6D946}"
@@ -178,6 +180,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.Client.Files", "libs\frontend\clients\ACommerce.Client.Files\ACommerce.Client.Files.csproj", "{BAADA4C1-D051-45B5-A58A-08C68592AEE8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.Client.Notifications", "libs\frontend\clients\ACommerce.Client.Notifications\ACommerce.Client.Notifications.csproj", "{B9EF0D52-622D-4B4B-913B-D3BAA63431B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.Client.Complaints", "libs\frontend\clients\ACommerce.Client.Complaints\ACommerce.Client.Complaints.csproj", "{D2E3F4A5-B6C7-8D9E-0F1A-2B3C4D5E6F7A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.Client.Orders", "libs\frontend\clients\ACommerce.Client.Orders\ACommerce.Client.Orders.csproj", "{98521671-D7DA-4705-8500-F45E420EDF7F}"
 EndProject

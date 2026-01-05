@@ -1,0 +1,257 @@
+@namespace ACommerce.Templates.Customer.Components
+
+<div class="ac-complaint-form @Class">
+    <AcCard Title="@Title">
+        <div class="ac-form">
+            @* نوع التذكرة *@
+            <div class="ac-form-group">
+                <label class="ac-label">نوع الطلب <span class="ac-required">*</span></label>
+                <div class="ac-button-group">
+                    @foreach (var type in ComplaintTypes)
+                    {
+                        <button type="button"
+                                class="ac-btn ac-btn-sm @(SelectedType == type.Value ? "ac-btn-primary" : "ac-btn-outline")"
+                                @onclick="() => SelectType(type.Value)">
+                            <i class="bi @type.Icon"></i>
+                            @type.Label
+                        </button>
+                    }
+                </div>
+            </div>
+
+            @* التصنيف *@
+            <div class="ac-form-group">
+                <label class="ac-label">التصنيف</label>
+                <select class="ac-input ac-select" @bind="SelectedCategory">
+                    @foreach (var category in Categories)
+                    {
+                        <option value="@category.Value">@category.Label</option>
+                    }
+                </select>
+            </div>
+
+            @* العنوان *@
+            <AcInput Label="العنوان"
+                     Placeholder="اكتب عنوان موجز للمشكلة..."
+                     Required="true"
+                     @bind-Value="ComplaintTitle"
+                     HasError="@(!string.IsNullOrEmpty(TitleError))"
+                     ErrorMessage="@TitleError" />
+
+            @* الوصف *@
+            <AcInput Label="الوصف التفصيلي"
+                     Type="textarea"
+                     Placeholder="اشرح المشكلة بالتفصيل..."
+                     Rows="5"
+                     Required="true"
+                     @bind-Value="Description"
+                     HasError="@(!string.IsNullOrEmpty(DescriptionError))"
+                     ErrorMessage="@DescriptionError" />
+
+            @* الكيان المرتبط *@
+            @if (ShowRelatedEntity)
+            {
+                <div class="ac-form-row">
+                    <div class="ac-form-col">
+                        <div class="ac-form-group">
+                            <label class="ac-label">مرتبط بـ</label>
+                            <select class="ac-input ac-select" @bind="RelatedEntityType">
+                                <option value="">-- اختر --</option>
+                                <option value="Order">طلب</option>
+                                <option value="Product">منتج</option>
+                                <option value="Vendor">بائع</option>
+                            </select>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(RelatedEntityType))
+                    {
+                        <div class="ac-form-col">
+                            <AcInput Label="رقم / معرف"
+                                     Placeholder="أدخل الرقم أو المعرف..."
+                                     @bind-Value="RelatedEntityIdInput" />
+                        </div>
+                    }
+                </div>
+            }
+
+            @* المرفقات *@
+            @if (ShowAttachments)
+            {
+                <div class="ac-form-group">
+                    <label class="ac-label">المرفقات</label>
+                    <div class="ac-file-upload">
+                        <input type="file"
+                               id="complaint-attachments"
+                               multiple
+                               accept="image/*,.pdf,.doc,.docx"
+                               @onchange="HandleFileUpload" />
+                        <label for="complaint-attachments" class="ac-file-upload-label">
+                            <i class="bi bi-cloud-upload"></i>
+                            <span>اسحب الملفات هنا أو انقر للاختيار</span>
+                            <small>PNG, JPG, PDF, DOC (الحد الأقصى: 5 ملفات)</small>
+                        </label>
+                    </div>
+                    @if (Attachments.Count > 0)
+                    {
+                        <div class="ac-attachment-list">
+                            @foreach (var attachment in Attachments)
+                            {
+                                <div class="ac-attachment-item">
+                                    <i class="bi bi-paperclip"></i>
+                                    <span>@attachment</span>
+                                    <button type="button" class="ac-btn-icon" @onclick="() => RemoveAttachment(attachment)">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+
+            @* أزرار الإجراءات *@
+            <div class="ac-form-actions">
+                @if (ShowCancelButton)
+                {
+                    <AcButton Text="إلغاء"
+                              Variant="ButtonVariant.Outline"
+                              OnClick="HandleCancel" />
+                }
+                <AcButton Text="@SubmitButtonText"
+                          Variant="ButtonVariant.Primary"
+                          Icon="bi-send"
+                          Loading="@IsSubmitting"
+                          OnClick="HandleSubmit" />
+            </div>
+        </div>
+    </AcCard>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "تقديم شكوى أو اقتراح";
+    [Parameter] public string SubmitButtonText { get; set; } = "إرسال";
+    [Parameter] public bool ShowRelatedEntity { get; set; } = true;
+    [Parameter] public bool ShowAttachments { get; set; } = true;
+    [Parameter] public bool ShowCancelButton { get; set; } = true;
+    [Parameter] public string? Class { get; set; }
+
+    [Parameter] public string? PreselectedType { get; set; }
+    [Parameter] public string? PreselectedCategory { get; set; }
+    [Parameter] public string? PreselectedEntityType { get; set; }
+    [Parameter] public Guid? PreselectedEntityId { get; set; }
+
+    [Parameter] public EventCallback<ComplaintFormData> OnSubmit { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private string SelectedType { get; set; } = "Complaint";
+    private string SelectedCategory { get; set; } = "Other";
+    private string ComplaintTitle { get; set; } = "";
+    private string Description { get; set; } = "";
+    private string? RelatedEntityType { get; set; }
+    private string? RelatedEntityIdInput { get; set; }
+    private List<string> Attachments { get; set; } = [];
+    private bool IsSubmitting { get; set; }
+    private string? TitleError { get; set; }
+    private string? DescriptionError { get; set; }
+
+    private static readonly List<(string Value, string Label, string Icon)> ComplaintTypes =
+    [
+        ("Complaint", "شكوى", "bi-exclamation-triangle"),
+        ("Suggestion", "اقتراح", "bi-lightbulb"),
+        ("Inquiry", "استفسار", "bi-question-circle"),
+        ("Refund", "استرداد", "bi-arrow-counterclockwise")
+    ];
+
+    private static readonly List<(string Value, string Label)> Categories =
+    [
+        ("Other", "أخرى"),
+        ("Order", "الطلبات"),
+        ("Product", "المنتجات"),
+        ("Shipping", "الشحن"),
+        ("Payment", "الدفع"),
+        ("Account", "الحساب"),
+        ("Technical", "تقنية")
+    ];
+
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrEmpty(PreselectedType))
+            SelectedType = PreselectedType;
+        if (!string.IsNullOrEmpty(PreselectedCategory))
+            SelectedCategory = PreselectedCategory;
+        if (!string.IsNullOrEmpty(PreselectedEntityType))
+            RelatedEntityType = PreselectedEntityType;
+        if (PreselectedEntityId.HasValue)
+            RelatedEntityIdInput = PreselectedEntityId.Value.ToString();
+    }
+
+    private void SelectType(string type)
+    {
+        SelectedType = type;
+    }
+
+    private void HandleFileUpload(ChangeEventArgs e)
+    {
+        // معالجة الملفات - يتم التنفيذ في التطبيق الفعلي
+    }
+
+    private void RemoveAttachment(string attachment)
+    {
+        Attachments.Remove(attachment);
+    }
+
+    private async Task HandleSubmit()
+    {
+        TitleError = null;
+        DescriptionError = null;
+
+        if (string.IsNullOrWhiteSpace(ComplaintTitle))
+        {
+            TitleError = "العنوان مطلوب";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(Description))
+        {
+            DescriptionError = "الوصف مطلوب";
+            return;
+        }
+
+        IsSubmitting = true;
+
+        Guid? relatedEntityId = null;
+        if (Guid.TryParse(RelatedEntityIdInput, out var parsed))
+            relatedEntityId = parsed;
+
+        var formData = new ComplaintFormData
+        {
+            Type = SelectedType,
+            Category = SelectedCategory,
+            Title = ComplaintTitle,
+            Description = Description,
+            RelatedEntityType = RelatedEntityType,
+            RelatedEntityId = relatedEntityId,
+            Attachments = Attachments
+        };
+
+        await OnSubmit.InvokeAsync(formData);
+
+        IsSubmitting = false;
+    }
+
+    private async Task HandleCancel()
+    {
+        await OnCancel.InvokeAsync();
+    }
+
+    public class ComplaintFormData
+    {
+        public string Type { get; set; } = "Complaint";
+        public string Category { get; set; } = "Other";
+        public required string Title { get; set; }
+        public required string Description { get; set; }
+        public string? RelatedEntityType { get; set; }
+        public Guid? RelatedEntityId { get; set; }
+        public List<string> Attachments { get; set; } = [];
+    }
+}
