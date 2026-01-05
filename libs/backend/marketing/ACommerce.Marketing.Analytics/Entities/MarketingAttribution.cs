@@ -1,24 +1,28 @@
+using ACommerce.SharedKernel.Abstractions.Entities;
+
 namespace ACommerce.Marketing.Analytics.Entities;
 
-public class MarketingAttribution
+public class MarketingAttribution : IBaseEntity
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    
+    public DateTime? UpdatedAt { get; set; }
+    public bool IsDeleted { get; set; } = false;
+
     public string? UserId { get; set; }
     public string? SessionId { get; set; }
-    
+
     public MarketingPlatform Platform { get; set; }
     public string? UtmSource { get; set; }
     public string? UtmMedium { get; set; }
     public string? UtmCampaign { get; set; }
     public string? UtmContent { get; set; }
     public string? UtmTerm { get; set; }
-    
+
     public string? ClickId { get; set; }
     public string? ReferrerUrl { get; set; }
     public string? LandingPage { get; set; }
-    
+
     public string? DeviceType { get; set; }
     public string? Country { get; set; }
     public string? City { get; set; }

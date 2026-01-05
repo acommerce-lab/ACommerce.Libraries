@@ -1,4 +1,5 @@
 using ACommerce.Templates.Customer.Services;
+using Ashare.Shared.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -7,51 +8,20 @@ namespace Ashare.Web.Services;
 /// <summary>
 /// Web implementation of navigation service
 /// </summary>
-public class WebNavigationService : IAppNavigationService
+public class WebNavigationService : BaseNavigationService
 {
-    private readonly NavigationManager _navigationManager;
     private readonly IJSRuntime _jsRuntime;
-    private readonly Stack<string> _history = new();
 
     public WebNavigationService(NavigationManager navigationManager, IJSRuntime jsRuntime)
+        : base(navigationManager)
     {
-        _navigationManager = navigationManager;
         _jsRuntime = jsRuntime;
     }
-
-    public void NavigateTo(string uri, bool forceLoad = false)
-    {
-        _history.Push(_navigationManager.Uri);
-        _navigationManager.NavigateTo(uri, forceLoad);
-    }
-
-    public void NavigateBack()
-    {
-        if (_history.Count > 0)
-        {
-            var previousUri = _history.Pop();
-            _navigationManager.NavigateTo(previousUri);
-        }
-        else
-        {
-            _navigationManager.NavigateTo("/");
-        }
-    }
-
-    public void NavigateToAndClearHistory(string uri)
-    {
-        // Clear navigation history
-        _history.Clear();
-        // Navigate with force reload
-        _navigationManager.NavigateTo(uri, forceLoad: true);
-    }
-
-    public string CurrentUri => _navigationManager.Uri;
 
     /// <summary>
     /// Open location in maps (web version)
     /// </summary>
-    public async Task OpenMapAsync(double latitude, double longitude, string? label = null)
+    public override async Task OpenMapAsync(double latitude, double longitude, string? label = null)
     {
         try
         {
@@ -71,7 +41,7 @@ public class WebNavigationService : IAppNavigationService
     /// <summary>
     /// Open external URL
     /// </summary>
-    public async Task OpenExternalAsync(string url)
+    public override async Task OpenExternalAsync(string url)
     {
         try
         {

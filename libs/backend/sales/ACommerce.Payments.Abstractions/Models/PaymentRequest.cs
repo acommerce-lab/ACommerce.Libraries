@@ -27,6 +27,18 @@ public record PaymentResult
 	public required PaymentStatus Status { get; init; }
 	public string? PaymentUrl { get; init; }
 	public string? ErrorMessage { get; init; }
+	/// <summary>
+	/// المبلغ (متاح عند جلب حالة الدفع)
+	/// </summary>
+	public decimal? Amount { get; init; }
+	/// <summary>
+	/// العملة (متاح عند جلب حالة الدفع)
+	/// </summary>
+	public string? Currency { get; init; }
+	/// <summary>
+	/// رقم الطلب الأصلي
+	/// </summary>
+	public string? OrderId { get; init; }
 	public Dictionary<string, string> Metadata { get; init; } = new();
 }
 

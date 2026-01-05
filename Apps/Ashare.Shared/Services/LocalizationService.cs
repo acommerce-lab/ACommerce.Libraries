@@ -1,3 +1,4 @@
+using ACommerce.Client.Core.Storage;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Services.Localization;
 
@@ -81,6 +82,7 @@ public class LocalizationService : BaseLocalizationService
         ar["EnterFullName"] = "أدخل اسمك الكامل";
         ar["ReEnterPassword"] = "أعد إدخال كلمة المرور";
         ar["LoginRequired"] = "يجب تسجيل الدخول";
+        ar["LoginRequiredDescription"] = "سجل دخولك للوصول لهذا المحتوى";
         ar["LoginToCreateListing"] = "يجب تسجيل الدخول لإنشاء عرض جديد";
 
         // Spaces (Ashare-specific)
@@ -315,6 +317,23 @@ public class LocalizationService : BaseLocalizationService
         ar["Guest"] = "زائر";
         ar["RedirectingToLogin"] = "جاري التوجيه لتسجيل الدخول...";
         ar["LoginToAccessProfile"] = "سجل دخولك للوصول لملفك الشخصي";
+        ar["Retry"] = "إعادة المحاولة";
+        ar["PageNotFound"] = "الصفحة غير موجودة";
+        ar["ErrorLoadingPage"] = "حدث خطأ أثناء تحميل الصفحة";
+
+        // Version Management
+        ar["VersionUnsupported"] = "إصدار غير مدعوم";
+        ar["VersionUnsupportedMessage"] = "إصدارك الحالي غير مدعوم. يجب التحديث للاستمرار في استخدام التطبيق.";
+        ar["VersionDeprecatedMessage"] = "هذا الإصدار سينتهي دعمه قريباً. يرجى التحديث.";
+        ar["VersionUpdateAvailable"] = "يتوفر إصدار جديد من التطبيق. قم بالتحديث للحصول على أحدث الميزات.";
+        ar["YourVersion"] = "إصدارك";
+        ar["LatestVersion"] = "أحدث إصدار";
+        ar["EndOfSupport"] = "تاريخ الإيقاف";
+        ar["WhatsNew"] = "ما الجديد؟";
+        ar["UpdateNow"] = "تحديث الآن";
+        ar["OpenStore"] = "فتح المتجر";
+        ar["NeedHelp"] = "تحتاج مساعدة؟";
+        ar["Later"] = "لاحقاً";
     }
 
     private static void AddEnglishTranslations(Dictionary<string, string> en)
@@ -363,6 +382,7 @@ public class LocalizationService : BaseLocalizationService
         en["EnterFullName"] = "Enter your full name";
         en["ReEnterPassword"] = "Re-enter your password";
         en["LoginRequired"] = "Login Required";
+        en["LoginRequiredDescription"] = "Please login to access this content";
         en["LoginToCreateListing"] = "Please login to create a listing";
 
         // Spaces (Ashare-specific)
@@ -597,6 +617,23 @@ public class LocalizationService : BaseLocalizationService
         en["Guest"] = "Guest";
         en["RedirectingToLogin"] = "Redirecting to login...";
         en["LoginToAccessProfile"] = "Login to access your profile";
+        en["Retry"] = "Retry";
+        en["PageNotFound"] = "Page not found";
+        en["ErrorLoadingPage"] = "Error loading page";
+
+        // Version Management
+        en["VersionUnsupported"] = "Unsupported Version";
+        en["VersionUnsupportedMessage"] = "Your current version is no longer supported. Please update to continue using the app.";
+        en["VersionDeprecatedMessage"] = "This version will be deprecated soon. Please update.";
+        en["VersionUpdateAvailable"] = "A new version is available. Update to get the latest features.";
+        en["YourVersion"] = "Your version";
+        en["LatestVersion"] = "Latest version";
+        en["EndOfSupport"] = "End of support";
+        en["WhatsNew"] = "What's New?";
+        en["UpdateNow"] = "Update Now";
+        en["OpenStore"] = "Open Store";
+        en["NeedHelp"] = "Need help?";
+        en["Later"] = "Later";
     }
 
     private static void AddUrduTranslations(Dictionary<string, string> ur)
@@ -661,6 +698,9 @@ public class LocalizationService : BaseLocalizationService
         ur["No"] = "نہیں";
         ur["OK"] = "ٹھیک ہے";
         ur["SAR"] = "ریال";
+        ur["Retry"] = "دوبارہ کوشش کریں";
+        ur["PageNotFound"] = "صفحہ نہیں ملا";
+        ur["ErrorLoadingPage"] = "صفحہ لوڈ کرنے میں خرابی";
 
         // Categories
         ur["Categories"] = "زمرے";
@@ -703,5 +743,19 @@ public class LocalizationService : BaseLocalizationService
         // Payment
         ur["PaymentFailedRetry"] = "ادائیگی ناکام ہوگئی، براہ کرم دوبارہ کوشش کریں";
         ur["PaymentFailedSelectPlan"] = "ادائیگی ناکام ہوگئی، جاری رکھنے کے لیے پلان منتخب کریں";
+
+        // Version Management
+        ur["VersionUnsupported"] = "غیر معاون ورژن";
+        ur["VersionUnsupportedMessage"] = "آپ کا موجودہ ورژن اب معاون نہیں ہے۔ ایپ استعمال جاری رکھنے کے لیے براہ کرم اپ ڈیٹ کریں۔";
+        ur["VersionDeprecatedMessage"] = "یہ ورژن جلد ختم ہو جائے گا۔ براہ کرم اپ ڈیٹ کریں۔";
+        ur["VersionUpdateAvailable"] = "ایک نیا ورژن دستیاب ہے۔ تازہ ترین خصوصیات حاصل کرنے کے لیے اپ ڈیٹ کریں۔";
+        ur["YourVersion"] = "آپ کا ورژن";
+        ur["LatestVersion"] = "تازہ ترین ورژن";
+        ur["EndOfSupport"] = "سپورٹ کا اختتام";
+        ur["WhatsNew"] = "نیا کیا ہے؟";
+        ur["UpdateNow"] = "ابھی اپ ڈیٹ کریں";
+        ur["OpenStore"] = "اسٹور کھولیں";
+        ur["NeedHelp"] = "مدد چاہیے؟";
+        ur["Later"] = "بعد میں";
     }
 }

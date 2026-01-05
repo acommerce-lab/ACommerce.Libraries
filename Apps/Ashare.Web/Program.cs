@@ -8,6 +8,7 @@ using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Services.Analytics;
 using ACommerce.Templates.Customer.Services.Localization;
 using ACommerce.ServiceRegistry.Client.Extensions;
+using ACommerce.Client.Core.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +24,7 @@ var apiBaseUrl = builder.Configuration["HostSettings:BaseUrl"]
 Console.WriteLine($"🌐 API Base URL: {apiBaseUrl}");
 
 builder.Services.AddScoped<IStorageService, BrowserStorageService>();
-builder.Services.AddScoped<ITokenStorage, TokenStorageService>();
+builder.Services.AddScoped<ITokenStorage, StorageBackedTokenStorage>();
 builder.Services.AddScoped<TokenManager>();
 builder.Services.AddSingleton<ScopedTokenProvider>();
 builder.Services.AddSingleton<ITokenProvider>(sp => sp.GetRequiredService<ScopedTokenProvider>());
@@ -40,6 +41,7 @@ builder.Services.AddScoped<IAppNavigationService, WebNavigationService>();
 builder.Services.AddScoped<SpaceDataService>();
 builder.Services.AddScoped<ITimezoneService, BrowserTimezoneService>();
 builder.Services.AddScoped<IPaymentService, WebPaymentService>();
+builder.Services.AddSingleton<IAppVersionService, WebAppVersionService>();
 builder.Services.AddACommerceAnalytics(builder.Configuration);
 builder.Services.AddLocalizationValidation();
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });

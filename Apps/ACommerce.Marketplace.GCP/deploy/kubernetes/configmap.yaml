@@ -1,0 +1,51 @@
+# =============================================================================
+# ACommerce Marketplace API - ConfigMap
+# Non-sensitive configuration values
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: acommerce-marketplace-config
+  labels:
+    app: acommerce-marketplace
+    app.kubernetes.io/name: acommerce-marketplace
+    app.kubernetes.io/component: api
+data:
+  # Application Settings
+  ASPNETCORE_ENVIRONMENT: "Production"
+
+  # Database Provider (postgresql, sqlserver, sqlite)
+  DATABASE_PROVIDER: "postgresql"
+
+  # Database connection components (connection string built from these)
+  DB_PORT: "5432"
+  DB_NAME: "acommerce"
+
+  # JWT Configuration
+  JWT__Issuer: "https://marketplace.acommerce.io"
+  JWT__Audience: "acommerce-marketplace"
+  JWT__ExpirationMinutes: "60"
+  JWT__RefreshExpirationDays: "7"
+
+  # Redis Configuration
+  REDIS_KEY_PREFIX: "acommerce:"
+
+  # GCP Configuration
+  GCP_SERVICE_NAME: "acommerce-marketplace"
+  GCP_USAGE_REPORT_INTERVAL_SECONDS: "60"
+
+  # File Storage
+  Files__Storage__GoogleCloud__UseDirectoryStructure: "true"
+  Files__Storage__GoogleCloud__DirectoryFormat: "yyyy/MM/dd"
+
+  # Logging
+  Logging__LogLevel__Default: "Information"
+  Logging__LogLevel__Microsoft.AspNetCore: "Warning"
+  Logging__LogLevel__Microsoft.EntityFrameworkCore: "Warning"
+
+  # Health Check Settings
+  HEALTH_CHECK_TIMEOUT_SECONDS: "10"
+
+  # Feature Flags
+  RUN_MIGRATIONS: "false"
+  SKIP_SEEDING: "true"

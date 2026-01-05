@@ -1,0 +1,268 @@
+# =============================================================================
+# ACommerce Marketplace API - Ingress Configuration
+# Google-managed SSL Certificate with HTTPS
+# =============================================================================
+#
+# Prerequisites:
+# 1. Reserve a static IP:
+#    gcloud compute addresses create acommerce-marketplace-ip --global
+#
+# 2. Get the IP address:
+#    gcloud compute addresses describe acommerce-marketplace-ip --global --format="value(address)"
+#
+# 3. Point your domain's DNS A record to this IP
+#
+# 4. Apply this manifest:
+#    kubectl apply -f ingress.yaml
+#
+# 5. Wait for certificate provisioning (can take 15-60 minutes):
+#    kubectl describe managedcertificate acommerce-marketplace-cert -n acommerce
+#
+# =============================================================================
+
+---
+# =============================================================================
+# Static IP Address (reference only - create via gcloud)
+# =============================================================================
+# gcloud compute addresses create acommerce-marketplace-ip --global
+# gcloud compute addresses describe acommerce-marketplace-ip --global
+
+---
+# =============================================================================
+# Google-Managed SSL Certificate
+# =============================================================================
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: acommerce-marketplace-cert
+  namespace: acommerce
+  labels:
+    app: acommerce-marketplace
+    app.kubernetes.io/name: acommerce-marketplace
+    app.kubernetes.io/component: ingress
+spec:
+  domains:
+    # Primary API domain
+    - api.acommerce.io
+    # Add additional domains/subdomains as needed:
+    # - api.mystore.com
+    # - marketplace-api.example.com
+
+---
+# =============================================================================
+# Frontend Config - HTTPS Redirect & Security Headers
+# =============================================================================
+apiVersion: networking.gke.io/v1beta1
+kind: FrontendConfig
+metadata:
+  name: acommerce-marketplace-frontend
+  namespace: acommerce
+  labels:
+    app: acommerce-marketplace
+    app.kubernetes.io/name: acommerce-marketplace
+    app.kubernetes.io/component: ingress
+spec:
+  # Redirect all HTTP traffic to HTTPS
+  redirectToHttps:
+    enabled: true
+    responseCodeName: MOVED_PERMANENTLY_DEFAULT
+
+  # SSL Policy (optional - for stricter TLS settings)
+  # Create with: gcloud compute ssl-policies create acommerce-ssl-policy --profile=MODERN --min-tls-version=1.2
+  # sslPolicy: acommerce-ssl-policy
+
+---
+# =============================================================================
+# Backend Config - Health Checks & Timeouts
+# =============================================================================
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: acommerce-marketplace-backend
+  namespace: acommerce
+  labels:
+    app: acommerce-marketplace
+    app.kubernetes.io/name: acommerce-marketplace
+    app.kubernetes.io/component: ingress
+spec:
+  # Health Check for Load Balancer
+  healthCheck:
+    type: HTTP
+    requestPath: /healthz
+    port: 8080
+    checkIntervalSec: 15
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 3
+
+  # Request/Response Timeout
+  timeoutSec: 30
+
+  # Connection Draining (graceful shutdown)
+  connectionDraining:
+    drainingTimeoutSec: 30
+
+  # Cloud CDN (optional - enable for static content caching)
+  # cdn:
+  #   enabled: true
+  #   cachePolicy:
+  #     includeHost: true
+  #     includeProtocol: true
+  #     includeQueryString: false
+
+  # Cloud Armor Security Policy (optional - for WAF/DDoS protection)
+  # Create policy first: gcloud compute security-policies create acommerce-waf-policy
+  # securityPolicy:
+  #   name: acommerce-waf-policy
+
+  # Session Affinity (optional - for sticky sessions if needed)
+  # sessionAffinity:
+  #   affinityType: "GENERATED_COOKIE"
+  #   affinityCookieTtlSec: 3600
+
+  # Custom Request Headers (optional)
+  # customRequestHeaders:
+  #   headers:
+  #     - "X-Client-Region:{client_region}"
+  #     - "X-Client-City:{client_city}"
+
+  # Logging (optional)
+  logging:
+    enable: true
+    sampleRate: 1.0  # Log all requests (reduce for high traffic)
+
+---
+# =============================================================================
+# Service (with Backend Config annotation)
+# =============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: acommerce-marketplace
+  namespace: acommerce
+  labels:
+    app: acommerce-marketplace
+    app.kubernetes.io/name: acommerce-marketplace
+    app.kubernetes.io/component: api
+  annotations:
+    # Link to Backend Config
+    cloud.google.com/backend-config: '{"default": "acommerce-marketplace-backend"}'
+    # Enable container-native load balancing (NEG)
+    cloud.google.com/neg: '{"ingress": true}'
+spec:
+  type: ClusterIP
+  selector:
+    app: acommerce-marketplace
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+
+---
+# =============================================================================
+# Ingress - Main Entry Point
+# =============================================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: acommerce-marketplace-ingress
+  namespace: acommerce
+  labels:
+    app: acommerce-marketplace
+    app.kubernetes.io/name: acommerce-marketplace
+    app.kubernetes.io/component: ingress
+  annotations:
+    # Use GKE Ingress Controller
+    kubernetes.io/ingress.class: "gce"
+
+    # Static IP address (must be created beforehand)
+    kubernetes.io/ingress.global-static-ip-name: "acommerce-marketplace-ip"
+
+    # Google-managed SSL certificate
+    networking.gke.io/managed-certificates: "acommerce-marketplace-cert"
+
+    # Frontend config (HTTPS redirect)
+    networking.gke.io/v1beta1.FrontendConfig: "acommerce-marketplace-frontend"
+
+    # Disable HTTP (only HTTPS)
+    kubernetes.io/ingress.allow-http: "false"
+
+spec:
+  # Default backend (catches all unmatched requests)
+  defaultBackend:
+    service:
+      name: acommerce-marketplace
+      port:
+        number: 80
+
+  # TLS configuration (for ingress-level TLS termination reference)
+  tls:
+    - secretName: acommerce-marketplace-cert  # Reference only, managed by GKE
+
+  # Routing rules
+  rules:
+    # Primary domain
+    - host: api.acommerce.io
+      http:
+        paths:
+          # API endpoints
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: acommerce-marketplace
+                port:
+                  number: 80
+
+          # Health endpoints
+          - path: /health
+            pathType: Prefix
+            backend:
+              service:
+                name: acommerce-marketplace
+                port:
+                  number: 80
+
+          # Swagger UI
+          - path: /swagger
+            pathType: Prefix
+            backend:
+              service:
+                name: acommerce-marketplace
+                port:
+                  number: 80
+
+          # Root path (Swagger UI redirect)
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: acommerce-marketplace
+                port:
+                  number: 80
+
+    # Additional domain example (uncomment and modify as needed)
+    # - host: api.customer-domain.com
+    #   http:
+    #     paths:
+    #       - path: /
+    #         pathType: Prefix
+    #         backend:
+    #           service:
+    #             name: acommerce-marketplace
+    #             port:
+    #               number: 80
+
+---
+# =============================================================================
+# CORS Configuration (if needed for frontend)
+# =============================================================================
+# Note: CORS is typically handled at the application level in ASP.NET Core.
+# However, you can also configure it at the load balancer level using
+# Cloud Armor custom rules or a service mesh like Istio.
+#
+# For ASP.NET Core CORS, set the ALLOWED_ORIGINS environment variable:
+#   ALLOWED_ORIGINS: "https://app.acommerce.io,https://admin.acommerce.io"
+#
+# =============================================================================

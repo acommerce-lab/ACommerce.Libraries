@@ -5,6 +5,7 @@ using ACommerce.Client.Categories;
 using ACommerce.Client.Products;
 using ACommerce.Client.ProductListings;
 using ACommerce.Client.Orders;
+using ACommerce.Client.Bookings;
 using ACommerce.Client.Subscriptions;
 using ACommerce.Client.Payments;
 using ACommerce.Client.Core.Http;
@@ -25,6 +26,7 @@ public class AshareApiService
         private readonly ProductsClient _productsClient;
         private readonly ProductListingsClient _listingsClient;
         private readonly OrdersClient _ordersClient;
+        private readonly BookingsClient _bookingsClient;
         private readonly SubscriptionClient _subscriptionClient;
         private readonly PaymentsClient _paymentsClient;
         private readonly ILogger<AshareApiService> _logger;
@@ -37,6 +39,7 @@ public class AshareApiService
                 ProductsClient productsClient,
                 ProductListingsClient listingsClient,
                 OrdersClient ordersClient,
+                BookingsClient bookingsClient,
                 SubscriptionClient subscriptionClient,
                 PaymentsClient paymentsClient,
                 ILogger<AshareApiService> logger)
@@ -46,6 +49,7 @@ public class AshareApiService
                 _productsClient = productsClient;
                 _listingsClient = listingsClient;
                 _ordersClient = ordersClient;
+                _bookingsClient = bookingsClient;
                 _subscriptionClient = subscriptionClient;
                 _paymentsClient = paymentsClient;
                 _logger = logger;
@@ -364,56 +368,96 @@ public class AshareApiService
         }
 
         // ═══════════════════════════════════════════════════════════════════
-        // Bookings (Orders)
+        // Bookings - نظام الحجوزات الجديد
         // ═══════════════════════════════════════════════════════════════════
 
         /// <summary>
         /// الحصول على حجوزات المستخدم
         /// </summary>
-        public async Task<List<BookingItem>> GetBookingsAsync()
+        public async Task<List<BookingItem>> GetBookingsAsync(string? customerId = null)
         {
                 try
                 {
-                        var result = await _ordersClient.SearchAsync(new OrderSearchRequest());
-                        return result?.Items?.Select(MapToBookingItem).ToList() ?? new List<BookingItem>();
+                        var serverBookings = new List<BookingItem>();
+                        try
+                        {
+                                PagedBookingResult? result;
+                                if (!string.IsNullOrEmpty(customerId))
+                                {
+                                        result = await _bookingsClient.GetMyBookingsAsync(customerId);
+                                }
+                                else
+                                {
+                                        result = await _bookingsClient.SearchAsync(new BookingSearchRequest());
+                                }
+                                serverBookings = result?.Items?.Select(MapBookingDtoToItem).ToList() ?? new List<BookingItem>();
+                        }
+                        catch (Exception ex)
+                        {
+                                Console.WriteLine($"Error fetching server bookings: {ex.Message}");
+                        }
+
+                        // Merge with local bookings (avoid duplicates)
+                        var localBookings = _localBookings.Where(lb =>
+                                !serverBookings.Any(sb => sb.Id == lb.Id)).ToList();
+
+                        var allBookings = serverBookings.Concat(localBookings).OrderByDescending(b => b.CreatedAt).ToList();
+                        return allBookings;
                 }
                 catch (Exception ex)
                 {
                         Console.WriteLine($"Error fetching bookings: {ex.Message}");
+                        return _localBookings.ToList();
+                }
+        }
+
+        /// <summary>
+        /// الحصول على حجوزات المالك (الواردة)
+        /// </summary>
+        public async Task<List<BookingItem>> GetHostBookingsAsync(Guid hostId)
+        {
+                try
+                {
+                        var result = await _bookingsClient.GetHostBookingsAsync(hostId);
+                        return result?.Items?.Select(MapBookingDtoToItem).ToList() ?? new List<BookingItem>();
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"Error fetching host bookings: {ex.Message}");
                         return new List<BookingItem>();
+                }
+        }
+
+        /// <summary>
+        /// الحصول على حجز بالمعرف
+        /// </summary>
+        public async Task<BookingItem?> GetBookingByIdAsync(Guid bookingId)
+        {
+                try
+                {
+                        var booking = await _bookingsClient.GetByIdAsync(bookingId);
+                        return booking != null ? MapBookingDtoToItem(booking) : null;
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"Error fetching booking: {ex.Message}");
+                        return null;
                 }
         }
 
         /// <summary>
         /// إنشاء حجز جديد
         /// </summary>
-        public async Task<BookingItem?> CreateBookingAsync(Guid spaceId, DateTime date, TimeOnly startTime, TimeOnly endTime)
+        public async Task<BookingItem?> CreateBookingAsync(CreateBookingRequest request)
         {
                 try
                 {
-                        var space = await GetSpaceByIdAsync(spaceId);
-                        if (space == null) return null;
-
-                        // Create order through the API
-                        // Note: The actual order creation depends on the Order API structure
-                        // This is a simplified implementation
-
-                        var booking = new BookingItem
+                        var result = await _bookingsClient.CreateAsync(request);
+                        if (result != null)
                         {
-                                Id = Guid.NewGuid(),
-                                SpaceId = spaceId,
-                                SpaceName = space.Name,
-                                SpaceImage = space.Images.FirstOrDefault(),
-                                Date = date,
-                                StartTime = startTime,
-                                EndTime = endTime,
-                                TotalPrice = space.PricePerHour * (decimal)(endTime - startTime).TotalHours,
-                                Currency = space.Currency,
-                                Status = BookingStatus.Pending,
-                                CreatedAt = DateTime.Now
-                        };
-
-                        return booking;
+                                return MapBookingDtoToItem(result);
+                        }
+                        return null;
                 }
                 catch (Exception ex)
                 {
@@ -423,18 +467,210 @@ public class AshareApiService
         }
 
         /// <summary>
-        /// إلغاء حجز
+        /// التحقق من دفع العربون
         /// </summary>
-        public async Task CancelBookingAsync(Guid bookingId)
+        public async Task<bool> VerifyBookingDepositAsync(Guid bookingId, string paymentId, string? transactionId = null)
         {
                 try
                 {
-                        await _ordersClient.CancelAsync(bookingId);
+                        var result = await _bookingsClient.VerifyDepositAsync(bookingId, new VerifyDepositRequest
+                        {
+                                PaymentId = paymentId,
+                                TransactionId = transactionId
+                        });
+                        return result?.Success ?? false;
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"Error verifying booking deposit: {ex.Message}");
+                        return false;
+                }
+        }
+
+        /// <summary>
+        /// تأكيد الحجز (من المالك)
+        /// </summary>
+        public async Task<bool> ConfirmBookingAsync(Guid bookingId, string? hostNotes = null)
+        {
+                try
+                {
+                        var result = await _bookingsClient.ConfirmAsync(bookingId, new ConfirmBookingRequest { HostNotes = hostNotes });
+                        return result?.Success ?? false;
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"Error confirming booking: {ex.Message}");
+                        return false;
+                }
+        }
+
+        /// <summary>
+        /// رفض الحجز (من المالك)
+        /// </summary>
+        public async Task<bool> RejectBookingAsync(Guid bookingId, string reason)
+        {
+                try
+                {
+                        var result = await _bookingsClient.RejectAsync(bookingId, new RejectBookingRequest { Reason = reason });
+                        return result?.Success ?? false;
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"Error rejecting booking: {ex.Message}");
+                        return false;
+                }
+        }
+
+        /// <summary>
+        /// إلغاء حجز
+        /// </summary>
+        public async Task<bool> CancelBookingAsync(Guid bookingId, string reason = "")
+        {
+                try
+                {
+                        var result = await _bookingsClient.CancelAsync(bookingId, new CancelBookingRequest { Reason = reason });
+
+                        // Remove from local bookings if exists
+                        _localBookings.RemoveAll(b => b.Id == bookingId);
+
+                        return result?.Success ?? false;
                 }
                 catch (Exception ex)
                 {
                         Console.WriteLine($"Error cancelling booking: {ex.Message}");
+                        return false;
                 }
+        }
+
+        /// <summary>
+        /// استرداد العربون
+        /// </summary>
+        public async Task<bool> RefundBookingAsync(Guid bookingId, string reason)
+        {
+                try
+                {
+                        var result = await _bookingsClient.RefundEscrowAsync(bookingId, new RefundEscrowRequest { Reason = reason });
+                        return result?.Success ?? false;
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"Error refunding booking: {ex.Message}");
+                        return false;
+                }
+        }
+
+        /// <summary>
+        /// إنشاء حجز جديد في الباك اند بعد الدفع
+        /// </summary>
+        public async Task<BookingItem?> CreateBookingAsync(Guid spaceId, decimal totalPrice, decimal depositAmount, string rentType, string? customerId = null, Guid? hostId = null, string? paymentId = null, string? notes = null)
+        {
+                try
+                {
+                        Console.WriteLine($"[AshareApiService] Creating booking in backend for space {spaceId}");
+
+                        // Convert rentType string to int enum value
+                        var rentTypeValue = rentType?.ToLower() switch
+                        {
+                                "monthly" => 1,
+                                "daily" => 2,
+                                "hourly" => 3,
+                                "yearly" or "annual" => 1, // Treat yearly as monthly for now
+                                _ => 1 // Default to monthly
+                        };
+
+                        var request = new CreateBookingRequest
+                        {
+                                SpaceId = spaceId,
+                                CustomerId = customerId,
+                                HostId = hostId,
+                                TotalPrice = totalPrice,
+                                DepositPercentage = totalPrice > 0 ? (depositAmount / totalPrice) * 100 : 10,
+                                RentType = rentTypeValue,
+                                CheckInDate = DateTime.Today,
+                                CheckOutDate = DateTime.Today.AddMonths(1), // Default to 1 month
+                                CustomerNotes = notes,
+                                GuestsCount = 1,
+                                PaymentId = paymentId
+                        };
+
+                        Console.WriteLine($"[AshareApiService] Booking request: CustomerId={customerId}, HostId={hostId}, RentType={rentTypeValue}");
+
+                        var result = await _bookingsClient.CreateAsync(request);
+
+                        if (result != null)
+                        {
+                                Console.WriteLine($"[AshareApiService] Booking created in backend: {result.Id}");
+                                return MapBookingDtoToItem(result);
+                        }
+
+                        Console.WriteLine("[AshareApiService] Failed to create booking in backend - null response");
+                        return null;
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"[AshareApiService] Error creating booking in backend: {ex.Message}");
+                        return null;
+                }
+        }
+
+        // Local bookings cache for storing newly created bookings (before server sync)
+        private static readonly List<BookingItem> _localBookings = new();
+
+        /// <summary>
+        /// إنشاء حجز محلياً بعد الدفع الناجح (مؤقت حتى يتم الإرسال للسيرفر)
+        /// </summary>
+        public void CreateBookingLocally(BookingItem booking)
+        {
+                booking.CreatedAt = DateTime.Now;
+                _localBookings.Add(booking);
+                Console.WriteLine($"[AshareApiService] Local booking created: {booking.Id}");
+
+                // TODO: Sync with server when online
+                // _ = SyncLocalBookingsAsync();
+        }
+
+        /// <summary>
+        /// تحويل BookingDto إلى BookingItem
+        /// </summary>
+        private static BookingItem MapBookingDtoToItem(BookingDto dto)
+        {
+                return new BookingItem
+                {
+                        Id = dto.Id,
+                        SpaceId = dto.SpaceId,
+                        SpaceName = dto.SpaceName ?? "",
+                        SpaceImage = dto.SpaceImage,
+                        Date = dto.CheckInDate,
+                        StartTime = TimeOnly.MinValue,
+                        EndTime = TimeOnly.MaxValue,
+                        GuestsCount = dto.GuestsCount,
+                        TotalPrice = dto.TotalPrice,
+                        DepositPaid = dto.DepositAmount,
+                        PaymentId = dto.DepositPaymentId,
+                        Currency = dto.Currency,
+                        Status = MapBookingStatus(dto.Status),
+                        IsReviewed = dto.HasReview,
+                        RentType = dto.RentType,
+                        CreatedAt = dto.CreatedAt
+                };
+        }
+
+        /// <summary>
+        /// تحويل حالة الحجز من string إلى enum
+        /// </summary>
+        private static BookingStatus MapBookingStatus(string? status)
+        {
+                return status?.ToLower() switch
+                {
+                        "pending" => BookingStatus.Pending,
+                        "depositpaid" => BookingStatus.Confirmed, // Deposit paid = waiting for host confirmation
+                        "confirmed" => BookingStatus.Confirmed,
+                        "active" => BookingStatus.Confirmed,
+                        "completed" => BookingStatus.Completed,
+                        "cancelled" => BookingStatus.Cancelled,
+                        "rejected" => BookingStatus.Cancelled,
+                        _ => BookingStatus.Pending
+                };
         }
 
         // ═══════════════════════════════════════════════════════════════════
@@ -789,6 +1025,128 @@ public class AshareApiService
         }
 
         // ═══════════════════════════════════════════════════════════════════
+        // Booking Payment - دفع عربون الحجز
+        // ═══════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// إنشاء دفعة حجز (عربون)
+        /// </summary>
+        public async Task<CreateBookingPaymentResponse?> CreateBookingPaymentAsync(CreateBookingPaymentRequest request)
+        {
+                try
+                {
+                        // إنشاء معرف الحجز
+                        var bookingId = Guid.NewGuid();
+
+                        // إنشاء عملية الدفع
+                        var paymentResponse = await _paymentsClient.CreatePaymentAsync(new CreatePaymentRequest
+                        {
+                                OrderId = bookingId,
+                                Amount = request.DepositAmount,
+                                Currency = "SAR",
+                                PaymentMethod = "CreditCard",
+                                Metadata = new Dictionary<string, string>
+                                {
+                                        { "space_id", request.SpaceId.ToString() },
+                                        { "type", "booking_deposit" },
+                                        { "total_price", request.TotalPrice.ToString() },
+                                        { "rent_type", request.RentType ?? "monthly" },
+                                        { "return_url", request.ReturnUrl ?? "" }
+                                }
+                        });
+
+                        if (paymentResponse == null || string.IsNullOrEmpty(paymentResponse.PaymentUrl))
+                        {
+                                return new CreateBookingPaymentResponse
+                                {
+                                        Success = false,
+                                        Message = "فشل في إنشاء عملية الدفع"
+                                };
+                        }
+
+                        return new CreateBookingPaymentResponse
+                        {
+                                Success = true,
+                                BookingId = bookingId.ToString(),
+                                PaymentId = paymentResponse.PaymentId,
+                                PaymentUrl = paymentResponse.PaymentUrl,
+                                Amount = request.DepositAmount,
+                                Currency = "SAR"
+                        };
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"Error creating booking payment: {ex.Message}");
+                        return new CreateBookingPaymentResponse
+                        {
+                                Success = false,
+                                Message = ex.Message
+                        };
+                }
+        }
+
+        /// <summary>
+        /// التحقق من حالة دفع الحجز
+        /// </summary>
+        public async Task<VerifyPaymentResponse?> VerifyBookingPaymentAsync(VerifyPaymentRequest request)
+        {
+                try
+                {
+                        var payment = await _paymentsClient.GetPaymentStatusAsync(request.PaymentId);
+
+                        if (payment == null)
+                        {
+                                return new VerifyPaymentResponse
+                                {
+                                        Success = false,
+                                        Status = "NotFound",
+                                        Message = "لم يتم العثور على عملية الدفع"
+                                };
+                        }
+
+                        var isCompleted = payment.Status.ToLower() switch
+                        {
+                                "completed" => true,
+                                "captured" => true,
+                                "success" => true,
+                                _ => false
+                        };
+
+                        if (isCompleted)
+                        {
+                                // TODO: تفعيل الحجز في قاعدة البيانات
+                                Console.WriteLine($"[VerifyBookingPayment] ✅ Payment completed for booking");
+
+                                return new VerifyPaymentResponse
+                                {
+                                        Success = true,
+                                        Status = "Completed",
+                                        BookingId = payment.OrderId,
+                                        ActivatedAt = DateTime.Now,
+                                        Message = "تم دفع العربون بنجاح"
+                                };
+                        }
+
+                        return new VerifyPaymentResponse
+                        {
+                                Success = false,
+                                Status = payment.Status,
+                                Message = GetPaymentStatusMessage(payment.Status)
+                        };
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"Error verifying booking payment: {ex.Message}");
+                        return new VerifyPaymentResponse
+                        {
+                                Success = false,
+                                Status = "Error",
+                                Message = ex.Message
+                        };
+                }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
         // Mapping Helpers
         // ═══════════════════════════════════════════════════════════════════
 
@@ -810,6 +1168,46 @@ public class AshareApiService
         /// </summary>
         private static SpaceItem MapListingToSpaceItem(ProductListingDto dto)
         {
+                // استخراج نوع الإيجار من الخصائص - يدعم كلاً من time_unit و rent_type
+                var rentType = "month"; // القيمة الافتراضية
+                if (dto.Attributes?.TryGetValue("time_unit", out var timeUnitValue) == true && timeUnitValue != null)
+                {
+                        rentType = timeUnitValue.ToString()?.ToLower() ?? "month";
+                }
+                else if (dto.Attributes?.TryGetValue("rent_type", out var rentTypeValue) == true && rentTypeValue != null)
+                {
+                        rentType = rentTypeValue.ToString()?.ToLower() ?? "month";
+                }
+
+                // تعيين الأسعار بناءً على نوع الإيجار
+                decimal pricePerHour = 0, pricePerDay = 0, pricePerMonth = 0;
+                switch (rentType)
+                {
+                        case "hour" or "hourly":
+                                pricePerHour = dto.Price;
+                                break;
+                        case "day" or "daily":
+                                pricePerDay = dto.Price;
+                                break;
+                        case "week" or "weekly":
+                                pricePerDay = dto.Price / 7; // تحويل للعرض اليومي
+                                break;
+                        case "year" or "yearly" or "annual":
+                                pricePerMonth = dto.Price / 12; // تحويل للعرض الشهري
+                                break;
+                        case "month" or "monthly":
+                        default:
+                                pricePerMonth = dto.Price;
+                                break;
+                }
+
+                // إضافة السعر الأصلي إلى الخصائص للاستخدام في صفحة الحجز
+                var attributes = dto.Attributes ?? new Dictionary<string, object>();
+                if (!attributes.ContainsKey("price"))
+                {
+                        attributes["price"] = dto.Price;
+                }
+
                 return new SpaceItem
                 {
                         Id = dto.Id,
@@ -818,9 +1216,9 @@ public class AshareApiService
                         Description = dto.Description ?? string.Empty,
                         CategoryId = dto.CategoryId,
                         CategoryName = dto.CategoryName,
-                        PricePerHour = dto.Price,
-                        PricePerDay = dto.Price * 8,
-                        PricePerMonth = dto.Price * 30,
+                        PricePerHour = pricePerHour,
+                        PricePerDay = pricePerDay,
+                        PricePerMonth = pricePerMonth,
                         Currency = dto.Currency,
                         Images = dto.Images.Any() ? dto.Images : (dto.FeaturedImage != null ? new List<string> { dto.FeaturedImage } : new List<string>()),
                         Location = dto.Address,
@@ -832,7 +1230,7 @@ public class AshareApiService
                         Rating = dto.AverageRating,
                         ReviewsCount = dto.RatingsCount,
                         ViewCount = dto.ViewCount,
-                        Attributes = dto.Attributes,
+                        Attributes = attributes,
                         CreatedAt = dto.CreatedAt,
                         // ربط المالك من بيانات البائع
                         OwnerId = dto.VendorId,

@@ -18,6 +18,10 @@
         </ItemGroup>
 
         <ItemGroup>
+                <!-- Core -->
+                <ProjectReference Include="..\..\libs\frontend\core\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
+
+                <!-- Clients -->
                 <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Products\ACommerce.Client.Products.csproj" />
                 <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Categories\ACommerce.Client.Categories.csproj" />
                 <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Cart\ACommerce.Client.Cart.csproj" />

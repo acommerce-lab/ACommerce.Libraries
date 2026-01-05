@@ -92,12 +92,25 @@ public static class ServiceCollectionExtensions
         var options = new StaticClientOptions();
         configureOptions?.Invoke(options);
 
-        // HttpClient باسم ثابت
-        services.AddHttpClient("ACommerceApi", client =>
+        // تسجيل TokenProvider إذا كان Authentication مفعلاً
+        if (options.EnableAuthentication && options.TokenProvider != null)
+        {
+            services.AddSingleton<ITokenProvider>(options.TokenProvider);
+            services.AddTransient<AuthenticationInterceptor>();
+        }
+
+        // HttpClient باسم ثابت مع Interceptors
+        var httpClientBuilder = services.AddHttpClient("ACommerceApi", client =>
         {
             client.BaseAddress = new Uri(baseUrl);
             client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
         });
+
+        // إضافة Authentication Interceptor
+        if (options.EnableAuthentication && options.TokenProvider != null)
+        {
+            httpClientBuilder.AddHttpMessageHandler<AuthenticationInterceptor>();
+        }
 
         // تسجيل StaticHttpClient كـ IApiClient
         services.AddScoped<IApiClient>(sp =>
@@ -187,6 +200,12 @@ public static class ServiceCollectionExtensions
             });
         }
 
+        // إضافة Custom Handlers
+        foreach (var handlerFactory in options.CustomHandlers)
+        {
+            httpClientBuilder.AddHttpMessageHandler(handlerFactory);
+        }
+
         // تسجيل IApiClient
         services.AddScoped<IApiClient>(sp => sp.GetRequiredService<DynamicHttpClient>());
 
@@ -240,6 +259,20 @@ public class ClientOptions
         /// يسمح بالاتصال بخوادم تستخدم شهادات ذاتية
         /// </summary>
         public bool BypassSslValidation { get; set; } = false;
+
+        /// <summary>
+        /// Custom DelegatingHandlers to add to the HTTP pipeline
+        /// </summary>
+        public List<Func<IServiceProvider, DelegatingHandler>> CustomHandlers { get; } = new();
+
+        /// <summary>
+        /// Add a custom handler to the HTTP pipeline
+        /// </summary>
+        public ClientOptions AddHandler<THandler>() where THandler : DelegatingHandler
+        {
+            CustomHandlers.Add(sp => sp.GetRequiredService<THandler>());
+            return this;
+        }
 }
 
 /// <summary>
@@ -251,4 +284,14 @@ public class StaticClientOptions
         /// Timeout بالثواني (افتراضياً: 30)
         /// </summary>
         public int TimeoutSeconds { get; set; } = 30;
+
+        /// <summary>
+        /// تفعيل Authentication تلقائي؟ (افتراضياً: false)
+        /// </summary>
+        public bool EnableAuthentication { get; set; } = false;
+
+        /// <summary>
+        /// Token Provider للـ Authentication
+        /// </summary>
+        public Func<IServiceProvider, ITokenProvider>? TokenProvider { get; set; }
 }

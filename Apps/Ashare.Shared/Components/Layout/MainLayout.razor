@@ -1,12 +1,17 @@
 @inherits LayoutComponentBase
+@using ACommerce.Templates.Customer.Components
 @inject Ashare.Shared.Services.ThemeService ThemeService
 @inject IAppNavigationService Navigation
 @inject AshareApiService ApiService
 @inject ACommerce.Client.Auth.TokenManager TokenManager
 @inject ACommerce.Client.Auth.AuthClient AuthClient
 @inject ACommerce.Templates.Customer.Services.GuestModeService GuestMode
+@inject Ashare.Shared.Services.VersionCheckService VersionCheck
+@inject ACommerce.Templates.Customer.Services.IAppVersionService AppVersion
 @inject ILocalizationService L
 @implements IDisposable
+
+@* Version Blocker تم نقله إلى AppStartup.razor للتحقق عند بدء التطبيق *@
 
 <div class="ashare-app @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
     @* Navbar *@
@@ -32,6 +37,21 @@
                 </div>
             </div>
         </nav>
+    }
+
+    @* Version Alert - تنبيه للإصدارات غير الأحدث *@
+    @if (ShouldShowVersionAlert)
+    {
+        <AcVersionAlert
+            AlertType="@CurrentAlertType"
+            Message="@GetVersionAlertMessage()"
+            EndOfSupportDate="@VersionCheck.LastCheckResult?.EndOfSupportDate"
+            UpdateUrl="@GetStoreUrl()"
+            IsArabic="@L.IsRtl"
+            OnDismiss="@HandleVersionAlertDismiss"
+            EndOfSupportLabel="@L["EndOfSupport"]"
+            UpdateNowLabel="@L["UpdateNow"]"
+            LaterLabel="@L["Later"]" />
     }
 
     @* Main Content *@
@@ -83,6 +103,109 @@
     private string? _lastCheckedPath;
     private static bool _bookingsCountLoaded;
     private static int _cachedBookingsCount;
+    private static bool _versionChecked;
+    private bool _versionAlertDismissed;
+
+    /// <summary>
+    /// إصدار التطبيق الحالي (من IAppVersionService)
+    /// </summary>
+    private string CurrentAppVersion => AppVersion.Version;
+
+    /// <summary>
+    /// رقم البناء الحالي (من IAppVersionService)
+    /// </summary>
+    private int CurrentBuildNumber => AppVersion.BuildNumber;
+
+    /// <summary>
+    /// هل يجب إظهار تنبيه الإصدار (في كل الحالات ماعدا الإصدار الأحدث أو المحظور)
+    /// </summary>
+    private bool ShouldShowVersionAlert =>
+        !VersionCheck.IsBlocked &&
+        !_versionAlertDismissed &&
+        VersionCheck.LastCheckResult != null &&
+        VersionCheck.LastCheckResult.CurrentStatus != ACommerce.Client.Versions.VersionStatus.Latest;
+
+    /// <summary>
+    /// نوع التنبيه الحالي
+    /// </summary>
+    private ACommerce.Templates.Customer.Components.VersionAlertType CurrentAlertType
+    {
+        get
+        {
+            var status = VersionCheck.LastCheckResult?.CurrentStatus;
+            return status switch
+            {
+                ACommerce.Client.Versions.VersionStatus.Deprecated => ACommerce.Templates.Customer.Components.VersionAlertType.Warning,
+                ACommerce.Client.Versions.VersionStatus.Unsupported => ACommerce.Templates.Customer.Components.VersionAlertType.Critical,
+                _ => ACommerce.Templates.Customer.Components.VersionAlertType.Info
+            };
+        }
+    }
+
+    /// <summary>
+    /// الحصول على رابط المتجر المناسب (App Store أو Play Store)
+    /// </summary>
+    private string GetStoreUrl()
+    {
+        // يمكن تحديد المتجر بناءً على المنصة
+        // حالياً نعيد رابط عام
+        return VersionCheck.LastCheckResult?.LatestVersion?.UpdateUrl ?? "https://ashare.sa";
+    }
+
+    /// <summary>
+    /// الحصول على رسالة شاشة الحظر
+    /// </summary>
+    private string GetBlockerMessage()
+    {
+        // أولاً نحاول استخدام الرسالة المخصصة من الـ API
+        var customMessage = L.IsRtl
+            ? VersionCheck.LastCheckResult?.MessageAr
+            : VersionCheck.LastCheckResult?.MessageEn;
+
+        if (!string.IsNullOrEmpty(customMessage))
+        {
+            return customMessage;
+        }
+
+        // إذا لم توجد رسالة مخصصة، نستخدم الترجمة
+        return L["VersionUnsupportedMessage"];
+    }
+
+    /// <summary>
+    /// الحصول على رسالة تنبيه الإصدار
+    /// </summary>
+    private string GetVersionAlertMessage()
+    {
+        // أولاً نحاول استخدام الرسالة المخصصة من الـ API
+        var customMessage = L.IsRtl
+            ? VersionCheck.LastCheckResult?.MessageAr
+            : VersionCheck.LastCheckResult?.MessageEn;
+
+        if (!string.IsNullOrEmpty(customMessage))
+        {
+            return customMessage;
+        }
+
+        // إذا لم توجد رسالة مخصصة، نستخدم الترجمة بناءً على الحالة
+        var status = VersionCheck.LastCheckResult?.CurrentStatus;
+        return status switch
+        {
+            ACommerce.Client.Versions.VersionStatus.Deprecated => L["VersionDeprecatedMessage"],
+            ACommerce.Client.Versions.VersionStatus.Unsupported => L["VersionUnsupportedMessage"],
+            ACommerce.Client.Versions.VersionStatus.Supported => L["VersionUpdateAvailable"],
+            ACommerce.Client.Versions.VersionStatus.Development => L["VersionUpdateAvailable"],
+            _ => L["VersionUpdateAvailable"]
+        };
+    }
+
+    /// <summary>
+    /// إغلاق تنبيه الإصدار
+    /// </summary>
+    private void HandleVersionAlertDismiss()
+    {
+        _versionAlertDismissed = true;
+        StateHasChanged();
+    }
 
     private bool IsAuthPage
     {
@@ -109,11 +232,13 @@
         get
         {
             var pageName = RouteData?.PageType?.Name;
-            if (pageName is "ChatRoom")
+            if (pageName is "ChatRoom" or "SpaceDetails" or "BookingCreate")
                 return true;
 
             var currentPath = Navigation.CurrentUri?.ToLowerInvariant() ?? "";
-            return currentPath.Contains("/chat/");
+            return currentPath.Contains("/chat/") ||
+                   currentPath.Contains("/space/") ||
+                   currentPath.Contains("/book/");
         }
     }
 
@@ -146,10 +271,10 @@
     {
         // الاشتراك في حدث تغيير اللغة
         L.OnLanguageChanged += HandleLanguageChanged;
-        
+
         // تحميل عدد الإشعارات (متزامن)
         NotificationCount = ApiService.GetNotificationsCount();
-        
+
         // استخدام القيمة المخزنة مباشرة إذا تم تحميلها سابقاً
         if (_bookingsCountLoaded)
         {
@@ -160,8 +285,60 @@
             // تحميل عدد الحجوزات في الخلفية (مرة واحدة فقط)
             _ = LoadBookingsCountAsync();
         }
-        
+
+        // فحص إصدار التطبيق (مرة واحدة فقط)
+        if (!_versionChecked)
+        {
+            _ = CheckVersionAsync();
+        }
+
         return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// فحص إصدار التطبيق والتحقق من أنه مدعوم
+    /// </summary>
+    private async Task CheckVersionAsync()
+    {
+        if (_versionChecked) return;
+
+        try
+        {
+            var currentVersion = CurrentAppVersion;
+            var buildNumber = CurrentBuildNumber;
+            Console.WriteLine($"[VersionCheck] Checking version {currentVersion} (build {buildNumber})...");
+
+            var result = await VersionCheck.CheckVersionAsync(currentVersion, buildNumber);
+            _versionChecked = true;
+
+            if (result != null)
+            {
+                Console.WriteLine($"[VersionCheck] Result - IsSupported: {result.IsSupported}, Status: {result.CurrentStatus}, ForceUpdate: {result.IsForceUpdate}");
+                Console.WriteLine($"[VersionCheck] ShouldShowVersionAlert: {ShouldShowVersionAlert}, IsBlocked: {VersionCheck.IsBlocked}, Dismissed: {_versionAlertDismissed}");
+
+                if (VersionCheck.IsBlocked)
+                {
+                    Console.WriteLine("[VersionCheck] ⛔ Version is BLOCKED - App will be locked");
+                }
+                else if (result.CurrentStatus != ACommerce.Client.Versions.VersionStatus.Latest)
+                {
+                    Console.WriteLine($"[VersionCheck] 📢 Alert will be shown - Status: {result.CurrentStatus}, AlertType: {CurrentAlertType}");
+                }
+                else
+                {
+                    Console.WriteLine("[VersionCheck] ✅ Version is LATEST - No alert needed");
+                }
+
+                // Always update state to ensure alert is shown
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[VersionCheck] Error: {ex.Message}");
+            // في حالة الخطأ، نسمح بالمتابعة
+            _versionChecked = true;
+        }
     }
     
     private void HandleLanguageChanged()
@@ -250,13 +427,9 @@
         // لا يوجد توكن
         if (isGuest)
         {
-            if (IsProtectedPage)
-            {
-                // ضيف يحاول الوصول لصفحة محمية - توجيه لصفحة الدخول
-                Console.WriteLine("[Auth] Guest trying to access protected page - redirecting to login");
-                Navigation.NavigateTo("/login");
-            }
-            // إذا كان ضيف ويريد الوصول لصفحة عامة - نسمح له
+            // الضيف يمكنه الوصول لجميع الصفحات
+            // الصفحات المحمية ستعرض واجهة "تسجيل الدخول مطلوب" بدلاً من إعادة التوجيه
+            return;
         }
         else
         {

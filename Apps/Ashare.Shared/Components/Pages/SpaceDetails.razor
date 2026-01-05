@@ -168,32 +168,15 @@
             }
 
             @* Pricing *@
-            <div class="ashare-section">
-                <h2 class="ashare-section-title">الأسعار</h2>
-                <div class="ashare-pricing-cards">
-                    @if (_space.PricePerHour > 0)
-                    {
-                        <div class="ashare-pricing-card">
-                            <span class="ashare-pricing-period">بالساعة</span>
-                            <span class="ashare-pricing-amount">@_space.PricePerHour ر.س</span>
-                        </div>
-                    }
-                    @if (_space.PricePerDay > 0)
-                    {
-                        <div class="ashare-pricing-card">
-                            <span class="ashare-pricing-period">باليوم</span>
-                            <span class="ashare-pricing-amount">@_space.PricePerDay ر.س</span>
-                        </div>
-                    }
-                    @if (_space.PricePerMonth > 0)
-                    {
-                        <div class="ashare-pricing-card featured">
-                            <span class="ashare-pricing-period">بالشهر</span>
-                            <span class="ashare-pricing-amount">@_space.PricePerMonth ر.س</span>
-                        </div>
-                    }
+            @if (HasPrice())
+            {
+                <div class="ashare-section">
+                    <h2 class="ashare-section-title">السعر</h2>
+                    <div class="ashare-pricing-display">
+                        <span class="ashare-price-amount">@GetPriceDisplay()</span>
+                    </div>
                 </div>
-            </div>
+            }
 
             @* Rules *@
             @if (_space.Rules?.Any() == true)
@@ -263,6 +246,45 @@
                     </div>
                 </div>
             }
+
+            @* Listing Stats *@
+            <div class="ashare-section ashare-listing-stats">
+                <h2 class="ashare-section-title">إحصائيات الإعلان</h2>
+                <div class="ashare-stats-grid">
+                    @if (_space.ViewCount > 0)
+                    {
+                        <div class="ashare-stat-card">
+                            <i class="bi bi-eye"></i>
+                            <span class="ashare-stat-value">@_space.ViewCount</span>
+                            <span class="ashare-stat-label">مشاهدة</span>
+                        </div>
+                    }
+                    @if (_space.CreatedAt != default)
+                    {
+                        <div class="ashare-stat-card">
+                            <i class="bi bi-calendar-plus"></i>
+                            <span class="ashare-stat-value">@GetRelativeDate(_space.CreatedAt)</span>
+                            <span class="ashare-stat-label">تاريخ الإضافة</span>
+                        </div>
+                    }
+                    @if (_space.IsAvailable)
+                    {
+                        <div class="ashare-stat-card ashare-stat-available">
+                            <i class="bi bi-check-circle"></i>
+                            <span class="ashare-stat-value">متاح</span>
+                            <span class="ashare-stat-label">الحالة</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="ashare-stat-card ashare-stat-unavailable">
+                            <i class="bi bi-x-circle"></i>
+                            <span class="ashare-stat-value">غير متاح</span>
+                            <span class="ashare-stat-label">الحالة</span>
+                        </div>
+                    }
+                </div>
+            </div>
 
             @* Owner Info *@
             <div class="ashare-section ashare-owner-section">
@@ -341,14 +363,21 @@
         </div>
 
         @* Booking Bar *@
-        <div class="ashare-booking-bar">
-            <div class="ashare-booking-price">
-                <span class="ashare-booking-amount">@GetDisplayPrice()</span>
+        @if (!_isOwnListing)
+        {
+            <div class="ashare-booking-bar">
+                <div class="ashare-booking-price">
+                    @if (HasPrice())
+                    {
+                        <span class="ashare-booking-amount">@GetPriceDisplay()</span>
+                    }
+                </div>
+                <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="StartBooking">
+                    <i class="bi bi-calendar-check"></i>
+                    <span>احجز الآن</span>
+                </button>
             </div>
-            <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="StartBooking">
-                احجز الآن
-            </button>
-        </div>
+        }
     }
     else
     {
@@ -359,81 +388,6 @@
     }
 </div>
 
-@* Booking Modal *@
-@if (_showBookingModal)
-{
-    <div class="ac-modal-overlay" @onclick="CloseBookingModal">
-        <div class="ac-modal ashare-booking-modal" @onclick:stopPropagation="true">
-            <div class="ac-modal-header">
-                <h3>احجز المساحة</h3>
-                <button class="ac-modal-close" @onclick="CloseBookingModal">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
-            <div class="ac-modal-body">
-                <div class="ashare-booking-form">
-                    <div class="ac-form-group">
-                        <label>نوع الحجز</label>
-                        <select class="ac-input" @bind="_bookingType">
-                            @if (_space?.PricePerHour > 0)
-                            {
-                                <option value="hourly">بالساعة</option>
-                            }
-                            @if (_space?.PricePerDay > 0)
-                            {
-                                <option value="daily">باليوم</option>
-                            }
-                            @if (_space?.PricePerMonth > 0)
-                            {
-                                <option value="monthly">بالشهر</option>
-                            }
-                        </select>
-                    </div>
-
-                    <div class="ac-form-group">
-                        <label>التاريخ</label>
-                        <input type="date" class="ac-input" @bind="_bookingDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
-                    </div>
-
-                    @if (_bookingType == "hourly")
-                    {
-                        <div class="ac-form-row">
-                            <div class="ac-form-group">
-                                <label>من الساعة</label>
-                                <input type="time" class="ac-input" @bind="_bookingStartTime" />
-                            </div>
-                            <div class="ac-form-group">
-                                <label>إلى الساعة</label>
-                                <input type="time" class="ac-input" @bind="_bookingEndTime" />
-                            </div>
-                        </div>
-                    }
-
-                    <div class="ac-form-group">
-                        <label>عدد الأشخاص</label>
-                        <input type="number" class="ac-input" @bind="_bookingGuests" min="1" max="@(_space?.Capacity > 0 ? _space.Capacity : 100)" />
-                    </div>
-
-                    <div class="ac-form-group">
-                        <label>ملاحظات (اختياري)</label>
-                        <textarea class="ac-input" rows="3" @bind="_bookingNotes" placeholder="أي متطلبات خاصة..."></textarea>
-                    </div>
-
-                    <div class="ashare-booking-summary">
-                        <div class="ashare-summary-row">
-                            <span>المجموع</span>
-                            <span class="ashare-summary-total">@CalculateTotal() ر.س</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="ac-modal-footer">
-                <button class="ac-btn ac-btn-secondary" @onclick="CloseBookingModal">إلغاء</button>
-                <button class="ac-btn ac-btn-primary" @onclick="ConfirmBooking">تأكيد الحجز</button>
-            </div>
-        </div>
-    </div>
-}
 
 @code {
     [Parameter]
@@ -446,15 +400,6 @@
     private bool _isOwnListing; // هل هذا معلن المستخدم الحالي
     private int _currentImageIndex;
     private bool _isLoading = true;
-
-    // Booking
-    private bool _showBookingModal;
-    private string _bookingType = "hourly";
-    private DateTime _bookingDate = DateTime.Today;
-    private TimeOnly _bookingStartTime = new(9, 0, 0);
-    private TimeOnly _bookingEndTime = new(12, 0, 0);
-    private int _bookingGuests = 1;
-    private string? _bookingNotes;
 
     private bool _mapInitialized;
 
@@ -518,13 +463,8 @@
             _reviews = await reviewsTask;
             _isFavorite = ApiService.GetFavorites().Contains(SpaceId);
 
-            // Set default booking type based on available pricing
             if (_space != null)
             {
-                if (_space.PricePerHour > 0) _bookingType = "hourly";
-                else if (_space.PricePerDay > 0) _bookingType = "daily";
-                else if (_space.PricePerMonth > 0) _bookingType = "monthly";
-
                 // التحقق من أن هذا المعلن خاص بالمستخدم الحالي
                 var currentUserId = TokenManager.GetUserIdFromToken();
                 _isOwnListing = !string.IsNullOrEmpty(currentUserId) &&
@@ -625,51 +565,421 @@
         return _space.DisplayPrice;
     }
 
+    /// <summary>
+    /// التحقق من وجود سعر (من الخصائص أو من SpaceItem)
+    /// </summary>
+    private bool HasPrice()
+    {
+        // التحقق من وجود السعر في الخصائص
+        if (HasAttribute("price")) return true;
+
+        // التحقق من وجود السعر في SpaceItem
+        return _space != null && (_space.PricePerHour > 0 || _space.PricePerDay > 0 || _space.PricePerMonth > 0);
+    }
+
+    /// <summary>
+    /// الحصول على عرض السعر مع وحدة الوقت
+    /// </summary>
+    private string GetPriceDisplay()
+    {
+        if (_space == null) return "";
+
+        // أولاً: استخدام السعر من الخصائص إن وجد
+        if (HasAttribute("price"))
+        {
+            var price = GetAttribute("price");
+
+            // تحديد وحدة الوقت
+            var timeUnit = "شهر"; // افتراضي
+            if (HasAttribute("time_unit"))
+            {
+                timeUnit = TranslateTimeUnit(GetAttribute("time_unit"));
+            }
+            else if (HasAttribute("rent_type"))
+            {
+                timeUnit = TranslateTimeUnit(GetAttribute("rent_type"));
+            }
+            else if (HasAttribute("duration") && HasAttribute("time_unit"))
+            {
+                var duration = GetAttribute("duration");
+                timeUnit = TranslateTimeUnit(GetAttribute("time_unit"));
+                return $"{price} ر.س / {duration} {timeUnit}";
+            }
+
+            return $"{price} ر.س / {timeUnit}";
+        }
+
+        // ثانياً: استخدام DisplayPrice من SpaceItem
+        return _space.DisplayPrice;
+    }
+
     // ═══════════════════════════════════════════════════════════════════
     // Property Details Builder
     // ═══════════════════════════════════════════════════════════════════
 
+    // الخصائص المعروفة مع ترجماتها
+    private static readonly Dictionary<string, string> _knownAttributeLabels = new()
+    {
+        // Property info
+        ["property_type"] = "نوع العقار",
+        ["unit_type"] = "نوع الوحدة",
+        ["area"] = "المساحة",
+        ["rooms_count"] = "عدد الغرف",
+        ["rooms"] = "عدد الغرف",
+        ["bathrooms_count"] = "عدد الحمامات",
+        ["bathrooms"] = "عدد الحمامات",
+        ["floor_number"] = "الطابق",
+        ["floor"] = "الطابق",
+        ["building_age"] = "عمر المبنى",
+        ["furnished"] = "مفروش",
+
+        // Location
+        ["city"] = "المدينة",
+        ["district"] = "الحي",
+        ["street"] = "الشارع",
+
+        // Rental info
+        ["rent_type"] = "نوع الإيجار",
+        ["rental_type"] = "نوع الإيجار",
+        ["time_unit"] = "وحدة الوقت",
+        ["duration"] = "المدة",
+        ["bill_type"] = "نوع الفاتورة",
+        ["price"] = "السعر",
+
+        // Additional
+        ["description"] = "الوصف",
+        ["capacity"] = "السعة",
+        ["beds_count"] = "عدد الأسرّة",
+        ["beds"] = "عدد الأسرّة",
+        ["living_rooms_count"] = "عدد الصالات",
+        ["living_rooms"] = "عدد الصالات",
+        ["kitchen_count"] = "عدد المطابخ",
+        ["kitchens"] = "عدد المطابخ",
+        ["parking_spaces"] = "مواقف السيارات",
+        ["facade"] = "الواجهة",
+        ["view"] = "الإطلالة",
+        ["electricity"] = "الكهرباء",
+        ["water"] = "المياه",
+        ["gas"] = "الغاز",
+        ["internet"] = "الإنترنت",
+        ["gender"] = "الجنس",
+        ["nationality"] = "الجنسية",
+        ["min_stay"] = "أقل مدة إقامة",
+        ["max_stay"] = "أقصى مدة إقامة",
+        ["deposit"] = "مبلغ التأمين",
+        ["available_from"] = "متاح من",
+        ["contact_phone"] = "رقم التواصل",
+        ["features"] = "المميزات"
+    };
+
+    // الخصائص المنطقية (مرافق) - يجب تجاهلها في قسم التفاصيل
+    private static readonly HashSet<string> _booleanAmenityKeys = new()
+    {
+        "has_wifi", "wifi", "has_parking", "parking", "has_ac", "ac",
+        "has_elevator", "elevator", "has_kitchen", "kitchen", "has_pool", "pool",
+        "has_gym", "gym", "has_security", "security", "has_garden", "garden",
+        "has_balcony", "balcony", "has_storage", "storage", "has_maid_room", "maid_room",
+        "has_driver_room", "driver_room", "is_phone_allowed", "is_whatsapp_allowed",
+        "is_messaging_allowed"
+    };
+
     private List<(string Label, string Value)> GetPropertyDetails()
     {
         var details = new List<(string Label, string Value)>();
+        var processedKeys = new HashSet<string>();
 
+        // أولاً: عرض الخصائص المعروفة بالترتيب المحدد
         if (HasAttribute("property_type"))
+        {
             details.Add(("نوع العقار", TranslatePropertyType(GetAttribute("property_type"))));
+            processedKeys.Add("property_type");
+        }
 
         if (HasAttribute("area"))
+        {
             details.Add(("المساحة", $"{GetAttribute("area")} م²"));
+            processedKeys.Add("area");
+        }
 
         if (HasAttribute("rooms_count"))
+        {
             details.Add(("عدد الغرف", GetAttribute("rooms_count")));
+            processedKeys.Add("rooms_count");
+        }
 
         if (HasAttribute("bathrooms_count"))
+        {
             details.Add(("عدد الحمامات", GetAttribute("bathrooms_count")));
+            processedKeys.Add("bathrooms_count");
+        }
+
+        if (HasAttribute("beds_count"))
+        {
+            details.Add(("عدد الأسرّة", GetAttribute("beds_count")));
+            processedKeys.Add("beds_count");
+        }
+
+        if (HasAttribute("living_rooms_count"))
+        {
+            details.Add(("عدد الصالات", GetAttribute("living_rooms_count")));
+            processedKeys.Add("living_rooms_count");
+        }
 
         if (HasAttribute("floor_number"))
+        {
             details.Add(("الطابق", GetAttribute("floor_number")));
+            processedKeys.Add("floor_number");
+        }
 
         if (HasAttribute("building_age"))
+        {
             details.Add(("عمر المبنى", $"{GetAttribute("building_age")} سنة"));
+            processedKeys.Add("building_age");
+        }
 
         if (HasAttribute("furnished"))
+        {
             details.Add(("مفروش", TranslateFurnished(GetAttribute("furnished"))));
+            processedKeys.Add("furnished");
+        }
 
         if (HasAttribute("city"))
+        {
             details.Add(("المدينة", TranslateCity(GetAttribute("city"))));
+            processedKeys.Add("city");
+        }
 
         if (HasAttribute("district"))
+        {
             details.Add(("الحي", GetAttribute("district")));
+            processedKeys.Add("district");
+        }
 
         if (HasAttribute("street"))
+        {
             details.Add(("الشارع", GetAttribute("street")));
+            processedKeys.Add("street");
+        }
+
+        if (HasAttribute("gender"))
+        {
+            details.Add(("الجنس", TranslateGender(GetAttribute("gender"))));
+            processedKeys.Add("gender");
+        }
+
+        if (HasAttribute("nationality"))
+        {
+            details.Add(("الجنسية", GetAttribute("nationality")));
+            processedKeys.Add("nationality");
+        }
+
+        if (HasAttribute("min_stay"))
+        {
+            details.Add(("أقل مدة إقامة", GetAttribute("min_stay")));
+            processedKeys.Add("min_stay");
+        }
+
+        if (HasAttribute("max_stay"))
+        {
+            details.Add(("أقصى مدة إقامة", GetAttribute("max_stay")));
+            processedKeys.Add("max_stay");
+        }
+
+        if (HasAttribute("deposit"))
+        {
+            details.Add(("مبلغ التأمين", $"{GetAttribute("deposit")} ر.س"));
+            processedKeys.Add("deposit");
+        }
+
+        if (HasAttribute("available_from"))
+        {
+            details.Add(("متاح من", GetAttribute("available_from")));
+            processedKeys.Add("available_from");
+        }
 
         if (HasAttribute("rent_type"))
+        {
             details.Add(("نوع الإيجار", TranslateRentType(GetAttribute("rent_type"))));
+            processedKeys.Add("rent_type");
+        }
 
         if (HasAttribute("price"))
+        {
             details.Add(("السعر", $"{GetAttribute("price")} ر.س"));
+            processedKeys.Add("price");
+        }
+
+        // ثانياً: عرض أي خصائص إضافية غير معروفة (ديناميكياً)
+        if (_space?.Attributes != null)
+        {
+            foreach (var attr in _space.Attributes)
+            {
+                // تجاهل الخصائص التي تمت معالجتها، والمرافق، والوصف
+                if (processedKeys.Contains(attr.Key) ||
+                    _booleanAmenityKeys.Contains(attr.Key) ||
+                    attr.Key == "description" ||
+                    attr.Value == null ||
+                    string.IsNullOrEmpty(attr.Value.ToString()))
+                    continue;
+
+                var label = _knownAttributeLabels.TryGetValue(attr.Key, out var knownLabel)
+                    ? knownLabel
+                    : FormatAttributeKey(attr.Key);
+
+                // ترجمة القيمة
+                var rawValue = attr.Value.ToString() ?? "";
+                var translatedValue = TranslateAttributeValue(attr.Key, rawValue);
+
+                details.Add((label, translatedValue));
+            }
+        }
 
         return details;
+    }
+
+    private string TranslateGender(string gender) => gender?.ToLower() switch
+    {
+        "male" => "ذكور فقط",
+        "female" => "إناث فقط",
+        "any" or "both" => "الجنسين",
+        _ => gender ?? ""
+    };
+
+    private string FormatAttributeKey(string key)
+    {
+        // تحويل snake_case إلى نص قابل للقراءة
+        return key.Replace("_", " ").Replace("-", " ");
+    }
+
+    /// <summary>
+    /// ترجمة القيم الإنجليزية الشائعة إلى العربية
+    /// </summary>
+    private string TranslateAttributeValue(string key, string value)
+    {
+        if (string.IsNullOrEmpty(value)) return value;
+
+        var lowerValue = value.ToLower().Trim();
+
+        // ترجمة القيم حسب نوع الخاصية
+        return key?.ToLower() switch
+        {
+            "floor" => TranslateFloor(lowerValue),
+            "unit_type" => TranslateUnitType(lowerValue),
+            "rental_type" or "rent_type" => TranslateRentalType(lowerValue),
+            "bill_type" => TranslateBillType(lowerValue),
+            "time_unit" => TranslateTimeUnit(lowerValue),
+            "furnished" => TranslateFurnished(lowerValue),
+            "gender" => TranslateGender(lowerValue),
+            _ => TranslateCommonValue(lowerValue) ?? value
+        };
+    }
+
+    private string TranslateFloor(string value) => value switch
+    {
+        "ground" => "الأرضي",
+        "first" => "الأول",
+        "second" => "الثاني",
+        "third" => "الثالث",
+        "fourth" => "الرابع",
+        "fifth" => "الخامس",
+        "sixth" => "السادس",
+        "seventh" => "السابع",
+        "eighth" => "الثامن",
+        "ninth" => "التاسع",
+        "tenth" => "العاشر",
+        "basement" => "القبو",
+        "roof" => "السطح",
+        _ => value
+    };
+
+    private string TranslateUnitType(string value) => value switch
+    {
+        "room" => "غرفة",
+        "apartment" => "شقة",
+        "villa" => "فيلا",
+        "studio" => "استوديو",
+        "duplex" => "دوبلكس",
+        "floor" => "دور كامل",
+        "building" => "عمارة",
+        "office" => "مكتب",
+        "shop" => "محل",
+        _ => value
+    };
+
+    private string TranslateRentalType(string value) => value switch
+    {
+        "shared" => "مشترك",
+        "private" => "خاص",
+        "full" => "كامل",
+        "partial" => "جزئي",
+        _ => TranslateRentType(value)
+    };
+
+    private string TranslateBillType(string value) => value switch
+    {
+        "included" => "شامل",
+        "excluded" or "separate" => "منفصل",
+        "offer" => "عرض",
+        "fixed" => "ثابت",
+        "variable" => "متغير",
+        _ => value
+    };
+
+    private string TranslateTimeUnit(string value) => value switch
+    {
+        "hour" or "hourly" => "ساعة",
+        "day" or "daily" => "يوم",
+        "week" or "weekly" => "أسبوع",
+        "month" or "monthly" => "شهر",
+        "year" or "yearly" or "annual" => "سنة",
+        _ => value
+    };
+
+    private string? TranslateCommonValue(string value) => value switch
+    {
+        // Yes/No
+        "yes" => "نعم",
+        "no" => "لا",
+        "true" => "نعم",
+        "false" => "لا",
+
+        // Common values
+        "available" => "متاح",
+        "unavailable" or "not available" => "غير متاح",
+        "new" => "جديد",
+        "used" => "مستعمل",
+        "excellent" => "ممتاز",
+        "good" => "جيد",
+        "fair" => "مقبول",
+
+        // Directions
+        "north" => "شمال",
+        "south" => "جنوب",
+        "east" => "شرق",
+        "west" => "غرب",
+        "northeast" => "شمال شرق",
+        "northwest" => "شمال غرب",
+        "southeast" => "جنوب شرق",
+        "southwest" => "جنوب غرب",
+
+        _ => null
+    };
+
+    private string GetRelativeDate(DateTime date)
+    {
+        var diff = DateTime.Now - date;
+
+        if (diff.TotalDays < 1)
+            return "اليوم";
+        if (diff.TotalDays < 2)
+            return "أمس";
+        if (diff.TotalDays < 7)
+            return $"منذ {(int)diff.TotalDays} أيام";
+        if (diff.TotalDays < 30)
+            return $"منذ {(int)(diff.TotalDays / 7)} أسابيع";
+        if (diff.TotalDays < 365)
+            return $"منذ {(int)(diff.TotalDays / 30)} أشهر";
+        return date.ToString("yyyy/MM/dd");
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -930,45 +1240,18 @@
         }
     }
 
-    private void StartBooking()
+    private string GetRentTypeLabel()
     {
-        _showBookingModal = true;
-    }
+        if (!HasAttribute("rent_type")) return "شهرياً";
 
-    private void CloseBookingModal()
-    {
-        _showBookingModal = false;
-    }
-
-    private decimal CalculateTotal()
-    {
-        if (_space == null) return 0;
-
-        return _bookingType switch
+        return GetAttribute("rent_type").ToLower() switch
         {
-            "hourly" => _space.PricePerHour * (decimal)(_bookingEndTime - _bookingStartTime).TotalHours,
-            "daily" => _space.PricePerDay,
-            "monthly" => _space.PricePerMonth,
-            _ => 0
+            "monthly" => "شهرياً",
+            "yearly" or "annual" => "سنوياً",
+            "daily" => "يومياً",
+            "weekly" => "أسبوعياً",
+            _ => "شهرياً"
         };
-    }
-
-    private async Task ConfirmBookingAsync()
-    {
-        var booking = await ApiService.CreateBookingAsync(
-            SpaceId,
-            _bookingDate,
-            _bookingStartTime,
-            _bookingEndTime
-        );
-
-        _showBookingModal = false;
-        Navigation.NavigateTo("/bookings?new=true");
-    }
-
-    private void ConfirmBooking()
-    {
-        _ = ConfirmBookingAsync();
     }
 
     private string GetAmenityIcon(string amenity) => amenity switch
@@ -1002,4 +1285,14 @@
         "نظافة أسبوعية" => "bi-stars",
         _ => "bi-check-circle"
     };
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Booking
+    // ═══════════════════════════════════════════════════════════════════
+
+    private void StartBooking()
+    {
+        // Navigate to booking page with space ID
+        Navigation.NavigateTo($"/book/{SpaceId}");
+    }
 }

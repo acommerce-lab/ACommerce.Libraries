@@ -13,6 +13,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ACommerce.Subscriptions\ACommerce.Subscriptions.csproj" />
+    <ProjectReference Include="..\..\marketing\ACommerce.Marketing.Analytics\ACommerce.Marketing.Analytics.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

@@ -21,6 +21,105 @@
             <span>@L["Loading"]</span>
         </div>
     }
+    else if (GuestMode.IsGuestMode)
+    {
+        @* Guest Mode Profile *@
+        <div class="guest-profile-header">
+            <div class="guest-profile-avatar">
+                <img src="images/app-icon.png" alt="@L["AppName"]" onerror="this.style.display='none'" />
+            </div>
+            <h1 class="guest-profile-name">@L["Guest"]</h1>
+            <p class="guest-profile-subtitle">@L["LoginToAccessProfile"]</p>
+            <button class="guest-login-btn" @onclick='() => Navigation.NavigateTo("/login")'>
+                <i class="bi bi-box-arrow-in-right"></i>
+                @L["Login"]
+            </button>
+        </div>
+
+        @* Menu Sections for Guest *@
+        <div class="ashare-profile-menu">
+            @* Settings Section *@
+            <div class="ashare-menu-section">
+                <h3 class="ashare-menu-title">@L["Settings"]</h3>
+                <div class="ashare-menu-items">
+                    <div class="ashare-menu-item">
+                        <div class="ashare-menu-icon">
+                            <i class="bi bi-moon"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["DarkMode"]</span>
+                        </div>
+                        <label class="ashare-toggle">
+                            <input type="checkbox" @bind="ThemeService.IsDarkMode" />
+                            <span class="ashare-toggle-slider"></span>
+                        </label>
+                    </div>
+                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/language")'>
+                        <div class="ashare-menu-icon">
+                            <i class="bi bi-globe"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["Language"]</span>
+                            <span class="ashare-menu-value">@GetCurrentLanguageName()</span>
+                        </div>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            @* Legal Pages Section (Dynamic) *@
+            @if (_legalPages.Any())
+            {
+                <div class="ashare-menu-section">
+                    <h3 class="ashare-menu-title">@L["LegalAndPolicies"]</h3>
+                    <div class="ashare-menu-items">
+                        @foreach (var page in _legalPages)
+                        {
+                            <button class="ashare-menu-item" @onclick="@(() => OpenLegalPage(page.Key))">
+                                <div class="ashare-menu-icon">
+                                    <i class="bi @(page.Icon)"></i>
+                                </div>
+                                <div class="ashare-menu-content">
+                                    <span class="ashare-menu-label">@GetLegalPageTitle(page)</span>
+                                </div>
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Support Section *@
+            <div class="ashare-menu-section">
+                <h3 class="ashare-menu-title">@L["Help"]</h3>
+                <div class="ashare-menu-items">
+                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/help")'>
+                        <div class="ashare-menu-icon">
+                            <i class="bi bi-question-circle"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["HelpCenter"]</span>
+                        </div>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/about")'>
+                        <div class="ashare-menu-icon">
+                            <i class="bi bi-info-circle"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["AboutAshare"]</span>
+                        </div>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            @* App Version *@
+            <div class="ashare-app-version">
+                <span>@L["AppName"] v1.0.0</span>
+            </div>
+        </div>
+    }
     else if (!_isLoggedIn)
     {
         @* Not Logged In - Redirect to Nafath login *@
@@ -169,7 +268,7 @@
                     <div class="ashare-menu-items">
                         @foreach (var page in _legalPages)
                         {
-                            <button class="ashare-menu-item" @onclick="@(() => OpenLegalPage(page.Url))">
+                            <button class="ashare-menu-item" @onclick="@(() => OpenLegalPage(page.Key))">
                                 <div class="ashare-menu-icon">
                                     <i class="bi @(page.Icon)"></i>
                                 </div>
@@ -238,12 +337,27 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // في وضع الضيف، لا نحتاج لتحميل بيانات المستخدم
+        if (GuestMode.IsGuestMode)
+        {
+            _isLoading = false;
+            await LoadLegalPages();
+            return;
+        }
+
         await LoadUserData();
         await LoadLegalPages();
     }
 
     private async Task LoadUserData()
     {
+        // لا تحميل في وضع الضيف
+        if (GuestMode.IsGuestMode)
+        {
+            _isLoading = false;
+            return;
+        }
+
         _isLoading = true;
 
         try
@@ -295,9 +409,7 @@
             }
             else
             {
-                Console.WriteLine("[Profile] No token - clearing and redirecting to Nafath");
-                TokenManager.ClearToken();
-                await GuestMode.DisableGuestModeAsync();
+                Console.WriteLine("[Profile] No token - redirecting to Nafath");
                 _isLoading = false;
                 Navigation.NavigateTo("/login", forceLoad: true);
                 return;
@@ -305,9 +417,7 @@
         }
         catch
         {
-            Console.WriteLine("[Profile] Auth check failed - clearing token and redirecting to Nafath");
-            TokenManager.ClearToken();
-            await GuestMode.DisableGuestModeAsync();
+            Console.WriteLine("[Profile] Auth check failed - redirecting to Nafath");
             _isLoggedIn = false;
             _isLoading = false;
             Navigation.NavigateTo("/login", forceLoad: true);
@@ -340,9 +450,9 @@
         return L.CurrentLanguage == "ar" ? page.TitleAr : page.TitleEn;
     }
 
-    private void OpenLegalPage(string url)
+    private void OpenLegalPage(string key)
     {
-        Navigation.NavigateTo(url);
+        Navigation.NavigateTo($"/legal/{key}");
     }
 
     private async Task Logout()

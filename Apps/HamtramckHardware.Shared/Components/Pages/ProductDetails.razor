@@ -1,0 +1,345 @@
+@page "/product/{ProductId:guid}"
+@inject ILocalizationService L
+@inject IAppNavigationService Navigation
+@inject ProductsClient ProductsClient
+@inject CartClient CartClient
+
+<div class="hh-page-content hh-product-details">
+    @if (_isLoading)
+    {
+        <div class="hh-loading-container">
+            <div class="hh-spinner"></div>
+        </div>
+    }
+    else if (_product == null)
+    {
+        <div class="hh-empty-state">
+            <i class="bi bi-box-seam"></i>
+            <h2>Product Not Found</h2>
+            <p>The product you're looking for doesn't exist or has been removed.</p>
+            <button class="hh-btn hh-btn-primary" @onclick="GoBack">
+                <i class="bi bi-arrow-left"></i> Go Back
+            </button>
+        </div>
+    }
+    else
+    {
+        <!-- Product Images -->
+        <div class="hh-product-gallery">
+            <img src="@(_product.Images.FirstOrDefault() ?? "/images/placeholder-product.png")"
+                 alt="@_product.Name"
+                 class="hh-product-main-image" />
+            @if (_product.Images.Count > 1)
+            {
+                <div class="hh-product-thumbnails">
+                    @foreach (var (image, index) in _product.Images.Select((img, i) => (img, i)))
+                    {
+                        <img src="@image"
+                             alt="@_product.Name @(index + 1)"
+                             class="hh-product-thumbnail @(_selectedImageIndex == index ? "active" : "")"
+                             @onclick="() => SelectImage(index)" />
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Product Info -->
+        <div class="hh-product-info-section">
+            <div class="hh-product-header">
+                <span class="hh-product-brand">@_product.Brand</span>
+                <h1 class="hh-product-title">@_product.Name</h1>
+                <div class="hh-product-meta">
+                    <span class="hh-product-sku">SKU: @_product.Sku</span>
+                    @if (_product.Rating.HasValue)
+                    {
+                        <span class="hh-product-rating">
+                            <i class="bi bi-star-fill"></i>
+                            @_product.Rating.Value.ToString("0.0")
+                            <span class="hh-rating-count">(@_product.ReviewCount reviews)</span>
+                        </span>
+                    }
+                </div>
+            </div>
+
+            <div class="hh-product-pricing">
+                <span class="hh-product-price">$@_product.Price.ToString("0.00")</span>
+                @if (_product.OriginalPrice.HasValue && _product.OriginalPrice > _product.Price)
+                {
+                    <span class="hh-product-original-price">$@_product.OriginalPrice.Value.ToString("0.00")</span>
+                    <span class="hh-product-discount">
+                        Save $@((_product.OriginalPrice.Value - _product.Price).ToString("0.00"))
+                    </span>
+                }
+            </div>
+
+            <div class="hh-stock-info">
+                @if (_product.InStock)
+                {
+                    <span class="hh-stock-badge in-stock">
+                        <i class="bi bi-check-circle"></i> In Stock
+                    </span>
+                    @if (_product.StockQuantity.HasValue && _product.StockQuantity < 10)
+                    {
+                        <span class="hh-low-stock">Only @_product.StockQuantity left!</span>
+                    }
+                }
+                else
+                {
+                    <span class="hh-stock-badge out-of-stock">
+                        <i class="bi bi-x-circle"></i> Out of Stock
+                    </span>
+                }
+            </div>
+
+            <!-- Quantity Selector -->
+            @if (_product.InStock)
+            {
+                <div class="hh-quantity-section">
+                    <span>Quantity:</span>
+                    <div class="hh-quantity-control">
+                        <button class="hh-qty-btn" @onclick="DecreaseQuantity" disabled="@(_quantity <= 1)">
+                            <i class="bi bi-dash"></i>
+                        </button>
+                        <span class="hh-qty-value">@_quantity</span>
+                        <button class="hh-qty-btn" @onclick="IncreaseQuantity">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="hh-product-actions">
+                    <button class="hh-btn hh-btn-primary hh-btn-lg hh-btn-block" @onclick="AddToCart" disabled="@_isAddingToCart">
+                        @if (_isAddingToCart)
+                        {
+                            <span class="hh-spinner-sm"></span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-cart-plus"></i>
+                        }
+                        @(_addedToCart ? "Added!" : "Add to Cart")
+                    </button>
+                    <button class="hh-btn hh-btn-secondary hh-btn-icon" @onclick="ToggleFavorite">
+                        <i class="@(_isFavorite ? "bi bi-heart-fill" : "bi bi-heart")"></i>
+                    </button>
+                </div>
+            }
+            else
+            {
+                <button class="hh-btn hh-btn-secondary hh-btn-block" @onclick="NotifyWhenAvailable">
+                    <i class="bi bi-bell"></i> Notify When Available
+                </button>
+            }
+
+            <!-- Store Pickup -->
+            <div class="hh-store-pickup hh-card">
+                <i class="bi bi-shop"></i>
+                <div>
+                    <strong>Store Pickup Available</strong>
+                    <p>Ready in 2 hours at Hamtramck Hardware</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Description -->
+        <div class="hh-product-description hh-card">
+            <h3>Description</h3>
+            <p>@_product.Description</p>
+        </div>
+
+        <!-- Specifications -->
+        @if (_product.Specifications?.Any() == true)
+        {
+            <div class="hh-product-specs hh-card">
+                <h3>Specifications</h3>
+                <dl class="hh-specs-list">
+                    @foreach (var spec in _product.Specifications)
+                    {
+                        <dt>@spec.Key</dt>
+                        <dd>@spec.Value</dd>
+                    }
+                </dl>
+            </div>
+        }
+
+        <!-- Related Products -->
+        @if (_relatedProducts.Any())
+        {
+            <div class="hh-related-products">
+                <h3>Related Products</h3>
+                <div class="hh-products-scroll">
+                    @foreach (var product in _relatedProducts)
+                    {
+                        <div class="hh-product-card hh-product-card-sm" @onclick="() => ViewProduct(product.Id)">
+                            <img src="@(product.ImageUrl ?? "/images/placeholder-product.png")"
+                                 alt="@product.Name"
+                                 class="hh-product-image" />
+                            <div class="hh-product-info">
+                                <div class="hh-product-name">@product.Name</div>
+                                <span class="hh-product-price">$@product.Price.ToString("0.00")</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid ProductId { get; set; }
+
+    private bool _isLoading = true;
+    private ProductDetailModel? _product;
+    private List<RelatedProductModel> _relatedProducts = new();
+    private int _quantity = 1;
+    private int _selectedImageIndex = 0;
+    private bool _isFavorite = false;
+    private bool _isAddingToCart = false;
+    private bool _addedToCart = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadProduct();
+    }
+
+    private async Task LoadProduct()
+    {
+        try
+        {
+            _isLoading = true;
+
+            // Simulate API call
+            await Task.Delay(300);
+
+            // Mock product data
+            _product = new ProductDetailModel(
+                ProductId,
+                "DeWalt",
+                "DeWalt 20V MAX Cordless Drill/Driver Kit",
+                "DCD771C2",
+                149.99m,
+                179.99m,
+                true,
+                15,
+                "The DeWalt DCD771C2 20V MAX Cordless Drill/Driver Kit delivers the power and runtime you need to get the job done. The lightweight design fits into tight areas and reduces user fatigue. High-speed transmission delivers 2 speeds (0-450 & 1,500 rpm) for a range of fastening and drilling applications.",
+                new List<string>
+                {
+                    "/images/products/drill.jpg",
+                    "/images/products/drill-2.jpg",
+                    "/images/products/drill-3.jpg"
+                },
+                new Dictionary<string, string>
+                {
+                    { "Voltage", "20V MAX" },
+                    { "Speed", "0-450/0-1,500 RPM" },
+                    { "Chuck Size", "1/2 inch" },
+                    { "Battery Type", "Lithium Ion" },
+                    { "Weight", "3.6 lbs" },
+                    { "Warranty", "3 Years" }
+                },
+                4.7m,
+                256
+            );
+
+            _relatedProducts = new List<RelatedProductModel>
+            {
+                new(Guid.NewGuid(), "DeWalt 20V Battery 2-Pack", 99.99m, "/images/products/battery.jpg"),
+                new(Guid.NewGuid(), "Drill Bit Set 29pc", 34.99m, "/images/products/bits.jpg"),
+                new(Guid.NewGuid(), "DeWalt Tool Bag", 24.99m, "/images/products/bag.jpg"),
+            };
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading product: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void SelectImage(int index)
+    {
+        _selectedImageIndex = index;
+    }
+
+    private void IncreaseQuantity()
+    {
+        if (_product?.StockQuantity == null || _quantity < _product.StockQuantity)
+            _quantity++;
+    }
+
+    private void DecreaseQuantity()
+    {
+        if (_quantity > 1)
+            _quantity--;
+    }
+
+    private async Task AddToCart()
+    {
+        _isAddingToCart = true;
+        StateHasChanged();
+
+        try
+        {
+            // Simulate API call
+            await Task.Delay(500);
+
+            _addedToCart = true;
+            StateHasChanged();
+
+            // Reset after delay
+            await Task.Delay(2000);
+            _addedToCart = false;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error adding to cart: {ex.Message}");
+        }
+        finally
+        {
+            _isAddingToCart = false;
+        }
+    }
+
+    private void ToggleFavorite()
+    {
+        _isFavorite = !_isFavorite;
+    }
+
+    private void NotifyWhenAvailable()
+    {
+        // TODO: Implement notification signup
+    }
+
+    private void ViewProduct(Guid id)
+    {
+        Navigation.NavigateTo($"/product/{id}");
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private record ProductDetailModel(
+        Guid Id,
+        string Brand,
+        string Name,
+        string Sku,
+        decimal Price,
+        decimal? OriginalPrice,
+        bool InStock,
+        int? StockQuantity,
+        string Description,
+        List<string> Images,
+        Dictionary<string, string> Specifications,
+        decimal? Rating,
+        int ReviewCount
+    );
+
+    private record RelatedProductModel(Guid Id, string Name, decimal Price, string? ImageUrl);
+}

@@ -2,8 +2,10 @@ using ACommerce.Chats.Abstractions.DTOs;
 using ACommerce.Chats.Abstractions.Enums;
 using ACommerce.Chats.Abstractions.Providers;
 using ACommerce.Chats.Core.Entities;
+using ACommerce.Marketing.Analytics.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ACommerce.SharedKernel.Abstractions.Queries;
@@ -27,16 +29,22 @@ public class ChatsController : BaseCrudController<
 {
 	private readonly IChatProvider _chatProvider;
 	private readonly IMessageProvider _messageProvider;
+	private readonly IMarketingEventTracker? _marketingTracker;
+	private readonly IHttpContextAccessor _httpContextAccessor;
 
 	public ChatsController(
 		IMediator mediator,
 		IChatProvider chatProvider,
 		IMessageProvider messageProvider,
-		ILogger<ChatsController> logger)
+		ILogger<ChatsController> logger,
+		IHttpContextAccessor httpContextAccessor,
+		IMarketingEventTracker? marketingTracker = null)
 		: base(mediator, logger)
 	{
 		_chatProvider = chatProvider ?? throw new ArgumentNullException(nameof(chatProvider));
 		_messageProvider = messageProvider ?? throw new ArgumentNullException(nameof(messageProvider));
+		_httpContextAccessor = httpContextAccessor;
+		_marketingTracker = marketingTracker;
 	}
 
 	// ? ?? ??? CRUD operations ?????? ?? BaseCrudController!
@@ -624,6 +632,33 @@ public class ChatsController : BaseCrudController<
 			};
 
 			var newChat = await _chatProvider.CreateChatAsync(createDto);
+
+			// Track Lead event - user contacting another user (likely a host)
+			if (_marketingTracker != null)
+			{
+				try
+				{
+					var ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+					var userAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString();
+
+					await _marketingTracker.TrackLeadAsync(new LeadTrackingRequest
+					{
+						ContentId = newChat.Id.ToString(),
+						ContentName = "Direct Chat",
+						LeadType = "contact_host",
+						User = new UserTrackingContext
+						{
+							UserId = currentUserId,
+							IpAddress = ipAddress,
+							UserAgent = userAgent
+						}
+					});
+				}
+				catch (Exception ex)
+				{
+					_logger.LogWarning(ex, "Failed to track Lead event for chat {ChatId}", newChat.Id);
+				}
+			}
 
 			return CreatedAtAction(nameof(GetById), new { id = newChat.Id }, newChat);
 		}

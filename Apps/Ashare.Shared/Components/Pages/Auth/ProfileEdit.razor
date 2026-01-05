@@ -8,8 +8,32 @@
 @inject ILocalizationService L
 @inject Ashare.Shared.Services.ThemeService Theme
 @inject NavigationManager NavManager
+@inject ACommerce.Templates.Customer.Services.GuestModeService GuestMode
 
 <div class="ac-page ashare-profile-edit-page @(Theme.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
+    @if (GuestMode.IsGuestMode)
+    {
+        @* Header for Guest Mode *@
+        <div class="ashare-profile-edit-header">
+            <button class="ashare-back-btn" @onclick="() => Navigation.NavigateBack()">
+                <i class="bi bi-arrow-right"></i>
+            </button>
+            <h1>@L["EditProfile"]</h1>
+            <div style="width: 40px"></div>
+        </div>
+
+        <div class="ashare-empty-state">
+            <i class="bi bi-person"></i>
+            <h3>@L["LoginRequired"]</h3>
+            <p>@L["LoginRequiredDescription"]</p>
+            <button class="ac-btn ac-btn-primary" @onclick='() => Navigation.NavigateTo("/login?returnUrl=/profile/edit")'>
+                <i class="bi bi-box-arrow-in-right"></i>
+                @L["Login"]
+            </button>
+        </div>
+    }
+    else
+    {
     @* Header *@
     <div class="ashare-profile-edit-header">
         @if (!_isNewUser)
@@ -190,6 +214,7 @@
             </button>
         </div>
     }
+    }
 </div>
 
 @code {
@@ -212,6 +237,13 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // في وضع الضيف، لا نحتاج لتحميل بيانات البروفايل
+        if (GuestMode.IsGuestMode)
+        {
+            _isLoading = false;
+            return;
+        }
+
         // التحقق من معامل new في الرابط (بدون استخدام WebUtilities للتوافق مع MAUI)
         try
         {
@@ -229,6 +261,13 @@
 
     private async Task LoadProfile()
     {
+        // لا تحميل في وضع الضيف
+        if (GuestMode.IsGuestMode)
+        {
+            _isLoading = false;
+            return;
+        }
+
         _isLoading = true;
 
         try

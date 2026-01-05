@@ -1,17 +1,31 @@
 @page "/favorites"
 @inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
+@inject ILocalizationService L
+@inject ACommerce.Templates.Customer.Services.GuestModeService GuestMode
 
 <div class="ac-page ashare-favorites-page">
     <div class="ac-page-header">
-        <h1>المفضلة</h1>
-        @if (_favoriteSpaces?.Any() == true)
+        <h1>@L["Favorites"]</h1>
+        @if (!GuestMode.IsGuestMode && _favoriteSpaces?.Any() == true)
         {
-            <span class="ashare-count">@_favoriteSpaces.Count مساحة</span>
+            <span class="ashare-count">@_favoriteSpaces.Count @L["Space"]</span>
         }
     </div>
 
-    @if (_favoriteSpaces?.Any() == true)
+    @if (GuestMode.IsGuestMode)
+    {
+        <div class="ashare-empty-state">
+            <i class="bi bi-heart"></i>
+            <h3>@L["LoginRequired"]</h3>
+            <p>@L["LoginRequiredDescription"]</p>
+            <button class="ac-btn ac-btn-primary" @onclick='() => Navigation.NavigateTo("/login?returnUrl=/favorites")'>
+                <i class="bi bi-box-arrow-in-right"></i>
+                @L["Login"]
+            </button>
+        </div>
+    }
+    else if (_favoriteSpaces?.Any() == true)
     {
         <div class="ashare-favorites-list">
             @foreach (var space in _favoriteSpaces)
@@ -78,11 +92,13 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (GuestMode.IsGuestMode) return;
         await LoadFavoritesAsync();
     }
 
     private async Task LoadFavoritesAsync()
     {
+        if (GuestMode.IsGuestMode) return;
         var favoriteIds = ApiService.GetFavorites();
         var allSpaces = await ApiService.GetAllSpacesAsync();
         _favoriteSpaces = allSpaces?.Where(s => favoriteIds.Contains(s.Id)).ToList();

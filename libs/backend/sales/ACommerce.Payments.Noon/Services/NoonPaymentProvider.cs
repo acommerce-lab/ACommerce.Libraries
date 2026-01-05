@@ -242,6 +242,9 @@ public class NoonPaymentProvider : IPaymentProvider
 					Success = status == PaymentStatus.Completed,
 					TransactionId = transactionId,
 					Status = status,
+					Amount = order.Amount,
+					Currency = order.Currency,
+					OrderId = order.Reference,
 					Metadata = new Dictionary<string, string>
 					{
 						["noonStatus"] = order.Status ?? "UNKNOWN",

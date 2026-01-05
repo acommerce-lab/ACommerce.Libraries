@@ -8,11 +8,13 @@ namespace Ashare.Admin.Services;
 public class AdminAuthStateProvider : AuthenticationStateProvider
 {
     private readonly ILocalStorageService _localStorage;
+    private readonly AdminTokenProvider _tokenProvider;
     private readonly ClaimsPrincipal _anonymous = new(new ClaimsIdentity());
 
-    public AdminAuthStateProvider(ILocalStorageService localStorage)
+    public AdminAuthStateProvider(ILocalStorageService localStorage, AdminTokenProvider tokenProvider)
     {
         _localStorage = localStorage;
+        _tokenProvider = tokenProvider;
     }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -34,14 +36,19 @@ public class AdminAuthStateProvider : AuthenticationStateProvider
             
             if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(userJson))
             {
+                _tokenProvider.ClearToken();
                 return new AuthenticationState(_anonymous);
             }
 
             var user = JsonSerializer.Deserialize<AdminUserInfo>(userJson);
             if (user == null)
             {
+                _tokenProvider.ClearToken();
                 return new AuthenticationState(_anonymous);
             }
+
+            // مزامنة Token للـ HTTP Client عند تحميل الصفحة
+            _tokenProvider.SetToken(token);
 
             var claims = new List<Claim>
             {
@@ -72,6 +79,9 @@ public class AdminAuthStateProvider : AuthenticationStateProvider
         await _localStorage.SetItemAsStringAsync("admin_token", token);
         await _localStorage.SetItemAsStringAsync("admin_user", JsonSerializer.Serialize(user));
 
+        // تحديث Token Provider للـ HTTP Client
+        _tokenProvider.SetToken(token);
+
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id),
@@ -95,6 +105,9 @@ public class AdminAuthStateProvider : AuthenticationStateProvider
     {
         await _localStorage.RemoveItemAsync("admin_token");
         await _localStorage.RemoveItemAsync("admin_user");
+
+        // مسح Token من الـ HTTP Client
+        _tokenProvider.ClearToken();
 
         NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_anonymous)));
     }

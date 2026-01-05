@@ -3,10 +3,15 @@ using Ashare.Admin.Services;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Syncfusion.Blazor;
+using ACommerce.Client.Core.Extensions;
+using ACommerce.Client.Versions;
 
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JFaF5cXGRCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWH9ecnRVR2RcUEJ2W0tWYEg=");
 
 var builder = WebApplication.CreateBuilder(args);
+
+// API Base URL
+var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://ashare-api-130415035604.me-central2.run.app";
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -16,16 +21,26 @@ builder.Services.AddMemoryCache();
 
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
+
+// Token Provider - Singleton للاستخدام مع HTTP Client
+builder.Services.AddSingleton<AdminTokenProvider>();
+
 builder.Services.AddScoped<AdminAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<AdminAuthStateProvider>());
 builder.Services.AddHttpClient<AuthService>((sp, client) =>
 {
-    var config = sp.GetRequiredService<IConfiguration>();
-    var baseUrl = config["ApiSettings:BaseUrl"] ?? "https://ashare-api-130415035604.me-central2.run.app";
-    client.BaseAddress = new Uri(baseUrl);
+    client.BaseAddress = new Uri(apiBaseUrl);
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 builder.Services.AddScoped(sp => new HttpClient());
+
+// ACommerce Client SDK مع Authentication
+builder.Services.AddACommerceStaticClient(apiBaseUrl, options =>
+{
+    options.EnableAuthentication = true;
+    options.TokenProvider = sp => sp.GetRequiredService<AdminTokenProvider>();
+});
+builder.Services.AddScoped<VersionsClient>();
 
 builder.Services.AddScoped<AdminApiService>();
 builder.Services.AddScoped<MarketingAnalyticsService>();

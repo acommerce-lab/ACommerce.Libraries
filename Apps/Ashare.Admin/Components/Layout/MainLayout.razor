@@ -59,6 +59,7 @@
         new() { Title = "الطلبات", Url = "/orders", Icon = "📦", IsActive = IsCurrentPage("/orders") },
         new() { Title = "التقارير", Url = "/reports", Icon = "📈", IsActive = IsCurrentPage("/reports") },
         new() { Title = "التسويق", Url = "/marketing", Icon = "📣", IsActive = IsCurrentPage("/marketing") },
+        new() { Title = "الإصدارات", Url = "/versions", Icon = "🔄", IsActive = IsCurrentPage("/versions") },
         new() { Title = "المشرفين", Url = "/admin-users", Icon = "🛡️", IsActive = IsCurrentPage("/admin-users") },
         new() { Title = "الأدوار", Url = "/roles", Icon = "🔐", IsActive = IsCurrentPage("/roles") },
         new() { Title = "الإعدادات", Url = "/settings", Icon = "⚙️", IsActive = IsCurrentPage("/settings") },
@@ -82,6 +83,7 @@
             "/reports" => "التقارير",
             "/settings" => "الإعدادات",
             "/marketing" => "تحليلات التسويق",
+            "/versions" => "إدارة الإصدارات",
             "/admin-users" => "إدارة المشرفين",
             "/roles" => "الأدوار والصلاحيات",
             _ => "عشير"

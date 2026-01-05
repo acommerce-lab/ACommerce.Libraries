@@ -30,7 +30,7 @@ public class MetaConversionsService : IMetaConversionsService
             EventName = "Purchase",
             EventTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             EventId = request.TransactionId,
-            ActionSource = "app",
+            ActionSource = "website",
             UserData = CreateUserData(request.User),
             CustomData = new CustomData
             {
@@ -40,9 +40,7 @@ public class MetaConversionsService : IMetaConversionsService
                 ContentIds = request.ContentIds,
                 NumItems = request.NumItems,
                 ContentType = "product"
-            },
-            AppData = new AppData()
-        };
+            }        };
 
         var response = await SendEventAsync(conversionEvent);
         return response?.EventsReceived > 0;
@@ -55,7 +53,7 @@ public class MetaConversionsService : IMetaConversionsService
             EventName = "ViewContent",
             EventTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             EventId = $"vc_{request.ContentId}_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}",
-            ActionSource = "app",
+            ActionSource = "website",
             UserData = CreateUserData(request.User),
             CustomData = new CustomData
             {
@@ -64,9 +62,7 @@ public class MetaConversionsService : IMetaConversionsService
                 ContentType = request.ContentType ?? "listing",
                 ContentCategory = request.Category,
                 Value = request.Value ?? 0
-            },
-            AppData = new AppData()
-        };
+            }        };
 
         var response = await SendEventAsync(conversionEvent);
         return response?.EventsReceived > 0;
@@ -79,15 +75,13 @@ public class MetaConversionsService : IMetaConversionsService
             EventName = "Search",
             EventTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             EventId = $"search_{Guid.NewGuid():N}",
-            ActionSource = "app",
+            ActionSource = "website",
             UserData = CreateUserData(request.User),
             CustomData = new CustomData
             {
                 SearchString = request.SearchQuery,
                 NumItems = request.ResultsCount ?? 0
-            },
-            AppData = new AppData()
-        };
+            }        };
 
         var response = await SendEventAsync(conversionEvent);
         return response?.EventsReceived > 0;
@@ -100,10 +94,8 @@ public class MetaConversionsService : IMetaConversionsService
             EventName = "CompleteRegistration",
             EventTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             EventId = $"reg_{request.User?.UserId ?? Guid.NewGuid().ToString("N")}",
-            ActionSource = "app",
-            UserData = CreateUserData(request.User),
-            AppData = new AppData()
-        };
+            ActionSource = "website",
+            UserData = CreateUserData(request.User)        };
 
         var response = await SendEventAsync(conversionEvent);
         return response?.EventsReceived > 0;
@@ -116,10 +108,8 @@ public class MetaConversionsService : IMetaConversionsService
             EventName = "Login",
             EventTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             EventId = $"login_{request.User?.UserId ?? Guid.NewGuid().ToString("N")}_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}",
-            ActionSource = "app",
-            UserData = CreateUserData(request.User),
-            AppData = new AppData()
-        };
+            ActionSource = "website",
+            UserData = CreateUserData(request.User)        };
 
         var response = await SendEventAsync(conversionEvent);
         return response?.EventsReceived > 0;
@@ -132,7 +122,7 @@ public class MetaConversionsService : IMetaConversionsService
             EventName = "AddToWishlist",
             EventTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             EventId = $"wish_{request.ContentId}_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}",
-            ActionSource = "app",
+            ActionSource = "website",
             UserData = CreateUserData(request.User),
             CustomData = new CustomData
             {
@@ -140,9 +130,7 @@ public class MetaConversionsService : IMetaConversionsService
                 ContentName = request.ContentName,
                 ContentType = request.ContentType ?? "listing",
                 Value = request.Value ?? 0
-            },
-            AppData = new AppData()
-        };
+            }        };
 
         var response = await SendEventAsync(conversionEvent);
         return response?.EventsReceived > 0;
@@ -155,10 +143,8 @@ public class MetaConversionsService : IMetaConversionsService
             EventName = request.EventName,
             EventTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             EventId = $"custom_{Guid.NewGuid():N}",
-            ActionSource = "app",
-            UserData = CreateUserData(request.User),
-            AppData = new AppData()
-        };
+            ActionSource = "website",
+            UserData = CreateUserData(request.User)        };
 
         var response = await SendEventAsync(conversionEvent);
         return response?.EventsReceived > 0;
@@ -194,8 +180,15 @@ public class MetaConversionsService : IMetaConversionsService
                 return result;
             }
 
+            _logger.LogError("[MetaConversions] Error Response: {Content}", content);
             var error = JsonSerializer.Deserialize<ConversionErrorResponse>(content);
-            _logger.LogError("[MetaConversions] Error: {Message}", error?.Error?.Message);
+            _logger.LogError("[MetaConversions] Error: {Message}, Code: {Code}, Type: {Type}, Subcode: {Subcode}",
+                error?.Error?.Message,
+                error?.Error?.Code,
+                error?.Error?.Type
+                //,
+                //error?.Error?.ErrorSubcode
+                );
             return null;
         }
         catch (Exception ex)

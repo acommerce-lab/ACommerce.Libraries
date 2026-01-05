@@ -27,6 +27,23 @@
         </button>
     </div>
 
+    @* Success Message *@
+    @if (_showSuccessMessage)
+    {
+        <div class="ashare-success-banner">
+            <div class="ashare-success-icon">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div class="ashare-success-content">
+                <h3>تم الحجز بنجاح!</h3>
+                <p>تم دفع العربون وحجز العقار. سيتم التواصل معك قريباً.</p>
+            </div>
+            <button class="ashare-success-close" @onclick="() => _showSuccessMessage = false">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+    }
+
     @* Bookings List *@
     <div class="ashare-bookings-list">
         @{
@@ -213,6 +230,7 @@
 
     private bool _showCancelModal;
     private Guid _cancelBookingId;
+    private bool _showSuccessMessage;
 
     private bool _showReviewModal;
     private BookingItem? _reviewBooking;
@@ -225,7 +243,7 @@
 
         if (New == true)
         {
-            // Show success message for new booking
+            _showSuccessMessage = true;
         }
     }
 

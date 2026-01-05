@@ -1,0 +1,103 @@
+@inherits LayoutComponentBase
+@inject ThemeService ThemeService
+@inject IAppNavigationService Navigation
+@inject TokenManager TokenManager
+@inject ILocalizationService L
+@implements IDisposable
+
+<div class="hh-app @(ThemeService.IsDarkMode ? "hh-dark" : "")">
+    <!-- Top Navbar -->
+    <nav class="hh-navbar">
+        <div class="hh-navbar-container" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="hh-navbar-brand" @onclick='() => Navigation.NavigateTo("/")' style="cursor: pointer;">
+                <i class="bi bi-tools" style="font-size: 1.5rem;"></i>
+                <span>Hamtramck Hardware</span>
+            </div>
+
+            <div style="display: flex; gap: 16px; align-items: center;">
+                <button class="hh-navbar-action" style="background: transparent; border: none; color: white; cursor: pointer;"
+                        @onclick='() => Navigation.NavigateTo("/search")' title="@L["Search"]">
+                    <i class="bi bi-search" style="font-size: 1.25rem;"></i>
+                </button>
+                <div class="hh-cart-badge">
+                    <button class="hh-navbar-action" style="background: transparent; border: none; color: white; cursor: pointer;"
+                            @onclick='() => Navigation.NavigateTo("/cart")' title="@L["Cart"]">
+                        <i class="bi bi-cart3" style="font-size: 1.25rem;"></i>
+                    </button>
+                    @if (_cartCount > 0)
+                    {
+                        <span class="hh-cart-count">@_cartCount</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Promo Banner -->
+    <div class="hh-promo-banner">
+        <i class="bi bi-fire"></i> Propane Refill Only $9.99! | Same Day Window Repair
+    </div>
+
+    <!-- Main Content -->
+    <main class="hh-page">
+        @Body
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="hh-bottom-nav">
+        <a href="/" class="hh-nav-item @(IsCurrentPage("/") ? "active" : "")">
+            <i class="bi bi-house-fill"></i>
+            <span class="hh-nav-label">@L["Home"]</span>
+        </a>
+        <a href="/categories" class="hh-nav-item @(IsCurrentPage("/categories") ? "active" : "")">
+            <i class="bi bi-grid-fill"></i>
+            <span class="hh-nav-label">@L["Categories"]</span>
+        </a>
+        <a href="/cart" class="hh-nav-item @(IsCurrentPage("/cart") ? "active" : "")">
+            <i class="bi bi-cart3"></i>
+            <span class="hh-nav-label">@L["Cart"]</span>
+        </a>
+        <a href="/orders" class="hh-nav-item @(IsCurrentPage("/orders") ? "active" : "")">
+            <i class="bi bi-box-seam"></i>
+            <span class="hh-nav-label">@L["Orders"]</span>
+        </a>
+        <a href="/profile" class="hh-nav-item @(IsCurrentPage("/profile") ? "active" : "")">
+            <i class="bi bi-person-fill"></i>
+            <span class="hh-nav-label">@L["Profile"]</span>
+        </a>
+    </nav>
+</div>
+
+@code {
+    private int _cartCount = 0;
+    private bool _isLoggedIn = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ThemeService.OnThemeChanged += OnThemeChanged;
+
+        var token = await TokenManager.GetTokenAsync();
+        _isLoggedIn = !string.IsNullOrEmpty(token);
+
+        // TODO: Get cart count from cart service
+    }
+
+    private bool IsCurrentPage(string path)
+    {
+        var currentPath = Navigation.CurrentUri;
+        if (string.IsNullOrEmpty(currentPath)) return path == "/";
+
+        var uri = new Uri(currentPath);
+        return uri.AbsolutePath == path || (path == "/" && uri.AbsolutePath == "/");
+    }
+
+    private void OnThemeChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        ThemeService.OnThemeChanged -= OnThemeChanged;
+    }
+}

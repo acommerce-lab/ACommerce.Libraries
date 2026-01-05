@@ -2,6 +2,7 @@ using Ashare.Shared.Extensions;
 using Ashare.Shared.Services;
 using ACommerce.Client.Auth;
 using ACommerce.Client.Realtime;
+using ACommerce.Client.Core.Storage;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Services.Analytics;
 using ACommerce.Templates.Customer.Themes;
@@ -23,6 +24,13 @@ public static class MauiProgram
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+            })
+            .ConfigureMauiHandlers(handlers =>
+            {
+#if ANDROID
+                // Custom WebView handler for 3DS/OTP payment verification
+                handlers.AddHandler<WebView, Ashare.App.Platforms.Android.Handlers.PaymentWebViewHandler>();
+#endif
             });
 
         builder.Services.AddMauiBlazorWebView();
@@ -53,12 +61,18 @@ public static class MauiProgram
         Console.WriteLine($"[MauiProgram] 🌐 API Base URL: {apiBaseUrl}");
 
         builder.Services.AddSingleton<IStorageService, MauiStorageService>();
-        builder.Services.AddSingleton<ITokenStorage, TokenStorageService>();
+        builder.Services.AddSingleton<ITokenStorage, StorageBackedTokenStorage>();
         builder.Services.AddSingleton<TokenManager>();
+
+        // تسجيل خدمة موافقة التتبع أولاً (يجب أن تكون قبل AddAshareClients)
+        builder.Services.AddSingleton<ITrackingConsentService, TrackingConsentService>();
+        builder.Services.AddTransient<TrackingConsentInterceptor>();
 
         builder.Services.AddAshareClients(apiBaseUrl, options =>
         {
             options.TokenProvider = sp => sp.GetRequiredService<TokenManager>();
+            // إضافة interceptor موافقة التتبع لإرسال الهيدر مع كل طلب
+            options.AddHandler<TrackingConsentInterceptor>();
 #if DEBUG
             options.BypassSslValidation = true;
 #endif
@@ -72,12 +86,28 @@ public static class MauiProgram
 #endif
 
         builder.Services.AddAshareServices();
+
+        // Override VersionCheckService registration with explicit mobile app code
+        // This is needed because OperatingSystem.IsAndroid() doesn't work correctly in Blazor Hybrid
+        builder.Services.AddScoped<Ashare.Shared.Services.VersionCheckService>(sp =>
+            new Ashare.Shared.Services.VersionCheckService(
+                sp.GetRequiredService<ACommerce.Client.Versions.VersionsClient>(),
+                sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<Ashare.Shared.Services.VersionCheckService>>(),
+                Ashare.Shared.Services.VersionCheckService.MobileAppCode));
+
         builder.Services.AddSingleton<ThemeService>();
         builder.Services.AddSingleton<GuestModeService>();
         builder.Services.AddScoped<IAppNavigationService, AppNavigationService>();
         builder.Services.AddSingleton<SpaceDataService>();
         builder.Services.AddSingleton<ITimezoneService, DeviceTimezoneService>();
         builder.Services.AddSingleton<IPaymentService, MauiPaymentService>();
+        builder.Services.AddSingleton<IAppVersionService, AppVersionService>();
+        builder.Services.AddSingleton<AppLifecycleService>();
+        builder.Services.AddSingleton<Ashare.Shared.Services.IAppLifecycleService>(sp =>
+            sp.GetRequiredService<AppLifecycleService>());
+
+        // Attribution Capture Service (for deep link tracking)
+        builder.Services.AddSingleton<IAttributionCaptureService, AttributionCaptureService>();
 
         builder.Services.AddMockAnalytics();
 

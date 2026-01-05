@@ -1,0 +1,220 @@
+@page "/legal/{Key}"
+@using ACommerce.Client.LegalPages
+@using ACommerce.Templates.Customer.Services
+
+@inject LegalPagesClient LegalPagesClient
+@inject NavigationManager Navigation
+@inject ILocalizationService L
+
+<div class="legal-page-container">
+    @* Header with back button *@
+    <div class="legal-page-header">
+        <button class="legal-back-btn" @onclick="GoBack">
+            <i class="bi bi-arrow-right"></i>
+        </button>
+        <span class="legal-page-title">@_title</span>
+        <div class="legal-header-spacer"></div>
+    </div>
+
+    @* Content area *@
+    <div class="legal-page-content">
+        @if (_isLoading)
+        {
+            <div class="legal-loading">
+                <div class="ac-spinner"></div>
+                <span>@L["Loading"]...</span>
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="legal-error">
+                <i class="bi bi-exclamation-triangle"></i>
+                <span>@_errorMessage</span>
+                <button class="ac-btn ac-btn-primary" @onclick="LoadPage">
+                    @L["Retry"]
+                </button>
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(_pageUrl))
+        {
+            <iframe
+                src="@_pageUrl"
+                class="legal-iframe @(_iframeLoading ? "loading" : "")"
+                sandbox="allow-scripts allow-same-origin allow-popups"
+                @onload="HandleIframeLoad">
+            </iframe>
+
+            @if (_iframeLoading)
+            {
+                <div class="legal-iframe-loading">
+                    <div class="ac-spinner"></div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Key { get; set; } = string.Empty;
+
+    private string _title = "";
+    private string _pageUrl = "";
+    private bool _isLoading = true;
+    private bool _iframeLoading = true;
+    private string? _errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPage();
+    }
+
+    private async Task LoadPage()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            var page = await LegalPagesClient.GetByKeyAsync(Key);
+            if (page != null)
+            {
+                _title = L.CurrentLanguage == "ar" ? page.TitleAr : page.TitleEn;
+                _pageUrl = page.Url;
+            }
+            else
+            {
+                _errorMessage = L["PageNotFound"];
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = L["ErrorLoadingPage"];
+            Console.WriteLine($"[LegalPageView] Error: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void HandleIframeLoad()
+    {
+        _iframeLoading = false;
+        StateHasChanged();
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/profile");
+    }
+}
+
+<style>
+    .legal-page-container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        height: 100dvh;
+        background: var(--ac-bg-primary);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 100;
+    }
+
+    .legal-page-header {
+        display: flex;
+        align-items: center;
+        padding: var(--ac-spacing-md);
+        background: var(--ac-bg-secondary);
+        border-bottom: 1px solid var(--ac-border);
+        gap: var(--ac-spacing-md);
+        flex-shrink: 0;
+    }
+
+    .legal-back-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: transparent;
+        border-radius: 50%;
+        cursor: pointer;
+        color: var(--ac-text-primary);
+    }
+
+        .legal-back-btn:hover {
+            background: var(--ac-bg-tertiary);
+        }
+
+        .legal-back-btn i {
+            font-size: 20px;
+        }
+
+    .legal-page-title {
+        flex: 1;
+        font-size: var(--ac-font-lg);
+        font-weight: 600;
+        color: var(--ac-text-primary);
+    }
+
+    .legal-header-spacer {
+        width: 40px;
+    }
+
+    .legal-page-content {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+        min-height: 0;
+    }
+
+    .legal-iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        background: white;
+        display: block;
+    }
+
+        .legal-iframe.loading {
+            opacity: 0;
+        }
+
+    .legal-loading,
+    .legal-iframe-loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--ac-spacing-md);
+        color: var(--ac-text-secondary);
+    }
+
+    .legal-error {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        gap: var(--ac-spacing-md);
+        padding: var(--ac-spacing-xl);
+        text-align: center;
+        color: var(--ac-text-secondary);
+    }
+
+        .legal-error i {
+            font-size: 48px;
+            color: var(--ac-warning);
+        }
+</style>

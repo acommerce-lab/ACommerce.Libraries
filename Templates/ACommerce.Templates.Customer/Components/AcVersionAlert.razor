@@ -1,0 +1,148 @@
+@namespace ACommerce.Templates.Customer.Components
+
+@if (IsVisible)
+{
+    <div class="ac-version-alert ac-version-alert-@AlertType.ToString().ToLower() @(IsClosing ? "ac-version-alert-closing" : "")">
+        <div class="ac-version-alert-inner">
+            <div class="ac-version-alert-header">
+                <div class="ac-version-alert-icon">
+                    <i class="bi @GetIcon()"></i>
+                </div>
+                <div class="ac-version-alert-title">@GetTitle()</div>
+            </div>
+
+            <div class="ac-version-alert-body">
+                <p class="ac-version-alert-message">@Message</p>
+                @if (ShowEndDate && EndOfSupportDate.HasValue)
+                {
+                    <p class="ac-version-alert-date">
+                        <i class="bi bi-calendar3"></i>
+                        @EndOfSupportText @EndOfSupportDate.Value.ToString("yyyy/MM/dd")
+                    </p>
+                }
+            </div>
+
+            <div class="ac-version-alert-actions">
+                @if (!string.IsNullOrEmpty(UpdateUrl))
+                {
+                    <a href="@UpdateUrl" class="ac-version-alert-btn ac-version-alert-btn-primary" target="_blank">
+                        <i class="bi bi-download"></i>
+                        @UpdateNowText
+                    </a>
+                }
+                @if (ShowDismiss)
+                {
+                    <button class="ac-version-alert-btn ac-version-alert-btn-secondary" @onclick="Dismiss">
+                        @LaterText
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// نوع التنبيه
+    /// </summary>
+    [Parameter] public VersionAlertType AlertType { get; set; } = VersionAlertType.Info;
+
+    /// <summary>
+    /// الرسالة
+    /// </summary>
+    [Parameter] public string Message { get; set; } = string.Empty;
+
+    /// <summary>
+    /// رابط التحديث
+    /// </summary>
+    [Parameter] public string? UpdateUrl { get; set; }
+
+    /// <summary>
+    /// تاريخ انتهاء الدعم
+    /// </summary>
+    [Parameter] public DateTime? EndOfSupportDate { get; set; }
+
+    /// <summary>
+    /// إظهار تاريخ الإيقاف
+    /// </summary>
+    [Parameter] public bool ShowEndDate { get; set; } = true;
+
+    /// <summary>
+    /// إظهار زر التأجيل
+    /// </summary>
+    [Parameter] public bool ShowDismiss { get; set; } = true;
+
+    /// <summary>
+    /// هل اللغة العربية؟
+    /// </summary>
+    [Parameter] public bool IsArabic { get; set; } = true;
+
+    /// <summary>
+    /// حدث عند الإغلاق
+    /// </summary>
+    [Parameter] public EventCallback OnDismiss { get; set; }
+
+    // ===== نصوص قابلة للترجمة (اختياري) =====
+
+    /// <summary>
+    /// نص "تاريخ الإيقاف:"
+    /// </summary>
+    [Parameter] public string? EndOfSupportLabel { get; set; }
+
+    /// <summary>
+    /// نص "تحديث الآن"
+    /// </summary>
+    [Parameter] public string? UpdateNowLabel { get; set; }
+
+    /// <summary>
+    /// نص "لاحقاً"
+    /// </summary>
+    [Parameter] public string? LaterLabel { get; set; }
+
+    // ===== الخصائص المحسوبة مع القيم الافتراضية =====
+
+    private string EndOfSupportText => EndOfSupportLabel ?? (IsArabic ? "تاريخ الإيقاف:" : "End of support:");
+    private string UpdateNowText => UpdateNowLabel ?? (IsArabic ? "تحديث الآن" : "Update Now");
+    private string LaterText => LaterLabel ?? (IsArabic ? "لاحقاً" : "Later");
+
+    private bool IsVisible { get; set; } = true;
+    private bool IsClosing { get; set; }
+
+    private string GetIcon() => AlertType switch
+    {
+        VersionAlertType.Info => "bi-arrow-up-circle-fill",
+        VersionAlertType.Warning => "bi-exclamation-triangle-fill",
+        VersionAlertType.Critical => "bi-exclamation-octagon-fill",
+        _ => "bi-arrow-up-circle-fill"
+    };
+
+    private string GetTitle() => AlertType switch
+    {
+        VersionAlertType.Info => IsArabic ? "تحديث متوفر" : "Update Available",
+        VersionAlertType.Warning => IsArabic ? "تحديث مطلوب" : "Update Required",
+        VersionAlertType.Critical => IsArabic ? "تحديث إلزامي" : "Critical Update",
+        _ => IsArabic ? "تحديث متوفر" : "Update Available"
+    };
+
+    private async Task Dismiss()
+    {
+        IsClosing = true;
+        StateHasChanged();
+        await Task.Delay(300);
+        IsVisible = false;
+        await OnDismiss.InvokeAsync();
+    }
+
+    public void Show()
+    {
+        IsVisible = true;
+        IsClosing = false;
+        StateHasChanged();
+    }
+
+    public void Hide()
+    {
+        IsVisible = false;
+        StateHasChanged();
+    }
+}

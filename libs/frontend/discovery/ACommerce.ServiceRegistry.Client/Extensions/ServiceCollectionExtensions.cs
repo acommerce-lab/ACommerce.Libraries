@@ -146,7 +146,8 @@ internal class PredefinedServicesCacheInitializer : IServiceCacheInitializer
 	{
 		foreach (var service in _services)
 		{
-			cache.Set(service.ServiceName, service);
+			// استخدام SetPermanent للخدمات المحددة مسبقاً حتى لا تنتهي صلاحيتها
+			cache.SetPermanent(service.ServiceName, service);
 		}
 	}
 }

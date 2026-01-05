@@ -1,0 +1,23 @@
+@namespace HamtramckHardware.App.Components
+@using Microsoft.AspNetCore.Components.Routing
+
+<Router AppAssembly="@typeof(Routes).Assembly"
+        AdditionalAssemblies="@(new[] { typeof(HamtramckHardware.Shared._Imports).Assembly })">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(HamtramckHardware.Shared.Components.Layout.MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <PageTitle>Page Not Found</PageTitle>
+        <LayoutView Layout="@typeof(HamtramckHardware.Shared.Components.Layout.MainLayout)">
+            <div class="hh-card" style="text-align: center; padding: 40px; margin: 20px;">
+                <i class="bi bi-emoji-frown" style="font-size: 4rem; color: var(--hh-text-secondary);"></i>
+                <h2 style="margin-top: 16px;">Page Not Found</h2>
+                <p style="color: var(--hh-text-secondary);">Sorry, the page you're looking for doesn't exist.</p>
+                <a href="/" class="hh-btn hh-btn-primary" style="margin-top: 16px;">
+                    <i class="bi bi-house"></i> Go Home
+                </a>
+            </div>
+        </LayoutView>
+    </NotFound>
+</Router>
