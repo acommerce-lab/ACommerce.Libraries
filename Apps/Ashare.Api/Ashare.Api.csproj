@@ -50,6 +50,9 @@
     <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Cart\ACommerce.Cart.csproj" />
     <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Orders.Api\ACommerce.Orders.Api.csproj" />
 
+    <!-- Bookings -->
+    <ProjectReference Include="..\..\libs\backend\marketplace\ACommerce.Bookings.Api\ACommerce.Bookings.Api.csproj" />
+
     <!-- Transactions -->
     <!--<ProjectReference Include="..\..\Other\ACommerce.Transactions.Core\ACommerce.Transactions.Core.csproj" />
     <ProjectReference Include="..\..\Other\ACommerce.Transactions.Core.Api\ACommerce.Transactions.Core.Api.csproj" />-->
@@ -94,6 +97,9 @@
     <!-- Legal Pages -->
     <ProjectReference Include="..\..\libs\backend\core\ACommerce.LegalPages\ACommerce.LegalPages.csproj" />
 
+    <!-- Version Management -->
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.Versions\ACommerce.Versions.csproj" />
+
     <!-- Admin Dashboard & Management -->
     <ProjectReference Include="..\..\libs\backend\admin\ACommerce.Admin.Dashboard.Api\ACommerce.Admin.Dashboard.Api.csproj" />
     <ProjectReference Include="..\..\libs\backend\admin\ACommerce.Admin.Orders.Api\ACommerce.Admin.Orders.Api.csproj" />
@@ -103,6 +109,7 @@
 
     <!-- Marketing & Analytics -->
     <ProjectReference Include="..\..\libs\backend\marketing\ACommerce.Marketing.MetaConversions\ACommerce.Marketing.MetaConversions.csproj" />
+    <ProjectReference Include="..\..\libs\backend\marketing\ACommerce.Marketing.Analytics\ACommerce.Marketing.Analytics.csproj" />
 
     <!-- Shared -->
     <ProjectReference Include="..\Ashare.Shared\Ashare.Shared.csproj" />

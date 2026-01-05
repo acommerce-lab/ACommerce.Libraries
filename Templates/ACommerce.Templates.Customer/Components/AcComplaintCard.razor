@@ -115,7 +115,7 @@
         "InProgress" => BadgeVariant.Warning,
         "Resolved" => BadgeVariant.Success,
         "Closed" => BadgeVariant.Secondary,
-        _ => BadgeVariant.Default
+        _ => BadgeVariant.Primary
     };
 
     private string PriorityLabel => Priority switch
@@ -131,7 +131,7 @@
         "Low" => BadgeVariant.Secondary,
         "High" => BadgeVariant.Warning,
         "Urgent" => BadgeVariant.Danger,
-        _ => BadgeVariant.Default
+        _ => BadgeVariant.Primary
     };
 
     private async Task HandleClick()

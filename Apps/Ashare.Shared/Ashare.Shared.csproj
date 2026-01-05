@@ -33,6 +33,7 @@
                 <!-- Sales Clients -->
                 <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Orders\ACommerce.Client.Orders.csproj" />
                 <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Cart\ACommerce.Client.Cart.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Bookings\ACommerce.Client.Bookings.csproj" />
 
                 <!-- Marketplace Clients -->
                 <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Vendors\ACommerce.Client.Vendors.csproj" />
@@ -53,6 +54,9 @@
 
                 <!-- Legal Pages Client -->
                 <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.LegalPages\ACommerce.Client.LegalPages.csproj" />
+
+                <!-- Version Management Client -->
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Versions\ACommerce.Client.Versions.csproj" />
 
                 <!-- Reference to Localization -->
                 <ProjectReference Include="..\..\Modules\ACommerce.Localization\ACommerce.Localization.csproj" />

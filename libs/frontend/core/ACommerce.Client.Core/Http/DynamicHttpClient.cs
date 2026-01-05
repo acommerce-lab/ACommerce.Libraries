@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using ACommerce.ServiceRegistry.Client;
 using Microsoft.Extensions.Logging;
 

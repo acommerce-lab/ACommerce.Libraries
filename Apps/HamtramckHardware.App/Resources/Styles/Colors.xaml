@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         Hamtramck Hardware Visual Identity - Brand Colors
+         Industrial Orange and Steel Gray theme
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- Primary Colors - Deep Orange (Industrial/Hardware aesthetic) -->
+    <Color x:Key="Primary">#E65100</Color>
+    <Color x:Key="PrimaryDark">#BF360C</Color>
+    <Color x:Key="PrimaryLight">#FF6D00</Color>
+
+    <!-- Secondary Colors - Steel Gray -->
+    <Color x:Key="Secondary">#455A64</Color>
+    <Color x:Key="SecondaryDark">#263238</Color>
+    <Color x:Key="SecondaryLight">#607D8B</Color>
+
+    <!-- Accent Color -->
+    <Color x:Key="Accent">#E65100</Color>
+    <Color x:Key="AccentDark">#BF360C</Color>
+    <Color x:Key="AccentLight">#FF6D00</Color>
+
+    <!-- Status Colors -->
+    <Color x:Key="Success">#4CAF50</Color>
+    <Color x:Key="Danger">#F44336</Color>
+    <Color x:Key="Warning">#FF9800</Color>
+    <Color x:Key="Info">#2196F3</Color>
+
+    <!-- Neutral Colors -->
+    <Color x:Key="White">#FFFFFF</Color>
+    <Color x:Key="Black">#000000</Color>
+    <Color x:Key="Gray50">#FAFAFA</Color>
+    <Color x:Key="Gray100">#F5F5F5</Color>
+    <Color x:Key="Gray200">#EEEEEE</Color>
+    <Color x:Key="Gray300">#E0E0E0</Color>
+    <Color x:Key="Gray400">#BDBDBD</Color>
+    <Color x:Key="Gray500">#9E9E9E</Color>
+    <Color x:Key="Gray600">#757575</Color>
+    <Color x:Key="Gray700">#616161</Color>
+    <Color x:Key="Gray800">#424242</Color>
+    <Color x:Key="Gray900">#212121</Color>
+
+    <!-- Page Colors -->
+    <Color x:Key="PageBackgroundColor">#FAFAFA</Color>
+    <Color x:Key="PageBackgroundColorDark">#121212</Color>
+
+    <!-- Surface Colors -->
+    <Color x:Key="Surface">#FFFFFF</Color>
+    <Color x:Key="SurfaceAlt">#F5F5F5</Color>
+    <Color x:Key="SurfaceDark">#1E1E1E</Color>
+
+    <!-- Text Colors -->
+    <Color x:Key="TextPrimary">#212121</Color>
+    <Color x:Key="TextSecondary">#757575</Color>
+    <Color x:Key="TextMuted">#9E9E9E</Color>
+    <Color x:Key="TextOnPrimary">#FFFFFF</Color>
+    <Color x:Key="TextOnSecondary">#FFFFFF</Color>
+
+    <!-- Border Colors -->
+    <Color x:Key="Border">#E0E0E0</Color>
+    <Color x:Key="BorderLight">#EEEEEE</Color>
+    <Color x:Key="BorderDark">#BDBDBD</Color>
+
+</ResourceDictionary>

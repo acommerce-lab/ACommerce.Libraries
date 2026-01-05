@@ -1,0 +1,180 @@
+# =============================================================================
+# ACommerce Marketplace API - Application Resource
+# This is the main Kubernetes application resource for GCP Marketplace
+# =============================================================================
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: "{{ .Release.Name }}"
+  namespace: "{{ .Release.Namespace }}"
+  labels:
+    app.kubernetes.io/name: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+  annotations:
+    marketplace.cloud.google.com/deploy-info: '{"partner_id": "acommerce", "product_id": "acommerce-marketplace", "partner_name": "ACommerce"}'
+spec:
+  # Application metadata shown in GCP Console
+  descriptor:
+    type: ACommerce Marketplace API
+    version: "1.0.0"
+
+    description: |
+      ACommerce Marketplace API is a complete e-commerce backend solution
+      designed for multi-vendor marketplaces. It provides:
+
+      - **Multi-Vendor Marketplace**: Support for multiple sellers with individual storefronts
+      - **Product Catalog**: Dynamic product attributes, categories, and variants
+      - **Order Management**: Complete order lifecycle with payment integration
+      - **User Management**: Authentication, profiles, and role-based access
+      - **Real-time Notifications**: WebSocket-based notifications
+      - **File Storage**: Google Cloud Storage integration for media files
+
+    keywords:
+      - e-commerce
+      - marketplace
+      - multi-vendor
+      - api
+      - backend
+      - dotnet
+      - aspnetcore
+
+    maintainers:
+      - name: ACommerce Team
+        email: support@acommerce.io
+
+    links:
+      - description: Documentation
+        url: https://docs.acommerce.io
+      - description: GitHub Repository
+        url: https://github.com/acommerce-lab/ACommerce.Libraries
+      - description: Support
+        url: https://support.acommerce.io
+
+    notes: |
+      # ACommerce Marketplace API Deployed!
+
+      ## Quick Start
+
+      1. **Access the API**:
+         ```
+         kubectl get ingress {{ .Release.Name }}-ingress -n {{ .Release.Namespace }}
+         ```
+
+      2. **View Swagger UI**:
+         Open your browser to the ingress URL to see the API documentation.
+
+      3. **Check Application Status**:
+         ```
+         kubectl get pods -n {{ .Release.Namespace }} -l app={{ .Release.Name }}
+         ```
+
+      4. **View Logs**:
+         ```
+         kubectl logs -f deployment/{{ .Release.Name }} -n {{ .Release.Namespace }}
+         ```
+
+      ## Configuration
+
+      The application is configured via environment variables.
+      See the ConfigMap and Secrets for current configuration:
+
+      ```
+      kubectl get configmap {{ .Release.Name }}-config -n {{ .Release.Namespace }} -o yaml
+      ```
+
+      ## Health Endpoints
+
+      - Liveness: `/health`
+      - Readiness: `/health/ready`
+      - Startup: `/health/startup`
+
+      ## Support
+
+      For support, please visit https://support.acommerce.io
+
+  # Application components
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "{{ .Release.Name }}"
+
+  # Component references
+  componentKinds:
+    - group: apps
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ConfigMap
+    - group: ""
+      kind: Secret
+    - group: ""
+      kind: ServiceAccount
+    - group: networking.k8s.io
+      kind: Ingress
+    - group: autoscaling
+      kind: HorizontalPodAutoscaler
+    - group: policy
+      kind: PodDisruptionBudget
+
+---
+# =============================================================================
+# Deployer Service Account
+# =============================================================================
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "{{ .Release.Name }}-deployer-sa"
+  namespace: "{{ .Release.Namespace }}"
+  labels:
+    app.kubernetes.io/name: "{{ .Release.Name }}"
+
+---
+# =============================================================================
+# Deployer Role
+# =============================================================================
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: "{{ .Release.Name }}-deployer-role"
+  namespace: "{{ .Release.Namespace }}"
+  labels:
+    app.kubernetes.io/name: "{{ .Release.Name }}"
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets", "services", "serviceaccounts"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["autoscaling"]
+    resources: ["horizontalpodautoscalers"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["policy"]
+    resources: ["poddisruptionbudgets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["app.k8s.io"]
+    resources: ["applications"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+---
+# =============================================================================
+# Deployer Role Binding
+# =============================================================================
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: "{{ .Release.Name }}-deployer-rb"
+  namespace: "{{ .Release.Namespace }}"
+  labels:
+    app.kubernetes.io/name: "{{ .Release.Name }}"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: "{{ .Release.Name }}-deployer-role"
+subjects:
+  - kind: ServiceAccount
+    name: "{{ .Release.Name }}-deployer-sa"
+    namespace: "{{ .Release.Namespace }}"

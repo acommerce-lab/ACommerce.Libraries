@@ -432,11 +432,46 @@ public class SpaceItem
     /// </summary>
     public Dictionary<string, object> Attributes { get; set; } = new();
 
-    public string DisplayPrice => PricePerHour > 0
-        ? $"{PricePerHour:N0} {Currency}/ساعة"
-        : PricePerDay > 0
-            ? $"{PricePerDay:N0} {Currency}/يوم"
-            : $"{PricePerMonth:N0} {Currency}/شهر";
+    public string DisplayPrice
+    {
+        get
+        {
+            // أولاً: التحقق من time_unit أو rent_type في الخصائص
+            string? timeUnit = null;
+            if (Attributes?.TryGetValue("time_unit", out var timeUnitObj) == true && timeUnitObj != null)
+            {
+                timeUnit = timeUnitObj.ToString()?.ToLower();
+            }
+            else if (Attributes?.TryGetValue("rent_type", out var rentTypeObj) == true && rentTypeObj != null)
+            {
+                timeUnit = rentTypeObj.ToString()?.ToLower();
+            }
+
+            if (!string.IsNullOrEmpty(timeUnit))
+            {
+                var price = Attributes!.TryGetValue("price", out var priceObj) && priceObj != null
+                    ? decimal.TryParse(priceObj.ToString(), out var p) ? p : 0
+                    : PricePerMonth > 0 ? PricePerMonth : PricePerDay > 0 ? PricePerDay : PricePerHour;
+
+                return timeUnit switch
+                {
+                    "hour" or "hourly" => $"{price:N0} {Currency}/ساعة",
+                    "day" or "daily" => $"{price:N0} {Currency}/يوم",
+                    "week" or "weekly" => $"{price:N0} {Currency}/أسبوع",
+                    "month" or "monthly" => $"{price:N0} {Currency}/شهر",
+                    "year" or "yearly" or "annual" => $"{price:N0} {Currency}/سنة",
+                    _ => $"{price:N0} {Currency}/شهر"
+                };
+            }
+
+            // ثانياً: الطريقة التقليدية بناءً على الأسعار المعينة
+            if (PricePerHour > 0)
+                return $"{PricePerHour:N0} {Currency}/ساعة";
+            if (PricePerDay > 0)
+                return $"{PricePerDay:N0} {Currency}/يوم";
+            return $"{PricePerMonth:N0} {Currency}/شهر";
+        }
+    }
 }
 
 public class BookingItem
@@ -455,6 +490,11 @@ public class BookingItem
     public string? Notes { get; set; }
     public bool IsReviewed { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    // Payment-related properties
+    public decimal DepositPaid { get; set; }
+    public string? PaymentId { get; set; }
+    public string? RentType { get; set; }
 }
 
 public class SpaceReview

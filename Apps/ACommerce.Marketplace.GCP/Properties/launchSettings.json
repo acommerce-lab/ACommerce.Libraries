@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "ACommerce.Marketplace.GCP": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:57379;http://localhost:57380"
+    }
+  }
+}

@@ -77,8 +77,18 @@ using ACommerce.Admin.AuditLog;
 using ACommerce.LegalPages.Api.Controllers;
 using ACommerce.LegalPages.Extensions;
 
+// Version Management
+using ACommerce.Versions.Api.Controllers;
+using ACommerce.Versions.Extensions;
+
+// Bookings
+using ACommerce.Bookings.Api.Controllers;
+
 // Marketing & Analytics
 using ACommerce.Marketing.MetaConversions.Extensions;
+using ACommerce.Marketing.Analytics.Extensions;
+using ACommerce.Marketing.Analytics.Services;
+using ACommerce.Marketing.Analytics.Controllers;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -90,11 +100,15 @@ Log.Logger = new LoggerConfiguration()
 _ = typeof(AttributeDefinition).Assembly;
 _ = typeof(AttributeType).Assembly;
 _ = typeof(ACommerce.LegalPages.Entities.LegalPage).Assembly;
+_ = typeof(ACommerce.Versions.Entities.AppVersion).Assembly;
 
 // ✅ تسجيل الـ Entities مبكراً قبل بناء DbContext
 // هذا ضروري لأن EntityDiscoveryRegistry يجب أن يحتوي على جميع الـ Entities
 // قبل أول استدعاء لـ ApplicationDbContext.OnModelCreating
 ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.LegalPages.Entities.LegalPage>();
+ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Bookings.Entities.Booking>();
+ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Bookings.Entities.BookingStatusHistory>();
+ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Versions.Entities.AppVersion>();
 
 try
 {
@@ -112,6 +126,9 @@ try
 
     // Memory Cache (required by ACommerce libraries)
     builder.Services.AddMemoryCache();
+
+    // HttpContextAccessor (required for IHttpContextAccessor injection in controllers)
+    builder.Services.AddHttpContextAccessor();
 
     // CORS
     builder.Services.AddCors(options =>
@@ -163,7 +180,10 @@ try
         .AddApplicationPart(typeof(AdminListingsController).Assembly) // Admin Listings
         .AddApplicationPart(typeof(ReportsController).Assembly) // Admin Reports
         .AddApplicationPart(typeof(AuditLogController).Assembly) // Admin Audit Log
-        .AddApplicationPart(typeof(LegalPagesController).Assembly); // Legal Pages
+        .AddApplicationPart(typeof(LegalPagesController).Assembly) // Legal Pages
+        .AddApplicationPart(typeof(AppVersionsController).Assembly) // Version Management
+        .AddApplicationPart(typeof(BookingsController).Assembly) // Bookings
+        .AddApplicationPart(typeof(MarketingStatsController).Assembly); // Marketing Analytics
 
     builder.Services.AddEndpointsApiExplorer();
 
@@ -287,8 +307,14 @@ try
     // Legal Pages
     builder.Services.AddLegalPages();
 
+    // Version Management
+    builder.Services.AddVersioning();
+
     // Meta Conversions API (Facebook Server-Side Events)
     builder.Services.AddMetaConversions(builder.Configuration);
+
+    // Marketing Analytics (Local Storage + Multi-Platform CAPI Integration)
+    builder.Services.AddMarketingAnalytics(builder.Configuration);
 
     // Subscription Services
     builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
@@ -313,6 +339,9 @@ try
 
     // Ashare Seed Service
     builder.Services.AddScoped<AshareSeedDataService>();
+
+    // Offers Migration Service (لترحيل العروض من النظام القديم)
+    builder.Services.AddScoped<OffersMigrationService>();
 
     // Cache Warm-up Service - DISABLED for debugging
     // builder.Services.AddHostedService<CacheWarmupService>();
@@ -474,8 +503,22 @@ Built using ACommerce libraries with configuration-first approach:
         if (!skipSeeding)
         {
             Log.Information("Seeding initial data...");
-            var seedService = scope.ServiceProvider.GetRequiredService<AshareSeedDataService>();
-            await seedService.SeedAsync();
+            //var seedService = scope.ServiceProvider.GetRequiredService<AshareSeedDataService>();
+            //await seedService.SeedAsync();
+
+            // بذر العروض من النظام القديم (تلقائياً)
+            Log.Information("Seeding offers from old system...");
+            //var migrationService = scope.ServiceProvider.GetRequiredService<OffersMigrationService>();
+            //var migrationResult = await migrationService.SeedOffersFromStaticDataAsync();
+            //if (migrationResult.IsSuccess)
+            {
+                //Log.Information("✅ Offers seeded: {Migrated} migrated, {Skipped} skipped",
+                    //migrationResult.Migrated, migrationResult.Skipped);
+            }
+            //else
+            {
+                //Log.Warning("⚠️ Offers seeding had errors: {Errors}", string.Join(", ", migrationResult.Errors));
+            }
         }
         else
         {

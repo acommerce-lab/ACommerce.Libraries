@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ACommerce.Chats.Core\ACommerce.Chats.Core.csproj" />
 		<ProjectReference Include="..\..\integration\ACommerce.SharedKernel.AspNetCore\ACommerce.SharedKernel.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\marketing\ACommerce.Marketing.Analytics\ACommerce.Marketing.Analytics.csproj" />
 	</ItemGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />

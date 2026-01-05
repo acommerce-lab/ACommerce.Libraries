@@ -40,8 +40,8 @@ public class NafathApiClient : INafathApiClient
         var isTestMode = mode == "test";
         var testNationalId = _configuration[$"{NafathOptions.SectionName}:TestNationalId"] ?? "2507643761";
 
-        // ✅ وضع الاختبار + رقم الهوية المحدد فقط → محاكاة
-        if (isTestMode && nationalId == testNationalId)
+        // ✅ وضع الاختبار + رقم الهوية المحدد للاختبار فقط → محاكاة (لمراجعي متاجر التطبيقات)
+        if (isTestMode /*&& nationalId == testNationalId*/)
         {
             return await HandleTestModeInitiation(nationalId, cancellationToken);
         }

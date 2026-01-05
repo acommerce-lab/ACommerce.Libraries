@@ -1,0 +1,312 @@
+# =============================================================================
+# ACommerce Marketplace API - Deployment
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: acommerce-marketplace
+  labels:
+    app: acommerce-marketplace
+    app.kubernetes.io/name: acommerce-marketplace
+    app.kubernetes.io/component: api
+    app.kubernetes.io/version: "1.0.0"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: acommerce-marketplace
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: acommerce-marketplace
+        app.kubernetes.io/name: acommerce-marketplace
+        app.kubernetes.io/component: api
+      annotations:
+        # Force rolling update when configmap/secrets change
+        checksum/config: "{{ include (print $.Template.BasePath \"/configmap.yaml\") . | sha256sum }}"
+        checksum/secrets: "{{ include (print $.Template.BasePath \"/secrets.yaml\") . | sha256sum }}"
+    spec:
+      # Service Account for Workload Identity
+      serviceAccountName: acommerce-marketplace-sa
+
+      # Security Context
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+
+      # Graceful shutdown
+      terminationGracePeriodSeconds: 30
+
+      containers:
+        - name: acommerce-marketplace
+          image: gcr.io/PROJECT_ID/acommerce-marketplace:latest
+          imagePullPolicy: Always
+
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+
+          # Environment Variables from ConfigMap
+          envFrom:
+            - configMapRef:
+                name: acommerce-marketplace-config
+
+          # Environment Variables from Secrets
+          env:
+            # Database
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: acommerce-marketplace-secrets
+                  key: DB_HOST
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: acommerce-marketplace-secrets
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: acommerce-marketplace-secrets
+                  key: DB_PASSWORD
+
+            # JWT
+            - name: JWT__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: acommerce-marketplace-secrets
+                  key: JWT__SecretKey
+
+            # Redis
+            - name: REDIS_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: acommerce-marketplace-secrets
+                  key: REDIS_CONNECTION_STRING
+
+            # GCP Marketplace Billing
+            - name: GCP_PROJECT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: acommerce-marketplace-secrets
+                  key: GCP_PROJECT_ID
+            - name: GCP_ENTITLEMENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: acommerce-marketplace-secrets
+                  key: GCP_ENTITLEMENT_ID
+            - name: GCP_CONSUMER_ID
+              valueFrom:
+                secretKeyRef:
+                  name: acommerce-marketplace-secrets
+                  key: GCP_CONSUMER_ID
+            - name: GCP_ENABLE_USAGE_REPORTING
+              value: "true"
+
+            # File Storage
+            - name: Files__Storage__GoogleCloud__BucketName
+              valueFrom:
+                secretKeyRef:
+                  name: acommerce-marketplace-secrets
+                  key: Files__Storage__GoogleCloud__BucketName
+
+          # =================================================================
+          # HEALTH CHECKS
+          # =================================================================
+
+          # Startup Probe - Allow up to 5 minutes for initial startup
+          startupProbe:
+            httpGet:
+              path: /health/startup
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30  # 30 * 10s = 5 minutes max startup time
+
+          # Liveness Probe - Is the container alive?
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+
+          # Readiness Probe - Is the container ready to receive traffic?
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+
+          # =================================================================
+          # RESOURCES
+          # =================================================================
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+
+          # Security Context for container
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+          # Volume Mounts
+          volumeMounts:
+            # Temporary files (ASP.NET Core needs writable temp)
+            - name: tmp
+              mountPath: /tmp
+            # Data protection keys
+            - name: data-protection
+              mountPath: /app/.aspnet/DataProtection-Keys
+            # GCP Service Account Key (if not using Workload Identity)
+            - name: gcp-sa-key
+              mountPath: /secrets
+              readOnly: true
+
+      # Cloud SQL Proxy Sidecar (for Cloud SQL connectivity)
+      # Uncomment if using Cloud SQL with private IP
+      # - name: cloud-sql-proxy
+      #   image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.8.0
+      #   args:
+      #     - "--structured-logs"
+      #     - "--port=5432"
+      #     - "PROJECT_ID:REGION:INSTANCE_NAME"
+      #   securityContext:
+      #     runAsNonRoot: true
+      #   resources:
+      #     requests:
+      #       cpu: "50m"
+      #       memory: "64Mi"
+      #     limits:
+      #       cpu: "200m"
+      #       memory: "128Mi"
+
+      # Volumes
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: data-protection
+          emptyDir: {}
+        - name: gcp-sa-key
+          secret:
+            secretName: acommerce-gcp-sa-key
+            optional: true
+
+      # Pod Anti-Affinity for High Availability
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: acommerce-marketplace
+                topologyKey: kubernetes.io/hostname
+
+      # Tolerations for spot/preemptible nodes (cost optimization)
+      tolerations:
+        - key: "cloud.google.com/gke-spot"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+
+---
+# =============================================================================
+# Horizontal Pod Autoscaler
+# =============================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: acommerce-marketplace-hpa
+  labels:
+    app: acommerce-marketplace
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: acommerce-marketplace
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 10
+          periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+        - type: Pods
+          value: 4
+          periodSeconds: 15
+      selectPolicy: Max
+
+---
+# =============================================================================
+# Pod Disruption Budget
+# =============================================================================
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: acommerce-marketplace-pdb
+  labels:
+    app: acommerce-marketplace
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: acommerce-marketplace
+
+---
+# =============================================================================
+# Service Account
+# =============================================================================
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: acommerce-marketplace-sa
+  labels:
+    app: acommerce-marketplace
+  annotations:
+    # Workload Identity annotation (replace with your GCP SA)
+    iam.gke.io/gcp-service-account: acommerce-marketplace@PROJECT_ID.iam.gserviceaccount.com

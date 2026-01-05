@@ -6,6 +6,8 @@ using ACommerce.Catalog.Attributes.Enums;
 using ACommerce.Catalog.Currencies.Entities;
 using ACommerce.Subscriptions.Entities;
 using ACommerce.LegalPages.Entities;
+using ACommerce.Versions.Entities;
+using ACommerce.Versions.Enums;
 using Ashare.Shared.Services;
 
 namespace Ashare.Api.Services;
@@ -32,6 +34,17 @@ public class AshareSeedDataService
         {
                 public static readonly Guid SAR = Guid.Parse("40000000-0000-0000-0001-000000000001");
                 public static readonly Guid USD = Guid.Parse("40000000-0000-0000-0001-000000000002");
+        }
+
+        public static class VersionIds
+        {
+                // Ashare Mobile App versions
+                public static readonly Guid AshareMobile_1_15 = Guid.Parse("60000000-0000-0000-0001-000000000001");
+                public static readonly Guid AshareMobile_1_16 = Guid.Parse("60000000-0000-0000-0001-000000000002");
+                public static readonly Guid AshareMobile_1_17 = Guid.Parse("60000000-0000-0000-0001-000000000003");
+
+                // Ashare Web App versions
+                public static readonly Guid AshareWeb_1_0 = Guid.Parse("60000000-0000-0000-0002-000000000001");
         }
 
         public static class ProductIds
@@ -260,6 +273,7 @@ public class AshareSeedDataService
                 await SeedProductPricesAsync();
                 await SeedSubscriptionPlansAsync();
                 await SeedLegalPagesAsync();
+                await SeedAppVersionsAsync();
         }
 
         private async Task SeedLegalPagesAsync()
@@ -1669,5 +1683,110 @@ public class AshareSeedDataService
                                 });
                         }
                 }
+        }
+
+        /// <summary>
+        /// بذر إصدارات التطبيق
+        /// </summary>
+        private async Task SeedAppVersionsAsync()
+        {
+                var repo = _repositoryFactory.CreateRepository<AppVersion>();
+
+                var existing = await repo.GetAllWithPredicateAsync();
+                var existingVersions = existing
+                        .Select(v => $"{v.ApplicationCode}:{v.VersionNumber}")
+                        .ToHashSet();
+
+                var versions = new List<AppVersion>
+                {
+                        // ═══════════════════════════════════════════════════════════════════
+                        // إصدارات تطبيق عشير للموبايل
+                        // ═══════════════════════════════════════════════════════════════════
+                        new()
+                        {
+                                Id = VersionIds.AshareMobile_1_15,
+                                ApplicationCode = "ashare-mobile",
+                                ApplicationNameAr = "تطبيق عشير",
+                                ApplicationNameEn = "Ashare Mobile App",
+                                VersionNumber = "1.15",
+                                BuildNumber = 115,
+                                Status = VersionStatus.Deprecated,
+                                ReleaseDate = new DateTime(2024, 9, 1, 0, 0, 0, DateTimeKind.Utc),
+                                DeprecationStartDate = new DateTime(2024, 12, 1, 0, 0, 0, DateTimeKind.Utc),
+                                EndOfSupportDate = new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc),
+                                ReleaseNotesAr = "تحسينات في الأداء وإصلاح أخطاء",
+                                ReleaseNotesEn = "Performance improvements and bug fixes",
+                                UpdateUrl = "https://ashare.app/update",
+                                IsForceUpdate = false,
+                                IsActive = true,
+                                CreatedAt = DateTime.UtcNow
+                        },
+                        new()
+                        {
+                                Id = VersionIds.AshareMobile_1_16,
+                                ApplicationCode = "ashare-mobile",
+                                ApplicationNameAr = "تطبيق عشير",
+                                ApplicationNameEn = "Ashare Mobile App",
+                                VersionNumber = "1.16",
+                                BuildNumber = 116,
+                                Status = VersionStatus.Supported,
+                                ReleaseDate = new DateTime(2024, 10, 15, 0, 0, 0, DateTimeKind.Utc),
+                                ReleaseNotesAr = "إضافة خاصية المحادثات وتحسينات في البحث",
+                                ReleaseNotesEn = "Added chat feature and search improvements",
+                                UpdateUrl = "https://ashare.app/update",
+                                IsForceUpdate = false,
+                                IsActive = true,
+                                CreatedAt = DateTime.UtcNow
+                        },
+                        new()
+                        {
+                                Id = VersionIds.AshareMobile_1_17,
+                                ApplicationCode = "ashare-mobile",
+                                ApplicationNameAr = "تطبيق عشير",
+                                ApplicationNameEn = "Ashare Mobile App",
+                                VersionNumber = "1.17",
+                                BuildNumber = 117,
+                                Status = VersionStatus.Latest,
+                                ReleaseDate = new DateTime(2024, 12, 1, 0, 0, 0, DateTimeKind.Utc),
+                                ReleaseNotesAr = "نظام الاشتراكات الجديد وتحسينات في واجهة المستخدم",
+                                ReleaseNotesEn = "New subscription system and UI improvements",
+                                UpdateUrl = "https://ashare.app/update",
+                                IsForceUpdate = false,
+                                IsActive = true,
+                                CreatedAt = DateTime.UtcNow
+                        },
+
+                        // ═══════════════════════════════════════════════════════════════════
+                        // إصدارات تطبيق عشير للويب
+                        // ═══════════════════════════════════════════════════════════════════
+                        new()
+                        {
+                                Id = VersionIds.AshareWeb_1_0,
+                                ApplicationCode = "ashare-web",
+                                ApplicationNameAr = "موقع عشير",
+                                ApplicationNameEn = "Ashare Web App",
+                                VersionNumber = "1.0",
+                                BuildNumber = 100,
+                                Status = VersionStatus.Latest,
+                                ReleaseDate = new DateTime(2024, 12, 1, 0, 0, 0, DateTimeKind.Utc),
+                                ReleaseNotesAr = "الإصدار الأول من موقع عشير",
+                                ReleaseNotesEn = "First release of Ashare website",
+                                IsForceUpdate = false,
+                                IsActive = true,
+                                CreatedAt = DateTime.UtcNow
+                        }
+                };
+
+                foreach (var version in versions)
+                {
+                        var key = $"{version.ApplicationCode}:{version.VersionNumber}";
+                        if (!existingVersions.Contains(key))
+                        {
+                                await repo.AddAsync(version);
+                                Console.WriteLine($"[Seed] Added app version: {version.ApplicationNameAr} v{version.VersionNumber} ({version.Status})");
+                        }
+                }
+
+                Console.WriteLine($"[Seed] App versions seeding complete. Total: {versions.Count}");
         }
 }

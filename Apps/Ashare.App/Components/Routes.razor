@@ -1,21 +1,24 @@
 @namespace Ashare.App.Components
 @using Microsoft.AspNetCore.Components.Routing
 
-<Router AppAssembly="@typeof(Routes).Assembly"
-        AdditionalAssemblies="@(new[] { typeof(Ashare.Shared._Imports).Assembly })">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(Ashare.Shared.Components.Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-    </Found>
-    <NotFound>
-        <PageTitle>الصفحة غير موجودة</PageTitle>
-        <LayoutView Layout="@typeof(Ashare.Shared.Components.Layout.MainLayout)">
-            <div class="ac-empty-state">
-                <i class="bi bi-exclamation-triangle ac-empty-state-icon"></i>
-                <h2 class="ac-empty-state-title">الصفحة غير موجودة</h2>
-                <p class="ac-empty-state-description">عذراً، الصفحة التي تبحث عنها غير موجودة.</p>
-                <a href="/" class="ac-btn ac-btn-primary">العودة للرئيسية</a>
-            </div>
-        </LayoutView>
-    </NotFound>
-</Router>
+@* AppStartup يتحقق من الإصدار أولاً قبل تحميل أي شيء *@
+<AppStartup>
+    <Router AppAssembly="@typeof(Routes).Assembly"
+            AdditionalAssemblies="@(new[] { typeof(Ashare.Shared._Imports).Assembly })">
+        <Found Context="routeData">
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(Ashare.Shared.Components.Layout.MainLayout)" />
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        </Found>
+        <NotFound>
+            <PageTitle>الصفحة غير موجودة</PageTitle>
+            <LayoutView Layout="@typeof(Ashare.Shared.Components.Layout.MainLayout)">
+                <div class="ac-empty-state">
+                    <i class="bi bi-exclamation-triangle ac-empty-state-icon"></i>
+                    <h2 class="ac-empty-state-title">الصفحة غير موجودة</h2>
+                    <p class="ac-empty-state-description">عذراً، الصفحة التي تبحث عنها غير موجودة.</p>
+                    <a href="/" class="ac-btn ac-btn-primary">العودة للرئيسية</a>
+                </div>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</AppStartup>

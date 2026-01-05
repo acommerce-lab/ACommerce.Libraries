@@ -1,0 +1,8 @@
+Any raw assets you want to be deployed with your application can be placed in
+this directory (and child directories). Deployment of the asset to your application
+is automatically handled by the following MSBuild targets:
+
+1. '_CreateMauiAssetItems' - adds 'MauiAsset' items for packaging
+2. 'BuildMauiAssets' - processes 'MauiAsset' items for inclusion
+
+To add an asset to your application, add the file to this directory.

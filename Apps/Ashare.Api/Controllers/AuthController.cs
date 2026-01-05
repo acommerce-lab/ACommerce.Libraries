@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using ACommerce.Authentication.Abstractions;
 using ACommerce.Authentication.AspNetCore.Controllers;
+using ACommerce.Marketing.Analytics.Services;
 using ACommerce.Profiles.Entities;
 using ACommerce.Profiles.Enums;
 using ACommerce.SharedKernel.Abstractions.Repositories;
@@ -19,17 +20,20 @@ public class AuthController : AuthenticationControllerBase
 {
     private readonly IBaseAsyncRepository<Profile> _profileRepository;
     private readonly DbContext _dbContext;
+    private readonly IMarketingEventTracker _marketingTracker;
 
     public AuthController(
         IAuthenticationProvider authProvider,
         ITwoFactorAuthenticationProvider twoFactorProvider,
         IBaseAsyncRepository<Profile> profileRepository,
         DbContext dbContext,
+        IMarketingEventTracker marketingTracker,
         ILogger<AuthController> logger)
         : base(authProvider, twoFactorProvider, logger)
     {
         _profileRepository = profileRepository;
         _dbContext = dbContext;
+        _marketingTracker = marketingTracker;
     }
 
     #region Nafath Authentication
@@ -83,14 +87,56 @@ public class AuthController : AuthenticationControllerBase
     /// <summary>
     /// التحقق من حالة المصادقة (polling)
     /// GET /api/auth/nafath/status?transactionId=xxx
+    /// يحاول التحقق من الجلسة ثم يعود للحالة الافتراضية إذا فشل
     /// </summary>
     [HttpGet("nafath/status")]
-    public async Task<ActionResult<NafathStatusResponse>> CheckNafathStatus([FromQuery] string transactionId)
+    public async Task<ActionResult<NafathStatusResponse>> CheckNafathStatus(
+        [FromQuery] string transactionId,
+        [FromServices] ACommerce.Authentication.TwoFactor.Abstractions.ITwoFactorSessionStore? sessionStore = null)
     {
         try
         {
-            // في التنفيذ الحقيقي، نتحقق من حالة الجلسة في نفاذ
-            // حالياً نرجع "pending" حتى يأتي webhook
+            // محاولة التحقق من الجلسة إذا كان session store متوفر
+            if (sessionStore != null)
+            {
+                var session = await sessionStore.GetSessionAsync(transactionId);
+
+                if (session == null)
+                {
+                    return Ok(new NafathStatusResponse
+                    {
+                        TransactionId = transactionId,
+                        Status = "expired",
+                        Message = "انتهت صلاحية الجلسة أو غير موجودة"
+                    });
+                }
+
+                var (status, message) = session.Status switch
+                {
+                    ACommerce.Authentication.TwoFactor.Abstractions.TwoFactorSessionStatus.Pending => ("pending", "في انتظار اختيار الرقم في تطبيق نفاذ"),
+                    ACommerce.Authentication.TwoFactor.Abstractions.TwoFactorSessionStatus.Verified => ("completed", "تم التحقق بنجاح"),
+                    ACommerce.Authentication.TwoFactor.Abstractions.TwoFactorSessionStatus.Expired => ("expired", "انتهت صلاحية الجلسة"),
+                    ACommerce.Authentication.TwoFactor.Abstractions.TwoFactorSessionStatus.Cancelled => ("rejected", "تم إلغاء المصادقة"),
+                    ACommerce.Authentication.TwoFactor.Abstractions.TwoFactorSessionStatus.Failed => ("rejected", "فشلت المصادقة"),
+                    _ => ("pending", "في انتظار اختيار الرقم في تطبيق نفاذ")
+                };
+
+                // التحقق من انتهاء الصلاحية
+                if (session.ExpiresAt < DateTimeOffset.UtcNow && session.Status == ACommerce.Authentication.TwoFactor.Abstractions.TwoFactorSessionStatus.Pending)
+                {
+                    status = "expired";
+                    message = "انتهت صلاحية الجلسة";
+                }
+
+                return Ok(new NafathStatusResponse
+                {
+                    TransactionId = transactionId,
+                    Status = status,
+                    Message = message
+                });
+            }
+
+            // إذا لم يتوفر session store، نرجع pending
             return Ok(new NafathStatusResponse
             {
                 TransactionId = transactionId,
@@ -159,6 +205,40 @@ public class AuthController : AuthenticationControllerBase
                     Success = false,
                     Message = "فشل إنشاء الجلسة"
                 });
+            }
+
+            // تتبع الحدث التسويقي (synchronously to avoid ObjectDisposedException)
+            try
+            {
+                var userContext = new UserTrackingContext
+                {
+                    UserId = profile.Id.ToString(),
+                    Phone = profile.PhoneNumber,
+                    FirstName = profile.FullName,
+                    IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    UserAgent = Request.Headers.UserAgent.ToString()
+                };
+
+                if (isNewUser)
+                {
+                    await _marketingTracker.TrackRegistrationAsync(new RegistrationTrackingRequest
+                    {
+                        Method = "nafath",
+                        User = userContext
+                    });
+                }
+                else
+                {
+                    await _marketingTracker.TrackLoginAsync(new LoginTrackingRequest
+                    {
+                        Method = "nafath",
+                        User = userContext
+                    });
+                }
+            }
+            catch (Exception trackEx)
+            {
+                Logger.LogWarning(trackEx, "فشل تتبع حدث المصادقة");
             }
 
             return Ok(new LoginResponse

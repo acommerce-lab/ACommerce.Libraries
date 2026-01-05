@@ -1,0 +1,202 @@
+@namespace ACommerce.Templates.Customer.Components
+
+@if (IsBlocked)
+{
+    <div class="ac-version-blocker">
+        <div class="ac-version-blocker-overlay"></div>
+        <div class="ac-version-blocker-content">
+            <div class="ac-version-blocker-icon">
+                <i class="bi bi-exclamation-octagon-fill"></i>
+            </div>
+
+            <h1 class="ac-version-blocker-title">
+                @TitleText
+            </h1>
+
+            <p class="ac-version-blocker-message">
+                @(string.IsNullOrEmpty(Message) ? DefaultMessage : Message)
+            </p>
+
+            @if (!string.IsNullOrEmpty(CurrentVersion) || !string.IsNullOrEmpty(LatestVersion))
+            {
+                <div class="ac-version-blocker-versions">
+                    @if (!string.IsNullOrEmpty(CurrentVersion))
+                    {
+                        <div class="ac-version-blocker-version">
+                            <span class="ac-version-blocker-version-label">@YourVersionText</span>
+                            <span class="ac-version-blocker-version-value ac-version-old">@CurrentVersion</span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(LatestVersion))
+                    {
+                        <div class="ac-version-blocker-version">
+                            <span class="ac-version-blocker-version-label">@LatestVersionText</span>
+                            <span class="ac-version-blocker-version-value ac-version-new">@LatestVersion</span>
+                        </div>
+                    }
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(ReleaseNotes))
+            {
+                <div class="ac-version-blocker-notes">
+                    <h3>@WhatsNewText</h3>
+                    <p>@ReleaseNotes</p>
+                </div>
+            }
+
+            <div class="ac-version-blocker-actions">
+                @if (!string.IsNullOrEmpty(UpdateUrl))
+                {
+                    <a href="@UpdateUrl" class="ac-version-blocker-btn ac-version-blocker-btn-primary" target="_blank">
+                        <i class="bi bi-download"></i>
+                        @UpdateNowText
+                    </a>
+                }
+
+                @if (!string.IsNullOrEmpty(StoreUrl))
+                {
+                    <a href="@StoreUrl" class="ac-version-blocker-btn ac-version-blocker-btn-secondary" target="_blank">
+                        <i class="bi bi-shop"></i>
+                        @OpenStoreText
+                    </a>
+                }
+            </div>
+
+            @if (!string.IsNullOrEmpty(SupportEmail) || !string.IsNullOrEmpty(SupportUrl))
+            {
+                <div class="ac-version-blocker-support">
+                    <p>@NeedHelpText</p>
+                    @if (!string.IsNullOrEmpty(SupportEmail))
+                    {
+                        <a href="mailto:@SupportEmail">@SupportEmail</a>
+                    }
+                    @if (!string.IsNullOrEmpty(SupportUrl))
+                    {
+                        <a href="@SupportUrl" target="_blank">@ContactUsText</a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// هل التطبيق محظور؟
+    /// </summary>
+    [Parameter] public bool IsBlocked { get; set; }
+
+    /// <summary>
+    /// الرسالة المخصصة
+    /// </summary>
+    [Parameter] public string? Message { get; set; }
+
+    /// <summary>
+    /// الإصدار الحالي
+    /// </summary>
+    [Parameter] public string? CurrentVersion { get; set; }
+
+    /// <summary>
+    /// أحدث إصدار متاح
+    /// </summary>
+    [Parameter] public string? LatestVersion { get; set; }
+
+    /// <summary>
+    /// ملاحظات الإصدار
+    /// </summary>
+    [Parameter] public string? ReleaseNotes { get; set; }
+
+    /// <summary>
+    /// رابط التحديث
+    /// </summary>
+    [Parameter] public string? UpdateUrl { get; set; }
+
+    /// <summary>
+    /// رابط المتجر (App Store / Google Play)
+    /// </summary>
+    [Parameter] public string? StoreUrl { get; set; }
+
+    /// <summary>
+    /// بريد الدعم
+    /// </summary>
+    [Parameter] public string? SupportEmail { get; set; }
+
+    /// <summary>
+    /// رابط صفحة الدعم
+    /// </summary>
+    [Parameter] public string? SupportUrl { get; set; }
+
+    /// <summary>
+    /// هل اللغة العربية؟
+    /// </summary>
+    [Parameter] public bool IsArabic { get; set; } = true;
+
+    // ===== نصوص قابلة للترجمة (اختياري) =====
+
+    /// <summary>
+    /// عنوان الشاشة
+    /// </summary>
+    [Parameter] public string? Title { get; set; }
+
+    /// <summary>
+    /// نص "إصدارك:"
+    /// </summary>
+    [Parameter] public string? YourVersionLabel { get; set; }
+
+    /// <summary>
+    /// نص "أحدث إصدار:"
+    /// </summary>
+    [Parameter] public string? LatestVersionLabel { get; set; }
+
+    /// <summary>
+    /// نص "ما الجديد؟"
+    /// </summary>
+    [Parameter] public string? WhatsNewLabel { get; set; }
+
+    /// <summary>
+    /// نص "تحديث الآن"
+    /// </summary>
+    [Parameter] public string? UpdateNowLabel { get; set; }
+
+    /// <summary>
+    /// نص "فتح المتجر"
+    /// </summary>
+    [Parameter] public string? OpenStoreLabel { get; set; }
+
+    /// <summary>
+    /// نص "تحتاج مساعدة؟"
+    /// </summary>
+    [Parameter] public string? NeedHelpLabel { get; set; }
+
+    /// <summary>
+    /// نص "تواصل معنا"
+    /// </summary>
+    [Parameter] public string? ContactUsLabel { get; set; }
+
+    // ===== الخصائص المحسوبة مع القيم الافتراضية =====
+
+    private string TitleText => Title ?? (IsArabic ? "إصدار غير مدعوم" : "Unsupported Version");
+    private string DefaultMessage => IsArabic
+        ? "إصدارك الحالي غير مدعوم. يجب التحديث للاستمرار في استخدام التطبيق."
+        : "Your current version is no longer supported. Please update to continue using the app.";
+    private string YourVersionText => YourVersionLabel ?? (IsArabic ? "إصدارك:" : "Your version:");
+    private string LatestVersionText => LatestVersionLabel ?? (IsArabic ? "أحدث إصدار:" : "Latest version:");
+    private string WhatsNewText => WhatsNewLabel ?? (IsArabic ? "ما الجديد؟" : "What's New?");
+    private string UpdateNowText => UpdateNowLabel ?? (IsArabic ? "تحديث الآن" : "Update Now");
+    private string OpenStoreText => OpenStoreLabel ?? (IsArabic ? "فتح المتجر" : "Open Store");
+    private string NeedHelpText => NeedHelpLabel ?? (IsArabic ? "تحتاج مساعدة؟" : "Need help?");
+    private string ContactUsText => ContactUsLabel ?? (IsArabic ? "تواصل معنا" : "Contact us");
+
+    public void Block()
+    {
+        IsBlocked = true;
+        StateHasChanged();
+    }
+
+    public void Unblock()
+    {
+        IsBlocked = false;
+        StateHasChanged();
+    }
+}

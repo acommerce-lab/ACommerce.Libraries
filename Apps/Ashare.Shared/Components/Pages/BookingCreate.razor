@@ -1,0 +1,965 @@
+@page "/book/{SpaceId:guid}"
+@using ACommerce.Client.Auth
+@using ACommerce.Client.Realtime
+@using ACommerce.Templates.Customer.Services
+@using Ashare.Shared.Models
+@using System.Text.Json
+@inject AshareApiService ApiService
+@inject IAppNavigationService Navigation
+@inject TokenManager TokenManager
+@inject IPaymentService PaymentService
+@inject NavigationManager NavigationManager
+@inject RealtimeClient RealtimeClient
+@implements IAsyncDisposable
+
+<div class="ac-page ashare-booking-create">
+    @if (_isLoading)
+    {
+        <div class="ashare-loading">
+            <div class="ac-spinner"></div>
+            <span>جاري التحميل...</span>
+        </div>
+    }
+    else if (_space == null)
+    {
+        <div class="ashare-error-state">
+            <i class="bi bi-exclamation-circle"></i>
+            <h2>العرض غير موجود</h2>
+            <button class="ac-btn ac-btn-primary" @onclick="GoBack">العودة</button>
+        </div>
+    }
+    else
+    {
+        @* Header *@
+        <div class="ashare-booking-header">
+            <button class="ashare-back-btn" @onclick="GoBack">
+                <i class="bi bi-arrow-right"></i>
+            </button>
+            <h1>حجز العقار</h1>
+        </div>
+
+        @* Space Summary *@
+        <div class="ashare-booking-space-card">
+            <div class="ashare-booking-space-image">
+                @if (_space.Images.Any())
+                {
+                    <img src="@_space.Images.First()" alt="@_space.Name" />
+                }
+                else
+                {
+                    <div class="ashare-space-no-image">
+                        <i class="bi bi-building"></i>
+                    </div>
+                }
+            </div>
+            <div class="ashare-booking-space-info">
+                <h3>@_space.Name</h3>
+                <p class="ashare-booking-space-location">
+                    <i class="bi bi-geo-alt"></i>
+                    @GetLocationDisplay()
+                </p>
+            </div>
+        </div>
+
+        @* Payment Protection Banner *@
+        <div class="ashare-protection-banner">
+            <div class="ashare-protection-icon">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <div class="ashare-protection-content">
+                <h3>حماية المبلغ</h3>
+                <p>مبلغك محمي بالكامل - لن يتم تحويله للمعلن إلا بعد اتفاق الطرفين، ويمكنك استرداده فوراً في أي وقت</p>
+            </div>
+        </div>
+
+        @* Pricing Details *@
+        <div class="ashare-booking-section">
+            <h2 class="ashare-section-title">تفاصيل السعر</h2>
+
+            <div class="ashare-price-breakdown">
+                <div class="ashare-price-row">
+                    <span>إيجار @GetRentTypeLabel()</span>
+                    <span>@GetPrice() ر.س</span>
+                </div>
+
+                @if (_depositPercentage > 0)
+                {
+                    <div class="ashare-price-row deposit">
+                        <span>العربون (@_depositPercentage%)</span>
+                        <span>@CalculateDeposit() ر.س</span>
+                    </div>
+                }
+
+                <div class="ashare-price-divider"></div>
+
+                <div class="ashare-price-row total">
+                    <span>المبلغ المطلوب الآن</span>
+                    <span>@GetRequiredAmount() ر.س</span>
+                </div>
+            </div>
+        </div>
+
+        @* How It Works *@
+        <div class="ashare-booking-section">
+            <h2 class="ashare-section-title">
+                <i class="bi bi-question-circle"></i>
+                كيف تعمل الحماية؟
+            </h2>
+            <div class="ashare-steps">
+                <div class="ashare-step">
+                    <div class="ashare-step-number">1</div>
+                    <div class="ashare-step-content">
+                        <h4>ادفع العربون</h4>
+                        <p>ادفع العربون الآن وسيتم حفظه في حسابك المحمي</p>
+                    </div>
+                </div>
+                <div class="ashare-step">
+                    <div class="ashare-step-number">2</div>
+                    <div class="ashare-step-content">
+                        <h4>تواصل مع المعلن</h4>
+                        <p>تواصل مع المعلن واتفق على تفاصيل العقد والمعاينة</p>
+                    </div>
+                </div>
+                <div class="ashare-step">
+                    <div class="ashare-step-number">3</div>
+                    <div class="ashare-step-content">
+                        <h4>أكد الاتفاق أو استرد</h4>
+                        <p>بعد الاتفاق، أكد الحجز ليتم تحويل العربون للمعلن، أو استرده فوراً</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* Important Notes *@
+        <div class="ashare-booking-section ashare-notes-section">
+            <h2 class="ashare-section-title">ملاحظات مهمة</h2>
+            <ul class="ashare-booking-notes">
+                <li>
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>العربون <strong>مسترد بالكامل</strong> في حال عدم الاتفاق</span>
+                </li>
+                <li>
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>لا يتم تحويل أي مبلغ للمعلن إلا <strong>بعد تأكيدك</strong></span>
+                </li>
+                <li>
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>يمكنك <strong>الاسترداد الفوري</strong> بضغطة زر بدون تعقيدات</span>
+                </li>
+                <li>
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>باقي الإيجار يتم دفعه <strong>مباشرة للمعلن</strong> عند التسليم</span>
+                </li>
+            </ul>
+        </div>
+
+        @* Agreement *@
+        <div class="ashare-booking-agreement">
+            <label class="ashare-checkbox">
+                <input type="checkbox" @bind="_agreedToTerms" />
+                <span class="ashare-checkbox-mark"></span>
+                <span>أوافق على <a href="/legal/terms">شروط الاستخدام</a> و<a href="/legal/privacy">سياسة الخصوصية</a></span>
+            </label>
+        </div>
+
+        @* Error Message *@
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="ashare-booking-error">
+                <i class="bi bi-exclamation-triangle"></i>
+                <span>@_errorMessage</span>
+                <button class="ashare-error-dismiss" @onclick="() => _errorMessage = null">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        }
+
+        @* Submit Button *@
+        <div class="ashare-booking-submit">
+            <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
+                    @onclick="StartPayment"
+                    disabled="@(!_agreedToTerms || _isSubmitting)">
+                @if (_isSubmitting)
+                {
+                    <div class="ac-spinner ac-spinner-sm"></div>
+                    <span>جاري تجهيز الدفع...</span>
+                }
+                else
+                {
+                    <i class="bi bi-shield-lock"></i>
+                    <span>دفع العربون @GetRequiredAmount() ر.س</span>
+                }
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid SpaceId { get; set; }
+
+    private SpaceItem? _space;
+    private bool _isLoading = true;
+    private bool _isSubmitting;
+    private bool _agreedToTerms;
+    private string? _errorMessage;
+    private decimal _depositPercentage = 10; // Default 10%, will be fetched from backend
+
+    // Payment state
+    private string? _paymentUrl;
+    private string? _paymentId;
+    private string? _bookingId;
+
+    // SignalR for payment notifications
+    private IDisposable? _notificationSubscription;
+    private bool _isConnectedToSignalR;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSpaceAsync();
+    }
+
+    private async Task LoadSpaceAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            _space = await ApiService.GetSpaceByIdAsync(SpaceId);
+
+            // Get deposit percentage from space attributes or use default
+            if (_space?.Attributes?.TryGetValue("deposit_percentage", out var depPercent) == true)
+            {
+                if (decimal.TryParse(depPercent?.ToString(), out var percentage))
+                {
+                    _depositPercentage = percentage;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[BookingCreate] Error loading space: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private string GetLocationDisplay()
+    {
+        var parts = new List<string>();
+
+        if (HasAttribute("district"))
+            parts.Add(GetAttribute("district"));
+        else if (!string.IsNullOrEmpty(_space?.Location))
+            parts.Add(_space.Location);
+
+        if (HasAttribute("city"))
+            parts.Add(GetAttribute("city"));
+        else if (!string.IsNullOrEmpty(_space?.City))
+            parts.Add(_space.City);
+
+        return parts.Any() ? string.Join("، ", parts) : "غير محدد";
+    }
+
+    private bool HasAttribute(string key)
+    {
+        return _space?.Attributes?.ContainsKey(key) == true &&
+               _space.Attributes[key] != null &&
+               !string.IsNullOrEmpty(_space.Attributes[key].ToString());
+    }
+
+    private string GetAttribute(string key)
+    {
+        if (_space?.Attributes?.TryGetValue(key, out var value) == true && value != null)
+        {
+            return value.ToString() ?? "";
+        }
+        return "";
+    }
+
+    private string GetRentTypeLabel()
+    {
+        // أولاً: التحقق من time_unit (ما يرسله الباك اند)
+        if (HasAttribute("time_unit"))
+        {
+            return GetAttribute("time_unit").ToLower() switch
+            {
+                "month" or "monthly" => "شهري",
+                "year" or "yearly" or "annual" => "سنوي",
+                "day" or "daily" => "يومي",
+                "week" or "weekly" => "أسبوعي",
+                "hour" or "hourly" => "بالساعة",
+                _ => "شهري"
+            };
+        }
+
+        // ثانياً: التحقق من rent_type
+        if (HasAttribute("rent_type"))
+        {
+            return GetAttribute("rent_type").ToLower() switch
+            {
+                "month" or "monthly" => "شهري",
+                "year" or "yearly" or "annual" => "سنوي",
+                "day" or "daily" => "يومي",
+                "week" or "weekly" => "أسبوعي",
+                "hour" or "hourly" => "بالساعة",
+                _ => "شهري"
+            };
+        }
+
+        return "شهري";
+    }
+
+    private decimal GetPrice()
+    {
+        // أولاً: محاولة الحصول على السعر من الخصائص
+        if (HasAttribute("price") && decimal.TryParse(GetAttribute("price"), out var attrPrice))
+        {
+            return attrPrice;
+        }
+
+        // ثانياً: استخدام السعر من SpaceItem (أول سعر غير صفري)
+        if (_space != null)
+        {
+            // إرجاع السعر الفعلي المُعين حسب نوع الإيجار
+            if (_space.PricePerMonth > 0) return _space.PricePerMonth;
+            if (_space.PricePerDay > 0) return _space.PricePerDay;
+            if (_space.PricePerHour > 0) return _space.PricePerHour;
+        }
+
+        return 0;
+    }
+
+    private string GetTimeUnit()
+    {
+        // الحصول على وحدة الوقت من time_unit أو rent_type
+        if (HasAttribute("time_unit"))
+            return GetAttribute("time_unit");
+        if (HasAttribute("rent_type"))
+            return GetAttribute("rent_type");
+        return "month"; // افتراضي
+    }
+
+    private decimal CalculateDeposit()
+    {
+        return Math.Round(GetPrice() * _depositPercentage / 100, 2);
+    }
+
+    private decimal GetRequiredAmount()
+    {
+        return CalculateDeposit();
+    }
+
+    private string GetPaymentReturnUrl()
+    {
+        // Use ashare.app as the return URL host (backend configured)
+        return "https://ashare.app/host/payment/callback";
+    }
+
+    private async Task StartPayment()
+    {
+        if (!_agreedToTerms)
+        {
+            _errorMessage = "يجب الموافقة على الشروط والأحكام";
+            return;
+        }
+
+        // Check if user is logged in
+        var userId = TokenManager.GetUserIdFromToken();
+        if (string.IsNullOrEmpty(userId))
+        {
+            Navigation.NavigateTo("/login?returnUrl=/book/" + SpaceId);
+            return;
+        }
+
+        _isSubmitting = true;
+        _errorMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            var returnUrl = GetPaymentReturnUrl();
+            Console.WriteLine($"[BookingCreate] Creating booking payment with returnUrl: {returnUrl}");
+
+            // Create booking and get payment URL
+            var response = await ApiService.CreateBookingPaymentAsync(new CreateBookingPaymentRequest
+            {
+                SpaceId = SpaceId,
+                DepositAmount = CalculateDeposit(),
+                TotalPrice = GetPrice(),
+                RentType = GetTimeUnit(),
+                ReturnUrl = returnUrl
+            });
+
+            Console.WriteLine($"[BookingCreate] Response: Success={response?.Success}, PaymentUrl={response?.PaymentUrl?.Substring(0, Math.Min(50, response?.PaymentUrl?.Length ?? 0))}...");
+
+            if (response != null && !string.IsNullOrEmpty(response.PaymentUrl))
+            {
+                _paymentUrl = response.PaymentUrl;
+                _paymentId = response.PaymentId;
+                _bookingId = response.BookingId;
+                Console.WriteLine($"[BookingCreate] PaymentId: {_paymentId}, BookingId: {_bookingId}");
+
+                // Check if in-app payment is supported
+                if (PaymentService.SupportsInAppPayment)
+                {
+                    Console.WriteLine("[BookingCreate] Using in-app WebView payment");
+
+                    // Connect to SignalR for payment notifications (as fallback)
+                    await ConnectAndSubscribeToPayment(_paymentId);
+
+                    // Open payment in WebView (use same callback pattern as backend)
+                    var result = await PaymentService.OpenPaymentInAppAsync(_paymentUrl, "/host/payment/callback");
+
+                    Console.WriteLine($"[BookingCreate] Payment callback: Status={result.Status}, OrderId={result.OrderId}");
+
+                    if (result.Cancelled)
+                    {
+                        _errorMessage = null;
+                        Console.WriteLine("[BookingCreate] Payment cancelled by user");
+                    }
+                    else if (result.Status == "pending_verification" && !string.IsNullOrEmpty(result.OrderId))
+                    {
+                        // Verify payment via API
+                        Console.WriteLine($"[BookingCreate] Verifying payment via API for orderId: {result.OrderId}");
+
+                        var verifyResult = await ApiService.VerifyBookingPaymentAsync(new VerifyPaymentRequest
+                        {
+                            PaymentId = _paymentId ?? result.OrderId,
+                            OrderId = result.OrderId,
+                            TransactionId = result.TransactionId
+                        });
+
+                        Console.WriteLine($"[BookingCreate] Verification result: Success={verifyResult?.Success}");
+
+                        if (verifyResult?.Success == true)
+                        {
+                            Console.WriteLine("[BookingCreate] Payment verified successfully!");
+
+                            // Create the booking in local storage/backend
+                            await CreateBookingInBackendAsync();
+
+                            Navigation.NavigateTo("/bookings?new=true");
+                            return;
+                        }
+                        else
+                        {
+                            _errorMessage = verifyResult?.Message ?? "فشل التحقق من الدفع";
+                        }
+                    }
+                    else if (result.Success)
+                    {
+                        await CreateBookingInBackendAsync();
+                        Navigation.NavigateTo("/bookings?new=true");
+                        return;
+                    }
+                    else
+                    {
+                        _errorMessage = result.Message ?? "فشلت عملية الدفع";
+                    }
+                }
+                else
+                {
+                    // Fallback: Open in external browser with SignalR
+                    Console.WriteLine("[BookingCreate] Using external browser payment");
+
+                    await ConnectAndSubscribeToPayment(_paymentId);
+
+                    var success = await PaymentService.OpenPaymentPageAsync(_paymentUrl);
+                    if (success)
+                    {
+                        Console.WriteLine("[BookingCreate] Payment page opened - waiting for SignalR notification");
+                        // Stay on page and wait for SignalR notification
+                    }
+                    else
+                    {
+                        _errorMessage = "تعذر فتح صفحة الدفع";
+                    }
+                }
+            }
+            else
+            {
+                _errorMessage = response?.Message ?? "فشل في إنشاء طلب الدفع";
+                Console.WriteLine($"[BookingCreate] Error: {_errorMessage}");
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = "حدث خطأ أثناء تجهيز الدفع. حاول مرة أخرى.";
+            Console.WriteLine($"[BookingCreate] Exception: {ex.Message}");
+        }
+        finally
+        {
+            _isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ConnectAndSubscribeToPayment(string? paymentId)
+    {
+        if (string.IsNullOrEmpty(paymentId)) return;
+
+        try
+        {
+            if (!_isConnectedToSignalR)
+            {
+                Console.WriteLine("[BookingCreate] Connecting to SignalR...");
+                await RealtimeClient.ConnectAsync(serviceName: "Ashare", hubPath: "/hubs/notifications");
+                _isConnectedToSignalR = true;
+                Console.WriteLine("[BookingCreate] Connected to SignalR");
+
+                _notificationSubscription = RealtimeClient.On<string, JsonElement>("ReceiveMessage", HandlePaymentMessage);
+            }
+
+            Console.WriteLine($"[BookingCreate] Subscribing to payment notifications for {paymentId}...");
+            await RealtimeClient.SendAsync("SubscribeToPayment", paymentId);
+            Console.WriteLine($"[BookingCreate] Subscribed to payment_{paymentId}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[BookingCreate] SignalR connection failed: {ex.Message}");
+        }
+    }
+
+    private void HandlePaymentMessage(string method, JsonElement data)
+    {
+        Console.WriteLine($"[BookingCreate] ReceiveMessage: method={method}");
+
+        if (method == "PaymentSuccess" || method == "PaymentFailed")
+        {
+            var isSuccess = method == "PaymentSuccess";
+            Console.WriteLine($"[BookingCreate] Payment result received: {method}");
+
+            try
+            {
+                var orderId = data.TryGetProperty("OrderId", out var orderIdProp) ? orderIdProp.GetString() : null;
+                var message = data.TryGetProperty("Message", out var msgProp) ? msgProp.GetString() : null;
+
+                if (!string.IsNullOrEmpty(_paymentId) && orderId == _paymentId)
+                {
+                    InvokeAsync(async () =>
+                    {
+                        if (_isConnectedToSignalR && !string.IsNullOrEmpty(_paymentId))
+                        {
+                            try { await RealtimeClient.SendAsync("UnsubscribeFromPayment", _paymentId); }
+                            catch { /* ignore */ }
+                        }
+
+                        if (isSuccess)
+                        {
+                            await CreateBookingInBackendAsync();
+                            Navigation.NavigateTo("/bookings?new=true");
+                        }
+                        else
+                        {
+                            _errorMessage = message ?? "فشلت عملية الدفع";
+                            StateHasChanged();
+                        }
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[BookingCreate] Error parsing payment result: {ex.Message}");
+            }
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateBack();
+    }
+
+    private async Task CreateBookingInBackendAsync()
+    {
+        try
+        {
+            if (_space == null) return;
+
+            Console.WriteLine($"[BookingCreate] Creating booking in backend for space {SpaceId}");
+
+            // Get current user ID
+            var customerId = TokenManager.GetUserIdFromToken();
+            var hostId = _space.OwnerId;
+
+            Console.WriteLine($"[BookingCreate] CustomerId: {customerId}, HostId: {hostId}");
+
+            // Create booking in backend via API
+            var booking = await ApiService.CreateBookingAsync(
+                spaceId: SpaceId,
+                totalPrice: GetPrice(),
+                depositAmount: CalculateDeposit(),
+                rentType: GetAttribute("rent_type"),
+                customerId: customerId,
+                hostId: hostId,
+                paymentId: _paymentId
+            );
+
+            if (booking != null)
+            {
+                Console.WriteLine($"[BookingCreate] Booking created in backend: {booking.Id}");
+            }
+            else
+            {
+                Console.WriteLine("[BookingCreate] Failed to create booking in backend");
+                _errorMessage = "فشل في حفظ الحجز. يرجى التواصل مع الدعم.";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[BookingCreate] Error creating booking: {ex.Message}");
+            _errorMessage = "حدث خطأ أثناء حفظ الحجز. يرجى المحاولة مرة أخرى.";
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _notificationSubscription?.Dispose();
+
+        if (_isConnectedToSignalR && !string.IsNullOrEmpty(_paymentId))
+        {
+            try { await RealtimeClient.SendAsync("UnsubscribeFromPayment", _paymentId); }
+            catch { /* ignore */ }
+        }
+
+        if (_isConnectedToSignalR)
+        {
+            try { await RealtimeClient.DisconnectAsync(); }
+            catch { /* ignore */ }
+        }
+    }
+}
+
+<style>
+    .ashare-booking-create {
+        padding-bottom: 100px;
+    }
+
+    .ashare-booking-header {
+        display: flex;
+        align-items: center;
+        gap: var(--ashare-spacing-md);
+        padding: var(--ashare-spacing-md);
+        background: var(--ashare-surface);
+        border-bottom: 1px solid var(--ashare-gray-200);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .ashare-booking-header h1 {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .ashare-booking-space-card {
+        display: flex;
+        gap: var(--ashare-spacing-md);
+        padding: var(--ashare-spacing-md);
+        background: var(--ashare-surface);
+        margin: var(--ashare-spacing-md);
+        border-radius: var(--ashare-radius-lg);
+        box-shadow: var(--ashare-shadow-sm);
+    }
+
+    .ashare-booking-space-image {
+        width: 80px;
+        height: 80px;
+        border-radius: var(--ashare-radius-md);
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .ashare-booking-space-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .ashare-booking-space-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .ashare-booking-space-info h3 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 var(--ashare-spacing-xs);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .ashare-booking-space-location {
+        font-size: 14px;
+        color: var(--ashare-gray-500);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: var(--ashare-spacing-xs);
+    }
+
+    /* Protection Banner */
+    .ashare-protection-banner {
+        display: flex;
+        gap: var(--ashare-spacing-md);
+        padding: var(--ashare-spacing-md);
+        margin: var(--ashare-spacing-md);
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-radius: var(--ashare-radius-lg);
+        color: white;
+    }
+
+    .ashare-protection-icon {
+        width: 48px;
+        height: 48px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .ashare-protection-icon i {
+        font-size: 24px;
+    }
+
+    .ashare-protection-content h3 {
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0 0 var(--ashare-spacing-xs);
+    }
+
+    .ashare-protection-content p {
+        font-size: 13px;
+        margin: 0;
+        opacity: 0.9;
+        line-height: 1.5;
+    }
+
+    .ashare-booking-section {
+        padding: var(--ashare-spacing-md);
+        margin: var(--ashare-spacing-md);
+        background: var(--ashare-surface);
+        border-radius: var(--ashare-radius-lg);
+        box-shadow: var(--ashare-shadow-sm);
+    }
+
+    .ashare-section-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 var(--ashare-spacing-md);
+        display: flex;
+        align-items: center;
+        gap: var(--ashare-spacing-sm);
+    }
+
+    .ashare-section-title i {
+        color: var(--ashare-primary);
+    }
+
+    .ashare-price-breakdown {
+        display: flex;
+        flex-direction: column;
+        gap: var(--ashare-spacing-sm);
+    }
+
+    .ashare-price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+    }
+
+    .ashare-price-row.deposit {
+        color: var(--ashare-secondary);
+        font-weight: 500;
+    }
+
+    .ashare-price-row.total {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--ashare-primary);
+    }
+
+    .ashare-price-divider {
+        height: 1px;
+        background: var(--ashare-gray-200);
+        margin: var(--ashare-spacing-sm) 0;
+    }
+
+    /* Steps */
+    .ashare-steps {
+        display: flex;
+        flex-direction: column;
+        gap: var(--ashare-spacing-md);
+    }
+
+    .ashare-step {
+        display: flex;
+        gap: var(--ashare-spacing-md);
+    }
+
+    .ashare-step-number {
+        width: 32px;
+        height: 32px;
+        background: var(--ashare-primary);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .ashare-step-content h4 {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 0 0 4px;
+    }
+
+    .ashare-step-content p {
+        font-size: 13px;
+        color: var(--ashare-gray-500);
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    /* Notes */
+    .ashare-notes-section {
+        background: var(--ashare-gray-50);
+    }
+
+    .ashare-booking-notes {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--ashare-spacing-sm);
+    }
+
+    .ashare-booking-notes li {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--ashare-spacing-sm);
+        font-size: 14px;
+        color: var(--ashare-gray-700);
+    }
+
+    .ashare-booking-notes li i {
+        color: #10b981;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .ashare-booking-notes li strong {
+        color: var(--ashare-primary);
+    }
+
+    .ashare-booking-agreement {
+        padding: var(--ashare-spacing-md);
+        margin: var(--ashare-spacing-md);
+    }
+
+    .ashare-checkbox {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--ashare-spacing-sm);
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .ashare-checkbox input {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--ashare-primary);
+        flex-shrink: 0;
+    }
+
+    .ashare-checkbox a {
+        color: var(--ashare-primary);
+        text-decoration: underline;
+    }
+
+    .ashare-booking-error {
+        display: flex;
+        align-items: center;
+        gap: var(--ashare-spacing-sm);
+        padding: var(--ashare-spacing-md);
+        margin: var(--ashare-spacing-md);
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        border-radius: var(--ashare-radius-md);
+        font-size: 14px;
+    }
+
+    .ashare-booking-error span {
+        flex: 1;
+    }
+
+    .ashare-error-dismiss {
+        background: none;
+        border: none;
+        color: #ef4444;
+        cursor: pointer;
+        padding: 4px;
+        display: flex;
+        opacity: 0.7;
+    }
+
+    .ashare-error-dismiss:hover {
+        opacity: 1;
+    }
+
+    .ashare-booking-submit {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: var(--ashare-spacing-md);
+        padding-bottom: calc(var(--ashare-spacing-md) + var(--safe-area-bottom));
+        background: var(--ashare-surface);
+        border-top: 1px solid var(--ashare-gray-200);
+    }
+
+    .ac-btn-block {
+        width: 100%;
+    }
+
+    .ashare-error-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 60vh;
+        gap: var(--ashare-spacing-md);
+        text-align: center;
+        padding: var(--ashare-spacing-xl);
+    }
+
+    .ashare-error-state i {
+        font-size: 48px;
+        color: var(--ashare-gray-400);
+    }
+
+    .ashare-error-state h2 {
+        font-size: 18px;
+        color: var(--ashare-gray-600);
+        margin: 0;
+    }
+
+    /* Tablet+ */
+    @@media (min-width: 768px) {
+        .ashare-booking-submit {
+            max-width: 430px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    }
+</style>

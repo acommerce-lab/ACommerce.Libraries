@@ -1,0 +1,132 @@
+@page "/login"
+@inject ILocalizationService L
+@inject IAppNavigationService Navigation
+@inject TokenManager TokenManager
+@inject AuthClient AuthClient
+
+<div class="hh-page" style="padding: 16px;">
+    <div class="hh-card" style="max-width: 400px; margin: 40px auto;">
+        <div style="text-align: center; margin-bottom: 24px;">
+            <i class="bi bi-tools" style="font-size: 3rem; color: var(--hh-primary);"></i>
+            <h2 style="margin-top: 16px;">Welcome Back</h2>
+            <p style="color: var(--hh-text-secondary);">Sign in to your account</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div style="background: rgba(244, 67, 54, 0.1); color: var(--hh-error); padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                <i class="bi bi-exclamation-circle"></i> @_errorMessage
+            </div>
+        }
+
+        <EditForm Model="_loginModel" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+
+            <div style="margin-bottom: 16px;">
+                <label class="hh-input-label">@L["Email"]</label>
+                <InputText class="hh-input" @bind-Value="_loginModel.Email" placeholder="you@example.com" />
+                <ValidationMessage For="() => _loginModel.Email" />
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label class="hh-input-label">@L["Password"]</label>
+                <InputText type="password" class="hh-input" @bind-Value="_loginModel.Password" placeholder="••••••••" />
+                <ValidationMessage For="() => _loginModel.Password" />
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <InputCheckbox @bind-Value="_loginModel.RememberMe" />
+                    <span style="font-size: 0.875rem;">Remember me</span>
+                </label>
+                <a href="/forgot-password" style="color: var(--hh-primary); font-size: 0.875rem;">
+                    @L["ForgotPassword"]
+                </a>
+            </div>
+
+            <button type="submit" class="hh-btn hh-btn-primary hh-btn-full" disabled="@_isLoading">
+                @if (_isLoading)
+                {
+                    <span class="hh-spinner" style="width: 20px; height: 20px; border-width: 2px;"></span>
+                    <span>Signing in...</span>
+                }
+                else
+                {
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>@L["Login"]</span>
+                }
+            </button>
+        </EditForm>
+
+        <div style="text-align: center; margin-top: 24px;">
+            <p style="color: var(--hh-text-secondary);">
+                @L["DontHaveAccount"]
+                <a href="/register" style="color: var(--hh-primary); font-weight: 500;">@L["CreateAccount"]</a>
+            </p>
+        </div>
+
+        <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--hh-border);">
+            <button class="hh-btn hh-btn-outline hh-btn-full" @onclick="ContinueAsGuest">
+                <i class="bi bi-person"></i>
+                @L["ContinueAsGuest"]
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginModel _loginModel = new();
+    private bool _isLoading = false;
+    private string? _errorMessage = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Check if already logged in
+        var token = await TokenManager.GetTokenAsync();
+        if (!string.IsNullOrEmpty(token))
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
+
+    private async Task HandleLogin()
+    {
+        try
+        {
+            _isLoading = true;
+            _errorMessage = null;
+
+            // TODO: Call actual auth endpoint
+            // For now, simulate login
+            await Task.Delay(1000);
+
+            // Mock successful login
+            var mockToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+            TokenManager.SetToken(mockToken, DateTime.UtcNow.AddDays(30));
+
+            Console.WriteLine("[Login] Successfully logged in");
+            Navigation.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = "Invalid email or password. Please try again.";
+            Console.WriteLine($"[Login] Error: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void ContinueAsGuest()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private class LoginModel
+    {
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+        public bool RememberMe { get; set; } = false;
+    }
+}

@@ -11,6 +11,7 @@ using ACommerce.SharedKernel.AspNetCore.Controllers;
 using ACommerce.SharedKernel.Abstractions.Queries;
 using ACommerce.SharedKernel.CQRS.Queries;
 using ACommerce.SharedKernel.CQRS.Commands;
+using ACommerce.Marketing.Analytics.Services;
 
 namespace ACommerce.Catalog.Listings.Api.Controllers;
 
@@ -23,6 +24,7 @@ namespace ACommerce.Catalog.Listings.Api.Controllers;
 public class ProductListingsController : BaseCrudController<ProductListing, CreateProductListingDto, CreateProductListingDto, ProductListingResponseDto, CreateProductListingDto>
 {
         private readonly IMemoryCache _cache;
+        private readonly IMarketingEventTracker? _marketingTracker;
         private readonly bool _cacheEnabled;
         private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(10);
         private static readonly TimeSpan SearchCacheDuration = TimeSpan.FromMinutes(5);
@@ -39,9 +41,11 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
         public ProductListingsController(
                 IMediator mediator,
                 ILogger<ProductListingsController> logger,
-                IMemoryCache cache) : base(mediator, logger)
+                IMemoryCache cache,
+                IMarketingEventTracker? marketingTracker = null) : base(mediator, logger)
         {
                 _cache = cache;
+                _marketingTracker = marketingTracker;
                 // Cache disabled by default - set LISTINGS_CACHE_ENABLED=true to enable
                 _cacheEnabled = Environment.GetEnvironmentVariable("LISTINGS_CACHE_ENABLED")?.ToLower() == "true";
                 if (!_cacheEnabled)
@@ -97,6 +101,9 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
 
                                 var items = result.Items?.ToList() ?? new List<ProductListingResponseDto>();
                                 if (_cacheEnabled) _cache.Set(cacheKey, items, CacheDuration);
+
+                                // Track browse event
+                                await TrackSearchEventAsync(null, items.Count);
 
                                 return Ok(items);
                         }
@@ -593,8 +600,11 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
 
                                 // تخزين في الكاش
                                 if (_cacheEnabled) _cache.Set(cacheKey, result, SearchCacheDuration);
-                                _logger.LogInformation("Cached search results: {Count} items in {ElapsedMs}ms for key: {CacheKey}", 
+                                _logger.LogInformation("Cached search results: {Count} items in {ElapsedMs}ms for key: {CacheKey}",
                                         result.Items?.Count() ?? 0, stopwatch.ElapsedMilliseconds, cacheKey);
+
+                                // Track search event
+                                await TrackSearchEventAsync(request.SearchTerm, result.Items?.Count() ?? 0);
 
                                 return Ok(result);
                         }
@@ -651,5 +661,80 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                 // ملاحظة: MemoryCache لا يدعم مسح بالبادئة مباشرة
                 // في الإنتاج يفضل استخدام Redis مع SCAN/DEL
                 _logger.LogInformation("Search cache invalidation requested");
+        }
+
+        /// <summary>
+        /// الحصول على عرض محدد بالمعرف (مع تتبع ViewContent)
+        /// </summary>
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(ProductListingResponseDto), 200)]
+        [ProducesResponseType(404)]
+        public override async Task<ActionResult<ProductListingResponseDto>> GetById(
+                Guid id,
+                [FromQuery] List<string>? includes = null,
+                [FromQuery] bool includeDeleted = false)
+        {
+                var result = await base.GetById(id, includes, includeDeleted);
+
+                // Track ViewContent event if marketing tracker is available
+                if (result.Result is OkObjectResult okResult && okResult.Value is ProductListingResponseDto listing)
+                {
+                        if (_marketingTracker != null)
+                        {
+                                try
+                                {
+                                        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                                        await _marketingTracker.TrackViewContentAsync(new ViewContentTrackingRequest
+                                        {
+                                                ContentId = listing.Id.ToString(),
+                                                ContentName = listing.Title ?? listing.ProductName ?? "Listing",
+                                                ContentType = "listing",
+                                                Category = listing.CategoryName,
+                                                Value = listing.Price,
+                                                User = new UserTrackingContext
+                                                {
+                                                        UserId = userId,
+                                                        IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                                                        UserAgent = Request.Headers.UserAgent.ToString()
+                                                }
+                                        });
+                                }
+                                catch (Exception ex)
+                                {
+                                        _logger.LogWarning(ex, "Failed to track ViewContent for listing {ListingId}", id);
+                                }
+                        }
+                }
+
+                return result;
+        }
+
+        /// <summary>
+        /// تتبع حدث البحث (يُستدعى بعد البحث الناجح)
+        /// </summary>
+        private async Task TrackSearchEventAsync(string? searchTerm, int resultsCount)
+        {
+                if (_marketingTracker == null)
+                        return;
+
+                try
+                {
+                        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                        await _marketingTracker.TrackSearchAsync(new SearchTrackingRequest
+                        {
+                                SearchQuery = string.IsNullOrEmpty(searchTerm) ? "[browse]" : searchTerm,
+                                ResultsCount = resultsCount,
+                                User = new UserTrackingContext
+                                {
+                                        UserId = userId,
+                                        IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                                        UserAgent = Request.Headers.UserAgent.ToString()
+                                }
+                        });
+                }
+                catch (Exception ex)
+                {
+                        _logger.LogWarning(ex, "Failed to track Search event for query: {SearchTerm}", searchTerm);
+                }
         }
 }

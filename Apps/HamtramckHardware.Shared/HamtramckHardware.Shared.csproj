@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>HamtramckHardware.Shared</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<SupportedPlatform Include="browser" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.*" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- Reference to Template Library -->
+		<ProjectReference Include="..\..\Templates\ACommerce.Templates.Customer\ACommerce.Templates.Customer.csproj" />
+
+		<!-- Reference to Clients -->
+		<ProjectReference Include="..\..\libs\frontend\core\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
+		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Auth\ACommerce.Client.Auth.csproj" />
+		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Profiles\ACommerce.Client.Profiles.csproj" />
+
+		<!-- Catalog Clients -->
+		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Products\ACommerce.Client.Products.csproj" />
+		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Categories\ACommerce.Client.Categories.csproj" />
+
+		<!-- Sales Clients -->
+		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Orders\ACommerce.Client.Orders.csproj" />
+		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Cart\ACommerce.Client.Cart.csproj" />
+		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Payments\ACommerce.Client.Payments.csproj" />
+
+		<!-- Version Management Client -->
+		<ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Versions\ACommerce.Client.Versions.csproj" />
+
+		<!-- Reference to Localization -->
+		<ProjectReference Include="..\..\Modules\ACommerce.Localization\ACommerce.Localization.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Update="wwwroot\**" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+
+</Project>

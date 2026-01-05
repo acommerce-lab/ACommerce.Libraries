@@ -12,6 +12,7 @@ public sealed class ServiceCache
 	private readonly IMemoryCache _cache;
 	private readonly TimeSpan _defaultExpiration = TimeSpan.FromMinutes(5);
 	private readonly TimeSpan _staleExpiration = TimeSpan.FromHours(1);
+	private readonly TimeSpan _permanentExpiration = TimeSpan.FromDays(365); // للخدمات المحددة مسبقاً
 
 	public ServiceCache(IMemoryCache cache)
 	{
@@ -31,6 +32,19 @@ public sealed class ServiceCache
 
 		// Stale cache (1 ساعة) - للاستخدام عند فشل Registry
 		_cache.Set(staleCacheKey, endpoint, _staleExpiration);
+	}
+
+	/// <summary>
+	/// حفظ في Cache بشكل دائم (للخدمات المحددة مسبقاً)
+	/// </summary>
+	public void SetPermanent(string serviceName, ServiceEndpoint endpoint)
+	{
+		var cacheKey = GetCacheKey(serviceName);
+		var staleCacheKey = GetStaleCacheKey(serviceName);
+
+		// Cache دائم (سنة كاملة)
+		_cache.Set(cacheKey, endpoint, _permanentExpiration);
+		_cache.Set(staleCacheKey, endpoint, _permanentExpiration);
 	}
 
 	/// <summary>

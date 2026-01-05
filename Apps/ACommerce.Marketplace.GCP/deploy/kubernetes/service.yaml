@@ -1,0 +1,133 @@
+# =============================================================================
+# ACommerce Marketplace API - Service & Network Policy
+# =============================================================================
+#
+# Note: Ingress, SSL Certificate, and Backend/Frontend configs are in ingress.yaml
+#
+# =============================================================================
+
+---
+# =============================================================================
+# Service (ClusterIP for internal access)
+# =============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: acommerce-marketplace
+  labels:
+    app: acommerce-marketplace
+    app.kubernetes.io/name: acommerce-marketplace
+    app.kubernetes.io/component: api
+  annotations:
+    # Link to Backend Config (defined in ingress.yaml)
+    cloud.google.com/backend-config: '{"default": "acommerce-marketplace-backend"}'
+    # Enable container-native load balancing (NEG)
+    cloud.google.com/neg: '{"ingress": true}'
+spec:
+  type: ClusterIP
+  selector:
+    app: acommerce-marketplace
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+
+---
+# =============================================================================
+# Network Policy - Restrict ingress/egress traffic
+# =============================================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: acommerce-marketplace-network-policy
+  labels:
+    app: acommerce-marketplace
+    app.kubernetes.io/name: acommerce-marketplace
+    app.kubernetes.io/component: api
+spec:
+  podSelector:
+    matchLabels:
+      app: acommerce-marketplace
+  policyTypes:
+    - Ingress
+    - Egress
+
+  # Ingress Rules
+  ingress:
+    # Allow traffic from GKE Ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: gke-system
+      ports:
+        - protocol: TCP
+          port: 8080
+
+    # Allow traffic from same namespace (internal services)
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
+
+    # Allow health checks from GCP load balancer
+    - from:
+        - ipBlock:
+            cidr: 35.191.0.0/16  # GCP Health Check ranges
+        - ipBlock:
+            cidr: 130.211.0.0/22
+      ports:
+        - protocol: TCP
+          port: 8080
+
+  # Egress Rules
+  egress:
+    # Allow DNS resolution
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+    # Allow HTTPS (external APIs, GCP services)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 443
+
+    # Allow PostgreSQL (Cloud SQL)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # Allow SQL Server
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 1433
+
+    # Allow Redis (Memorystore)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 6379
+
+    # Allow GCP metadata server (for Workload Identity)
+    - to:
+        - ipBlock:
+            cidr: 169.254.169.254/32
+      ports:
+        - protocol: TCP
+          port: 80

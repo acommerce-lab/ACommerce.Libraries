@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using ACommerce.Payments.Abstractions.Contracts;
 using ACommerce.Payments.Abstractions.Models;
 using ACommerce.Payments.Abstractions.Enums;
+using ACommerce.Marketing.Analytics.Services;
 
 namespace ACommerce.Payments.Api.Controllers;
 
@@ -13,13 +15,19 @@ namespace ACommerce.Payments.Api.Controllers;
 public class PaymentsController : ControllerBase
 {
     private readonly IPaymentProvider _paymentProvider;
+    private readonly IMarketingEventTracker _marketingTracker;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<PaymentsController> _logger;
 
     public PaymentsController(
         IPaymentProvider paymentProvider,
+        IMarketingEventTracker marketingTracker,
+        IHttpContextAccessor httpContextAccessor,
         ILogger<PaymentsController> logger)
     {
         _paymentProvider = paymentProvider;
+        _marketingTracker = marketingTracker;
+        _httpContextAccessor = httpContextAccessor;
         _logger = logger;
     }
 
@@ -104,10 +112,42 @@ public class PaymentsController : ControllerBase
         {
             var result = await _paymentProvider.GetPaymentStatusAsync(paymentId, cancellationToken);
 
+            // إرسال حدث الشراء عند اكتمال الدفع بنجاح
+            if (result.Success && result.Status == PaymentStatus.Completed)
+            {
+                var userId = User.FindFirst("sub")?.Value ??
+                             User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ??
+                             "anonymous";
+
+                _logger.LogInformation("📊 Payment completed! Queuing purchase event for {PaymentId}", paymentId);
+
+                // Create user context with attribution data from headers
+                var userContext = AttributionHeaderReader.CreateFromRequest(
+                    _httpContextAccessor.HttpContext!,
+                    userId);
+
+                _logger.LogInformation("📊 Attribution data: Fbc={Fbc}, Fbp={Fbp}",
+                    userContext.Fbc ?? "(none)", userContext.Fbp ?? "(none)");
+
+                // إرسال للطابور الخلفي (لا يحجب)
+                await _marketingTracker.TrackPurchaseAsync(new PurchaseTrackingRequest
+                {
+                    TransactionId = paymentId,
+                    Value = result.Amount ?? 0,
+                    Currency = result.Currency ?? "SAR",
+                    ContentName = $"Payment {paymentId}",
+                    ContentIds = new[] { result.OrderId ?? paymentId },
+                    ContentType = "payment",
+                    User = userContext
+                });
+            }
+
             return Ok(new PaymentResponse
             {
                 Success = result.Success,
                 PaymentId = result.TransactionId,
+                Amount = result.Amount ?? 0,
+                Currency = result.Currency ?? string.Empty,
                 Status = result.Status.ToString(),
                 Message = result.ErrorMessage
             });

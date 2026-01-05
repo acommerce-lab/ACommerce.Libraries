@@ -1,48 +1,15 @@
+// Re-export from Client.Core for backward compatibility
+// New code should use ACommerce.Client.Core.Storage namespace directly
+global using IStorageService = ACommerce.Client.Core.Storage.IStorageService;
+global using InMemoryStorageService = ACommerce.Client.Core.Storage.InMemoryStorageService;
+
 namespace ACommerce.Templates.Customer.Services;
 
 /// <summary>
-/// Storage service interface for cross-platform storage
+/// هذا الملف يعيد تصدير IStorageService من Client.Core للتوافق العكسي
+/// الكود الجديد يجب أن يستخدم ACommerce.Client.Core.Storage مباشرة
 /// </summary>
-public interface IStorageService
+public static class StorageServiceAliases
 {
-    /// <summary>
-    /// Get a value from storage
-    /// </summary>
-    Task<string?> GetAsync(string key);
-
-    /// <summary>
-    /// Set a value in storage
-    /// </summary>
-    Task SetAsync(string key, string value);
-
-    /// <summary>
-    /// Remove a value from storage
-    /// </summary>
-    Task RemoveAsync(string key);
-}
-
-/// <summary>
-/// In-memory storage implementation (fallback for testing)
-/// </summary>
-public class InMemoryStorageService : IStorageService
-{
-    private readonly Dictionary<string, string> _storage = new();
-
-    public Task<string?> GetAsync(string key)
-    {
-        _storage.TryGetValue(key, out var value);
-        return Task.FromResult(value);
-    }
-
-    public Task SetAsync(string key, string value)
-    {
-        _storage[key] = value;
-        return Task.CompletedTask;
-    }
-
-    public Task RemoveAsync(string key)
-    {
-        _storage.Remove(key);
-        return Task.CompletedTask;
-    }
+    // Aliases are defined via global using above
 }
