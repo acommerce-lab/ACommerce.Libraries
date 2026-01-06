@@ -1719,6 +1719,7 @@ public class AshareSeedDataService
                 var repo = _repositoryFactory.CreateRepository<AppVersion>();
 
                 var existing = await repo.GetAllWithPredicateAsync();
+                var existingIds = existing.Select(v => v.Id).ToHashSet();
                 var existingVersions = existing
                         .Select(v => $"{v.ApplicationCode}:{v.VersionNumber}")
                         .ToHashSet();
@@ -1806,7 +1807,7 @@ public class AshareSeedDataService
                 foreach (var version in versions)
                 {
                         var key = $"{version.ApplicationCode}:{version.VersionNumber}";
-                        if (!existingVersions.Contains(key))
+                        if (!existingIds.Contains(version.Id) && !existingVersions.Contains(key))
                         {
                                 await repo.AddAsync(version);
                                 Console.WriteLine($"[Seed] Added app version: {version.ApplicationNameAr} v{version.VersionNumber} ({version.Status})");
