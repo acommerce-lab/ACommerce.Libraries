@@ -119,6 +119,11 @@ public class AshareSeedDataService
                 public static readonly Guid Parking = Guid.Parse("20000000-0000-0000-0004-000000000003");
                 public static readonly Guid WorkingHours = Guid.Parse("20000000-0000-0000-0004-000000000004");
                 public static readonly Guid Facilities = Guid.Parse("20000000-0000-0000-0004-000000000005");
+
+                // ═══════════════════════════════════════════════════════════════════
+                // License attributes (رقم الترخيص)
+                // ═══════════════════════════════════════════════════════════════════
+                public static readonly Guid LicenseNumber = Guid.Parse("20000000-0000-0000-0005-000000000001");
         }
 
         /// <summary>
@@ -136,6 +141,7 @@ public class AshareSeedDataService
                         AttributeIds.Price,           // السعر
                         AttributeIds.Duration,        // المدة
                         AttributeIds.TimeUnit,        // وحدة الوقت (شهر/أسبوع/يوم)
+                        AttributeIds.LicenseNumber,   // رقم الترخيص
                         AttributeIds.PropertyType,    // نوع العقار (فيلا/عمارة)
                         AttributeIds.UnitType,        // نوع الوحدة (شقة/استوديو/غرفة) - للعمارة فقط
                         AttributeIds.Floor,           // الطابق
@@ -207,6 +213,7 @@ public class AshareSeedDataService
                         AttributeIds.Price,
                         AttributeIds.Duration,
                         AttributeIds.TimeUnit,
+                        AttributeIds.LicenseNumber,   // رقم الترخيص
                         AttributeIds.PropertyType,    // عمارة فقط
                         AttributeIds.Floor,
                         AttributeIds.Area,
@@ -233,6 +240,7 @@ public class AshareSeedDataService
                         AttributeIds.Price,
                         AttributeIds.Duration,
                         AttributeIds.TimeUnit,
+                        AttributeIds.LicenseNumber,   // رقم الترخيص
                         AttributeIds.CommercialPropertyType, // محل/مجمع/مول
                         AttributeIds.Floor,
                         AttributeIds.Area,
@@ -1474,6 +1482,24 @@ public class AshareSeedDataService
                                         new() { Id = Guid.NewGuid(), Value = "generator", DisplayName = "مولد كهربائي", SortOrder = 14, CreatedAt = DateTime.UtcNow },
                                         new() { Id = Guid.NewGuid(), Value = "cctv", DisplayName = "كاميرات مراقبة", SortOrder = 15, CreatedAt = DateTime.UtcNow }
                                 }
+                        },
+                        // ═══════════════════════════════════════════════════════════════════
+                        // رقم الترخيص - مطلوب لعروض العقارات
+                        // ═══════════════════════════════════════════════════════════════════
+                        new()
+                        {
+                                Id = AttributeIds.LicenseNumber,
+                                Name = "رقم الترخيص",
+                                Code = "license_number",
+                                Type = AttributeType.Text,
+                                Description = "رقم ترخيص الإعلان العقاري من الهيئة العامة للعقار",
+                                IsRequired = false, // اختياري - يمكن استخدام ترخيص المنصة
+                                IsFilterable = false,
+                                IsVisibleInList = false,
+                                IsVisibleInDetail = true,
+                                SortOrder = 6, // بعد السعر مباشرة
+                                CreatedAt = DateTime.UtcNow,
+                                DefaultValue = null // القيمة الافتراضية تأتي من التهيئة
                         }
                 };
         }
