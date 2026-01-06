@@ -337,7 +337,7 @@ public class LocalizationService : BaseLocalizationService
 
         // Complaints & Support
         ar["Complaints"] = "الشكاوى والاقتراحات";
-        ar["MyComplaints"] = "شكاواي";
+        ar["MyComplaints"] = "التذاكر";
         ar["NewComplaint"] = "شكوى جديدة";
         ar["SubmitComplaint"] = "إرسال الشكوى";
         ar["ComplaintSubmitted"] = "تم إرسال الشكوى بنجاح";
