@@ -57,7 +57,7 @@
                 <div class="ashare-space-rating-large">
                     <i class="bi bi-star-fill"></i>
                     <span>@_space.Rating</span>
-                    <span class="ashare-reviews-count">(@_space.ReviewsCount تقييم)</span>
+                    <span class="ashare-reviews-count">(@_space.ReviewsCount @L["ReviewsCount"])</span>
                 </div>
             </div>
 
@@ -68,7 +68,7 @@
                 <span>@GetLocationDisplay()</span>
                 @if (_space.Latitude.HasValue && _space.Longitude.HasValue)
                 {
-                    <a href="#map" class="ashare-map-link">عرض الخريطة</a>
+                    <a href="#map" class="ashare-map-link">@L["ViewMap"]</a>
                 }
             </div>
 
@@ -80,11 +80,11 @@
                         <i class="bi bi-shield-check"></i>
                     </div>
                     <div class="ashare-license-info">
-                        <span class="ashare-license-label">ترخيص فال</span>
+                        <span class="ashare-license-label">@L["FaalLicense"]</span>
                         <span class="ashare-license-number" dir="ltr">@GetAttribute("license_number")</span>
                         @if (!GetBoolAttribute("has_owner_license"))
                         {
-                            <span class="ashare-license-note">ترخيص المنصة</span>
+                            <span class="ashare-license-note">@L["PlatformLicense"]</span>
                         }
                     </div>
                 </div>
@@ -103,35 +103,35 @@
                 {
                     <div class="ashare-stat">
                         <i class="bi bi-rulers"></i>
-                        <span>المساحة: @GetAttribute("area") م²</span>
+                        <span>@L["AreaLabel"]: @GetAttribute("area") @L["SquareMeter"]</span>
                     </div>
                 }
                 @if (HasAttribute("rooms_count"))
                 {
                     <div class="ashare-stat">
                         <i class="bi bi-door-open"></i>
-                        <span>@GetAttribute("rooms_count") غرف</span>
+                        <span>@GetAttribute("rooms_count") @L["RoomsLabel"]</span>
                     </div>
                 }
                 @if (HasAttribute("bathrooms_count"))
                 {
                     <div class="ashare-stat">
                         <i class="bi bi-droplet"></i>
-                        <span>@GetAttribute("bathrooms_count") حمام</span>
+                        <span>@GetAttribute("bathrooms_count") @L["BathroomsLabel"]</span>
                     </div>
                 }
                 @if (_space.Capacity > 0)
                 {
                     <div class="ashare-stat">
                         <i class="bi bi-people"></i>
-                        <span>السعة: @_space.Capacity شخص</span>
+                        <span>@L["Capacity"]: @_space.Capacity @L["PersonUnit"]</span>
                     </div>
                 }
                 @if (_space.Area > 0 && !HasAttribute("area"))
                 {
                     <div class="ashare-stat">
                         <i class="bi bi-rulers"></i>
-                        <span>المساحة: @_space.Area م²</span>
+                        <span>@L["AreaLabel"]: @_space.Area @L["SquareMeter"]</span>
                     </div>
                 }
             </div>
@@ -140,7 +140,7 @@
             @if (!string.IsNullOrEmpty(GetDescription()))
             {
                 <div class="ashare-section">
-                    <h2 class="ashare-section-title">الوصف</h2>
+                    <h2 class="ashare-section-title">@L["Description"]</h2>
                     <p class="ashare-description">@GetDescription()</p>
                 </div>
             }
@@ -152,7 +152,7 @@
             @if (propertyDetails.Any())
             {
                 <div class="ashare-section">
-                    <h2 class="ashare-section-title">تفاصيل العقار</h2>
+                    <h2 class="ashare-section-title">@L["PropertyDetails"]</h2>
                     <div class="ashare-details-list">
                         @foreach (var detail in propertyDetails)
                         {
@@ -172,7 +172,7 @@
             @if (amenities.Any())
             {
                 <div class="ashare-section">
-                    <h2 class="ashare-section-title">المرافق والخدمات</h2>
+                    <h2 class="ashare-section-title">@L["Amenities"]</h2>
                     <div class="ashare-amenities-list">
                         @foreach (var amenity in amenities)
                         {
@@ -189,7 +189,7 @@
             @if (HasPrice())
             {
                 <div class="ashare-section">
-                    <h2 class="ashare-section-title">السعر</h2>
+                    <h2 class="ashare-section-title">@L["Pricing"]</h2>
                     <div class="ashare-pricing-display">
                         <span class="ashare-price-amount">@GetPriceDisplay()</span>
                     </div>
@@ -200,7 +200,7 @@
             @if (_space.Rules?.Any() == true)
             {
                 <div class="ashare-section">
-                    <h2 class="ashare-section-title">القواعد والشروط</h2>
+                    <h2 class="ashare-section-title">@L["Rules"]</h2>
                     <ul class="ashare-rules-list">
                         @foreach (var rule in _space.Rules)
                         {
@@ -217,7 +217,7 @@
             @if (contactOptions.Any())
             {
                 <div class="ashare-section">
-                    <h2 class="ashare-section-title">طرق التواصل</h2>
+                    <h2 class="ashare-section-title">@L["ContactMethods"]</h2>
                     <div class="ashare-contact-options">
                         @foreach (var option in contactOptions)
                         {
@@ -236,14 +236,14 @@
                 <div class="ashare-section" id="map">
                     <h2 class="ashare-section-title">
                         <i class="bi bi-geo-alt-fill"></i>
-                        الموقع
+                        @L["Location"]
                     </h2>
                     <div class="ashare-location-card">
                         @* Mini Map *@
                         <div class="ashare-mini-map" id="detailsMap">
                             <div class="ashare-map-loading">
                                 <i class="bi bi-map"></i>
-                                <span>جاري تحميل الخريطة...</span>
+                                <span>@L["LoadingMap"]</span>
                             </div>
                         </div>
 
@@ -259,7 +259,7 @@
                         @* Open in Maps Button *@
                         <button class="ashare-open-maps-btn" @onclick="OpenInNativeMaps">
                             <i class="bi bi-box-arrow-up-right"></i>
-                            <span>فتح في تطبيق الخرائط</span>
+                            <span>@L["OpenInMapsApp"]</span>
                         </button>
                     </div>
                 </div>
@@ -267,14 +267,14 @@
 
             @* Listing Stats *@
             <div class="ashare-section ashare-listing-stats">
-                <h2 class="ashare-section-title">إحصائيات الإعلان</h2>
+                <h2 class="ashare-section-title">@L["ListingStats"]</h2>
                 <div class="ashare-stats-grid">
                     @if (_space.ViewCount > 0)
                     {
                         <div class="ashare-stat-card">
                             <i class="bi bi-eye"></i>
                             <span class="ashare-stat-value">@_space.ViewCount</span>
-                            <span class="ashare-stat-label">مشاهدة</span>
+                            <span class="ashare-stat-label">@L["ViewsCount"]</span>
                         </div>
                     }
                     @if (_space.CreatedAt != default)
@@ -282,23 +282,23 @@
                         <div class="ashare-stat-card">
                             <i class="bi bi-calendar-plus"></i>
                             <span class="ashare-stat-value">@GetRelativeDate(_space.CreatedAt)</span>
-                            <span class="ashare-stat-label">تاريخ الإضافة</span>
+                            <span class="ashare-stat-label">@L["DateAdded"]</span>
                         </div>
                     }
                     @if (_space.IsAvailable)
                     {
                         <div class="ashare-stat-card ashare-stat-available">
                             <i class="bi bi-check-circle"></i>
-                            <span class="ashare-stat-value">متاح</span>
-                            <span class="ashare-stat-label">الحالة</span>
+                            <span class="ashare-stat-value">@L["Available"]</span>
+                            <span class="ashare-stat-label">@L["Status"]</span>
                         </div>
                     }
                     else
                     {
                         <div class="ashare-stat-card ashare-stat-unavailable">
                             <i class="bi bi-x-circle"></i>
-                            <span class="ashare-stat-value">غير متاح</span>
-                            <span class="ashare-stat-label">الحالة</span>
+                            <span class="ashare-stat-value">@L["NotAvailable"]</span>
+                            <span class="ashare-stat-label">@L["Status"]</span>
                         </div>
                     }
                 </div>
@@ -306,7 +306,7 @@
 
             @* Owner Info *@
             <div class="ashare-section ashare-owner-section">
-                <h2 class="ashare-section-title">مالك المساحة</h2>
+                <h2 class="ashare-section-title">@L["SpaceOwner"]</h2>
                 <div class="ashare-owner-card">
                     <div class="ashare-owner-avatar">
                         @if (!string.IsNullOrEmpty(_ownerProfile?.Avatar))
@@ -322,22 +322,22 @@
                         <h3>@GetOwnerDisplayName()</h3>
                         @if (_ownerProfile?.CreatedAt != null && _ownerProfile.CreatedAt != default)
                         {
-                            <span>عضو منذ @_ownerProfile.CreatedAt.ToString("yyyy")</span>
+                            <span>@L["MemberSince"] @_ownerProfile.CreatedAt.ToString("yyyy")</span>
                         }
                         else if (_space.OwnerJoinDate != default)
                         {
-                            <span>عضو منذ @_space.OwnerJoinDate.ToString("yyyy")</span>
+                            <span>@L["MemberSince"] @_space.OwnerJoinDate.ToString("yyyy")</span>
                         }
                     </div>
                     @if (_isOwnListing)
                     {
-                        <span class="ac-badge ac-badge-primary">معلنك</span>
+                        <span class="ac-badge ac-badge-primary">@L["YourListing"]</span>
                     }
                     else
                     {
                         <button class="ac-btn ac-btn-secondary" @onclick="ContactOwner">
                             <i class="bi bi-chat"></i>
-                            تواصل
+                            @L["Contact"]
                         </button>
                     }
                 </div>
@@ -346,8 +346,8 @@
             @* Reviews *@
             <div class="ashare-section" id="reviews">
                 <div class="ashare-section-header">
-                    <h2 class="ashare-section-title">التقييمات</h2>
-                    <a href="/space/@SpaceId/reviews" class="ashare-view-all">عرض الكل</a>
+                    <h2 class="ashare-section-title">@L["Reviews"]</h2>
+                    <a href="/space/@SpaceId/reviews" class="ashare-view-all">@L["ViewAll"]</a>
                 </div>
                 @if (_reviews?.Any() == true)
                 {
@@ -375,7 +375,7 @@
                 }
                 else
                 {
-                    <p class="ashare-no-reviews">لا توجد تقييمات بعد</p>
+                    <p class="ashare-no-reviews">@L["NoReviews"]</p>
                 }
             </div>
         </div>
@@ -392,7 +392,7 @@
                 </div>
                 <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="StartBooking">
                     <i class="bi bi-calendar-check"></i>
-                    <span>احجز الآن</span>
+                    <span>@L["BookNow"]</span>
                 </button>
             </div>
         }
@@ -401,7 +401,7 @@
     {
         <div class="ashare-loading">
             <div class="ac-spinner"></div>
-            <span>جاري التحميل...</span>
+            <span>@L["Loading"]</span>
         </div>
     }
 </div>
