@@ -687,7 +687,12 @@
         ["deposit"] = "مبلغ التأمين",
         ["available_from"] = "متاح من",
         ["contact_phone"] = "رقم التواصل",
-        ["features"] = "المميزات"
+        ["features"] = "المميزات",
+
+        // License info (رقم الترخيص)
+        ["license_number"] = "رقم الترخيص",
+        ["requires_license"] = "يتطلب ترخيص",
+        ["has_owner_license"] = "ترخيص المالك"
     };
 
     // الخصائص المنطقية (مرافق) - يجب تجاهلها في قسم التفاصيل
@@ -698,7 +703,9 @@
         "has_gym", "gym", "has_security", "security", "has_garden", "garden",
         "has_balcony", "balcony", "has_storage", "storage", "has_maid_room", "maid_room",
         "has_driver_room", "driver_room", "is_phone_allowed", "is_whatsapp_allowed",
-        "is_messaging_allowed"
+        "is_messaging_allowed",
+        // License attributes (معروضة في البادج بالفعل)
+        "requires_license", "has_owner_license", "license_number"
     };
 
     private List<(string Label, string Value)> GetPropertyDetails()
