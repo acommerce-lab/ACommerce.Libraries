@@ -1,0 +1,258 @@
+{
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ",
+    "retry": "إعادة المحاولة",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "add": "إضافة",
+    "search": "بحث",
+    "filter": "تصفية",
+    "sort": "ترتيب",
+    "close": "إغلاق",
+    "back": "رجوع",
+    "next": "التالي",
+    "previous": "السابق",
+    "yes": "نعم",
+    "no": "لا",
+    "ok": "موافق",
+    "done": "تم",
+    "required": "مطلوب",
+    "optional": "اختياري",
+    "sar": "ريال",
+    "km": "كم",
+    "minutes": "دقيقة",
+    "free": "مجاني"
+  },
+
+  "restaurant": {
+    "status": {
+      "available": "متاح",
+      "busy": "مشغول",
+      "closed": "مغلق",
+      "unavailable": "غير متاح"
+    },
+    "info": {
+      "minimumOrder": "الحد الأدنى للطلب",
+      "deliveryFee": "رسوم التوصيل",
+      "estimatedTime": "الوقت المتوقع",
+      "distance": "المسافة",
+      "rating": "التقييم",
+      "reviews": "تقييم"
+    },
+    "messages": {
+      "closedToday": "المطعم مغلق اليوم",
+      "opensAt": "يفتح الساعة {time}",
+      "closedNow": "المطعم أغلق لهذا اليوم",
+      "onBreak": "المطعم في استراحة حتى {time}",
+      "notAcceptingOrders": "المطعم لا يستقبل طلبات جديدة حالياً",
+      "busyNow": "المطعم مشغول بطلبات كثيرة، يرجى المحاولة لاحقاً",
+      "outsideDeliveryRange": "موقعك خارج نطاق التوصيل",
+      "maxDeliveryRange": "الحد الأقصى للتوصيل هو {distance} كم",
+      "closingSoon": "ينغلق قريباً"
+    }
+  },
+
+  "order": {
+    "status": {
+      "cart": "في السلة",
+      "pendingConfirmation": "بانتظار التأكيد",
+      "waitingAcceptance": "بانتظار قبول المطعم",
+      "accepted": "تم القبول",
+      "rejected": "مرفوض",
+      "preparing": "قيد التحضير",
+      "ready": "جاهز",
+      "assignedToDriver": "بانتظار السائق",
+      "driverPickedUp": "مع السائق",
+      "onTheWay": "في الطريق",
+      "delivered": "تم التسليم",
+      "deliveryConfirmed": "تم تأكيد الاستلام",
+      "deliveryDisputed": "نزاع على التسليم",
+      "cancelled": "ملغي",
+      "refunded": "مسترجع"
+    },
+    "actions": {
+      "placeOrder": "إتمام الطلب",
+      "confirmOrder": "تأكيد الطلب",
+      "cancelOrder": "إلغاء الطلب",
+      "trackOrder": "تتبع الطلب",
+      "rateOrder": "تقييم الطلب",
+      "reorder": "طلب مرة أخرى",
+      "confirmDelivery": "تأكيد الاستلام",
+      "disputeDelivery": "لم يتم التسليم"
+    },
+    "labels": {
+      "orderNumber": "رقم الطلب",
+      "orderDate": "تاريخ الطلب",
+      "deliveryAddress": "عنوان التوصيل",
+      "subtotal": "المجموع الفرعي",
+      "deliveryFee": "رسوم التوصيل",
+      "discount": "الخصم",
+      "total": "المجموع الكلي",
+      "estimatedDelivery": "التسليم المتوقع",
+      "driver": "السائق",
+      "items": "العناصر",
+      "notes": "ملاحظات"
+    },
+    "messages": {
+      "enterOtp": "أدخل رمز التحقق المرسل إلى هاتفك",
+      "waitingRestaurant": "بانتظار قبول المطعم...",
+      "restaurantAccepted": "المطعم قبل طلبك",
+      "restaurantRejected": "المطعم رفض الطلب",
+      "orderPreparing": "طلبك قيد التحضير",
+      "orderReady": "طلبك جاهز!",
+      "driverOnTheWay": "السائق في الطريق إليك",
+      "orderDelivered": "تم تسليم طلبك"
+    }
+  },
+
+  "cart": {
+    "title": "السلة",
+    "empty": "السلة فارغة",
+    "emptyMessage": "لم تضف أي عناصر بعد",
+    "addItems": "تصفح المنيو",
+    "clearCart": "إفراغ السلة",
+    "checkout": "إتمام الطلب",
+    "minimumNotMet": "الحد الأدنى للطلب {amount} ريال",
+    "addMore": "أضف {amount} ريال للوصول للحد الأدنى",
+    "quantity": "الكمية",
+    "specialInstructions": "تعليمات خاصة",
+    "specialInstructionsPlaceholder": "مثال: بدون بصل"
+  },
+
+  "menu": {
+    "title": "المنيو",
+    "categories": "الأقسام",
+    "allItems": "جميع الأصناف",
+    "popular": "الأكثر طلباً",
+    "addToCart": "أضف للسلة",
+    "customize": "تخصيص",
+    "options": "الخيارات",
+    "addons": "الإضافات",
+    "size": "الحجم",
+    "price": "السعر",
+    "outOfStock": "غير متوفر"
+  },
+
+  "radar": {
+    "title": "صفحة الرادار",
+    "status": {
+      "open": "مفتوح",
+      "busy": "مشغول",
+      "closed": "مغلق"
+    },
+    "actions": {
+      "openRadar": "فتح استلام الطلبات",
+      "closeRadar": "إغلاق استلام الطلبات",
+      "setBusy": "تعيين كمشغول"
+    },
+    "newOrder": "طلب جديد!",
+    "accept": "قبول",
+    "reject": "رفض",
+    "secondsAgo": "منذ {seconds} ثانية",
+    "expiresIn": "ينتهي خلال {seconds} ثانية",
+    "pendingOrders": "طلبات معلقة",
+    "preparingOrders": "قيد التحضير",
+    "readyOrders": "جاهزة"
+  },
+
+  "driver": {
+    "title": "تطبيق السائق",
+    "assignedOrders": "الطلبات المعينة",
+    "noOrders": "لا توجد طلبات حالياً",
+    "scanBarcode": "مسح الباركود",
+    "pickupOrder": "استلام الطلب",
+    "startDelivery": "بدء التوصيل",
+    "confirmDelivery": "تأكيد التسليم",
+    "takePhoto": "التقاط صورة",
+    "addNotes": "إضافة ملاحظات",
+    "availability": {
+      "available": "متاح للطلبات",
+      "unavailable": "غير متاح",
+      "toggle": "تغيير الحالة"
+    },
+    "stats": {
+      "todayDeliveries": "توصيلات اليوم",
+      "totalDeliveries": "إجمالي التوصيلات",
+      "rating": "التقييم"
+    }
+  },
+
+  "employee": {
+    "title": "الموظفين",
+    "addEmployee": "إضافة موظف",
+    "roles": {
+      "driver": "سائق توصيل",
+      "cashier": "كاشير",
+      "manager": "مدير",
+      "preparer": "محضر طلبات"
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "suspended": "معلق"
+    },
+    "vehicleTypes": {
+      "motorcycle": "دراجة نارية",
+      "car": "سيارة",
+      "bicycle": "دراجة هوائية"
+    }
+  },
+
+  "deliveryZones": {
+    "title": "نطاقات التوصيل",
+    "addZone": "إضافة نطاق",
+    "zoneName": "اسم النطاق",
+    "minRadius": "من (كم)",
+    "maxRadius": "إلى (كم)",
+    "deliveryFee": "رسوم التوصيل",
+    "estimatedTime": "الوقت المتوقع",
+    "active": "نشط"
+  },
+
+  "schedule": {
+    "title": "ساعات العمل",
+    "days": {
+      "saturday": "السبت",
+      "sunday": "الأحد",
+      "monday": "الاثنين",
+      "tuesday": "الثلاثاء",
+      "wednesday": "الأربعاء",
+      "thursday": "الخميس",
+      "friday": "الجمعة"
+    },
+    "open": "مفتوح",
+    "closed": "مغلق",
+    "openTime": "وقت الفتح",
+    "closeTime": "وقت الإغلاق",
+    "breakTime": "فترة الاستراحة"
+  },
+
+  "rating": {
+    "title": "التقييم",
+    "rateRestaurant": "قيّم المطعم",
+    "rateDriver": "قيّم السائق",
+    "comment": "اكتب تعليقك (اختياري)",
+    "submit": "إرسال التقييم",
+    "thanks": "شكراً لتقييمك!"
+  },
+
+  "validation": {
+    "required": "هذا الحقل مطلوب",
+    "invalidPhone": "رقم الهاتف غير صحيح",
+    "invalidEmail": "البريد الإلكتروني غير صحيح",
+    "minLength": "يجب أن يكون على الأقل {min} أحرف",
+    "maxLength": "يجب ألا يتجاوز {max} أحرف"
+  },
+
+  "errors": {
+    "general": "حدث خطأ، يرجى المحاولة مرة أخرى",
+    "network": "خطأ في الاتصال بالإنترنت",
+    "notFound": "غير موجود",
+    "unauthorized": "غير مصرح",
+    "serverError": "خطأ في الخادم"
+  }
+}

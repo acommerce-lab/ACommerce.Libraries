@@ -1,0 +1,258 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "done": "Done",
+    "required": "Required",
+    "optional": "Optional",
+    "sar": "SAR",
+    "km": "km",
+    "minutes": "min",
+    "free": "Free"
+  },
+
+  "restaurant": {
+    "status": {
+      "available": "Available",
+      "busy": "Busy",
+      "closed": "Closed",
+      "unavailable": "Unavailable"
+    },
+    "info": {
+      "minimumOrder": "Minimum order",
+      "deliveryFee": "Delivery fee",
+      "estimatedTime": "Estimated time",
+      "distance": "Distance",
+      "rating": "Rating",
+      "reviews": "reviews"
+    },
+    "messages": {
+      "closedToday": "Restaurant is closed today",
+      "opensAt": "Opens at {time}",
+      "closedNow": "Restaurant has closed for today",
+      "onBreak": "Restaurant on break until {time}",
+      "notAcceptingOrders": "Restaurant is not accepting new orders",
+      "busyNow": "Restaurant is busy with many orders, please try again later",
+      "outsideDeliveryRange": "Your location is outside delivery range",
+      "maxDeliveryRange": "Maximum delivery range is {distance} km",
+      "closingSoon": "Closing soon"
+    }
+  },
+
+  "order": {
+    "status": {
+      "cart": "In Cart",
+      "pendingConfirmation": "Pending Confirmation",
+      "waitingAcceptance": "Waiting for Restaurant",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "preparing": "Preparing",
+      "ready": "Ready",
+      "assignedToDriver": "Assigned to Driver",
+      "driverPickedUp": "Picked Up",
+      "onTheWay": "On the Way",
+      "delivered": "Delivered",
+      "deliveryConfirmed": "Delivery Confirmed",
+      "deliveryDisputed": "Delivery Disputed",
+      "cancelled": "Cancelled",
+      "refunded": "Refunded"
+    },
+    "actions": {
+      "placeOrder": "Place Order",
+      "confirmOrder": "Confirm Order",
+      "cancelOrder": "Cancel Order",
+      "trackOrder": "Track Order",
+      "rateOrder": "Rate Order",
+      "reorder": "Reorder",
+      "confirmDelivery": "Confirm Delivery",
+      "disputeDelivery": "Not Delivered"
+    },
+    "labels": {
+      "orderNumber": "Order Number",
+      "orderDate": "Order Date",
+      "deliveryAddress": "Delivery Address",
+      "subtotal": "Subtotal",
+      "deliveryFee": "Delivery Fee",
+      "discount": "Discount",
+      "total": "Total",
+      "estimatedDelivery": "Estimated Delivery",
+      "driver": "Driver",
+      "items": "Items",
+      "notes": "Notes"
+    },
+    "messages": {
+      "enterOtp": "Enter the verification code sent to your phone",
+      "waitingRestaurant": "Waiting for restaurant to accept...",
+      "restaurantAccepted": "Restaurant accepted your order",
+      "restaurantRejected": "Restaurant rejected the order",
+      "orderPreparing": "Your order is being prepared",
+      "orderReady": "Your order is ready!",
+      "driverOnTheWay": "Driver is on the way",
+      "orderDelivered": "Your order has been delivered"
+    }
+  },
+
+  "cart": {
+    "title": "Cart",
+    "empty": "Cart is empty",
+    "emptyMessage": "You haven't added any items yet",
+    "addItems": "Browse Menu",
+    "clearCart": "Clear Cart",
+    "checkout": "Checkout",
+    "minimumNotMet": "Minimum order is {amount} SAR",
+    "addMore": "Add {amount} SAR to reach minimum",
+    "quantity": "Quantity",
+    "specialInstructions": "Special Instructions",
+    "specialInstructionsPlaceholder": "e.g., No onions"
+  },
+
+  "menu": {
+    "title": "Menu",
+    "categories": "Categories",
+    "allItems": "All Items",
+    "popular": "Popular",
+    "addToCart": "Add to Cart",
+    "customize": "Customize",
+    "options": "Options",
+    "addons": "Add-ons",
+    "size": "Size",
+    "price": "Price",
+    "outOfStock": "Out of Stock"
+  },
+
+  "radar": {
+    "title": "Radar Page",
+    "status": {
+      "open": "Open",
+      "busy": "Busy",
+      "closed": "Closed"
+    },
+    "actions": {
+      "openRadar": "Start Accepting Orders",
+      "closeRadar": "Stop Accepting Orders",
+      "setBusy": "Set as Busy"
+    },
+    "newOrder": "New Order!",
+    "accept": "Accept",
+    "reject": "Reject",
+    "secondsAgo": "{seconds}s ago",
+    "expiresIn": "Expires in {seconds}s",
+    "pendingOrders": "Pending Orders",
+    "preparingOrders": "Preparing",
+    "readyOrders": "Ready"
+  },
+
+  "driver": {
+    "title": "Driver App",
+    "assignedOrders": "Assigned Orders",
+    "noOrders": "No orders at the moment",
+    "scanBarcode": "Scan Barcode",
+    "pickupOrder": "Pickup Order",
+    "startDelivery": "Start Delivery",
+    "confirmDelivery": "Confirm Delivery",
+    "takePhoto": "Take Photo",
+    "addNotes": "Add Notes",
+    "availability": {
+      "available": "Available for Orders",
+      "unavailable": "Unavailable",
+      "toggle": "Toggle Status"
+    },
+    "stats": {
+      "todayDeliveries": "Today's Deliveries",
+      "totalDeliveries": "Total Deliveries",
+      "rating": "Rating"
+    }
+  },
+
+  "employee": {
+    "title": "Employees",
+    "addEmployee": "Add Employee",
+    "roles": {
+      "driver": "Delivery Driver",
+      "cashier": "Cashier",
+      "manager": "Manager",
+      "preparer": "Order Preparer"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "suspended": "Suspended"
+    },
+    "vehicleTypes": {
+      "motorcycle": "Motorcycle",
+      "car": "Car",
+      "bicycle": "Bicycle"
+    }
+  },
+
+  "deliveryZones": {
+    "title": "Delivery Zones",
+    "addZone": "Add Zone",
+    "zoneName": "Zone Name",
+    "minRadius": "From (km)",
+    "maxRadius": "To (km)",
+    "deliveryFee": "Delivery Fee",
+    "estimatedTime": "Estimated Time",
+    "active": "Active"
+  },
+
+  "schedule": {
+    "title": "Working Hours",
+    "days": {
+      "saturday": "Saturday",
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday"
+    },
+    "open": "Open",
+    "closed": "Closed",
+    "openTime": "Opening Time",
+    "closeTime": "Closing Time",
+    "breakTime": "Break Time"
+  },
+
+  "rating": {
+    "title": "Rating",
+    "rateRestaurant": "Rate Restaurant",
+    "rateDriver": "Rate Driver",
+    "comment": "Write a comment (optional)",
+    "submit": "Submit Rating",
+    "thanks": "Thank you for your rating!"
+  },
+
+  "validation": {
+    "required": "This field is required",
+    "invalidPhone": "Invalid phone number",
+    "invalidEmail": "Invalid email address",
+    "minLength": "Must be at least {min} characters",
+    "maxLength": "Must not exceed {max} characters"
+  },
+
+  "errors": {
+    "general": "An error occurred, please try again",
+    "network": "Network connection error",
+    "notFound": "Not found",
+    "unauthorized": "Unauthorized",
+    "serverError": "Server error"
+  }
+}

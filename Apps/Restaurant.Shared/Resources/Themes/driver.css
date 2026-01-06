@@ -1,0 +1,363 @@
+/* ===========================================
+   Restaurant Platform - Driver Theme
+   Color: Blue (Trust, Navigation)
+   =========================================== */
+
+@import url('variables.css');
+
+:root {
+  /* === Primary Colors (Blue) === */
+  --color-primary-50: #EFF6FF;
+  --color-primary-100: #DBEAFE;
+  --color-primary-200: #BFDBFE;
+  --color-primary-300: #93C5FD;
+  --color-primary-400: #60A5FA;
+  --color-primary-500: #3B82F6;
+  --color-primary-600: #2563EB;
+  --color-primary-700: #1D4ED8;
+  --color-primary-800: #1E40AF;
+  --color-primary-900: #1E3A8A;
+
+  /* === Theme Aliases === */
+  --color-primary: var(--color-primary-500);
+  --color-primary-light: var(--color-primary-100);
+  --color-primary-dark: var(--color-primary-700);
+
+  --color-background: var(--color-gray-50);
+  --color-surface: var(--color-white);
+  --color-text: var(--color-gray-900);
+  --color-text-secondary: var(--color-gray-600);
+  --color-text-muted: var(--color-gray-400);
+
+  --color-border: var(--color-gray-200);
+  --color-divider: var(--color-gray-100);
+}
+
+/* === Driver App Specific Styles === */
+
+/* Driver Header with Status */
+.driver-header {
+  background: linear-gradient(135deg, var(--color-primary-700), var(--color-primary-500));
+  color: var(--color-white);
+  padding: var(--spacing-4);
+  padding-top: calc(var(--spacing-4) + env(safe-area-inset-top));
+}
+
+.driver-status-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-3);
+  margin-top: var(--spacing-3);
+}
+
+.driver-status-label {
+  font-weight: var(--font-weight-semibold);
+}
+
+.driver-status-switch {
+  position: relative;
+  width: 56px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.driver-status-switch.active {
+  background: var(--color-success);
+}
+
+.driver-status-switch::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background: var(--color-white);
+  border-radius: var(--radius-full);
+  top: 2px;
+  left: 2px;
+  transition: transform var(--transition-fast);
+}
+
+.driver-status-switch.active::after {
+  transform: translateX(28px);
+}
+
+/* Driver Stats */
+.driver-stats {
+  display: flex;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+  background: var(--color-white);
+  margin: var(--spacing-4);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+}
+
+.driver-stat {
+  flex: 1;
+  text-align: center;
+}
+
+.driver-stat-value {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
+.driver-stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* Order Card for Driver */
+.driver-order-card {
+  background: var(--color-white);
+  margin: var(--spacing-4);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.driver-order-header {
+  background: var(--color-primary);
+  color: var(--color-white);
+  padding: var(--spacing-3) var(--spacing-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.driver-order-number {
+  font-weight: var(--font-weight-bold);
+}
+
+.driver-order-status {
+  font-size: var(--font-size-sm);
+  background: rgba(255, 255, 255, 0.2);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-md);
+}
+
+.driver-order-content {
+  padding: var(--spacing-4);
+}
+
+.driver-order-location {
+  display: flex;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+}
+
+.driver-order-location-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.driver-order-location-info {
+  flex: 1;
+}
+
+.driver-order-location-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-1);
+}
+
+.driver-order-location-address {
+  font-weight: var(--font-weight-medium);
+}
+
+/* Barcode Scanner */
+.barcode-scanner {
+  background: var(--color-gray-900);
+  padding: var(--spacing-6);
+  text-align: center;
+  color: var(--color-white);
+}
+
+.barcode-scanner-frame {
+  width: 250px;
+  height: 250px;
+  margin: 0 auto;
+  border: 3px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  position: relative;
+}
+
+.barcode-scanner-frame::before,
+.barcode-scanner-frame::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 2px;
+  background: var(--color-primary);
+  animation: scan 2s linear infinite;
+}
+
+@keyframes scan {
+  0%, 100% { top: 10%; }
+  50% { top: 90%; }
+}
+
+.barcode-scanner-hint {
+  margin-top: var(--spacing-4);
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-400);
+}
+
+/* Navigation Button */
+.btn-navigate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  background: var(--color-info);
+  color: var(--color-white);
+  border: none;
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--radius-lg);
+  font-weight: var(--font-weight-semibold);
+  width: 100%;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.btn-navigate:hover {
+  background: var(--color-info-dark);
+}
+
+/* Call Button */
+.btn-call {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  background: var(--color-success);
+  color: var(--color-white);
+  border: none;
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--radius-lg);
+  font-weight: var(--font-weight-semibold);
+  width: 100%;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.btn-call:hover {
+  background: var(--color-success-dark);
+}
+
+/* Delivery Confirmation */
+.delivery-confirmation {
+  padding: var(--spacing-4);
+}
+
+.delivery-photo-upload {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-8);
+  text-align: center;
+  margin-bottom: var(--spacing-4);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.delivery-photo-upload:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.delivery-photo-upload svg {
+  width: 48px;
+  height: 48px;
+  color: var(--color-gray-400);
+  margin-bottom: var(--spacing-2);
+}
+
+.delivery-photo-preview {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-4);
+}
+
+/* Bottom Action Bar */
+.driver-action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-white);
+  padding: var(--spacing-4);
+  padding-bottom: calc(var(--spacing-4) + env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.1);
+  z-index: var(--z-fixed);
+}
+
+.btn-primary-lg {
+  background: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  padding: var(--spacing-4);
+  border-radius: var(--radius-xl);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+  width: 100%;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.btn-primary-lg:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.btn-primary-lg:disabled {
+  background: var(--color-gray-300);
+  cursor: not-allowed;
+}
+
+/* Map Container */
+.map-container {
+  height: 200px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--spacing-4);
+  background: var(--color-gray-200);
+}
+
+/* Order Items Summary (Compact) */
+.order-items-compact {
+  background: var(--color-gray-50);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+}
+
+.order-items-compact-title {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-2);
+}
+
+.order-items-compact-list {
+  font-size: var(--font-size-sm);
+}
+
+.order-items-compact-item {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--spacing-1) 0;
+}

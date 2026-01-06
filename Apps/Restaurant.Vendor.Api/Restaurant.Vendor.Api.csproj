@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Restaurant.Vendor.Api</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Restaurant.Core\Restaurant.Core.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.Infrastructure.EFCores\ACommerce.SharedKernel.Infrastructure.EFCores.csproj" />
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.JWT\ACommerce.Authentication.JWT.csproj" />
+    <ProjectReference Include="..\..\libs\backend\marketplace\ACommerce.Vendors.Api\ACommerce.Vendors.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Products.Api\ACommerce.Catalog.Products.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Listings.Api\ACommerce.Catalog.Listings.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Orders.Api\ACommerce.Orders.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Realtime.SignalR\ACommerce.Realtime.SignalR.csproj" />
+  </ItemGroup>
+
+</Project>

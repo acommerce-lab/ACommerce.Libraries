@@ -1,0 +1,99 @@
+@using Restaurant.Core.Enums
+
+<div class="status-badge status-badge--@GetStatusClass()" style="background-color: @GetBackgroundColor(); color: @GetTextColor();">
+    <span class="status-badge-dot" style="background-color: @GetDotColor();"></span>
+    <span class="status-badge-text">@GetStatusText()</span>
+</div>
+
+@code {
+    [Parameter]
+    public RestaurantAvailabilityStatus Status { get; set; }
+
+    [Parameter]
+    public string? CustomMessage { get; set; }
+
+    [Parameter]
+    public bool ShowDot { get; set; } = true;
+
+    private string GetStatusClass() => Status switch
+    {
+        RestaurantAvailabilityStatus.Available => "available",
+        RestaurantAvailabilityStatus.Busy => "busy",
+        RestaurantAvailabilityStatus.Closed => "closed",
+        RestaurantAvailabilityStatus.Unavailable => "unavailable",
+        _ => "closed"
+    };
+
+    private string GetStatusText()
+    {
+        if (!string.IsNullOrEmpty(CustomMessage))
+            return CustomMessage;
+
+        return Status switch
+        {
+            RestaurantAvailabilityStatus.Available => "متاح",
+            RestaurantAvailabilityStatus.Busy => "مشغول",
+            RestaurantAvailabilityStatus.Closed => "مغلق",
+            RestaurantAvailabilityStatus.Unavailable => "غير متاح",
+            _ => "غير معروف"
+        };
+    }
+
+    private string GetBackgroundColor() => Status switch
+    {
+        RestaurantAvailabilityStatus.Available => "#DCFCE7",
+        RestaurantAvailabilityStatus.Busy => "#FEF3C7",
+        RestaurantAvailabilityStatus.Closed => "#FEE2E2",
+        RestaurantAvailabilityStatus.Unavailable => "#F3F4F6",
+        _ => "#F3F4F6"
+    };
+
+    private string GetTextColor() => Status switch
+    {
+        RestaurantAvailabilityStatus.Available => "#16A34A",
+        RestaurantAvailabilityStatus.Busy => "#D97706",
+        RestaurantAvailabilityStatus.Closed => "#DC2626",
+        RestaurantAvailabilityStatus.Unavailable => "#6B7280",
+        _ => "#6B7280"
+    };
+
+    private string GetDotColor() => Status switch
+    {
+        RestaurantAvailabilityStatus.Available => "#22C55E",
+        RestaurantAvailabilityStatus.Busy => "#F59E0B",
+        RestaurantAvailabilityStatus.Closed => "#EF4444",
+        RestaurantAvailabilityStatus.Unavailable => "#6B7280",
+        _ => "#6B7280"
+    };
+}
+
+<style>
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 9999px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .status-badge-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+
+    .status-badge--available .status-badge-dot {
+        animation: pulse-dot 2s infinite;
+    }
+
+    @@keyframes pulse-dot {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+</style>

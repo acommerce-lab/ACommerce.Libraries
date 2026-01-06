@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Restaurant.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
+    <ProjectReference Include="..\..\libs\backend\marketplace\ACommerce.Vendors\ACommerce.Vendors.csproj" />
+    <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Orders\ACommerce.Orders.csproj" />
+    <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Listings\ACommerce.Catalog.Listings.csproj" />
+  </ItemGroup>
+
+</Project>

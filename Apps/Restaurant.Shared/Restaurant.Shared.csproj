@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Restaurant.Shared</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Restaurant.Core\Restaurant.Core.csproj" />
+    <ProjectReference Include="..\..\libs\frontend\core\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
+    <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Auth\ACommerce.Client.Auth.csproj" />
+    <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Vendors\ACommerce.Client.Vendors.csproj" />
+    <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Products\ACommerce.Client.Products.csproj" />
+    <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Categories\ACommerce.Client.Categories.csproj" />
+    <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.ProductListings\ACommerce.Client.ProductListings.csproj" />
+    <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Cart\ACommerce.Client.Cart.csproj" />
+    <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Orders\ACommerce.Client.Orders.csproj" />
+    <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Notifications\ACommerce.Client.Notifications.csproj" />
+    <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Locations\ACommerce.Client.Locations.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Localization\*.json" />
+    <Content Include="Resources\Themes\*.css" />
+  </ItemGroup>
+
+</Project>
