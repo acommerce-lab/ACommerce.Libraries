@@ -337,7 +337,7 @@ public class LocalizationService : BaseLocalizationService
 
         // Complaints & Support
         ar["Complaints"] = "الشكاوى والاقتراحات";
-        ar["MyComplaints"] = "شكاواي";
+        ar["MyComplaints"] = "التذاكر";
         ar["NewComplaint"] = "شكوى جديدة";
         ar["SubmitComplaint"] = "إرسال الشكوى";
         ar["ComplaintSubmitted"] = "تم إرسال الشكوى بنجاح";
@@ -444,6 +444,188 @@ public class LocalizationService : BaseLocalizationService
         ar["TypeRequired"] = "نوع الطلب مطلوب";
         ar["CategoryRequired"] = "التصنيف مطلوب";
         ar["DescriptionMinLength"] = "الوصف يجب أن يكون 10 أحرف على الأقل";
+
+        // Space Details Page
+        ar["ReviewsCount"] = "تقييم";
+        ar["FaalLicense"] = "ترخيص فال";
+        ar["PlatformLicense"] = "ترخيص المنصة";
+        ar["AreaLabel"] = "المساحة";
+        ar["RoomsLabel"] = "غرف";
+        ar["BathroomsLabel"] = "حمام";
+        ar["PropertyDetails"] = "تفاصيل العقار";
+        ar["ContactMethods"] = "طرق التواصل";
+        ar["Location"] = "الموقع";
+        ar["LoadingMap"] = "جاري تحميل الخريطة...";
+        ar["OpenInMapsApp"] = "فتح في تطبيق الخرائط";
+        ar["ListingStats"] = "إحصائيات الإعلان";
+        ar["ViewsCount"] = "مشاهدة";
+        ar["DateAdded"] = "تاريخ الإضافة";
+        ar["Available"] = "متاح";
+        ar["NotAvailable"] = "غير متاح";
+        ar["Status"] = "الحالة";
+        ar["SpaceOwner"] = "مالك المساحة";
+        ar["YourListing"] = "معلنك";
+        ar["ViewAll"] = "عرض الكل";
+        ar["NotSpecified"] = "غير محدد";
+        ar["ExploreSpaces"] = "استكشف المساحات";
+
+        // Property Attributes Labels
+        ar["AttrPropertyType"] = "نوع العقار";
+        ar["AttrUnitType"] = "نوع الوحدة";
+        ar["AttrArea"] = "المساحة";
+        ar["AttrRoomsCount"] = "عدد الغرف";
+        ar["AttrBathroomsCount"] = "عدد الحمامات";
+        ar["AttrFloorNumber"] = "الطابق";
+        ar["AttrBuildingAge"] = "عمر المبنى";
+        ar["AttrFurnished"] = "مفروش";
+        ar["AttrCity"] = "المدينة";
+        ar["AttrDistrict"] = "الحي";
+        ar["AttrStreet"] = "الشارع";
+        ar["AttrRentType"] = "نوع الإيجار";
+        ar["AttrTimeUnit"] = "وحدة الوقت";
+        ar["AttrDuration"] = "المدة";
+        ar["AttrBillType"] = "نوع الفاتورة";
+        ar["AttrPrice"] = "السعر";
+        ar["AttrCapacity"] = "السعة";
+        ar["AttrBedsCount"] = "عدد الأسرّة";
+        ar["AttrLivingRoomsCount"] = "عدد الصالات";
+        ar["AttrKitchenCount"] = "عدد المطابخ";
+        ar["AttrParkingSpaces"] = "مواقف السيارات";
+        ar["AttrFacade"] = "الواجهة";
+        ar["AttrView"] = "الإطلالة";
+        ar["AttrElectricity"] = "الكهرباء";
+        ar["AttrWater"] = "المياه";
+        ar["AttrGas"] = "الغاز";
+        ar["AttrFeatures"] = "المميزات";
+
+        // Booking Create Page
+        ar["RentLabel"] = "إيجار";
+        ar["DepositLabel"] = "العربون";
+        ar["AmountRequiredNow"] = "المبلغ المطلوب الآن";
+        ar["HowProtectionWorks"] = "كيف تعمل الحماية؟";
+        ar["PayDeposit"] = "ادفع العربون";
+        ar["PayDepositDescription"] = "ادفع العربون الآن وسيتم حفظه في حسابك المحمي";
+        ar["ContactAdvertiser"] = "تواصل مع المعلن";
+        ar["ContactAdvertiserDescription"] = "تواصل مع المعلن واتفق على تفاصيل العقد والمعاينة";
+        ar["ConfirmOrRefund"] = "أكد الاتفاق أو استرد";
+        ar["ConfirmOrRefundDescription"] = "بعد الاتفاق، أكد الحجز ليتم تحويل العربون للمعلن، أو استرده فوراً";
+        ar["ImportantNotes"] = "ملاحظات مهمة";
+        ar["DepositFullyRefundable"] = "العربون <strong>مسترد بالكامل</strong> في حال عدم الاتفاق";
+        ar["NoTransferWithoutConfirmation"] = "لا يتم تحويل أي مبلغ للمعلن إلا <strong>بعد تأكيدك</strong>";
+        ar["InstantRefund"] = "يمكنك <strong>الاسترداد الفوري</strong> بضغطة زر بدون تعقيدات";
+        ar["RemainingRentOnDelivery"] = "باقي الإيجار يتم دفعه <strong>مباشرة للمعلن</strong> عند التسليم";
+        ar["AgreeToTerms"] = "أوافق على";
+        ar["TermsOfUse"] = "شروط الاستخدام";
+        ar["PrivacyPolicy"] = "سياسة الخصوصية";
+        ar["And"] = "و";
+        ar["PreparingPayment"] = "جاري تجهيز الدفع...";
+        ar["PayDepositAmount"] = "دفع العربون";
+        ar["MustAgreeToTerms"] = "يجب الموافقة على الشروط والأحكام";
+        ar["PaymentVerificationFailed"] = "فشل التحقق من الدفع";
+        ar["PaymentFailed"] = "فشلت عملية الدفع";
+        ar["CouldNotOpenPaymentPage"] = "تعذر فتح صفحة الدفع";
+        ar["PaymentRequestFailed"] = "فشل في إنشاء طلب الدفع";
+        ar["PaymentError"] = "حدث خطأ أثناء تجهيز الدفع. حاول مرة أخرى.";
+        ar["BookingSaveFailed"] = "فشل في حفظ الحجز. يرجى التواصل مع الدعم.";
+        ar["BookingSaveError"] = "حدث خطأ أثناء حفظ الحجز. يرجى المحاولة مرة أخرى.";
+
+        // Rent Types
+        ar["RentMonthly"] = "شهري";
+        ar["RentYearly"] = "سنوي";
+        ar["RentDaily"] = "يومي";
+        ar["RentWeekly"] = "أسبوعي";
+        ar["RentHourly"] = "بالساعة";
+        ar["MonthUnit"] = "شهر";
+
+        // Create Listing Page
+        ar["SubscriptionRequiredTitle"] = "لإنشاء عروض، تحتاج للاشتراك في إحدى الباقات";
+        ar["SubscriptionRequiredDescription"] = "اختر الباقة المناسبة لك للبدء في نشر عروضك";
+        ar["ListingsCount"] = "عرض";
+        ar["Unlimited"] = "غير محدود";
+        ar["ChoosePlan"] = "اختر باقتك";
+        ar["SubscriptionRequired"] = "اشتراك مطلوب";
+        ar["UpgradePlanRequired"] = "ترقية الباقة";
+        ar["LoadingPlans"] = "جاري تحميل الباقات...";
+        ar["Recommended"] = "موصى به";
+        ar["PerMonth"] = "شهري";
+        ar["UnlimitedListings"] = "عدد غير محدود";
+        ar["ListingsFormat"] = "{0} عروض";
+        ar["CommissionFormat"] = "{0}% عمولة";
+        ar["SelectPlan"] = "اختيار الباقة";
+        ar["GoBack"] = "رجوع";
+        ar["NoPlansAvailable"] = "لا توجد باقات متاحة حالياً";
+        ar["ListingCreationError"] = "حدث خطأ أثناء إنشاء العرض. حاول مرة أخرى.";
+        ar["AttributesLoadError"] = "حدث خطأ أثناء تحميل الخصائص";
+
+        // Favorites Page
+        ar["PersonUnit"] = "شخص";
+        ar["NoFavoritesTitle"] = "لا توجد مساحات مفضلة";
+        ar["NoFavoritesDescription"] = "أضف المساحات التي تعجبك لتجدها بسهولة لاحقاً";
+
+        // Chat
+        ar["DefaultUserName"] = "مستخدم";
+
+        // Form Components
+        ar["SelectOption"] = "اختر";
+        ar["NoAttributesToDisplay"] = "لا توجد خصائص للعرض";
+        ar["RepliesCount"] = "رد";
+        ar["View"] = "عرض";
+        ar["New"] = "جديد";
+        ar["Featured"] = "مميز";
+        ar["AddToCart"] = "إضافة للسلة";
+        ar["AddToWishlist"] = "إضافة للمفضلة";
+        ar["InStock"] = "متوفر";
+        ar["OutOfStock"] = "غير متوفر";
+        ar["SearchProducts"] = "ابحث عن منتجات...";
+
+        // Address Form Labels
+        ar["AddressLabel"] = "اسم العنوان";
+        ar["AddressLabelPlaceholder"] = "مثال: المنزل، العمل...";
+        ar["CountryLabel"] = "الدولة";
+        ar["RegionLabel"] = "المنطقة";
+        ar["CityLabel"] = "المدينة";
+        ar["NeighborhoodLabel"] = "الحي";
+        ar["StreetLabel"] = "الشارع";
+        ar["StreetPlaceholder"] = "اسم الشارع";
+        ar["BuildingNumberLabel"] = "رقم المبنى";
+        ar["FloorLabel"] = "الطابق";
+        ar["FloorPlaceholder"] = "رقم الطابق";
+        ar["ApartmentLabel"] = "الشقة";
+        ar["ApartmentPlaceholder"] = "رقم الشقة";
+        ar["PostalCodeLabel"] = "الرمز البريدي";
+        ar["AdditionalInfoLabel"] = "ملاحظات إضافية";
+        ar["AdditionalInfoPlaceholder"] = "تفاصيل إضافية للتوصيل...";
+        ar["LatitudeLabel"] = "خط العرض";
+        ar["LongitudeLabel"] = "خط الطول";
+        ar["GetCurrentLocation"] = "تحديد موقعي الحالي";
+        ar["SetAsDefault"] = "تعيين كعنوان افتراضي";
+
+        // Empty State
+        ar["NoDataTitle"] = "لا توجد بيانات";
+
+        // Complaint Form
+        ar["ComplaintFormTitle"] = "تقديم شكوى أو اقتراح";
+        ar["RequestType"] = "نوع الطلب";
+        ar["BriefTitlePlaceholder"] = "اكتب عنوان موجز للمشكلة...";
+        ar["DetailedDescription"] = "الوصف التفصيلي";
+        ar["DetailedDescriptionPlaceholder"] = "اشرح المشكلة بالتفصيل...";
+        ar["RelatedTo"] = "مرتبط بـ";
+        ar["SelectRelatedEntity"] = "-- اختر --";
+        ar["Order"] = "طلب";
+        ar["Product"] = "منتج";
+        ar["Vendor"] = "بائع";
+        ar["IdNumber"] = "رقم / معرف";
+        ar["IdNumberPlaceholder"] = "أدخل الرقم أو المعرف...";
+        ar["Attachments"] = "المرفقات";
+        ar["DragFilesOrClick"] = "اسحب الملفات هنا أو انقر للاختيار";
+        ar["FileTypesLimit"] = "PNG, JPG, PDF, DOC (الحد الأقصى: 5 ملفات)";
+
+        // Navigation
+        ar["HomeNav"] = "الرئيسية";
+        ar["CategoriesNav"] = "التصنيفات";
+        ar["CartNav"] = "السلة";
+        ar["OrdersNav"] = "طلباتي";
+        ar["AccountNav"] = "حسابي";
     }
 
     private static void AddEnglishTranslations(Dictionary<string, string> en)
@@ -854,6 +1036,188 @@ public class LocalizationService : BaseLocalizationService
         en["TypeRequired"] = "Request type is required";
         en["CategoryRequired"] = "Category is required";
         en["DescriptionMinLength"] = "Description must be at least 10 characters";
+
+        // Space Details Page
+        en["ReviewsCount"] = "review";
+        en["FaalLicense"] = "Faal License";
+        en["PlatformLicense"] = "Platform License";
+        en["AreaLabel"] = "Area";
+        en["RoomsLabel"] = "rooms";
+        en["BathroomsLabel"] = "bathroom";
+        en["PropertyDetails"] = "Property Details";
+        en["ContactMethods"] = "Contact Methods";
+        en["Location"] = "Location";
+        en["LoadingMap"] = "Loading map...";
+        en["OpenInMapsApp"] = "Open in Maps App";
+        en["ListingStats"] = "Listing Statistics";
+        en["ViewsCount"] = "views";
+        en["DateAdded"] = "Date Added";
+        en["Available"] = "Available";
+        en["NotAvailable"] = "Not Available";
+        en["Status"] = "Status";
+        en["SpaceOwner"] = "Space Owner";
+        en["YourListing"] = "Your Listing";
+        en["ViewAll"] = "View All";
+        en["NotSpecified"] = "Not specified";
+        en["ExploreSpaces"] = "Explore Spaces";
+
+        // Property Attributes Labels
+        en["AttrPropertyType"] = "Property Type";
+        en["AttrUnitType"] = "Unit Type";
+        en["AttrArea"] = "Area";
+        en["AttrRoomsCount"] = "Rooms Count";
+        en["AttrBathroomsCount"] = "Bathrooms Count";
+        en["AttrFloorNumber"] = "Floor";
+        en["AttrBuildingAge"] = "Building Age";
+        en["AttrFurnished"] = "Furnished";
+        en["AttrCity"] = "City";
+        en["AttrDistrict"] = "District";
+        en["AttrStreet"] = "Street";
+        en["AttrRentType"] = "Rent Type";
+        en["AttrTimeUnit"] = "Time Unit";
+        en["AttrDuration"] = "Duration";
+        en["AttrBillType"] = "Bill Type";
+        en["AttrPrice"] = "Price";
+        en["AttrCapacity"] = "Capacity";
+        en["AttrBedsCount"] = "Beds Count";
+        en["AttrLivingRoomsCount"] = "Living Rooms";
+        en["AttrKitchenCount"] = "Kitchens";
+        en["AttrParkingSpaces"] = "Parking Spaces";
+        en["AttrFacade"] = "Facade";
+        en["AttrView"] = "View";
+        en["AttrElectricity"] = "Electricity";
+        en["AttrWater"] = "Water";
+        en["AttrGas"] = "Gas";
+        en["AttrFeatures"] = "Features";
+
+        // Booking Create Page
+        en["RentLabel"] = "Rent";
+        en["DepositLabel"] = "Deposit";
+        en["AmountRequiredNow"] = "Amount Required Now";
+        en["HowProtectionWorks"] = "How does protection work?";
+        en["PayDeposit"] = "Pay Deposit";
+        en["PayDepositDescription"] = "Pay the deposit now and it will be saved in your protected account";
+        en["ContactAdvertiser"] = "Contact Advertiser";
+        en["ContactAdvertiserDescription"] = "Contact the advertiser and agree on contract details and inspection";
+        en["ConfirmOrRefund"] = "Confirm or Refund";
+        en["ConfirmOrRefundDescription"] = "After agreement, confirm the booking to transfer the deposit, or get an instant refund";
+        en["ImportantNotes"] = "Important Notes";
+        en["DepositFullyRefundable"] = "Deposit is <strong>fully refundable</strong> if no agreement is reached";
+        en["NoTransferWithoutConfirmation"] = "No amount is transferred to the advertiser <strong>without your confirmation</strong>";
+        en["InstantRefund"] = "You can get an <strong>instant refund</strong> with one click";
+        en["RemainingRentOnDelivery"] = "Remaining rent is paid <strong>directly to the advertiser</strong> upon delivery";
+        en["AgreeToTerms"] = "I agree to";
+        en["TermsOfUse"] = "Terms of Use";
+        en["PrivacyPolicy"] = "Privacy Policy";
+        en["And"] = "and";
+        en["PreparingPayment"] = "Preparing payment...";
+        en["PayDepositAmount"] = "Pay Deposit";
+        en["MustAgreeToTerms"] = "You must agree to the terms and conditions";
+        en["PaymentVerificationFailed"] = "Payment verification failed";
+        en["PaymentFailed"] = "Payment failed";
+        en["CouldNotOpenPaymentPage"] = "Could not open payment page";
+        en["PaymentRequestFailed"] = "Failed to create payment request";
+        en["PaymentError"] = "An error occurred while preparing payment. Please try again.";
+        en["BookingSaveFailed"] = "Failed to save booking. Please contact support.";
+        en["BookingSaveError"] = "An error occurred while saving booking. Please try again.";
+
+        // Rent Types
+        en["RentMonthly"] = "Monthly";
+        en["RentYearly"] = "Yearly";
+        en["RentDaily"] = "Daily";
+        en["RentWeekly"] = "Weekly";
+        en["RentHourly"] = "Hourly";
+        en["MonthUnit"] = "month";
+
+        // Create Listing Page
+        en["SubscriptionRequiredTitle"] = "To create listings, you need to subscribe to a plan";
+        en["SubscriptionRequiredDescription"] = "Choose the right plan for you to start publishing your listings";
+        en["ListingsCount"] = "listing";
+        en["Unlimited"] = "Unlimited";
+        en["ChoosePlan"] = "Choose your plan";
+        en["SubscriptionRequired"] = "Subscription Required";
+        en["UpgradePlanRequired"] = "Upgrade Plan";
+        en["LoadingPlans"] = "Loading plans...";
+        en["Recommended"] = "Recommended";
+        en["PerMonth"] = "per month";
+        en["UnlimitedListings"] = "Unlimited listings";
+        en["ListingsFormat"] = "{0} listings";
+        en["CommissionFormat"] = "{0}% commission";
+        en["SelectPlan"] = "Select Plan";
+        en["GoBack"] = "Go Back";
+        en["NoPlansAvailable"] = "No plans available at the moment";
+        en["ListingCreationError"] = "An error occurred while creating the listing. Please try again.";
+        en["AttributesLoadError"] = "An error occurred while loading attributes";
+
+        // Favorites Page
+        en["PersonUnit"] = "person";
+        en["NoFavoritesTitle"] = "No favorite spaces";
+        en["NoFavoritesDescription"] = "Add spaces you like to find them easily later";
+
+        // Chat
+        en["DefaultUserName"] = "User";
+
+        // Form Components
+        en["SelectOption"] = "Select";
+        en["NoAttributesToDisplay"] = "No attributes to display";
+        en["RepliesCount"] = "reply";
+        en["View"] = "View";
+        en["New"] = "New";
+        en["Featured"] = "Featured";
+        en["AddToCart"] = "Add to Cart";
+        en["AddToWishlist"] = "Add to Wishlist";
+        en["InStock"] = "In Stock";
+        en["OutOfStock"] = "Out of Stock";
+        en["SearchProducts"] = "Search for products...";
+
+        // Address Form Labels
+        en["AddressLabel"] = "Address Name";
+        en["AddressLabelPlaceholder"] = "e.g., Home, Work...";
+        en["CountryLabel"] = "Country";
+        en["RegionLabel"] = "Region";
+        en["CityLabel"] = "City";
+        en["NeighborhoodLabel"] = "Neighborhood";
+        en["StreetLabel"] = "Street";
+        en["StreetPlaceholder"] = "Street name";
+        en["BuildingNumberLabel"] = "Building Number";
+        en["FloorLabel"] = "Floor";
+        en["FloorPlaceholder"] = "Floor number";
+        en["ApartmentLabel"] = "Apartment";
+        en["ApartmentPlaceholder"] = "Apartment number";
+        en["PostalCodeLabel"] = "Postal Code";
+        en["AdditionalInfoLabel"] = "Additional Notes";
+        en["AdditionalInfoPlaceholder"] = "Additional delivery details...";
+        en["LatitudeLabel"] = "Latitude";
+        en["LongitudeLabel"] = "Longitude";
+        en["GetCurrentLocation"] = "Get Current Location";
+        en["SetAsDefault"] = "Set as default address";
+
+        // Empty State
+        en["NoDataTitle"] = "No data";
+
+        // Complaint Form
+        en["ComplaintFormTitle"] = "Submit a complaint or suggestion";
+        en["RequestType"] = "Request Type";
+        en["BriefTitlePlaceholder"] = "Write a brief title for the issue...";
+        en["DetailedDescription"] = "Detailed Description";
+        en["DetailedDescriptionPlaceholder"] = "Describe the issue in detail...";
+        en["RelatedTo"] = "Related to";
+        en["SelectRelatedEntity"] = "-- Select --";
+        en["Order"] = "Order";
+        en["Product"] = "Product";
+        en["Vendor"] = "Vendor";
+        en["IdNumber"] = "ID / Number";
+        en["IdNumberPlaceholder"] = "Enter the ID or number...";
+        en["Attachments"] = "Attachments";
+        en["DragFilesOrClick"] = "Drag files here or click to select";
+        en["FileTypesLimit"] = "PNG, JPG, PDF, DOC (Max: 5 files)";
+
+        // Navigation
+        en["HomeNav"] = "Home";
+        en["CategoriesNav"] = "Categories";
+        en["CartNav"] = "Cart";
+        en["OrdersNav"] = "My Orders";
+        en["AccountNav"] = "My Account";
     }
 
     private static void AddUrduTranslations(Dictionary<string, string> ur)
@@ -1003,5 +1367,187 @@ public class LocalizationService : BaseLocalizationService
         ur["StatusInProgress"] = "جاری";
         ur["StatusResolved"] = "حل ہو گیا";
         ur["StatusClosed"] = "بند";
+
+        // Space Details Page
+        ur["ReviewsCount"] = "جائزہ";
+        ur["FaalLicense"] = "فال لائسنس";
+        ur["PlatformLicense"] = "پلیٹ فارم لائسنس";
+        ur["AreaLabel"] = "رقبہ";
+        ur["RoomsLabel"] = "کمرے";
+        ur["BathroomsLabel"] = "باتھ روم";
+        ur["PropertyDetails"] = "جائیداد کی تفصیلات";
+        ur["ContactMethods"] = "رابطے کے طریقے";
+        ur["Location"] = "مقام";
+        ur["LoadingMap"] = "نقشہ لوڈ ہو رہا ہے...";
+        ur["OpenInMapsApp"] = "نقشے کی ایپ میں کھولیں";
+        ur["ListingStats"] = "اشتہار کے اعدادوشمار";
+        ur["ViewsCount"] = "مشاہدات";
+        ur["DateAdded"] = "شامل کرنے کی تاریخ";
+        ur["Available"] = "دستیاب";
+        ur["NotAvailable"] = "دستیاب نہیں";
+        ur["Status"] = "حیثیت";
+        ur["SpaceOwner"] = "جگہ کا مالک";
+        ur["YourListing"] = "آپ کا اشتہار";
+        ur["ViewAll"] = "سب دیکھیں";
+        ur["NotSpecified"] = "متعین نہیں";
+        ur["ExploreSpaces"] = "جگہیں دریافت کریں";
+
+        // Property Attributes Labels
+        ur["AttrPropertyType"] = "جائیداد کی قسم";
+        ur["AttrUnitType"] = "یونٹ کی قسم";
+        ur["AttrArea"] = "رقبہ";
+        ur["AttrRoomsCount"] = "کمروں کی تعداد";
+        ur["AttrBathroomsCount"] = "باتھ رومز کی تعداد";
+        ur["AttrFloorNumber"] = "منزل";
+        ur["AttrBuildingAge"] = "عمارت کی عمر";
+        ur["AttrFurnished"] = "فرنشڈ";
+        ur["AttrCity"] = "شہر";
+        ur["AttrDistrict"] = "ضلع";
+        ur["AttrStreet"] = "گلی";
+        ur["AttrRentType"] = "کرائے کی قسم";
+        ur["AttrTimeUnit"] = "وقت کی اکائی";
+        ur["AttrDuration"] = "مدت";
+        ur["AttrBillType"] = "بل کی قسم";
+        ur["AttrPrice"] = "قیمت";
+        ur["AttrCapacity"] = "گنجائش";
+        ur["AttrBedsCount"] = "بستروں کی تعداد";
+        ur["AttrLivingRoomsCount"] = "لونج";
+        ur["AttrKitchenCount"] = "باورچی خانے";
+        ur["AttrParkingSpaces"] = "پارکنگ";
+        ur["AttrFacade"] = "سامنے";
+        ur["AttrView"] = "منظر";
+        ur["AttrElectricity"] = "بجلی";
+        ur["AttrWater"] = "پانی";
+        ur["AttrGas"] = "گیس";
+        ur["AttrFeatures"] = "خصوصیات";
+
+        // Booking Create Page
+        ur["RentLabel"] = "کرایہ";
+        ur["DepositLabel"] = "جمانت رقم";
+        ur["AmountRequiredNow"] = "ابھی درکار رقم";
+        ur["HowProtectionWorks"] = "تحفظ کیسے کام کرتا ہے؟";
+        ur["PayDeposit"] = "جمانت ادا کریں";
+        ur["PayDepositDescription"] = "ابھی جمانت ادا کریں اور یہ آپ کے محفوظ اکاؤنٹ میں رکھی جائے گی";
+        ur["ContactAdvertiser"] = "مشتہر سے رابطہ کریں";
+        ur["ContactAdvertiserDescription"] = "مشتہر سے رابطہ کریں اور معاہدے اور معائنے پر اتفاق کریں";
+        ur["ConfirmOrRefund"] = "تصدیق کریں یا واپسی لیں";
+        ur["ConfirmOrRefundDescription"] = "اتفاق کے بعد، بکنگ کی تصدیق کریں یا فوری واپسی حاصل کریں";
+        ur["ImportantNotes"] = "اہم نوٹس";
+        ur["DepositFullyRefundable"] = "اتفاق نہ ہونے پر جمانت <strong>مکمل واپس</strong> ہے";
+        ur["NoTransferWithoutConfirmation"] = "آپ کی <strong>تصدیق کے بغیر</strong> کوئی رقم منتقل نہیں ہوتی";
+        ur["InstantRefund"] = "آپ ایک کلک سے <strong>فوری واپسی</strong> حاصل کر سکتے ہیں";
+        ur["RemainingRentOnDelivery"] = "باقی کرایہ <strong>براہ راست مشتہر کو</strong> دیا جاتا ہے";
+        ur["AgreeToTerms"] = "میں متفق ہوں";
+        ur["TermsOfUse"] = "استعمال کی شرائط";
+        ur["PrivacyPolicy"] = "پرائیویسی پالیسی";
+        ur["And"] = "اور";
+        ur["PreparingPayment"] = "ادائیگی تیار ہو رہی ہے...";
+        ur["PayDepositAmount"] = "جمانت ادا کریں";
+        ur["MustAgreeToTerms"] = "آپ کو شرائط سے اتفاق کرنا ہوگا";
+        ur["PaymentVerificationFailed"] = "ادائیگی کی تصدیق ناکام";
+        ur["PaymentFailed"] = "ادائیگی ناکام";
+        ur["CouldNotOpenPaymentPage"] = "ادائیگی کا صفحہ نہیں کھل سکا";
+        ur["PaymentRequestFailed"] = "ادائیگی کی درخواست ناکام";
+        ur["PaymentError"] = "ادائیگی میں خرابی۔ دوبارہ کوشش کریں۔";
+        ur["BookingSaveFailed"] = "بکنگ محفوظ نہیں ہو سکی۔ سپورٹ سے رابطہ کریں۔";
+        ur["BookingSaveError"] = "بکنگ محفوظ کرنے میں خرابی۔ دوبارہ کوشش کریں۔";
+
+        // Rent Types
+        ur["RentMonthly"] = "ماہانہ";
+        ur["RentYearly"] = "سالانہ";
+        ur["RentDaily"] = "روزانہ";
+        ur["RentWeekly"] = "ہفتہ وار";
+        ur["RentHourly"] = "فی گھنٹہ";
+        ur["MonthUnit"] = "ماہ";
+
+        // Create Listing Page
+        ur["SubscriptionRequiredTitle"] = "اشتہارات بنانے کے لیے، آپ کو سبسکرپشن کی ضرورت ہے";
+        ur["SubscriptionRequiredDescription"] = "اپنے اشتہارات شائع کرنے کے لیے صحیح پلان منتخب کریں";
+        ur["ListingsCount"] = "اشتہار";
+        ur["Unlimited"] = "لامحدود";
+        ur["ChoosePlan"] = "اپنا پلان منتخب کریں";
+        ur["SubscriptionRequired"] = "سبسکرپشن درکار ہے";
+        ur["UpgradePlanRequired"] = "پلان اپ گریڈ کریں";
+        ur["LoadingPlans"] = "پلان لوڈ ہو رہے ہیں...";
+        ur["Recommended"] = "تجویز کردہ";
+        ur["PerMonth"] = "فی ماہ";
+        ur["UnlimitedListings"] = "لامحدود اشتہارات";
+        ur["ListingsFormat"] = "{0} اشتہارات";
+        ur["CommissionFormat"] = "{0}% کمیشن";
+        ur["SelectPlan"] = "پلان منتخب کریں";
+        ur["GoBack"] = "واپس جائیں";
+        ur["NoPlansAvailable"] = "اس وقت کوئی پلان دستیاب نہیں";
+        ur["ListingCreationError"] = "اشتہار بنانے میں خرابی۔ دوبارہ کوشش کریں۔";
+        ur["AttributesLoadError"] = "خصوصیات لوڈ کرنے میں خرابی";
+
+        // Favorites Page
+        ur["PersonUnit"] = "شخص";
+        ur["NoFavoritesTitle"] = "کوئی پسندیدہ جگہ نہیں";
+        ur["NoFavoritesDescription"] = "جو جگہیں آپ کو پسند ہیں انہیں بعد میں آسانی سے تلاش کرنے کے لیے شامل کریں";
+
+        // Chat
+        ur["DefaultUserName"] = "صارف";
+
+        // Form Components
+        ur["SelectOption"] = "منتخب کریں";
+        ur["NoAttributesToDisplay"] = "کوئی خصوصیات نہیں";
+        ur["RepliesCount"] = "جواب";
+        ur["View"] = "دیکھیں";
+        ur["New"] = "نیا";
+        ur["Featured"] = "نمایاں";
+        ur["AddToCart"] = "کارٹ میں شامل کریں";
+        ur["AddToWishlist"] = "پسندیدہ میں شامل کریں";
+        ur["InStock"] = "دستیاب";
+        ur["OutOfStock"] = "دستیاب نہیں";
+        ur["SearchProducts"] = "مصنوعات تلاش کریں...";
+
+        // Address Form Labels
+        ur["AddressLabel"] = "پتے کا نام";
+        ur["AddressLabelPlaceholder"] = "مثال: گھر، دفتر...";
+        ur["CountryLabel"] = "ملک";
+        ur["RegionLabel"] = "علاقہ";
+        ur["CityLabel"] = "شہر";
+        ur["NeighborhoodLabel"] = "محلہ";
+        ur["StreetLabel"] = "گلی";
+        ur["StreetPlaceholder"] = "گلی کا نام";
+        ur["BuildingNumberLabel"] = "عمارت نمبر";
+        ur["FloorLabel"] = "منزل";
+        ur["FloorPlaceholder"] = "منزل نمبر";
+        ur["ApartmentLabel"] = "فلیٹ";
+        ur["ApartmentPlaceholder"] = "فلیٹ نمبر";
+        ur["PostalCodeLabel"] = "پوسٹل کوڈ";
+        ur["AdditionalInfoLabel"] = "اضافی نوٹس";
+        ur["AdditionalInfoPlaceholder"] = "ڈیلیوری کی اضافی تفصیلات...";
+        ur["LatitudeLabel"] = "عرض البلد";
+        ur["LongitudeLabel"] = "طول البلد";
+        ur["GetCurrentLocation"] = "موجودہ مقام حاصل کریں";
+        ur["SetAsDefault"] = "ڈیفالٹ پتہ مقرر کریں";
+
+        // Empty State
+        ur["NoDataTitle"] = "کوئی ڈیٹا نہیں";
+
+        // Complaint Form
+        ur["ComplaintFormTitle"] = "شکایت یا تجویز جمع کرائیں";
+        ur["RequestType"] = "درخواست کی قسم";
+        ur["BriefTitlePlaceholder"] = "مسئلے کا مختصر عنوان لکھیں...";
+        ur["DetailedDescription"] = "تفصیلی وضاحت";
+        ur["DetailedDescriptionPlaceholder"] = "مسئلے کی تفصیل بیان کریں...";
+        ur["RelatedTo"] = "متعلقہ";
+        ur["SelectRelatedEntity"] = "-- منتخب کریں --";
+        ur["Order"] = "آرڈر";
+        ur["Product"] = "مصنوعہ";
+        ur["Vendor"] = "فروش";
+        ur["IdNumber"] = "شناختی نمبر";
+        ur["IdNumberPlaceholder"] = "نمبر درج کریں...";
+        ur["Attachments"] = "منسلکات";
+        ur["DragFilesOrClick"] = "فائلیں یہاں ڈریگ کریں یا منتخب کریں";
+        ur["FileTypesLimit"] = "PNG, JPG, PDF, DOC (زیادہ سے زیادہ: 5 فائلیں)";
+
+        // Navigation
+        ur["HomeNav"] = "ہوم";
+        ur["CategoriesNav"] = "زمرے";
+        ur["CartNav"] = "کارٹ";
+        ur["OrdersNav"] = "میرے آرڈرز";
+        ur["AccountNav"] = "میرا اکاؤنٹ";
     }
 }
