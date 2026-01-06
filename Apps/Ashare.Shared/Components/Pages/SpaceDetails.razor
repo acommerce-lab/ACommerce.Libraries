@@ -73,7 +73,7 @@
             </div>
 
             @* رقم الترخيص - عرض بارز *@
-            @if (GetBoolAttribute("requires_license") && HasAttribute("license_number"))
+            @if (HasLicenseNumber())
             {
                 <div class="ashare-license-badge">
                     <div class="ashare-license-icon">
@@ -81,7 +81,7 @@
                     </div>
                     <div class="ashare-license-info">
                         <span class="ashare-license-label">رقم الترخيص</span>
-                        <span class="ashare-license-number">@GetAttribute("license_number")</span>
+                        <span class="ashare-license-number" dir="ltr">@GetAttribute("license_number")</span>
                         @if (!GetBoolAttribute("has_owner_license"))
                         {
                             <span class="ashare-license-note">ترخيص المنصة</span>
@@ -528,6 +528,18 @@
     {
         if (_space?.Attributes?.TryGetValue(key, out var value) == true && value != null)
         {
+            // Handle JsonElement from System.Text.Json deserialization
+            if (value is System.Text.Json.JsonElement jsonElement)
+            {
+                return jsonElement.ValueKind switch
+                {
+                    System.Text.Json.JsonValueKind.String => jsonElement.GetString() ?? "",
+                    System.Text.Json.JsonValueKind.Number => jsonElement.GetRawText(),
+                    System.Text.Json.JsonValueKind.True => "true",
+                    System.Text.Json.JsonValueKind.False => "false",
+                    _ => jsonElement.GetRawText()
+                };
+            }
             return value.ToString() ?? "";
         }
         return "";
@@ -535,12 +547,33 @@
 
     private bool GetBoolAttribute(string key)
     {
-        if (_space?.Attributes?.TryGetValue(key, out var value) == true)
+        if (_space?.Attributes?.TryGetValue(key, out var value) == true && value != null)
         {
             if (value is bool b) return b;
             if (value is string s) return s.ToLower() == "true" || s == "1";
+            // Handle JsonElement from System.Text.Json deserialization
+            if (value is System.Text.Json.JsonElement jsonElement)
+            {
+                if (jsonElement.ValueKind == System.Text.Json.JsonValueKind.True) return true;
+                if (jsonElement.ValueKind == System.Text.Json.JsonValueKind.False) return false;
+                if (jsonElement.ValueKind == System.Text.Json.JsonValueKind.String)
+                {
+                    var str = jsonElement.GetString()?.ToLower();
+                    return str == "true" || str == "1";
+                }
+            }
         }
         return false;
+    }
+
+    /// <summary>
+    /// التحقق من وجود رقم ترخيص صالح
+    /// </summary>
+    private bool HasLicenseNumber()
+    {
+        if (!HasAttribute("license_number")) return false;
+        var license = GetAttribute("license_number");
+        return !string.IsNullOrWhiteSpace(license) && license != "0";
     }
 
     private string GetDescription()
