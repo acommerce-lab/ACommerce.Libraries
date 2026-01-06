@@ -513,21 +513,21 @@ Built using ACommerce libraries with configuration-first approach:
         if (!skipSeeding)
         {
             Log.Information("Seeding initial data...");
-            //var seedService = scope.ServiceProvider.GetRequiredService<AshareSeedDataService>();
-            //await seedService.SeedAsync();
+            var seedService = scope.ServiceProvider.GetRequiredService<AshareSeedDataService>();
+            await seedService.SeedAsync();
 
             // بذر العروض من النظام القديم (تلقائياً)
             Log.Information("Seeding offers from old system...");
-            //var migrationService = scope.ServiceProvider.GetRequiredService<OffersMigrationService>();
-            //var migrationResult = await migrationService.SeedOffersFromStaticDataAsync();
-            //if (migrationResult.IsSuccess)
+            var migrationService = scope.ServiceProvider.GetRequiredService<OffersMigrationService>();
+            var migrationResult = await migrationService.SeedOffersFromStaticDataAsync();
+            if (migrationResult.IsSuccess)
             {
-                //Log.Information("✅ Offers seeded: {Migrated} migrated, {Skipped} skipped",
-                    //migrationResult.Migrated, migrationResult.Skipped);
+                Log.Information("✅ Offers seeded: {Migrated} migrated, {Skipped} skipped",
+                    migrationResult.Migrated, migrationResult.Skipped);
             }
-            //else
+            else
             {
-                //Log.Warning("⚠️ Offers seeding had errors: {Errors}", string.Join(", ", migrationResult.Errors));
+                Log.Warning("⚠️ Offers seeding had errors: {Errors}", string.Join(", ", migrationResult.Errors));
             }
         }
         else
