@@ -31,6 +31,7 @@
                 <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Profiles\ACommerce.Client.Profiles.csproj" />
                 <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Notifications\ACommerce.Client.Notifications.csproj" />
                 <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Locations\ACommerce.Client.Locations.csproj" />
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Files\ACommerce.Client.Files.csproj" />
         </ItemGroup>
 
 </Project>
