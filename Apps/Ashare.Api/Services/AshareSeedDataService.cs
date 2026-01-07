@@ -9,6 +9,7 @@ using ACommerce.LegalPages.Entities;
 using ACommerce.Versions.Entities;
 using ACommerce.Versions.Enums;
 using Ashare.Shared.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace Ashare.Api.Services;
 
@@ -19,6 +20,7 @@ namespace Ashare.Api.Services;
 public class AshareSeedDataService
 {
         private readonly IRepositoryFactory _repositoryFactory;
+        private readonly IConfiguration _configuration;
 
         // Pre-defined IDs for consistency
         public static class CategoryIds
@@ -256,9 +258,18 @@ public class AshareSeedDataService
                 }
         };
 
-        public AshareSeedDataService(IRepositoryFactory repositoryFactory)
+        public AshareSeedDataService(IRepositoryFactory repositoryFactory, IConfiguration configuration)
         {
                 _repositoryFactory = repositoryFactory;
+                _configuration = configuration;
+        }
+
+        /// <summary>
+        /// الحصول على رقم الترخيص الافتراضي من الإعدادات
+        /// </summary>
+        private string GetDefaultLicenseNumber()
+        {
+                return _configuration["Listings:DefaultLicenseNumber"] ?? "7200000000";
         }
 
         /// <summary>
@@ -517,14 +528,34 @@ public class AshareSeedDataService
 
                 var existing = await repo.GetAllWithPredicateAsync();
                 var existingIds = existing.Select(a => a.Id).ToHashSet();
+                var existingByCode = existing.ToDictionary(a => a.Code, a => a);
 
                 var attributes = GetAllAttributeDefinitions();
+
+                // تعيين القيمة الافتراضية لرقم الترخيص من الإعدادات
+                var licenseAttr = attributes.FirstOrDefault(a => a.Code == "license_number");
+                if (licenseAttr != null)
+                {
+                        licenseAttr.DefaultValue = GetDefaultLicenseNumber();
+                }
 
                 foreach (var attr in attributes)
                 {
                         if (!existingIds.Contains(attr.Id))
                         {
                                 await repo.AddAsync(attr);
+                        }
+                        else
+                        {
+                                // تحديث القيمة الافتراضية للخصائص الموجودة إذا تغيرت
+                                if (existingByCode.TryGetValue(attr.Code, out var existingAttr))
+                                {
+                                        if (attr.Code == "license_number" && existingAttr.DefaultValue != attr.DefaultValue)
+                                        {
+                                                existingAttr.DefaultValue = attr.DefaultValue;
+                                                await repo.UpdateAsync(existingAttr);
+                                        }
+                                }
                         }
                 }
         }
