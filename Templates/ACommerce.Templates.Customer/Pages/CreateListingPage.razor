@@ -5,6 +5,7 @@
 @using System.Net.Http.Json
 @using System.Net.Http.Headers
 @using ACommerce.Client.Auth
+@using ACommerce.Client.Files
 
 <div class="ac-page ac-create-listing-page">
     @* Header *@
@@ -828,6 +829,7 @@
     [Inject] private IJSRuntime? JS { get; set; }
     [Inject] private HttpClient? Http { get; set; }
     [Inject] private TokenManager? TokenManager { get; set; }
+    [Inject] private FilesClient? FilesClientService { get; set; }
 
     private async Task OpenInNativeMaps()
     {
@@ -908,8 +910,34 @@
 
                 try
                 {
-                    if (Http != null)
+                    if (FilesClientService != null)
                     {
+                        // Use FilesClient which properly handles service discovery and builds absolute URLs
+                        using var stream = file.OpenReadStream(MaxFileSize);
+                        Console.WriteLine($"[CreateListingPage] Uploading {file.Name} via FilesClient");
+
+                        var result = await FilesClientService.UploadMediaAsync(
+                            stream,
+                            file.Name,
+                            file.ContentType,
+                            "listings");
+
+                        if (result != null && !string.IsNullOrEmpty(result.Url))
+                        {
+                            Console.WriteLine($"[CreateListingPage] Upload successful: {result.Url}");
+                            Model.Images.Add(result.Url);
+                            StateHasChanged();
+                        }
+                        else
+                        {
+                            Console.WriteLine($"[CreateListingPage] Upload returned null or empty URL for {file.Name}");
+                            failedFiles++;
+                        }
+                    }
+                    else if (Http != null)
+                    {
+                        // Fallback to HttpClient if FilesClient is not available
+                        // Note: This requires HttpClient to have BaseAddress configured
                         using var stream = file.OpenReadStream(MaxFileSize);
                         using var content = new MultipartFormDataContent();
                         using var fileContent = new StreamContent(stream);
@@ -950,7 +978,7 @@
                     }
                     else
                     {
-                        Console.WriteLine("HttpClient not available, falling back to base64");
+                        Console.WriteLine("FilesClient and HttpClient not available, falling back to base64");
                         using var stream = file.OpenReadStream(MaxFileSize);
                         using var memoryStream = new MemoryStream();
                         await stream.CopyToAsync(memoryStream);
