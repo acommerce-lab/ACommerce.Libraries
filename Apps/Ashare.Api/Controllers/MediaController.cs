@@ -79,8 +79,15 @@ public class MediaController : ControllerBase
         {
             await using var stream = file.OpenReadStream();
             var objectName = await _storageProvider.SaveAsync(stream, file.FileName, safeDirectory, cancellationToken);
-            
-            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+
+            // Use X-Forwarded-Proto header if available (for load balancers/reverse proxies like Cloud Run)
+            // Otherwise fall back to Request.Scheme, but prefer HTTPS in production
+            var scheme = Request.Headers["X-Forwarded-Proto"].FirstOrDefault() ?? Request.Scheme;
+            if (scheme == "http" && !Request.Host.Host.Contains("localhost") && !Request.Host.Host.Contains("127.0.0.1"))
+            {
+                scheme = "https"; // Force HTTPS for production environments
+            }
+            var baseUrl = $"{scheme}://{Request.Host}";
             var proxyUrl = $"{baseUrl}/api/media/{objectName}";
 
             _logger.LogInformation("File uploaded successfully: {ObjectName}, ProxyUrl: {ProxyUrl}", objectName, proxyUrl);
@@ -148,8 +155,14 @@ public class MediaController : ControllerBase
             {
                 await using var stream = file.OpenReadStream();
                 var objectName = await _storageProvider.SaveAsync(stream, file.FileName, safeDirectory, cancellationToken);
-                
-                var baseUrl = $"{Request.Scheme}://{Request.Host}";
+
+                // Use X-Forwarded-Proto header if available (for load balancers/reverse proxies like Cloud Run)
+                var scheme = Request.Headers["X-Forwarded-Proto"].FirstOrDefault() ?? Request.Scheme;
+                if (scheme == "http" && !Request.Host.Host.Contains("localhost") && !Request.Host.Host.Contains("127.0.0.1"))
+                {
+                    scheme = "https";
+                }
+                var baseUrl = $"{scheme}://{Request.Host}";
                 var proxyUrl = $"{baseUrl}/api/media/{objectName}";
 
                 results.Add(new UploadResponse
