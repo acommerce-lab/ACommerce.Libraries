@@ -1,0 +1,187 @@
+@using Restaurant.Core.Enums
+
+<div class="restaurant-card @(CanOrder ? "" : "disabled")">
+    <div class="restaurant-image">
+        @if (!string.IsNullOrEmpty(ImageUrl))
+        {
+            <img src="@ImageUrl" alt="@Name" />
+        }
+        else
+        {
+            <div class="placeholder-image">
+                <i class="bi bi-shop"></i>
+            </div>
+        }
+        <div class="status-overlay">
+            <RestaurantStatusBadge Status="@AvailabilityStatus" />
+        </div>
+    </div>
+
+    <div class="restaurant-info">
+        <h3 class="restaurant-name">@Name</h3>
+
+        <div class="restaurant-meta">
+            @if (Rating > 0)
+            {
+                <span class="rating">
+                    <i class="bi bi-star-fill"></i>
+                    @Rating.ToString("F1")
+                </span>
+            }
+            <span class="cuisine">@CuisineType</span>
+        </div>
+
+        <div class="delivery-info">
+            <span class="delivery-time">
+                <i class="bi bi-clock"></i>
+                @EstimatedMinutes دقيقة
+            </span>
+            @if (DeliveryFee > 0)
+            {
+                <span class="delivery-fee">
+                    توصيل @DeliveryFee ر.س
+                </span>
+            }
+            else
+            {
+                <span class="delivery-fee free">
+                    توصيل مجاني
+                </span>
+            }
+        </div>
+
+        @if (!CanOrder)
+        {
+            <div class="unavailable-message">
+                @StatusMessage
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    [Parameter] public string Name { get; set; } = string.Empty;
+    [Parameter] public string ImageUrl { get; set; } = string.Empty;
+    [Parameter] public string CuisineType { get; set; } = string.Empty;
+    [Parameter] public decimal Rating { get; set; }
+    [Parameter] public int EstimatedMinutes { get; set; }
+    [Parameter] public decimal DeliveryFee { get; set; }
+    [Parameter] public RestaurantAvailabilityStatus AvailabilityStatus { get; set; }
+    [Parameter] public string StatusMessage { get; set; } = string.Empty;
+    [Parameter] public bool CanOrder { get; set; }
+}
+
+<style>
+    .restaurant-card {
+        background: white;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+    }
+
+    .restaurant-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+
+    .restaurant-card.disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .restaurant-card.disabled:hover {
+        transform: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .restaurant-image {
+        position: relative;
+        height: 150px;
+        background: #F3F4F6;
+    }
+
+    .restaurant-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .placeholder-image {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: #D1D5DB;
+    }
+
+    .status-overlay {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+    }
+
+    .restaurant-info {
+        padding: 1rem;
+    }
+
+    .restaurant-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem;
+        color: var(--text, #1F2937);
+    }
+
+    .restaurant-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .rating {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        color: #F59E0B;
+        font-weight: 500;
+    }
+
+    .cuisine {
+        color: var(--text-secondary, #6B7280);
+    }
+
+    .delivery-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 0.8rem;
+        color: var(--text-secondary, #6B7280);
+    }
+
+    .delivery-time {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .delivery-fee.free {
+        color: #22C55E;
+        font-weight: 500;
+    }
+
+    .unavailable-message {
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        background: #FEF2F2;
+        border-radius: 0.5rem;
+        color: #DC2626;
+        font-size: 0.8rem;
+        text-align: center;
+    }
+</style>

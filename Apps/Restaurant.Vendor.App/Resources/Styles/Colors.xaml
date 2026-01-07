@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Vendor Theme: Orange -->
+    <Color x:Key="Primary">#F97316</Color>
+    <Color x:Key="PrimaryDark">#EA580C</Color>
+    <Color x:Key="PrimaryLight">#FB923C</Color>
+    <Color x:Key="Secondary">#22C55E</Color>
+    <Color x:Key="Background">#FFF7ED</Color>
+    <Color x:Key="Surface">#FFFFFF</Color>
+    <Color x:Key="Error">#EF4444</Color>
+    <Color x:Key="Success">#22C55E</Color>
+    <Color x:Key="Warning">#F59E0B</Color>
+
+    <Color x:Key="TextPrimary">#1F2937</Color>
+    <Color x:Key="TextSecondary">#6B7280</Color>
+    <Color x:Key="Border">#E5E7EB</Color>
+
+    <Color x:Key="PageBackgroundColor">#FFF7ED</Color>
+
+</ResourceDictionary>
