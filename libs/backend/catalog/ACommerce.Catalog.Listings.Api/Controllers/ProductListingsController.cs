@@ -7,8 +7,10 @@ using Microsoft.Extensions.Logging;
 using ACommerce.Catalog.Listings.Entities;
 using ACommerce.Catalog.Listings.Enums;
 using ACommerce.Catalog.Listings.DTOs;
+using ACommerce.Catalog.Attributes.Entities;
 using ACommerce.SharedKernel.AspNetCore.Controllers;
 using ACommerce.SharedKernel.Abstractions.Queries;
+using ACommerce.SharedKernel.Abstractions.Repositories;
 using ACommerce.SharedKernel.CQRS.Queries;
 using ACommerce.SharedKernel.CQRS.Commands;
 using ACommerce.Marketing.Analytics.Services;
@@ -25,6 +27,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
 {
         private readonly IMemoryCache _cache;
         private readonly IMarketingEventTracker? _marketingTracker;
+        private readonly IAsyncRepository<AttributeDefinition>? _attributeRepository;
         private readonly bool _cacheEnabled;
         private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(10);
         private static readonly TimeSpan SearchCacheDuration = TimeSpan.FromMinutes(5);
@@ -42,10 +45,12 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                 IMediator mediator,
                 ILogger<ProductListingsController> logger,
                 IMemoryCache cache,
-                IMarketingEventTracker? marketingTracker = null) : base(mediator, logger)
+                IMarketingEventTracker? marketingTracker = null,
+                IAsyncRepository<AttributeDefinition>? attributeRepository = null) : base(mediator, logger)
         {
                 _cache = cache;
                 _marketingTracker = marketingTracker;
+                _attributeRepository = attributeRepository;
                 // Cache disabled by default - set LISTINGS_CACHE_ENABLED=true to enable
                 _cacheEnabled = Environment.GetEnvironmentVariable("LISTINGS_CACHE_ENABLED")?.ToLower() == "true";
                 if (!_cacheEnabled)
@@ -407,6 +412,9 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                         // تعيين VendorId من المستخدم المصادق (تجاهل أي قيمة مرسلة من العميل)
                         dto.VendorId = vendorId;
 
+                        // تطبيق القيم الافتراضية للخصائص المفقودة
+                        await ApplyDefaultAttributeValuesAsync(dto);
+
                         _logger.LogInformation("Creating listing for vendor {VendorId}", vendorId);
 
                         var command = new CreateCommand<ProductListing, CreateProductListingDto> { Data = dto };
@@ -735,6 +743,51 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                 catch (Exception ex)
                 {
                         _logger.LogWarning(ex, "Failed to track Search event for query: {SearchTerm}", searchTerm);
+                }
+        }
+
+        /// <summary>
+        /// تطبيق القيم الافتراضية للخصائص المفقودة من تعريفات الخصائص
+        /// </summary>
+        private async Task ApplyDefaultAttributeValuesAsync(CreateProductListingDto dto)
+        {
+                if (_attributeRepository == null)
+                {
+                        _logger.LogDebug("Attribute repository not available, skipping default value application");
+                        return;
+                }
+
+                try
+                {
+                        // جلب تعريفات الخصائص التي لها قيم افتراضية
+                        var attributeDefinitions = await _attributeRepository.GetAllWithPredicateAsync(
+                                a => !string.IsNullOrEmpty(a.DefaultValue));
+
+                        if (!attributeDefinitions.Any())
+                        {
+                                return;
+                        }
+
+                        // إنشاء قاموس الخصائص إذا لم يكن موجوداً
+                        dto.Attributes ??= new Dictionary<string, object>();
+
+                        foreach (var attrDef in attributeDefinitions)
+                        {
+                                // تطبيق القيمة الافتراضية فقط إذا كانت الخاصية غير موجودة أو فارغة
+                                if (!dto.Attributes.ContainsKey(attrDef.Code) ||
+                                    dto.Attributes[attrDef.Code] == null ||
+                                    string.IsNullOrEmpty(dto.Attributes[attrDef.Code].ToString()))
+                                {
+                                        dto.Attributes[attrDef.Code] = attrDef.DefaultValue!;
+                                        _logger.LogDebug("Applied default value for attribute {AttributeCode}: {DefaultValue}",
+                                                attrDef.Code, attrDef.DefaultValue);
+                                }
+                        }
+                }
+                catch (Exception ex)
+                {
+                        _logger.LogWarning(ex, "Failed to apply default attribute values");
+                        // لا نفشل العملية إذا فشل تطبيق القيم الافتراضية
                 }
         }
 }
