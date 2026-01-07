@@ -16,6 +16,7 @@
 		<ProjectReference Include="..\..\integration\ACommerce.SharedKernel.AspNetCore\ACommerce.SharedKernel.AspNetCore.csproj" />
 		<ProjectReference Include="..\..\core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
     <ProjectReference Include="..\..\marketing\ACommerce.Marketing.Analytics\ACommerce.Marketing.Analytics.csproj" />
+    <ProjectReference Include="..\ACommerce.Catalog.Attributes\ACommerce.Catalog.Attributes.csproj" />
   </ItemGroup>
   <!-- MediatR inherited from SharedKernel.CQRS -->
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
