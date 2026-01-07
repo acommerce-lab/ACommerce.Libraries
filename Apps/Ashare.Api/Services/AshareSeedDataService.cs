@@ -1743,7 +1743,7 @@ public class AshareSeedDataService
                                 EndOfSupportDate = new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc),
                                 ReleaseNotesAr = "تحسينات في الأداء وإصلاح أخطاء",
                                 ReleaseNotesEn = "Performance improvements and bug fixes",
-                                UpdateUrl = "https://ashare.app/update",
+                                UpdateUrl = "https://ashare.sa",
                                 IsForceUpdate = false,
                                 IsActive = true,
                                 CreatedAt = DateTime.UtcNow
@@ -1760,7 +1760,7 @@ public class AshareSeedDataService
                                 ReleaseDate = new DateTime(2024, 10, 15, 0, 0, 0, DateTimeKind.Utc),
                                 ReleaseNotesAr = "إضافة خاصية المحادثات وتحسينات في البحث",
                                 ReleaseNotesEn = "Added chat feature and search improvements",
-                                UpdateUrl = "https://ashare.app/update",
+                                UpdateUrl = "https://ashare.sa",
                                 IsForceUpdate = false,
                                 IsActive = true,
                                 CreatedAt = DateTime.UtcNow
@@ -1777,7 +1777,7 @@ public class AshareSeedDataService
                                 ReleaseDate = new DateTime(2024, 12, 1, 0, 0, 0, DateTimeKind.Utc),
                                 ReleaseNotesAr = "نظام الاشتراكات الجديد وتحسينات في واجهة المستخدم",
                                 ReleaseNotesEn = "New subscription system and UI improvements",
-                                UpdateUrl = "https://ashare.app/update",
+                                UpdateUrl = "https://ashare.sa",
                                 IsForceUpdate = false,
                                 IsActive = true,
                                 CreatedAt = DateTime.UtcNow
