@@ -188,6 +188,7 @@
 @code {
     [Parameter] public string PlanSlug { get; set; } = string.Empty;
     [SupplyParameterFromQuery] public int? Cycle { get; set; }
+    [SupplyParameterFromQuery(Name = "returnUrl")] public string? ReturnUrl { get; set; }
 
     private bool _isLoading = true;
     private bool _isProcessing = false;
@@ -271,6 +272,34 @@
         return $"{baseUri}/host/payment/callback";
     }
 
+    /// <summary>
+    /// الحصول على صفحة التحويل بعد نجاح الدفع
+    /// إذا كان هناك returnUrl محدد (مثل /create-listing) نستخدمه، وإلا نذهب للاشتراكات
+    /// </summary>
+    private string GetSuccessRedirectUrl()
+    {
+        if (!string.IsNullOrEmpty(ReturnUrl))
+        {
+            // التحويل لصفحة العرض المعلق مع علامة النجاح
+            var separator = ReturnUrl.Contains("?") ? "&" : "?";
+            return $"{ReturnUrl}{separator}success=true";
+        }
+        return "/host/subscription?success=true";
+    }
+
+    /// <summary>
+    /// الحصول على صفحة التحويل بعد فشل الدفع
+    /// </summary>
+    private string GetFailureRedirectUrl(string? errorMessage)
+    {
+        if (!string.IsNullOrEmpty(ReturnUrl))
+        {
+            var separator = ReturnUrl.Contains("?") ? "&" : "?";
+            return $"{ReturnUrl}{separator}payment_failed=true&error={Uri.EscapeDataString(errorMessage ?? "فشلت عملية الدفع")}";
+        }
+        return $"/host/subscription?error={Uri.EscapeDataString(errorMessage ?? "فشلت عملية الدفع")}";
+    }
+
     private async Task ProcessPayment()
     {
         if (_selectedPlan == null) return;
@@ -341,7 +370,7 @@
                         if (verifyResult?.Success == true)
                         {
                             Console.WriteLine("[SubscriptionCheckout] ✅ Payment verified successfully!");
-                            Navigation.NavigateTo("/host/subscription?success=true");
+                            Navigation.NavigateTo(GetSuccessRedirectUrl());
                             return;
                         }
                         else
@@ -354,7 +383,7 @@
                     else if (result.Success)
                     {
                         // نجاح مباشر (حالة نادرة)
-                        Navigation.NavigateTo("/host/subscription?success=true");
+                        Navigation.NavigateTo(GetSuccessRedirectUrl());
                         return;
                     }
                     else
@@ -389,7 +418,7 @@
             {
                 // Free trial or free plan - no payment needed
                 Console.WriteLine("[SubscriptionCheckout] No payment required, redirecting...");
-                Navigation.NavigateTo("/host/subscription?success=true");
+                Navigation.NavigateTo(GetSuccessRedirectUrl());
                 return;
             }
             else
@@ -490,11 +519,11 @@
                         // Navigate to result page
                         if (isSuccess)
                         {
-                            Navigation.NavigateTo("/host/subscription?success=true");
+                            Navigation.NavigateTo(GetSuccessRedirectUrl());
                         }
                         else
                         {
-                            Navigation.NavigateTo($"/host/subscription?error={Uri.EscapeDataString(message ?? "فشلت عملية الدفع")}");
+                            Navigation.NavigateTo(GetFailureRedirectUrl(message));
                         }
                     });
                 }
@@ -514,11 +543,11 @@
     {
         if (result.Success)
         {
-            Navigation.NavigateTo("/host/subscription?success=true");
+            Navigation.NavigateTo(GetSuccessRedirectUrl());
         }
         else
         {
-            Navigation.NavigateTo($"/host/subscription?error={Uri.EscapeDataString(result.Message ?? "Payment failed")}");
+            Navigation.NavigateTo(GetFailureRedirectUrl(result.Message));
         }
     }
 

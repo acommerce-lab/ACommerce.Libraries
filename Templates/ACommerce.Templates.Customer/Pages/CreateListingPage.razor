@@ -283,6 +283,18 @@
                         </label>
                     </div>
 
+                    @* رسالة خطأ رفع الصور *@
+                    @if (!string.IsNullOrEmpty(_imageUploadError))
+                    {
+                        <div class="ac-upload-error">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <span>@_imageUploadError</span>
+                            <button class="ac-error-dismiss" @onclick="() => _imageUploadError = null">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    }
+
                     @if (Model.Images.Any())
                     {
                         <div class="ac-images-preview">
@@ -716,6 +728,16 @@
         StateHasChanged();
     }
 
+    /// <summary>
+    /// إلغاء عملية الإرسال والعودة لصفحة المراجعة
+    /// يُستخدم عند إلغاء الدفع أو الاشتراك
+    /// </summary>
+    public void CancelSubmission()
+    {
+        CurrentStep = CreateListingStep.Review;
+        StateHasChanged();
+    }
+
     public void AddImage(string imageUrl)
     {
         if (Model.Images.Count < 10)
@@ -754,13 +776,25 @@
 
     private void GoToImages()
     {
-        // Sync title from attributes to Model.Title for backwards compatibility
-        var titleInput = Model.Attributes.FirstOrDefault(a => a.Code == "title");
-        if (titleInput != null)
+        try
         {
-            Model.Title = titleInput.TextValue ?? "";
+            // Sync title from attributes to Model.Title for backwards compatibility
+            if (Model.Attributes != null && Model.Attributes.Any())
+            {
+                var titleInput = Model.Attributes.FirstOrDefault(a => a.Code == "title");
+                if (titleInput != null)
+                {
+                    Model.Title = titleInput.TextValue ?? "";
+                }
+            }
+            CurrentStep = CreateListingStep.AddImages;
         }
-        CurrentStep = CreateListingStep.AddImages;
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[CreateListingPage] Error in GoToImages: {ex.Message}");
+            // في حالة حدوث خطأ، ننتقل للخطوة التالية على أي حال
+            CurrentStep = CreateListingStep.AddImages;
+        }
     }
 
     private void GoToLocation()
@@ -817,16 +851,33 @@
         return $"https://tile.openstreetmap.org/{zoom}/{x}/{y}.png";
     }
 
+    private string? _imageUploadError;
+
     private async Task HandleImageUpload(InputFileChangeEventArgs e)
     {
         if (_isUploadingImages) return;
 
-        var files = e.GetMultipleFiles(10 - Model.Images.Count);
-        if (!files.Any()) return;
+        _imageUploadError = null;
+        IReadOnlyList<IBrowserFile> files;
+
+        try
+        {
+            files = e.GetMultipleFiles(10 - Model.Images.Count);
+            if (!files.Any()) return;
+        }
+        catch (Exception ex)
+        {
+            // معالجة خطأ الوصول للكاميرا أو الملفات
+            Console.WriteLine($"[CreateListingPage] Error accessing files/camera: {ex.Message}");
+            _imageUploadError = "تعذر الوصول للصور. تأكد من منح التطبيق صلاحية الوصول للصور والكاميرا.";
+            StateHasChanged();
+            return;
+        }
 
         _isUploadingImages = true;
         var totalFiles = files.Count;
         var processedFiles = 0;
+        var failedFiles = 0;
 
         try
         {
@@ -840,12 +891,14 @@
                 if (file.Size > MaxFileSize)
                 {
                     Console.WriteLine($"File {file.Name} exceeds 10MB limit");
+                    failedFiles++;
                     continue;
                 }
 
                 if (!file.ContentType.StartsWith("image/"))
                 {
                     Console.WriteLine($"File {file.Name} is not an image");
+                    failedFiles++;
                     continue;
                 }
 
@@ -866,14 +919,14 @@
                         // Add authorization token
                         var token = TokenManager != null ? await TokenManager.GetTokenAsync() : null;
                         Console.WriteLine($"[CreateListingPage] Token: {(string.IsNullOrEmpty(token) ? "NULL/EMPTY" : $"Bearer {token.Substring(0, Math.Min(20, token.Length))}...")}");
-                        
+
                         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/media/upload?directory=listings");
                         request.Content = content;
                         if (!string.IsNullOrEmpty(token))
                         {
                             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
                         }
-                        
+
                         var response = await Http.SendAsync(request);
                         if (response.IsSuccessStatusCode)
                         {
@@ -883,11 +936,16 @@
                                 Model.Images.Add(result.Url);
                                 StateHasChanged();
                             }
+                            else
+                            {
+                                failedFiles++;
+                            }
                         }
                         else
                         {
                             var errorBody = await response.Content.ReadAsStringAsync();
                             Console.WriteLine($"Upload failed for {file.Name}: {response.StatusCode} - {errorBody}");
+                            failedFiles++;
                         }
                     }
                     else
@@ -903,11 +961,29 @@
                         StateHasChanged();
                     }
                 }
+                catch (UnauthorizedAccessException)
+                {
+                    Console.WriteLine($"[CreateListingPage] Permission denied for {file.Name}");
+                    _imageUploadError = "تعذر الوصول للصورة. تأكد من منح صلاحيات الوصول.";
+                    failedFiles++;
+                }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error processing file {file.Name}: {ex.Message}");
+                    failedFiles++;
                 }
             }
+
+            // عرض رسالة إذا فشل رفع بعض الصور
+            if (failedFiles > 0 && string.IsNullOrEmpty(_imageUploadError))
+            {
+                _imageUploadError = $"تعذر رفع {failedFiles} صورة. حاول مرة أخرى.";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[CreateListingPage] Critical error in image upload: {ex.Message}");
+            _imageUploadError = "حدث خطأ أثناء رفع الصور. حاول مرة أخرى.";
         }
         finally
         {

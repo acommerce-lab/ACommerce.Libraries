@@ -479,6 +479,9 @@ else
         _showSubscriptionSheet = false;
         _showPlansInSheet = false;
         _subscriptionCheckResult = null;
+
+        // إعادة حالة صفحة الإنشاء للمراجعة (لتجنب بقاء الصفحة في حالة دوران)
+        _createListingPage?.CancelSubmission();
     }
 
     private string GetSheetTitle()

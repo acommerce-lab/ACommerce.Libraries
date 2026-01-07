@@ -3642,6 +3642,46 @@ h1, h2, h3, .ashare-logo-text {
     color: white;
 }
 
+/* Image Upload Error */
+.ac-upload-error {
+    display: flex;
+    align-items: center;
+    gap: var(--ashare-spacing-sm);
+    padding: var(--ashare-spacing-md);
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--ashare-danger);
+    border-radius: var(--ashare-radius-md);
+    color: var(--ashare-danger);
+    margin-bottom: var(--ashare-spacing-md);
+}
+
+.ac-upload-error i {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.ac-upload-error span {
+    flex: 1;
+    font-size: 14px;
+}
+
+.ac-error-dismiss {
+    background: none;
+    border: none;
+    color: var(--ashare-danger);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.ac-error-dismiss:hover {
+    opacity: 1;
+}
+
 /* Image Grid - Small Squares */
 .ac-image-grid {
     display: grid;
