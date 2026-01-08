@@ -1,4 +1,4 @@
-namespace Ashare.Shared.Services;
+namespace ACommerce.Templates.Customer.Services;
 
 /// <summary>
 /// خدمة اختيار الوسائط (صور/فيديو) من الكاميرا أو المعرض
