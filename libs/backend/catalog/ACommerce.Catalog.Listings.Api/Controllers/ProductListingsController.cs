@@ -563,6 +563,47 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
         }
 
         /// <summary>
+        /// البحث باستخدام GET (للعميل) - يدعم query parameters
+        /// </summary>
+        [HttpGet("search")]
+        [ProducesResponseType(typeof(PagedResult<ProductListingResponseDto>), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<PagedResult<ProductListingResponseDto>>> SearchGet(
+                [FromQuery] string? q = null,
+                [FromQuery] Guid? categoryId = null,
+                [FromQuery] int page = 1,
+                [FromQuery] int pageSize = 20)
+        {
+                // تحويل query parameters إلى SmartSearchRequest
+                var request = new SmartSearchRequest
+                {
+                        PageNumber = page,
+                        PageSize = Math.Min(pageSize, 100), // حد أقصى 100
+                        SearchTerm = q,
+                        Filters = new List<FilterItem>
+                        {
+                                new() { PropertyName = "IsActive", Value = true, Operator = FilterOperator.Equals },
+                                new() { PropertyName = "Status", Value = ListingStatus.Active, Operator = FilterOperator.Equals }
+                        },
+                        OrderBy = "CreatedAt",
+                        Ascending = false
+                };
+
+                // إضافة فلتر الفئة إذا تم تحديدها
+                if (categoryId.HasValue)
+                {
+                        request.Filters.Add(new FilterItem
+                        {
+                                PropertyName = "CategoryId",
+                                Value = categoryId.Value,
+                                Operator = FilterOperator.Equals
+                        });
+                }
+
+                return await Search(request);
+        }
+
+        /// <summary>
         /// البحث الذكي مع التصفية والترتيب والتصفح (مع كاش)
         /// </summary>
         [HttpPost("search")]
