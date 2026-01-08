@@ -21,8 +21,6 @@ public class ProductListingConfiguration : IEntityTypeConfiguration<ProductListi
                 builder.HasIndex(x => new { x.VendorId, x.IsDeleted, x.IsActive, x.CreatedAt });
                 builder.HasIndex(x => new { x.CategoryId, x.IsDeleted, x.IsActive, x.Status, x.CreatedAt });
 
-                // نسبة العمولة - قيمة افتراضية 0
-                builder.Property(x => x.CommissionPercentage)
-                        .HasDefaultValue(0m);
+                // نسبة العمولة - القيمة الافتراضية تُعيّن عبر EnsureSchemaUpdatesAsync في Program.cs
         }
 }
