@@ -109,6 +109,9 @@ public static class MauiProgram
         // Attribution Capture Service (for deep link tracking)
         builder.Services.AddSingleton<IAttributionCaptureService, AttributionCaptureService>();
 
+        // Media Picker Service (for camera and gallery access)
+        builder.Services.AddSingleton<IMediaPickerService, MauiMediaPickerService>();
+
         builder.Services.AddMockAnalytics();
 
         builder.Services.AddHttpClient("AshareApi", client =>

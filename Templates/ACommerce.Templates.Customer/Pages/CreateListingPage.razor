@@ -6,6 +6,7 @@
 @using System.Net.Http.Headers
 @using ACommerce.Client.Auth
 @using ACommerce.Client.Files
+@using Ashare.Shared.Services
 
 <div class="ac-page ac-create-listing-page">
     @* Header *@
@@ -253,7 +254,9 @@
                     </div>
 
                     <div class="ac-upload-container">
-                        <label class="ac-upload-area @(Model.Images.Any() ? "has-images" : "") @(_isUploadingImages ? "uploading" : "")">
+                        <div class="ac-upload-area @(Model.Images.Any() ? "has-images" : "") @(_isUploadingImages ? "uploading" : "")"
+                             @onclick="HandleAddImagesClick"
+                             style="cursor: pointer;">
                             <div class="ac-upload-content">
                                 @if (_isUploadingImages)
                                 {
@@ -272,16 +275,22 @@
                                     </div>
                                     <div class="ac-upload-text">
                                         <span class="ac-upload-title">اضغط لإضافة صور</span>
-                                        <span class="ac-upload-hint">PNG, JPG حتى 10MB</span>
+                                        <span class="ac-upload-hint">الكاميرا أو المعرض - حتى 10MB</span>
                                     </div>
                                 }
                             </div>
-                            <InputFile OnChange="HandleImageUpload"
-                                       accept="image/*"
-                                       multiple
-                                       disabled="@_isUploadingImages"
-                                       style="position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer;" />
-                        </label>
+                        </div>
+                        @* Fallback InputFile for web/unsupported platforms *@
+                        @if (MediaPickerService == null)
+                        {
+                            <label class="ac-upload-area-fallback" style="display: none;">
+                                <InputFile @ref="_inputFileRef"
+                                           OnChange="HandleImageUpload"
+                                           accept="image/*"
+                                           multiple
+                                           disabled="@_isUploadingImages" />
+                            </label>
+                        }
                     </div>
 
                     @* رسالة خطأ رفع الصور *@
@@ -830,6 +839,9 @@
     [Inject] private HttpClient? Http { get; set; }
     [Inject] private TokenManager? TokenManager { get; set; }
     [Inject] private FilesClient? FilesClientService { get; set; }
+    [Inject] private IMediaPickerService? MediaPickerService { get; set; }
+
+    private InputFile? _inputFileRef;
 
     private async Task OpenInNativeMaps()
     {
@@ -854,6 +866,129 @@
     }
 
     private string? _imageUploadError;
+
+    /// <summary>
+    /// معالجة النقر على منطقة إضافة الصور
+    /// </summary>
+    private async Task HandleAddImagesClick()
+    {
+        if (_isUploadingImages) return;
+
+        _imageUploadError = null;
+
+        // استخدام MediaPicker إذا كان متاحاً (MAUI)
+        if (MediaPickerService != null)
+        {
+            try
+            {
+                var remainingSlots = 10 - Model.Images.Count;
+                if (remainingSlots <= 0)
+                {
+                    _imageUploadError = "تم الوصول للحد الأقصى (10 صور)";
+                    return;
+                }
+
+                var results = await MediaPickerService.PickOrCapturePhotosAsync(remainingSlots);
+
+                if (results.Any())
+                {
+                    await ProcessMediaPickerResults(results);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CreateListingPage] Error using MediaPicker: {ex.Message}");
+                _imageUploadError = "حدث خطأ أثناء اختيار الصور. حاول مرة أخرى.";
+            }
+        }
+        else if (JS != null)
+        {
+            // Fallback للويب - trigger InputFile click
+            try
+            {
+                await JS.InvokeVoidAsync("eval", "document.querySelector('.ac-upload-area-fallback input[type=file]')?.click()");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CreateListingPage] Error triggering file input: {ex.Message}");
+            }
+        }
+
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// معالجة نتائج MediaPicker ورفعها للخادم
+    /// </summary>
+    private async Task ProcessMediaPickerResults(List<MediaPickResult> results)
+    {
+        if (!results.Any()) return;
+
+        _isUploadingImages = true;
+        var totalFiles = results.Count;
+        var processedFiles = 0;
+        var failedFiles = 0;
+
+        try
+        {
+            foreach (var result in results)
+            {
+                if (Model.Images.Count >= 10) break;
+
+                processedFiles++;
+                _uploadProgress = $"جاري رفع {processedFiles} من {totalFiles}...";
+                StateHasChanged();
+
+                try
+                {
+                    if (result.OpenReadAsync != null && FilesClientService != null)
+                    {
+                        using var stream = await result.OpenReadAsync();
+                        Console.WriteLine($"[CreateListingPage] Uploading {result.FileName} via FilesClient");
+
+                        var uploadResult = await FilesClientService.UploadMediaAsync(
+                            stream,
+                            result.FileName,
+                            result.ContentType,
+                            "listings");
+
+                        if (uploadResult != null && !string.IsNullOrEmpty(uploadResult.Url))
+                        {
+                            Console.WriteLine($"[CreateListingPage] Upload successful: {uploadResult.Url}");
+                            Model.Images.Add(uploadResult.Url);
+                            StateHasChanged();
+                        }
+                        else
+                        {
+                            Console.WriteLine($"[CreateListingPage] Upload returned null for {result.FileName}");
+                            failedFiles++;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[CreateListingPage] Cannot upload: stream={result.OpenReadAsync != null}, FilesClient={FilesClientService != null}");
+                        failedFiles++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[CreateListingPage] Error uploading {result.FileName}: {ex.Message}");
+                    failedFiles++;
+                }
+            }
+
+            if (failedFiles > 0)
+            {
+                _imageUploadError = $"تعذر رفع {failedFiles} صورة. حاول مرة أخرى.";
+            }
+        }
+        finally
+        {
+            _isUploadingImages = false;
+            _uploadProgress = "";
+            StateHasChanged();
+        }
+    }
 
     private async Task HandleImageUpload(InputFileChangeEventArgs e)
     {
