@@ -113,14 +113,14 @@
                 <div class="ashare-results-header">
                     <span>@_searchResults.Count نتيجة</span>
                 </div>
-                <div class="ashare-results-list">
+                <div class="ashare-spaces-grid">
                     @foreach (var space in _searchResults)
                     {
-                        <div class="ashare-search-result-card" @onclick="() => OpenSpace(space.Id)">
-                            <div class="ashare-result-image">
+                        <div class="ashare-space-card ashare-space-card-grid" @onclick="() => OpenSpace(space.Id)">
+                            <div class="ashare-space-image">
                                 @if (space.Images.Any())
                                 {
-                                    <img src="@space.Images.First()" alt="@space.Name" />
+                                    <img src="@space.Images.First()" alt="@space.Name" loading="lazy" />
                                 }
                                 else
                                 {
@@ -128,21 +128,32 @@
                                         <i class="bi bi-building"></i>
                                     </div>
                                 }
+                                @if (space.IsFeatured)
+                                {
+                                    <span class="ac-product-badge ac-product-badge-featured">مميز</span>
+                                }
+                                @if (space.IsNew)
+                                {
+                                    <span class="ac-product-badge ac-product-badge-new">جديد</span>
+                                }
+                                <button class="ashare-favorite-btn" @onclick:stopPropagation="true" @onclick="() => ToggleFavorite(space.Id)">
+                                    <i class="bi @(IsFavorite(space.Id) ? "bi-heart-fill" : "bi-heart")"></i>
+                                </button>
                             </div>
-                            <div class="ashare-result-content">
-                                <span class="ashare-result-category">@space.CategoryName</span>
-                                <h4 class="ashare-result-name">@space.Name</h4>
-                                <div class="ashare-result-location">
+                            <div class="ashare-space-content">
+                                <span class="ashare-space-category">@space.CategoryName</span>
+                                <h3 class="ashare-space-name">@space.Name</h3>
+                                <div class="ashare-space-location">
                                     <i class="bi bi-geo-alt"></i>
-                                    @space.Location
+                                    @(space.Location ?? space.City ?? "غير محدد")
                                 </div>
-                                <div class="ashare-result-meta">
-                                    <span class="ashare-result-price">@space.DisplayPrice</span>
-                                    <span class="ashare-result-rating">
+                                <div class="ashare-space-meta">
+                                    <span class="ashare-space-rating">
                                         <i class="bi bi-star-fill"></i>
                                         @space.Rating
                                     </span>
                                 </div>
+                                <div class="ashare-space-price">@space.DisplayPrice</div>
                             </div>
                         </div>
                     }
@@ -167,6 +178,7 @@
     private string _searchQuery = "";
     private List<SpaceItem>? _searchResults;
     private List<SpaceCategory>? _categories;
+    private HashSet<Guid> _favorites = new();
     private List<string> _recentSearches = new() { "قاعة اجتماعات", "مكتب مشترك", "استوديو تصوير" };
     private List<string> _popularSearches = new() { "قاعة مؤتمرات", "مكتب خاص", "صالة رياضية", "مساحة فعاليات", "استوديو", "محل تجاري" };
     private bool _isSearching;
@@ -178,6 +190,7 @@
     protected override async Task OnInitializedAsync()
     {
         _categories = await ApiService.GetCategoriesAsync();
+        _favorites = ApiService.GetFavorites();
     }
 
     private void GoBack()
@@ -319,6 +332,14 @@
         {
             _ = PerformSearchAsync();
         }
+    }
+
+    private bool IsFavorite(Guid spaceId) => _favorites.Contains(spaceId);
+
+    private void ToggleFavorite(Guid spaceId)
+    {
+        ApiService.ToggleFavorite(spaceId);
+        _favorites = ApiService.GetFavorites();
     }
 
     public void Dispose()
