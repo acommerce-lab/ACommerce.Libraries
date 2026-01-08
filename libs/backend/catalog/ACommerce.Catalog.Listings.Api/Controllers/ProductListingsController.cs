@@ -14,6 +14,7 @@ using ACommerce.SharedKernel.Abstractions.Repositories;
 using ACommerce.SharedKernel.CQRS.Queries;
 using ACommerce.SharedKernel.CQRS.Commands;
 using ACommerce.Marketing.Analytics.Services;
+using ACommerce.Subscriptions.Services;
 
 namespace ACommerce.Catalog.Listings.Api.Controllers;
 
@@ -27,6 +28,8 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
 {
         private readonly IMemoryCache _cache;
         private readonly IMarketingEventTracker? _marketingTracker;
+        private readonly IAsyncRepository<AttributeDefinition>? _attributeRepository;
+        private readonly ISubscriptionService? _subscriptionService;
         private readonly IBaseAsyncRepository<AttributeDefinition>? _attributeRepository;
         private readonly bool _cacheEnabled;
         private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(10);
@@ -46,11 +49,14 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                 ILogger<ProductListingsController> logger,
                 IMemoryCache cache,
                 IMarketingEventTracker? marketingTracker = null,
+                IAsyncRepository<AttributeDefinition>? attributeRepository = null,
+                ISubscriptionService? subscriptionService = null) : base(mediator, logger)
                 IBaseAsyncRepository<AttributeDefinition>? attributeRepository = null) : base(mediator, logger)
         {
                 _cache = cache;
                 _marketingTracker = marketingTracker;
                 _attributeRepository = attributeRepository;
+                _subscriptionService = subscriptionService;
                 // Cache disabled by default - set LISTINGS_CACHE_ENABLED=true to enable
                 _cacheEnabled = Environment.GetEnvironmentVariable("LISTINGS_CACHE_ENABLED")?.ToLower() == "true";
                 if (!_cacheEnabled)
@@ -415,7 +421,11 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                         // تطبيق القيم الافتراضية للخصائص المفقودة
                         await ApplyDefaultAttributeValuesAsync(dto);
 
-                        _logger.LogInformation("Creating listing for vendor {VendorId}", vendorId);
+                        // الحصول على نسبة العمولة من اشتراك المستخدم
+                        await ApplyCommissionPercentageAsync(dto, vendorId);
+
+                        _logger.LogInformation("Creating listing for vendor {VendorId} with commission {Commission}%",
+                                vendorId, dto.CommissionPercentage);
 
                         var command = new CreateCommand<ProductListing, CreateProductListingDto> { Data = dto };
                         var result = await _mediator.Send(command);
@@ -788,6 +798,42 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                 {
                         _logger.LogWarning(ex, "Failed to apply default attribute values");
                         // لا نفشل العملية إذا فشل تطبيق القيم الافتراضية
+                }
+        }
+
+        /// <summary>
+        /// تطبيق نسبة العمولة من اشتراك المستخدم على العرض
+        /// </summary>
+        private async Task ApplyCommissionPercentageAsync(CreateProductListingDto dto, Guid vendorId)
+        {
+                if (_subscriptionService == null)
+                {
+                        _logger.LogDebug("Subscription service not available, using default commission 0%");
+                        dto.CommissionPercentage = 0;
+                        return;
+                }
+
+                try
+                {
+                        var subscription = await _subscriptionService.GetVendorSubscriptionAsync(vendorId);
+
+                        if (subscription != null)
+                        {
+                                dto.CommissionPercentage = subscription.CommissionPercentage;
+                                _logger.LogDebug("Applied commission {Commission}% from subscription {SubscriptionId} for vendor {VendorId}",
+                                        subscription.CommissionPercentage, subscription.Id, vendorId);
+                        }
+                        else
+                        {
+                                // لا يوجد اشتراك - استخدام نسبة افتراضية
+                                dto.CommissionPercentage = 0;
+                                _logger.LogDebug("No subscription found for vendor {VendorId}, using default commission 0%", vendorId);
+                        }
+                }
+                catch (Exception ex)
+                {
+                        _logger.LogWarning(ex, "Failed to get commission percentage for vendor {VendorId}, using default 0%", vendorId);
+                        dto.CommissionPercentage = 0;
                 }
         }
 }

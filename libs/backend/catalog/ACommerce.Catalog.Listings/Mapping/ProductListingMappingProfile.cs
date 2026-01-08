@@ -41,6 +41,8 @@ public class ProductListingMappingProfile : Profile
 			.ForMember(dest => dest.Rating, opt => opt.Ignore())
 			.ForMember(dest => dest.ReviewCount, opt => opt.Ignore())
 			.ForMember(dest => dest.Metadata, opt => opt.Ignore())
+			// CommissionPercentage يتم تعيينها من قبل الـ Controller بناءً على باقة المستخدم
+			.ForMember(dest => dest.CommissionPercentage, opt => opt.MapFrom(src => src.CommissionPercentage ?? 0))
 			.ForMember(dest => dest.ImagesJson, opt => opt.MapFrom(src =>
 				src.Images != null ? JsonSerializer.Serialize(src.Images, JsonOptions) : null))
 			.ForMember(dest => dest.AttributesJson, opt => opt.MapFrom(src =>
