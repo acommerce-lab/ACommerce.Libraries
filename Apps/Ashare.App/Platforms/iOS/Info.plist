@@ -46,5 +46,17 @@
 	<!-- App Tracking Transparency -->
 	<key>NSUserTrackingUsageDescription</key>
 	<string>نستخدم معرّفك لتحسين تجربة الإعلانات وقياس فعالية الحملات التسويقية. لن نشارك بياناتك مع أطراف ثالثة بدون موافقتك.</string>
+
+	<!-- Camera Access -->
+	<key>NSCameraUsageDescription</key>
+	<string>نحتاج الوصول للكاميرا لالتقاط صور لعروضك</string>
+
+	<!-- Photo Library Access -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>نحتاج الوصول لمكتبة الصور لاختيار صور لعروضك</string>
+
+	<!-- Photo Library Add Access (for saving photos) -->
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>نحتاج الوصول لحفظ الصور في مكتبة الصور</string>
 </dict>
 </plist>
