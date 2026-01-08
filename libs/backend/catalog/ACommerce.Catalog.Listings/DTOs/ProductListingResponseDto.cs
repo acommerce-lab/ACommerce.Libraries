@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using ACommerce.Catalog.Listings.Enums;
@@ -50,9 +51,14 @@ public class ProductListingResponseDto
         public DateTime? UpdatedAt { get; set; }
 
         /// <summary>
-        /// الصورة المميزة
+        /// الصورة المميزة (مع تصحيح HTTPS)
         /// </summary>
-        public string? FeaturedImage { get; set; }
+        private string? _featuredImage;
+        public string? FeaturedImage
+        {
+                get => EnsureHttps(_featuredImage);
+                set => _featuredImage = value;
+        }
 
         /// <summary>
         /// الموقع الجغرافي
@@ -88,13 +94,16 @@ public class ProductListingResponseDto
                         }
                         if (_imagesCache != null && _lastImagesJson == ImagesJson)
                         {
-                                return _imagesCache;
+                                // Return HTTPS-corrected URLs
+                                return _imagesCache.Select(EnsureHttps).ToList()!;
                         }
                         try
                         {
-                                _imagesCache = JsonSerializer.Deserialize<List<string>>(ImagesJson, JsonOptions) ?? new List<string>();
+                                var urls = JsonSerializer.Deserialize<List<string>>(ImagesJson, JsonOptions) ?? new List<string>();
+                                _imagesCache = urls;
                                 _lastImagesJson = ImagesJson;
-                                return _imagesCache;
+                                // Return HTTPS-corrected URLs
+                                return urls.Select(EnsureHttps).ToList()!;
                         }
                         catch
                         {
@@ -169,5 +178,24 @@ public class ProductListingResponseDto
                         }
                         return null;
                 }
+        }
+
+        /// <summary>
+        /// تحويل روابط HTTP إلى HTTPS لتجنب Mixed Content errors
+        /// </summary>
+        private static string? EnsureHttps(string? url)
+        {
+                if (string.IsNullOrEmpty(url))
+                        return url;
+
+                // فقط تحويل روابط الـ API (لا نغير localhost أو 127.0.0.1)
+                if (url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
+                    !url.Contains("localhost", StringComparison.OrdinalIgnoreCase) &&
+                    !url.Contains("127.0.0.1", StringComparison.OrdinalIgnoreCase))
+                {
+                        return "https://" + url.Substring(7);
+                }
+
+                return url;
         }
 }
