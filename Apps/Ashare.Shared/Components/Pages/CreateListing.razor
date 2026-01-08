@@ -58,6 +58,16 @@ else
                             <p>اختر الباقة المناسبة لك للبدء في نشر عروضك</p>
                         </div>
                     }
+                    else if (_subscriptionCheckResult?.WrongPlanType == true)
+                    {
+                        <div class="ac-subscription-message">
+                            <div class="ac-icon-circle warning">
+                                <i class="bi bi-exclamation-triangle"></i>
+                            </div>
+                            <h3>باقتك الحالية لا تدعم هذا النوع من الإعلانات</h3>
+                            <p>@(_subscriptionCheckResult?.RequiredPlanMessage ?? "يرجى اختيار الباقة المناسبة لهذا النوع من الإعلانات")</p>
+                        </div>
+                    }
                     else
                     {
                         <div class="ac-subscription-message">
@@ -403,10 +413,10 @@ else
     {
         try
         {
-            // التحقق من إمكانية إنشاء عرض (الاشتراك)
+            // التحقق من إمكانية إنشاء عرض (الاشتراك) مع فحص الفئة
             if (_currentUserId.HasValue)
             {
-                var canAddResult = await SubscriptionClient.CanAddListingAsync(_currentUserId.Value);
+                var canAddResult = await SubscriptionClient.CanAddListingAsync(_currentUserId.Value, model.CategoryId);
 
                 if (canAddResult != null && !canAddResult.CanAdd)
                 {
@@ -489,7 +499,13 @@ else
         if (_showPlansInSheet)
             return "اختر باقتك";
 
-        return _subscriptionCheckResult?.SubscriptionRequired == true ? "اشتراك مطلوب" : "ترقية الباقة";
+        if (_subscriptionCheckResult?.SubscriptionRequired == true)
+            return "اشتراك مطلوب";
+
+        if (_subscriptionCheckResult?.WrongPlanType == true)
+            return "باقة غير مناسبة";
+
+        return "ترقية الباقة";
     }
 
     private async Task ShowPlansInSheet()
