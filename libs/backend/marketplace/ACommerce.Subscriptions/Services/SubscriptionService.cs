@@ -497,6 +497,147 @@ public class SubscriptionService : ISubscriptionService
         };
     }
 
+    public async Task<CanAddListingResult> CanAddListingAsync(Guid vendorId, Guid categoryId, CancellationToken ct = default)
+    {
+        // أولاً: تحقق من وجود باقات في النظام
+        var hasPlans = await _context.Set<SubscriptionPlan>()
+            .AnyAsync(p => p.IsActive && !p.IsDeleted, ct);
+
+        if (!hasPlans)
+        {
+            return new CanAddListingResult
+            {
+                CanAdd = true,
+                Reason = null,
+                CurrentCount = 0,
+                MaxAllowed = -1,
+                ShouldUpgrade = false,
+                SubscriptionRequired = false
+            };
+        }
+
+        // الحصول على اشتراك المستخدم مع بيانات الباقة
+        var subscription = await _context.Set<Subscription>()
+            .Include(s => s.Plan)
+            .FirstOrDefaultAsync(s => s.VendorId == vendorId && !s.IsDeleted, ct);
+
+        // تحديد الباقات المطلوبة لهذه الفئة
+        var (requiredPlanSlugs, requiredPlanMessage) = GetRequiredPlansForCategory(categoryId);
+
+        if (subscription == null)
+        {
+            return new CanAddListingResult
+            {
+                CanAdd = false,
+                Reason = "لا يوجد اشتراك نشط",
+                CurrentCount = 0,
+                MaxAllowed = 0,
+                ShouldUpgrade = true,
+                SubscriptionRequired = true,
+                RequiredPlanSlugs = requiredPlanSlugs,
+                RequiredPlanMessage = requiredPlanMessage
+            };
+        }
+
+        if (!subscription.IsActive)
+        {
+            return new CanAddListingResult
+            {
+                CanAdd = false,
+                Reason = "الاشتراك غير نشط أو منتهي",
+                CurrentCount = subscription.CurrentListingsCount,
+                MaxAllowed = subscription.MaxListings,
+                ShouldUpgrade = true,
+                SubscriptionRequired = true,
+                RequiredPlanSlugs = requiredPlanSlugs,
+                RequiredPlanMessage = requiredPlanMessage
+            };
+        }
+
+        // التحقق من نوع الباقة يتناسب مع الفئة
+        var planSlug = subscription.Plan?.Slug ?? "";
+        if (requiredPlanSlugs.Count > 0 && !requiredPlanSlugs.Any(s => planSlug.StartsWith(s.TrimEnd('*'))))
+        {
+            return new CanAddListingResult
+            {
+                CanAdd = false,
+                Reason = requiredPlanMessage ?? "باقتك الحالية لا تدعم هذا النوع من الإعلانات",
+                CurrentCount = subscription.CurrentListingsCount,
+                MaxAllowed = subscription.MaxListings,
+                ShouldUpgrade = true,
+                SubscriptionRequired = false,
+                WrongPlanType = true,
+                RequiredPlanSlugs = requiredPlanSlugs,
+                RequiredPlanMessage = requiredPlanMessage
+            };
+        }
+
+        if (subscription.HasReachedListingsLimit)
+        {
+            return new CanAddListingResult
+            {
+                CanAdd = false,
+                Reason = "وصلت للحد الأقصى من العروض المسموحة في باقتك",
+                CurrentCount = subscription.CurrentListingsCount,
+                MaxAllowed = subscription.MaxListings,
+                ShouldUpgrade = true,
+                SubscriptionRequired = false
+            };
+        }
+
+        return new CanAddListingResult
+        {
+            CanAdd = true,
+            CurrentCount = subscription.CurrentListingsCount,
+            MaxAllowed = subscription.MaxListings,
+            ShouldUpgrade = false,
+            SubscriptionRequired = false
+        };
+    }
+
+    /// <summary>
+    /// تحديد الباقات المطلوبة لكل فئة
+    /// </summary>
+    private static (List<string> Slugs, string? Message) GetRequiredPlansForCategory(Guid categoryId)
+    {
+        // Category IDs من AshareSeedDataService
+        var residentialId = Guid.Parse("10000000-0000-0000-0001-000000000001");
+        var lookingForHousingId = Guid.Parse("10000000-0000-0000-0001-000000000002");
+        var lookingForPartnerId = Guid.Parse("10000000-0000-0000-0001-000000000003");
+        var administrativeId = Guid.Parse("10000000-0000-0000-0001-000000000004");
+        var commercialId = Guid.Parse("10000000-0000-0000-0001-000000000005");
+
+        // سكني أو باحث عن سكن → باقات المنشآت أو الأفراد
+        if (categoryId == residentialId || categoryId == lookingForHousingId)
+        {
+            return (
+                new List<string> { "business-", "individual-" },
+                "هذا النوع من الإعلانات يتطلب باقة المنشآت أو الأفراد"
+            );
+        }
+
+        // طلب شريك سكن → باقة الباحث عن شريك
+        if (categoryId == lookingForPartnerId)
+        {
+            return (
+                new List<string> { "partner-seeker" },
+                "إعلانات طلب شريك سكن تتطلب باقة الباحث عن شريك (49 ريال)"
+            );
+        }
+
+        // إداري أو تجاري → باقة الإداري والتجاري
+        if (categoryId == administrativeId || categoryId == commercialId)
+        {
+            return (
+                new List<string> { "commercial-admin" },
+                "إعلانات المساحات الإدارية والتجارية تتطلب باقة الإداري والتجاري (5% عمولة)"
+            );
+        }
+
+        // لا توجد قيود على الفئة
+        return (new List<string>(), null);
+    }
+
     public async Task<bool> IncrementListingsCountAsync(Guid vendorId, CancellationToken ct = default)
     {
         var subscription = await _context.Set<Subscription>()

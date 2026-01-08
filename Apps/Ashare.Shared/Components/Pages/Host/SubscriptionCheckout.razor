@@ -118,11 +118,11 @@
                     </div>
                 </div>
 
-                @* Price Breakdown *@
+                @* Price Breakdown - الأسعار شاملة الضريبة *@
                 <div class="ashare-price-breakdown">
                     <div class="ashare-price-row">
-                        <span>@L["Subtotal"]</span>
-                        <span>@(GetSelectedPrice().ToString("N2")) @_selectedPlan.Currency</span>
+                        <span>@L["PriceBeforeVAT"]</span>
+                        <span>@((GetSelectedPrice() / 1.15m).ToString("N2")) @_selectedPlan.Currency</span>
                     </div>
                     @if (_selectedPlan.TrialDays > 0 && _currentSubscription == null)
                     {
@@ -133,11 +133,11 @@
                     }
                     <div class="ashare-price-row tax">
                         <span>@L["VAT"] (15%)</span>
-                        <span>@((GetSelectedPrice() * 0.15m).ToString("N2")) @_selectedPlan.Currency</span>
+                        <span>@((GetSelectedPrice() - GetSelectedPrice() / 1.15m).ToString("N2")) @_selectedPlan.Currency</span>
                     </div>
                     <div class="ashare-price-row total">
-                        <span>@L["Total"]</span>
-                        <span>@((GetSelectedPrice() * 1.15m).ToString("N2")) @_selectedPlan.Currency</span>
+                        <span>@L["TotalIncludingVAT"]</span>
+                        <span>@(GetSelectedPrice().ToString("N2")) @_selectedPlan.Currency</span>
                     </div>
                 </div>
 

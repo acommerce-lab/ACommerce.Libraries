@@ -64,6 +64,9 @@ public interface ISubscriptionService
     /// <summary>التحقق من إمكانية إضافة عرض</summary>
     Task<CanAddListingResult> CanAddListingAsync(Guid vendorId, CancellationToken ct = default);
 
+    /// <summary>التحقق من إمكانية إضافة عرض لفئة محددة</summary>
+    Task<CanAddListingResult> CanAddListingAsync(Guid vendorId, Guid categoryId, CancellationToken ct = default);
+
     /// <summary>زيادة عداد العروض</summary>
     Task<bool> IncrementListingsCountAsync(Guid vendorId, CancellationToken ct = default);
 

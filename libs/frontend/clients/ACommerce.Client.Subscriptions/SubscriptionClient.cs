@@ -149,6 +149,15 @@ public sealed class SubscriptionClient
             ct);
     }
 
+    /// <summary>التحقق من إمكانية إضافة عرض لفئة محددة</summary>
+    public async Task<CanAddListingResult?> CanAddListingAsync(Guid vendorId, Guid categoryId, CancellationToken ct = default)
+    {
+        return await _httpClient.GetAsync<CanAddListingResult>(
+            ServiceName,
+            $"{BasePath}/vendor/{vendorId}/can-add-listing?categoryId={categoryId}",
+            ct);
+    }
+
     /// <summary>الحصول على إحصائيات الاستخدام</summary>
     public async Task<VendorUsageStatsDto?> GetUsageStatsAsync(Guid vendorId, CancellationToken ct = default)
     {
