@@ -149,6 +149,7 @@ public class AshareSeedDataService
                         AttributeIds.Floor,           // الطابق
                         AttributeIds.BillType,        // نوع الإعلان (عرض/طلب)
                         AttributeIds.RentalType,      // نوع الإيجار (مشترك/كامل)
+                        AttributeIds.Gender,          // الجنس (ذكر/أنثى)
                         AttributeIds.Area,            // المساحة (اختياري)
                         AttributeIds.Rooms,           // عدد الغرف (للشقق فقط)
                         AttributeIds.Bathrooms,       // عدد الحمامات (للشقق فقط)
@@ -175,6 +176,7 @@ public class AshareSeedDataService
                         AttributeIds.UnitType,        // نوع الوحدة المطلوبة
                         AttributeIds.Rooms,           // عدد الغرف المطلوب
                         AttributeIds.Furnished,       // التأثيث المطلوب
+                        AttributeIds.Gender,          // الجنس (ذكر/أنثى)
                         AttributeIds.City,            // المدينة
                         AttributeIds.Location,        // الموقع المفضل
                         AttributeIds.IsPhoneAllowed,
@@ -592,7 +594,7 @@ public class AshareSeedDataService
                         {
                                 "title", "description", "price", "duration", "time_unit",
                                 "property_type", "unit_type", "floor", "bill_type", "rental_type",
-                                "area", "rooms", "bathrooms", "furnished", "amenities",
+                                "gender", "area", "rooms", "bathrooms", "furnished", "amenities",
                                 "city", "location",
                                 "is_phone_allowed", "is_whatsapp_allowed", "is_messaging_allowed",
                                 "images"
@@ -604,7 +606,7 @@ public class AshareSeedDataService
                         ["looking-for-housing"] = new List<string>
                         {
                                 "title", "description", "min_price", "max_price",
-                                "property_type", "unit_type", "rooms", "furnished",
+                                "property_type", "unit_type", "rooms", "furnished", "gender",
                                 "city", "location",
                                 "is_phone_allowed", "is_whatsapp_allowed", "is_messaging_allowed"
                         },
