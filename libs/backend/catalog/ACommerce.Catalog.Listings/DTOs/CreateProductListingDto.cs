@@ -43,4 +43,11 @@ public class CreateProductListingDto
 	/// الخصائص الديناميكية
 	/// </summary>
 	public Dictionary<string, object>? Attributes { get; set; }
+
+	/// <summary>
+	/// نسبة العمولة/العربون - يتم تعيينها تلقائياً من باقة المستخدم
+	/// لا يجب إرسالها من العميل
+	/// </summary>
+	[JsonIgnore]
+	public decimal? CommissionPercentage { get; set; }
 }

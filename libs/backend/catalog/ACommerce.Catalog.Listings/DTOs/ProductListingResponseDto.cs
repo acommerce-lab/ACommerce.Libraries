@@ -31,6 +31,12 @@ public class ProductListingResponseDto
         public decimal Price { get; set; }
         public decimal? CompareAtPrice { get; set; }
         public string Currency { get; set; } = "SAR";
+
+        /// <summary>
+        /// نسبة العمولة/العربون المطلوبة للحجز (من 0 إلى 100)
+        /// </summary>
+        public decimal CommissionPercentage { get; set; }
+
         public int QuantityAvailable { get; set; }
         public int QuantityReserved { get; set; }
         public bool IsActive { get; set; }

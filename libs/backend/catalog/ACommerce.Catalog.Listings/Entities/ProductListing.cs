@@ -187,6 +187,13 @@ public class ProductListing : IBaseEntity
 	public string? Currency { get; set; }
 
 	/// <summary>
+	/// نسبة العمولة/العربون المطلوبة للحجز (من 0 إلى 100)
+	/// يتم نسخها من باقة المستخدم عند إنشاء العرض
+	/// مثال: 3% للسنوي، 5% للتجاري، 100% لليومي
+	/// </summary>
+	public decimal CommissionPercentage { get; set; }
+
+	/// <summary>
 	/// الخصائص الديناميكية (JSON)
 	/// </summary>
 	public string? AttributesJson { get; set; }
