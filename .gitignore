@@ -6,3 +6,7 @@
 # Build outputs
 bin/
 obj/
+
+# Deployment secrets
+deploy-alibaba.env
+*.env.local
