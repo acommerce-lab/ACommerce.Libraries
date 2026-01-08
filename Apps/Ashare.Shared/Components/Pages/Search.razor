@@ -252,6 +252,7 @@
         finally
         {
             _isSearching = false;
+            StateHasChanged(); // تحديث واجهة المستخدم بعد انتهاء البحث
         }
     }
 
@@ -264,12 +265,13 @@
     private async Task UseRecentSearchAsync(string search)
     {
         _searchQuery = search;
+        StateHasChanged(); // تحديث حقل البحث فوراً
         await PerformSearchAsync();
     }
 
     private void UseRecentSearch(string search)
     {
-        _ = UseRecentSearchAsync(search);
+        _ = InvokeAsync(async () => await UseRecentSearchAsync(search));
     }
 
     private void RemoveRecentSearch(string search)
