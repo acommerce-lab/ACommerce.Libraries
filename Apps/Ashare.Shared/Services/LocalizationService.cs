@@ -299,6 +299,8 @@ public class LocalizationService : BaseLocalizationService
         ar["Quarterly"] = "ربع سنوي";
         ar["FreeTrial"] = "فترة تجريبية مجانية";
         ar["VAT"] = "ضريبة القيمة المضافة";
+        ar["PriceBeforeVAT"] = "السعر قبل الضريبة";
+        ar["TotalIncludingVAT"] = "الإجمالي شامل الضريبة";
         ar["StartFreeTrial"] = "ابدأ الفترة التجريبية";
         ar["PayNow"] = "ادفع الآن";
         ar["PaymentSecureNotice"] = "ستتم معالجة الدفع بشكل آمن عبر بوابة الدفع";
@@ -891,6 +893,8 @@ public class LocalizationService : BaseLocalizationService
         en["Quarterly"] = "Quarterly";
         en["FreeTrial"] = "Free Trial";
         en["VAT"] = "VAT";
+        en["PriceBeforeVAT"] = "Price before VAT";
+        en["TotalIncludingVAT"] = "Total including VAT";
         en["StartFreeTrial"] = "Start Free Trial";
         en["PayNow"] = "Pay Now";
         en["PaymentSecureNotice"] = "Your payment will be securely processed through the payment gateway";
