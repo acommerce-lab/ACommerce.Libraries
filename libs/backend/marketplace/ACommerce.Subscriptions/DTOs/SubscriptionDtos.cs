@@ -166,6 +166,15 @@ public record CanAddListingResult
 
     /// <summary>الباقات المقترحة للترقية</summary>
     public List<SubscriptionPlanSummaryDto>? SuggestedPlans { get; init; }
+
+    /// <summary>هل الباقة الحالية غير مناسبة لنوع الإعلان</summary>
+    public bool WrongPlanType { get; init; }
+
+    /// <summary>الباقات المطلوبة لهذا النوع من الإعلانات (slugs)</summary>
+    public List<string>? RequiredPlanSlugs { get; init; }
+
+    /// <summary>رسالة توضيحية عن الباقة المطلوبة</summary>
+    public string? RequiredPlanMessage { get; init; }
 }
 
 /// <summary>

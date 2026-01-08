@@ -231,9 +231,11 @@ public class SubscriptionsController : ControllerBase
     /// <summary>التحقق من إمكانية إضافة عرض</summary>
     [HttpGet("vendor/{vendorId:guid}/can-add-listing")]
     [Authorize]
-    public async Task<ActionResult<CanAddListingResult>> CanAddListing(Guid vendorId, CancellationToken ct)
+    public async Task<ActionResult<CanAddListingResult>> CanAddListing(Guid vendorId, [FromQuery] Guid? categoryId, CancellationToken ct)
     {
-        var result = await _subscriptionService.CanAddListingAsync(vendorId, ct);
+        var result = categoryId.HasValue
+            ? await _subscriptionService.CanAddListingAsync(vendorId, categoryId.Value, ct)
+            : await _subscriptionService.CanAddListingAsync(vendorId, ct);
         return Ok(result);
     }
 
