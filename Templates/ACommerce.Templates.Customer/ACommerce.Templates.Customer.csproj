@@ -21,9 +21,6 @@
                 <!-- Core -->
                 <ProjectReference Include="..\..\libs\frontend\core\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
 
-                <!-- Shared Services -->
-                <ProjectReference Include="..\..\Apps\Ashare.Shared\Ashare.Shared.csproj" />
-
                 <!-- Clients -->
                 <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Products\ACommerce.Client.Products.csproj" />
                 <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Categories\ACommerce.Client.Categories.csproj" />
