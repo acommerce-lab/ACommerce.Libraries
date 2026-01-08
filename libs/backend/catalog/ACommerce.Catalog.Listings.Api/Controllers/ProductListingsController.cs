@@ -27,7 +27,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
 {
         private readonly IMemoryCache _cache;
         private readonly IMarketingEventTracker? _marketingTracker;
-        private readonly IAsyncRepository<AttributeDefinition>? _attributeRepository;
+        private readonly IBaseAsyncRepository<AttributeDefinition>? _attributeRepository;
         private readonly bool _cacheEnabled;
         private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(10);
         private static readonly TimeSpan SearchCacheDuration = TimeSpan.FromMinutes(5);
@@ -46,7 +46,7 @@ public class ProductListingsController : BaseCrudController<ProductListing, Crea
                 ILogger<ProductListingsController> logger,
                 IMemoryCache cache,
                 IMarketingEventTracker? marketingTracker = null,
-                IAsyncRepository<AttributeDefinition>? attributeRepository = null) : base(mediator, logger)
+                IBaseAsyncRepository<AttributeDefinition>? attributeRepository = null) : base(mediator, logger)
         {
                 _cache = cache;
                 _marketingTracker = marketingTracker;
