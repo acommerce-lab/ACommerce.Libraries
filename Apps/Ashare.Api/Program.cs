@@ -504,6 +504,10 @@ Built using ACommerce libraries with configuration-first approach:
         Log.Information("Ensuring database is created...");
         await dbContext.Database.EnsureCreatedAsync();
 
+        // إضافة الأعمدة الجديدة إذا لم تكن موجودة
+        Log.Information("Ensuring schema updates...");
+        await EnsureSchemaUpdatesAsync(dbContext);
+
         // إنشاء الفهارس إذا لم تكن موجودة (مهم للأداء)
         Log.Information("Ensuring indexes exist...");
         await EnsureIndexesAsync(dbContext);
@@ -653,6 +657,77 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
+}
+
+// دالة إضافة الأعمدة الجديدة إلى الجداول الموجودة
+static async Task EnsureSchemaUpdatesAsync(ApplicationDbContext dbContext)
+{
+    var providerName = dbContext.Database.ProviderName ?? "";
+
+    try
+    {
+        // أعمدة جديدة يجب إضافتها إلى الجداول الموجودة
+        var schemaUpdates = new List<(string TableName, string ColumnName, string SqliteType, string SqlServerType, string DefaultValue)>
+        {
+            ("ProductListings", "CommissionPercentage", "REAL", "decimal(18,2)", "0")
+        };
+
+        foreach (var (tableName, columnName, sqliteType, sqlServerType, defaultValue) in schemaUpdates)
+        {
+            try
+            {
+                // التحقق من وجود العمود
+                bool columnExists = false;
+
+                if (providerName.Contains("Sqlite", StringComparison.OrdinalIgnoreCase))
+                {
+                    var sql = $"SELECT COUNT(*) FROM pragma_table_info('{tableName}') WHERE name = '{columnName}'";
+                    var result = await dbContext.Database.ExecuteSqlRawAsync($"SELECT 1 FROM pragma_table_info('{tableName}') WHERE name = '{columnName}'");
+                    // For SQLite, we try to add the column and catch the error if it exists
+                    try
+                    {
+                        await dbContext.Database.ExecuteSqlRawAsync(
+                            $"ALTER TABLE \"{tableName}\" ADD COLUMN \"{columnName}\" {sqliteType} NOT NULL DEFAULT {defaultValue}");
+                        Log.Information("✅ Added column {Column} to {Table}", columnName, tableName);
+                    }
+                    catch (Exception ex) when (ex.Message.Contains("duplicate column"))
+                    {
+                        Log.Debug("Column {Column} already exists in {Table}", columnName, tableName);
+                    }
+                }
+                else if (providerName.Contains("SqlServer", StringComparison.OrdinalIgnoreCase))
+                {
+                    var alterSql = $@"
+                        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('{tableName}') AND name = '{columnName}')
+                        BEGIN
+                            ALTER TABLE [{tableName}] ADD [{columnName}] {sqlServerType} NOT NULL DEFAULT {defaultValue}
+                        END";
+                    await dbContext.Database.ExecuteSqlRawAsync(alterSql);
+                    Log.Information("✅ Ensured column {Column} exists in {Table}", columnName, tableName);
+                }
+                else if (providerName.Contains("Npgsql", StringComparison.OrdinalIgnoreCase) || providerName.Contains("PostgreSQL", StringComparison.OrdinalIgnoreCase))
+                {
+                    var alterSql = $@"
+                        DO $$
+                        BEGIN
+                            IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = '{tableName.ToLower()}' AND column_name = '{columnName.ToLower()}') THEN
+                                ALTER TABLE ""{tableName}"" ADD COLUMN ""{columnName}"" DECIMAL(18,2) NOT NULL DEFAULT {defaultValue};
+                            END IF;
+                        END $$;";
+                    await dbContext.Database.ExecuteSqlRawAsync(alterSql);
+                    Log.Information("✅ Ensured column {Column} exists in {Table}", columnName, tableName);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Could not add column {Column} to {Table} - may already exist", columnName, tableName);
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        Log.Warning(ex, "Schema update check failed - continuing anyway");
+    }
 }
 
 // دالة إنشاء الفهارس للأداء الأمثل - تعمل فقط مع SQLite
