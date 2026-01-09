@@ -85,6 +85,8 @@ build_image() {
 
     docker build \
         --build-arg ACOMMERCE_BUILD_MODE=CLOUD \
+        --build-arg ALIYUN_ACCESS_KEY_ID="${ALIYUN_ACCESS_KEY_ID}" \
+        --build-arg ALIYUN_ACCESS_KEY_SECRET="${ALIYUN_ACCESS_KEY_SECRET}" \
         -t "$FULL_IMAGE" \
         -f Apps/Ashare.Api/Dockerfile \
         .
