@@ -40,10 +40,18 @@ RUN mkdir -p /app/data /app/logs /app/uploads && \
 # Switch to non-root user
 USER appuser
 
+# Build arguments for secrets (passed at build time or runtime)
+ARG ALIYUN_ACCESS_KEY_ID
+ARG ALIYUN_ACCESS_KEY_SECRET
+
 # Environment variables
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV DOTNET_RUNNING_IN_CONTAINER=true
 ENV PORT=8080
+
+# Alibaba Cloud OSS Storage (from build args or can be overridden at runtime)
+ENV Files__Storage__AliyunOSS__AccessKeyId=${ALIYUN_ACCESS_KEY_ID}
+ENV Files__Storage__AliyunOSS__AccessKeySecret=${ALIYUN_ACCESS_KEY_SECRET}
 
 # Expose port
 EXPOSE 8080
