@@ -58,6 +58,7 @@ using ACommerce.Payments.Api.Controllers;
 using ACommerce.Payments.Abstractions.Contracts;
 using ACommerce.Payments.Noon.Extensions;
 using ACommerce.Files.Storage.GoogleCloud.Extensions;
+using ACommerce.Files.Storage.AliyunOSS.Extensions;
 using Ashare.Api.Middleware;
 using Microsoft.AspNetCore.SignalR;
 
@@ -329,8 +330,21 @@ try
     // Subscription Services
     builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 
-    // Google Cloud Storage (for image uploads)
-    builder.Services.AddGoogleCloudStorage(builder.Configuration);
+    // File Storage Provider (supports Google Cloud Storage and Alibaba OSS)
+    // التبديل بين مزودي التخزين عبر الإعدادات: Files:Storage:Provider = "GoogleCloud" | "AliyunOSS"
+    var storageProvider = builder.Configuration["Files:Storage:Provider"] ?? "GoogleCloud";
+    Log.Information("📦 Using storage provider: {Provider}", storageProvider);
+
+    if (storageProvider.Equals("AliyunOSS", StringComparison.OrdinalIgnoreCase))
+    {
+        builder.Services.AddAliyunOSSFileStorage(builder.Configuration);
+        Log.Information("☁️ Alibaba Cloud OSS storage configured");
+    }
+    else
+    {
+        builder.Services.AddGoogleCloudStorage(builder.Configuration);
+        Log.Information("☁️ Google Cloud Storage configured");
+    }
 
     // Payment Provider (Noon) - مع استخدام HostSettings لبناء ReturnUrl تلقائياً
     var webBaseUrlForPayment = builder.Configuration["HostSettings:WebBaseUrl"] 
