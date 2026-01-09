@@ -22,6 +22,8 @@ public class MauiMediaPickerService : IMediaPickerService
                 if (status != PermissionStatus.Granted)
                 {
                     Console.WriteLine("[MauiMediaPicker] Camera permission denied");
+                    await ShowErrorAlertAsync("صلاحية الكاميرا مطلوبة",
+                        "يرجى السماح للتطبيق باستخدام الكاميرا من إعدادات الجهاز");
                     return null;
                 }
             }
@@ -45,17 +47,38 @@ public class MauiMediaPickerService : IMediaPickerService
         catch (FeatureNotSupportedException)
         {
             Console.WriteLine("[MauiMediaPicker] Camera not supported on this device");
+            await ShowErrorAlertAsync("الكاميرا غير متاحة",
+                "هذا الجهاز لا يدعم التقاط الصور");
             return null;
         }
         catch (PermissionException)
         {
             Console.WriteLine("[MauiMediaPicker] Camera permission not granted");
+            await ShowErrorAlertAsync("صلاحية الكاميرا مطلوبة",
+                "يرجى السماح للتطبيق باستخدام الكاميرا من إعدادات الجهاز");
             return null;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[MauiMediaPicker] Error capturing photo: {ex.Message}");
+            await ShowErrorAlertAsync("خطأ في الكاميرا",
+                "حدث خطأ أثناء فتح الكاميرا. يرجى المحاولة مرة أخرى");
             return null;
+        }
+    }
+
+    private static async Task ShowErrorAlertAsync(string title, string message)
+    {
+        try
+        {
+            if (Application.Current?.MainPage != null)
+            {
+                await Application.Current.MainPage.DisplayAlert(title, message, "حسناً");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[MauiMediaPicker] Error showing alert: {ex.Message}");
         }
     }
 
@@ -63,6 +86,20 @@ public class MauiMediaPickerService : IMediaPickerService
     {
         try
         {
+            // التحقق من صلاحية قراءة الصور
+            var status = await Permissions.CheckStatusAsync<Permissions.Photos>();
+            if (status != PermissionStatus.Granted)
+            {
+                status = await Permissions.RequestAsync<Permissions.Photos>();
+                if (status != PermissionStatus.Granted)
+                {
+                    Console.WriteLine("[MauiMediaPicker] Photos permission denied");
+                    await ShowErrorAlertAsync("صلاحية الصور مطلوبة",
+                        "يرجى السماح للتطبيق بالوصول إلى الصور من إعدادات الجهاز");
+                    return null;
+                }
+            }
+
             var photo = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions
             {
                 Title = "اختر صورة"
@@ -79,9 +116,18 @@ public class MauiMediaPickerService : IMediaPickerService
                 OpenReadAsync = () => photo.OpenReadAsync()
             };
         }
+        catch (PermissionException)
+        {
+            Console.WriteLine("[MauiMediaPicker] Photos permission not granted");
+            await ShowErrorAlertAsync("صلاحية الصور مطلوبة",
+                "يرجى السماح للتطبيق بالوصول إلى الصور من إعدادات الجهاز");
+            return null;
+        }
         catch (Exception ex)
         {
             Console.WriteLine($"[MauiMediaPicker] Error picking photo: {ex.Message}");
+            await ShowErrorAlertAsync("خطأ في اختيار الصورة",
+                "حدث خطأ أثناء اختيار الصورة. يرجى المحاولة مرة أخرى");
             return null;
         }
     }
@@ -93,6 +139,20 @@ public class MauiMediaPickerService : IMediaPickerService
         try
         {
 #if ANDROID
+            // التحقق من صلاحية قراءة الصور
+            var status = await Permissions.CheckStatusAsync<Permissions.Photos>();
+            if (status != PermissionStatus.Granted)
+            {
+                status = await Permissions.RequestAsync<Permissions.Photos>();
+                if (status != PermissionStatus.Granted)
+                {
+                    Console.WriteLine("[MauiMediaPicker] Photos permission denied");
+                    await ShowErrorAlertAsync("صلاحية الصور مطلوبة",
+                        "يرجى السماح للتطبيق بالوصول إلى الصور من إعدادات الجهاز");
+                    return results;
+                }
+            }
+
             // على Android، نستخدم FilePicker لاختيار صور متعددة
             var options = new PickOptions
             {
@@ -123,9 +183,17 @@ public class MauiMediaPickerService : IMediaPickerService
             }
 #endif
         }
+        catch (PermissionException)
+        {
+            Console.WriteLine("[MauiMediaPicker] Photos permission not granted");
+            await ShowErrorAlertAsync("صلاحية الصور مطلوبة",
+                "يرجى السماح للتطبيق بالوصول إلى الصور من إعدادات الجهاز");
+        }
         catch (Exception ex)
         {
             Console.WriteLine($"[MauiMediaPicker] Error picking photos: {ex.Message}");
+            await ShowErrorAlertAsync("خطأ في اختيار الصور",
+                "حدث خطأ أثناء اختيار الصور. يرجى المحاولة مرة أخرى");
         }
 
         return results;
