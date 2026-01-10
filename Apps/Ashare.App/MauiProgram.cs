@@ -3,6 +3,7 @@ using Ashare.Shared.Services;
 using ACommerce.Client.Auth;
 using ACommerce.Client.Realtime;
 using ACommerce.Client.Core.Storage;
+using ACommerce.Client.Files;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Services.Analytics;
 using ACommerce.Templates.Customer.Themes;
@@ -67,6 +68,9 @@ public static class MauiProgram
         // تسجيل خدمة موافقة التتبع أولاً (يجب أن تكون قبل AddAshareClients)
         builder.Services.AddSingleton<ITrackingConsentService, TrackingConsentService>();
         builder.Services.AddTransient<TrackingConsentInterceptor>();
+
+        // Device Info Provider للحصول على معلومات الجهاز في تقارير الأخطاء
+        builder.Services.AddSingleton<IDeviceInfoProvider, MauiDeviceInfoProvider>();
 
         builder.Services.AddAshareClients(apiBaseUrl, options =>
         {

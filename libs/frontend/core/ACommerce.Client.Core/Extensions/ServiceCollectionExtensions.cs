@@ -206,6 +206,22 @@ public static class ServiceCollectionExtensions
             httpClientBuilder.AddHttpMessageHandler(handlerFactory);
         }
 
+        // Named HttpClient للاستخدام في FilesClient وغيره
+        // يجب أن يكون له نفس الإعدادات والـ timeout
+        var namedClientBuilder = services.AddHttpClient("DynamicHttpClient")
+            .ConfigureHttpClient(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
+            });
+
+        if (options.BypassSslValidation)
+        {
+            namedClientBuilder.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+            });
+        }
+
         // تسجيل IApiClient
         services.AddScoped<IApiClient>(sp => sp.GetRequiredService<DynamicHttpClient>());
 

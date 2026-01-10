@@ -13,15 +13,22 @@ public sealed class FilesClient
         private readonly HttpClient _rawHttpClient;
         private readonly ITokenProvider? _tokenProvider;
         private readonly ServiceRegistryClient _serviceRegistry;
+        private readonly IDeviceInfoProvider _deviceInfo;
         private const string ServiceName = "Files";
-        private static readonly TimeSpan UploadTimeout = TimeSpan.FromSeconds(120); // 2 minutes timeout
+        private static readonly TimeSpan UploadTimeout = TimeSpan.FromSeconds(180); // 3 minutes timeout
 
-        public FilesClient(IApiClient httpClient, IHttpClientFactory httpClientFactory, ServiceRegistryClient serviceRegistry, ITokenProvider? tokenProvider = null)
+        public FilesClient(
+                IApiClient httpClient,
+                IHttpClientFactory httpClientFactory,
+                ServiceRegistryClient serviceRegistry,
+                ITokenProvider? tokenProvider = null,
+                IDeviceInfoProvider? deviceInfoProvider = null)
         {
                 _httpClient = httpClient;
                 _rawHttpClient = httpClientFactory.CreateClient("DynamicHttpClient");
                 _serviceRegistry = serviceRegistry;
                 _tokenProvider = tokenProvider;
+                _deviceInfo = deviceInfoProvider ?? new DefaultDeviceInfoProvider();
         }
         
         private async Task<string> GetServiceUrlAsync(CancellationToken cancellationToken = default)
@@ -250,6 +257,11 @@ public sealed class FilesClient
                         var baseUrl = await _serviceRegistry.DiscoverAsync(ServiceName, CancellationToken.None);
                         if (baseUrl == null) return;
 
+                        // إضافة معلومات الشبكة للبيانات الإضافية
+                        additionalData ??= new Dictionary<string, object>();
+                        additionalData["networkType"] = _deviceInfo.NetworkType;
+                        additionalData["manufacturer"] = _deviceInfo.Manufacturer;
+
                         var report = new
                         {
                                 reportId = Guid.NewGuid().ToString(),
@@ -257,10 +269,10 @@ public sealed class FilesClient
                                 operation,
                                 errorMessage,
                                 stackTrace,
-                                platform = GetPlatform(),
-                                appVersion = GetAppVersion(),
-                                osVersion = GetOsVersion(),
-                                deviceModel = GetDeviceModel(),
+                                platform = _deviceInfo.Platform,
+                                appVersion = _deviceInfo.AppVersion,
+                                osVersion = _deviceInfo.OsVersion,
+                                deviceModel = _deviceInfo.DeviceModel,
                                 timestamp = DateTime.UtcNow,
                                 additionalData
                         };
@@ -276,57 +288,6 @@ public sealed class FilesClient
                 catch (Exception ex)
                 {
                         Console.WriteLine($"[FilesClient] Failed to send error report: {ex.Message}");
-                }
-        }
-
-        private static string GetPlatform()
-        {
-#if ANDROID
-                return "Android";
-#elif IOS
-                return "iOS";
-#elif WINDOWS
-                return "Windows";
-#elif MACCATALYST
-                return "MacOS";
-#else
-                return "Unknown";
-#endif
-        }
-
-        private static string GetAppVersion()
-        {
-                try
-                {
-                        return typeof(FilesClient).Assembly.GetName().Version?.ToString() ?? "Unknown";
-                }
-                catch
-                {
-                        return "Unknown";
-                }
-        }
-
-        private static string GetOsVersion()
-        {
-                try
-                {
-                        return Environment.OSVersion.ToString();
-                }
-                catch
-                {
-                        return "Unknown";
-                }
-        }
-
-        private static string GetDeviceModel()
-        {
-                try
-                {
-                        return Environment.MachineName;
-                }
-                catch
-                {
-                        return "Unknown";
                 }
         }
 
