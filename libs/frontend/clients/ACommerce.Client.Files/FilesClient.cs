@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 using ACommerce.Client.Core.Http;
 using ACommerce.Client.Core.Interceptors;
 using ACommerce.ServiceRegistry.Client;
@@ -13,6 +14,7 @@ public sealed class FilesClient
         private readonly ITokenProvider? _tokenProvider;
         private readonly ServiceRegistryClient _serviceRegistry;
         private const string ServiceName = "Files";
+        private static readonly TimeSpan UploadTimeout = TimeSpan.FromSeconds(120); // 2 minutes timeout
 
         public FilesClient(IApiClient httpClient, IHttpClientFactory httpClientFactory, ServiceRegistryClient serviceRegistry, ITokenProvider? tokenProvider = null)
         {
@@ -131,35 +133,201 @@ public sealed class FilesClient
                 string directory = "listings",
                 CancellationToken cancellationToken = default)
         {
-                using var content = new MultipartFormDataContent();
-                using var fileContent = new StreamContent(imageStream);
+                var startTime = DateTime.UtcNow;
+                long streamLength = 0;
+                string? baseUrl = null;
 
-                fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
-                content.Add(fileContent, "file", fileName);
+                try
+                {
+                        // Get stream length for logging
+                        if (imageStream.CanSeek)
+                        {
+                                streamLength = imageStream.Length;
+                                Console.WriteLine($"[FilesClient] UploadMediaAsync - Stream length: {streamLength / 1024.0:F2} KB");
+                        }
 
-                var baseUrl = await GetServiceUrlAsync(cancellationToken);
-                var fullUrl = $"{baseUrl}/api/media/upload?directory={directory}";
-                Console.WriteLine($"[FilesClient] UploadMediaAsync - URL: {fullUrl}");
-                Console.WriteLine($"[FilesClient] UploadMediaAsync - FileName: {fileName}, ContentType: {contentType}");
-                
-                var request = new HttpRequestMessage(HttpMethod.Post, fullUrl)
-                {
-                        Content = content
-                };
-                await AddAuthorizationAsync(request);
-                
-                Console.WriteLine($"[FilesClient] UploadMediaAsync - Sending request...");
-                var response = await _rawHttpClient.SendAsync(request, cancellationToken);
-                Console.WriteLine($"[FilesClient] UploadMediaAsync - Response: {(int)response.StatusCode} {response.StatusCode}");
-                
-                if (!response.IsSuccessStatusCode)
-                {
-                        var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
-                        Console.WriteLine($"[FilesClient] UploadMediaAsync - ERROR Body: {errorBody}");
-                        response.EnsureSuccessStatusCode();
+                        using var content = new MultipartFormDataContent();
+                        using var fileContent = new StreamContent(imageStream);
+
+                        fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
+                        content.Add(fileContent, "file", fileName);
+
+                        baseUrl = await GetServiceUrlAsync(cancellationToken);
+                        var fullUrl = $"{baseUrl}/api/media/upload?directory={directory}";
+                        Console.WriteLine($"[FilesClient] UploadMediaAsync - URL: {fullUrl}");
+                        Console.WriteLine($"[FilesClient] UploadMediaAsync - FileName: {fileName}, ContentType: {contentType}");
+
+                        var request = new HttpRequestMessage(HttpMethod.Post, fullUrl)
+                        {
+                                Content = content
+                        };
+                        await AddAuthorizationAsync(request);
+
+                        Console.WriteLine($"[FilesClient] UploadMediaAsync - Sending request...");
+
+                        // Use timeout for upload
+                        using var timeoutCts = new CancellationTokenSource(UploadTimeout);
+                        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+
+                        var response = await _rawHttpClient.SendAsync(request, linkedCts.Token);
+                        var duration = DateTime.UtcNow - startTime;
+                        Console.WriteLine($"[FilesClient] UploadMediaAsync - Response: {(int)response.StatusCode} {response.StatusCode} (took {duration.TotalSeconds:F2}s)");
+
+                        if (!response.IsSuccessStatusCode)
+                        {
+                                var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                                Console.WriteLine($"[FilesClient] UploadMediaAsync - ERROR Body: {errorBody}");
+
+                                // Report error
+                                await ReportErrorAsync("FilesClient", "UploadMediaAsync",
+                                        $"HTTP {(int)response.StatusCode}: {errorBody}",
+                                        new Dictionary<string, object>
+                                        {
+                                                ["fileName"] = fileName,
+                                                ["contentType"] = contentType,
+                                                ["directory"] = directory,
+                                                ["streamLength"] = streamLength,
+                                                ["duration"] = duration.TotalSeconds,
+                                                ["statusCode"] = (int)response.StatusCode,
+                                                ["url"] = fullUrl
+                                        });
+
+                                response.EnsureSuccessStatusCode();
+                        }
+
+                        return await response.Content.ReadFromJsonAsync<MediaUploadResponse>(cancellationToken);
                 }
+                catch (OperationCanceledException ex) when (ex.CancellationToken != cancellationToken)
+                {
+                        // Timeout occurred
+                        var duration = DateTime.UtcNow - startTime;
+                        Console.WriteLine($"[FilesClient] UploadMediaAsync - TIMEOUT after {duration.TotalSeconds:F2}s");
 
-                return await response.Content.ReadFromJsonAsync<MediaUploadResponse>(cancellationToken);
+                        await ReportErrorAsync("FilesClient", "UploadMediaAsync",
+                                $"Upload timeout after {duration.TotalSeconds:F2}s",
+                                new Dictionary<string, object>
+                                {
+                                        ["fileName"] = fileName,
+                                        ["contentType"] = contentType,
+                                        ["directory"] = directory,
+                                        ["streamLength"] = streamLength,
+                                        ["duration"] = duration.TotalSeconds,
+                                        ["timeoutSeconds"] = UploadTimeout.TotalSeconds
+                                });
+
+                        throw new TimeoutException($"Upload timed out after {UploadTimeout.TotalSeconds} seconds");
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                        var duration = DateTime.UtcNow - startTime;
+                        Console.WriteLine($"[FilesClient] UploadMediaAsync - EXCEPTION: {ex.GetType().Name}: {ex.Message}");
+
+                        await ReportErrorAsync("FilesClient", "UploadMediaAsync",
+                                $"{ex.GetType().Name}: {ex.Message}",
+                                new Dictionary<string, object>
+                                {
+                                        ["fileName"] = fileName,
+                                        ["contentType"] = contentType,
+                                        ["directory"] = directory,
+                                        ["streamLength"] = streamLength,
+                                        ["duration"] = duration.TotalSeconds,
+                                        ["exceptionType"] = ex.GetType().FullName ?? ex.GetType().Name
+                                },
+                                ex.StackTrace);
+
+                        throw;
+                }
+        }
+
+        /// <summary>
+        /// إرسال تقرير خطأ للخادم
+        /// </summary>
+        private async Task ReportErrorAsync(string source, string operation, string errorMessage,
+                Dictionary<string, object>? additionalData = null, string? stackTrace = null)
+        {
+                try
+                {
+                        var baseUrl = await _serviceRegistry.DiscoverAsync(ServiceName, CancellationToken.None);
+                        if (baseUrl == null) return;
+
+                        var report = new
+                        {
+                                reportId = Guid.NewGuid().ToString(),
+                                source,
+                                operation,
+                                errorMessage,
+                                stackTrace,
+                                platform = GetPlatform(),
+                                appVersion = GetAppVersion(),
+                                osVersion = GetOsVersion(),
+                                deviceModel = GetDeviceModel(),
+                                timestamp = DateTime.UtcNow,
+                                additionalData
+                        };
+
+                        var json = JsonSerializer.Serialize(report);
+                        var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+                        // Fire and forget - don't wait for response
+                        _ = _rawHttpClient.PostAsync($"{baseUrl.BaseUrl}/api/errorreporting/report", content);
+
+                        Console.WriteLine($"[FilesClient] Error report sent for {operation}");
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"[FilesClient] Failed to send error report: {ex.Message}");
+                }
+        }
+
+        private static string GetPlatform()
+        {
+#if ANDROID
+                return "Android";
+#elif IOS
+                return "iOS";
+#elif WINDOWS
+                return "Windows";
+#elif MACCATALYST
+                return "MacOS";
+#else
+                return "Unknown";
+#endif
+        }
+
+        private static string GetAppVersion()
+        {
+                try
+                {
+                        return typeof(FilesClient).Assembly.GetName().Version?.ToString() ?? "Unknown";
+                }
+                catch
+                {
+                        return "Unknown";
+                }
+        }
+
+        private static string GetOsVersion()
+        {
+                try
+                {
+                        return Environment.OSVersion.ToString();
+                }
+                catch
+                {
+                        return "Unknown";
+                }
+        }
+
+        private static string GetDeviceModel()
+        {
+                try
+                {
+                        return Environment.MachineName;
+                }
+                catch
+                {
+                        return "Unknown";
+                }
         }
 
         /// <summary>
