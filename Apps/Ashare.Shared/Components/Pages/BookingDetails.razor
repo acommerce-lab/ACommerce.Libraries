@@ -1,6 +1,7 @@
 @page "/booking/{BookingId:guid}"
 @inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
+@inject TokenManager TokenManager
 
 <div class="ac-page ashare-booking-details">
     @if (_isLoading)
@@ -25,7 +26,7 @@
             <button class="ashare-back-btn" @onclick="GoBack">
                 <i class="bi bi-arrow-right"></i>
             </button>
-            <h1>تفاصيل الحجز</h1>
+            <h1>@(_isHost ? "طلب حجز وارد" : "تفاصيل الحجز")</h1>
         </div>
 
         @* Status Banner *@
@@ -36,6 +37,28 @@
                 <span class="ashare-status-date">@GetStatusDate()</span>
             </div>
         </div>
+
+        @* Host Actions - أزرار القبول والرفض للمالك *@
+        @if (_isHost && _booking.Status == BookingStatus.Pending)
+        {
+            <div class="ashare-host-actions-card">
+                <div class="ashare-host-actions-header">
+                    <i class="bi bi-bell"></i>
+                    <span>طلب حجز جديد</span>
+                </div>
+                <p>لديك طلب حجز جديد. يرجى مراجعة التفاصيل والرد على الطلب.</p>
+                <div class="ashare-host-actions-buttons">
+                    <button class="ac-btn ac-btn-success ac-btn-lg" @onclick="ShowConfirmModal">
+                        <i class="bi bi-check-lg"></i>
+                        قبول الحجز
+                    </button>
+                    <button class="ac-btn ac-btn-outline-danger ac-btn-lg" @onclick="ShowRejectModal">
+                        <i class="bi bi-x-lg"></i>
+                        رفض الحجز
+                    </button>
+                </div>
+            </div>
+        }
 
         @* Space Info *@
         <div class="ashare-details-card">
@@ -255,15 +278,78 @@
     </div>
 }
 
+@* Host Confirm Booking Modal - قبول الحجز *@
+@if (_showConfirmModal)
+{
+    <div class="ac-modal-overlay" @onclick="() => _showConfirmModal = false">
+        <div class="ac-modal" @onclick:stopPropagation="true">
+            <div class="ac-modal-header">
+                <h3>قبول الحجز</h3>
+                <button class="ac-modal-close" @onclick="() => _showConfirmModal = false">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="ac-modal-body">
+                <div class="ashare-confirm-info">
+                    <i class="bi bi-check-circle"></i>
+                    <p>بقبولك للحجز، سيتم إيقاف عرض العقار للعملاء الآخرين وسيبدأ الحجز.</p>
+                </div>
+                <div class="ashare-refund-amount">
+                    <span>مبلغ العربون:</span>
+                    <strong>@_booking?.DepositAmount ر.س</strong>
+                </div>
+            </div>
+            <div class="ac-modal-footer">
+                <button class="ac-btn ac-btn-secondary" @onclick="() => _showConfirmModal = false">تراجع</button>
+                <button class="ac-btn ac-btn-success" @onclick="ConfirmBookingByHost">قبول الحجز</button>
+            </div>
+        </div>
+    </div>
+}
+
+@* Host Reject Booking Modal - رفض الحجز *@
+@if (_showRejectModal)
+{
+    <div class="ac-modal-overlay" @onclick="() => _showRejectModal = false">
+        <div class="ac-modal" @onclick:stopPropagation="true">
+            <div class="ac-modal-header">
+                <h3>رفض الحجز</h3>
+                <button class="ac-modal-close" @onclick="() => _showRejectModal = false">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="ac-modal-body">
+                <div class="ashare-reject-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <p>سيتم رفض الحجز واسترداد العربون للعميل تلقائياً.</p>
+                </div>
+                <div class="ac-form-group">
+                    <label>سبب الرفض (اختياري)</label>
+                    <textarea class="ac-input" rows="3" @bind="_rejectReason"
+                              placeholder="أدخل سبب الرفض..."></textarea>
+                </div>
+            </div>
+            <div class="ac-modal-footer">
+                <button class="ac-btn ac-btn-secondary" @onclick="() => _showRejectModal = false">تراجع</button>
+                <button class="ac-btn ac-btn-danger" @onclick="RejectBookingByHost">رفض الحجز</button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     [Parameter]
     public Guid BookingId { get; set; }
 
     private BookingItem? _booking;
     private bool _isLoading = true;
+    private bool _isHost; // هل المستخدم الحالي هو صاحب العرض
     private bool _showCancelModal;
     private bool _showRefundModal;
     private bool _showReleaseModal;
+    private bool _showConfirmModal; // للمالك - قبول الحجز
+    private bool _showRejectModal; // للمالك - رفض الحجز
+    private string _rejectReason = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -276,6 +362,13 @@
         try
         {
             _booking = await ApiService.GetBookingByIdAsync(BookingId);
+
+            // تحديد إذا كان المستخدم هو المالك أو العميل
+            var currentUserId = TokenManager.GetUserIdFromToken();
+            if (_booking != null && !string.IsNullOrEmpty(currentUserId))
+            {
+                _isHost = _booking.HostId.ToString().Equals(currentUserId, StringComparison.OrdinalIgnoreCase);
+            }
         }
         catch (Exception ex)
         {
@@ -414,6 +507,66 @@
     private void ContactSupport()
     {
         Navigation.NavigateTo($"/support?booking={BookingId}");
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Host Actions - إجراءات المالك
+    // ═══════════════════════════════════════════════════════════════════
+
+    private void ShowConfirmModal()
+    {
+        _showConfirmModal = true;
+    }
+
+    private void ShowRejectModal()
+    {
+        _rejectReason = "";
+        _showRejectModal = true;
+    }
+
+    private async Task ConfirmBookingByHost()
+    {
+        if (_booking == null) return;
+
+        try
+        {
+            var success = await ApiService.ConfirmBookingAsync(_booking.Id);
+            if (success)
+            {
+                // إعادة تحميل الحجز لعرض الحالة الجديدة
+                await LoadBookingAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[BookingDetails] Error confirming booking: {ex.Message}");
+        }
+        finally
+        {
+            _showConfirmModal = false;
+        }
+    }
+
+    private async Task RejectBookingByHost()
+    {
+        if (_booking == null) return;
+
+        try
+        {
+            var success = await ApiService.RejectBookingAsync(_booking.Id, _rejectReason);
+            if (success)
+            {
+                await LoadBookingAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[BookingDetails] Error rejecting booking: {ex.Message}");
+        }
+        finally
+        {
+            _showRejectModal = false;
+        }
     }
 }
 
@@ -718,5 +871,89 @@
         font-size: 18px;
         color: var(--ashare-gray-600);
         margin: 0;
+    }
+
+    /* Host Actions Card */
+    .ashare-host-actions-card {
+        background: linear-gradient(135deg, #fef3c7 0%, #fef9c3 100%);
+        border: 1px solid #fbbf24;
+        margin: var(--ashare-spacing-md);
+        padding: var(--ashare-spacing-lg);
+        border-radius: var(--ashare-radius-lg);
+    }
+
+    .ashare-host-actions-header {
+        display: flex;
+        align-items: center;
+        gap: var(--ashare-spacing-sm);
+        margin-bottom: var(--ashare-spacing-sm);
+        color: #92400e;
+    }
+
+    .ashare-host-actions-header i {
+        font-size: 24px;
+    }
+
+    .ashare-host-actions-header span {
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .ashare-host-actions-card p {
+        font-size: 14px;
+        color: #78350f;
+        margin: 0 0 var(--ashare-spacing-md);
+        line-height: 1.5;
+    }
+
+    .ashare-host-actions-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: var(--ashare-spacing-sm);
+    }
+
+    .ashare-confirm-info {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--ashare-spacing-sm);
+        padding: var(--ashare-spacing-md);
+        background: #d1fae5;
+        border-radius: var(--ashare-radius-md);
+        margin-bottom: var(--ashare-spacing-md);
+        color: #065f46;
+    }
+
+    .ashare-confirm-info i {
+        font-size: 24px;
+        color: #10b981;
+        flex-shrink: 0;
+    }
+
+    .ashare-confirm-info p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .ashare-reject-warning {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--ashare-spacing-sm);
+        padding: var(--ashare-spacing-md);
+        background: #fee2e2;
+        border-radius: var(--ashare-radius-md);
+        margin-bottom: var(--ashare-spacing-md);
+        color: #991b1b;
+    }
+
+    .ashare-reject-warning i {
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .ashare-reject-warning p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
     }
 </style>
