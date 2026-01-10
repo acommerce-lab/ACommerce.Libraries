@@ -1,6 +1,7 @@
 @page "/bookings"
 @inject AshareApiService ApiService
 @inject IAppNavigationService Navigation
+@inject ITokenManager TokenManager
 
 <div class="ac-page ashare-bookings-page">
     <div class="ac-page-header">
@@ -249,7 +250,8 @@
 
     private async Task LoadBookingsAsync()
     {
-        var allBookings = await ApiService.GetBookingsAsync();
+        var customerId = TokenManager.GetUserIdFromToken();
+        var allBookings = await ApiService.GetBookingsAsync(customerId);
         var today = DateTime.Today;
 
         _upcomingBookings = allBookings
