@@ -480,6 +480,7 @@ public class BookingItem
     public Guid SpaceId { get; set; }
     public string SpaceName { get; set; } = string.Empty;
     public string? SpaceImage { get; set; }
+    public string? SpaceLocation { get; set; }
     public DateTime Date { get; set; }
     public TimeOnly StartTime { get; set; }
     public TimeOnly EndTime { get; set; }
@@ -488,11 +489,16 @@ public class BookingItem
     public string Currency { get; set; } = "ر.س";
     public BookingStatus Status { get; set; }
     public string? Notes { get; set; }
+    public string? CustomerNotes { get; set; }
     public bool IsReviewed { get; set; }
     public DateTime CreatedAt { get; set; }
+    public DateTime? ConfirmedAt { get; set; }
+    public DateTime? CancelledAt { get; set; }
 
     // Payment-related properties
     public decimal DepositPaid { get; set; }
+    public decimal DepositAmount => DepositPaid; // alias for backward compatibility
+    public bool IsDepositPaid => DepositPaid > 0;
     public string? PaymentId { get; set; }
     public string? RentType { get; set; }
 }
