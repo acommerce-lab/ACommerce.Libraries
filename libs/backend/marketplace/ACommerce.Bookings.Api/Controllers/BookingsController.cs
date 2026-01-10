@@ -172,13 +172,21 @@ public class BookingsController(
                 return NotFound(new { success = false, message = "الحجز غير موجود" });
             }
 
-            // TODO: Implement confirmation logic
-            // 1. Verify status is DepositPaid
-            // 2. Verify caller is the host
-            // 3. Update status to Confirmed
-            // 4. Send notification to customer
+            // التحقق من الحالة الحالية
+            if (booking.Status != BookingStatus.Pending && booking.Status != BookingStatus.DepositPaid)
+            {
+                return BadRequest(new { success = false, message = "لا يمكن تأكيد هذا الحجز بحالته الحالية" });
+            }
 
             _logger.LogInformation("Confirming booking {BookingId}", id);
+
+            // تحديث حالة الحجز
+            booking.Status = BookingStatus.Confirmed;
+            booking.ConfirmedAt = DateTime.UtcNow;
+            booking.HostNotes = dto?.HostNotes;
+            booking.UpdatedAt = DateTime.UtcNow;
+
+            await _bookingRepository.UpdateAsync(booking);
 
             // تتبع حدث الشراء (Purchase) عند تأكيد الحجز
             try
@@ -224,14 +232,31 @@ public class BookingsController(
     {
         try
         {
-            // TODO: Implement rejection logic
-            // 1. Get booking and verify status
-            // 2. Verify caller is the host
-            // 3. Update status to Rejected
-            // 4. Initiate refund if deposit was paid
-            // 5. Send notification to customer
+            // جلب الحجز من قاعدة البيانات
+            var booking = await _bookingRepository.GetByIdAsync(id);
+            if (booking == null)
+            {
+                return NotFound(new { success = false, message = "الحجز غير موجود" });
+            }
+
+            // التحقق من الحالة الحالية
+            if (booking.Status != BookingStatus.Pending && booking.Status != BookingStatus.DepositPaid)
+            {
+                return BadRequest(new { success = false, message = "لا يمكن رفض هذا الحجز بحالته الحالية" });
+            }
 
             _logger.LogInformation("Rejecting booking {BookingId} with reason: {Reason}", id, dto.Reason);
+
+            // تحديث حالة الحجز
+            booking.Status = BookingStatus.Rejected;
+            booking.RejectedAt = DateTime.UtcNow;
+            booking.RejectionReason = dto.Reason;
+            booking.UpdatedAt = DateTime.UtcNow;
+
+            await _bookingRepository.UpdateAsync(booking);
+
+            // TODO: إرسال إشعار للعميل
+            // TODO: بدء عملية استرداد العربون إذا تم دفعه
 
             return Ok(new { success = true, message = "تم رفض الحجز" });
         }

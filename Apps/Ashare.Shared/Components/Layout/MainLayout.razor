@@ -103,6 +103,7 @@
     private string? _lastCheckedPath;
     private static bool _bookingsCountLoaded;
     private static int _cachedBookingsCount;
+    private static string? _cachedBookingsCustomerId; // لتتبع من تم تحميل العدد له
     private static bool _versionChecked;
     private bool _versionAlertDismissed;
 
@@ -353,14 +354,20 @@
 
     private async Task LoadBookingsCountAsync()
     {
-        // تجنب التحميل المتكرر
-        if (_bookingsCountLoaded) return;
-
         try
         {
             var customerId = TokenManager.GetUserIdFromToken();
+
+            // التحقق من أن الـ cache للمستخدم الصحيح
+            if (_bookingsCountLoaded && _cachedBookingsCustomerId == customerId)
+            {
+                BookingsCount = _cachedBookingsCount;
+                return;
+            }
+
             var count = await ApiService.GetBookingsCountAsync(customerId);
             _cachedBookingsCount = count;
+            _cachedBookingsCustomerId = customerId;
             _bookingsCountLoaded = true;
             BookingsCount = count;
             await InvokeAsync(StateHasChanged);
@@ -378,6 +385,7 @@
     {
         _bookingsCountLoaded = false;
         _cachedBookingsCount = 0;
+        _cachedBookingsCustomerId = null;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

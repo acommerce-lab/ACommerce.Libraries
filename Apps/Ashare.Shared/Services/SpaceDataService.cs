@@ -478,6 +478,8 @@ public class BookingItem
 {
     public Guid Id { get; set; }
     public Guid SpaceId { get; set; }
+    public Guid HostId { get; set; }
+    public string? CustomerId { get; set; }
     public string SpaceName { get; set; } = string.Empty;
     public string? SpaceImage { get; set; }
     public string? SpaceLocation { get; set; }

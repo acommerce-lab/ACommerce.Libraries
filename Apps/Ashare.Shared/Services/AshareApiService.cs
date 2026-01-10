@@ -655,6 +655,8 @@ public class AshareApiService
                 {
                         Id = dto.Id,
                         SpaceId = dto.SpaceId,
+                        HostId = dto.HostId,
+                        CustomerId = dto.CustomerId,
                         SpaceName = dto.SpaceName ?? "",
                         SpaceImage = dto.SpaceImage,
                         SpaceLocation = dto.SpaceLocation,
