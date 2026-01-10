@@ -48,7 +48,8 @@ public static class ServiceCollectionExtensions
             },
             options =>
             {
-                options.TimeoutSeconds = 120;
+                // 3 دقائق timeout لرفع الصور الكبيرة على الشبكات البطيئة
+                options.TimeoutSeconds = 180;
                 options.EnableAuthentication = true;
                 configureClient?.Invoke(options);
             });
