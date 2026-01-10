@@ -1,5 +1,6 @@
 using ACommerce.Client.Core.Configuration;
 using Ashare.Shared.Services;
+using Microsoft.Maui.Devices;
 using AshareApiConfig = Ashare.Shared.Services.ApiConfiguration;
 
 namespace Ashare.App.Services;
