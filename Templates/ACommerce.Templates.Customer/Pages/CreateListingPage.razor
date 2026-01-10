@@ -8,6 +8,8 @@
 @using ACommerce.Client.Auth
 @using ACommerce.Client.Files
 
+@inject IImageCompressionService? ImageCompressionService
+
 <div class="ac-page ac-create-listing-page">
     @* Header *@
     <div class="ac-page-header">
@@ -936,21 +938,71 @@
                 if (Model.Images.Count >= 10) break;
 
                 processedFiles++;
-                _uploadProgress = $"جاري رفع {processedFiles} من {totalFiles}...";
+                _uploadProgress = $"جاري ضغط ورفع {processedFiles} من {totalFiles}...";
                 StateHasChanged();
 
                 try
                 {
                     if (result.OpenReadAsync != null && FilesClientService != null)
                     {
-                        using var stream = await result.OpenReadAsync();
+                        Stream streamToUpload;
+                        string contentType = result.ContentType;
+                        long originalSize = 0;
+                        long compressedSize = 0;
+
+                        // ضغط الصورة قبل الرفع إذا كانت خدمة الضغط متاحة
+                        if (ImageCompressionService != null)
+                        {
+                            _uploadProgress = $"جاري ضغط {processedFiles} من {totalFiles}...";
+                            StateHasChanged();
+
+                            using var originalStream = await result.OpenReadAsync();
+                            originalSize = originalStream.CanSeek ? originalStream.Length : 0;
+
+                            Console.WriteLine($"[CreateListingPage] Compressing {result.FileName} (original: {originalSize / 1024.0:F2} KB)");
+
+                            var compressionResult = await ImageCompressionService.CompressAsync(
+                                originalStream,
+                                maxWidth: 1920,
+                                maxHeight: 1920,
+                                quality: 75);
+
+                            if (compressionResult.Success && compressionResult.Stream != null)
+                            {
+                                streamToUpload = compressionResult.Stream;
+                                compressedSize = compressionResult.CompressedSize;
+                                contentType = "image/jpeg"; // SkiaSharp يحول لـ JPEG
+                                Console.WriteLine($"[CreateListingPage] Compressed to {compressedSize / 1024.0:F2} KB (saved {compressionResult.CompressionRatio:F1}%)");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"[CreateListingPage] Compression failed: {compressionResult.ErrorMessage}, using original");
+                                // في حالة فشل الضغط، نستخدم الصورة الأصلية
+                                streamToUpload = await result.OpenReadAsync();
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"[CreateListingPage] ImageCompressionService not available, using original image");
+                            streamToUpload = await result.OpenReadAsync();
+                        }
+
+                        _uploadProgress = $"جاري رفع {processedFiles} من {totalFiles}...";
+                        StateHasChanged();
+
                         Console.WriteLine($"[CreateListingPage] Uploading {result.FileName} via FilesClient");
 
                         var uploadResult = await FilesClientService.UploadMediaAsync(
-                            stream,
-                            result.FileName,
-                            result.ContentType,
+                            streamToUpload,
+                            result.FileName.Replace(Path.GetExtension(result.FileName), ".jpg"),
+                            contentType,
                             "listings");
+
+                        // تنظيف stream الضغط
+                        if (streamToUpload != null && ImageCompressionService != null)
+                        {
+                            await streamToUpload.DisposeAsync();
+                        }
 
                         if (uploadResult != null && !string.IsNullOrEmpty(uploadResult.Url))
                         {
@@ -1047,15 +1099,57 @@
                 {
                     if (FilesClientService != null)
                     {
-                        // Use FilesClient which properly handles service discovery and builds absolute URLs
-                        using var stream = file.OpenReadStream(MaxFileSize);
+                        Stream streamToUpload;
+                        string contentType = file.ContentType;
+
+                        // ضغط الصورة قبل الرفع إذا كانت خدمة الضغط متاحة
+                        if (ImageCompressionService != null)
+                        {
+                            _uploadProgress = $"جاري ضغط {processedFiles} من {totalFiles}...";
+                            StateHasChanged();
+
+                            using var originalStream = file.OpenReadStream(MaxFileSize);
+                            Console.WriteLine($"[CreateListingPage] Compressing {file.Name} (original: {file.Size / 1024.0:F2} KB)");
+
+                            var compressionResult = await ImageCompressionService.CompressAsync(
+                                originalStream,
+                                maxWidth: 1920,
+                                maxHeight: 1920,
+                                quality: 75);
+
+                            if (compressionResult.Success && compressionResult.Stream != null)
+                            {
+                                streamToUpload = compressionResult.Stream;
+                                contentType = "image/jpeg";
+                                Console.WriteLine($"[CreateListingPage] Compressed to {compressionResult.CompressedSize / 1024.0:F2} KB (saved {compressionResult.CompressionRatio:F1}%)");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"[CreateListingPage] Compression failed: {compressionResult.ErrorMessage}, using original");
+                                streamToUpload = file.OpenReadStream(MaxFileSize);
+                            }
+                        }
+                        else
+                        {
+                            streamToUpload = file.OpenReadStream(MaxFileSize);
+                        }
+
+                        _uploadProgress = $"جاري رفع {processedFiles} من {totalFiles}...";
+                        StateHasChanged();
+
                         Console.WriteLine($"[CreateListingPage] Uploading {file.Name} via FilesClient");
 
                         var result = await FilesClientService.UploadMediaAsync(
-                            stream,
-                            file.Name,
-                            file.ContentType,
+                            streamToUpload,
+                            file.Name.Replace(Path.GetExtension(file.Name), ".jpg"),
+                            contentType,
                             "listings");
+
+                        // تنظيف stream الضغط
+                        if (ImageCompressionService != null)
+                        {
+                            await streamToUpload.DisposeAsync();
+                        }
 
                         if (result != null && !string.IsNullOrEmpty(result.Url))
                         {
