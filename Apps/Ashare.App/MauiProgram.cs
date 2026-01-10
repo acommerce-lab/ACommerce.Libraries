@@ -116,6 +116,9 @@ public static class MauiProgram
         // Media Picker Service (for camera and gallery access)
         builder.Services.AddSingleton<IMediaPickerService, MauiMediaPickerService>();
 
+        // Image Compression Service (for compressing images before upload)
+        builder.Services.AddSingleton<IImageCompressionService, SkiaImageCompressionService>();
+
         builder.Services.AddMockAnalytics();
 
         builder.Services.AddHttpClient("AshareApi", client =>

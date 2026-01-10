@@ -26,6 +26,9 @@ public sealed class FilesClient
         {
                 _httpClient = httpClient;
                 _rawHttpClient = httpClientFactory.CreateClient("DynamicHttpClient");
+                // Ensure HttpClient timeout is set correctly (fixes 60-second default timeout issue)
+                _rawHttpClient.Timeout = UploadTimeout;
+                Console.WriteLine($"[FilesClient] HttpClient timeout set to {_rawHttpClient.Timeout.TotalSeconds}s");
                 _serviceRegistry = serviceRegistry;
                 _tokenProvider = tokenProvider;
                 _deviceInfo = deviceInfoProvider ?? new DefaultDeviceInfoProvider();
