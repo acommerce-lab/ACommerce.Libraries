@@ -1,0 +1,722 @@
+@page "/booking/{BookingId:guid}"
+@inject AshareApiService ApiService
+@inject IAppNavigationService Navigation
+
+<div class="ac-page ashare-booking-details">
+    @if (_isLoading)
+    {
+        <div class="ashare-loading">
+            <div class="ac-spinner"></div>
+            <span>جاري التحميل...</span>
+        </div>
+    }
+    else if (_booking == null)
+    {
+        <div class="ashare-error-state">
+            <i class="bi bi-exclamation-circle"></i>
+            <h2>الحجز غير موجود</h2>
+            <button class="ac-btn ac-btn-primary" @onclick="GoBack">العودة</button>
+        </div>
+    }
+    else
+    {
+        @* Header *@
+        <div class="ashare-details-header">
+            <button class="ashare-back-btn" @onclick="GoBack">
+                <i class="bi bi-arrow-right"></i>
+            </button>
+            <h1>تفاصيل الحجز</h1>
+        </div>
+
+        @* Status Banner *@
+        <div class="ashare-status-banner @GetStatusClass(_booking.Status)">
+            <i class="bi @GetStatusIcon(_booking.Status)"></i>
+            <div class="ashare-status-content">
+                <span class="ashare-status-label">@GetStatusText(_booking.Status)</span>
+                <span class="ashare-status-date">@GetStatusDate()</span>
+            </div>
+        </div>
+
+        @* Space Info *@
+        <div class="ashare-details-card">
+            <div class="ashare-space-summary" @onclick="ViewSpace">
+                <div class="ashare-space-image">
+                    @if (!string.IsNullOrEmpty(_booking.SpaceImage))
+                    {
+                        <img src="@_booking.SpaceImage" alt="@_booking.SpaceName" />
+                    }
+                    else
+                    {
+                        <div class="ashare-no-image">
+                            <i class="bi bi-building"></i>
+                        </div>
+                    }
+                </div>
+                <div class="ashare-space-info">
+                    <h3>@_booking.SpaceName</h3>
+                    @if (!string.IsNullOrEmpty(_booking.SpaceLocation))
+                    {
+                        <p class="ashare-space-location">
+                            <i class="bi bi-geo-alt"></i>
+                            @_booking.SpaceLocation
+                        </p>
+                    }
+                </div>
+                <i class="bi bi-chevron-left"></i>
+            </div>
+        </div>
+
+        @* Booking Details *@
+        <div class="ashare-details-card">
+            <h2 class="ashare-card-title">تفاصيل الحجز</h2>
+
+            <div class="ashare-details-row">
+                <span class="ashare-details-label">رقم الحجز</span>
+                <span class="ashare-details-value">@_booking.Id.ToString().Substring(0, 8).ToUpper()</span>
+            </div>
+
+            <div class="ashare-details-row">
+                <span class="ashare-details-label">تاريخ الحجز</span>
+                <span class="ashare-details-value">@_booking.Date.ToString("yyyy/MM/dd")</span>
+            </div>
+
+            <div class="ashare-details-row">
+                <span class="ashare-details-label">الوقت</span>
+                <span class="ashare-details-value">@_booking.StartTime.ToString(@"hh\:mm") - @_booking.EndTime.ToString(@"hh\:mm")</span>
+            </div>
+
+            <div class="ashare-details-row">
+                <span class="ashare-details-label">عدد الضيوف</span>
+                <span class="ashare-details-value">@_booking.GuestsCount شخص</span>
+            </div>
+        </div>
+
+        @* Payment Details *@
+        <div class="ashare-details-card">
+            <h2 class="ashare-card-title">تفاصيل الدفع</h2>
+
+            <div class="ashare-details-row">
+                <span class="ashare-details-label">السعر الكلي</span>
+                <span class="ashare-details-value">@_booking.TotalPrice ر.س</span>
+            </div>
+
+            <div class="ashare-details-row">
+                <span class="ashare-details-label">العربون المدفوع</span>
+                <span class="ashare-details-value highlight">@_booking.DepositAmount ر.س</span>
+            </div>
+
+            <div class="ashare-details-row">
+                <span class="ashare-details-label">المتبقي</span>
+                <span class="ashare-details-value">@(_booking.TotalPrice - _booking.DepositAmount) ر.س</span>
+            </div>
+
+            @if (_booking.IsDepositPaid)
+            {
+                <div class="ashare-payment-status paid">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>تم دفع العربون</span>
+                </div>
+            }
+        </div>
+
+        @* Protection Info *@
+        <div class="ashare-details-card ashare-protection-card">
+            <div class="ashare-protection-header">
+                <i class="bi bi-shield-check"></i>
+                <h2>حماية المبلغ</h2>
+            </div>
+            <p>مبلغك محمي بالكامل. لن يتم تحويله للمعلن إلا بعد تأكيدك، ويمكنك استرداده فوراً في أي وقت.</p>
+
+            @if (_booking.Status == BookingStatus.Pending || _booking.Status == BookingStatus.Confirmed)
+            {
+                <div class="ashare-protection-actions">
+                    <button class="ac-btn ac-btn-success" @onclick="ReleaseDeposit" disabled="@(_booking.Status != BookingStatus.Confirmed)">
+                        <i class="bi bi-check-lg"></i>
+                        تأكيد وتحويل للمعلن
+                    </button>
+                    <button class="ac-btn ac-btn-outline-danger" @onclick="RequestRefund">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        استرداد المبلغ
+                    </button>
+                </div>
+            }
+        </div>
+
+        @* Actions *@
+        <div class="ashare-details-actions">
+            @if (_booking.Status == BookingStatus.Pending)
+            {
+                <button class="ac-btn ac-btn-outline-danger ac-btn-block" @onclick="CancelBooking">
+                    <i class="bi bi-x-circle"></i>
+                    إلغاء الحجز
+                </button>
+            }
+
+            <button class="ac-btn ac-btn-outline-primary ac-btn-block" @onclick="ContactSupport">
+                <i class="bi bi-headset"></i>
+                تواصل مع الدعم
+            </button>
+        </div>
+
+        @* Notes *@
+        @if (!string.IsNullOrEmpty(_booking.CustomerNotes))
+        {
+            <div class="ashare-details-card">
+                <h2 class="ashare-card-title">ملاحظاتك</h2>
+                <p class="ashare-notes">@_booking.CustomerNotes</p>
+            </div>
+        }
+    }
+</div>
+
+@* Cancel Confirmation Modal *@
+@if (_showCancelModal)
+{
+    <div class="ac-modal-overlay" @onclick="() => _showCancelModal = false">
+        <div class="ac-modal" @onclick:stopPropagation="true">
+            <div class="ac-modal-header">
+                <h3>إلغاء الحجز</h3>
+                <button class="ac-modal-close" @onclick="() => _showCancelModal = false">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="ac-modal-body">
+                <p>هل أنت متأكد من إلغاء هذا الحجز؟</p>
+                <div class="ashare-cancel-info">
+                    <i class="bi bi-info-circle"></i>
+                    <span>سيتم استرداد العربون خلال 3-5 أيام عمل</span>
+                </div>
+            </div>
+            <div class="ac-modal-footer">
+                <button class="ac-btn ac-btn-secondary" @onclick="() => _showCancelModal = false">تراجع</button>
+                <button class="ac-btn ac-btn-danger" @onclick="ConfirmCancel">تأكيد الإلغاء</button>
+            </div>
+        </div>
+    </div>
+}
+
+@* Refund Confirmation Modal *@
+@if (_showRefundModal)
+{
+    <div class="ac-modal-overlay" @onclick="() => _showRefundModal = false">
+        <div class="ac-modal" @onclick:stopPropagation="true">
+            <div class="ac-modal-header">
+                <h3>استرداد المبلغ</h3>
+                <button class="ac-modal-close" @onclick="() => _showRefundModal = false">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="ac-modal-body">
+                <p>هل أنت متأكد من طلب استرداد العربون؟</p>
+                <div class="ashare-refund-amount">
+                    <span>المبلغ المسترد:</span>
+                    <strong>@_booking?.DepositAmount ر.س</strong>
+                </div>
+                <div class="ashare-cancel-info">
+                    <i class="bi bi-info-circle"></i>
+                    <span>سيتم استرداد المبلغ خلال 3-5 أيام عمل</span>
+                </div>
+            </div>
+            <div class="ac-modal-footer">
+                <button class="ac-btn ac-btn-secondary" @onclick="() => _showRefundModal = false">تراجع</button>
+                <button class="ac-btn ac-btn-primary" @onclick="ConfirmRefund">تأكيد الاسترداد</button>
+            </div>
+        </div>
+    </div>
+}
+
+@* Release Confirmation Modal *@
+@if (_showReleaseModal)
+{
+    <div class="ac-modal-overlay" @onclick="() => _showReleaseModal = false">
+        <div class="ac-modal" @onclick:stopPropagation="true">
+            <div class="ac-modal-header">
+                <h3>تأكيد وتحويل للمعلن</h3>
+                <button class="ac-modal-close" @onclick="() => _showReleaseModal = false">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="ac-modal-body">
+                <div class="ashare-release-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <p>بعد التأكيد، سيتم تحويل العربون للمعلن ولن تتمكن من استرداده.</p>
+                </div>
+                <p>هل أنت متأكد من تأكيد الحجز وتحويل العربون؟</p>
+                <div class="ashare-refund-amount">
+                    <span>المبلغ:</span>
+                    <strong>@_booking?.DepositAmount ر.س</strong>
+                </div>
+            </div>
+            <div class="ac-modal-footer">
+                <button class="ac-btn ac-btn-secondary" @onclick="() => _showReleaseModal = false">تراجع</button>
+                <button class="ac-btn ac-btn-success" @onclick="ConfirmRelease">تأكيد التحويل</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid BookingId { get; set; }
+
+    private BookingItem? _booking;
+    private bool _isLoading = true;
+    private bool _showCancelModal;
+    private bool _showRefundModal;
+    private bool _showReleaseModal;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBookingAsync();
+    }
+
+    private async Task LoadBookingAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            _booking = await ApiService.GetBookingByIdAsync(BookingId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[BookingDetails] Error loading booking: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateBack();
+    }
+
+    private void ViewSpace()
+    {
+        if (_booking != null)
+        {
+            Navigation.NavigateTo($"/space/{_booking.SpaceId}");
+        }
+    }
+
+    private string GetStatusClass(BookingStatus status) => status switch
+    {
+        BookingStatus.Pending => "pending",
+        BookingStatus.Confirmed => "confirmed",
+        BookingStatus.Completed => "completed",
+        BookingStatus.Cancelled => "cancelled",
+        _ => ""
+    };
+
+    private string GetStatusIcon(BookingStatus status) => status switch
+    {
+        BookingStatus.Pending => "bi-hourglass-split",
+        BookingStatus.Confirmed => "bi-check-circle",
+        BookingStatus.Completed => "bi-check-circle-fill",
+        BookingStatus.Cancelled => "bi-x-circle",
+        _ => "bi-circle"
+    };
+
+    private string GetStatusText(BookingStatus status) => status switch
+    {
+        BookingStatus.Pending => "قيد المراجعة",
+        BookingStatus.Confirmed => "مؤكد",
+        BookingStatus.Completed => "مكتمل",
+        BookingStatus.Cancelled => "ملغي",
+        _ => ""
+    };
+
+    private string GetStatusDate()
+    {
+        if (_booking == null) return "";
+
+        return _booking.Status switch
+        {
+            BookingStatus.Confirmed => _booking.ConfirmedAt?.ToString("yyyy/MM/dd") ?? "",
+            BookingStatus.Cancelled => _booking.CancelledAt?.ToString("yyyy/MM/dd") ?? "",
+            _ => _booking.CreatedAt.ToString("yyyy/MM/dd")
+        };
+    }
+
+    private void CancelBooking()
+    {
+        _showCancelModal = true;
+    }
+
+    private async Task ConfirmCancel()
+    {
+        if (_booking == null) return;
+
+        try
+        {
+            await ApiService.CancelBookingAsync(_booking.Id);
+            await LoadBookingAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[BookingDetails] Error cancelling booking: {ex.Message}");
+        }
+        finally
+        {
+            _showCancelModal = false;
+        }
+    }
+
+    private void RequestRefund()
+    {
+        _showRefundModal = true;
+    }
+
+    private async Task ConfirmRefund()
+    {
+        if (_booking == null) return;
+
+        try
+        {
+            await ApiService.RefundBookingAsync(_booking.Id, "طلب استرداد من العميل");
+            await LoadBookingAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[BookingDetails] Error refunding booking: {ex.Message}");
+        }
+        finally
+        {
+            _showRefundModal = false;
+        }
+    }
+
+    private void ReleaseDeposit()
+    {
+        _showReleaseModal = true;
+    }
+
+    private async Task ConfirmRelease()
+    {
+        if (_booking == null) return;
+
+        try
+        {
+            await ApiService.ReleaseBookingDepositAsync(_booking.Id);
+            await LoadBookingAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[BookingDetails] Error releasing deposit: {ex.Message}");
+        }
+        finally
+        {
+            _showReleaseModal = false;
+        }
+    }
+
+    private void ContactSupport()
+    {
+        Navigation.NavigateTo($"/support?booking={BookingId}");
+    }
+}
+
+<style>
+    .ashare-booking-details {
+        padding-bottom: 32px;
+    }
+
+    .ashare-details-header {
+        display: flex;
+        align-items: center;
+        gap: var(--ashare-spacing-md);
+        padding: var(--ashare-spacing-md);
+        background: var(--ashare-surface);
+        border-bottom: 1px solid var(--ashare-gray-200);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .ashare-details-header h1 {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .ashare-status-banner {
+        display: flex;
+        align-items: center;
+        gap: var(--ashare-spacing-md);
+        padding: var(--ashare-spacing-md);
+        margin: var(--ashare-spacing-md);
+        border-radius: var(--ashare-radius-lg);
+    }
+
+    .ashare-status-banner.pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .ashare-status-banner.confirmed {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .ashare-status-banner.completed {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .ashare-status-banner.cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .ashare-status-banner i {
+        font-size: 24px;
+    }
+
+    .ashare-status-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .ashare-status-label {
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .ashare-status-date {
+        font-size: 13px;
+        opacity: 0.8;
+    }
+
+    .ashare-details-card {
+        background: var(--ashare-surface);
+        margin: var(--ashare-spacing-md);
+        padding: var(--ashare-spacing-md);
+        border-radius: var(--ashare-radius-lg);
+        box-shadow: var(--ashare-shadow-sm);
+    }
+
+    .ashare-card-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 var(--ashare-spacing-md);
+        padding-bottom: var(--ashare-spacing-sm);
+        border-bottom: 1px solid var(--ashare-gray-200);
+    }
+
+    .ashare-space-summary {
+        display: flex;
+        align-items: center;
+        gap: var(--ashare-spacing-md);
+        cursor: pointer;
+    }
+
+    .ashare-space-image {
+        width: 64px;
+        height: 64px;
+        border-radius: var(--ashare-radius-md);
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .ashare-space-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .ashare-no-image {
+        width: 100%;
+        height: 100%;
+        background: var(--ashare-gray-100);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--ashare-gray-400);
+        font-size: 24px;
+    }
+
+    .ashare-space-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .ashare-space-info h3 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 4px;
+    }
+
+    .ashare-space-location {
+        font-size: 13px;
+        color: var(--ashare-gray-500);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .ashare-details-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--ashare-spacing-sm) 0;
+        border-bottom: 1px solid var(--ashare-gray-100);
+    }
+
+    .ashare-details-row:last-child {
+        border-bottom: none;
+    }
+
+    .ashare-details-label {
+        color: var(--ashare-gray-500);
+        font-size: 14px;
+    }
+
+    .ashare-details-value {
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .ashare-details-value.highlight {
+        color: var(--ashare-primary);
+        font-weight: 600;
+    }
+
+    .ashare-payment-status {
+        display: flex;
+        align-items: center;
+        gap: var(--ashare-spacing-sm);
+        padding: var(--ashare-spacing-sm) var(--ashare-spacing-md);
+        border-radius: var(--ashare-radius-md);
+        margin-top: var(--ashare-spacing-md);
+    }
+
+    .ashare-payment-status.paid {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .ashare-protection-card {
+        background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+        border: 1px solid #86efac;
+    }
+
+    .ashare-protection-header {
+        display: flex;
+        align-items: center;
+        gap: var(--ashare-spacing-sm);
+        margin-bottom: var(--ashare-spacing-sm);
+    }
+
+    .ashare-protection-header i {
+        font-size: 24px;
+        color: #10b981;
+    }
+
+    .ashare-protection-header h2 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0;
+        color: #065f46;
+    }
+
+    .ashare-protection-card p {
+        font-size: 14px;
+        color: #047857;
+        margin: 0 0 var(--ashare-spacing-md);
+        line-height: 1.5;
+    }
+
+    .ashare-protection-actions {
+        display: flex;
+        flex-direction: column;
+        gap: var(--ashare-spacing-sm);
+    }
+
+    .ashare-details-actions {
+        padding: var(--ashare-spacing-md);
+        display: flex;
+        flex-direction: column;
+        gap: var(--ashare-spacing-sm);
+    }
+
+    .ashare-notes {
+        font-size: 14px;
+        color: var(--ashare-gray-600);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .ashare-cancel-info {
+        display: flex;
+        align-items: center;
+        gap: var(--ashare-spacing-sm);
+        padding: var(--ashare-spacing-sm) var(--ashare-spacing-md);
+        background: var(--ashare-gray-100);
+        border-radius: var(--ashare-radius-md);
+        margin-top: var(--ashare-spacing-md);
+        font-size: 13px;
+        color: var(--ashare-gray-600);
+    }
+
+    .ashare-refund-amount {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--ashare-spacing-md);
+        background: var(--ashare-gray-50);
+        border-radius: var(--ashare-radius-md);
+        margin: var(--ashare-spacing-md) 0;
+    }
+
+    .ashare-refund-amount strong {
+        color: var(--ashare-primary);
+        font-size: 18px;
+    }
+
+    .ashare-release-warning {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--ashare-spacing-sm);
+        padding: var(--ashare-spacing-md);
+        background: #fef3c7;
+        border-radius: var(--ashare-radius-md);
+        margin-bottom: var(--ashare-spacing-md);
+        color: #92400e;
+    }
+
+    .ashare-release-warning i {
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .ashare-release-warning p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .ashare-loading,
+    .ashare-error-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 60vh;
+        gap: var(--ashare-spacing-md);
+        text-align: center;
+        padding: var(--ashare-spacing-xl);
+    }
+
+    .ashare-error-state i {
+        font-size: 48px;
+        color: var(--ashare-gray-400);
+    }
+
+    .ashare-error-state h2 {
+        font-size: 18px;
+        color: var(--ashare-gray-600);
+        margin: 0;
+    }
+</style>

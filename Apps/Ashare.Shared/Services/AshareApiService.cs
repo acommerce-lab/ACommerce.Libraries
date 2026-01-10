@@ -560,6 +560,23 @@ public class AshareApiService
         }
 
         /// <summary>
+        /// تحرير العربون للمالك بعد تأكيد العميل
+        /// </summary>
+        public async Task<bool> ReleaseBookingDepositAsync(Guid bookingId, string? notes = null)
+        {
+                try
+                {
+                        var result = await _bookingsClient.ReleaseEscrowAsync(bookingId, new ReleaseEscrowRequest { Notes = notes });
+                        return result?.Success ?? false;
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"Error releasing booking deposit: {ex.Message}");
+                        return false;
+                }
+        }
+
+        /// <summary>
         /// إنشاء حجز جديد في الباك اند بعد الدفع
         /// </summary>
         public async Task<BookingItem?> CreateBookingAsync(Guid spaceId, decimal totalPrice, decimal depositAmount, string rentType, string? customerId = null, Guid? hostId = null, string? paymentId = null, string? notes = null)
@@ -640,6 +657,7 @@ public class AshareApiService
                         SpaceId = dto.SpaceId,
                         SpaceName = dto.SpaceName ?? "",
                         SpaceImage = dto.SpaceImage,
+                        SpaceLocation = dto.SpaceLocation,
                         Date = dto.CheckInDate,
                         StartTime = TimeOnly.MinValue,
                         EndTime = TimeOnly.MaxValue,
@@ -651,7 +669,10 @@ public class AshareApiService
                         Status = MapBookingStatus(dto.Status),
                         IsReviewed = dto.HasReview,
                         RentType = dto.RentType,
-                        CreatedAt = dto.CreatedAt
+                        CustomerNotes = dto.CustomerNotes,
+                        CreatedAt = dto.CreatedAt,
+                        ConfirmedAt = dto.ConfirmedAt,
+                        CancelledAt = dto.CancelledAt
                 };
         }
 
