@@ -698,9 +698,9 @@ public class AshareApiService
         // Stats
         // ═══════════════════════════════════════════════════════════════════
 
-        public async Task<int> GetBookingsCountAsync()
+        public async Task<int> GetBookingsCountAsync(string? customerId = null)
         {
-                var bookings = await GetBookingsAsync();
+                var bookings = await GetBookingsAsync(customerId);
                 return bookings.Count(b => b.Status != BookingStatus.Cancelled);
         }
 

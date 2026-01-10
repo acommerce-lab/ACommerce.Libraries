@@ -162,7 +162,7 @@
     private IDisposable? _notificationSubscription;
     private bool _isConnectedToSignalR;
     private int _pollCounter = 0; // عداد للـ polling
-    private const int PollIntervalSeconds = 30; // فحص كل 30 ثانية (تعزيزي بجانب SignalR)
+    private const int PollIntervalSeconds = 1; // فحص كل ثانية (سريع للتحقق عند العودة للتطبيق)
     private bool _isCheckingStatus = false; // منع التداخل في فحص الحالة
 
     protected override async Task OnInitializedAsync()
