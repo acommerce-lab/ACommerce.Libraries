@@ -355,10 +355,11 @@
     {
         // تجنب التحميل المتكرر
         if (_bookingsCountLoaded) return;
-        
+
         try
         {
-            var count = await ApiService.GetBookingsCountAsync();
+            var customerId = TokenManager.GetUserIdFromToken();
+            var count = await ApiService.GetBookingsCountAsync(customerId);
             _cachedBookingsCount = count;
             _bookingsCountLoaded = true;
             BookingsCount = count;
