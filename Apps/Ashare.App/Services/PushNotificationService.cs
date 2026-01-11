@@ -139,13 +139,13 @@ public class PushNotificationService : IPushNotificationService
         }
     }
 
-    private async void OnTokenChanged(object? sender, string newToken)
+    private async void OnTokenChanged(object? sender, FCMTokenChangedEventArgs e)
     {
         _logger.LogInformation("[Push] FCM Token refreshed");
-        _currentToken = newToken;
+        _currentToken = e.Token;
 
-        await RegisterTokenWithBackendAsync(newToken);
-        TokenRefreshed?.Invoke(this, newToken);
+        await RegisterTokenWithBackendAsync(e.Token);
+        TokenRefreshed?.Invoke(this, e.Token);
     }
 
     private void OnNotificationReceived(object? sender, FCMNotificationReceivedEventArgs e)
