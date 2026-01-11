@@ -55,56 +55,22 @@ public class BookingsController(
                 ascending: false
             );
 
-            // إرسال تقرير تشخيصي عبر الإيميل
-            try
+            // تجميع معلومات التشخيص لإرجاعها في الاستجابة
+            var debugInfo = new
             {
-                var debugReport = new System.Text.StringBuilder();
-                debugReport.AppendLine($"=== تقرير تشخيص الحجوزات ===");
-                debugReport.AppendLine($"معرف المستخدم المُرسل من التطبيق: '{customerId}'");
-                debugReport.AppendLine($"طول المعرف: {customerId.Length}");
-                debugReport.AppendLine($"إجمالي الحجوزات في قاعدة البيانات: {allBookings.TotalCount}");
-                debugReport.AppendLine();
-                debugReport.AppendLine("=== الحجوزات الموجودة ===");
-
-                foreach (var booking in allBookings.Items.Take(20))
+                RequestedCustomerId = customerId,
+                RequestedCustomerIdLength = customerId.Length,
+                TotalBookingsInDb = allBookings.TotalCount,
+                AllBookings = allBookings.Items.Take(20).Select(b => new
                 {
-                    var match = booking.CustomerId == customerId ? "✅ تطابق" : "❌ لا يتطابق";
-                    debugReport.AppendLine($"الحجز: {booking.Id}");
-                    debugReport.AppendLine($"  - CustomerId: '{booking.CustomerId}'");
-                    debugReport.AppendLine($"  - طول المعرف: {booking.CustomerId?.Length ?? 0}");
-                    debugReport.AppendLine($"  - SpaceName: {booking.SpaceName}");
-                    debugReport.AppendLine($"  - CreatedAt: {booking.CreatedAt}");
-                    debugReport.AppendLine($"  - {match}");
-                    debugReport.AppendLine();
-                }
-
-                // إرسال التقرير عبر نقطة الأخطاء
-                using var httpClient = new HttpClient();
-                var report = new
-                {
-                    Source = "BookingsController",
-                    Operation = "GetCustomerBookings-Debug",
-                    ErrorMessage = debugReport.ToString(),
-                    Platform = "Backend",
-                    Timestamp = DateTime.UtcNow,
-                    AdditionalData = new Dictionary<string, object>
-                    {
-                        ["RequestedCustomerId"] = customerId,
-                        ["TotalBookings"] = allBookings.TotalCount,
-                        ["BookingCustomerIds"] = allBookings.Items.Take(10).Select(b => b.CustomerId).ToList()
-                    }
-                };
-
-                var json = System.Text.Json.JsonSerializer.Serialize(report);
-                var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-
-                // إرسال للـ localhost (نفس السيرفر)
-                _ = httpClient.PostAsync("http://localhost:5000/api/errorreporting/report", content);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to send debug report");
-            }
+                    BookingId = b.Id,
+                    StoredCustomerId = b.CustomerId,
+                    StoredCustomerIdLength = b.CustomerId?.Length ?? 0,
+                    SpaceName = b.SpaceName,
+                    CreatedAt = b.CreatedAt,
+                    IsMatch = b.CustomerId == customerId
+                }).ToList()
+            };
 
             // استخدام repository مباشرة مع predicate للتأكد من الفلترة الصحيحة
             var result = await _bookingRepository.GetPagedAsync(
@@ -149,12 +115,14 @@ public class BookingsController(
                 UpdatedAt = b.UpdatedAt
             }).ToList();
 
-            return Ok(new PagedResult<BookingResponseDto>
+            // إرجاع النتائج مع معلومات التشخيص
+            return Ok(new
             {
                 Items = dtoItems,
                 TotalCount = result.TotalCount,
                 PageNumber = result.PageNumber,
-                PageSize = result.PageSize
+                PageSize = result.PageSize,
+                Debug = debugInfo // معلومات التشخيص
             });
         }
         catch (Exception ex)
