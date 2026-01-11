@@ -11,28 +11,27 @@ using ACommerce.SharedKernel.Abstractions.Repositories;
 namespace ACommerce.Chats.Core.Providers;
 
 /// <summary>
-/// ???? ??????? ???????? ????? ????????
-/// ?????? ?? ??? SharedKernel! ??
+/// مزود المحادثات باستخدام قاعدة البيانات
+/// يستخدم الـ SharedKernel
 /// </summary>
 public class DatabaseChatProvider : IChatProvider
 {
-	// ? Repository ?? SharedKernel
 	private readonly IBaseAsyncRepository<Chat> _chatRepo;
 	private readonly IBaseAsyncRepository<ChatParticipant> _participantRepo;
-
-	// ? CQRS ?? SharedKernel
+	private readonly IBaseAsyncRepository<Message> _messageRepo;
 	private readonly IMediator _mediator;
-
 	private readonly ILogger<DatabaseChatProvider> _logger;
 
 	public DatabaseChatProvider(
 		IBaseAsyncRepository<Chat> chatRepo,
 		IBaseAsyncRepository<ChatParticipant> participantRepo,
+		IBaseAsyncRepository<Message> messageRepo,
 		IMediator mediator,
 		ILogger<DatabaseChatProvider> logger)
 	{
 		_chatRepo = chatRepo ?? throw new ArgumentNullException(nameof(chatRepo));
 		_participantRepo = participantRepo ?? throw new ArgumentNullException(nameof(participantRepo));
+		_messageRepo = messageRepo ?? throw new ArgumentNullException(nameof(messageRepo));
 		_mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
@@ -103,7 +102,7 @@ public class DatabaseChatProvider : IChatProvider
 	{
 		_logger.LogDebug("Getting chats for user: {UserId}", userId);
 
-		// ? ?????? ??? ?????? ???????? ???? ????? ???? ????????
+		// جلب جميع المحادثات التي يشارك فيها المستخدم
 		var participations = await _participantRepo.GetAllWithPredicateAsync(
 			p => p.UserId == userId,
 			includeDeleted: false);
@@ -121,19 +120,73 @@ public class DatabaseChatProvider : IChatProvider
 			};
 		}
 
-		// ? ??? ????????
+		// جلب المحادثات
 		var chats = await _chatRepo.GetAllWithPredicateAsync(
 			c => chatIds.Contains(c.Id),
 			includeDeleted: false);
 
-		var orderedChats = chats.OrderByDescending(c => c.UpdatedAt ?? c.CreatedAt).ToList();
+		// جلب جميع المشاركين لكل المحادثات
+		var allParticipants = await _participantRepo.GetAllWithPredicateAsync(
+			p => chatIds.Contains(p.ChatId),
+			includeDeleted: false);
+
+		// جلب آخر رسالة لكل محادثة
+		var allMessages = await _messageRepo.GetAllWithPredicateAsync(
+			m => chatIds.Contains(m.ChatId),
+			includeDeleted: false);
+
+		// تجميع البيانات حسب المحادثة
+		var participantsByChat = allParticipants.GroupBy(p => p.ChatId).ToDictionary(g => g.Key, g => g.ToList());
+		var lastMessageByChat = allMessages
+			.GroupBy(m => m.ChatId)
+			.ToDictionary(g => g.Key, g => g.OrderByDescending(m => m.CreatedAt).FirstOrDefault());
+
+		// ترتيب المحادثات حسب آخر نشاط (آخر رسالة أو تاريخ التحديث)
+		var orderedChats = chats
+			.OrderByDescending(c =>
+			{
+				if (lastMessageByChat.TryGetValue(c.Id, out var lastMsg) && lastMsg != null)
+					return lastMsg.CreatedAt;
+				return c.UpdatedAt ?? c.CreatedAt;
+			})
+			.ToList();
 
 		var skip = (request.PageNumber - 1) * request.PageSize;
 		var pagedChats = orderedChats.Skip(skip).Take(request.PageSize).ToList();
 
+		// تحويل إلى DTOs مع البيانات الكاملة
+		var chatDtos = pagedChats.Select(chat =>
+		{
+			var participants = participantsByChat.TryGetValue(chat.Id, out var p) ? p : new List<ChatParticipant>();
+			var lastMessage = lastMessageByChat.TryGetValue(chat.Id, out var m) ? m : null;
+
+			// تحديد الطرف الآخر (للمحادثات المباشرة)
+			string? otherPartyId = null;
+			if (chat.Type == ChatType.Direct)
+			{
+				otherPartyId = participants.FirstOrDefault(p => p.UserId != userId)?.UserId;
+			}
+
+			return new ChatDto
+			{
+				Id = chat.Id,
+				Title = chat.Title,
+				Type = chat.Type,
+				Description = chat.Description,
+				ImageUrl = chat.ImageUrl,
+				OtherPartyId = otherPartyId,
+				Participants = participants.Select(p => p.UserId).ToList(),
+				ParticipantsCount = participants.Count,
+				UnreadMessagesCount = 0, // TODO: حساب الرسائل غير المقروءة
+				LastMessage = lastMessage != null ? MapToMessageDto(lastMessage) : null,
+				CreatedAt = chat.CreatedAt,
+				UpdatedAt = chat.UpdatedAt
+			};
+		}).ToList();
+
 		return new PagedResult<ChatDto>
 		{
-			Items = pagedChats.Select(MapToChatDto).ToList(),
+			Items = chatDtos,
 			TotalCount = orderedChats.Count,
 			PageNumber = request.PageNumber,
 			PageSize = request.PageSize
@@ -293,6 +346,27 @@ public class DatabaseChatProvider : IChatProvider
 			IsMuted = participant.IsMuted,
 			IsPinned = participant.IsPinned,
 			JoinedAt = participant.CreatedAt
+		};
+	}
+
+	private MessageDto MapToMessageDto(Message message)
+	{
+		return new MessageDto
+		{
+			Id = message.Id,
+			ChatId = message.ChatId,
+			SenderId = message.SenderId,
+			SenderName = string.Empty, // TODO: جلب من User Service
+			SenderAvatar = null,
+			Content = message.Content,
+			Type = message.Type,
+			ReplyToMessageId = message.ReplyToMessageId,
+			ReplyToMessage = null, // لتجنب الاستدعاء المتكرر
+			Attachments = message.Attachments,
+			IsEdited = message.IsEdited,
+			EditedAt = message.EditedAt,
+			ReadByCount = message.ReadBy?.Count ?? 0,
+			CreatedAt = message.CreatedAt
 		};
 	}
 }
