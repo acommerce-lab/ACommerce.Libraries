@@ -90,7 +90,8 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
     /// <summary>
     /// استلام Device Token من APNS
     /// </summary>
-    public override void RegisteredForRemoteNotifications(UIApplication application, NSData deviceToken)
+    [Export("application:didRegisterForRemoteNotificationsWithDeviceToken:")]
+    public void RegisteredForRemoteNotifications(UIApplication application, NSData deviceToken)
     {
         System.Diagnostics.Debug.WriteLine("[Push iOS] Registered for remote notifications");
         // Firebase سيتعامل مع التوكن تلقائياً
@@ -100,7 +101,8 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
     /// <summary>
     /// فشل التسجيل للإشعارات
     /// </summary>
-    public override void FailedToRegisterForRemoteNotifications(UIApplication application, NSError error)
+    [Export("application:didFailToRegisterForRemoteNotificationsWithError:")]
+    public void FailedToRegisterForRemoteNotifications(UIApplication application, NSError error)
     {
         System.Diagnostics.Debug.WriteLine($"[Push iOS] Failed to register: {error.LocalizedDescription}");
     }
