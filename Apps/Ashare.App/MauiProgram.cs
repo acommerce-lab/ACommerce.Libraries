@@ -4,12 +4,14 @@ using ACommerce.Client.Auth;
 using ACommerce.Client.Realtime;
 using ACommerce.Client.Core.Storage;
 using ACommerce.Client.Files;
+using ACommerce.Client.Notifications;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Services.Analytics;
 using ACommerce.Templates.Customer.Themes;
 using ACommerce.ServiceRegistry.Client.Extensions;
 using Microsoft.Extensions.Logging;
 using Ashare.App.Services;
+using Plugin.Firebase.CloudMessaging;
 using ThemeService = Ashare.Shared.Services.ThemeService;
 
 namespace Ashare.App;
@@ -32,7 +34,9 @@ public static class MauiProgram
                 // Custom WebView handler for 3DS/OTP payment verification
                 handlers.AddHandler<WebView, Ashare.App.Platforms.Android.Handlers.PaymentWebViewHandler>();
 #endif
-            });
+            })
+            // Firebase Cloud Messaging
+            .RegisterFirebaseServices();
 
         builder.Services.AddMauiBlazorWebView();
 
@@ -118,6 +122,9 @@ public static class MauiProgram
 
         // Image Compression Service (for compressing images before upload)
         builder.Services.AddSingleton<IImageCompressionService, SkiaImageCompressionService>();
+
+        // Push Notification Service (Firebase Cloud Messaging)
+        builder.Services.AddSingleton<IPushNotificationService, PushNotificationService>();
 
         builder.Services.AddMockAnalytics();
 

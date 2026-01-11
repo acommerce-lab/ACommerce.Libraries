@@ -58,5 +58,15 @@
 	<!-- Photo Library Add Access (for saving photos) -->
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>نحتاج الوصول لحفظ الصور في مكتبة الصور</string>
+
+	<!-- Background Modes for Push Notifications -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
+
+	<!-- Firebase Analytics - Disable swizzling for manual handling -->
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
 </dict>
 </plist>

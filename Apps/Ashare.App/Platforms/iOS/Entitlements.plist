@@ -8,5 +8,8 @@
 		<string>applinks:ashare.sa</string>
 		<string>applinks:www.ashare.sa</string>
 	</array>
+	<!-- Push Notifications -->
+	<key>aps-environment</key>
+	<string>production</string>
 </dict>
 </plist>
