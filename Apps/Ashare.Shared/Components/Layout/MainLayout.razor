@@ -292,25 +292,14 @@
         // تحميل عدد الإشعارات (متزامن)
         NotificationCount = ApiService.GetNotificationsCount();
 
-        // استخدام القيمة المخزنة مباشرة إذا تم تحميلها سابقاً
+        // استخدام القيم المخزنة مباشرة إذا تم تحميلها سابقاً
         if (_bookingsCountLoaded)
         {
             BookingsCount = _cachedBookingsCount;
         }
-        else
-        {
-            // تحميل عدد الحجوزات في الخلفية (مرة واحدة فقط)
-            _ = LoadBookingsCountAsync();
-        }
-
-        // تحميل عدد الرسائل غير المقروءة
         if (_messagesCountLoaded)
         {
             MessagesCount = _cachedMessagesCount;
-        }
-        else
-        {
-            _ = LoadMessagesCountAsync();
         }
 
         // فحص إصدار التطبيق (مرة واحدة فقط)
@@ -463,12 +452,41 @@
             // تهيئة حالة وضع الضيف من التخزين
             await GuestMode.InitializeAsync();
             _initialized = true;
+
+            // تحميل العدادات بعد تهيئة التوكن
+            await LoadCountsAsync();
         }
 
         // التحقق من المصادقة بعد التهيئة
         if (_initialized)
         {
             await CheckAuthAsync();
+        }
+    }
+
+    /// <summary>
+    /// تحميل عدادات الحجوزات والرسائل بعد تهيئة التوكن
+    /// </summary>
+    private async Task LoadCountsAsync()
+    {
+        // انتظر تهيئة التوكن أولاً
+        var token = await TokenManager.GetTokenAsync();
+        if (string.IsNullOrEmpty(token))
+        {
+            // لا يوجد مستخدم مسجل - لا نحمل العدادات
+            return;
+        }
+
+        // تحميل عدد الحجوزات
+        if (!_bookingsCountLoaded)
+        {
+            _ = LoadBookingsCountAsync();
+        }
+
+        // تحميل عدد الرسائل
+        if (!_messagesCountLoaded)
+        {
+            _ = LoadMessagesCountAsync();
         }
     }
 
