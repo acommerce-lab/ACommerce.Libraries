@@ -1,7 +1,11 @@
 @page "/chats"
 @using ACommerce.Client.Chats
+@using ACommerce.Client.Profiles
+@using ACommerce.Client.Auth
 @using Ashare.Shared.Services
 @inject ChatsClient ChatsClient
+@inject ProfilesClient ProfilesClient
+@inject TokenManager TokenManager
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
 @inject ITimezoneService Timezone
@@ -76,37 +80,38 @@
     private List<ChatListItem>? _chats;
     private bool _isLoading = true;
     private Dictionary<Guid, string> _formattedTimes = new();
+    private string? _currentUserId;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
+            // الحصول على معرف المستخدم الحالي
+            _currentUserId = TokenManager.GetUserIdFromToken();
+            Console.WriteLine($"[Chats] Current user: {_currentUserId}");
+
             var conversations = await ChatsClient.GetConversationsAsync();
             Console.WriteLine($"[Chats] Loaded {conversations?.Count ?? 0} conversations");
 
-            _chats = conversations?
-            .Select(chat =>
+            if (conversations == null || !conversations.Any())
             {
-                // استخدم OtherPartyName أو Title أو "محادثة" كاسم
-                var displayName = !string.IsNullOrEmpty(chat.OtherPartyName)
-                    ? chat.OtherPartyName
-                    : (!string.IsNullOrEmpty(chat.Title) ? chat.Title : "محادثة");
+                _chats = [];
+                return;
+            }
 
-                Console.WriteLine($"[Chats] Chat: Id={chat.Id}, Name='{displayName}', Title='{chat.Title}', OtherParty='{chat.OtherPartyName}'");
-
-                return new ChatListItem
-                {
-                    Avatar = chat.OtherPartyAvatar,
-                    IsOnline = chat.IsOnline,
-                    LastMessage = chat.LastMessage?.Content ?? "",
-                    LastMessageAt = chat.LastMessage?.SentAt ?? DateTime.UtcNow,
-                    Name = displayName,
-                    Id = chat.Id,
-                    IsTyping = false,
-                    UnreadCount = chat.UnreadCount,
-                };
-            })
-            .ToList() ?? [];
+            // تحويل المحادثات إلى قائمة مبدئية
+            _chats = conversations.Select(chat => new ChatListItem
+            {
+                Id = chat.Id,
+                OtherPartyUserId = GetOtherPartyUserId(chat),
+                Avatar = chat.OtherPartyAvatar,
+                IsOnline = chat.IsOnline,
+                LastMessage = chat.LastMessage?.Content ?? "",
+                LastMessageAt = chat.LastMessage?.SentAt ?? DateTime.UtcNow,
+                Name = chat.Title ?? "محادثة", // مؤقت حتى يتم جلب البروفايل
+                UnreadCount = chat.UnreadCount,
+                IsTyping = false,
+            }).ToList();
         }
         catch (Exception ex)
         {
@@ -121,15 +126,88 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender && _chats != null && _chats.Any())
+        {
+            // جلب بروفايلات الأطراف الأخرى
+            await LoadOtherPartyProfilesAsync();
+        }
+
+        // تنسيق الأوقات
         if (_chats != null && _chats.Any(c => !_formattedTimes.ContainsKey(c.Id)))
         {
-            // Format all chat times using timezone service
             foreach (var chat in _chats.Where(c => !_formattedTimes.ContainsKey(c.Id)))
             {
                 var formattedTime = await Timezone.FormatRelativeTimeAsync(chat.LastMessageAt, L);
                 _formattedTimes[chat.Id] = formattedTime;
             }
             StateHasChanged();
+        }
+    }
+
+    /// <summary>
+    /// الحصول على معرف الطرف الآخر في المحادثة
+    /// </summary>
+    private string? GetOtherPartyUserId(ConversationResponse chat)
+    {
+        // أولاً: من OtherPartyId مباشرة
+        if (!string.IsNullOrEmpty(chat.OtherPartyId))
+        {
+            return chat.OtherPartyId;
+        }
+
+        // ثانياً: من قائمة المشاركين - نبحث عن المستخدم الآخر
+        if (chat.Participants?.Any() == true && !string.IsNullOrEmpty(_currentUserId))
+        {
+            var otherParty = chat.Participants.FirstOrDefault(p => p != _currentUserId);
+            if (!string.IsNullOrEmpty(otherParty))
+            {
+                return otherParty;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// جلب بروفايلات الأطراف الأخرى من الـ API
+    /// </summary>
+    private async Task LoadOtherPartyProfilesAsync()
+    {
+        if (_chats == null) return;
+
+        var updated = false;
+
+        foreach (var chat in _chats.Where(c => !string.IsNullOrEmpty(c.OtherPartyUserId)))
+        {
+            try
+            {
+                var profile = await ProfilesClient.GetByUserIdAsync(chat.OtherPartyUserId!);
+                if (profile != null)
+                {
+                    // تحديث الاسم من البروفايل
+                    chat.Name = !string.IsNullOrEmpty(profile.FullName)
+                        ? profile.FullName
+                        : (!string.IsNullOrEmpty(profile.BusinessName) ? profile.BusinessName : chat.Name);
+
+                    // تحديث الصورة إذا كانت فارغة
+                    if (string.IsNullOrEmpty(chat.Avatar) && !string.IsNullOrEmpty(profile.Avatar))
+                    {
+                        chat.Avatar = profile.Avatar;
+                    }
+
+                    updated = true;
+                    Console.WriteLine($"[Chats] Loaded profile for {chat.OtherPartyUserId}: {chat.Name}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Chats] Error loading profile for {chat.OtherPartyUserId}: {ex.Message}");
+            }
+        }
+
+        if (updated)
+        {
+            await InvokeAsync(StateHasChanged);
         }
     }
 
@@ -143,14 +221,12 @@
         if (_formattedTimes.TryGetValue(chatId, out var formatted))
             return formatted;
 
-        // Fallback: find the chat and show raw time
         var chat = _chats?.FirstOrDefault(c => c.Id == chatId);
         if (chat != null)
             return FormatTimeQuick(chat.LastMessageAt);
         return "";
     }
 
-    // Quick synchronous fallback for initial render
     private string FormatTimeQuick(DateTime utcTime)
     {
         var diff = DateTime.UtcNow - utcTime;
@@ -165,10 +241,11 @@
     public class ChatListItem
     {
         public Guid Id { get; set; }
+        public string? OtherPartyUserId { get; set; }
         public string Name { get; set; } = "";
         public string? Avatar { get; set; }
         public string? LastMessage { get; set; }
-        public DateTime LastMessageAt { get; set; } // Stored in UTC
+        public DateTime LastMessageAt { get; set; }
         public int UnreadCount { get; set; }
         public bool IsOnline { get; set; }
         public bool IsTyping { get; set; }
