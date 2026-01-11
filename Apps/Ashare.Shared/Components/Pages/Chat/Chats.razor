@@ -87,14 +87,20 @@
             _chats = conversations?
             .Select(chat =>
             {
-                Console.WriteLine($"[Chats] Chat: Id={chat.Id}, Name='{chat.OtherPartyName}', LastMsg='{chat.LastMessage?.Content}'");
+                // استخدم OtherPartyName أو Title أو "محادثة" كاسم
+                var displayName = !string.IsNullOrEmpty(chat.OtherPartyName)
+                    ? chat.OtherPartyName
+                    : (!string.IsNullOrEmpty(chat.Title) ? chat.Title : "محادثة");
+
+                Console.WriteLine($"[Chats] Chat: Id={chat.Id}, Name='{displayName}', Title='{chat.Title}', OtherParty='{chat.OtherPartyName}'");
+
                 return new ChatListItem
                 {
                     Avatar = chat.OtherPartyAvatar,
                     IsOnline = chat.IsOnline,
                     LastMessage = chat.LastMessage?.Content ?? "",
                     LastMessageAt = chat.LastMessage?.SentAt ?? DateTime.UtcNow,
-                    Name = chat.OtherPartyName ?? "مستخدم", // Fallback name
+                    Name = displayName,
                     Id = chat.Id,
                     IsTyping = false,
                     UnreadCount = chat.UnreadCount,
