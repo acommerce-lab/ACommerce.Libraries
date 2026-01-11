@@ -10,6 +10,7 @@ using ACommerce.SharedKernel.AspNetCore.Controllers;
 using ACommerce.SharedKernel.Abstractions.Queries;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using ACommerce.SharedKernel.CQRS.Queries;
+using ACommerce.Catalog.Listings.Entities;
 
 namespace ACommerce.Bookings.Api.Controllers;
 
@@ -20,13 +21,91 @@ public class BookingsController(
     IMediator mediator,
     IMarketingEventTracker marketingTracker,
     IBaseAsyncRepository<Booking> bookingRepository,
+    IBaseAsyncRepository<ProductListing> listingRepository,
     IHttpContextAccessor httpContextAccessor,
     ILogger<BookingsController> logger)
     : BaseCrudController<Booking, CreateBookingDto, UpdateBookingDto, BookingResponseDto, UpdateBookingDto>(mediator, logger)
 {
     private readonly IMarketingEventTracker _marketingTracker = marketingTracker;
     private readonly IBaseAsyncRepository<Booking> _bookingRepository = bookingRepository;
+    private readonly IBaseAsyncRepository<ProductListing> _listingRepository = listingRepository;
     private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+
+    /// <summary>
+    /// إنشاء حجز جديد - يستخرج HostId تلقائياً من العقار
+    /// </summary>
+    [HttpPost]
+    public async Task<ActionResult<BookingResponseDto>> CreateBooking([FromBody] CreateBookingDto dto)
+    {
+        try
+        {
+            _logger.LogInformation("Creating booking for space {SpaceId}, customer {CustomerId}", dto.SpaceId, dto.CustomerId);
+
+            // استخراج HostId من العقار
+            var listing = await _listingRepository.GetByIdAsync(dto.SpaceId);
+            var hostId = listing?.VendorId ?? dto.HostId ?? Guid.Empty;
+
+            _logger.LogInformation("Listing found: {ListingFound}, VendorId: {VendorId}, Final HostId: {HostId}",
+                listing != null, listing?.VendorId, hostId);
+
+            // إنشاء الحجز
+            var booking = new Booking
+            {
+                Id = Guid.NewGuid(),
+                SpaceId = dto.SpaceId,
+                CustomerId = dto.CustomerId ?? "",
+                HostId = hostId,
+                SpaceName = listing?.Title,
+                SpaceImage = listing?.MainImage,
+                SpaceLocation = listing?.Address,
+                CheckInDate = dto.CheckInDate,
+                CheckOutDate = dto.CheckOutDate,
+                RentType = dto.RentType,
+                TotalPrice = dto.TotalPrice,
+                DepositPercentage = dto.DepositPercentage ?? 10m,
+                DepositAmount = dto.TotalPrice * (dto.DepositPercentage ?? 10m) / 100m,
+                CustomerNotes = dto.CustomerNotes,
+                GuestsCount = dto.GuestsCount,
+                DepositPaymentId = dto.PaymentId,
+                DepositPaidAt = !string.IsNullOrEmpty(dto.PaymentId) ? DateTime.UtcNow : null,
+                Status = BookingStatus.Pending,
+                EscrowStatus = EscrowStatus.None,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _bookingRepository.AddAsync(booking);
+
+            _logger.LogInformation("Booking created: {BookingId} with HostId: {HostId}", booking.Id, booking.HostId);
+
+            return Ok(new BookingResponseDto
+            {
+                Id = booking.Id,
+                SpaceId = booking.SpaceId,
+                CustomerId = booking.CustomerId,
+                HostId = booking.HostId,
+                SpaceName = booking.SpaceName,
+                SpaceImage = booking.SpaceImage,
+                SpaceLocation = booking.SpaceLocation,
+                CheckInDate = booking.CheckInDate,
+                CheckOutDate = booking.CheckOutDate,
+                RentType = booking.RentType.ToString(),
+                TotalPrice = booking.TotalPrice,
+                DepositPercentage = booking.DepositPercentage,
+                DepositAmount = booking.DepositAmount,
+                RemainingAmount = booking.RemainingAmount,
+                Currency = booking.Currency,
+                Status = booking.Status.ToString(),
+                EscrowStatus = booking.EscrowStatus.ToString(),
+                CreatedAt = booking.CreatedAt
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating booking for space {SpaceId}", dto.SpaceId);
+            return StatusCode(500, new { message = "An error occurred", detail = ex.Message });
+        }
+    }
+
     /// <summary>
     /// الحصول على حجوزات المستأجر
     /// </summary>
