@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- الألوان الأساسية للتطبيق -->
-    <color name="colorPrimary">#345454</color>
-    <color name="colorPrimaryDark">#263F3F</color>
-    <color name="colorAccent">#F4844C</color>
-</resources>

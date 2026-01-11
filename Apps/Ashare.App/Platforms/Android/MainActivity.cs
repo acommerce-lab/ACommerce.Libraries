@@ -5,7 +5,6 @@ using Android.OS;
 using AndroidX.Core.App;
 using AndroidX.Core.Content;
 using Ashare.App.Services;
-using Plugin.Firebase.CloudMessaging;
 
 namespace Ashare.App;
 

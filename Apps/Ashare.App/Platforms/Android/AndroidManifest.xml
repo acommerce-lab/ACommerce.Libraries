@@ -17,21 +17,6 @@
 				android:name="android.support.FILE_PROVIDER_PATHS"
 				android:resource="@xml/file_paths" />
 		</provider>
-
-		<!-- Firebase Cloud Messaging Default Channel -->
-		<meta-data
-			android:name="com.google.firebase.messaging.default_notification_channel_id"
-			android:value="ashare_notifications" />
-
-		<!-- Firebase Default Notification Icon -->
-		<meta-data
-			android:name="com.google.firebase.messaging.default_notification_icon"
-			android:resource="@mipmap/appicon" />
-
-		<!-- Firebase Default Notification Color -->
-		<meta-data
-			android:name="com.google.firebase.messaging.default_notification_color"
-			android:resource="@color/colorPrimary" />
 	</application>
 
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
