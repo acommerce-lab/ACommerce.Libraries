@@ -126,31 +126,6 @@ public class BookingsController(
 
             _logger.LogInformation("Getting bookings for customer: {CustomerId}", customerId);
 
-            // DEBUG: Get all bookings to compare CustomerIds
-            var allBookings = await _bookingRepository.GetPagedAsync(
-                pageNumber: 1,
-                pageSize: 100,
-                orderBy: b => b.CreatedAt,
-                ascending: false
-            );
-
-            // تجميع معلومات التشخيص لإرجاعها في الاستجابة
-            var debugInfo = new
-            {
-                RequestedCustomerId = customerId,
-                RequestedCustomerIdLength = customerId.Length,
-                TotalBookingsInDb = allBookings.TotalCount,
-                AllBookings = allBookings.Items.Take(20).Select(b => new
-                {
-                    BookingId = b.Id,
-                    StoredCustomerId = b.CustomerId,
-                    StoredCustomerIdLength = b.CustomerId?.Length ?? 0,
-                    SpaceName = b.SpaceName,
-                    CreatedAt = b.CreatedAt,
-                    IsMatch = b.CustomerId == customerId
-                }).ToList()
-            };
-
             // استخدام repository مباشرة مع predicate للتأكد من الفلترة الصحيحة
             var result = await _bookingRepository.GetPagedAsync(
                 pageNumber: pageNumber,
@@ -194,14 +169,12 @@ public class BookingsController(
                 UpdatedAt = b.UpdatedAt
             }).ToList();
 
-            // إرجاع النتائج مع معلومات التشخيص
-            return Ok(new
+            return Ok(new PagedResult<BookingResponseDto>
             {
                 Items = dtoItems,
                 TotalCount = result.TotalCount,
                 PageNumber = result.PageNumber,
-                PageSize = result.PageSize,
-                Debug = debugInfo // معلومات التشخيص
+                PageSize = result.PageSize
             });
         }
         catch (Exception ex)

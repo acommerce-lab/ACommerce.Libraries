@@ -348,6 +348,16 @@
     color: white;
 }
 
+.ac-dark .ashare-action-btn.success {
+    color: #22c55e;
+    background-color: rgba(34, 197, 94, 0.15);
+}
+
+.ac-dark .ashare-action-btn.danger {
+    color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.15);
+}
+
 /* Dark mode favorites */
 .ac-dark .ashare-favorite-card {
     background-color: var(--ashare-surface);
@@ -1812,6 +1822,15 @@ h1, h2, h3, .ashare-logo-text {
 .ashare-action-btn.primary {
     background-color: var(--ashare-primary);
     color: white;
+}
+
+.ashare-action-btn.success {
+    color: var(--ashare-success, #22c55e);
+    background-color: rgba(34, 197, 94, 0.1);
+}
+
+.ashare-action-btn.success:hover {
+    background-color: rgba(34, 197, 94, 0.2);
 }
 
 /* ─────────────────────────────────────────────────────────────────
