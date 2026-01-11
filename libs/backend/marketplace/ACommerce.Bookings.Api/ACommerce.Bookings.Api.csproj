@@ -17,6 +17,7 @@
     <ProjectReference Include="..\..\core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
     <ProjectReference Include="..\..\marketing\ACommerce.Marketing.Analytics\ACommerce.Marketing.Analytics.csproj" />
     <ProjectReference Include="..\..\catalog\ACommerce.Catalog.Listings\ACommerce.Catalog.Listings.csproj" />
+    <ProjectReference Include="..\..\messaging\ACommerce.Notifications.Abstractions\ACommerce.Notifications.Abstractions.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

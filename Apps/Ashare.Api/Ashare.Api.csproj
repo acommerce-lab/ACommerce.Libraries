@@ -64,6 +64,7 @@
     <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notifications.Core\ACommerce.Notifications.Core.csproj" />
     <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notifications.Recipients.Api\ACommerce.Notifications.Recipients.Api.csproj" />
     <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notifications.Channels.InApp\ACommerce.Notifications.Channels.InApp.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notifications.Channels.Firebase\ACommerce.Notifications.Channels.Firebase.csproj" />
     <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notifications.Messaging\ACommerce.Notifications.Messaging.csproj" />
 
     <!-- Chat & Real-time -->

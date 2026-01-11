@@ -30,6 +30,7 @@ using ACommerce.Messaging.SignalR.Hub.Hubs;
 using ACommerce.Notifications.Core.Extensions;
 using ACommerce.Notifications.Channels.InApp.Extensions;
 using ACommerce.Notifications.Messaging.Extensions;
+using ACommerce.Notifications.Channels.Firebase;
 using ACommerce.Authentication.Abstractions.Contracts;
 using ACommerce.Authentication.AspNetCore.Services;
 using ACommerce.Authentication.Messaging.Extensions;
@@ -244,10 +245,31 @@ try
     // SignalR Messaging Hub (inter-service communication)
     builder.Services.AddMessagingHub();
 
-    // Notifications (InApp via SignalR)
+    // Notifications (InApp via SignalR + Firebase Push)
     builder.Services.AddNotificationCore(builder.Configuration);
     builder.Services.AddInAppNotifications();
     builder.Services.AddInMemoryNotificationPublisher();
+
+    // Firebase Cloud Messaging (Push Notifications)
+    var firebaseKeyJson = Environment.GetEnvironmentVariable("FIREBASE_SERVICE_ACCOUNT_JSON")
+        ?? builder.Configuration["Notifications:Firebase:ServiceAccountKeyJson"];
+
+    if (!string.IsNullOrEmpty(firebaseKeyJson))
+    {
+        builder.Services.AddFirebaseNotifications(options =>
+        {
+            options.ServiceAccountKeyJson = firebaseKeyJson;
+            options.ProjectId = builder.Configuration["Notifications:Firebase:ProjectId"] ?? "ashare-app";
+            options.DefaultPriority = ACommerce.Notifications.Channels.Firebase.Options.FirebaseMessagePriority.High;
+            options.EnableBadge = true;
+            options.DefaultSound = "default";
+        });
+        Log.Information("🔔 Firebase Cloud Messaging configured");
+    }
+    else
+    {
+        Log.Warning("⚠️ Firebase not configured - Push notifications will not work");
+    }
 
     // ✅ Notification Messaging Handler (subscribes to notify.commands.send and sends notifications)
     builder.Services.AddNotificationMessaging();
@@ -366,6 +388,9 @@ try
 
     // Offers Migration Service (لترحيل العروض من النظام القديم)
     builder.Services.AddScoped<OffersMigrationService>();
+
+    // Ashare Notification Service (للإشعارات المخصصة)
+    builder.Services.AddScoped<IAshareNotificationService, AshareNotificationService>();
 
     // Cache Warm-up Service - DISABLED for debugging
     // builder.Services.AddHostedService<CacheWarmupService>();

@@ -3,6 +3,9 @@ using ACommerce.Chats.Abstractions.Enums;
 using ACommerce.Chats.Abstractions.Providers;
 using ACommerce.Chats.Core.Entities;
 using ACommerce.Marketing.Analytics.Services;
+using ACommerce.Notifications.Abstractions.Contracts;
+using ACommerce.Notifications.Abstractions.Models;
+using ACommerce.Notifications.Abstractions.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -14,7 +17,7 @@ using ACommerce.SharedKernel.AspNetCore.Controllers;
 namespace ACommerce.Chats.Api.Controllers;
 
 /// <summary>
-/// ????? ???????? (Chats)
+/// متحكم المحادثات (Chats)
 /// </summary>
 [Authorize]
 [ApiController]
@@ -31,6 +34,7 @@ public class ChatsController : BaseCrudController<
 	private readonly IMessageProvider _messageProvider;
 	private readonly IMarketingEventTracker? _marketingTracker;
 	private readonly IHttpContextAccessor _httpContextAccessor;
+	private readonly INotificationService? _notificationService;
 
 	public ChatsController(
 		IMediator mediator,
@@ -38,13 +42,15 @@ public class ChatsController : BaseCrudController<
 		IMessageProvider messageProvider,
 		ILogger<ChatsController> logger,
 		IHttpContextAccessor httpContextAccessor,
-		IMarketingEventTracker? marketingTracker = null)
+		IMarketingEventTracker? marketingTracker = null,
+		INotificationService? notificationService = null)
 		: base(mediator, logger)
 	{
 		_chatProvider = chatProvider ?? throw new ArgumentNullException(nameof(chatProvider));
 		_messageProvider = messageProvider ?? throw new ArgumentNullException(nameof(messageProvider));
 		_httpContextAccessor = httpContextAccessor;
 		_marketingTracker = marketingTracker;
+		_notificationService = notificationService;
 	}
 
 	// ? ?? ??? CRUD operations ?????? ?? BaseCrudController!
@@ -204,6 +210,50 @@ public class ChatsController : BaseCrudController<
 			};
 
 			var message = await _messageProvider.SendMessageAsync(chatId, dto);
+
+			// إرسال إشعارات للمشاركين الآخرين في المحادثة
+			if (_notificationService != null)
+			{
+				try
+				{
+					var participants = await _chatProvider.GetParticipantsAsync(chatId);
+					var otherParticipants = participants.Where(p => p.UserId != userId).ToList();
+
+					foreach (var participant in otherParticipants)
+					{
+						await _notificationService.SendAsync(new Notification
+						{
+							Id = Guid.NewGuid(),
+							UserId = participant.UserId,
+							Title = "رسالة جديدة 💬",
+							Message = request.Content.Length > 100 ? request.Content[..100] + "..." : request.Content,
+							Type = NotificationType.ChatMessage,
+							Priority = NotificationPriority.High,
+							CreatedAt = DateTimeOffset.UtcNow,
+							ActionUrl = $"/chat/{chatId}",
+							Sound = "default",
+							BadgeCount = 1,
+							Channels = new List<ChannelDelivery>
+							{
+								new() { Channel = NotificationChannel.InApp },
+								new() { Channel = NotificationChannel.Firebase }
+							},
+							Data = new Dictionary<string, string>
+							{
+								["type"] = "new_message",
+								["chatId"] = chatId.ToString(),
+								["messageId"] = message.Id.ToString(),
+								["senderId"] = userId
+							}
+						});
+					}
+					_logger.LogDebug("Message notifications sent to {Count} participants", otherParticipants.Count);
+				}
+				catch (Exception notifyEx)
+				{
+					_logger.LogWarning(notifyEx, "Failed to send message notifications for chat {ChatId}", chatId);
+				}
+			}
 
 			return CreatedAtAction(
 				nameof(GetMessage),
