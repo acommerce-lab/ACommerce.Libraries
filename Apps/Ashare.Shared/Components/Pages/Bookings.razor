@@ -285,18 +285,22 @@
         var allBookings = await ApiService.GetBookingsAsync(customerId);
 
         // تحميل طلبات الحجز الواردة (الحجوزات على عقارات المستخدم كمضيف)
+        _incomingBookings = new List<BookingItem>();
         if (!string.IsNullOrEmpty(customerId) && Guid.TryParse(customerId, out var hostId))
         {
-            var hostBookings = await ApiService.GetHostBookingsAsync(hostId);
-            // الطلبات الواردة: المعلقة أو المؤكدة (طلبات على عقاراتي)
-            _incomingBookings = hostBookings
-                .Where(b => b.Status != BookingStatus.Cancelled && b.Status != BookingStatus.Completed)
-                .OrderByDescending(b => b.Date)
-                .ToList();
-        }
-        else
-        {
-            _incomingBookings = new List<BookingItem>();
+            try
+            {
+                var hostBookings = await ApiService.GetHostBookingsAsync(hostId);
+                // الطلبات الواردة: المعلقة أو المؤكدة (طلبات على عقاراتي)
+                _incomingBookings = hostBookings
+                    .Where(b => b.Status != BookingStatus.Cancelled && b.Status != BookingStatus.Completed)
+                    .OrderByDescending(b => b.Date)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading host bookings: {ex.Message}");
+            }
         }
 
         // حجوزاتي (القادمة): الحجوزات المعلقة أو المؤكدة (الحجوزات التي قمت بها)
