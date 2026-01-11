@@ -86,8 +86,8 @@ public class AshareNotificationService : IAshareNotificationService
             };
 
             var result = await _notificationService.SendAsync(notification);
-            _logger.LogInformation("New message notification sent to {UserId}, status: {Status}",
-                recipientUserId, result.OverallStatus);
+            _logger.LogInformation("New message notification sent to {UserId}, success: {Success}",
+                recipientUserId, result.Success);
         }
         catch (Exception ex)
         {
@@ -129,8 +129,8 @@ public class AshareNotificationService : IAshareNotificationService
             };
 
             var result = await _notificationService.SendAsync(notification);
-            _logger.LogInformation("New booking notification sent to host {UserId}, status: {Status}",
-                hostUserId, result.OverallStatus);
+            _logger.LogInformation("New booking notification sent to host {UserId}, success: {Success}",
+                hostUserId, result.Success);
         }
         catch (Exception ex)
         {
@@ -170,8 +170,8 @@ public class AshareNotificationService : IAshareNotificationService
             };
 
             var result = await _notificationService.SendAsync(notification);
-            _logger.LogInformation("Booking confirmed notification sent to {UserId}, status: {Status}",
-                customerUserId, result.OverallStatus);
+            _logger.LogInformation("Booking confirmed notification sent to {UserId}, success: {Success}",
+                customerUserId, result.Success);
         }
         catch (Exception ex)
         {
@@ -217,8 +217,8 @@ public class AshareNotificationService : IAshareNotificationService
             };
 
             var result = await _notificationService.SendAsync(notification);
-            _logger.LogInformation("Booking rejected notification sent to {UserId}, status: {Status}",
-                customerUserId, result.OverallStatus);
+            _logger.LogInformation("Booking rejected notification sent to {UserId}, success: {Success}",
+                customerUserId, result.Success);
         }
         catch (Exception ex)
         {
@@ -263,8 +263,8 @@ public class AshareNotificationService : IAshareNotificationService
             };
 
             var result = await _notificationService.SendAsync(notification);
-            _logger.LogInformation("Booking cancelled notification sent to {UserId}, status: {Status}",
-                userId, result.OverallStatus);
+            _logger.LogInformation("Booking cancelled notification sent to {UserId}, success: {Success}",
+                userId, result.Success);
         }
         catch (Exception ex)
         {
