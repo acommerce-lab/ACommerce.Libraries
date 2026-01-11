@@ -10,55 +10,59 @@
 @inject ILocalizationService L
 @inject ITimezoneService Timezone
 
-<div class="ac-page ashare-chats-page">
-    <div class="ac-page-header">
+<div class="ashare-chats-page">
+    @* Header *@
+    <div class="chats-header">
         <h1>@L["Messages"]</h1>
     </div>
 
     @if (_isLoading)
     {
-        <div class="ashare-loading">
+        <div class="chats-loading">
             <div class="ac-spinner"></div>
-            <span>@L["Loading"]</span>
         </div>
     }
     else if (_chats?.Any() == true)
     {
-        <div class="ashare-chats-list">
+        <div class="chats-list">
             @foreach (var chat in _chats)
             {
-                <div class="ashare-chat-item" @onclick="() => OpenChat(chat.Id)">
-                    <div class="ashare-chat-avatar">
+                <div class="chat-item @(chat.UnreadCount > 0 ? "unread" : "")" @onclick="() => OpenChat(chat.Id)">
+                    <div class="chat-avatar">
                         @if (!string.IsNullOrEmpty(chat.Avatar))
                         {
-                            <img src="@chat.Avatar" alt="" />
+                            <img src="@chat.Avatar" alt="@chat.Name" />
                         }
                         else
                         {
-                            <i class="bi bi-person-circle"></i>
+                            <div class="avatar-placeholder">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
                         }
                         @if (chat.IsOnline)
                         {
-                            <span class="ashare-online-indicator"></span>
+                            <span class="online-dot"></span>
                         }
                     </div>
-                    <div class="ashare-chat-content">
-                        <div class="ashare-chat-header">
-                            <h4 class="ashare-chat-name">@chat.Name</h4>
-                            <span class="ashare-chat-time">@GetFormattedTime(chat.Id)</span>
+                    <div class="chat-content">
+                        <div class="chat-row">
+                            <span class="chat-name">@chat.Name</span>
+                            <span class="chat-time">@GetFormattedTime(chat.Id)</span>
                         </div>
-                        <div class="ashare-chat-preview">
-                            @if (chat.IsTyping)
-                            {
-                                <span class="ashare-typing">@L["Typing"]</span>
-                            }
-                            else
-                            {
-                                <span class="@(chat.UnreadCount > 0 ? "unread" : "")">@chat.LastMessage</span>
-                            }
+                        <div class="chat-row">
+                            <span class="chat-preview @(chat.UnreadCount > 0 ? "unread-text" : "")">
+                                @if (chat.IsTyping)
+                                {
+                                    <em class="typing-indicator">@L["Typing"]...</em>
+                                }
+                                else
+                                {
+                                    @(string.IsNullOrEmpty(chat.LastMessage) ? L["NoMessages"] : chat.LastMessage)
+                                }
+                            </span>
                             @if (chat.UnreadCount > 0)
                             {
-                                <span class="ashare-unread-badge">@chat.UnreadCount</span>
+                                <span class="unread-badge">@chat.UnreadCount</span>
                             }
                         </div>
                     </div>
@@ -68,8 +72,10 @@
     }
     else
     {
-        <div class="ashare-empty-state">
-            <i class="bi bi-chat-dots"></i>
+        <div class="chats-empty">
+            <div class="empty-icon">
+                <i class="bi bi-chat-dots"></i>
+            </div>
             <h3>@L["NoChats"]</h3>
             <p>@L["StartChatHint"]</p>
         </div>
@@ -86,12 +92,9 @@
     {
         try
         {
-            // الحصول على معرف المستخدم الحالي
             _currentUserId = TokenManager.GetUserIdFromToken();
-            Console.WriteLine($"[Chats] Current user: {_currentUserId}");
 
             var conversations = await ChatsClient.GetConversationsAsync();
-            Console.WriteLine($"[Chats] Loaded {conversations?.Count ?? 0} conversations");
 
             if (conversations == null || !conversations.Any())
             {
@@ -99,19 +102,47 @@
                 return;
             }
 
-            // تحويل المحادثات إلى قائمة مبدئية
-            _chats = conversations.Select(chat => new ChatListItem
+            // تحويل المحادثات إلى قائمة وجلب البروفايلات مباشرة
+            _chats = new List<ChatListItem>();
+
+            foreach (var chat in conversations)
             {
-                Id = chat.Id,
-                OtherPartyUserId = GetOtherPartyUserId(chat),
-                Avatar = chat.OtherPartyAvatar,
-                IsOnline = chat.IsOnline,
-                LastMessage = chat.LastMessage?.Content ?? "",
-                LastMessageAt = chat.LastMessage?.SentAt ?? DateTime.UtcNow,
-                Name = chat.Title ?? "محادثة", // مؤقت حتى يتم جلب البروفايل
-                UnreadCount = chat.UnreadCount,
-                IsTyping = false,
-            }).ToList();
+                var otherPartyId = GetOtherPartyUserId(chat);
+                var item = new ChatListItem
+                {
+                    Id = chat.Id,
+                    OtherPartyUserId = otherPartyId,
+                    Avatar = chat.OtherPartyAvatar,
+                    IsOnline = chat.IsOnline,
+                    LastMessage = chat.LastMessage?.Content ?? "",
+                    LastMessageAt = chat.LastMessage?.CreatedAt ?? chat.CreatedAt,
+                    Name = chat.OtherPartyName ?? chat.Title ?? L["Chat"],
+                    UnreadCount = chat.UnreadCount,
+                    IsTyping = false,
+                };
+
+                // جلب البروفايل مباشرة إذا كان الاسم فارغ أو افتراضي
+                if (!string.IsNullOrEmpty(otherPartyId) &&
+                    (string.IsNullOrEmpty(item.Name) || item.Name == "محادثة مباشرة" || item.Name == L["Chat"]))
+                {
+                    try
+                    {
+                        var profile = await ProfilesClient.GetByUserIdAsync(otherPartyId);
+                        if (profile != null)
+                        {
+                            item.Name = !string.IsNullOrEmpty(profile.FullName)
+                                ? profile.FullName
+                                : (!string.IsNullOrEmpty(profile.BusinessName) ? profile.BusinessName : item.Name);
+
+                            if (string.IsNullOrEmpty(item.Avatar) && !string.IsNullOrEmpty(profile.Avatar))
+                                item.Avatar = profile.Avatar;
+                        }
+                    }
+                    catch { /* تجاهل الأخطاء */ }
+                }
+
+                _chats.Add(item);
+            }
         }
         catch (Exception ex)
         {
@@ -126,12 +157,6 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && _chats != null && _chats.Any())
-        {
-            // جلب بروفايلات الأطراف الأخرى
-            await LoadOtherPartyProfilesAsync();
-        }
-
         // تنسيق الأوقات
         if (_chats != null && _chats.Any(c => !_formattedTimes.ContainsKey(c.Id)))
         {
@@ -144,71 +169,21 @@
         }
     }
 
-    /// <summary>
-    /// الحصول على معرف الطرف الآخر في المحادثة
-    /// </summary>
     private string? GetOtherPartyUserId(ConversationResponse chat)
     {
-        // أولاً: من OtherPartyId مباشرة
+        // من OtherPartyId مباشرة
         if (!string.IsNullOrEmpty(chat.OtherPartyId))
-        {
             return chat.OtherPartyId;
-        }
 
-        // ثانياً: من قائمة المشاركين - نبحث عن المستخدم الآخر
+        // من قائمة المشاركين
         if (chat.Participants?.Any() == true && !string.IsNullOrEmpty(_currentUserId))
         {
             var otherParty = chat.Participants.FirstOrDefault(p => p != _currentUserId);
             if (!string.IsNullOrEmpty(otherParty))
-            {
                 return otherParty;
-            }
         }
 
         return null;
-    }
-
-    /// <summary>
-    /// جلب بروفايلات الأطراف الأخرى من الـ API
-    /// </summary>
-    private async Task LoadOtherPartyProfilesAsync()
-    {
-        if (_chats == null) return;
-
-        var updated = false;
-
-        foreach (var chat in _chats.Where(c => !string.IsNullOrEmpty(c.OtherPartyUserId)))
-        {
-            try
-            {
-                var profile = await ProfilesClient.GetByUserIdAsync(chat.OtherPartyUserId!);
-                if (profile != null)
-                {
-                    // تحديث الاسم من البروفايل
-                    chat.Name = !string.IsNullOrEmpty(profile.FullName)
-                        ? profile.FullName
-                        : (!string.IsNullOrEmpty(profile.BusinessName) ? profile.BusinessName : chat.Name);
-
-                    // تحديث الصورة إذا كانت فارغة
-                    if (string.IsNullOrEmpty(chat.Avatar) && !string.IsNullOrEmpty(profile.Avatar))
-                    {
-                        chat.Avatar = profile.Avatar;
-                    }
-
-                    updated = true;
-                    Console.WriteLine($"[Chats] Loaded profile for {chat.OtherPartyUserId}: {chat.Name}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Chats] Error loading profile for {chat.OtherPartyUserId}: {ex.Message}");
-            }
-        }
-
-        if (updated)
-        {
-            await InvokeAsync(StateHasChanged);
-        }
     }
 
     private void OpenChat(Guid chatId)
@@ -237,7 +212,6 @@
         return utcTime.ToString("MM/dd");
     }
 
-    // Chat List Item DTO
     public class ChatListItem
     {
         public Guid Id { get; set; }
