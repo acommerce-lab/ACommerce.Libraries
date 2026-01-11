@@ -254,16 +254,19 @@
         var allBookings = await ApiService.GetBookingsAsync(customerId);
         var today = DateTime.Today;
 
+        // القادمة: الحجوزات المعلقة أو المؤكدة (بغض النظر عن التاريخ) أو التواريخ المستقبلية
         _upcomingBookings = allBookings
-            .Where(b => b.Date >= today && b.Status != BookingStatus.Cancelled)
-            .OrderBy(b => b.Date)
-            .ToList();
-
-        _pastBookings = allBookings
-            .Where(b => b.Date < today && b.Status == BookingStatus.Completed)
+            .Where(b => b.Status != BookingStatus.Cancelled && b.Status != BookingStatus.Completed)
             .OrderByDescending(b => b.Date)
             .ToList();
 
+        // السابقة: الحجوزات المكتملة فقط
+        _pastBookings = allBookings
+            .Where(b => b.Status == BookingStatus.Completed)
+            .OrderByDescending(b => b.Date)
+            .ToList();
+
+        // الملغاة: الحجوزات الملغاة
         _cancelledBookings = allBookings
             .Where(b => b.Status == BookingStatus.Cancelled)
             .OrderByDescending(b => b.Date)
