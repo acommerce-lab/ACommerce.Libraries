@@ -473,6 +473,11 @@
     {
         await AuthClient.LogoutAsync();
         _isLoggedIn = false;
+
+        // تصفير العدادات عند تسجيل الخروج
+        MainLayout.InvalidateBookingsCache();
+        MainLayout.InvalidateMessagesCache();
+
         Navigation.NavigateToAndClearHistory("/");
     }
 }
