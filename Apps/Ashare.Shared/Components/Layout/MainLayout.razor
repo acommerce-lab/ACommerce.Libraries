@@ -373,6 +373,12 @@
         {
             var customerId = TokenManager.GetUserIdFromToken();
 
+            // لا نحمل العدد إذا لم يكن هناك مستخدم
+            if (string.IsNullOrEmpty(customerId))
+            {
+                return;
+            }
+
             // التحقق من أن الـ cache للمستخدم الصحيح
             if (_bookingsCountLoaded && _cachedBookingsCustomerId == customerId)
             {
