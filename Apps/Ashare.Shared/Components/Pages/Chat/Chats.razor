@@ -81,23 +81,30 @@
     {
         try
         {
-            _chats = (await ChatsClient.GetConversationsAsync())?
+            var conversations = await ChatsClient.GetConversationsAsync();
+            Console.WriteLine($"[Chats] Loaded {conversations?.Count ?? 0} conversations");
+
+            _chats = conversations?
             .Select(chat =>
-            new ChatListItem
+            {
+                Console.WriteLine($"[Chats] Chat: Id={chat.Id}, Name='{chat.OtherPartyName}', LastMsg='{chat.LastMessage?.Content}'");
+                return new ChatListItem
                 {
                     Avatar = chat.OtherPartyAvatar,
                     IsOnline = chat.IsOnline,
                     LastMessage = chat.LastMessage?.Content ?? "",
-                    LastMessageAt = chat.LastMessage?.SentAt ?? DateTime.UtcNow, // Use UTC
-                    Name = chat.OtherPartyName,
+                    LastMessageAt = chat.LastMessage?.SentAt ?? DateTime.UtcNow,
+                    Name = chat.OtherPartyName ?? "مستخدم", // Fallback name
                     Id = chat.Id,
                     IsTyping = false,
                     UnreadCount = chat.UnreadCount,
-                })
+                };
+            })
             .ToList() ?? [];
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"[Chats] Error: {ex.Message}");
             _chats = [];
         }
         finally
