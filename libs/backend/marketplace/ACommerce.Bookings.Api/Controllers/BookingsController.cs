@@ -38,22 +38,58 @@ public class BookingsController(
     {
         try
         {
-            var searchRequest = new SmartSearchRequest
+            _logger.LogInformation("Getting bookings for customer: {CustomerId}", customerId);
+
+            // استخدام repository مباشرة مع predicate للتأكد من الفلترة الصحيحة
+            var result = await _bookingRepository.GetPagedAsync(
+                pageNumber: pageNumber,
+                pageSize: pageSize,
+                predicate: b => b.CustomerId == customerId,
+                orderBy: b => b.CreatedAt,
+                ascending: false
+            );
+
+            _logger.LogInformation("Found {Count} bookings for customer {CustomerId}", result.TotalCount, customerId);
+
+            // تحويل النتائج إلى DTOs
+            var dtoItems = result.Items.Select(b => new BookingResponseDto
             {
-                PageSize = pageSize,
-                PageNumber = pageNumber,
-                Filters =
-                [
-                    new() { PropertyName = "CustomerId", Value = customerId, Operator = FilterOperator.Equals }
-                ],
-                OrderBy = "CreatedAt",
-                Ascending = false
-            };
+                Id = b.Id,
+                SpaceId = b.SpaceId,
+                CustomerId = b.CustomerId,
+                HostId = b.HostId,
+                SpaceName = b.SpaceName,
+                SpaceImage = b.SpaceImage,
+                SpaceLocation = b.SpaceLocation,
+                CheckInDate = b.CheckInDate,
+                CheckOutDate = b.CheckOutDate,
+                RentType = b.RentType.ToString(),
+                TotalPrice = b.TotalPrice,
+                DepositPercentage = b.DepositPercentage,
+                DepositAmount = b.DepositAmount,
+                RemainingAmount = b.RemainingAmount,
+                Currency = b.Currency,
+                DepositPaymentId = b.DepositPaymentId,
+                DepositPaidAt = b.DepositPaidAt,
+                Status = b.Status.ToString(),
+                EscrowStatus = b.EscrowStatus.ToString(),
+                EscrowReleasedAt = b.EscrowReleasedAt,
+                ConfirmedAt = b.ConfirmedAt,
+                CancelledAt = b.CancelledAt,
+                CancellationReason = b.CancellationReason,
+                CustomerNotes = b.CustomerNotes,
+                GuestsCount = b.GuestsCount,
+                CreatedAt = b.CreatedAt,
+                UpdatedAt = b.UpdatedAt
+            }).ToList();
 
-            var query = new SmartSearchQuery<Booking, BookingResponseDto> { Request = searchRequest };
-            var result = await _mediator.Send(query);
-
-            return Ok(result);
+            return Ok(new PagedResult<BookingResponseDto>
+            {
+                Items = dtoItems,
+                TotalCount = result.TotalCount,
+                PageNumber = result.PageNumber,
+                PageSize = result.PageSize
+            });
         }
         catch (Exception ex)
         {
