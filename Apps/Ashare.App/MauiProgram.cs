@@ -34,9 +34,8 @@ public static class MauiProgram
                 // Custom WebView handler for 3DS/OTP payment verification
                 handlers.AddHandler<WebView, Ashare.App.Platforms.Android.Handlers.PaymentWebViewHandler>();
 #endif
-            })
-            // Firebase Cloud Messaging
-            .RegisterFirebaseServices();
+            });
+            // Note: Firebase initializes automatically through google-services.json and GoogleService-Info.plist
 
         builder.Services.AddMauiBlazorWebView();
 

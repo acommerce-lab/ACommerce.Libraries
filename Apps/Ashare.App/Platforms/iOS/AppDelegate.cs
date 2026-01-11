@@ -94,8 +94,7 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
     public void RegisteredForRemoteNotifications(UIApplication application, NSData deviceToken)
     {
         System.Diagnostics.Debug.WriteLine("[Push iOS] Registered for remote notifications");
-        // Firebase سيتعامل مع التوكن تلقائياً
-        FirebaseCloudMessagingImplementation.DidRegisterRemoteNotifications(deviceToken);
+        // Plugin.Firebase.CloudMessaging يتعامل مع التوكن تلقائياً عبر CrossFirebaseCloudMessaging
     }
 
     /// <summary>
