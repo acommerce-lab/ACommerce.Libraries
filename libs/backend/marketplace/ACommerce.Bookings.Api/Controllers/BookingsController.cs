@@ -47,6 +47,65 @@ public class BookingsController(
 
             _logger.LogInformation("Getting bookings for customer: {CustomerId}", customerId);
 
+            // DEBUG: Get all bookings to compare CustomerIds
+            var allBookings = await _bookingRepository.GetPagedAsync(
+                pageNumber: 1,
+                pageSize: 100,
+                orderBy: b => b.CreatedAt,
+                ascending: false
+            );
+
+            // إرسال تقرير تشخيصي عبر الإيميل
+            try
+            {
+                var debugReport = new System.Text.StringBuilder();
+                debugReport.AppendLine($"=== تقرير تشخيص الحجوزات ===");
+                debugReport.AppendLine($"معرف المستخدم المُرسل من التطبيق: '{customerId}'");
+                debugReport.AppendLine($"طول المعرف: {customerId.Length}");
+                debugReport.AppendLine($"إجمالي الحجوزات في قاعدة البيانات: {allBookings.TotalCount}");
+                debugReport.AppendLine();
+                debugReport.AppendLine("=== الحجوزات الموجودة ===");
+
+                foreach (var booking in allBookings.Items.Take(20))
+                {
+                    var match = booking.CustomerId == customerId ? "✅ تطابق" : "❌ لا يتطابق";
+                    debugReport.AppendLine($"الحجز: {booking.Id}");
+                    debugReport.AppendLine($"  - CustomerId: '{booking.CustomerId}'");
+                    debugReport.AppendLine($"  - طول المعرف: {booking.CustomerId?.Length ?? 0}");
+                    debugReport.AppendLine($"  - SpaceName: {booking.SpaceName}");
+                    debugReport.AppendLine($"  - CreatedAt: {booking.CreatedAt}");
+                    debugReport.AppendLine($"  - {match}");
+                    debugReport.AppendLine();
+                }
+
+                // إرسال التقرير عبر نقطة الأخطاء
+                using var httpClient = new HttpClient();
+                var report = new
+                {
+                    Source = "BookingsController",
+                    Operation = "GetCustomerBookings-Debug",
+                    ErrorMessage = debugReport.ToString(),
+                    Platform = "Backend",
+                    Timestamp = DateTime.UtcNow,
+                    AdditionalData = new Dictionary<string, object>
+                    {
+                        ["RequestedCustomerId"] = customerId,
+                        ["TotalBookings"] = allBookings.TotalCount,
+                        ["BookingCustomerIds"] = allBookings.Items.Take(10).Select(b => b.CustomerId).ToList()
+                    }
+                };
+
+                var json = System.Text.Json.JsonSerializer.Serialize(report);
+                var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+                // إرسال للـ localhost (نفس السيرفر)
+                _ = httpClient.PostAsync("http://localhost:5000/api/errorreporting/report", content);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send debug report");
+            }
+
             // استخدام repository مباشرة مع predicate للتأكد من الفلترة الصحيحة
             var result = await _bookingRepository.GetPagedAsync(
                 pageNumber: pageNumber,
