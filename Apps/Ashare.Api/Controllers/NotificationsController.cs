@@ -203,22 +203,19 @@ public class NotificationsController : ControllerBase
 
             var result = await _notificationService.SendAsync(notification);
 
-            _logger.LogInformation("Test notification sent to user {UserId}, result: {Status}",
-                userId, result.OverallStatus);
+            _logger.LogInformation("Test notification sent to user {UserId}, success: {Success}",
+                userId, result.Success);
 
             return Ok(new
             {
-                success = result.OverallStatus == DeliveryStatus.Sent,
+                success = result.Success,
                 message = "تم إرسال الإشعار الاختباري",
                 result = new
                 {
-                    status = result.OverallStatus.ToString(),
-                    channelResults = result.ChannelResults.Select(c => new
-                    {
-                        channel = c.Key.ToString(),
-                        status = c.Value.Status.ToString(),
-                        error = c.Value.ErrorMessage
-                    })
+                    success = result.Success,
+                    errorMessage = result.ErrorMessage,
+                    deliveredChannels = result.DeliveredChannels,
+                    failedChannels = result.FailedChannels
                 }
             });
         }
