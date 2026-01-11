@@ -1,0 +1,543 @@
+@page "/notifications"
+@using Syncfusion.Blazor.Grids
+@inject AdminApiService ApiService
+@inject IJSRuntime JS
+
+<div class="notifications-page">
+    <div class="page-header">
+        <div class="header-stats">
+            <div class="stat-card">
+                <span class="stat-value">@Stats.TotalUsers</span>
+                <span class="stat-label">إجمالي المستخدمين</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">@Stats.ActiveUsers</span>
+                <span class="stat-label">المستخدمين النشطين</span>
+            </div>
+            <div class="stat-card highlight">
+                <span class="stat-value">@Stats.UsersWithDevices</span>
+                <span class="stat-label">لديهم أجهزة مسجلة</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-grid">
+        <!-- قسم إرسال الإشعار -->
+        <div class="card notification-form">
+            <h3>إرسال إشعار</h3>
+
+            <div class="form-group">
+                <label>عنوان الإشعار *</label>
+                <SfTextBox @bind-Value="NotificationTitle" Placeholder="أدخل عنوان الإشعار" />
+            </div>
+
+            <div class="form-group">
+                <label>نص الإشعار *</label>
+                <SfTextBox @bind-Value="NotificationMessage" Placeholder="أدخل نص الإشعار" Multiline="true" />
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>نوع الإشعار</label>
+                    <SfDropDownList TItem="NotificationTypeOption" TValue="string"
+                                    DataSource="@NotificationTypes"
+                                    @bind-Value="NotificationType">
+                        <DropDownListFieldSettings Text="Label" Value="Value" />
+                    </SfDropDownList>
+                </div>
+
+                <div class="form-group">
+                    <label>الأولوية</label>
+                    <SfDropDownList TItem="PriorityOption" TValue="string"
+                                    DataSource="@Priorities"
+                                    @bind-Value="NotificationPriority">
+                        <DropDownListFieldSettings Text="Label" Value="Value" />
+                    </SfDropDownList>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>رابط الإجراء (اختياري)</label>
+                <SfTextBox @bind-Value="ActionUrl" Placeholder="مثال: /booking/123" />
+            </div>
+
+            <div class="form-actions">
+                <SfButton CssClass="e-primary e-block"
+                          OnClick="SendToSelected"
+                          Disabled="@(!CanSend || SelectedUsers.Count == 0)">
+                    إرسال للمحددين (@SelectedUsers.Count)
+                </SfButton>
+                <SfButton CssClass="e-warning e-block"
+                          OnClick="ShowBroadcastConfirm"
+                          Disabled="@(!CanSend)">
+                    إرسال للجميع
+                </SfButton>
+            </div>
+
+            @if (!string.IsNullOrEmpty(ResultMessage))
+            {
+                <div class="result-message @(IsSuccess ? "success" : "error")">
+                    @ResultMessage
+                </div>
+            }
+        </div>
+
+        <!-- قسم اختيار المستخدمين -->
+        <div class="card users-section">
+            <div class="section-header">
+                <h3>اختيار المستخدمين</h3>
+                <div class="search-box">
+                    <SfTextBox @bind-Value="SearchTerm"
+                               Placeholder="بحث بالاسم، البريد، أو الهاتف..."
+                               Width="250px" />
+                    <SfButton CssClass="e-primary" OnClick="SearchUsers">بحث</SfButton>
+                </div>
+            </div>
+
+            <SfGrid DataSource="@Users"
+                    AllowPaging="true"
+                    AllowSelection="true"
+                    @ref="UsersGrid">
+                <GridSelectionSettings Type="Syncfusion.Blazor.Grids.SelectionType.Multiple" />
+                <GridEvents RowSelected="OnRowSelected" RowDeselected="OnRowDeselected" TValue="NotificationUserDto" />
+                <GridPageSettings PageSize="10" />
+                <GridColumns>
+                    <GridColumn Type="ColumnType.CheckBox" Width="50" />
+                    <GridColumn Field="@nameof(NotificationUserDto.Name)" HeaderText="الاسم" Width="150" />
+                    <GridColumn Field="@nameof(NotificationUserDto.Email)" HeaderText="البريد" Width="180" />
+                    <GridColumn Field="@nameof(NotificationUserDto.Phone)" HeaderText="الهاتف" Width="120" />
+                    <GridColumn Field="@nameof(NotificationUserDto.DeviceCount)" HeaderText="الأجهزة" Width="80">
+                        <Template>
+                            @{
+                                var user = (context as NotificationUserDto);
+                                <span class="device-badge @(user?.HasDevices == true ? "has-device" : "no-device")">
+                                    @(user?.DeviceCount ?? 0)
+                                </span>
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn HeaderText="الحالة" Width="100">
+                        <Template>
+                            @{
+                                var user = (context as NotificationUserDto);
+                                @if (user?.HasDevices == true)
+                                {
+                                    <span class="status-badge active">متصل</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge inactive">غير متصل</span>
+                                }
+                            }
+                        </Template>
+                    </GridColumn>
+                </GridColumns>
+            </SfGrid>
+
+            <div class="selection-info">
+                تم تحديد <strong>@SelectedUsers.Count</strong> مستخدم
+                @if (SelectedUsers.Any(u => !u.HasDevices))
+                {
+                    <span class="warning-text">
+                        (بعضهم ليس لديه أجهزة مسجلة - سيتم إرسال إشعار داخلي فقط)
+                    </span>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Broadcast Confirmation Dialog -->
+<SfDialog @bind-Visible="@ShowBroadcastDialog"
+          Header="تأكيد الإرسال الجماعي"
+          Width="400px"
+          IsModal="true"
+          ShowCloseIcon="true">
+    <DialogTemplates>
+        <Content>
+            <p>هل أنت متأكد من إرسال هذا الإشعار لجميع المستخدمين النشطين؟</p>
+            <p><strong>العنوان:</strong> @NotificationTitle</p>
+            <p><strong>الرسالة:</strong> @NotificationMessage</p>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="إلغاء" OnClick="@(() => ShowBroadcastDialog = false)" />
+        <DialogButton Content="إرسال للجميع" IsPrimary="true" OnClick="BroadcastNotification" />
+    </DialogButtons>
+</SfDialog>
+
+<style>
+    .notifications-page {
+        padding: 0;
+    }
+
+    .header-stats {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        text-align: center;
+        min-width: 150px;
+    }
+
+    .stat-card.highlight {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+    }
+
+    .stat-value {
+        display: block;
+        font-size: 1.75rem;
+        font-weight: 700;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        opacity: 0.8;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 400px 1fr;
+        gap: 1.5rem;
+    }
+
+    .notification-form h3,
+    .users-section h3 {
+        margin: 0 0 1.5rem 0;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #374151;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+    }
+
+    .result-message {
+        margin-top: 1rem;
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+    }
+
+    .result-message.success {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #6ee7b7;
+    }
+
+    .result-message.error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fca5a5;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .section-header h3 {
+        margin: 0;
+        border: none;
+        padding: 0;
+    }
+
+    .search-box {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .device-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .device-badge.has-device {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .device-badge.no-device {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .status-badge.active {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+
+    .status-badge.inactive {
+        background: rgba(107, 114, 128, 0.1);
+        color: #6b7280;
+    }
+
+    .selection-info {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: #f9fafb;
+        border-radius: 6px;
+        font-size: 0.875rem;
+    }
+
+    .warning-text {
+        color: #d97706;
+        font-size: 0.8rem;
+    }
+
+    @@media (max-width: 1024px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+@code {
+    private SfGrid<NotificationUserDto>? UsersGrid;
+
+    private List<NotificationUserDto> Users { get; set; } = new();
+    private List<NotificationUserDto> SelectedUsers { get; set; } = new();
+    private NotificationStatsDto Stats { get; set; } = new();
+
+    private string NotificationTitle { get; set; } = string.Empty;
+    private string NotificationMessage { get; set; } = string.Empty;
+    private string NotificationType { get; set; } = "info";
+    private string NotificationPriority { get; set; } = "normal";
+    private string? ActionUrl { get; set; }
+    private string SearchTerm { get; set; } = string.Empty;
+
+    private string? ResultMessage { get; set; }
+    private bool IsSuccess { get; set; }
+    private bool ShowBroadcastDialog { get; set; }
+    private bool IsSending { get; set; }
+
+    private bool CanSend => !IsSending &&
+                            !string.IsNullOrWhiteSpace(NotificationTitle) &&
+                            !string.IsNullOrWhiteSpace(NotificationMessage);
+
+    private List<NotificationTypeOption> NotificationTypes = new()
+    {
+        new() { Value = "info", Label = "معلومات" },
+        new() { Value = "success", Label = "نجاح" },
+        new() { Value = "warning", Label = "تحذير" },
+        new() { Value = "promo", Label = "عرض ترويجي" },
+        new() { Value = "system", Label = "نظام" }
+    };
+
+    private List<PriorityOption> Priorities = new()
+    {
+        new() { Value = "low", Label = "منخفضة" },
+        new() { Value = "normal", Label = "عادية" },
+        new() { Value = "high", Label = "عالية" },
+        new() { Value = "urgent", Label = "عاجلة" }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStats();
+        await LoadUsers();
+    }
+
+    private async Task LoadStats()
+    {
+        Stats = await ApiService.GetNotificationStatsAsync();
+    }
+
+    private async Task LoadUsers()
+    {
+        var result = await ApiService.GetNotificationUsersAsync(SearchTerm);
+        Users = result ?? new List<NotificationUserDto>();
+    }
+
+    private async Task SearchUsers()
+    {
+        await LoadUsers();
+    }
+
+    private void OnRowSelected(RowSelectEventArgs<NotificationUserDto> args)
+    {
+        if (args.Data != null && !SelectedUsers.Any(u => u.UserId == args.Data.UserId))
+        {
+            SelectedUsers.Add(args.Data);
+        }
+    }
+
+    private void OnRowDeselected(RowDeselectEventArgs<NotificationUserDto> args)
+    {
+        if (args.Data != null)
+        {
+            SelectedUsers.RemoveAll(u => u.UserId == args.Data.UserId);
+        }
+    }
+
+    private async Task SendToSelected()
+    {
+        if (SelectedUsers.Count == 0)
+        {
+            ResultMessage = "الرجاء تحديد مستخدم واحد على الأقل";
+            IsSuccess = false;
+            return;
+        }
+
+        IsSending = true;
+        ResultMessage = null;
+
+        try
+        {
+            var result = await ApiService.SendNotificationAsync(new SendNotificationRequestDto
+            {
+                Title = NotificationTitle,
+                Message = NotificationMessage,
+                Type = NotificationType,
+                Priority = NotificationPriority,
+                ActionUrl = ActionUrl,
+                UserIds = SelectedUsers.Select(u => u.UserId).ToList()
+            });
+
+            if (result != null)
+            {
+                IsSuccess = result.SuccessCount > 0;
+                ResultMessage = $"تم إرسال {result.SuccessCount} من {result.TotalSent} إشعار بنجاح";
+
+                if (result.FailedCount > 0)
+                {
+                    ResultMessage += $" ({result.FailedCount} فشل)";
+                }
+
+                // مسح النموذج بعد الإرسال الناجح
+                if (IsSuccess)
+                {
+                    ClearForm();
+                }
+            }
+            else
+            {
+                IsSuccess = false;
+                ResultMessage = "فشل في إرسال الإشعارات";
+            }
+        }
+        catch (Exception ex)
+        {
+            IsSuccess = false;
+            ResultMessage = $"خطأ: {ex.Message}";
+        }
+        finally
+        {
+            IsSending = false;
+        }
+    }
+
+    private void ShowBroadcastConfirm()
+    {
+        ShowBroadcastDialog = true;
+    }
+
+    private async Task BroadcastNotification()
+    {
+        ShowBroadcastDialog = false;
+        IsSending = true;
+        ResultMessage = null;
+
+        try
+        {
+            var result = await ApiService.BroadcastNotificationAsync(new BroadcastNotificationRequestDto
+            {
+                Title = NotificationTitle,
+                Message = NotificationMessage,
+                Type = NotificationType,
+                Priority = NotificationPriority,
+                ActionUrl = ActionUrl
+            });
+
+            if (result != null)
+            {
+                IsSuccess = result.SuccessCount > 0;
+                ResultMessage = $"تم إرسال الإشعار لـ {result.SuccessCount} مستخدم بنجاح";
+
+                if (result.FailedCount > 0)
+                {
+                    ResultMessage += $" ({result.FailedCount} فشل)";
+                }
+
+                if (IsSuccess)
+                {
+                    ClearForm();
+                }
+            }
+            else
+            {
+                IsSuccess = false;
+                ResultMessage = "فشل في إرسال الإشعار الجماعي";
+            }
+        }
+        catch (Exception ex)
+        {
+            IsSuccess = false;
+            ResultMessage = $"خطأ: {ex.Message}";
+        }
+        finally
+        {
+            IsSending = false;
+        }
+    }
+
+    private void ClearForm()
+    {
+        NotificationTitle = string.Empty;
+        NotificationMessage = string.Empty;
+        NotificationType = "info";
+        NotificationPriority = "normal";
+        ActionUrl = null;
+    }
+
+    public class NotificationTypeOption
+    {
+        public string Value { get; set; } = string.Empty;
+        public string Label { get; set; } = string.Empty;
+    }
+
+    public class PriorityOption
+    {
+        public string Value { get; set; } = string.Empty;
+        public string Label { get; set; } = string.Empty;
+    }
+}

@@ -260,17 +260,17 @@ public class AdminApiService
             await SetAuthHeaderAsync();
             var url = "/api/admin/reports/sales";
             var queryParams = new List<string>();
-            
+
             if (startDate.HasValue)
                 queryParams.Add($"startDate={startDate.Value:yyyy-MM-dd}");
             if (endDate.HasValue)
                 queryParams.Add($"endDate={endDate.Value:yyyy-MM-dd}");
-            
+
             if (queryParams.Any())
                 url += "?" + string.Join("&", queryParams);
-            
+
             var response = await _httpClient.GetAsync(url);
-            
+
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<SalesReportDto>();
@@ -296,6 +296,109 @@ public class AdminApiService
             TotalOrders = 432,
             AverageOrderValue = 289.35m
         };
+    }
+
+    // ============================================================================
+    // Notification Methods
+    // ============================================================================
+
+    public async Task<NotificationStatsDto> GetNotificationStatsAsync()
+    {
+        try
+        {
+            await SetAuthHeaderAsync();
+            var response = await _httpClient.GetAsync("/api/admin/notifications/stats");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<NotificationStatsDto>();
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+
+            _logger.LogWarning("Failed to fetch notification stats: {StatusCode}", response.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching notification stats");
+        }
+
+        return new NotificationStatsDto { TotalUsers = 0, ActiveUsers = 0, UsersWithDevices = 0 };
+    }
+
+    public async Task<List<NotificationUserDto>?> GetNotificationUsersAsync(string? search = null, int page = 1, int pageSize = 20)
+    {
+        try
+        {
+            await SetAuthHeaderAsync();
+            var url = $"/api/admin/notifications/users?page={page}&pageSize={pageSize}";
+            if (!string.IsNullOrEmpty(search))
+            {
+                url += $"&search={Uri.EscapeDataString(search)}";
+            }
+
+            var response = await _httpClient.GetAsync(url);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<NotificationUsersResponse>();
+                return result?.Items;
+            }
+
+            _logger.LogWarning("Failed to fetch notification users: {StatusCode}", response.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching notification users");
+        }
+
+        return new List<NotificationUserDto>();
+    }
+
+    public async Task<SendNotificationResultDto?> SendNotificationAsync(SendNotificationRequestDto request)
+    {
+        try
+        {
+            await SetAuthHeaderAsync();
+            var response = await _httpClient.PostAsJsonAsync("/api/admin/notifications/send", request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<SendNotificationResultDto>();
+            }
+
+            _logger.LogWarning("Failed to send notification: {StatusCode}", response.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending notification");
+        }
+
+        return null;
+    }
+
+    public async Task<SendNotificationResultDto?> BroadcastNotificationAsync(BroadcastNotificationRequestDto request)
+    {
+        try
+        {
+            await SetAuthHeaderAsync();
+            var response = await _httpClient.PostAsJsonAsync("/api/admin/notifications/broadcast", request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<SendNotificationResultDto>();
+            }
+
+            _logger.LogWarning("Failed to broadcast notification: {StatusCode}", response.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error broadcasting notification");
+        }
+
+        return null;
     }
 
     private string TranslateOrderStatus(string? status)
@@ -567,13 +670,99 @@ public class ApiUserItem
 {
     [JsonPropertyName("userId")]
     public Guid? UserId { get; set; }
-    
+
     [JsonPropertyName("userName")]
     public string? UserName { get; set; }
-    
+
     [JsonPropertyName("email")]
     public string? Email { get; set; }
-    
+
     [JsonPropertyName("phone")]
     public string? Phone { get; set; }
+}
+
+// ============================================================================
+// Notification DTOs & Methods
+// ============================================================================
+
+public class NotificationUserDto
+{
+    [JsonPropertyName("userId")]
+    public string UserId { get; set; } = string.Empty;
+
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    [JsonPropertyName("email")]
+    public string? Email { get; set; }
+
+    [JsonPropertyName("phone")]
+    public string? Phone { get; set; }
+
+    [JsonPropertyName("deviceCount")]
+    public int DeviceCount { get; set; }
+
+    [JsonPropertyName("hasDevices")]
+    public bool HasDevices { get; set; }
+}
+
+public class NotificationStatsDto
+{
+    [JsonPropertyName("totalUsers")]
+    public int TotalUsers { get; set; }
+
+    [JsonPropertyName("activeUsers")]
+    public int ActiveUsers { get; set; }
+
+    [JsonPropertyName("usersWithDevices")]
+    public int UsersWithDevices { get; set; }
+}
+
+public class SendNotificationRequestDto
+{
+    public string Title { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+    public string? Type { get; set; }
+    public string? Priority { get; set; }
+    public string? ActionUrl { get; set; }
+    public List<string> UserIds { get; set; } = new();
+}
+
+public class BroadcastNotificationRequestDto
+{
+    public string Title { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+    public string? Type { get; set; }
+    public string? Priority { get; set; }
+    public string? ActionUrl { get; set; }
+}
+
+public class SendNotificationResultDto
+{
+    [JsonPropertyName("totalSent")]
+    public int TotalSent { get; set; }
+
+    [JsonPropertyName("successCount")]
+    public int SuccessCount { get; set; }
+
+    [JsonPropertyName("failedCount")]
+    public int FailedCount { get; set; }
+}
+
+public class NotificationUsersResponse
+{
+    [JsonPropertyName("items")]
+    public List<NotificationUserDto>? Items { get; set; }
+
+    [JsonPropertyName("totalCount")]
+    public int TotalCount { get; set; }
+
+    [JsonPropertyName("page")]
+    public int Page { get; set; }
+
+    [JsonPropertyName("pageSize")]
+    public int PageSize { get; set; }
+
+    [JsonPropertyName("totalPages")]
+    public int TotalPages { get; set; }
 }
