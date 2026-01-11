@@ -6110,10 +6110,11 @@ h1, h2, h3, .ashare-logo-text {
     margin: 0;
     font-size: 16px;
     font-weight: 600;
-    color: var(--ashare-text);
+    color: var(--ashare-gray-900);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    flex: 1;
 }
 
 .ashare-chat-time {
@@ -6140,7 +6141,7 @@ h1, h2, h3, .ashare-logo-text {
 }
 
 .ashare-chat-preview span.unread {
-    color: var(--ashare-text);
+    color: var(--ashare-gray-900);
     font-weight: 500;
 }
 
