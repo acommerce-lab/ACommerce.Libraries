@@ -38,6 +38,13 @@ public class BookingsController(
     {
         try
         {
+            // أمان: التحقق من أن customerId ليس فارغاً
+            if (string.IsNullOrWhiteSpace(customerId))
+            {
+                _logger.LogWarning("GetCustomerBookings called with empty customerId");
+                return BadRequest(new { message = "معرف العميل مطلوب" });
+            }
+
             _logger.LogInformation("Getting bookings for customer: {CustomerId}", customerId);
 
             // استخدام repository مباشرة مع predicate للتأكد من الفلترة الصحيحة

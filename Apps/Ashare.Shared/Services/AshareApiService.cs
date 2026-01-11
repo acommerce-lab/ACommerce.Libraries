@@ -376,20 +376,19 @@ public class AshareApiService
         /// </summary>
         public async Task<List<BookingItem>> GetBookingsAsync(string? customerId = null)
         {
+                // أمان: إذا لم يكن هناك معرف مستخدم، لا نعرض أي حجوزات
+                if (string.IsNullOrEmpty(customerId))
+                {
+                        Console.WriteLine("[GetBookingsAsync] No customerId provided - returning empty list for security");
+                        return new List<BookingItem>();
+                }
+
                 try
                 {
                         var serverBookings = new List<BookingItem>();
                         try
                         {
-                                PagedBookingResult? result;
-                                if (!string.IsNullOrEmpty(customerId))
-                                {
-                                        result = await _bookingsClient.GetMyBookingsAsync(customerId);
-                                }
-                                else
-                                {
-                                        result = await _bookingsClient.SearchAsync(new BookingSearchRequest());
-                                }
+                                var result = await _bookingsClient.GetMyBookingsAsync(customerId);
                                 serverBookings = result?.Items?.Select(MapBookingDtoToItem).ToList() ?? new List<BookingItem>();
                         }
                         catch (Exception ex)
