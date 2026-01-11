@@ -410,4 +410,119 @@ public class BookingsController(
             return StatusCode(500, new { message = "An error occurred", detail = ex.Message });
         }
     }
+
+    /// <summary>
+    /// تحديث معرفات الحجز (للإدارة فقط)
+    /// </summary>
+    [HttpPost("{id}/update-ownership")]
+    public async Task<IActionResult> UpdateBookingOwnership(Guid id, [FromBody] UpdateBookingOwnershipDto dto)
+    {
+        try
+        {
+            var booking = await _bookingRepository.GetByIdAsync(id);
+            if (booking == null)
+            {
+                return NotFound(new { success = false, message = "الحجز غير موجود" });
+            }
+
+            _logger.LogInformation("Updating booking {BookingId} ownership - CustomerId: {CustomerId}, HostId: {HostId}",
+                id, dto.CustomerId, dto.HostId);
+
+            if (!string.IsNullOrEmpty(dto.CustomerId))
+            {
+                booking.CustomerId = dto.CustomerId;
+            }
+
+            if (dto.HostId.HasValue)
+            {
+                booking.HostId = dto.HostId.Value;
+            }
+
+            booking.UpdatedAt = DateTime.UtcNow;
+            await _bookingRepository.UpdateAsync(booking);
+
+            return Ok(new
+            {
+                success = true,
+                message = "تم تحديث معرفات الحجز",
+                booking = new
+                {
+                    booking.Id,
+                    booking.CustomerId,
+                    booking.HostId,
+                    booking.SpaceName
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating booking ownership {BookingId}", id);
+            return StatusCode(500, new { message = "An error occurred", detail = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// تحديث جميع الحجوزات (للإدارة - تغيير CustomerId)
+    /// </summary>
+    [HttpPost("admin/bulk-update-customer")]
+    public async Task<IActionResult> BulkUpdateCustomerId([FromBody] BulkUpdateCustomerDto dto)
+    {
+        try
+        {
+            var allBookings = await _bookingRepository.GetPagedAsync(
+                pageNumber: 1,
+                pageSize: 100,
+                predicate: b => b.CustomerId == dto.OldCustomerId,
+                orderBy: b => b.CreatedAt,
+                ascending: false
+            );
+
+            _logger.LogInformation("Found {Count} bookings to update from {Old} to {New}",
+                allBookings.TotalCount, dto.OldCustomerId, dto.NewCustomerId);
+
+            var updatedCount = 0;
+            foreach (var booking in allBookings.Items)
+            {
+                booking.CustomerId = dto.NewCustomerId;
+                if (dto.NewHostId.HasValue)
+                {
+                    booking.HostId = dto.NewHostId.Value;
+                }
+                booking.UpdatedAt = DateTime.UtcNow;
+                await _bookingRepository.UpdateAsync(booking);
+                updatedCount++;
+            }
+
+            return Ok(new
+            {
+                success = true,
+                message = $"تم تحديث {updatedCount} حجز",
+                updatedCount
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error bulk updating bookings");
+            return StatusCode(500, new { message = "An error occurred", detail = ex.Message });
+        }
+    }
+}
+
+/// <summary>
+/// DTO لتحديث ملكية الحجز
+/// </summary>
+public class UpdateBookingOwnershipDto
+{
+    public string? CustomerId { get; set; }
+    public Guid? HostId { get; set; }
+}
+
+/// <summary>
+/// DTO للتحديث الجماعي
+/// </summary>
+public class BulkUpdateCustomerDto
+{
+    public required string OldCustomerId { get; set; }
+    public required string NewCustomerId { get; set; }
+    public Guid? NewHostId { get; set; }
 }
