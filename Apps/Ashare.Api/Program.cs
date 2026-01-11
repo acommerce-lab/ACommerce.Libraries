@@ -31,6 +31,7 @@ using ACommerce.Notifications.Core.Extensions;
 using ACommerce.Notifications.Channels.InApp.Extensions;
 using ACommerce.Notifications.Messaging.Extensions;
 using ACommerce.Notifications.Channels.Firebase;
+using ACommerce.Notifications.Channels.Firebase.EntityFramework.Extensions;
 using ACommerce.Authentication.Abstractions.Contracts;
 using ACommerce.Authentication.AspNetCore.Services;
 using ACommerce.Authentication.Messaging.Extensions;
@@ -117,6 +118,7 @@ ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEnt
 ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Versions.Entities.AppVersion>();
 ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Complaints.Entities.Complaint>();
 ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Complaints.Entities.ComplaintReply>();
+ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Notifications.Channels.Firebase.EntityFramework.Entities.DeviceTokenEntity>();
 
 try
 {
@@ -270,6 +272,10 @@ try
     {
         Log.Warning("⚠️ Firebase not configured - Push notifications will not work");
     }
+
+    // ✅ Use EF Core for Firebase Token Storage (database persistence)
+    builder.Services.AddFirebaseTokenStoreEntityFramework<ApplicationDbContext>();
+    Log.Information("💾 Firebase Token Store: Entity Framework (Database)");
 
     // ✅ Notification Messaging Handler (subscribes to notify.commands.send and sends notifications)
     builder.Services.AddNotificationMessaging();
