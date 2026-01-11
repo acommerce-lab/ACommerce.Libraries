@@ -2,11 +2,13 @@ using Ashare.App.Services;
 using Ashare.Shared.Services;
 using Foundation;
 using UIKit;
+using UserNotifications;
+using Plugin.Firebase.CloudMessaging;
 
 namespace Ashare.App;
 
 [Register("AppDelegate")]
-public class AppDelegate : MauiUIApplicationDelegate
+public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterDelegate
 {
     protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
 
@@ -34,7 +36,99 @@ public class AppDelegate : MauiUIApplicationDelegate
         // طلب إذن التتبع (ATT) بعد تأخير قصير
         RequestTrackingAuthorizationAsync();
 
+        // تسجيل للإشعارات المدفوعة
+        RegisterForPushNotifications(application);
+
         return result;
+    }
+
+    /// <summary>
+    /// تسجيل التطبيق للإشعارات المدفوعة
+    /// </summary>
+    private void RegisterForPushNotifications(UIApplication application)
+    {
+        UNUserNotificationCenter.Current.Delegate = this;
+
+        UNUserNotificationCenter.Current.RequestAuthorization(
+            UNAuthorizationOptions.Alert | UNAuthorizationOptions.Badge | UNAuthorizationOptions.Sound,
+            (granted, error) =>
+            {
+                if (granted)
+                {
+                    System.Diagnostics.Debug.WriteLine("[Push iOS] Notification authorization granted");
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        application.RegisterForRemoteNotifications();
+                    });
+
+                    // تهيئة خدمة الإشعارات بعد الحصول على الإذن
+                    Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await Task.Delay(2000);
+                            var pushService = IPlatformApplication.Current?.Services.GetService<IPushNotificationService>();
+                            if (pushService != null)
+                            {
+                                await pushService.InitializeAsync();
+                                System.Diagnostics.Debug.WriteLine("[Push iOS] Push notification service initialized");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[Push iOS] Init error: {ex.Message}");
+                        }
+                    });
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"[Push iOS] Notification authorization denied: {error?.LocalizedDescription}");
+                }
+            });
+    }
+
+    /// <summary>
+    /// استلام Device Token من APNS
+    /// </summary>
+    public override void RegisteredForRemoteNotifications(UIApplication application, NSData deviceToken)
+    {
+        System.Diagnostics.Debug.WriteLine("[Push iOS] Registered for remote notifications");
+        // Firebase سيتعامل مع التوكن تلقائياً
+        FirebaseCloudMessagingImplementation.DidRegisterRemoteNotifications(deviceToken);
+    }
+
+    /// <summary>
+    /// فشل التسجيل للإشعارات
+    /// </summary>
+    public override void FailedToRegisterForRemoteNotifications(UIApplication application, NSError error)
+    {
+        System.Diagnostics.Debug.WriteLine($"[Push iOS] Failed to register: {error.LocalizedDescription}");
+    }
+
+    /// <summary>
+    /// استلام إشعار عندما التطبيق في الواجهة
+    /// </summary>
+    [Export("userNotificationCenter:willPresentNotification:withCompletionHandler:")]
+    public void WillPresentNotification(UNUserNotificationCenter center, UNNotification notification, Action<UNNotificationPresentationOptions> completionHandler)
+    {
+        System.Diagnostics.Debug.WriteLine($"[Push iOS] Notification received in foreground: {notification.Request.Content.Title}");
+
+        // عرض الإشعار حتى عندما التطبيق مفتوح
+        completionHandler(UNNotificationPresentationOptions.Banner | UNNotificationPresentationOptions.Sound | UNNotificationPresentationOptions.Badge);
+    }
+
+    /// <summary>
+    /// معالجة الضغط على الإشعار
+    /// </summary>
+    [Export("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")]
+    public void DidReceiveNotificationResponse(UNUserNotificationCenter center, UNNotificationResponse response, Action completionHandler)
+    {
+        var userInfo = response.Notification.Request.Content.UserInfo;
+        System.Diagnostics.Debug.WriteLine($"[Push iOS] Notification tapped: {response.Notification.Request.Content.Title}");
+
+        // يمكن إضافة التنقل بناءً على بيانات الإشعار هنا
+
+        completionHandler();
     }
 
     /// <summary>

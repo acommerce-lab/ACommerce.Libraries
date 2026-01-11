@@ -11,6 +11,9 @@ using ACommerce.SharedKernel.Abstractions.Queries;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using ACommerce.SharedKernel.CQRS.Queries;
 using ACommerce.Catalog.Listings.Entities;
+using ACommerce.Notifications.Abstractions.Contracts;
+using ACommerce.Notifications.Abstractions.Models;
+using ACommerce.Notifications.Abstractions.Enums;
 
 namespace ACommerce.Bookings.Api.Controllers;
 
@@ -23,13 +26,15 @@ public class BookingsController(
     IBaseAsyncRepository<Booking> bookingRepository,
     IBaseAsyncRepository<ProductListing> listingRepository,
     IHttpContextAccessor httpContextAccessor,
-    ILogger<BookingsController> logger)
+    ILogger<BookingsController> logger,
+    INotificationService? notificationService = null)
     : BaseCrudController<Booking, CreateBookingDto, UpdateBookingDto, BookingResponseDto, UpdateBookingDto>(mediator, logger)
 {
     private readonly IMarketingEventTracker _marketingTracker = marketingTracker;
     private readonly IBaseAsyncRepository<Booking> _bookingRepository = bookingRepository;
     private readonly IBaseAsyncRepository<ProductListing> _listingRepository = listingRepository;
     private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly INotificationService? _notificationService = notificationService;
 
     /// <summary>
     /// إنشاء حجز جديد - يستخرج HostId تلقائياً من العقار
@@ -76,6 +81,43 @@ public class BookingsController(
             await _bookingRepository.AddAsync(booking);
 
             _logger.LogInformation("Booking created: {BookingId} with HostId: {HostId}", booking.Id, booking.HostId);
+
+            // إرسال إشعار للمضيف عن الحجز الجديد
+            if (_notificationService != null && hostId != Guid.Empty)
+            {
+                try
+                {
+                    await _notificationService.SendAsync(new Notification
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = hostId.ToString(),
+                        Title = "طلب حجز جديد 🏠",
+                        Message = $"لديك طلب حجز جديد على {listing?.Title ?? "عقارك"}",
+                        Type = NotificationType.NewBooking,
+                        Priority = NotificationPriority.High,
+                        CreatedAt = DateTimeOffset.UtcNow,
+                        ActionUrl = $"/booking/{booking.Id}",
+                        Sound = "default",
+                        BadgeCount = 1,
+                        Channels = new List<ChannelDelivery>
+                        {
+                            new() { Channel = NotificationChannel.InApp },
+                            new() { Channel = NotificationChannel.Firebase }
+                        },
+                        Data = new Dictionary<string, string>
+                        {
+                            ["type"] = "new_booking",
+                            ["bookingId"] = booking.Id.ToString(),
+                            ["spaceName"] = listing?.Title ?? ""
+                        }
+                    });
+                    _logger.LogInformation("New booking notification sent to host {HostId}", hostId);
+                }
+                catch (Exception notifyEx)
+                {
+                    _logger.LogWarning(notifyEx, "Failed to send new booking notification to host {HostId}", hostId);
+                }
+            }
 
             return Ok(new BookingResponseDto
             {
@@ -373,6 +415,42 @@ public class BookingsController(
                 _logger.LogWarning(trackEx, "فشل تتبع حدث تأكيد الحجز");
             }
 
+            // إرسال إشعار للعميل بتأكيد الحجز
+            if (_notificationService != null && !string.IsNullOrEmpty(booking.CustomerId))
+            {
+                try
+                {
+                    await _notificationService.SendAsync(new Notification
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = booking.CustomerId,
+                        Title = "تم تأكيد حجزك ✅",
+                        Message = $"تم تأكيد حجزك على {booking.SpaceName ?? "العقار"}. استمتع بإقامتك!",
+                        Type = NotificationType.BookingUpdate,
+                        Priority = NotificationPriority.High,
+                        CreatedAt = DateTimeOffset.UtcNow,
+                        ActionUrl = $"/booking/{id}",
+                        Sound = "default",
+                        Channels = new List<ChannelDelivery>
+                        {
+                            new() { Channel = NotificationChannel.InApp },
+                            new() { Channel = NotificationChannel.Firebase }
+                        },
+                        Data = new Dictionary<string, string>
+                        {
+                            ["type"] = "booking_confirmed",
+                            ["bookingId"] = id.ToString(),
+                            ["spaceName"] = booking.SpaceName ?? ""
+                        }
+                    });
+                    _logger.LogInformation("Booking confirmed notification sent to customer {CustomerId}", booking.CustomerId);
+                }
+                catch (Exception notifyEx)
+                {
+                    _logger.LogWarning(notifyEx, "Failed to send booking confirmed notification to customer {CustomerId}", booking.CustomerId);
+                }
+            }
+
             return Ok(new { success = true, message = "تم تأكيد الحجز بنجاح" });
         }
         catch (Exception ex)
@@ -413,7 +491,47 @@ public class BookingsController(
 
             await _bookingRepository.UpdateAsync(booking);
 
-            // TODO: إرسال إشعار للعميل
+            // إرسال إشعار للعميل برفض الحجز
+            if (_notificationService != null && !string.IsNullOrEmpty(booking.CustomerId))
+            {
+                try
+                {
+                    var message = string.IsNullOrEmpty(dto.Reason)
+                        ? $"للأسف، تم رفض طلب حجزك على {booking.SpaceName ?? "العقار"}"
+                        : $"للأسف، تم رفض طلب حجزك على {booking.SpaceName ?? "العقار"}. السبب: {dto.Reason}";
+
+                    await _notificationService.SendAsync(new Notification
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = booking.CustomerId,
+                        Title = "تم رفض الحجز ❌",
+                        Message = message,
+                        Type = NotificationType.BookingUpdate,
+                        Priority = NotificationPriority.High,
+                        CreatedAt = DateTimeOffset.UtcNow,
+                        ActionUrl = $"/booking/{id}",
+                        Sound = "default",
+                        Channels = new List<ChannelDelivery>
+                        {
+                            new() { Channel = NotificationChannel.InApp },
+                            new() { Channel = NotificationChannel.Firebase }
+                        },
+                        Data = new Dictionary<string, string>
+                        {
+                            ["type"] = "booking_rejected",
+                            ["bookingId"] = id.ToString(),
+                            ["spaceName"] = booking.SpaceName ?? "",
+                            ["reason"] = dto.Reason ?? ""
+                        }
+                    });
+                    _logger.LogInformation("Booking rejected notification sent to customer {CustomerId}", booking.CustomerId);
+                }
+                catch (Exception notifyEx)
+                {
+                    _logger.LogWarning(notifyEx, "Failed to send booking rejected notification to customer {CustomerId}", booking.CustomerId);
+                }
+            }
+
             // TODO: بدء عملية استرداد العربون إذا تم دفعه
 
             return Ok(new { success = true, message = "تم رفض الحجز" });

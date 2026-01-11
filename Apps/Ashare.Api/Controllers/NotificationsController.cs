@@ -1,252 +1,305 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Concurrent;
+using Microsoft.Extensions.Logging;
+using ACommerce.Notifications.Abstractions.Contracts;
+using ACommerce.Notifications.Abstractions.Models;
+using ACommerce.Notifications.Abstractions.Enums;
+using ACommerce.Notifications.Channels.Firebase.Storage;
+using ACommerce.Notifications.Channels.Firebase.Models;
+using ACommerce.SharedKernel.Abstractions.Queries;
+using System.Security.Claims;
 
 namespace Ashare.Api.Controllers;
 
 /// <summary>
 /// نقاط نهاية الإشعارات لتطبيق عشير
 /// </summary>
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
+[Produces("application/json")]
 public class NotificationsController : ControllerBase
 {
-	// In-memory storage for demo purposes
-	private static readonly ConcurrentDictionary<Guid, NotificationDto> _notifications = new();
-	private static bool _isSeeded = false;
+    private readonly INotificationService _notificationService;
+    private readonly IFirebaseTokenStore? _firebaseTokenStore;
+    private readonly ILogger<NotificationsController> _logger;
 
-	public NotificationsController()
-	{
-		SeedNotificationsIfNeeded();
-	}
+    public NotificationsController(
+        INotificationService notificationService,
+        ILogger<NotificationsController> logger,
+        IFirebaseTokenStore? firebaseTokenStore = null)
+    {
+        _notificationService = notificationService;
+        _firebaseTokenStore = firebaseTokenStore;
+        _logger = logger;
+    }
 
-	private static void SeedNotificationsIfNeeded()
-	{
-		if (_isSeeded) return;
-		_isSeeded = true;
+    private string? GetUserId() => User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-		var sampleNotifications = new List<NotificationDto>
-		{
-			new()
-			{
-				Id = Guid.NewGuid(),
-				Title = "مرحباً بك في عشير!",
-				Message = "شكراً لانضمامك إلينا. ابدأ باستكشاف المساحات المتاحة للإيجار.",
-				Type = "System",
-				IsRead = false,
-				CreatedAt = DateTime.UtcNow.AddMinutes(-5),
-				UserId = "demo-user"
-			},
-			new()
-			{
-				Id = Guid.NewGuid(),
-				Title = "عرض جديد متاح",
-				Message = "شقة مفروشة في حي النرجس متاحة الآن. تحقق من التفاصيل!",
-				Type = "Promo",
-				IsRead = false,
-				CreatedAt = DateTime.UtcNow.AddHours(-2),
-				UserId = "demo-user"
-			},
-			new()
-			{
-				Id = Guid.NewGuid(),
-				Title = "تم تأكيد حجزك",
-				Message = "تم تأكيد حجزك لقاعة الاجتماعات VIP ليوم الأحد القادم.",
-				Type = "Booking",
-				IsRead = true,
-				CreatedAt = DateTime.UtcNow.AddDays(-1),
-				UserId = "demo-user"
-			},
-			new()
-			{
-				Id = Guid.NewGuid(),
-				Title = "رسالة جديدة",
-				Message = "لديك رسالة جديدة من مالك الشقة بخصوص استفسارك.",
-				Type = "Message",
-				IsRead = false,
-				CreatedAt = DateTime.UtcNow.AddHours(-6),
-				UserId = "demo-user"
-			},
-			new()
-			{
-				Id = Guid.NewGuid(),
-				Title = "تم استلام الدفع",
-				Message = "تم استلام دفعة الإيجار بنجاح. شكراً لك!",
-				Type = "Payment",
-				IsRead = true,
-				CreatedAt = DateTime.UtcNow.AddDays(-3),
-				UserId = "demo-user"
-			},
-			new()
-			{
-				Id = Guid.NewGuid(),
-				Title = "تقييم جديد",
-				Message = "حصلت على تقييم 5 نجوم من أحمد على مساحتك.",
-				Type = "Review",
-				IsRead = false,
-				CreatedAt = DateTime.UtcNow.AddHours(-12),
-				UserId = "demo-user"
-			},
-			new()
-			{
-				Id = Guid.NewGuid(),
-				Title = "تذكير بالحجز",
-				Message = "تذكير: حجزك للمكتب المشترك يبدأ غداً الساعة 9 صباحاً.",
-				Type = "Booking",
-				IsRead = false,
-				CreatedAt = DateTime.UtcNow.AddHours(-1),
-				UserId = "demo-user"
-			}
-		};
+    /// <summary>
+    /// تسجيل Device Token للإشعارات
+    /// </summary>
+    [HttpPost("device-token")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(401)]
+    public async Task<IActionResult> RegisterDeviceToken([FromBody] RegisterDeviceTokenRequest request)
+    {
+        var userId = GetUserId();
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
 
-		foreach (var notification in sampleNotifications)
-		{
-			_notifications.TryAdd(notification.Id, notification);
-		}
-	}
+        if (string.IsNullOrEmpty(request.DeviceToken))
+        {
+            return BadRequest(new { message = "Device token is required" });
+        }
 
-	/// <summary>
-	/// الحصول على جميع الإشعارات
-	/// </summary>
-	[HttpGet]
-	public ActionResult<List<NotificationDto>> GetNotifications(
-		[FromQuery] int page = 1,
-		[FromQuery] int pageSize = 20)
-	{
-		var notifications = _notifications.Values
-			.OrderByDescending(n => n.CreatedAt)
-			.Skip((page - 1) * pageSize)
-			.Take(pageSize)
-			.ToList();
+        if (_firebaseTokenStore == null)
+        {
+            _logger.LogWarning("Firebase token store not configured");
+            return Ok(new { message = "Firebase not configured, token not saved" });
+        }
 
-		return Ok(notifications);
-	}
+        try
+        {
+            // تحديد نوع الجهاز
+            var platform = request.Platform?.ToLowerInvariant() switch
+            {
+                "ios" => DevicePlatform.iOS,
+                "android" => DevicePlatform.Android,
+                "web" => DevicePlatform.Web,
+                _ => DevicePlatform.Android // الافتراضي
+            };
 
-	/// <summary>
-	/// الحصول على إشعاراتي
-	/// </summary>
-	[HttpGet("me")]
-	public ActionResult<List<NotificationDto>> GetMyNotifications()
-	{
-		var notifications = _notifications.Values
-			.OrderByDescending(n => n.CreatedAt)
-			.ToList();
+            var deviceToken = new FirebaseDeviceToken
+            {
+                UserId = userId,
+                Token = request.DeviceToken,
+                Platform = platform,
+                RegisteredAt = DateTimeOffset.UtcNow,
+                LastUsedAt = DateTimeOffset.UtcNow,
+                IsActive = true,
+                Metadata = new Dictionary<string, string>
+                {
+                    ["AppVersion"] = request.AppVersion ?? "unknown",
+                    ["DeviceModel"] = request.DeviceModel ?? "unknown"
+                }
+            };
 
-		return Ok(notifications);
-	}
+            await _firebaseTokenStore.SaveTokenAsync(deviceToken);
 
-	/// <summary>
-	/// الحصول على عدد الإشعارات غير المقروءة
-	/// </summary>
-	[HttpGet("unread-count")]
-	public ActionResult<object> GetUnreadCount()
-	{
-		var count = _notifications.Values.Count(n => !n.IsRead);
-		return Ok(new { count });
-	}
+            _logger.LogInformation("Device token registered for user {UserId}, platform: {Platform}",
+                userId, platform);
 
-	/// <summary>
-	/// تعليم إشعار كمقروء
-	/// </summary>
-	[HttpPost("{id}/read")]
-	public ActionResult MarkAsRead(Guid id)
-	{
-		if (_notifications.TryGetValue(id, out var notification))
-		{
-			notification.IsRead = true;
-			return Ok();
-		}
+            return Ok(new { success = true, message = "Device token registered successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error registering device token for user {UserId}", userId);
+            return StatusCode(500, new { message = "Failed to register device token" });
+        }
+    }
 
-		return NotFound();
-	}
+    /// <summary>
+    /// إلغاء تسجيل Device Token
+    /// </summary>
+    [HttpDelete("device-token")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(401)]
+    public async Task<IActionResult> UnregisterDeviceToken([FromQuery] string deviceToken)
+    {
+        var userId = GetUserId();
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
 
-	/// <summary>
-	/// تعليم جميع الإشعارات كمقروءة
-	/// </summary>
-	[HttpPost("mark-all-read")]
-	public ActionResult MarkAllAsRead()
-	{
-		foreach (var notification in _notifications.Values)
-		{
-			notification.IsRead = true;
-		}
+        if (_firebaseTokenStore == null)
+        {
+            return Ok(new { message = "Firebase not configured" });
+        }
 
-		return Ok();
-	}
+        try
+        {
+            await _firebaseTokenStore.DeleteTokenAsync(deviceToken);
+            _logger.LogInformation("Device token unregistered for user {UserId}", userId);
+            return Ok(new { success = true, message = "Device token unregistered" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error unregistering device token");
+            return StatusCode(500, new { message = "Failed to unregister device token" });
+        }
+    }
 
-	/// <summary>
-	/// حذف إشعار
-	/// </summary>
-	[HttpDelete("{id}")]
-	public ActionResult DeleteNotification(Guid id)
-	{
-		if (_notifications.TryRemove(id, out _))
-		{
-			return Ok();
-		}
+    /// <summary>
+    /// الحصول على عدد الأجهزة المسجلة
+    /// </summary>
+    [HttpGet("devices/count")]
+    [ProducesResponseType(typeof(object), 200)]
+    public async Task<IActionResult> GetDeviceCount()
+    {
+        var userId = GetUserId();
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
 
-		return NotFound();
-	}
+        if (_firebaseTokenStore == null)
+        {
+            return Ok(new { count = 0 });
+        }
 
-	/// <summary>
-	/// تسجيل Device Token
-	/// </summary>
-	[HttpPost("device-token")]
-	public ActionResult RegisterDeviceToken([FromBody] RegisterDeviceTokenDto request)
-	{
-		// In a real app, this would store the token for push notifications
-		return Ok();
-	}
+        try
+        {
+            var count = await _firebaseTokenStore.GetActiveDeviceCountAsync(userId);
+            return Ok(new { count });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting device count for user {UserId}", userId);
+            return Ok(new { count = 0 });
+        }
+    }
 
-	/// <summary>
-	/// الحصول على إعدادات Push
-	/// </summary>
-	[HttpGet("push-settings")]
-	public ActionResult<PushSettingsDto> GetPushSettings()
-	{
-		return Ok(new PushSettingsDto
-		{
-			EnablePush = true,
-			OrderUpdates = true,
-			ChatMessages = true,
-			Promotions = true,
-			SystemAlerts = true
-		});
-	}
+    /// <summary>
+    /// إرسال إشعار اختباري
+    /// </summary>
+    [HttpPost("test")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(401)]
+    public async Task<IActionResult> SendTestNotification()
+    {
+        var userId = GetUserId();
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new { message = "User not authenticated" });
+        }
 
-	/// <summary>
-	/// تحديث إعدادات Push
-	/// </summary>
-	[HttpPut("push-settings")]
-	public ActionResult UpdatePushSettings([FromBody] PushSettingsDto settings)
-	{
-		// In a real app, this would update user preferences
-		return Ok();
-	}
+        try
+        {
+            var notification = new Notification
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                Title = "إشعار اختباري",
+                Message = "هذا إشعار اختباري من تطبيق عشير 🎉",
+                Type = NotificationType.Info,
+                Priority = NotificationPriority.Normal,
+                CreatedAt = DateTimeOffset.UtcNow,
+                Channels = new List<ChannelDelivery>
+                {
+                    new() { Channel = NotificationChannel.InApp },
+                    new() { Channel = NotificationChannel.Firebase }
+                },
+                Data = new Dictionary<string, string>
+                {
+                    ["type"] = "test",
+                    ["timestamp"] = DateTimeOffset.UtcNow.ToString("o")
+                }
+            };
+
+            var result = await _notificationService.SendAsync(notification);
+
+            _logger.LogInformation("Test notification sent to user {UserId}, result: {Status}",
+                userId, result.OverallStatus);
+
+            return Ok(new
+            {
+                success = result.OverallStatus == DeliveryStatus.Sent,
+                message = "تم إرسال الإشعار الاختباري",
+                result = new
+                {
+                    status = result.OverallStatus.ToString(),
+                    channelResults = result.ChannelResults.Select(c => new
+                    {
+                        channel = c.Key.ToString(),
+                        status = c.Value.Status.ToString(),
+                        error = c.Value.ErrorMessage
+                    })
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending test notification to user {UserId}", userId);
+            return StatusCode(500, new { message = "Failed to send test notification", error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// الحصول على إعدادات الإشعارات
+    /// </summary>
+    [HttpGet("settings")]
+    [ProducesResponseType(typeof(NotificationSettingsDto), 200)]
+    public IActionResult GetNotificationSettings()
+    {
+        // في المستقبل يمكن تخزين هذه الإعدادات في قاعدة البيانات
+        return Ok(new NotificationSettingsDto
+        {
+            EnablePush = true,
+            NewBookings = true,
+            BookingUpdates = true,
+            ChatMessages = true,
+            Promotions = true,
+            SystemAlerts = true
+        });
+    }
+
+    /// <summary>
+    /// تحديث إعدادات الإشعارات
+    /// </summary>
+    [HttpPut("settings")]
+    [ProducesResponseType(200)]
+    public IActionResult UpdateNotificationSettings([FromBody] NotificationSettingsDto settings)
+    {
+        // TODO: حفظ الإعدادات في قاعدة البيانات
+        _logger.LogInformation("Notification settings updated for user {UserId}", GetUserId());
+        return Ok(new { success = true, message = "تم تحديث الإعدادات" });
+    }
 }
 
-public class NotificationDto
+// ============================================================================
+// DTOs
+// ============================================================================
+
+/// <summary>
+/// طلب تسجيل Device Token
+/// </summary>
+public class RegisterDeviceTokenRequest
 {
-	public Guid Id { get; set; }
-	public string Title { get; set; } = string.Empty;
-	public string Message { get; set; } = string.Empty;
-	public string Type { get; set; } = "System";
-	public bool IsRead { get; set; }
-	public DateTime CreatedAt { get; set; }
-	public string UserId { get; set; } = string.Empty;
-	public Dictionary<string, string> Data { get; set; } = new();
+    /// <summary>
+    /// Firebase Device Token
+    /// </summary>
+    public string DeviceToken { get; set; } = string.Empty;
+
+    /// <summary>
+    /// نوع الجهاز: ios, android, web
+    /// </summary>
+    public string? Platform { get; set; }
+
+    /// <summary>
+    /// إصدار التطبيق
+    /// </summary>
+    public string? AppVersion { get; set; }
+
+    /// <summary>
+    /// موديل الجهاز
+    /// </summary>
+    public string? DeviceModel { get; set; }
 }
 
-public class RegisterDeviceTokenDto
+/// <summary>
+/// إعدادات الإشعارات
+/// </summary>
+public class NotificationSettingsDto
 {
-	public string DeviceToken { get; set; } = string.Empty;
-	public string Platform { get; set; } = string.Empty;
-}
-
-public class PushSettingsDto
-{
-	public bool EnablePush { get; set; }
-	public bool OrderUpdates { get; set; } = true;
-	public bool ChatMessages { get; set; } = true;
-	public bool Promotions { get; set; } = true;
-	public bool SystemAlerts { get; set; } = true;
+    public bool EnablePush { get; set; } = true;
+    public bool NewBookings { get; set; } = true;
+    public bool BookingUpdates { get; set; } = true;
+    public bool ChatMessages { get; set; } = true;
+    public bool Promotions { get; set; } = true;
+    public bool SystemAlerts { get; set; } = true;
 }
