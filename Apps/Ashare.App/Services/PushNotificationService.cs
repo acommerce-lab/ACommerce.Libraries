@@ -1,5 +1,7 @@
 using ACommerce.Client.Notifications;
+using Microsoft.Extensions.Logging;
 using Plugin.Firebase.CloudMessaging;
+using Plugin.Firebase.CloudMessaging.EventArgs;
 
 namespace Ashare.App.Services;
 
