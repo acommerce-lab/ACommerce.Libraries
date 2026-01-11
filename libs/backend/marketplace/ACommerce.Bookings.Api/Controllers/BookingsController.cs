@@ -47,6 +47,20 @@ public class BookingsController(
 
             _logger.LogInformation("Getting bookings for customer: {CustomerId}", customerId);
 
+            // DEBUG: Log all bookings to see stored CustomerIds
+            var allBookings = await _bookingRepository.GetPagedAsync(
+                pageNumber: 1,
+                pageSize: 100,
+                orderBy: b => b.CreatedAt,
+                ascending: false
+            );
+            _logger.LogInformation("DEBUG: Total bookings in database: {Count}", allBookings.TotalCount);
+            foreach (var booking in allBookings.Items.Take(10))
+            {
+                _logger.LogInformation("DEBUG: Booking {Id} - CustomerId: '{CustomerId}' (length: {Length})",
+                    booking.Id, booking.CustomerId, booking.CustomerId?.Length ?? 0);
+            }
+
             // استخدام repository مباشرة مع predicate للتأكد من الفلترة الصحيحة
             var result = await _bookingRepository.GetPagedAsync(
                 pageNumber: pageNumber,
