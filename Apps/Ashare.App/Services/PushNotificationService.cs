@@ -1,13 +1,11 @@
 using ACommerce.Client.Notifications;
 using Microsoft.Extensions.Logging;
-using Plugin.Firebase.CloudMessaging;
-using Plugin.Firebase.CloudMessaging.EventArgs;
 
 namespace Ashare.App.Services;
 
 /// <summary>
-/// خدمة إشعارات Firebase Push للتطبيق
-/// تتولى تسجيل الجهاز واستلام الإشعارات
+/// خدمة إشعارات Push للتطبيق
+/// ملاحظة: هذه نسخة مبسطة. Firebase SDK سيُضاف لاحقاً عند البناء على macOS
 /// </summary>
 public class PushNotificationService : IPushNotificationService
 {
@@ -37,44 +35,39 @@ public class PushNotificationService : IPushNotificationService
 
         try
         {
-            _logger.LogInformation("[Push] Initializing Firebase Cloud Messaging...");
+            _logger.LogInformation("[Push] Initializing Push Notification Service...");
 
-            // طلب إذن الإشعارات
-            await CrossFirebaseCloudMessaging.Current.CheckIfValidAsync();
-
-            // الاشتراك في التحديثات عند تجديد التوكن
-            CrossFirebaseCloudMessaging.Current.TokenChanged += OnTokenChanged;
-
-            // الاشتراك في استقبال الإشعارات
-            CrossFirebaseCloudMessaging.Current.NotificationReceived += OnNotificationReceived;
-            CrossFirebaseCloudMessaging.Current.NotificationTapped += OnNotificationTapped;
-
-            // الحصول على التوكن الحالي
-            _currentToken = await CrossFirebaseCloudMessaging.Current.GetTokenAsync();
-
-            if (!string.IsNullOrEmpty(_currentToken))
-            {
-                _logger.LogInformation("[Push] FCM Token obtained: {Token}", _currentToken[..Math.Min(20, _currentToken.Length)] + "...");
-                await RegisterTokenWithBackendAsync(_currentToken);
-            }
-            else
-            {
-                _logger.LogWarning("[Push] Failed to get FCM token");
-            }
+            // TODO: تكامل Firebase سيُضاف لاحقاً
+            // حالياً الخدمة جاهزة لاستقبال التوكن من native code
 
             _isInitialized = true;
-            _logger.LogInformation("[Push] Firebase Cloud Messaging initialized successfully");
+            _logger.LogInformation("[Push] Push Notification Service initialized (stub mode)");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[Push] Failed to initialize Firebase Cloud Messaging");
+            _logger.LogError(ex, "[Push] Failed to initialize Push Notification Service");
         }
+
+        await Task.CompletedTask;
     }
 
     /// <summary>
     /// الحصول على التوكن الحالي
     /// </summary>
     public string? GetCurrentToken() => _currentToken;
+
+    /// <summary>
+    /// تسجيل التوكن من native code
+    /// </summary>
+    public async Task RegisterTokenAsync(string token)
+    {
+        if (string.IsNullOrEmpty(token))
+            return;
+
+        _currentToken = token;
+        await RegisterTokenWithBackendAsync(token);
+        TokenRefreshed?.Invoke(this, token);
+    }
 
     /// <summary>
     /// إعادة تسجيل التوكن مع الخادم (بعد تسجيل الدخول مثلاً)
@@ -90,33 +83,19 @@ public class PushNotificationService : IPushNotificationService
     /// <summary>
     /// الاشتراك في موضوع معين
     /// </summary>
-    public async Task SubscribeToTopicAsync(string topic)
+    public Task SubscribeToTopicAsync(string topic)
     {
-        try
-        {
-            await CrossFirebaseCloudMessaging.Current.SubscribeToTopicAsync(topic);
-            _logger.LogInformation("[Push] Subscribed to topic: {Topic}", topic);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "[Push] Failed to subscribe to topic: {Topic}", topic);
-        }
+        _logger.LogInformation("[Push] Subscribe to topic requested: {Topic} (not implemented)", topic);
+        return Task.CompletedTask;
     }
 
     /// <summary>
     /// إلغاء الاشتراك من موضوع
     /// </summary>
-    public async Task UnsubscribeFromTopicAsync(string topic)
+    public Task UnsubscribeFromTopicAsync(string topic)
     {
-        try
-        {
-            await CrossFirebaseCloudMessaging.Current.UnsubscribeFromTopicAsync(topic);
-            _logger.LogInformation("[Push] Unsubscribed from topic: {Topic}", topic);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "[Push] Failed to unsubscribe from topic: {Topic}", topic);
-        }
+        _logger.LogInformation("[Push] Unsubscribe from topic requested: {Topic} (not implemented)", topic);
+        return Task.CompletedTask;
     }
 
     private async Task RegisterTokenWithBackendAsync(string token)
@@ -139,68 +118,20 @@ public class PushNotificationService : IPushNotificationService
         }
     }
 
-    private async void OnTokenChanged(object? sender, FCMTokenChangedEventArgs e)
+    /// <summary>
+    /// معالجة إشعار وارد (يُستدعى من native code)
+    /// </summary>
+    public void HandleNotificationReceived(string title, string body, IDictionary<string, string>? data)
     {
-        _logger.LogInformation("[Push] FCM Token refreshed");
-        _currentToken = e.Token;
-
-        await RegisterTokenWithBackendAsync(e.Token);
-        TokenRefreshed?.Invoke(this, e.Token);
-    }
-
-    private void OnNotificationReceived(object? sender, FCMNotificationReceivedEventArgs e)
-    {
-        _logger.LogInformation("[Push] Notification received: {Title}", e.Notification?.Title);
+        _logger.LogInformation("[Push] Notification received: {Title}", title);
 
         NotificationReceived?.Invoke(this, new PushNotificationEventArgs
         {
-            Title = e.Notification?.Title ?? "",
-            Body = e.Notification?.Body ?? "",
-            Data = e.Notification?.Data ?? new Dictionary<string, string>(),
+            Title = title,
+            Body = body,
+            Data = data ?? new Dictionary<string, string>(),
             WasInForeground = true
         });
-    }
-
-    private void OnNotificationTapped(object? sender, FCMNotificationTappedEventArgs e)
-    {
-        _logger.LogInformation("[Push] Notification tapped: {Title}", e.Notification?.Title);
-
-        var data = e.Notification?.Data ?? new Dictionary<string, string>();
-
-        // التنقل بناءً على نوع الإشعار
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            HandleNotificationNavigation(data);
-        });
-    }
-
-    private void HandleNotificationNavigation(IDictionary<string, string> data)
-    {
-        try
-        {
-            if (data.TryGetValue("type", out var type))
-            {
-                string? targetPage = type switch
-                {
-                    "NewBooking" => "/bookings",
-                    "BookingConfirmed" => "/bookings",
-                    "BookingRejected" => "/bookings",
-                    "ChatMessage" => data.TryGetValue("chatId", out var chatId) ? $"/chat/{chatId}" : "/chats",
-                    "NewMessage" => data.TryGetValue("chatId", out var cid) ? $"/chat/{cid}" : "/chats",
-                    _ => null
-                };
-
-                if (!string.IsNullOrEmpty(targetPage))
-                {
-                    _logger.LogInformation("[Push] Navigating to: {Page}", targetPage);
-                    // يمكن استخدام IAppNavigationService هنا للتنقل
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "[Push] Error handling notification navigation");
-        }
     }
 }
 
@@ -218,6 +149,11 @@ public interface IPushNotificationService
     /// الحصول على التوكن الحالي
     /// </summary>
     string? GetCurrentToken();
+
+    /// <summary>
+    /// تسجيل التوكن من native code
+    /// </summary>
+    Task RegisterTokenAsync(string token);
 
     /// <summary>
     /// إعادة تسجيل التوكن

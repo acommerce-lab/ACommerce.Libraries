@@ -3,7 +3,6 @@ using Ashare.Shared.Services;
 using Foundation;
 using UIKit;
 using UserNotifications;
-using Plugin.Firebase.CloudMessaging;
 
 namespace Ashare.App;
 
