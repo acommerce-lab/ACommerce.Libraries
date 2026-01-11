@@ -1,8 +1,10 @@
 @inherits LayoutComponentBase
 @using ACommerce.Templates.Customer.Components
+@using ACommerce.Client.Chats
 @inject Ashare.Shared.Services.ThemeService ThemeService
 @inject IAppNavigationService Navigation
 @inject AshareApiService ApiService
+@inject ChatsClient ChatsClient
 @inject ACommerce.Client.Auth.TokenManager TokenManager
 @inject ACommerce.Client.Auth.AuthClient AuthClient
 @inject ACommerce.Templates.Customer.Services.GuestModeService GuestMode
@@ -81,6 +83,16 @@
                 </span>
                 <span class="ac-bottom-nav-label">@L["Bookings"]</span>
             </a>
+            <a href="/chats" class="ac-bottom-nav-item @(IsActive("/chats") ? "active" : "")">
+                <span class="ac-bottom-nav-icon">
+                    <i class="bi bi-chat-dots"></i>
+                    @if (MessagesCount > 0)
+                    {
+                        <span class="ac-badge ac-badge-danger ac-badge-sm">@MessagesCount</span>
+                    }
+                </span>
+                <span class="ac-bottom-nav-label">@L["Messages"]</span>
+            </a>
             <a href="/favorites" class="ac-bottom-nav-item @(IsActive("/favorites") ? "active" : "")">
                 <span class="ac-bottom-nav-icon"><i class="bi bi-heart"></i></span>
                 <span class="ac-bottom-nav-label">@L["Favorites"]</span>
@@ -98,12 +110,16 @@
     private RouteData? RouteData { get; set; }
 
     private int BookingsCount { get; set; }
+    private int MessagesCount { get; set; }
     private int NotificationCount { get; set; }
     private bool _initialized;
     private string? _lastCheckedPath;
     private static bool _bookingsCountLoaded;
     private static int _cachedBookingsCount;
     private static string? _cachedBookingsCustomerId; // لتتبع من تم تحميل العدد له
+    private static bool _messagesCountLoaded;
+    private static int _cachedMessagesCount;
+    private static string? _cachedMessagesUserId; // لتتبع من تم تحميل عدد الرسائل له
     private static bool _versionChecked;
     private bool _versionAlertDismissed;
 
@@ -251,7 +267,7 @@
         get
         {
             var pageName = RouteData?.PageType?.Name;
-            if (pageName is "Bookings" or "Favorites" or "Profile" or "Chat" or "ChatRoom" or "Notifications")
+            if (pageName is "Bookings" or "Favorites" or "Profile" or "Chats" or "Chat" or "ChatRoom" or "Notifications")
                 return true;
 
             var currentPath = Navigation.CurrentUri?.ToLowerInvariant() ?? "";
@@ -285,6 +301,16 @@
         {
             // تحميل عدد الحجوزات في الخلفية (مرة واحدة فقط)
             _ = LoadBookingsCountAsync();
+        }
+
+        // تحميل عدد الرسائل غير المقروءة
+        if (_messagesCountLoaded)
+        {
+            MessagesCount = _cachedMessagesCount;
+        }
+        else
+        {
+            _ = LoadMessagesCountAsync();
         }
 
         // فحص إصدار التطبيق (مرة واحدة فقط)
@@ -386,6 +412,48 @@
         _bookingsCountLoaded = false;
         _cachedBookingsCount = 0;
         _cachedBookingsCustomerId = null;
+    }
+
+    /// <summary>
+    /// تحميل عدد الرسائل غير المقروءة
+    /// </summary>
+    private async Task LoadMessagesCountAsync()
+    {
+        try
+        {
+            var userId = TokenManager.GetUserIdFromToken();
+            if (string.IsNullOrEmpty(userId)) return;
+
+            // التحقق من أن الـ cache للمستخدم الصحيح
+            if (_messagesCountLoaded && _cachedMessagesUserId == userId)
+            {
+                MessagesCount = _cachedMessagesCount;
+                return;
+            }
+
+            var conversations = await ChatsClient.GetConversationsAsync();
+            var unreadCount = conversations?.Sum(c => c.UnreadCount) ?? 0;
+
+            _cachedMessagesCount = unreadCount;
+            _cachedMessagesUserId = userId;
+            _messagesCountLoaded = true;
+            MessagesCount = unreadCount;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[MainLayout] Error loading messages count: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// إعادة تحميل عدد الرسائل (يُستدعى بعد قراءة رسالة)
+    /// </summary>
+    public static void InvalidateMessagesCache()
+    {
+        _messagesCountLoaded = false;
+        _cachedMessagesCount = 0;
+        _cachedMessagesUserId = null;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
