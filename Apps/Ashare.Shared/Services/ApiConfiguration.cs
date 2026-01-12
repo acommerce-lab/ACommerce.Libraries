@@ -12,9 +12,9 @@ public class ApiConfiguration : ACommerce.Client.Core.Configuration.ApiConfigura
     // ═══════════════════════════════════════════════════════════════════════════
 
     /// <summary>
-    /// Production API URL (Google Cloud Run - Dammam)
+    /// Production API URL (Alibaba Cloud - Saudi Arabia)
     /// </summary>
-    public const string DefaultProductionUrl = "https://ashare-api-130415035604.me-central2.run.app";
+    public const string DefaultProductionUrl = "https://api.ashare.sa";
 
     /// <summary>
     /// Development URL for Android Emulator (10.0.2.2 maps to host's localhost)
