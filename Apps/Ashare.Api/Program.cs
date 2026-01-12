@@ -274,7 +274,7 @@ try
     }
 
     // ✅ Use EF Core for Firebase Token Storage (database persistence)
-    builder.Services.AddFirebaseTokenStoreEntityFramework<ApplicationDbContext>();
+    builder.Services.AddFirebaseTokenStoreEntityFramework();
     Log.Information("💾 Firebase Token Store: Entity Framework (Database)");
 
     // ✅ Notification Messaging Handler (subscribes to notify.commands.send and sends notifications)

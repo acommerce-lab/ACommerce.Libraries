@@ -1,5 +1,4 @@
 using ACommerce.Notifications.Channels.Firebase.Storage;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ACommerce.Notifications.Channels.Firebase.EntityFramework.Extensions;
@@ -12,13 +11,10 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// تسجيل EF Firebase Token Store
     /// يخزن Device Tokens في قاعدة البيانات
+    /// يستخدم DbContext المسجل مسبقاً في DI
     /// </summary>
-    /// <typeparam name="TContext">نوع DbContext</typeparam>
-    /// <param name="services">مجموعة الخدمات</param>
-    /// <returns>مجموعة الخدمات</returns>
-    public static IServiceCollection AddFirebaseTokenStoreEntityFramework<TContext>(
+    public static IServiceCollection AddFirebaseTokenStoreEntityFramework(
         this IServiceCollection services)
-        where TContext : DbContext
     {
         // Remove any existing IFirebaseTokenStore registration (like InMemory)
         var existingDescriptor = services.FirstOrDefault(
@@ -29,8 +25,8 @@ public static class ServiceCollectionExtensions
             services.Remove(existingDescriptor);
         }
 
-        // Register EF implementation
-        services.AddScoped<IFirebaseTokenStore, EfFirebaseTokenStore<TContext>>();
+        // Register EF implementation - uses DbContext from DI
+        services.AddScoped<IFirebaseTokenStore, EfFirebaseTokenStore>();
 
         return services;
     }
