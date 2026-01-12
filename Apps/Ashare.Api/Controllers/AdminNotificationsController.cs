@@ -187,7 +187,7 @@ public class AdminNotificationsController : ControllerBase
 
                 _logger.LogInformation(
                     "Admin notification sent to user {UserId}: Success={Success}, Channels={Channels}",
-                    userId, result.Success, string.Join(",", result.DeliveredChannels ?? Array.Empty<string>()));
+                    userId, result.Success, string.Join(",", result.DeliveredChannels ?? []));
             }
             catch (Exception ex)
             {
@@ -317,7 +317,7 @@ public class AdminNotificationsController : ControllerBase
         "error" => NotificationType.Error,
         "success" => NotificationType.Success,
         "promo" or "promotion" => NotificationType.Promotion,
-        "system" => NotificationType.System,
+        "system" => NotificationType.Welcome,
         _ => NotificationType.Info
     };
 

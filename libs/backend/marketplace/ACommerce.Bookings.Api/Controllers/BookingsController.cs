@@ -61,7 +61,7 @@ public class BookingsController(
                 CustomerId = dto.CustomerId ?? "",
                 HostId = hostId,
                 SpaceName = listing?.Title,
-                SpaceImage = listing?.MainImage,
+                SpaceImage = listing?.FeaturedImage,
                 SpaceLocation = listing?.Address,
                 CheckInDate = dto.CheckInDate,
                 CheckOutDate = dto.CheckOutDate,
