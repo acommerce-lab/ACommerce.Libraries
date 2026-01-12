@@ -10,16 +10,16 @@ namespace ACommerce.Notifications.Channels.Firebase.EntityFramework;
 /// <summary>
 /// Entity Framework implementation of IFirebaseTokenStore
 /// يخزن Device Tokens في قاعدة البيانات
+/// يعمل مع أي DbContext يحتوي على DeviceTokenEntity (يُكتشف تلقائياً عبر IBaseEntity)
 /// </summary>
-public class EfFirebaseTokenStore<TContext> : IFirebaseTokenStore
-    where TContext : DbContext
+public class EfFirebaseTokenStore : IFirebaseTokenStore
 {
-    private readonly TContext _context;
-    private readonly ILogger<EfFirebaseTokenStore<TContext>> _logger;
+    private readonly DbContext _context;
+    private readonly ILogger<EfFirebaseTokenStore> _logger;
 
     public EfFirebaseTokenStore(
-        TContext context,
-        ILogger<EfFirebaseTokenStore<TContext>> logger)
+        DbContext context,
+        ILogger<EfFirebaseTokenStore> logger)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -163,7 +163,6 @@ public class EfFirebaseTokenStore<TContext> : IFirebaseTokenStore
             ? JsonSerializer.Deserialize<Dictionary<string, string>>(entity.MetadataJson)
             : new Dictionary<string, string>();
 
-        // Ensure AppVersion and DeviceModel are in metadata
         if (metadata != null)
         {
             if (!string.IsNullOrEmpty(entity.AppVersion))
