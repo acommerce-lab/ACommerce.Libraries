@@ -2,6 +2,7 @@ using Ashare.Admin.Components;
 using Ashare.Admin.Services;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Syncfusion.Blazor;
 using ACommerce.Client.Core.Extensions;
 using ACommerce.Client.Versions;
@@ -9,6 +10,15 @@ using ACommerce.Client.Versions;
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JFaF5cXGRCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWH9ecnRVR2RcUEJ2W0tWYEg=");
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Data Protection - Configure for consistent key storage across deployments
+// This ensures session state and anti-forgery tokens work correctly
+var dataProtectionPath = builder.Configuration["DataProtection:KeysPath"]
+    ?? Path.Combine(builder.Environment.ContentRootPath, "keys");
+
+builder.Services.AddDataProtection()
+    .SetApplicationName("Ashare.Admin")
+    .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionPath));
 
 // API Base URL
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://ashare-api-130415035604.me-central2.run.app";

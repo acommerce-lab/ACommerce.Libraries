@@ -169,7 +169,9 @@ try
     });
 
     // Controllers - Auto-discover from all referenced API libraries
+    // Note: Explicitly add local assembly first to ensure local controllers are discovered
     builder.Services.AddControllers()
+        .AddApplicationPart(typeof(Ashare.Api.Controllers.AdminNotificationsController).Assembly) // Local controllers (AdminNotificationsController, etc.)
         .AddApplicationPart(typeof(ProfilesController).Assembly)
         .AddApplicationPart(typeof(VendorsController).Assembly)
         .AddApplicationPart(typeof(ProductsController).Assembly)
