@@ -4,6 +4,7 @@ using ACommerce.Notifications.Abstractions.Contracts;
 using ACommerce.Notifications.Abstractions.Models;
 using ACommerce.Notifications.Abstractions.Enums;
 using ACommerce.Notifications.Channels.Firebase.Storage;
+using ACommerce.Notifications.Channels.Firebase.EntityFramework.Entities;
 using ACommerce.Profiles.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -47,43 +48,64 @@ public class AdminNotificationsController : ControllerBase
     {
         try
         {
-            var query = _dbContext.Set<Profile>().Where(p => !p.IsDeleted);
+            // الاستعلام من جدول DeviceTokens للحصول على المستخدمين الذين لديهم أجهزة مسجلة
+            var deviceTokensQuery = _dbContext.Set<DeviceTokenEntity>()
+                .Where(d => d.IsActive && !d.IsDeleted);
 
+            // الحصول على معرفات المستخدمين الفريدة مع عدد الأجهزة
+            var usersWithDevicesQuery = deviceTokensQuery
+                .GroupBy(d => d.UserId)
+                .Select(g => new
+                {
+                    UserId = g.Key,
+                    DeviceCount = g.Count(),
+                    LastActivity = g.Max(d => d.LastUsedAt)
+                });
+
+            // الربط مع البروفايلات للحصول على معلومات المستخدم
+            var query = from ud in usersWithDevicesQuery
+                        join p in _dbContext.Set<Profile>().Where(p => !p.IsDeleted)
+                            on ud.UserId equals p.Id.ToString() into profiles
+                        from profile in profiles.DefaultIfEmpty()
+                        select new
+                        {
+                            ud.UserId,
+                            ud.DeviceCount,
+                            ud.LastActivity,
+                            ProfileName = profile != null ? profile.FullName : null,
+                            ProfileEmail = profile != null ? profile.Email : null,
+                            ProfilePhone = profile != null ? profile.PhoneNumber : null,
+                            ProfileCreatedAt = profile != null ? profile.CreatedAt : ud.LastActivity
+                        };
+
+            // تطبيق البحث
             if (!string.IsNullOrWhiteSpace(search))
             {
                 search = search.ToLower();
-                query = query.Where(p =>
-                    (p.FullName != null && p.FullName.ToLower().Contains(search)) ||
-                    (p.Email != null && p.Email.ToLower().Contains(search)) ||
-                    (p.PhoneNumber != null && p.PhoneNumber.Contains(search)));
+                query = query.Where(u =>
+                    u.UserId.ToLower().Contains(search) ||
+                    (u.ProfileName != null && u.ProfileName.ToLower().Contains(search)) ||
+                    (u.ProfileEmail != null && u.ProfileEmail.ToLower().Contains(search)) ||
+                    (u.ProfilePhone != null && u.ProfilePhone.Contains(search)));
             }
 
             var totalCount = await query.CountAsync();
 
             var users = await query
-                .OrderByDescending(p => p.CreatedAt)
+                .OrderByDescending(u => u.LastActivity)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(p => new NotificationUserDto
+                .Select(u => new NotificationUserDto
                 {
-                    UserId = p.UserId ?? p.Id.ToString(),
-                    Name = p.FullName ?? "",
-                    Email = p.Email,
-                    Phone = p.PhoneNumber,
-                    CreatedAt = p.CreatedAt
+                    UserId = u.UserId,
+                    Name = u.ProfileName ?? $"مستخدم {u.UserId[..8]}...",
+                    Email = u.ProfileEmail,
+                    Phone = u.ProfilePhone,
+                    DeviceCount = u.DeviceCount,
+                    HasDevices = true,
+                    CreatedAt = u.ProfileCreatedAt
                 })
                 .ToListAsync();
-
-            // إضافة معلومات الأجهزة المسجلة لكل مستخدم
-            if (_firebaseTokenStore != null)
-            {
-                foreach (var user in users)
-                {
-                    var deviceCount = await _firebaseTokenStore.GetActiveDeviceCountAsync(user.UserId);
-                    user.DeviceCount = deviceCount;
-                    user.HasDevices = deviceCount > 0;
-                }
-            }
 
             return Ok(new
             {
@@ -230,10 +252,11 @@ public class AdminNotificationsController : ControllerBase
 
         try
         {
-            // جلب جميع المستخدمين الذين لديهم أجهزة مسجلة
-            var userIds = await _dbContext.Set<Profile>()
-                .Where(p => p.IsActive && !p.IsDeleted && p.UserId != null)
-                .Select(p => p.UserId!)
+            // جلب جميع المستخدمين الذين لديهم أجهزة مسجلة فعلياً
+            var userIds = await _dbContext.Set<DeviceTokenEntity>()
+                .Where(d => d.IsActive && !d.IsDeleted)
+                .Select(d => d.UserId)
+                .Distinct()
                 .ToListAsync();
 
             if (!userIds.Any())
@@ -278,29 +301,30 @@ public class AdminNotificationsController : ControllerBase
     {
         try
         {
-            var profileQuery = _dbContext.Set<Profile>().Where(p => !p.IsDeleted);
-            var totalUsers = await profileQuery.CountAsync();
-            var activeUsers = await profileQuery.CountAsync(p => p.IsActive);
+            // إحصائيات من جدول الأجهزة المسجلة (الأكثر دقة)
+            var deviceQuery = _dbContext.Set<DeviceTokenEntity>().Where(d => !d.IsDeleted);
 
-            var usersWithDevices = 0;
-            if (_firebaseTokenStore != null)
-            {
-                // هذا تقدير - في بيئة الإنتاج يمكن عمل query أفضل
-                var sampleUsers = await profileQuery.Where(p => p.UserId != null).Take(100).Select(p => p.UserId!).ToListAsync();
-                foreach (var userId in sampleUsers)
-                {
-                    var count = await _firebaseTokenStore.GetActiveDeviceCountAsync(userId);
-                    if (count > 0) usersWithDevices++;
-                }
-                // تقدير النسبة
-                usersWithDevices = (int)(usersWithDevices / 100.0 * totalUsers);
-            }
+            // عدد المستخدمين الذين لديهم أجهزة (فريدة)
+            var usersWithDevices = await deviceQuery
+                .Where(d => d.IsActive)
+                .Select(d => d.UserId)
+                .Distinct()
+                .CountAsync();
+
+            // إجمالي الأجهزة النشطة
+            var totalActiveDevices = await deviceQuery.CountAsync(d => d.IsActive);
+
+            // إحصائيات البروفايلات (اختياري)
+            var profileQuery = _dbContext.Set<Profile>().Where(p => !p.IsDeleted);
+            var totalProfiles = await profileQuery.CountAsync();
+            var activeProfiles = await profileQuery.CountAsync(p => p.IsActive);
 
             return Ok(new NotificationStatsDto
             {
-                TotalUsers = totalUsers,
-                ActiveUsers = activeUsers,
-                UsersWithDevices = usersWithDevices
+                TotalUsers = totalProfiles,
+                ActiveUsers = activeProfiles,
+                UsersWithDevices = usersWithDevices,
+                TotalActiveDevices = totalActiveDevices
             });
         }
         catch (Exception ex)
@@ -391,4 +415,5 @@ public class NotificationStatsDto
     public int TotalUsers { get; set; }
     public int ActiveUsers { get; set; }
     public int UsersWithDevices { get; set; }
+    public int TotalActiveDevices { get; set; }
 }
