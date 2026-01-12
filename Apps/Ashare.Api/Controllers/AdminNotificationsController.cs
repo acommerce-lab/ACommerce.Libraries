@@ -4,7 +4,7 @@ using ACommerce.Notifications.Abstractions.Contracts;
 using ACommerce.Notifications.Abstractions.Models;
 using ACommerce.Notifications.Abstractions.Enums;
 using ACommerce.Notifications.Channels.Firebase.Storage;
-using ACommerce.Data;
+using ACommerce.Profiles.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ashare.Api.Controllers;
@@ -20,12 +20,12 @@ public class AdminNotificationsController : ControllerBase
 {
     private readonly INotificationService _notificationService;
     private readonly IFirebaseTokenStore? _firebaseTokenStore;
-    private readonly ACommerceDbContext _dbContext;
+    private readonly DbContext _dbContext;
     private readonly ILogger<AdminNotificationsController> _logger;
 
     public AdminNotificationsController(
         INotificationService notificationService,
-        ACommerceDbContext dbContext,
+        DbContext dbContext,
         ILogger<AdminNotificationsController> logger,
         IFirebaseTokenStore? firebaseTokenStore = null)
     {
@@ -47,31 +47,30 @@ public class AdminNotificationsController : ControllerBase
     {
         try
         {
-            var query = _dbContext.Users.AsQueryable();
+            var query = _dbContext.Set<Profile>().Where(p => !p.IsDeleted);
 
             if (!string.IsNullOrWhiteSpace(search))
             {
                 search = search.ToLower();
-                query = query.Where(u =>
-                    (u.FirstName != null && u.FirstName.ToLower().Contains(search)) ||
-                    (u.LastName != null && u.LastName.ToLower().Contains(search)) ||
-                    (u.Email != null && u.Email.ToLower().Contains(search)) ||
-                    (u.PhoneNumber != null && u.PhoneNumber.Contains(search)));
+                query = query.Where(p =>
+                    (p.FullName != null && p.FullName.ToLower().Contains(search)) ||
+                    (p.Email != null && p.Email.ToLower().Contains(search)) ||
+                    (p.PhoneNumber != null && p.PhoneNumber.Contains(search)));
             }
 
             var totalCount = await query.CountAsync();
 
             var users = await query
-                .OrderByDescending(u => u.CreatedAt)
+                .OrderByDescending(p => p.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(u => new NotificationUserDto
+                .Select(p => new NotificationUserDto
                 {
-                    UserId = u.Id,
-                    Name = $"{u.FirstName ?? ""} {u.LastName ?? ""}".Trim(),
-                    Email = u.Email,
-                    Phone = u.PhoneNumber,
-                    CreatedAt = u.CreatedAt
+                    UserId = p.UserId ?? p.Id.ToString(),
+                    Name = p.FullName ?? "",
+                    Email = p.Email,
+                    Phone = p.PhoneNumber,
+                    CreatedAt = p.CreatedAt
                 })
                 .ToListAsync();
 
@@ -232,9 +231,9 @@ public class AdminNotificationsController : ControllerBase
         try
         {
             // جلب جميع المستخدمين الذين لديهم أجهزة مسجلة
-            var userIds = await _dbContext.Users
-                .Where(u => u.IsActive)
-                .Select(u => u.Id)
+            var userIds = await _dbContext.Set<Profile>()
+                .Where(p => p.IsActive && !p.IsDeleted && p.UserId != null)
+                .Select(p => p.UserId!)
                 .ToListAsync();
 
             if (!userIds.Any())
@@ -279,14 +278,15 @@ public class AdminNotificationsController : ControllerBase
     {
         try
         {
-            var totalUsers = await _dbContext.Users.CountAsync();
-            var activeUsers = await _dbContext.Users.CountAsync(u => u.IsActive);
+            var profileQuery = _dbContext.Set<Profile>().Where(p => !p.IsDeleted);
+            var totalUsers = await profileQuery.CountAsync();
+            var activeUsers = await profileQuery.CountAsync(p => p.IsActive);
 
             var usersWithDevices = 0;
             if (_firebaseTokenStore != null)
             {
                 // هذا تقدير - في بيئة الإنتاج يمكن عمل query أفضل
-                var sampleUsers = await _dbContext.Users.Take(100).Select(u => u.Id).ToListAsync();
+                var sampleUsers = await profileQuery.Where(p => p.UserId != null).Take(100).Select(p => p.UserId!).ToListAsync();
                 foreach (var userId in sampleUsers)
                 {
                     var count = await _firebaseTokenStore.GetActiveDeviceCountAsync(userId);
@@ -343,7 +343,7 @@ public class NotificationUserDto
     public string? Phone { get; set; }
     public int DeviceCount { get; set; }
     public bool HasDevices { get; set; }
-    public DateTimeOffset CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 }
 
 public class SendNotificationRequest
