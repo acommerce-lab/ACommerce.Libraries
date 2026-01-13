@@ -66,14 +66,6 @@
 		<AndroidEnableMarshalMethods>false</AndroidEnableMarshalMethods>
 	</PropertyGroup>
 
-	<!-- Firebase Configuration Files -->
-	<ItemGroup Condition="'$(TargetFramework)'=='net9.0-android'">
-		<GoogleServicesJson Include="Platforms\Android\google-services.json" />
-	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)'=='net9.0-ios'">
-		<BundleResource Include="Platforms\iOS\GoogleService-Info.plist" />
-	</ItemGroup>
-
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android|AnyCPU'">
 		<AndroidLinkMode>None</AndroidLinkMode>
 		<RunAOTCompilation>false</RunAOTCompilation>
