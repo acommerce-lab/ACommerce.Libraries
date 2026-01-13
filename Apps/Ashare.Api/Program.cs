@@ -97,6 +97,10 @@ using ACommerce.Marketing.Analytics.Controllers;
 using ACommerce.Complaints.Api.Controllers;
 using ACommerce.Complaints.Extensions;
 
+// Data Protection
+using Microsoft.AspNetCore.DataProtection;
+using Ashare.Api.Data;
+
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.File("logs/ashare-.txt", rollingInterval: RollingInterval.Day)
@@ -228,6 +232,27 @@ try
     });
 
     builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
+
+    // Data Protection Key Storage (EF Core)
+    // يستخدم نفس قاعدة البيانات لتخزين مفاتيح Data Protection
+    builder.Services.AddDbContext<DataProtectionKeyContext>(options =>
+    {
+        if (string.IsNullOrEmpty(connectionString) || connectionString.Contains("Data Source="))
+        {
+            options.UseSqlite(connectionString ?? "Data Source=ashare.db");
+        }
+        else
+        {
+            options.UseSqlServer(connectionString);
+        }
+    });
+
+    // Data Protection Configuration
+    // يحفظ المفاتيح في قاعدة البيانات بدلاً من الملفات المؤقتة
+    builder.Services.AddDataProtection()
+        .SetApplicationName("Ashare")
+        .PersistKeysToDbContext<DataProtectionKeyContext>();
+    Log.Information("🔐 Data Protection configured with EF Core persistence");
 
     // Repository & Unit of Work
     builder.Services.AddScoped<IRepositoryFactory, RepositoryFactory>();
@@ -550,6 +575,11 @@ Built using ACommerce libraries with configuration-first approach:
 
         Log.Information("Ensuring database is created...");
         await dbContext.Database.EnsureCreatedAsync();
+
+        // Data Protection Keys table - إنشاء جدول مفاتيح حماية البيانات
+        var dataProtectionContext = scope.ServiceProvider.GetRequiredService<DataProtectionKeyContext>();
+        await dataProtectionContext.Database.EnsureCreatedAsync();
+        Log.Information("🔐 Data Protection Keys table ensured");
 
         // إضافة الأعمدة الجديدة إذا لم تكن موجودة
         Log.Information("Ensuring schema updates...");
