@@ -138,7 +138,7 @@ public class NotificationsController : ControllerBase
     /// الحصول على عدد الأجهزة المسجلة
     /// </summary>
     [HttpGet("devices/count")]
-    [ProducesResponseType(typeof(object), 200)]
+    [ProducesResponseType(typeof(DeviceCountResponse), 200)]
     public async Task<IActionResult> GetDeviceCount()
     {
         var userId = GetUserId();
@@ -149,18 +149,18 @@ public class NotificationsController : ControllerBase
 
         if (_firebaseTokenStore == null)
         {
-            return Ok(new { count = 0 });
+            return Ok(new DeviceCountResponse { Count = 0 });
         }
 
         try
         {
             var count = await _firebaseTokenStore.GetActiveDeviceCountAsync(userId);
-            return Ok(new { count });
+            return Ok(new DeviceCountResponse { Count = count });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting device count for user {UserId}", userId);
-            return Ok(new { count = 0 });
+            return Ok(new DeviceCountResponse { Count = 0 });
         }
     }
 
@@ -299,4 +299,12 @@ public class NotificationSettingsDto
     public bool ChatMessages { get; set; } = true;
     public bool Promotions { get; set; } = true;
     public bool SystemAlerts { get; set; } = true;
+}
+
+/// <summary>
+/// استجابة عدد الأجهزة
+/// </summary>
+public class DeviceCountResponse
+{
+    public int Count { get; set; }
 }
