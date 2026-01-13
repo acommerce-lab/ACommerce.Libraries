@@ -66,6 +66,14 @@
 		<AndroidEnableMarshalMethods>false</AndroidEnableMarshalMethods>
 	</PropertyGroup>
 
+	<!-- Firebase Configuration Files -->
+	<ItemGroup Condition="'$(TargetFramework)'=='net9.0-android'">
+		<GoogleServicesJson Include="Platforms\Android\google-services.json" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)'=='net9.0-ios'">
+		<BundleResource Include="Platforms\iOS\GoogleService-Info.plist" />
+	</ItemGroup>
+
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android|AnyCPU'">
 		<AndroidLinkMode>None</AndroidLinkMode>
 		<RunAOTCompilation>false</RunAOTCompilation>
@@ -97,6 +105,8 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.*" />
 		<!-- SkiaSharp for image compression -->
 		<PackageReference Include="SkiaSharp" Version="3.116.1" />
+		<!-- Firebase Cloud Messaging -->
+		<PackageReference Include="Plugin.Firebase.CloudMessaging" Version="3.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>

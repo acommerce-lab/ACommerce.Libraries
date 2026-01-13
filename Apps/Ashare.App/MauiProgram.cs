@@ -11,6 +11,7 @@ using ACommerce.Templates.Customer.Themes;
 using ACommerce.ServiceRegistry.Client.Extensions;
 using Microsoft.Extensions.Logging;
 using Ashare.App.Services;
+using Plugin.Firebase.CloudMessaging;
 using ThemeService = Ashare.Shared.Services.ThemeService;
 
 namespace Ashare.App;
@@ -33,8 +34,8 @@ public static class MauiProgram
                 // Custom WebView handler for 3DS/OTP payment verification
                 handlers.AddHandler<WebView, Ashare.App.Platforms.Android.Handlers.PaymentWebViewHandler>();
 #endif
-            });
-            // Note: Firebase initializes automatically through google-services.json and GoogleService-Info.plist
+            })
+            .RegisterFirebaseServices();
 
         builder.Services.AddMauiBlazorWebView();
 
