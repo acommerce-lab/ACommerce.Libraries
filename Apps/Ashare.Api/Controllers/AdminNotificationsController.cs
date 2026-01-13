@@ -48,64 +48,64 @@ public class AdminNotificationsController : ControllerBase
     {
         try
         {
-            // الاستعلام من جدول DeviceTokens للحصول على المستخدمين الذين لديهم أجهزة مسجلة
-            var deviceTokensQuery = _dbContext.Set<DeviceTokenEntity>()
-                .Where(d => d.IsActive && !d.IsDeleted);
-
-            // الحصول على معرفات المستخدمين الفريدة مع عدد الأجهزة
-            var usersWithDevicesQuery = deviceTokensQuery
-                .GroupBy(d => d.UserId)
-                .Select(g => new
-                {
-                    UserId = g.Key,
-                    DeviceCount = g.Count(),
-                    LastActivity = g.Max(d => d.LastUsedAt)
-                });
-
-            // الربط مع البروفايلات للحصول على معلومات المستخدم
-            var query = from ud in usersWithDevicesQuery
-                        join p in _dbContext.Set<Profile>().Where(p => !p.IsDeleted)
-                            on ud.UserId equals p.Id.ToString() into profiles
-                        from profile in profiles.DefaultIfEmpty()
-                        select new
-                        {
-                            ud.UserId,
-                            ud.DeviceCount,
-                            ud.LastActivity,
-                            ProfileName = profile != null ? profile.FullName : null,
-                            ProfileEmail = profile != null ? profile.Email : null,
-                            ProfilePhone = profile != null ? profile.PhoneNumber : null,
-                            ProfileCreatedAt = profile != null ? profile.CreatedAt : ud.LastActivity
-                        };
+            // 1. جلب جميع المستخدمين من Profiles (المصدر الرئيسي)
+            var profilesQuery = _dbContext.Set<Profile>()
+                .Where(p => !p.IsDeleted && p.IsActive);
 
             // تطبيق البحث
             if (!string.IsNullOrWhiteSpace(search))
             {
                 search = search.ToLower();
-                query = query.Where(u =>
-                    u.UserId.ToLower().Contains(search) ||
-                    (u.ProfileName != null && u.ProfileName.ToLower().Contains(search)) ||
-                    (u.ProfileEmail != null && u.ProfileEmail.ToLower().Contains(search)) ||
-                    (u.ProfilePhone != null && u.ProfilePhone.Contains(search)));
+                profilesQuery = profilesQuery.Where(p =>
+                    (p.FullName != null && p.FullName.ToLower().Contains(search)) ||
+                    (p.Email != null && p.Email.ToLower().Contains(search)) ||
+                    (p.PhoneNumber != null && p.PhoneNumber.Contains(search)));
             }
 
-            var totalCount = await query.CountAsync();
+            var totalCount = await profilesQuery.CountAsync();
 
-            var users = await query
-                .OrderByDescending(u => u.LastActivity)
+            // 2. جلب البروفايلات مع الترقيم
+            var profiles = await profilesQuery
+                .OrderByDescending(p => p.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(u => new NotificationUserDto
+                .Select(p => new
                 {
-                    UserId = u.UserId,
-                    Name = u.ProfileName ?? $"مستخدم {u.UserId[..8]}...",
-                    Email = u.ProfileEmail,
-                    Phone = u.ProfilePhone,
-                    DeviceCount = u.DeviceCount,
-                    HasDevices = true,
-                    CreatedAt = u.ProfileCreatedAt
+                    p.Id,
+                    p.UserId,
+                    p.FullName,
+                    p.Email,
+                    p.PhoneNumber,
+                    p.CreatedAt
                 })
                 .ToListAsync();
+
+            // 3. جلب عدد الأجهزة لكل مستخدم من DeviceTokenEntity
+            var userIds = profiles.Select(p => p.UserId ?? p.Id.ToString()).ToList();
+
+            var deviceCounts = await _dbContext.Set<DeviceTokenEntity>()
+                .Where(d => d.IsActive && !d.IsDeleted && userIds.Contains(d.UserId))
+                .GroupBy(d => d.UserId)
+                .Select(g => new { UserId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.UserId, x => x.Count);
+
+            // 4. بناء النتيجة
+            var users = profiles.Select(p =>
+            {
+                var userId = p.UserId ?? p.Id.ToString();
+                deviceCounts.TryGetValue(userId, out var deviceCount);
+
+                return new NotificationUserDto
+                {
+                    UserId = userId,
+                    Name = p.FullName ?? "مستخدم",
+                    Email = p.Email,
+                    Phone = p.PhoneNumber,
+                    DeviceCount = deviceCount,
+                    HasDevices = deviceCount > 0,
+                    CreatedAt = p.CreatedAt
+                };
+            }).ToList();
 
             return Ok(new
             {
@@ -301,23 +301,19 @@ public class AdminNotificationsController : ControllerBase
     {
         try
         {
-            // إحصائيات من جدول الأجهزة المسجلة (الأكثر دقة)
-            var deviceQuery = _dbContext.Set<DeviceTokenEntity>().Where(d => !d.IsDeleted);
+            // إحصائيات البروفايلات (المصدر الرئيسي)
+            var profileQuery = _dbContext.Set<Profile>().Where(p => !p.IsDeleted);
+            var totalProfiles = await profileQuery.CountAsync();
+            var activeProfiles = await profileQuery.CountAsync(p => p.IsActive);
 
-            // عدد المستخدمين الذين لديهم أجهزة (فريدة)
+            // إحصائيات الأجهزة
+            var deviceQuery = _dbContext.Set<DeviceTokenEntity>().Where(d => !d.IsDeleted);
+            var totalActiveDevices = await deviceQuery.CountAsync(d => d.IsActive);
             var usersWithDevices = await deviceQuery
                 .Where(d => d.IsActive)
                 .Select(d => d.UserId)
                 .Distinct()
                 .CountAsync();
-
-            // إجمالي الأجهزة النشطة
-            var totalActiveDevices = await deviceQuery.CountAsync(d => d.IsActive);
-
-            // إحصائيات البروفايلات (اختياري)
-            var profileQuery = _dbContext.Set<Profile>().Where(p => !p.IsDeleted);
-            var totalProfiles = await profileQuery.CountAsync();
-            var activeProfiles = await profileQuery.CountAsync(p => p.IsActive);
 
             return Ok(new NotificationStatsDto
             {
