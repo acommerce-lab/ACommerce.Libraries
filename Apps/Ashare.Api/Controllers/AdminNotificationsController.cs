@@ -326,7 +326,39 @@ public class AdminNotificationsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting notification stats");
-            return StatusCode(500, new { message = "فشل في جلب الإحصائيات" });
+            return StatusCode(500, new { message = "فشل في جلب الإحصائيات", error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// اختبار الاتصال بقاعدة البيانات (بدون مصادقة)
+    /// </summary>
+    [AllowAnonymous]
+    [HttpGet("test")]
+    public async Task<IActionResult> TestConnection()
+    {
+        try
+        {
+            var profileCount = await _dbContext.Set<Profile>().CountAsync();
+            var deviceCount = await _dbContext.Set<DeviceTokenEntity>().CountAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = "الاتصال يعمل",
+                profilesCount = profileCount,
+                devicesCount = deviceCount
+            });
+        }
+        catch (Exception ex)
+        {
+            return Ok(new
+            {
+                success = false,
+                message = "فشل الاتصال",
+                error = ex.Message,
+                innerError = ex.InnerException?.Message
+            });
         }
     }
 
