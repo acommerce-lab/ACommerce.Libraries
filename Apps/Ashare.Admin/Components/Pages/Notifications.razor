@@ -4,6 +4,23 @@
 @inject IJSRuntime JS
 
 <div class="notifications-page">
+    @if (IsLoading)
+    {
+        <div class="loading-overlay">
+            <div class="spinner"></div>
+            <span>جاري التحميل...</span>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(LoadError))
+    {
+        <div class="error-banner">
+            <span class="error-icon">⚠️</span>
+            <span>@LoadError</span>
+            <SfButton CssClass="e-link" OnClick="RetryLoad">إعادة المحاولة</SfButton>
+        </div>
+    }
+
     <div class="page-header">
         <div class="header-stats">
             <div class="stat-card">
@@ -17,6 +34,10 @@
             <div class="stat-card highlight">
                 <span class="stat-value">@Stats.UsersWithDevices</span>
                 <span class="stat-label">لديهم أجهزة مسجلة</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">@Stats.TotalActiveDevices</span>
+                <span class="stat-label">إجمالي الأجهزة</span>
             </div>
         </div>
     </div>
@@ -169,6 +190,53 @@
 <style>
     .notifications-page {
         padding: 0;
+        position: relative;
+    }
+
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        z-index: 100;
+        font-size: 1rem;
+        color: #6b7280;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e5e7eb;
+        border-top-color: #10b981;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .error-banner {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .error-icon {
+        font-size: 1.25rem;
     }
 
     .header-stats {
@@ -349,6 +417,8 @@
     private bool IsSuccess { get; set; }
     private bool ShowBroadcastDialog { get; set; }
     private bool IsSending { get; set; }
+    private bool IsLoading { get; set; }
+    private string? LoadError { get; set; }
 
     private bool CanSend => !IsSending &&
                             !string.IsNullOrWhiteSpace(NotificationTitle) &&
@@ -373,8 +443,37 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadStats();
-        await LoadUsers();
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        IsLoading = true;
+        LoadError = null;
+
+        try
+        {
+            await LoadStats();
+            await LoadUsers();
+
+            if (Users.Count == 0 && Stats.TotalUsers == 0)
+            {
+                LoadError = "لم يتم العثور على مستخدمين. تأكد من نشر API أو وجود بيانات في قاعدة البيانات.";
+            }
+        }
+        catch (Exception ex)
+        {
+            LoadError = $"فشل في تحميل البيانات: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task RetryLoad()
+    {
+        await LoadData();
     }
 
     private async Task LoadStats()

@@ -704,6 +704,9 @@ public class NotificationUserDto
 
     [JsonPropertyName("hasDevices")]
     public bool HasDevices { get; set; }
+
+    [JsonPropertyName("createdAt")]
+    public DateTime CreatedAt { get; set; }
 }
 
 public class NotificationStatsDto
@@ -716,6 +719,9 @@ public class NotificationStatsDto
 
     [JsonPropertyName("usersWithDevices")]
     public int UsersWithDevices { get; set; }
+
+    [JsonPropertyName("totalActiveDevices")]
+    public int TotalActiveDevices { get; set; }
 }
 
 public class SendNotificationRequestDto
