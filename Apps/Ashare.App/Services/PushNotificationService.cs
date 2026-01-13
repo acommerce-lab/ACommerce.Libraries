@@ -229,9 +229,7 @@ public class PushNotificationService : IPushNotificationService
             await _notificationsClient.RegisterDeviceTokenAsync(new RegisterDeviceTokenRequest
             {
                 DeviceToken = token,
-                Platform = platform,
-                AppVersion = AppInfo.VersionString,
-                DeviceModel = DeviceInfo.Model
+                Platform = platform
             });
 
             _logger.LogInformation("[Push] Device token registered with backend for platform: {Platform}", platform);
