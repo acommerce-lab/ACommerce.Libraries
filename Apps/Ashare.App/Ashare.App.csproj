@@ -97,6 +97,8 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.*" />
 		<!-- SkiaSharp for image compression -->
 		<PackageReference Include="SkiaSharp" Version="3.116.1" />
+		<!-- Firebase Cloud Messaging -->
+		<PackageReference Include="Plugin.Firebase.CloudMessaging" Version="3.0.0" />
 	</ItemGroup>
 
 
