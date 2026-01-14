@@ -51,12 +51,22 @@ public class MainActivity : MauiAppCompatActivity
         // تهيئة Firebase (مطلوب قبل استخدام أي خدمة Firebase)
         try
         {
-            Firebase.FirebaseApp.InitializeApp(this);
-            System.Diagnostics.Debug.WriteLine("[Firebase Android] Firebase initialized successfully");
+            var firebaseApp = Firebase.FirebaseApp.InitializeApp(this);
+            if (firebaseApp != null)
+            {
+                Android.Util.Log.Info("Firebase", "✅ Firebase initialized successfully");
+                System.Diagnostics.Debug.WriteLine("[Firebase Android] ✅ Firebase initialized successfully");
+            }
+            else
+            {
+                Android.Util.Log.Warn("Firebase", "⚠️ FirebaseApp.InitializeApp returned null - check google-services.json");
+                System.Diagnostics.Debug.WriteLine("[Firebase Android] ⚠️ FirebaseApp returned null");
+            }
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[Firebase Android] Firebase init error: {ex.Message}");
+            Android.Util.Log.Error("Firebase", $"❌ Firebase init error: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[Firebase Android] ❌ Firebase init error: {ex.Message}");
         }
 
         // إنشاء قناة الإشعارات (مطلوب لأندرويد 8+)
