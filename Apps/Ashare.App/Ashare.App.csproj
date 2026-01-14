@@ -101,6 +101,11 @@
 		<PackageReference Include="Plugin.Firebase.CloudMessaging" Version="3.0.0" />
 	</ItemGroup>
 
+	<!-- Firebase Configuration - Android -->
+	<ItemGroup Condition="'$(TargetFramework)'=='net9.0-android'">
+		<GoogleServicesJson Include="Platforms\Android\google-services.json" />
+	</ItemGroup>
+
 
 	<ItemGroup>
 		<!-- Reference to Shared Library (contains all pages, components, services) -->
