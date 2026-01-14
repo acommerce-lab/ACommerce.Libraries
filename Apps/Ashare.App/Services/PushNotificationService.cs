@@ -52,7 +52,8 @@ public class PushNotificationService : IPushNotificationService
             if (!string.IsNullOrEmpty(token))
             {
                 _currentToken = token;
-                _logger.LogInformation("[Push] Firebase token obtained: {TokenPrefix}...", token[..Math.Min(20, token.Length)]);
+                _logger.LogInformation("[Push] Firebase token obtained: {TokenPrefix}...",
+                    token.Length > 20 ? token[..20] : token);
 
                 // تسجيل التوكن مع الخادم
                 await RegisterTokenWithBackendAsync(token);
@@ -232,7 +233,7 @@ public class PushNotificationService : IPushNotificationService
                 Platform = platform
             });
 
-            _logger.LogInformation("[Push] Device token registered with backend for platform: {Platform}", platform);
+            _logger.LogInformation("[Push] ✅ Device token registered with backend for platform: {Platform}", platform);
         }
         catch (Exception ex)
         {
@@ -262,44 +263,13 @@ public class PushNotificationService : IPushNotificationService
 /// </summary>
 public interface IPushNotificationService
 {
-    /// <summary>
-    /// تهيئة الخدمة وتسجيل الجهاز
-    /// </summary>
     Task InitializeAsync();
-
-    /// <summary>
-    /// الحصول على التوكن الحالي
-    /// </summary>
     string? GetCurrentToken();
-
-    /// <summary>
-    /// تسجيل التوكن من native code
-    /// </summary>
     Task RegisterTokenAsync(string token);
-
-    /// <summary>
-    /// إعادة تسجيل التوكن
-    /// </summary>
     Task RefreshTokenRegistrationAsync();
-
-    /// <summary>
-    /// الاشتراك في موضوع
-    /// </summary>
     Task SubscribeToTopicAsync(string topic);
-
-    /// <summary>
-    /// إلغاء الاشتراك من موضوع
-    /// </summary>
     Task UnsubscribeFromTopicAsync(string topic);
-
-    /// <summary>
-    /// حدث استقبال إشعار
-    /// </summary>
     event EventHandler<PushNotificationEventArgs>? NotificationReceived;
-
-    /// <summary>
-    /// حدث تجديد التوكن
-    /// </summary>
     event EventHandler<string>? TokenRefreshed;
 }
 

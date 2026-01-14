@@ -101,6 +101,7 @@
 		<PackageReference Include="Plugin.Firebase.CloudMessaging" Version="3.0.0" />
 	</ItemGroup>
 
+
 	<ItemGroup>
 		<!-- Reference to Shared Library (contains all pages, components, services) -->
 		<ProjectReference Include="..\Ashare.Shared\Ashare.Shared.csproj" />

@@ -48,6 +48,17 @@ public class MainActivity : MauiAppCompatActivity
     {
         base.OnCreate(savedInstanceState);
 
+        // تهيئة Firebase (مطلوب قبل استخدام أي خدمة Firebase)
+        try
+        {
+            Firebase.FirebaseApp.InitializeApp(this);
+            System.Diagnostics.Debug.WriteLine("[Firebase Android] Firebase initialized successfully");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Firebase Android] Firebase init error: {ex.Message}");
+        }
+
         // إنشاء قناة الإشعارات (مطلوب لأندرويد 8+)
         CreateNotificationChannel();
 
