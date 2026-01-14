@@ -5,6 +5,7 @@ using Android.OS;
 using AndroidX.Core.App;
 using AndroidX.Core.Content;
 using Ashare.App.Services;
+using Ashare.App.Platforms.Android.Extensions;
 
 namespace Ashare.App;
 
@@ -71,7 +72,7 @@ public class MainActivity : MauiAppCompatActivity
             }
         });
 
-        // تهيئة خدمة الإشعارات المدفوعة
+        // تهيئة خدمة الإشعارات المدفوعة والحصول على توكن Firebase
         Task.Run(async () =>
         {
             try
@@ -84,6 +85,16 @@ public class MainActivity : MauiAppCompatActivity
                 {
                     await pushService.InitializeAsync();
                     System.Diagnostics.Debug.WriteLine("[Push Android] Push notification service initialized");
+
+                    // الحصول على توكن Firebase الحالي
+                    var tokenTask = Firebase.Messaging.FirebaseMessaging.Instance.GetToken();
+                    var token = await tokenTask.AsAsync<Java.Lang.String>();
+                    if (token != null)
+                    {
+                        var tokenString = token.ToString();
+                        System.Diagnostics.Debug.WriteLine($"[Push Android] Firebase token: {tokenString[..Math.Min(20, tokenString.Length)]}...");
+                        await pushService.RegisterTokenAsync(tokenString);
+                    }
                 }
             }
             catch (Exception ex)

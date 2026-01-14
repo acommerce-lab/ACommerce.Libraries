@@ -97,8 +97,12 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.*" />
 		<!-- SkiaSharp for image compression -->
 		<PackageReference Include="SkiaSharp" Version="3.116.1" />
-		<!-- Firebase Cloud Messaging -->
-		<PackageReference Include="Plugin.Firebase.CloudMessaging" Version="3.0.0" />
+	</ItemGroup>
+
+	<!-- Firebase for Android only -->
+	<ItemGroup Condition="'$(TargetFramework)'=='net9.0-android'">
+		<PackageReference Include="Xamarin.Firebase.Messaging" Version="124.0.3" />
+		<GoogleServicesJson Include="Platforms\Android\google-services.json" />
 	</ItemGroup>
 
 	<ItemGroup>
