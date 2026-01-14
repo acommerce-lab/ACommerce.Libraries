@@ -99,11 +99,6 @@
 		<PackageReference Include="SkiaSharp" Version="3.116.1" />
 	</ItemGroup>
 
-	<!-- Firebase for Android only -->
-	<ItemGroup Condition="'$(TargetFramework)'=='net9.0-android'">
-		<PackageReference Include="Xamarin.Firebase.Messaging" Version="124.0.3" />
-		<GoogleServicesJson Include="Platforms\Android\google-services.json" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<!-- Reference to Shared Library (contains all pages, components, services) -->
