@@ -292,6 +292,7 @@ try
             options.DefaultPriority = ACommerce.Notifications.Channels.Firebase.Options.FirebaseMessagePriority.High;
             options.EnableBadge = true;
             options.DefaultSound = "default";
+            options.DefaultChannelId = builder.Configuration["Notifications:Firebase:DefaultChannelId"] ?? "ashare_notifications";
         });
         Log.Information("🔔 Firebase Cloud Messaging configured");
     }
