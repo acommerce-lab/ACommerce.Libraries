@@ -8,7 +8,7 @@ using ACommerce.Notifications.Channels.Firebase.EntityFramework.Entities;
 using ACommerce.Notifications.Channels.Firebase.Services;
 using ACommerce.Profiles.Entities;
 using Microsoft.EntityFrameworkCore;
-using FirebaseAdmin.Messaging;
+using FirebaseMessaging = FirebaseAdmin.Messaging;
 
 namespace Ashare.Api.Controllers;
 
@@ -547,9 +547,9 @@ public class AdminNotificationsController : ControllerBase
             diagnostics.Add($"📝 العنوان: {title}");
             diagnostics.Add($"📝 النص: {body}");
 
-            var message = new MulticastMessage
+            var message = new FirebaseMessaging.MulticastMessage
             {
-                Notification = new FirebaseAdmin.Messaging.Notification
+                Notification = new FirebaseMessaging.Notification
                 {
                     Title = title,
                     Body = body
@@ -579,7 +579,7 @@ public class AdminNotificationsController : ControllerBase
                     else
                     {
                         var errorMsg = r.Exception?.Message ?? "غير معروف";
-                        var errorCode = (r.Exception as FirebaseMessagingException)?.MessagingErrorCode.ToString() ?? "N/A";
+                        var errorCode = (r.Exception as FirebaseMessaging.FirebaseMessagingException)?.MessagingErrorCode.ToString() ?? "N/A";
                         diagnostics.Add($"❌ Response[{i}]: فشل - ErrorCode={errorCode}, Message={errorMsg}");
                     }
                 }
@@ -598,12 +598,12 @@ public class AdminNotificationsController : ControllerBase
                             isSuccess = r.IsSuccess,
                             messageId = r.MessageId,
                             error = r.Exception?.Message,
-                            errorCode = (r.Exception as FirebaseMessagingException)?.MessagingErrorCode.ToString()
+                            errorCode = (r.Exception as FirebaseMessaging.FirebaseMessagingException)?.MessagingErrorCode.ToString()
                         })
                     }
                 });
             }
-            catch (FirebaseMessagingException fex)
+            catch (FirebaseMessaging.FirebaseMessagingException fex)
             {
                 diagnostics.Add($"❌ Firebase Exception: {fex.MessagingErrorCode}");
                 diagnostics.Add($"❌ Message: {fex.Message}");
