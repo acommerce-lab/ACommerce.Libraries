@@ -4,6 +4,8 @@ using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace ACommerce.Notifications.Channels.Firebase.Services;
 
@@ -56,12 +58,14 @@ public class FirebaseMessagingService
 						"Firebase initialized from file: {Path}",
 						_options.ServiceAccountKeyPath);
 				}
-				// ??????? 2: ?? JSON ?????? (Environment Variable)
+				// الطريقة 2: من JSON مباشرة (Environment Variable)
 				else if (!string.IsNullOrEmpty(_options.ServiceAccountKeyJson))
 				{
-					credential = GoogleCredential.FromJson(_options.ServiceAccountKeyJson);
+					var processedJson = ProcessServiceAccountJson(_options.ServiceAccountKeyJson);
+					credential = GoogleCredential.FromJson(processedJson);
 
-					_logger.LogInformation("Firebase initialized from JSON string");
+					_logger.LogInformation("Firebase initialized from JSON string (length: {Length})",
+						processedJson.Length);
 				}
 				else
 				{
@@ -357,6 +361,54 @@ public class FirebaseMessagingService
 			return "***";
 
 		return $"{token[..5]}...{token[^5..]}";
+	}
+
+	/// <summary>
+	/// معالجة JSON الخاص بحساب الخدمة لإصلاح مشاكل الـ newlines في private_key
+	/// عند تخزين JSON في متغير بيئة، قد تكون \n كنص حرفي بدلاً من newlines فعلية
+	/// </summary>
+	private string ProcessServiceAccountJson(string json)
+	{
+		try
+		{
+			// محاولة parse الـ JSON
+			var jsonNode = JsonNode.Parse(json);
+			if (jsonNode == null)
+			{
+				_logger.LogWarning("Failed to parse service account JSON, using as-is");
+				return json;
+			}
+
+			// الحصول على private_key
+			var privateKey = jsonNode["private_key"]?.GetValue<string>();
+			if (string.IsNullOrEmpty(privateKey))
+			{
+				_logger.LogWarning("private_key not found in service account JSON");
+				return json;
+			}
+
+			// التحقق مما إذا كانت newlines بحاجة للإصلاح
+			// إذا كان يحتوي على \n كنص ولكن لا يحتوي على newlines فعلية
+			if (privateKey.Contains("\\n") && !privateKey.Contains('\n'))
+			{
+				_logger.LogInformation("Fixing escaped newlines in private_key");
+				// استبدال \n النصية بـ newlines فعلية
+				var fixedKey = privateKey.Replace("\\n", "\n");
+				jsonNode["private_key"] = fixedKey;
+
+				var result = jsonNode.ToJsonString();
+				_logger.LogDebug("Service account JSON processed successfully");
+				return result;
+			}
+
+			_logger.LogDebug("private_key newlines are correct, no processing needed");
+			return json;
+		}
+		catch (JsonException ex)
+		{
+			_logger.LogWarning(ex, "Failed to process service account JSON, using as-is");
+			return json;
+		}
 	}
 }
 
