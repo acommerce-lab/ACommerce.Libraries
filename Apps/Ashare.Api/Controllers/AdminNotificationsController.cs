@@ -540,6 +540,35 @@ public class AdminNotificationsController : ControllerBase
             var firebaseKeyJson = Environment.GetEnvironmentVariable("FIREBASE_SERVICE_ACCOUNT_JSON");
             diagnostics.Add($"🔑 FIREBASE_SERVICE_ACCOUNT_JSON: {(string.IsNullOrEmpty(firebaseKeyJson) ? "غير موجود" : $"{firebaseKeyJson.Length} حرف")}");
 
+            // 🔍 تشخيص تفصيلي للـ private_key
+            if (!string.IsNullOrEmpty(firebaseKeyJson))
+            {
+                // التحقق من وجود \n كنص حرفي (backslash + n)
+                var literalBackslashN = firebaseKeyJson.Contains("\\n");
+                var actualNewlines = firebaseKeyJson.Contains("\n");
+                diagnostics.Add($"🔍 JSON يحتوي على \\\\n (حرفي): {literalBackslashN}");
+                diagnostics.Add($"🔍 JSON يحتوي على newlines فعلية: {actualNewlines}");
+
+                // محاولة استخراج private_key
+                try
+                {
+                    var jsonNode = System.Text.Json.Nodes.JsonNode.Parse(firebaseKeyJson);
+                    var privateKey = jsonNode?["private_key"]?.GetValue<string>();
+                    if (privateKey != null)
+                    {
+                        diagnostics.Add($"🔑 private_key length: {privateKey.Length}");
+                        diagnostics.Add($"🔑 private_key يبدأ بـ: {privateKey[..50]}...");
+                        diagnostics.Add($"🔑 private_key يحتوي \\\\n: {privateKey.Contains("\\n")}");
+                        diagnostics.Add($"🔑 private_key يحتوي newlines: {privateKey.Contains('\n')}");
+                        diagnostics.Add($"🔑 عدد newlines: {privateKey.Count(c => c == '\n')}");
+                    }
+                }
+                catch (Exception parseEx)
+                {
+                    diagnostics.Add($"❌ فشل تحليل JSON: {parseEx.Message}");
+                }
+            }
+
             // 4. بناء الرسالة البسيطة
             var title = request.Title ?? "اختبار مباشر";
             var body = request.Message ?? $"إشعار تجريبي مباشر - {DateTime.UtcNow:HH:mm:ss}";
