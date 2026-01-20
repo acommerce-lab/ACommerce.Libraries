@@ -501,6 +501,29 @@ public class AdminNotificationsController : ControllerBase
         {
             diagnostics.Add("🚀 بدء الاختبار المباشر...");
 
+            // 0. تشخيص إعدادات Firebase
+            var firebasePath = Environment.GetEnvironmentVariable("FIREBASE_SERVICE_ACCOUNT_PATH");
+            var firebaseJson = Environment.GetEnvironmentVariable("FIREBASE_SERVICE_ACCOUNT_JSON");
+            diagnostics.Add($"📁 FIREBASE_SERVICE_ACCOUNT_PATH: {firebasePath ?? "(غير موجود)"}");
+            if (!string.IsNullOrEmpty(firebasePath))
+            {
+                diagnostics.Add($"📁 الملف موجود: {System.IO.File.Exists(firebasePath)}");
+                if (System.IO.File.Exists(firebasePath))
+                {
+                    try
+                    {
+                        var fileContent = System.IO.File.ReadAllText(firebasePath);
+                        diagnostics.Add($"📁 حجم الملف: {fileContent.Length} حرف");
+                        diagnostics.Add($"📁 يبدأ بـ: {fileContent[..Math.Min(50, fileContent.Length)]}...");
+                    }
+                    catch (Exception ex)
+                    {
+                        diagnostics.Add($"❌ خطأ قراءة الملف: {ex.Message}");
+                    }
+                }
+            }
+            diagnostics.Add($"🔑 FIREBASE_SERVICE_ACCOUNT_JSON: {(string.IsNullOrEmpty(firebaseJson) ? "(غير موجود)" : $"{firebaseJson.Length} حرف")}");
+
             // 1. التحقق من وجود FirebaseMessagingService
             if (_firebaseMessagingService == null)
             {
