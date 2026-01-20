@@ -280,25 +280,44 @@ try
     builder.Services.AddInMemoryNotificationPublisher();
 
     // Firebase Cloud Messaging (Push Notifications)
+    // الأولوية: 1. ملف من متغير بيئة  2. JSON من متغير بيئة  3. من الإعدادات
+    var firebaseKeyPath = Environment.GetEnvironmentVariable("FIREBASE_SERVICE_ACCOUNT_PATH")
+        ?? builder.Configuration["Notifications:Firebase:ServiceAccountKeyPath"];
     var firebaseKeyJson = Environment.GetEnvironmentVariable("FIREBASE_SERVICE_ACCOUNT_JSON")
         ?? builder.Configuration["Notifications:Firebase:ServiceAccountKeyJson"];
 
-    if (!string.IsNullOrEmpty(firebaseKeyJson))
+    if (!string.IsNullOrEmpty(firebaseKeyPath) && File.Exists(firebaseKeyPath))
     {
+        // ✅ الطريقة المفضلة: من ملف
         builder.Services.AddFirebaseNotifications(options =>
         {
-            options.ServiceAccountKeyJson = firebaseKeyJson;
-            options.ProjectId = builder.Configuration["Notifications:Firebase:ProjectId"] ?? "ashare-app";
+            options.ServiceAccountKeyPath = firebaseKeyPath;
+            options.ProjectId = builder.Configuration["Notifications:Firebase:ProjectId"] ?? "ashir-f4bfd";
             options.DefaultPriority = ACommerce.Notifications.Channels.Firebase.Options.FirebaseMessagePriority.High;
             options.EnableBadge = true;
             options.DefaultSound = "default";
             options.DefaultChannelId = builder.Configuration["Notifications:Firebase:DefaultChannelId"] ?? "ashare_notifications";
         });
-        Log.Information("🔔 Firebase Cloud Messaging configured");
+        Log.Information("🔔 Firebase Cloud Messaging configured from file: {Path}", firebaseKeyPath);
+    }
+    else if (!string.IsNullOrEmpty(firebaseKeyJson))
+    {
+        // الطريقة البديلة: من JSON string
+        builder.Services.AddFirebaseNotifications(options =>
+        {
+            options.ServiceAccountKeyJson = firebaseKeyJson;
+            options.ProjectId = builder.Configuration["Notifications:Firebase:ProjectId"] ?? "ashir-f4bfd";
+            options.DefaultPriority = ACommerce.Notifications.Channels.Firebase.Options.FirebaseMessagePriority.High;
+            options.EnableBadge = true;
+            options.DefaultSound = "default";
+            options.DefaultChannelId = builder.Configuration["Notifications:Firebase:DefaultChannelId"] ?? "ashare_notifications";
+        });
+        Log.Information("🔔 Firebase Cloud Messaging configured from JSON string (length: {Length})", firebaseKeyJson.Length);
     }
     else
     {
         Log.Warning("⚠️ Firebase not configured - Push notifications will not work");
+        Log.Warning("   Set FIREBASE_SERVICE_ACCOUNT_PATH or FIREBASE_SERVICE_ACCOUNT_JSON environment variable");
     }
 
     // ✅ Use EF Core for Firebase Token Storage (database persistence)
