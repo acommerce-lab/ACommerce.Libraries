@@ -56,7 +56,7 @@ Info "Loading new image..."
 ssh -i $SshKey "${EcsUser}@${EcsHost}" "docker load -i /home/ecs-user/ashare-api.tar"
 
 Info "Starting container..."
-ssh -i $SshKey "${EcsUser}@${EcsHost}" "docker run -d --name ashare-api --env-file /home/ecs-user/ashare.env -p 8080:8080 --restart unless-stopped ashare-api:latest"
+ssh -i $SshKey "${EcsUser}@${EcsHost}" "docker run -d --name ashare-api --env-file /home/ecs-user/ashare.env -v /app/secrets:/app/secrets:ro -p 8080:8080 --restart unless-stopped ashare-api:latest"
 
 # -------- STEP 5: VERIFY --------------------
 Info "Step 5: Waiting for startup..."
