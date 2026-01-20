@@ -5,8 +5,10 @@ using ACommerce.Notifications.Abstractions.Models;
 using ACommerce.Notifications.Abstractions.Enums;
 using ACommerce.Notifications.Channels.Firebase.Storage;
 using ACommerce.Notifications.Channels.Firebase.EntityFramework.Entities;
+using ACommerce.Notifications.Channels.Firebase.Services;
 using ACommerce.Profiles.Entities;
 using Microsoft.EntityFrameworkCore;
+using FirebaseMessaging = FirebaseAdmin.Messaging;
 
 namespace Ashare.Api.Controllers;
 
@@ -21,6 +23,7 @@ public class AdminNotificationsController : ControllerBase
 {
     private readonly INotificationService _notificationService;
     private readonly IFirebaseTokenStore? _firebaseTokenStore;
+    private readonly FirebaseMessagingService? _firebaseMessagingService;
     private readonly DbContext _dbContext;
     private readonly ILogger<AdminNotificationsController> _logger;
 
@@ -28,11 +31,13 @@ public class AdminNotificationsController : ControllerBase
         INotificationService notificationService,
         DbContext dbContext,
         ILogger<AdminNotificationsController> logger,
-        IFirebaseTokenStore? firebaseTokenStore = null)
+        IFirebaseTokenStore? firebaseTokenStore = null,
+        FirebaseMessagingService? firebaseMessagingService = null)
     {
         _notificationService = notificationService;
         _dbContext = dbContext;
         _firebaseTokenStore = firebaseTokenStore;
+        _firebaseMessagingService = firebaseMessagingService;
         _logger = logger;
     }
 
@@ -362,6 +367,281 @@ public class AdminNotificationsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// 🔥 اختبار إرسال إشعار Firebase مباشرة (للتشخيص)
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPost("test-firebase")]
+    public async Task<IActionResult> TestFirebaseSend([FromBody] TestFirebaseRequest request)
+    {
+        var diagnostics = new List<string>();
+
+        try
+        {
+            diagnostics.Add("🚀 بدء الاختبار...");
+
+            // 1. التحقق من وجود التوكن
+            if (string.IsNullOrEmpty(request.Token))
+            {
+                // جلب أول توكن من قاعدة البيانات
+                var firstToken = await _dbContext.Set<DeviceTokenEntity>()
+                    .Where(d => d.IsActive && !d.IsDeleted)
+                    .FirstOrDefaultAsync();
+
+                if (firstToken == null)
+                {
+                    return Ok(new {
+                        success = false,
+                        diagnostics,
+                        error = "لا توجد توكنات في قاعدة البيانات"
+                    });
+                }
+
+                request.Token = firstToken.Token;
+                request.UserId = firstToken.UserId;
+                diagnostics.Add($"📱 تم جلب توكن من قاعدة البيانات للمستخدم: {request.UserId}");
+            }
+
+            diagnostics.Add($"📱 التوكن: {request.Token[..15]}...{request.Token[^10..]}");
+
+            // 2. التحقق من إعدادات Firebase
+            var firebaseKeyJson = Environment.GetEnvironmentVariable("FIREBASE_SERVICE_ACCOUNT_JSON");
+            var hasFirebaseKey = !string.IsNullOrEmpty(firebaseKeyJson);
+            diagnostics.Add($"🔑 FIREBASE_SERVICE_ACCOUNT_JSON موجود: {hasFirebaseKey}");
+
+            if (hasFirebaseKey)
+            {
+                diagnostics.Add($"🔑 طول المفتاح: {firebaseKeyJson!.Length} حرف");
+                diagnostics.Add($"🔑 يبدأ بـ: {firebaseKeyJson[..50]}...");
+            }
+            else
+            {
+                return Ok(new {
+                    success = false,
+                    diagnostics,
+                    error = "❌ متغير البيئة FIREBASE_SERVICE_ACCOUNT_JSON غير موجود!"
+                });
+            }
+
+            // 3. محاولة الإرسال
+            diagnostics.Add("📤 جاري الإرسال عبر NotificationService...");
+
+            var notification = new Notification
+            {
+                Id = Guid.NewGuid(),
+                UserId = request.UserId ?? "test-user",
+                Title = request.Title ?? "اختبار",
+                Message = request.Message ?? "هذا إشعار تجريبي",
+                Type = NotificationType.Info,
+                Priority = NotificationPriority.High,
+                CreatedAt = DateTimeOffset.UtcNow,
+                Channels = new List<ChannelDelivery>
+                {
+                    new() { Channel = NotificationChannel.Firebase }
+                }
+            };
+
+            var result = await _notificationService.SendAsync(notification);
+
+            diagnostics.Add($"📊 نتيجة الإرسال: Success={result.Success}");
+            diagnostics.Add($"📊 القنوات الناجحة: {string.Join(", ", result.DeliveredChannels ?? [])}");
+            diagnostics.Add($"📊 القنوات الفاشلة: {string.Join(", ", result.FailedChannels ?? [])}");
+
+            if (!string.IsNullOrEmpty(result.ErrorMessage))
+            {
+                diagnostics.Add($"❌ رسالة الخطأ: {result.ErrorMessage}");
+            }
+
+            return Ok(new
+            {
+                success = result.Success,
+                diagnostics,
+                result = new
+                {
+                    result.Success,
+                    result.NotificationId,
+                    result.ErrorMessage,
+                    DeliveredChannels = result.DeliveredChannels?.ToList(),
+                    FailedChannels = result.FailedChannels?.ToList(),
+                    result.Metadata
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            diagnostics.Add($"❌ استثناء: {ex.GetType().Name}");
+            diagnostics.Add($"❌ رسالة: {ex.Message}");
+
+            if (ex.InnerException != null)
+            {
+                diagnostics.Add($"❌ استثناء داخلي: {ex.InnerException.Message}");
+            }
+
+            return Ok(new
+            {
+                success = false,
+                diagnostics,
+                error = ex.Message,
+                innerError = ex.InnerException?.Message,
+                stackTrace = ex.StackTrace
+            });
+        }
+    }
+
+    /// <summary>
+    /// 🔥 اختبار إرسال Firebase مباشرة (تجاوز NotificationService لتشخيص دقيق)
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPost("test-firebase-direct")]
+    public async Task<IActionResult> TestFirebaseDirectSend([FromBody] TestFirebaseRequest request)
+    {
+        var diagnostics = new List<string>();
+
+        try
+        {
+            diagnostics.Add("🚀 بدء الاختبار المباشر...");
+
+            // 1. التحقق من وجود FirebaseMessagingService
+            if (_firebaseMessagingService == null)
+            {
+                diagnostics.Add("❌ FirebaseMessagingService غير مسجل في DI Container");
+                return Ok(new { success = false, diagnostics, error = "Firebase غير مُعد" });
+            }
+            diagnostics.Add("✅ FirebaseMessagingService موجود");
+
+            // 2. جلب التوكن
+            string token;
+            string userId;
+            if (string.IsNullOrEmpty(request.Token))
+            {
+                var firstToken = await _dbContext.Set<DeviceTokenEntity>()
+                    .Where(d => d.IsActive && !d.IsDeleted)
+                    .FirstOrDefaultAsync();
+
+                if (firstToken == null)
+                {
+                    diagnostics.Add("❌ لا توجد توكنات في قاعدة البيانات");
+                    return Ok(new { success = false, diagnostics, error = "لا توجد توكنات" });
+                }
+
+                token = firstToken.Token;
+                userId = firstToken.UserId;
+                diagnostics.Add($"📱 تم جلب توكن: {token[..15]}...{token[^10..]}");
+                diagnostics.Add($"👤 المستخدم: {userId}");
+            }
+            else
+            {
+                token = request.Token;
+                userId = request.UserId ?? "test-user";
+                diagnostics.Add($"📱 توكن من الطلب: {token[..15]}...{token[^10..]}");
+            }
+
+            // 3. التحقق من إعدادات Firebase
+            var firebaseKeyJson = Environment.GetEnvironmentVariable("FIREBASE_SERVICE_ACCOUNT_JSON");
+            diagnostics.Add($"🔑 FIREBASE_SERVICE_ACCOUNT_JSON: {(string.IsNullOrEmpty(firebaseKeyJson) ? "غير موجود" : $"{firebaseKeyJson.Length} حرف")}");
+
+            // 4. بناء الرسالة البسيطة
+            var title = request.Title ?? "اختبار مباشر";
+            var body = request.Message ?? $"إشعار تجريبي مباشر - {DateTime.UtcNow:HH:mm:ss}";
+
+            diagnostics.Add($"📝 العنوان: {title}");
+            diagnostics.Add($"📝 النص: {body}");
+
+            var message = new FirebaseMessaging.MulticastMessage
+            {
+                Notification = new FirebaseMessaging.Notification
+                {
+                    Title = title,
+                    Body = body
+                },
+                Tokens = new List<string> { token }
+            };
+
+            // 5. إرسال مباشر عبر FirebaseMessagingService
+            diagnostics.Add("📤 جاري الإرسال المباشر عبر Firebase SDK...");
+
+            try
+            {
+                var response = await _firebaseMessagingService.SendMulticastAsync(
+                    new[] { token },
+                    message);
+
+                diagnostics.Add($"✅ استجابة Firebase: Success={response.SuccessCount}, Failure={response.FailureCount}");
+
+                // تفاصيل كل استجابة
+                for (int i = 0; i < response.Responses.Count; i++)
+                {
+                    var r = response.Responses[i];
+                    if (r.IsSuccess)
+                    {
+                        diagnostics.Add($"✅ Response[{i}]: نجاح - MessageId={r.MessageId}");
+                    }
+                    else
+                    {
+                        var errorMsg = r.Exception?.Message ?? "غير معروف";
+                        var errorCode = (r.Exception as FirebaseMessaging.FirebaseMessagingException)?.MessagingErrorCode.ToString() ?? "N/A";
+                        diagnostics.Add($"❌ Response[{i}]: فشل - ErrorCode={errorCode}, Message={errorMsg}");
+                    }
+                }
+
+                return Ok(new
+                {
+                    success = response.SuccessCount > 0,
+                    diagnostics,
+                    response = new
+                    {
+                        successCount = response.SuccessCount,
+                        failureCount = response.FailureCount,
+                        responses = response.Responses.Select((r, i) => new
+                        {
+                            index = i,
+                            isSuccess = r.IsSuccess,
+                            messageId = r.MessageId,
+                            error = r.Exception?.Message,
+                            errorCode = (r.Exception as FirebaseMessaging.FirebaseMessagingException)?.MessagingErrorCode.ToString()
+                        })
+                    }
+                });
+            }
+            catch (FirebaseMessaging.FirebaseMessagingException fex)
+            {
+                diagnostics.Add($"❌ Firebase Exception: {fex.MessagingErrorCode}");
+                diagnostics.Add($"❌ Message: {fex.Message}");
+                diagnostics.Add($"❌ HttpResponse: {fex.HttpResponse?.StatusCode}");
+
+                return Ok(new
+                {
+                    success = false,
+                    diagnostics,
+                    error = fex.Message,
+                    errorCode = fex.MessagingErrorCode.ToString(),
+                    httpStatus = fex.HttpResponse?.StatusCode.ToString()
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            diagnostics.Add($"❌ استثناء عام: {ex.GetType().Name}");
+            diagnostics.Add($"❌ رسالة: {ex.Message}");
+
+            if (ex.InnerException != null)
+            {
+                diagnostics.Add($"❌ استثناء داخلي: {ex.InnerException.GetType().Name}");
+                diagnostics.Add($"❌ رسالة داخلية: {ex.InnerException.Message}");
+            }
+
+            return Ok(new
+            {
+                success = false,
+                diagnostics,
+                error = ex.Message,
+                innerError = ex.InnerException?.Message,
+                exceptionType = ex.GetType().FullName,
+                stackTrace = ex.StackTrace?[..Math.Min(500, ex.StackTrace?.Length ?? 0)]
+            });
+        }
+    }
+
     private static NotificationType MapNotificationType(string? type) => type?.ToLower() switch
     {
         "info" => NotificationType.Info,
@@ -444,4 +724,12 @@ public class NotificationStatsDto
     public int ActiveUsers { get; set; }
     public int UsersWithDevices { get; set; }
     public int TotalActiveDevices { get; set; }
+}
+
+public class TestFirebaseRequest
+{
+    public string? Token { get; set; }
+    public string? UserId { get; set; }
+    public string? Title { get; set; }
+    public string? Message { get; set; }
 }

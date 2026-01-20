@@ -4,6 +4,8 @@ using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace ACommerce.Notifications.Channels.Firebase.Services;
 
@@ -56,12 +58,14 @@ public class FirebaseMessagingService
 						"Firebase initialized from file: {Path}",
 						_options.ServiceAccountKeyPath);
 				}
-				// ??????? 2: ?? JSON ?????? (Environment Variable)
+				// الطريقة 2: من JSON مباشرة (Environment Variable)
 				else if (!string.IsNullOrEmpty(_options.ServiceAccountKeyJson))
 				{
-					credential = GoogleCredential.FromJson(_options.ServiceAccountKeyJson);
+					var processedJson = ProcessServiceAccountJson(_options.ServiceAccountKeyJson);
+					credential = GoogleCredential.FromJson(processedJson);
 
-					_logger.LogInformation("Firebase initialized from JSON string");
+					_logger.LogInformation("Firebase initialized from JSON string (length: {Length})",
+						processedJson.Length);
 				}
 				else
 				{
@@ -196,19 +200,48 @@ public class FirebaseMessagingService
 
 		try
 		{
-			_logger.LogDebug(
-				"Sending FCM multicast message to {Count} tokens",
-				tokenList.Count);
+			_logger.LogInformation(
+				"📤 [FCM] Sending multicast to {Count} tokens, DryRun={DryRun}, ProjectId={ProjectId}",
+				tokenList.Count,
+				_options.DryRun,
+				_options.ProjectId);
+
+			// طباعة التوكنات
+			for (int i = 0; i < tokenList.Count; i++)
+			{
+				var t = tokenList[i];
+				var masked = t.Length > 20 ? $"{t[..10]}...{t[^10..]}" : t;
+				_logger.LogInformation("📱 [FCM] Token[{Index}]: {Token}", i, masked);
+			}
+
+			_logger.LogInformation(
+				"📨 [FCM] Message: Title={Title}, Body={Body}",
+				message.Notification?.Title ?? "(null)",
+				message.Notification?.Body ?? "(null)");
 
 			var response = await _messaging!.SendEachForMulticastAsync(
 				message,
-				_options.DryRun,
+				false, // ⚠️ تعطيل DryRun للاختبار - إرسال حقيقي
 				cancellationToken);
 
 			_logger.LogInformation(
-				"FCM multicast sent. Success: {Success}, Failure: {Failure}",
+				"✅ [FCM] Response: Success={Success}, Failure={Failure}",
 				response.SuccessCount,
 				response.FailureCount);
+
+			// طباعة تفاصيل كل استجابة
+			for (int i = 0; i < response.Responses.Count; i++)
+			{
+				var r = response.Responses[i];
+				if (r.IsSuccess)
+				{
+					_logger.LogInformation("✅ [FCM] Token[{Index}]: Success, MessageId={MessageId}", i, r.MessageId);
+				}
+				else
+				{
+					_logger.LogError("❌ [FCM] Token[{Index}]: Failed, Error={Error}", i, r.Exception?.Message);
+				}
+			}
 
 			return new CustomBatchResponse
 			{
@@ -219,7 +252,12 @@ public class FirebaseMessagingService
 		}
 		catch (FirebaseMessagingException ex)
 		{
-			_logger.LogError(ex, "Firebase multicast error");
+			_logger.LogError(ex, "❌ [FCM] Firebase multicast error: {ErrorCode} - {Message}", ex.MessagingErrorCode, ex.Message);
+			throw;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "❌ [FCM] General error sending multicast");
 			throw;
 		}
 	}
@@ -323,6 +361,54 @@ public class FirebaseMessagingService
 			return "***";
 
 		return $"{token[..5]}...{token[^5..]}";
+	}
+
+	/// <summary>
+	/// معالجة JSON الخاص بحساب الخدمة لإصلاح مشاكل الـ newlines في private_key
+	/// عند تخزين JSON في متغير بيئة، قد تكون \n كنص حرفي بدلاً من newlines فعلية
+	/// </summary>
+	private string ProcessServiceAccountJson(string json)
+	{
+		try
+		{
+			// محاولة parse الـ JSON
+			var jsonNode = JsonNode.Parse(json);
+			if (jsonNode == null)
+			{
+				_logger.LogWarning("Failed to parse service account JSON, using as-is");
+				return json;
+			}
+
+			// الحصول على private_key
+			var privateKey = jsonNode["private_key"]?.GetValue<string>();
+			if (string.IsNullOrEmpty(privateKey))
+			{
+				_logger.LogWarning("private_key not found in service account JSON");
+				return json;
+			}
+
+			// التحقق مما إذا كانت newlines بحاجة للإصلاح
+			// إذا كان يحتوي على \n كنص ولكن لا يحتوي على newlines فعلية
+			if (privateKey.Contains("\\n") && !privateKey.Contains('\n'))
+			{
+				_logger.LogInformation("Fixing escaped newlines in private_key");
+				// استبدال \n النصية بـ newlines فعلية
+				var fixedKey = privateKey.Replace("\\n", "\n");
+				jsonNode["private_key"] = fixedKey;
+
+				var result = jsonNode.ToJsonString();
+				_logger.LogDebug("Service account JSON processed successfully");
+				return result;
+			}
+
+			_logger.LogDebug("private_key newlines are correct, no processing needed");
+			return json;
+		}
+		catch (JsonException ex)
+		{
+			_logger.LogWarning(ex, "Failed to process service account JSON, using as-is");
+			return json;
+		}
 	}
 }
 
