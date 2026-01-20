@@ -196,19 +196,48 @@ public class FirebaseMessagingService
 
 		try
 		{
-			_logger.LogDebug(
-				"Sending FCM multicast message to {Count} tokens",
-				tokenList.Count);
+			_logger.LogInformation(
+				"📤 [FCM] Sending multicast to {Count} tokens, DryRun={DryRun}, ProjectId={ProjectId}",
+				tokenList.Count,
+				_options.DryRun,
+				_options.ProjectId);
+
+			// طباعة التوكنات
+			for (int i = 0; i < tokenList.Count; i++)
+			{
+				var t = tokenList[i];
+				var masked = t.Length > 20 ? $"{t[..10]}...{t[^10..]}" : t;
+				_logger.LogInformation("📱 [FCM] Token[{Index}]: {Token}", i, masked);
+			}
+
+			_logger.LogInformation(
+				"📨 [FCM] Message: Title={Title}, Body={Body}",
+				message.Notification?.Title ?? "(null)",
+				message.Notification?.Body ?? "(null)");
 
 			var response = await _messaging!.SendEachForMulticastAsync(
 				message,
-				_options.DryRun,
+				false, // ⚠️ تعطيل DryRun للاختبار - إرسال حقيقي
 				cancellationToken);
 
 			_logger.LogInformation(
-				"FCM multicast sent. Success: {Success}, Failure: {Failure}",
+				"✅ [FCM] Response: Success={Success}, Failure={Failure}",
 				response.SuccessCount,
 				response.FailureCount);
+
+			// طباعة تفاصيل كل استجابة
+			for (int i = 0; i < response.Responses.Count; i++)
+			{
+				var r = response.Responses[i];
+				if (r.IsSuccess)
+				{
+					_logger.LogInformation("✅ [FCM] Token[{Index}]: Success, MessageId={MessageId}", i, r.MessageId);
+				}
+				else
+				{
+					_logger.LogError("❌ [FCM] Token[{Index}]: Failed, Error={Error}", i, r.Exception?.Message);
+				}
+			}
 
 			return new CustomBatchResponse
 			{
@@ -219,7 +248,12 @@ public class FirebaseMessagingService
 		}
 		catch (FirebaseMessagingException ex)
 		{
-			_logger.LogError(ex, "Firebase multicast error");
+			_logger.LogError(ex, "❌ [FCM] Firebase multicast error: {ErrorCode} - {Message}", ex.MessagingErrorCode, ex.Message);
+			throw;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "❌ [FCM] General error sending multicast");
 			throw;
 		}
 	}

@@ -40,20 +40,25 @@ public class FirebaseNotificationChannel : INotificationChannel
 	{
 		try
 		{
-			_logger.LogDebug(
-				"Sending Firebase notification {NotificationId} to user {UserId}",
+			_logger.LogInformation(
+				"🚀 [Firebase] Starting to send notification {NotificationId} to user {UserId}",
 				notification.Id,
 				notification.UserId);
 
-			// ?????? ??? Tokens ????????
+			// الحصول على Tokens المستخدم
 			var deviceTokens = await _tokenStore.GetUserTokensAsync(
 				notification.UserId,
 				cancellationToken);
 
+			_logger.LogInformation(
+				"🔍 [Firebase] Found {TokenCount} tokens for user {UserId}",
+				deviceTokens.Count,
+				notification.UserId);
+
 			if (!deviceTokens.Any())
 			{
 				_logger.LogWarning(
-					"No Firebase tokens found for user {UserId}",
+					"⚠️ [Firebase] No tokens found for user {UserId}",
 					notification.UserId);
 
 				return new NotificationResult
@@ -64,14 +69,32 @@ public class FirebaseNotificationChannel : INotificationChannel
 				};
 			}
 
-			// ???? ???????
+			// طباعة التوكنات (مخفية جزئياً)
+			foreach (var token in deviceTokens)
+			{
+				var maskedToken = token.Token.Length > 20
+					? $"{token.Token[..10]}...{token.Token[^10..]}"
+					: token.Token;
+				_logger.LogInformation(
+					"📱 [Firebase] Token: {Token}, Platform: {Platform}, Active: {IsActive}",
+					maskedToken, token.Platform, token.IsActive);
+			}
+
+			// بناء الرسالة
 			var message = BuildMulticastMessage(notification, deviceTokens);
 
-			// ???????
+			_logger.LogInformation("📤 [Firebase] Sending message to Firebase...");
+
+			// الإرسال
 			var response = await _messagingService.SendMulticastAsync(
 				deviceTokens.Select(t => t.Token),
 				message,
 				cancellationToken);
+
+			_logger.LogInformation(
+				"📊 [Firebase] Response: SuccessCount={Success}, FailureCount={Failure}",
+				response.SuccessCount,
+				response.FailureCount);
 
 			// ?????? ???????
 			await ProcessResponseAsync(response, deviceTokens, cancellationToken);
@@ -139,100 +162,20 @@ public class FirebaseNotificationChannel : INotificationChannel
 		Abstractions.Models.Notification notification,
 		List<FirebaseDeviceToken> deviceTokens)
 	{
-		// ???? Notification Payload
-		var fcmNotification = new FirebaseAdmin.Messaging.Notification
-		{
-			Title = notification.Title,
-			Body = notification.Message,
-			ImageUrl = notification.ImageUrl
-		};
-
-		// ???? Data Payload
-		var data = new Dictionary<string, string>
-		{
-			["notificationId"] = notification.Id.ToString(),
-			["type"] = notification.Type.ToString(),
-			["priority"] = notification.Priority.ToString(),
-			["createdAt"] = notification.CreatedAt.ToString("o")
-		};
-
-		// ????? Custom Data
-		if (notification.Data != null)
-		{
-			foreach (var kvp in notification.Data)
-			{
-				data[kvp.Key] = kvp.Value;
-			}
-		}
-
-		if (!string.IsNullOrEmpty(notification.ActionUrl))
-		{
-			data["actionUrl"] = notification.ActionUrl;
-		}
-
-		// ????? ??? ??????????
-		var androidConfig = new AndroidConfig
-		{
-			Priority = _options.DefaultPriority == FirebaseMessagePriority.High
-				? Priority.High
-				: Priority.Normal,
-			TimeToLive = TimeSpan.FromSeconds(_options.TimeToLiveSeconds),
-			Notification = new AndroidNotification
-			{
-				Title = notification.Title,
-				Body = notification.Message,
-				Icon = _options.DefaultIcon,
-				Color = _options.DefaultColor,
-				Sound = notification.Sound ?? _options.DefaultSound,
-				ChannelId = _options.DefaultChannelId,
-				Priority = FirebaseAdmin.Messaging.NotificationPriority.HIGH,
-				DefaultSound = true,
-				DefaultVibrateTimings = true,
-				DefaultLightSettings = true
-			}
-		};
-
-		// ??? ??? ???? ????
-		if (!string.IsNullOrEmpty(notification.ImageUrl))
-		{
-			androidConfig.Notification.ImageUrl = notification.ImageUrl;
-		}
-
-		// ????? ??? ?? iOS
-		var apnsConfig = new ApnsConfig
-		{
-			Aps = new Aps
-			{
-				Alert = new ApsAlert
-				{
-					Title = notification.Title,
-					Body = notification.Message
-				},
-				Badge = notification.BadgeCount ?? (int?)null,
-				Sound = notification.Sound ?? _options.DefaultSound,
-				MutableContent = !string.IsNullOrEmpty(notification.ImageUrl)
-			}
-		};
-
-		// ????? Custom Data ?? iOS
-		if (notification.Data != null)
-		{
-			apnsConfig.Aps.CustomData = notification.Data.ToDictionary(
-				kvp => kvp.Key,
-				kvp => (object)kvp.Value);
-		}
-
-		// Collapse Key (???? ????????? ?????????)
-		var collapseKey = _options.EnableCollapseKey
-			? $"{notification.Type}_{notification.UserId}"
-			: null;
+		// 🔥 إرسال بسيط جداً - عنوان ونص فقط (للاختبار)
+		_logger.LogInformation(
+			"Building SIMPLE Firebase message: Title={Title}, Body={Body}, Tokens={TokenCount}",
+			notification.Title,
+			notification.Message,
+			deviceTokens.Count);
 
 		return new MulticastMessage
 		{
-			Notification = fcmNotification,
-			Data = data,
-			Android = androidConfig,
-			Apns = apnsConfig,
+			Notification = new FirebaseAdmin.Messaging.Notification
+			{
+				Title = notification.Title,
+				Body = notification.Message
+			},
 			Tokens = deviceTokens.Select(t => t.Token).ToList()
 		};
 	}
