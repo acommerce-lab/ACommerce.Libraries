@@ -3,6 +3,7 @@ using Ashare.Shared.Services;
 using Foundation;
 using UIKit;
 using UserNotifications;
+using Firebase.Core;
 
 namespace Ashare.App;
 
@@ -13,6 +14,17 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
 
     public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
     {
+        // ✅ تهيئة Firebase (مطلوب قبل أي عملية Firebase)
+        try
+        {
+            App.Configure();
+            System.Diagnostics.Debug.WriteLine("[Firebase iOS] Firebase configured successfully");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Firebase iOS] Firebase configuration error: {ex.Message}");
+        }
+
         var result = base.FinishedLaunching(application, launchOptions);
 
         // تهيئة خدمة الإسناد
