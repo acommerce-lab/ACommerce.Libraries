@@ -17,6 +17,16 @@ public class EfFirebaseTokenStore : IFirebaseTokenStore
     private readonly DbContext _context;
     private readonly ILogger<EfFirebaseTokenStore> _logger;
 
+    /// <summary>
+    /// مدة صلاحية التوكن بالأيام (افتراضي: 30 يوم)
+    /// </summary>
+    private const int TokenValidityDays = 30;
+
+    /// <summary>
+    /// الحد الأقصى لعدد التوكنات النشطة لكل مستخدم
+    /// </summary>
+    private const int MaxTokensPerUser = 5;
+
     public EfFirebaseTokenStore(
         DbContext context,
         ILogger<EfFirebaseTokenStore> logger)
@@ -34,16 +44,22 @@ public class EfFirebaseTokenStore : IFirebaseTokenStore
             deviceToken.UserId,
             deviceToken.Platform);
 
-        // Check if token already exists
+        // 1. تنظيف التوكنات المنتهية للمستخدم
+        await CleanupExpiredTokensAsync(deviceToken.UserId, cancellationToken);
+
+        // 2. Check if token already exists
         var existingEntity = await _context.Set<DeviceTokenEntity>()
             .FirstOrDefaultAsync(x => x.Token == deviceToken.Token, cancellationToken);
 
+        var expiresAt = DateTime.UtcNow.AddDays(TokenValidityDays);
+
         if (existingEntity != null)
         {
-            // Update existing token
+            // Update existing token - تجديد الصلاحية
             existingEntity.UserId = deviceToken.UserId;
             existingEntity.Platform = deviceToken.Platform.ToString();
             existingEntity.LastUsedAt = DateTime.UtcNow;
+            existingEntity.ExpiresAt = expiresAt;
             existingEntity.IsActive = deviceToken.IsActive;
             existingEntity.UpdatedAt = DateTime.UtcNow;
 
@@ -55,11 +71,36 @@ public class EfFirebaseTokenStore : IFirebaseTokenStore
             }
 
             _logger.LogInformation(
-                "Updated existing device token for user {UserId}",
-                deviceToken.UserId);
+                "Updated existing device token for user {UserId}, expires at {ExpiresAt}",
+                deviceToken.UserId,
+                expiresAt);
         }
         else
         {
+            // 3. التحقق من عدد التوكنات النشطة
+            var activeTokenCount = await _context.Set<DeviceTokenEntity>()
+                .CountAsync(x => x.UserId == deviceToken.UserId && x.IsActive && !x.IsDeleted, cancellationToken);
+
+            // إذا تجاوز الحد، نحذف أقدم توكن
+            if (activeTokenCount >= MaxTokensPerUser)
+            {
+                var oldestToken = await _context.Set<DeviceTokenEntity>()
+                    .Where(x => x.UserId == deviceToken.UserId && x.IsActive && !x.IsDeleted)
+                    .OrderBy(x => x.LastUsedAt)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (oldestToken != null)
+                {
+                    oldestToken.IsActive = false;
+                    oldestToken.IsDeleted = true;
+                    oldestToken.UpdatedAt = DateTime.UtcNow;
+
+                    _logger.LogInformation(
+                        "Deactivated oldest token for user {UserId} to make room for new one",
+                        deviceToken.UserId);
+                }
+            }
+
             // Create new token
             var entity = new DeviceTokenEntity
             {
@@ -69,6 +110,7 @@ public class EfFirebaseTokenStore : IFirebaseTokenStore
                 Platform = deviceToken.Platform.ToString(),
                 RegisteredAt = deviceToken.RegisteredAt.UtcDateTime,
                 LastUsedAt = deviceToken.LastUsedAt.UtcDateTime,
+                ExpiresAt = expiresAt,
                 IsActive = deviceToken.IsActive,
                 CreatedAt = DateTime.UtcNow,
                 AppVersion = deviceToken.Metadata?.GetValueOrDefault("AppVersion"),
@@ -81,12 +123,41 @@ public class EfFirebaseTokenStore : IFirebaseTokenStore
             _context.Set<DeviceTokenEntity>().Add(entity);
 
             _logger.LogInformation(
-                "Created new device token for user {UserId}, platform: {Platform}",
+                "Created new device token for user {UserId}, platform: {Platform}, expires at {ExpiresAt}",
                 deviceToken.UserId,
-                deviceToken.Platform);
+                deviceToken.Platform,
+                expiresAt);
         }
 
         await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// تنظيف التوكنات المنتهية للمستخدم
+    /// </summary>
+    private async Task CleanupExpiredTokensAsync(string userId, CancellationToken cancellationToken)
+    {
+        var expiredTokens = await _context.Set<DeviceTokenEntity>()
+            .Where(x => x.UserId == userId
+                && !x.IsDeleted
+                && x.ExpiresAt.HasValue
+                && x.ExpiresAt.Value < DateTime.UtcNow)
+            .ToListAsync(cancellationToken);
+
+        if (expiredTokens.Any())
+        {
+            foreach (var token in expiredTokens)
+            {
+                token.IsActive = false;
+                token.IsDeleted = true;
+                token.UpdatedAt = DateTime.UtcNow;
+            }
+
+            _logger.LogInformation(
+                "Cleaned up {Count} expired tokens for user {UserId}",
+                expiredTokens.Count,
+                userId);
+        }
     }
 
     public async Task<List<FirebaseDeviceToken>> GetUserTokensAsync(
@@ -95,10 +166,17 @@ public class EfFirebaseTokenStore : IFirebaseTokenStore
     {
         _logger.LogDebug("Getting device tokens for user {UserId}", userId);
 
+        var now = DateTime.UtcNow;
+
         var entities = await _context.Set<DeviceTokenEntity>()
             .AsNoTracking()
-            .Where(x => x.UserId == userId && x.IsActive && !x.IsDeleted)
+            .Where(x => x.UserId == userId
+                && x.IsActive
+                && !x.IsDeleted
+                && (!x.ExpiresAt.HasValue || x.ExpiresAt.Value > now)) // استثناء المنتهية
             .ToListAsync(cancellationToken);
+
+        _logger.LogDebug("Found {Count} active tokens for user {UserId}", entities.Count, userId);
 
         return entities.Select(MapToModel).ToList();
     }

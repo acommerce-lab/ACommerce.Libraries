@@ -38,6 +38,11 @@ public class DeviceTokenEntity : IBaseEntity
     public DateTime LastUsedAt { get; set; }
 
     /// <summary>
+    /// تاريخ انتهاء صلاحية التوكن
+    /// </summary>
+    public DateTime? ExpiresAt { get; set; }
+
+    /// <summary>
     /// هل التوكن نشط
     /// </summary>
     public bool IsActive { get; set; } = true;
@@ -61,4 +66,9 @@ public class DeviceTokenEntity : IBaseEntity
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }
+
+    /// <summary>
+    /// هل التوكن منتهي الصلاحية
+    /// </summary>
+    public bool IsExpired => ExpiresAt.HasValue && ExpiresAt.Value < DateTime.UtcNow;
 }
