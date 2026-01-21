@@ -54,8 +54,18 @@ public class PushNotificationService : IPushNotificationService
             }
 
             // التحقق من التوكن المحفوظ
-            var storedToken = await GetStoredTokenAsync();
-            var tokenExpiry = await GetStoredTokenExpiryAsync();
+            string? storedToken = null;
+            DateTime tokenExpiry = DateTime.MinValue;
+
+            try
+            {
+                storedToken = GetStoredToken();
+                tokenExpiry = GetStoredTokenExpiry();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "[Push] Failed to read stored token, will request new one");
+            }
 
             if (!string.IsNullOrEmpty(storedToken) && tokenExpiry > DateTime.UtcNow)
             {
@@ -93,7 +103,7 @@ public class PushNotificationService : IPushNotificationService
                 var expiry = DateTime.UtcNow.Add(TokenValidity);
 
                 // حفظ التوكن محلياً مع تاريخ الانتهاء
-                await SaveTokenLocallyAsync(token, expiry);
+                SaveTokenLocally(token, expiry);
 
                 _logger.LogInformation("[Push] New token obtained: {TokenPrefix}..., expires: {Expiry}",
                     token.Length > 20 ? token[..20] : token,
@@ -116,50 +126,45 @@ public class PushNotificationService : IPushNotificationService
     }
 
     /// <summary>
-    /// حفظ التوكن محلياً
+    /// حفظ التوكن محلياً (متزامن - Preferences فقط لتجنب مشاكل SecureStorage)
     /// </summary>
-    private async Task SaveTokenLocallyAsync(string token, DateTime expiry)
+    private void SaveTokenLocally(string token, DateTime expiry)
     {
         try
         {
-            await SecureStorage.Default.SetAsync(TokenKey, token);
-            await SecureStorage.Default.SetAsync(TokenExpiryKey, expiry.ToString("O"));
+            Preferences.Default.Set(TokenKey, token);
+            Preferences.Default.Set(TokenExpiryKey, expiry.ToString("O"));
             _logger.LogDebug("[Push] Token saved locally");
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "[Push] Failed to save token to secure storage, using preferences");
-            // Fallback to preferences
-            Preferences.Default.Set(TokenKey, token);
-            Preferences.Default.Set(TokenExpiryKey, expiry.ToString("O"));
+            _logger.LogWarning(ex, "[Push] Failed to save token locally");
         }
     }
 
     /// <summary>
-    /// الحصول على التوكن المحفوظ
+    /// الحصول على التوكن المحفوظ (متزامن)
     /// </summary>
-    private async Task<string?> GetStoredTokenAsync()
+    private string? GetStoredToken()
     {
         try
         {
-            return await SecureStorage.Default.GetAsync(TokenKey)
-                ?? Preferences.Default.Get<string?>(TokenKey, null);
+            return Preferences.Default.Get(TokenKey, string.Empty);
         }
         catch
         {
-            return Preferences.Default.Get<string?>(TokenKey, null);
+            return null;
         }
     }
 
     /// <summary>
-    /// الحصول على تاريخ انتهاء التوكن المحفوظ
+    /// الحصول على تاريخ انتهاء التوكن المحفوظ (متزامن)
     /// </summary>
-    private async Task<DateTime> GetStoredTokenExpiryAsync()
+    private DateTime GetStoredTokenExpiry()
     {
         try
         {
-            var expiryStr = await SecureStorage.Default.GetAsync(TokenExpiryKey)
-                ?? Preferences.Default.Get<string?>(TokenExpiryKey, null);
+            var expiryStr = Preferences.Default.Get(TokenExpiryKey, string.Empty);
 
             if (!string.IsNullOrEmpty(expiryStr) && DateTime.TryParse(expiryStr, out var expiry))
             {
@@ -188,7 +193,7 @@ public class PushNotificationService : IPushNotificationService
             var expiry = DateTime.UtcNow.Add(TokenValidity);
 
             // حفظ التوكن الجديد محلياً
-            await SaveTokenLocallyAsync(newToken, expiry);
+            SaveTokenLocally(newToken, expiry);
 
             // تسجيل مع الخادم
             await RegisterTokenWithBackendAsync(newToken);
@@ -273,7 +278,7 @@ public class PushNotificationService : IPushNotificationService
     /// </summary>
     public async Task RefreshTokenRegistrationAsync()
     {
-        var tokenExpiry = await GetStoredTokenExpiryAsync();
+        var tokenExpiry = GetStoredTokenExpiry();
 
         if (!string.IsNullOrEmpty(_currentToken) && tokenExpiry > DateTime.UtcNow)
         {
