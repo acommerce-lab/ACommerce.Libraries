@@ -12,7 +12,7 @@ public class PushNotificationService : IPushNotificationService
     private readonly NotificationsClient _notificationsClient;
     private readonly ILogger<PushNotificationService> _logger;
     private string? _currentToken;
-    private bool _isInitialized;
+    private bool _isSubscribed; // للتحقق من الاشتراك في الأحداث فقط
 
     public event EventHandler<PushNotificationEventArgs>? NotificationReceived;
     public event EventHandler<string>? TokenRefreshed;
@@ -27,12 +27,10 @@ public class PushNotificationService : IPushNotificationService
 
     /// <summary>
     /// تهيئة خدمة الإشعارات وتسجيل الجهاز مع Firebase
+    /// يُستدعى عند كل تشغيل للتطبيق للحصول على توكن جديد
     /// </summary>
     public async Task InitializeAsync()
     {
-        if (_isInitialized)
-            return;
-
         try
         {
             _logger.LogInformation("[Push] Initializing Firebase Cloud Messaging...");
@@ -40,22 +38,29 @@ public class PushNotificationService : IPushNotificationService
             // التحقق من دعم الإشعارات
             await CrossFirebaseCloudMessaging.Current.CheckIfValidAsync();
 
-            // الاشتراك في تحديثات التوكن
-            CrossFirebaseCloudMessaging.Current.TokenChanged += OnTokenChanged;
+            // الاشتراك في الأحداث (مرة واحدة فقط)
+            if (!_isSubscribed)
+            {
+                CrossFirebaseCloudMessaging.Current.TokenChanged += OnTokenChanged;
+                CrossFirebaseCloudMessaging.Current.NotificationReceived += OnNotificationReceived;
+                CrossFirebaseCloudMessaging.Current.NotificationTapped += OnNotificationTapped;
+                _isSubscribed = true;
+            }
 
-            // الاشتراك في استقبال الإشعارات
-            CrossFirebaseCloudMessaging.Current.NotificationReceived += OnNotificationReceived;
-            CrossFirebaseCloudMessaging.Current.NotificationTapped += OnNotificationTapped;
-
-            // الحصول على التوكن الحالي
+            // 🔄 دائماً نطلب توكن جديد من Firebase عند كل تشغيل
+            _logger.LogInformation("[Push] Requesting fresh token from Firebase...");
             var token = await CrossFirebaseCloudMessaging.Current.GetTokenAsync();
+
             if (!string.IsNullOrEmpty(token))
             {
+                var isNewToken = _currentToken != token;
                 _currentToken = token;
-                _logger.LogInformation("[Push] Firebase token obtained: {TokenPrefix}...",
-                    token.Length > 20 ? token[..20] : token);
 
-                // تسجيل التوكن مع الخادم
+                _logger.LogInformation("[Push] Firebase token obtained: {TokenPrefix}... (new: {IsNew})",
+                    token.Length > 20 ? token[..20] : token,
+                    isNewToken);
+
+                // ✅ دائماً نسجل التوكن مع الخادم عند كل تشغيل
                 await RegisterTokenWithBackendAsync(token);
             }
             else
@@ -63,7 +68,6 @@ public class PushNotificationService : IPushNotificationService
                 _logger.LogWarning("[Push] Firebase token is null or empty");
             }
 
-            _isInitialized = true;
             _logger.LogInformation("[Push] Firebase Cloud Messaging initialized successfully");
         }
         catch (Exception ex)
