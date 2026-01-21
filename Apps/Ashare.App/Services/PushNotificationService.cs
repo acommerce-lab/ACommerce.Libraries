@@ -12,7 +12,14 @@ public class PushNotificationService : IPushNotificationService
     private readonly NotificationsClient _notificationsClient;
     private readonly ILogger<PushNotificationService> _logger;
     private string? _currentToken;
-    private bool _isSubscribed; // للتحقق من الاشتراك في الأحداث فقط
+    private bool _isSubscribed;
+
+    // مفاتيح التخزين المحلي
+    private const string TokenKey = "firebase_token";
+    private const string TokenExpiryKey = "firebase_token_expiry";
+
+    // مدة صلاحية التوكن (30 يوم)
+    private static readonly TimeSpan TokenValidity = TimeSpan.FromDays(30);
 
     public event EventHandler<PushNotificationEventArgs>? NotificationReceived;
     public event EventHandler<string>? TokenRefreshed;
@@ -26,8 +33,7 @@ public class PushNotificationService : IPushNotificationService
     }
 
     /// <summary>
-    /// تهيئة خدمة الإشعارات وتسجيل الجهاز مع Firebase
-    /// يُستدعى عند كل تشغيل للتطبيق للحصول على توكن جديد
+    /// تهيئة خدمة الإشعارات - يتحقق من التوكن ويطلب جديد إذا لزم
     /// </summary>
     public async Task InitializeAsync()
     {
@@ -47,25 +53,21 @@ public class PushNotificationService : IPushNotificationService
                 _isSubscribed = true;
             }
 
-            // 🔄 دائماً نطلب توكن جديد من Firebase عند كل تشغيل
-            _logger.LogInformation("[Push] Requesting fresh token from Firebase...");
-            var token = await CrossFirebaseCloudMessaging.Current.GetTokenAsync();
+            // التحقق من التوكن المحفوظ
+            var storedToken = await GetStoredTokenAsync();
+            var tokenExpiry = await GetStoredTokenExpiryAsync();
 
-            if (!string.IsNullOrEmpty(token))
+            if (!string.IsNullOrEmpty(storedToken) && tokenExpiry > DateTime.UtcNow)
             {
-                var isNewToken = _currentToken != token;
-                _currentToken = token;
-
-                _logger.LogInformation("[Push] Firebase token obtained: {TokenPrefix}... (new: {IsNew})",
-                    token.Length > 20 ? token[..20] : token,
-                    isNewToken);
-
-                // ✅ دائماً نسجل التوكن مع الخادم عند كل تشغيل
-                await RegisterTokenWithBackendAsync(token);
+                // ✅ التوكن موجود وصالح - نستخدمه
+                _currentToken = storedToken;
+                _logger.LogInformation("[Push] Using stored token (expires: {Expiry})", tokenExpiry);
             }
             else
             {
-                _logger.LogWarning("[Push] Firebase token is null or empty");
+                // 🔄 التوكن غير موجود أو منتهي - نطلب جديد
+                _logger.LogInformation("[Push] Token missing or expired, requesting new token...");
+                await RequestAndRegisterNewTokenAsync();
             }
 
             _logger.LogInformation("[Push] Firebase Cloud Messaging initialized successfully");
@@ -77,7 +79,100 @@ public class PushNotificationService : IPushNotificationService
     }
 
     /// <summary>
-    /// معالجة تغيير التوكن
+    /// طلب توكن جديد من Firebase وتسجيله مع الخادم
+    /// </summary>
+    private async Task RequestAndRegisterNewTokenAsync()
+    {
+        try
+        {
+            var token = await CrossFirebaseCloudMessaging.Current.GetTokenAsync();
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                _currentToken = token;
+                var expiry = DateTime.UtcNow.Add(TokenValidity);
+
+                // حفظ التوكن محلياً مع تاريخ الانتهاء
+                await SaveTokenLocallyAsync(token, expiry);
+
+                _logger.LogInformation("[Push] New token obtained: {TokenPrefix}..., expires: {Expiry}",
+                    token.Length > 20 ? token[..20] : token,
+                    expiry);
+
+                // تسجيل مع الخادم
+                await RegisterTokenWithBackendAsync(token);
+
+                TokenRefreshed?.Invoke(this, token);
+            }
+            else
+            {
+                _logger.LogWarning("[Push] Firebase returned null or empty token");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[Push] Failed to request new token");
+        }
+    }
+
+    /// <summary>
+    /// حفظ التوكن محلياً
+    /// </summary>
+    private async Task SaveTokenLocallyAsync(string token, DateTime expiry)
+    {
+        try
+        {
+            await SecureStorage.Default.SetAsync(TokenKey, token);
+            await SecureStorage.Default.SetAsync(TokenExpiryKey, expiry.ToString("O"));
+            _logger.LogDebug("[Push] Token saved locally");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "[Push] Failed to save token to secure storage, using preferences");
+            // Fallback to preferences
+            Preferences.Default.Set(TokenKey, token);
+            Preferences.Default.Set(TokenExpiryKey, expiry.ToString("O"));
+        }
+    }
+
+    /// <summary>
+    /// الحصول على التوكن المحفوظ
+    /// </summary>
+    private async Task<string?> GetStoredTokenAsync()
+    {
+        try
+        {
+            return await SecureStorage.Default.GetAsync(TokenKey)
+                ?? Preferences.Default.Get<string?>(TokenKey, null);
+        }
+        catch
+        {
+            return Preferences.Default.Get<string?>(TokenKey, null);
+        }
+    }
+
+    /// <summary>
+    /// الحصول على تاريخ انتهاء التوكن المحفوظ
+    /// </summary>
+    private async Task<DateTime> GetStoredTokenExpiryAsync()
+    {
+        try
+        {
+            var expiryStr = await SecureStorage.Default.GetAsync(TokenExpiryKey)
+                ?? Preferences.Default.Get<string?>(TokenExpiryKey, null);
+
+            if (!string.IsNullOrEmpty(expiryStr) && DateTime.TryParse(expiryStr, out var expiry))
+            {
+                return expiry;
+            }
+        }
+        catch { }
+
+        return DateTime.MinValue;
+    }
+
+    /// <summary>
+    /// معالجة تغيير التوكن (يُستدعى تلقائياً من Firebase عند تغيير التوكن)
     /// </summary>
     private async void OnTokenChanged(object? sender, Plugin.Firebase.CloudMessaging.EventArgs.FCMTokenChangedEventArgs e)
     {
@@ -87,10 +182,17 @@ public class PushNotificationService : IPushNotificationService
             if (string.IsNullOrEmpty(newToken))
                 return;
 
-            _logger.LogInformation("[Push] Firebase token refreshed");
+            _logger.LogInformation("[Push] Firebase token changed by Firebase");
             _currentToken = newToken;
 
+            var expiry = DateTime.UtcNow.Add(TokenValidity);
+
+            // حفظ التوكن الجديد محلياً
+            await SaveTokenLocallyAsync(newToken, expiry);
+
+            // تسجيل مع الخادم
             await RegisterTokenWithBackendAsync(newToken);
+
             TokenRefreshed?.Invoke(this, newToken);
         }
         catch (Exception ex)
@@ -167,29 +269,21 @@ public class PushNotificationService : IPushNotificationService
 
     /// <summary>
     /// إعادة تسجيل التوكن مع الخادم (بعد تسجيل الدخول مثلاً)
+    /// يطلب توكن جديد إذا كان الحالي منتهي
     /// </summary>
     public async Task RefreshTokenRegistrationAsync()
     {
-        if (!string.IsNullOrEmpty(_currentToken))
+        var tokenExpiry = await GetStoredTokenExpiryAsync();
+
+        if (!string.IsNullOrEmpty(_currentToken) && tokenExpiry > DateTime.UtcNow)
         {
+            // التوكن صالح - نرسله للخادم
             await RegisterTokenWithBackendAsync(_currentToken);
         }
         else
         {
-            // حاول الحصول على التوكن مرة أخرى
-            try
-            {
-                var token = await CrossFirebaseCloudMessaging.Current.GetTokenAsync();
-                if (!string.IsNullOrEmpty(token))
-                {
-                    _currentToken = token;
-                    await RegisterTokenWithBackendAsync(token);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[Push] Failed to refresh token");
-            }
+            // التوكن منتهي أو غير موجود - نطلب جديد
+            await RequestAndRegisterNewTokenAsync();
         }
     }
 
