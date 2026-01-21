@@ -4,6 +4,7 @@ using Foundation;
 using UIKit;
 using UserNotifications;
 using Firebase.Core;
+using Firebase.CloudMessaging;
 
 namespace Ashare.App;
 
@@ -100,12 +101,18 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
 
     /// <summary>
     /// استلام Device Token من APNS
+    /// ⚠️ مطلوب لأن FirebaseAppDelegateProxyEnabled=false في Info.plist
     /// </summary>
     [Export("application:didRegisterForRemoteNotificationsWithDeviceToken:")]
     public void RegisteredForRemoteNotifications(UIApplication application, NSData deviceToken)
     {
-        System.Diagnostics.Debug.WriteLine("[Push iOS] Registered for remote notifications");
-        // Plugin.Firebase.CloudMessaging يتعامل مع التوكن تلقائياً عبر CrossFirebaseCloudMessaging
+        System.Diagnostics.Debug.WriteLine("[Push iOS] Registered for remote notifications with APNs token");
+
+        // ⚠️ مهم: تمرير APNs token إلى Firebase يدوياً
+        // لأن FirebaseAppDelegateProxyEnabled=false يعطل التمرير التلقائي
+        Messaging.SharedInstance.ApnsToken = deviceToken;
+
+        System.Diagnostics.Debug.WriteLine("[Push iOS] APNs token passed to Firebase Messaging");
     }
 
     /// <summary>
