@@ -589,6 +589,10 @@
                 await GuestMode.DisableGuestModeAsync();
                 Console.WriteLine("[Login] ✅ Guest mode disabled");
 
+                // إعلام الخدمات بتسجيل الدخول (لتسجيل Push Token)
+                await AppLifecycle.NotifyUserLoggedInAsync();
+                Console.WriteLine("[Login] ✅ Notified services of login");
+
                 if (result.IsNewUser)
                 {
                     Console.WriteLine("[Login] ✅ NEW USER - navigating to profile edit");

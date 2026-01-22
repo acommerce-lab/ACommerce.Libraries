@@ -19,6 +19,11 @@ public class AppLifecycleService : IAppLifecycleService
     public event Func<Task>? AppPaused;
 
     /// <summary>
+    /// حدث يُطلق عند تسجيل دخول المستخدم بنجاح
+    /// </summary>
+    public event Func<Task>? UserLoggedIn;
+
+    /// <summary>
     /// إعلام جميع المستمعين بأن التطبيق استؤنف
     /// </summary>
     public async Task NotifyResumedAsync()
@@ -49,6 +54,28 @@ public class AppLifecycleService : IAppLifecycleService
         if (AppPaused != null)
         {
             foreach (var handler in AppPaused.GetInvocationList().Cast<Func<Task>>())
+            {
+                try
+                {
+                    await handler();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[AppLifecycle] ⚠️ Handler error: {ex.Message}");
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// إعلام جميع المستمعين بأن المستخدم سجل دخوله
+    /// </summary>
+    public async Task NotifyUserLoggedInAsync()
+    {
+        Console.WriteLine("[AppLifecycle] 🔐 User LOGGED IN - notifying listeners");
+        if (UserLoggedIn != null)
+        {
+            foreach (var handler in UserLoggedIn.GetInvocationList().Cast<Func<Task>>())
             {
                 try
                 {
