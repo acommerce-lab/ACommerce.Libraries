@@ -108,7 +108,7 @@
 
 	<!-- Firebase Configuration - iOS -->
 	<ItemGroup Condition="'$(TargetFramework)'=='net9.0-ios'">
-		<BundleResource Include="Platforms\iOS\GoogleService-Info.plist" />
+		<BundleResource Include="Platforms/iOS/GoogleService-Info.plist" Link="GoogleService-Info.plist" />
 	</ItemGroup>
 
 
