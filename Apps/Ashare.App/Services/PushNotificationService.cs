@@ -33,13 +33,13 @@ public class PushNotificationService : IPushNotificationService
     }
 
     /// <summary>
-    /// تهيئة خدمة الإشعارات - يتحقق من التوكن ويطلب جديد إذا لزم
+    /// تهيئة خدمة الإشعارات - يطلب توكن فوراً
     /// </summary>
     public async Task InitializeAsync()
     {
         try
         {
-            _logger.LogInformation("[Push] Initializing Firebase Cloud Messaging...");
+            _logger.LogInformation("[Push] 🚀 Initializing Firebase Cloud Messaging...");
 
             // التحقق من دعم الإشعارات
             await CrossFirebaseCloudMessaging.Current.CheckIfValidAsync();
@@ -53,38 +53,15 @@ public class PushNotificationService : IPushNotificationService
                 _isSubscribed = true;
             }
 
-            // التحقق من التوكن المحفوظ
-            string? storedToken = null;
-            DateTime tokenExpiry = DateTime.MinValue;
+            // 🔥 طلب توكن فوراً - بدون شروط
+            _logger.LogInformation("[Push] 📱 Requesting FCM token...");
+            await RequestAndRegisterNewTokenAsync();
 
-            try
-            {
-                storedToken = GetStoredToken();
-                tokenExpiry = GetStoredTokenExpiry();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "[Push] Failed to read stored token, will request new one");
-            }
-
-            if (!string.IsNullOrEmpty(storedToken) && tokenExpiry > DateTime.UtcNow)
-            {
-                // ✅ التوكن موجود وصالح - نستخدمه
-                _currentToken = storedToken;
-                _logger.LogInformation("[Push] Using stored token (expires: {Expiry})", tokenExpiry);
-            }
-            else
-            {
-                // 🔄 التوكن غير موجود أو منتهي - نطلب جديد
-                _logger.LogInformation("[Push] Token missing or expired, requesting new token...");
-                await RequestAndRegisterNewTokenAsync();
-            }
-
-            _logger.LogInformation("[Push] Firebase Cloud Messaging initialized successfully");
+            _logger.LogInformation("[Push] ✅ Firebase Cloud Messaging initialized");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[Push] Failed to initialize Firebase Cloud Messaging");
+            _logger.LogError(ex, "[Push] ❌ Failed to initialize: {Message}", ex.Message);
         }
     }
 
@@ -326,21 +303,28 @@ public class PushNotificationService : IPushNotificationService
 
     private async Task RegisterTokenWithBackendAsync(string token)
     {
+        var platform = DeviceInfo.Platform == DevicePlatform.iOS ? "iOS" : "Android";
+
+        _logger.LogInformation("[Push] 📤 Sending token to backend: Platform={Platform}, Token={Token}...",
+            platform, token[..Math.Min(20, token.Length)]);
+
         try
         {
-            var platform = DeviceInfo.Platform == DevicePlatform.iOS ? "iOS" : "Android";
-
             await _notificationsClient.RegisterDeviceTokenAsync(new RegisterDeviceTokenRequest
             {
                 DeviceToken = token,
                 Platform = platform
             });
 
-            _logger.LogInformation("[Push] ✅ Device token registered with backend for platform: {Platform}", platform);
+            _logger.LogInformation("[Push] ✅✅✅ TOKEN REGISTERED WITH BACKEND!");
+        }
+        catch (HttpRequestException httpEx)
+        {
+            _logger.LogError("[Push] ❌ HTTP Error: {Status} - {Message}", httpEx.StatusCode, httpEx.Message);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[Push] Failed to register device token with backend");
+            _logger.LogError(ex, "[Push] ❌ Failed to register: {Type} - {Message}", ex.GetType().Name, ex.Message);
         }
     }
 

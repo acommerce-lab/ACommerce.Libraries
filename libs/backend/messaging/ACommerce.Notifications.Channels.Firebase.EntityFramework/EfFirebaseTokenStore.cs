@@ -33,54 +33,15 @@ public class EfFirebaseTokenStore : IFirebaseTokenStore
         FirebaseDeviceToken deviceToken,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug(
-            "Saving device token for user {UserId}, platform: {Platform}",
+        _logger.LogInformation(
+            "💾 SAVING TOKEN: User={UserId}, Platform={Platform}, Token={Token}",
             deviceToken.UserId,
-            deviceToken.Platform);
+            deviceToken.Platform,
+            deviceToken.Token?[..Math.Min(20, deviceToken.Token?.Length ?? 0)] + "...");
 
         try
         {
-            // 1. هل التوكن نفسه موجود؟
-            var existingToken = await _context.Set<DeviceTokenEntity>()
-                .FirstOrDefaultAsync(x => x.Token == deviceToken.Token && !x.IsDeleted, cancellationToken);
-
-            if (existingToken != null)
-            {
-                // التوكن موجود - فقط نحدث LastUsedAt و UserId
-                existingToken.UserId = deviceToken.UserId;
-                existingToken.LastUsedAt = DateTime.UtcNow;
-                existingToken.IsActive = true;
-                existingToken.UpdatedAt = DateTime.UtcNow;
-
-                _logger.LogInformation(
-                    "Token already exists, updated LastUsedAt for user {UserId}",
-                    deviceToken.UserId);
-
-                await _context.SaveChangesAsync(cancellationToken);
-                return;
-            }
-
-            // 2. توكن جديد - نتحقق من العدد
-            var userTokens = await _context.Set<DeviceTokenEntity>()
-                .Where(x => x.UserId == deviceToken.UserId && x.IsActive && !x.IsDeleted)
-                .OrderBy(x => x.LastUsedAt)
-                .ToListAsync(cancellationToken);
-
-            // 3. إذا تجاوز الحد، نحذف الأقدم
-            while (userTokens.Count >= MaxTokensPerUser)
-            {
-                var oldest = userTokens.First();
-                oldest.IsActive = false;
-                oldest.IsDeleted = true;
-                oldest.UpdatedAt = DateTime.UtcNow;
-                userTokens.RemoveAt(0);
-
-                _logger.LogInformation(
-                    "Removed oldest token for user {UserId} (limit: {Max})",
-                    deviceToken.UserId, MaxTokensPerUser);
-            }
-
-            // 4. إنشاء التوكن الجديد
+            // فقط أضف التوكن - بدون أي شروط
             var entity = new DeviceTokenEntity
             {
                 Id = Guid.NewGuid(),
@@ -101,14 +62,11 @@ public class EfFirebaseTokenStore : IFirebaseTokenStore
             _context.Set<DeviceTokenEntity>().Add(entity);
             await _context.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation(
-                "Created new device token for user {UserId}, platform: {Platform}",
-                deviceToken.UserId,
-                deviceToken.Platform);
+            _logger.LogInformation("✅ TOKEN SAVED SUCCESSFULLY! Id={Id}", entity.Id);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error saving token for user {UserId}", deviceToken.UserId);
+            _logger.LogError(ex, "❌ FAILED TO SAVE TOKEN: {Error}", ex.Message);
             throw;
         }
     }
