@@ -1,6 +1,8 @@
 using ACommerce.Client.Notifications;
 using Microsoft.Extensions.Logging;
 using Plugin.Firebase.CloudMessaging;
+using System.Text;
+using System.Text.Json;
 
 namespace Ashare.App.Services;
 
@@ -70,14 +72,20 @@ public class PushNotificationService : IPushNotificationService
     /// </summary>
     private async Task RequestAndRegisterNewTokenAsync()
     {
+        var platform = DeviceInfo.Platform == DevicePlatform.iOS ? "iOS" : "Android";
+
         try
         {
+            await SendDiagnosticAsync($"FCM.GetToken.{platform}", "STARTED", "Requesting FCM token...");
+
             var token = await CrossFirebaseCloudMessaging.Current.GetTokenAsync();
 
             if (!string.IsNullOrEmpty(token))
             {
                 _currentToken = token;
                 var expiry = DateTime.UtcNow.Add(TokenValidity);
+
+                await SendDiagnosticAsync($"FCM.GetToken.{platform}", "SUCCESS", $"Token: {token[..Math.Min(40, token.Length)]}...");
 
                 // حفظ التوكن محلياً مع تاريخ الانتهاء
                 SaveTokenLocally(token, expiry);
@@ -94,11 +102,13 @@ public class PushNotificationService : IPushNotificationService
             else
             {
                 _logger.LogWarning("[Push] Firebase returned null or empty token");
+                await SendDiagnosticAsync($"FCM.GetToken.{platform}", "EMPTY", "Firebase returned null/empty token!");
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "[Push] Failed to request new token");
+            await SendDiagnosticAsync($"FCM.GetToken.{platform}", "ERROR", ex.Message, ex.StackTrace);
         }
     }
 
@@ -308,6 +318,8 @@ public class PushNotificationService : IPushNotificationService
         _logger.LogInformation("[Push] 📤 Sending token to backend: Platform={Platform}, Token={Token}...",
             platform, token[..Math.Min(20, token.Length)]);
 
+        await SendDiagnosticAsync($"Backend.Register.{platform}", "STARTED", $"Sending token to backend...");
+
         try
         {
             await _notificationsClient.RegisterDeviceTokenAsync(new RegisterDeviceTokenRequest
@@ -317,14 +329,17 @@ public class PushNotificationService : IPushNotificationService
             });
 
             _logger.LogInformation("[Push] ✅✅✅ TOKEN REGISTERED WITH BACKEND!");
+            await SendDiagnosticAsync($"Backend.Register.{platform}", "SUCCESS", "Token registered with backend!");
         }
         catch (HttpRequestException httpEx)
         {
             _logger.LogError("[Push] ❌ HTTP Error: {Status} - {Message}", httpEx.StatusCode, httpEx.Message);
+            await SendDiagnosticAsync($"Backend.Register.{platform}", "HTTP_ERROR", $"Status: {httpEx.StatusCode}, Message: {httpEx.Message}");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "[Push] ❌ Failed to register: {Type} - {Message}", ex.GetType().Name, ex.Message);
+            await SendDiagnosticAsync($"Backend.Register.{platform}", "ERROR", $"{ex.GetType().Name}: {ex.Message}", ex.StackTrace);
         }
     }
 
@@ -342,6 +357,48 @@ public class PushNotificationService : IPushNotificationService
             Data = data ?? new Dictionary<string, string>(),
             WasInForeground = true
         });
+    }
+
+    /// <summary>
+    /// إرسال تقرير تشخيصي للخادم
+    /// </summary>
+    private static readonly HttpClient _diagnosticClient = new();
+    private const string DiagnosticUrl = "https://api.ashare.sa/api/errorreporting/report";
+
+    private async Task SendDiagnosticAsync(string operation, string status, string message, string? stackTrace = null)
+    {
+        try
+        {
+            var report = new
+            {
+                ReportId = Guid.NewGuid().ToString(),
+                Source = "Push-Diagnostic",
+                Operation = $"{operation}: {status}",
+                ErrorMessage = message,
+                StackTrace = stackTrace,
+                Platform = DeviceInfo.Platform.ToString(),
+                AppVersion = AppInfo.VersionString,
+                OsVersion = DeviceInfo.VersionString,
+                DeviceModel = DeviceInfo.Model,
+                Timestamp = DateTime.UtcNow,
+                AdditionalData = new Dictionary<string, object>
+                {
+                    ["Manufacturer"] = DeviceInfo.Manufacturer,
+                    ["DeviceName"] = DeviceInfo.Name,
+                    ["Idiom"] = DeviceInfo.Idiom.ToString()
+                }
+            };
+
+            var json = JsonSerializer.Serialize(report);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _diagnosticClient.PostAsync(DiagnosticUrl, content);
+            _logger.LogDebug("[Diagnostic] Sent: {Operation} = {Status}, Response: {Code}", operation, status, response.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("[Diagnostic] Failed to send: {Error}", ex.Message);
+        }
     }
 }
 

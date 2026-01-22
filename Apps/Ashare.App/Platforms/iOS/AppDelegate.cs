@@ -4,12 +4,17 @@ using Foundation;
 using UIKit;
 using UserNotifications;
 using Firebase.Core;
+using System.Text;
+using System.Text.Json;
 
 namespace Ashare.App;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterDelegate
 {
+    private static readonly HttpClient _httpClient = new();
+    private const string DiagnosticUrl = "https://api.ashare.sa/api/errorreporting/report";
+
     protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
 
     public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
@@ -19,10 +24,12 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
         {
             App.Configure();
             System.Diagnostics.Debug.WriteLine("[Firebase iOS] Firebase configured successfully");
+            _ = SendDiagnosticAsync("Firebase.Configure", "SUCCESS", "Firebase configured successfully");
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[Firebase iOS] Firebase configuration error: {ex.Message}");
+            _ = SendDiagnosticAsync("Firebase.Configure", "FAILED", ex.Message, ex.StackTrace);
         }
 
         var result = base.FinishedLaunching(application, launchOptions);
@@ -60,6 +67,8 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
     {
         UNUserNotificationCenter.Current.Delegate = this;
 
+        _ = SendDiagnosticAsync("Push.RequestAuthorization", "STARTED", "Requesting notification authorization...");
+
         UNUserNotificationCenter.Current.RequestAuthorization(
             UNAuthorizationOptions.Alert | UNAuthorizationOptions.Badge | UNAuthorizationOptions.Sound,
             (granted, error) =>
@@ -67,9 +76,12 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
                 if (granted)
                 {
                     System.Diagnostics.Debug.WriteLine("[Push iOS] Notification authorization granted");
+                    _ = SendDiagnosticAsync("Push.Authorization", "GRANTED", "User granted notification permission");
+
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
                         application.RegisterForRemoteNotifications();
+                        _ = SendDiagnosticAsync("Push.RegisterForRemote", "CALLED", "RegisterForRemoteNotifications called");
                     });
 
                     // تهيئة خدمة الإشعارات بعد الحصول على الإذن
@@ -81,32 +93,42 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
                             var pushService = IPlatformApplication.Current?.Services.GetService<IPushNotificationService>();
                             if (pushService != null)
                             {
+                                await SendDiagnosticAsync("Push.InitializeService", "STARTED", "Initializing PushNotificationService...");
                                 await pushService.InitializeAsync();
+                                await SendDiagnosticAsync("Push.InitializeService", "COMPLETED", "PushNotificationService initialized");
                                 System.Diagnostics.Debug.WriteLine("[Push iOS] Push notification service initialized");
+                            }
+                            else
+                            {
+                                await SendDiagnosticAsync("Push.InitializeService", "FAILED", "PushNotificationService is NULL!");
                             }
                         }
                         catch (Exception ex)
                         {
                             System.Diagnostics.Debug.WriteLine($"[Push iOS] Init error: {ex.Message}");
+                            await SendDiagnosticAsync("Push.InitializeService", "ERROR", ex.Message, ex.StackTrace);
                         }
                     });
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"[Push iOS] Notification authorization denied: {error?.LocalizedDescription}");
+                    var errorMsg = error?.LocalizedDescription ?? "Unknown error";
+                    System.Diagnostics.Debug.WriteLine($"[Push iOS] Notification authorization denied: {errorMsg}");
+                    _ = SendDiagnosticAsync("Push.Authorization", "DENIED", errorMsg);
                 }
             });
     }
 
     /// <summary>
     /// استلام Device Token من APNS
-    /// FirebaseAppDelegateProxyEnabled=true يتعامل مع هذا تلقائياً
     /// </summary>
     [Export("application:didRegisterForRemoteNotificationsWithDeviceToken:")]
     public void RegisteredForRemoteNotifications(UIApplication application, NSData deviceToken)
     {
-        System.Diagnostics.Debug.WriteLine("[Push iOS] Registered for remote notifications with APNs token");
-        // Firebase proxy يتعامل مع تمرير التوكن تلقائياً
+        var tokenBytes = deviceToken.ToArray();
+        var tokenString = BitConverter.ToString(tokenBytes).Replace("-", "").ToLowerInvariant();
+        System.Diagnostics.Debug.WriteLine($"[Push iOS] APNs token received: {tokenString[..Math.Min(20, tokenString.Length)]}...");
+        _ = SendDiagnosticAsync("Push.APNsToken", "RECEIVED", $"APNs token: {tokenString[..Math.Min(40, tokenString.Length)]}...");
     }
 
     /// <summary>
@@ -116,6 +138,7 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
     public void FailedToRegisterForRemoteNotifications(UIApplication application, NSError error)
     {
         System.Diagnostics.Debug.WriteLine($"[Push iOS] Failed to register: {error.LocalizedDescription}");
+        _ = SendDiagnosticAsync("Push.APNsToken", "FAILED", error.LocalizedDescription, $"Code: {error.Code}, Domain: {error.Domain}");
     }
 
     /// <summary>
@@ -247,6 +270,45 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[DeepLink iOS] Error handling: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// إرسال تقرير تشخيصي للخادم
+    /// </summary>
+    private static async Task SendDiagnosticAsync(string operation, string status, string message, string? stackTrace = null)
+    {
+        try
+        {
+            var report = new
+            {
+                ReportId = Guid.NewGuid().ToString(),
+                Source = "iOS-Push-Diagnostic",
+                Operation = $"{operation}: {status}",
+                ErrorMessage = message,
+                StackTrace = stackTrace,
+                Platform = "iOS",
+                AppVersion = AppInfo.VersionString,
+                OsVersion = $"iOS {UIDevice.CurrentDevice.SystemVersion}",
+                DeviceModel = UIDevice.CurrentDevice.Model,
+                Timestamp = DateTime.UtcNow,
+                AdditionalData = new Dictionary<string, object>
+                {
+                    ["DeviceName"] = UIDevice.CurrentDevice.Name,
+                    ["SystemName"] = UIDevice.CurrentDevice.SystemName,
+                    ["Idiom"] = UIDevice.CurrentDevice.UserInterfaceIdiom.ToString()
+                }
+            };
+
+            var json = JsonSerializer.Serialize(report);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync(DiagnosticUrl, content);
+            System.Diagnostics.Debug.WriteLine($"[Diagnostic] Sent: {operation} = {status}, Response: {response.StatusCode}");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Diagnostic] Failed to send: {ex.Message}");
         }
     }
 }
