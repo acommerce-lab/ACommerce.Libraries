@@ -10,7 +10,6 @@ namespace ACommerce.Notifications.Channels.Firebase.EntityFramework;
 /// <summary>
 /// Entity Framework implementation of IFirebaseTokenStore
 /// يخزن Device Tokens في قاعدة البيانات
-/// يعمل مع أي DbContext يحتوي على DeviceTokenEntity (يُكتشف تلقائياً عبر IBaseEntity)
 /// </summary>
 public class EfFirebaseTokenStore : IFirebaseTokenStore
 {
@@ -18,12 +17,7 @@ public class EfFirebaseTokenStore : IFirebaseTokenStore
     private readonly ILogger<EfFirebaseTokenStore> _logger;
 
     /// <summary>
-    /// مدة صلاحية التوكن بالأيام (افتراضي: 30 يوم)
-    /// </summary>
-    private const int TokenValidityDays = 30;
-
-    /// <summary>
-    /// الحد الأقصى لعدد التوكنات النشطة لكل مستخدم
+    /// الحد الأقصى لعدد التوكنات لكل مستخدم
     /// </summary>
     private const int MaxTokensPerUser = 5;
 
@@ -44,74 +38,58 @@ public class EfFirebaseTokenStore : IFirebaseTokenStore
             deviceToken.UserId,
             deviceToken.Platform);
 
-        // 1. تنظيف التوكنات المنتهية للمستخدم
-        await CleanupExpiredTokensAsync(deviceToken.UserId, cancellationToken);
-
-        // 2. Check if token already exists
-        var existingEntity = await _context.Set<DeviceTokenEntity>()
-            .FirstOrDefaultAsync(x => x.Token == deviceToken.Token, cancellationToken);
-
-        var expiresAt = DateTime.UtcNow.AddDays(TokenValidityDays);
-
-        if (existingEntity != null)
+        try
         {
-            // Update existing token - تجديد الصلاحية
-            existingEntity.UserId = deviceToken.UserId;
-            existingEntity.Platform = deviceToken.Platform.ToString();
-            existingEntity.LastUsedAt = DateTime.UtcNow;
-            existingEntity.ExpiresAt = expiresAt;
-            existingEntity.IsActive = deviceToken.IsActive;
-            existingEntity.UpdatedAt = DateTime.UtcNow;
+            // 1. هل التوكن نفسه موجود؟
+            var existingToken = await _context.Set<DeviceTokenEntity>()
+                .FirstOrDefaultAsync(x => x.Token == deviceToken.Token && !x.IsDeleted, cancellationToken);
 
-            if (deviceToken.Metadata != null)
+            if (existingToken != null)
             {
-                existingEntity.AppVersion = deviceToken.Metadata.GetValueOrDefault("AppVersion");
-                existingEntity.DeviceModel = deviceToken.Metadata.GetValueOrDefault("DeviceModel");
-                existingEntity.MetadataJson = JsonSerializer.Serialize(deviceToken.Metadata);
+                // التوكن موجود - فقط نحدث LastUsedAt و UserId
+                existingToken.UserId = deviceToken.UserId;
+                existingToken.LastUsedAt = DateTime.UtcNow;
+                existingToken.IsActive = true;
+                existingToken.UpdatedAt = DateTime.UtcNow;
+
+                _logger.LogInformation(
+                    "Token already exists, updated LastUsedAt for user {UserId}",
+                    deviceToken.UserId);
+
+                await _context.SaveChangesAsync(cancellationToken);
+                return;
             }
 
-            _logger.LogInformation(
-                "Updated existing device token for user {UserId}, expires at {ExpiresAt}",
-                deviceToken.UserId,
-                expiresAt);
-        }
-        else
-        {
-            // 3. التحقق من عدد التوكنات النشطة
-            var activeTokenCount = await _context.Set<DeviceTokenEntity>()
-                .CountAsync(x => x.UserId == deviceToken.UserId && x.IsActive && !x.IsDeleted, cancellationToken);
+            // 2. توكن جديد - نتحقق من العدد
+            var userTokens = await _context.Set<DeviceTokenEntity>()
+                .Where(x => x.UserId == deviceToken.UserId && x.IsActive && !x.IsDeleted)
+                .OrderBy(x => x.LastUsedAt)
+                .ToListAsync(cancellationToken);
 
-            // إذا تجاوز الحد، نحذف أقدم توكن
-            if (activeTokenCount >= MaxTokensPerUser)
+            // 3. إذا تجاوز الحد، نحذف الأقدم
+            while (userTokens.Count >= MaxTokensPerUser)
             {
-                var oldestToken = await _context.Set<DeviceTokenEntity>()
-                    .Where(x => x.UserId == deviceToken.UserId && x.IsActive && !x.IsDeleted)
-                    .OrderBy(x => x.LastUsedAt)
-                    .FirstOrDefaultAsync(cancellationToken);
+                var oldest = userTokens.First();
+                oldest.IsActive = false;
+                oldest.IsDeleted = true;
+                oldest.UpdatedAt = DateTime.UtcNow;
+                userTokens.RemoveAt(0);
 
-                if (oldestToken != null)
-                {
-                    oldestToken.IsActive = false;
-                    oldestToken.IsDeleted = true;
-                    oldestToken.UpdatedAt = DateTime.UtcNow;
-
-                    _logger.LogInformation(
-                        "Deactivated oldest token for user {UserId} to make room for new one",
-                        deviceToken.UserId);
-                }
+                _logger.LogInformation(
+                    "Removed oldest token for user {UserId} (limit: {Max})",
+                    deviceToken.UserId, MaxTokensPerUser);
             }
 
-            // Create new token
+            // 4. إنشاء التوكن الجديد
             var entity = new DeviceTokenEntity
             {
                 Id = Guid.NewGuid(),
                 UserId = deviceToken.UserId,
                 Token = deviceToken.Token,
                 Platform = deviceToken.Platform.ToString(),
-                RegisteredAt = deviceToken.RegisteredAt.UtcDateTime,
-                LastUsedAt = deviceToken.LastUsedAt.UtcDateTime,
-                ExpiresAt = expiresAt,
-                IsActive = deviceToken.IsActive,
+                RegisteredAt = DateTime.UtcNow,
+                LastUsedAt = DateTime.UtcNow,
+                IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 AppVersion = deviceToken.Metadata?.GetValueOrDefault("AppVersion"),
                 DeviceModel = deviceToken.Metadata?.GetValueOrDefault("DeviceModel"),
@@ -121,42 +99,17 @@ public class EfFirebaseTokenStore : IFirebaseTokenStore
             };
 
             _context.Set<DeviceTokenEntity>().Add(entity);
+            await _context.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
-                "Created new device token for user {UserId}, platform: {Platform}, expires at {ExpiresAt}",
+                "Created new device token for user {UserId}, platform: {Platform}",
                 deviceToken.UserId,
-                deviceToken.Platform,
-                expiresAt);
+                deviceToken.Platform);
         }
-
-        await _context.SaveChangesAsync(cancellationToken);
-    }
-
-    /// <summary>
-    /// تنظيف التوكنات المنتهية للمستخدم
-    /// </summary>
-    private async Task CleanupExpiredTokensAsync(string userId, CancellationToken cancellationToken)
-    {
-        var expiredTokens = await _context.Set<DeviceTokenEntity>()
-            .Where(x => x.UserId == userId
-                && !x.IsDeleted
-                && x.ExpiresAt.HasValue
-                && x.ExpiresAt.Value < DateTime.UtcNow)
-            .ToListAsync(cancellationToken);
-
-        if (expiredTokens.Any())
+        catch (Exception ex)
         {
-            foreach (var token in expiredTokens)
-            {
-                token.IsActive = false;
-                token.IsDeleted = true;
-                token.UpdatedAt = DateTime.UtcNow;
-            }
-
-            _logger.LogInformation(
-                "Cleaned up {Count} expired tokens for user {UserId}",
-                expiredTokens.Count,
-                userId);
+            _logger.LogError(ex, "Error saving token for user {UserId}", deviceToken.UserId);
+            throw;
         }
     }
 
@@ -166,14 +119,9 @@ public class EfFirebaseTokenStore : IFirebaseTokenStore
     {
         _logger.LogDebug("Getting device tokens for user {UserId}", userId);
 
-        var now = DateTime.UtcNow;
-
         var entities = await _context.Set<DeviceTokenEntity>()
             .AsNoTracking()
-            .Where(x => x.UserId == userId
-                && x.IsActive
-                && !x.IsDeleted
-                && (!x.ExpiresAt.HasValue || x.ExpiresAt.Value > now)) // استثناء المنتهية
+            .Where(x => x.UserId == userId && x.IsActive && !x.IsDeleted)
             .ToListAsync(cancellationToken);
 
         _logger.LogDebug("Found {Count} active tokens for user {UserId}", entities.Count, userId);
@@ -192,7 +140,6 @@ public class EfFirebaseTokenStore : IFirebaseTokenStore
 
         if (entity != null)
         {
-            // Soft delete
             entity.IsDeleted = true;
             entity.IsActive = false;
             entity.UpdatedAt = DateTime.UtcNow;
@@ -219,9 +166,7 @@ public class EfFirebaseTokenStore : IFirebaseTokenStore
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation(
-                "Device token deactivated for user {UserId}",
-                entity.UserId);
+            _logger.LogInformation("Device token deactivated for user {UserId}", entity.UserId);
         }
     }
 
