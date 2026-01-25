@@ -217,9 +217,9 @@ public class SubscriptionService : ISubscriptionService
         // تحديد حالة الاشتراك:
         // - Trial: إذا كان هناك فترة تجريبية
         // - Active: إذا كانت الباقة مجانية
-        // - PastDue: إذا كان الدفع مطلوباً (ينتظر إتمام الدفع)
+        // - PendingPayment: إذا كان الدفع مطلوباً (اشتراك جديد ينتظر الدفع الأول)
         var status = plan.TrialDays > 0 ? SubscriptionStatus.Trial
-                   : price > 0 ? SubscriptionStatus.PastDue
+                   : price > 0 ? SubscriptionStatus.PendingPayment
                    : SubscriptionStatus.Active;
 
         var subscription = new Subscription

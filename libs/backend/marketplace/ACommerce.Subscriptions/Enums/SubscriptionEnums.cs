@@ -11,7 +11,7 @@ public enum SubscriptionStatus
     /// <summary>نشط - الاشتراك فعال ومدفوع</summary>
     Active = 2,
 
-    /// <summary>معلق - في انتظار الدفع</summary>
+    /// <summary>متأخر السداد - اشتراك كان نشطاً وتأخر في التجديد</summary>
     PastDue = 3,
 
     /// <summary>ملغي - تم إلغاء الاشتراك</summary>
@@ -21,7 +21,10 @@ public enum SubscriptionStatus
     Expired = 5,
 
     /// <summary>موقوف - تم إيقافه من الإدارة</summary>
-    Suspended = 6
+    Suspended = 6,
+
+    /// <summary>في انتظار السداد - اشتراك جديد في انتظار الدفع الأول</summary>
+    PendingPayment = 7
 }
 
 /// <summary>
