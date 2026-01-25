@@ -10,12 +10,16 @@ namespace ACommerce.Notifications.Channels.Firebase.EntityFramework;
 /// <summary>
 /// Entity Framework implementation of IFirebaseTokenStore
 /// يخزن Device Tokens في قاعدة البيانات
-/// يعمل مع أي DbContext يحتوي على DeviceTokenEntity (يُكتشف تلقائياً عبر IBaseEntity)
 /// </summary>
 public class EfFirebaseTokenStore : IFirebaseTokenStore
 {
     private readonly DbContext _context;
     private readonly ILogger<EfFirebaseTokenStore> _logger;
+
+    /// <summary>
+    /// الحد الأقصى لعدد التوكنات لكل مستخدم
+    /// </summary>
+    private const int MaxTokensPerUser = 5;
 
     public EfFirebaseTokenStore(
         DbContext context,
@@ -29,47 +33,24 @@ public class EfFirebaseTokenStore : IFirebaseTokenStore
         FirebaseDeviceToken deviceToken,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug(
-            "Saving device token for user {UserId}, platform: {Platform}",
+        _logger.LogInformation(
+            "💾 SAVING TOKEN: User={UserId}, Platform={Platform}, Token={Token}",
             deviceToken.UserId,
-            deviceToken.Platform);
+            deviceToken.Platform,
+            deviceToken.Token?[..Math.Min(20, deviceToken.Token?.Length ?? 0)] + "...");
 
-        // Check if token already exists
-        var existingEntity = await _context.Set<DeviceTokenEntity>()
-            .FirstOrDefaultAsync(x => x.Token == deviceToken.Token, cancellationToken);
-
-        if (existingEntity != null)
+        try
         {
-            // Update existing token
-            existingEntity.UserId = deviceToken.UserId;
-            existingEntity.Platform = deviceToken.Platform.ToString();
-            existingEntity.LastUsedAt = DateTime.UtcNow;
-            existingEntity.IsActive = deviceToken.IsActive;
-            existingEntity.UpdatedAt = DateTime.UtcNow;
-
-            if (deviceToken.Metadata != null)
-            {
-                existingEntity.AppVersion = deviceToken.Metadata.GetValueOrDefault("AppVersion");
-                existingEntity.DeviceModel = deviceToken.Metadata.GetValueOrDefault("DeviceModel");
-                existingEntity.MetadataJson = JsonSerializer.Serialize(deviceToken.Metadata);
-            }
-
-            _logger.LogInformation(
-                "Updated existing device token for user {UserId}",
-                deviceToken.UserId);
-        }
-        else
-        {
-            // Create new token
+            // فقط أضف التوكن - بدون أي شروط
             var entity = new DeviceTokenEntity
             {
                 Id = Guid.NewGuid(),
                 UserId = deviceToken.UserId,
                 Token = deviceToken.Token,
                 Platform = deviceToken.Platform.ToString(),
-                RegisteredAt = deviceToken.RegisteredAt.UtcDateTime,
-                LastUsedAt = deviceToken.LastUsedAt.UtcDateTime,
-                IsActive = deviceToken.IsActive,
+                RegisteredAt = DateTime.UtcNow,
+                LastUsedAt = DateTime.UtcNow,
+                IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 AppVersion = deviceToken.Metadata?.GetValueOrDefault("AppVersion"),
                 DeviceModel = deviceToken.Metadata?.GetValueOrDefault("DeviceModel"),
@@ -79,14 +60,15 @@ public class EfFirebaseTokenStore : IFirebaseTokenStore
             };
 
             _context.Set<DeviceTokenEntity>().Add(entity);
+            await _context.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation(
-                "Created new device token for user {UserId}, platform: {Platform}",
-                deviceToken.UserId,
-                deviceToken.Platform);
+            _logger.LogInformation("✅ TOKEN SAVED SUCCESSFULLY! Id={Id}", entity.Id);
         }
-
-        await _context.SaveChangesAsync(cancellationToken);
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ FAILED TO SAVE TOKEN: {Error}", ex.Message);
+            throw;
+        }
     }
 
     public async Task<List<FirebaseDeviceToken>> GetUserTokensAsync(
@@ -99,6 +81,8 @@ public class EfFirebaseTokenStore : IFirebaseTokenStore
             .AsNoTracking()
             .Where(x => x.UserId == userId && x.IsActive && !x.IsDeleted)
             .ToListAsync(cancellationToken);
+
+        _logger.LogDebug("Found {Count} active tokens for user {UserId}", entities.Count, userId);
 
         return entities.Select(MapToModel).ToList();
     }
@@ -114,7 +98,6 @@ public class EfFirebaseTokenStore : IFirebaseTokenStore
 
         if (entity != null)
         {
-            // Soft delete
             entity.IsDeleted = true;
             entity.IsActive = false;
             entity.UpdatedAt = DateTime.UtcNow;
@@ -141,9 +124,7 @@ public class EfFirebaseTokenStore : IFirebaseTokenStore
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation(
-                "Device token deactivated for user {UserId}",
-                entity.UserId);
+            _logger.LogInformation("Device token deactivated for user {UserId}", entity.UserId);
         }
     }
 

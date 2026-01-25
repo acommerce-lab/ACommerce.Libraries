@@ -5,11 +5,22 @@ namespace Ashare.App;
 public partial class App : Application
 {
     private readonly AppLifecycleService _lifecycleService;
+    private readonly IPushNotificationService _pushService;
 
-    public App(AppLifecycleService lifecycleService)
+    public App(AppLifecycleService lifecycleService, IPushNotificationService pushService)
     {
         InitializeComponent();
         _lifecycleService = lifecycleService;
+        _pushService = pushService;
+
+        // الاشتراك في حدث تسجيل الدخول لتسجيل Push Token
+        _lifecycleService.UserLoggedIn += OnUserLoggedIn;
+    }
+
+    private async Task OnUserLoggedIn()
+    {
+        Console.WriteLine("[App] 🔐 User logged in - refreshing push token registration");
+        await _pushService.RefreshTokenRegistrationAsync();
     }
 
     protected override Window CreateWindow(IActivationState? activationState)

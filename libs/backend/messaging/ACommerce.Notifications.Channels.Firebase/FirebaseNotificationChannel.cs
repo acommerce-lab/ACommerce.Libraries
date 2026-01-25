@@ -162,12 +162,36 @@ public class FirebaseNotificationChannel : INotificationChannel
 		Abstractions.Models.Notification notification,
 		List<FirebaseDeviceToken> deviceTokens)
 	{
-		// 🔥 إرسال بسيط جداً - عنوان ونص فقط (للاختبار)
 		_logger.LogInformation(
-			"Building SIMPLE Firebase message: Title={Title}, Body={Body}, Tokens={TokenCount}",
+			"Building Firebase message: Title={Title}, Body={Body}, Type={Type}, Tokens={TokenCount}",
 			notification.Title,
 			notification.Message,
+			notification.Type,
 			deviceTokens.Count);
+
+		// بناء Data payload
+		var data = new Dictionary<string, string>
+		{
+			["notificationId"] = notification.Id.ToString(),
+			["type"] = notification.Type.ToString(),
+			["priority"] = notification.Priority.ToString(),
+			["createdAt"] = notification.CreatedAt.ToString("O")
+		};
+
+		// إضافة ActionUrl إذا وجد
+		if (!string.IsNullOrEmpty(notification.ActionUrl))
+		{
+			data["actionUrl"] = notification.ActionUrl;
+		}
+
+		// إضافة البيانات الإضافية
+		if (notification.Data != null)
+		{
+			foreach (var kvp in notification.Data)
+			{
+				data[kvp.Key] = kvp.Value?.ToString() ?? "";
+			}
+		}
 
 		return new MulticastMessage
 		{
@@ -175,6 +199,27 @@ public class FirebaseNotificationChannel : INotificationChannel
 			{
 				Title = notification.Title,
 				Body = notification.Message
+			},
+			Data = data,
+			Android = new AndroidConfig
+			{
+				Priority = Priority.High,
+				Notification = new AndroidNotification
+				{
+					ChannelId = _options.DefaultChannelId,
+					Sound = _options.DefaultSound,
+					DefaultSound = true,
+					NotificationPriority = NotificationPriority.PRIORITY_HIGH
+				}
+			},
+			Apns = new ApnsConfig
+			{
+				Aps = new Aps
+				{
+					Sound = _options.DefaultSound,
+					Badge = _options.EnableBadge ? 1 : 0,
+					ContentAvailable = true
+				}
 			},
 			Tokens = deviceTokens.Select(t => t.Token).ToList()
 		};
