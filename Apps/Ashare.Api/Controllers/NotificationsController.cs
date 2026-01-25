@@ -45,11 +45,18 @@ public class NotificationsController : ControllerBase
     [ProducesResponseType(401)]
     public async Task<IActionResult> RegisterDeviceToken([FromBody] RegisterDeviceTokenRequest request)
     {
+        _logger.LogInformation("📱 RegisterDeviceToken called - Token: {Token}..., Platform: {Platform}",
+            request.DeviceToken?[..Math.Min(20, request.DeviceToken?.Length ?? 0)],
+            request.Platform);
+
         var userId = GetUserId();
         if (string.IsNullOrEmpty(userId))
         {
+            _logger.LogWarning("❌ User not authenticated");
             return Unauthorized(new { message = "User not authenticated" });
         }
+
+        _logger.LogInformation("✅ User authenticated: {UserId}", userId);
 
         if (string.IsNullOrEmpty(request.DeviceToken))
         {
@@ -58,19 +65,18 @@ public class NotificationsController : ControllerBase
 
         if (_firebaseTokenStore == null)
         {
-            _logger.LogWarning("Firebase token store not configured");
+            _logger.LogWarning("❌ Firebase token store not configured!");
             return Ok(new { message = "Firebase not configured, token not saved" });
         }
 
         try
         {
-            // تحديد نوع الجهاز
             var platform = request.Platform?.ToLowerInvariant() switch
             {
                 "ios" => DevicePlatform.iOS,
                 "android" => DevicePlatform.Android,
                 "web" => DevicePlatform.Web,
-                _ => DevicePlatform.Android // الافتراضي
+                _ => DevicePlatform.Android
             };
 
             var deviceToken = new FirebaseDeviceToken
@@ -88,17 +94,17 @@ public class NotificationsController : ControllerBase
                 }
             };
 
+            _logger.LogInformation("💾 Calling SaveTokenAsync...");
             await _firebaseTokenStore.SaveTokenAsync(deviceToken);
 
-            _logger.LogInformation("Device token registered for user {UserId}, platform: {Platform}",
-                userId, platform);
+            _logger.LogInformation("✅✅✅ TOKEN SAVED! User: {UserId}, Platform: {Platform}", userId, platform);
 
             return Ok(new { success = true, message = "Device token registered successfully" });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error registering device token for user {UserId}", userId);
-            return StatusCode(500, new { message = "Failed to register device token" });
+            _logger.LogError(ex, "❌ Error registering device token: {Error}", ex.Message);
+            return StatusCode(500, new { message = "Failed to register device token", error = ex.Message });
         }
     }
 

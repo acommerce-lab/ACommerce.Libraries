@@ -65,8 +65,8 @@
 		<string>remote-notification</string>
 	</array>
 
-	<!-- Firebase Analytics - Disable swizzling for manual handling -->
+	<!-- Firebase - Enable automatic APNs token handling -->
 	<key>FirebaseAppDelegateProxyEnabled</key>
-	<false/>
+	<true/>
 </dict>
 </plist>
