@@ -445,6 +445,27 @@
     padding: 0;
 }
 
+/* Remove tap highlight and focus outlines on mobile */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Remove default focus outline for interactive elements */
+button, a, input, select, textarea, [tabindex] {
+    outline: none;
+}
+
+/* Provide visible focus for keyboard navigation (accessibility) */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+    outline: 2px solid var(--ashare-primary);
+    outline-offset: 2px;
+}
+
 html {
     font-size: 16px;
     -webkit-text-size-adjust: 100%;
@@ -7032,6 +7053,11 @@ h1, h2, h3, .ashare-logo-text {
     color: var(--ashare-warning);
 }
 
+.ashare-subscription-status.status-pending-payment {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--ashare-info);
+}
+
 .ashare-subscription-status.status-cancelled,
 .ashare-subscription-status.status-expired,
 .ashare-subscription-status.status-suspended {
@@ -8277,6 +8303,51 @@ h1, h2, h3, .ashare-logo-text {
 
 .ac-btn-outline:hover::after {
     opacity: 1;
+}
+
+/* Outline Button Variants */
+.ac-btn-outline-primary {
+    background: transparent;
+    border: 2px solid var(--ashare-primary);
+    color: var(--ashare-primary);
+    transition: all var(--ashare-transition-normal);
+}
+
+.ac-btn-outline-primary:hover {
+    background: var(--ashare-primary);
+    color: white;
+}
+
+.ac-btn-outline-primary:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2);
+}
+
+.ac-btn-outline-secondary {
+    background: transparent;
+    border: 2px solid var(--ashare-secondary);
+    color: var(--ashare-secondary);
+    transition: all var(--ashare-transition-normal);
+}
+
+.ac-btn-outline-secondary:hover {
+    background: var(--ashare-secondary);
+    color: white;
+}
+
+.ac-btn-outline-secondary:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(244, 132, 76, 0.2);
+}
+
+/* Remove default focus outline for all buttons */
+.ac-btn:focus,
+.ac-btn-primary:focus,
+.ac-btn-secondary:focus,
+.ac-btn-accent:focus,
+.ac-btn-cta:focus,
+.ac-btn-outline:focus {
+    outline: none;
 }
 
 /* Floating Action Button */

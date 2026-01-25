@@ -247,6 +247,7 @@ public class LocalizationService : BaseLocalizationService
         ar["StatusActive"] = "نشط";
         ar["StatusTrial"] = "فترة تجريبية";
         ar["StatusPastDue"] = "متأخر السداد";
+        ar["StatusPendingPayment"] = "في انتظار السداد";
         ar["StatusCancelled"] = "ملغي";
         ar["StatusExpired"] = "منتهي";
         ar["StatusSuspended"] = "موقوف";
@@ -841,6 +842,7 @@ public class LocalizationService : BaseLocalizationService
         en["StatusActive"] = "Active";
         en["StatusTrial"] = "Trial";
         en["StatusPastDue"] = "Past Due";
+        en["StatusPendingPayment"] = "Pending Payment";
         en["StatusCancelled"] = "Cancelled";
         en["StatusExpired"] = "Expired";
         en["StatusSuspended"] = "Suspended";
