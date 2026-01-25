@@ -97,15 +97,22 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.*" />
 		<!-- SkiaSharp for image compression -->
 		<PackageReference Include="SkiaSharp" Version="3.116.1" />
-		<!-- Firebase Cloud Messaging -->
-		<PackageReference Include="Plugin.Firebase.CloudMessaging" Version="3.0.0" />
+		<!-- Firebase Cloud Messaging - v4.0+ required for .NET 9 -->
+		<PackageReference Include="Plugin.Firebase.CloudMessaging" Version="4.0.0" />
 	</ItemGroup>
 
 	<!-- Firebase Configuration - Android -->
-	<ItemGroup Condition="'$(TargetFramework)'=='net9.0-android'">
+	<!-- Firebase Configuration - Android -->
+	<!-- Note: google-services.json is required for Firebase. Create it from Firebase Console -->
+	<ItemGroup Condition="'$(TargetFramework)'=='net9.0-android' AND Exists('Platforms\Android\google-services.json')">
 		<GoogleServicesJson Include="Platforms\Android\google-services.json" />
 	</ItemGroup>
 
+	<!-- Firebase Configuration - iOS -->
+	<!-- Note: GoogleService-Info.plist is required for Firebase. Create it from Firebase Console -->
+	<ItemGroup Condition="'$(TargetFramework)'=='net9.0-ios' AND Exists('Platforms\iOS\GoogleService-Info.plist')">
+		<BundleResource Include="Platforms\iOS\GoogleService-Info.plist" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<!-- Reference to Shared Library (contains all pages, components, services) -->
