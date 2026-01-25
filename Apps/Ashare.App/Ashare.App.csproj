@@ -1,13 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
 	<PropertyGroup>
-		<TargetFrameworks>net9.0-android;net9.0-ios</TargetFrameworks>
+		<!-- To build Android only, use: dotnet publish -f net9.0-android -->
+		<!-- Or set AndroidOnly=true: dotnet build -p:AndroidOnly=true -->
+		<TargetFrameworks Condition="'$(AndroidOnly)'!='true'">net9.0-android;net9.0-ios</TargetFrameworks>
+		<TargetFrameworks Condition="'$(AndroidOnly)'=='true'">net9.0-android</TargetFrameworks>
 
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows')) AND '$(AndroidOnly)'!='true'">
 			$(TargetFrameworks);net9.0-windows10.0.19041.0
 		</TargetFrameworks>
 
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('osx'))">
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('osx')) AND '$(AndroidOnly)'!='true'">
 			$(TargetFrameworks);net9.0-maccatalyst
 		</TargetFrameworks>
 
