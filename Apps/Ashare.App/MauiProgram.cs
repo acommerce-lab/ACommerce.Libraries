@@ -12,6 +12,8 @@ using ACommerce.ServiceRegistry.Client.Extensions;
 using Microsoft.Extensions.Logging;
 using Ashare.App.Services;
 using ThemeService = Ashare.Shared.Services.ThemeService;
+using Microsoft.Maui.LifecycleEvents;
+
 #if IOS
 using Plugin.Firebase.Core.Platforms.iOS;
 #elif ANDROID
