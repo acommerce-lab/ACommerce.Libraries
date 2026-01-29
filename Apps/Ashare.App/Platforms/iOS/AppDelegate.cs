@@ -6,6 +6,7 @@ using UserNotifications;
 using Firebase.Core;
 using System.Text;
 using System.Text.Json;
+using Plugin.Firebase.Core.Platforms.iOS;
 
 namespace Ashare.App;
 
@@ -19,20 +20,33 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
 
     public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
     {
-        // ✅ تهيئة Firebase (مطلوب قبل أي عملية Firebase)
+        // ✅ تهيئة Firebase Native SDK أولاً
         try
         {
             Firebase.Core.App.Configure();
-            System.Diagnostics.Debug.WriteLine("[Firebase iOS] Firebase configured successfully");
-            _ = SendDiagnosticAsync("Firebase.Configure", "SUCCESS", "Firebase configured successfully");
+            System.Diagnostics.Debug.WriteLine("[Firebase iOS] Firebase.Core configured successfully");
+            _ = SendDiagnosticAsync("Firebase.Configure", "SUCCESS", "Firebase.Core configured successfully");
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[Firebase iOS] Firebase configuration error: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[Firebase iOS] Firebase.Core configuration error: {ex.Message}");
             _ = SendDiagnosticAsync("Firebase.Configure", "FAILED", ex.Message, ex.StackTrace);
         }
 
         var result = base.FinishedLaunching(application, launchOptions);
+
+        // ✅ تهيئة CrossFirebase بعد base.FinishedLaunching لضمان اكتمال تهيئة MAUI
+        try
+        {
+            CrossFirebase.Initialize();
+            System.Diagnostics.Debug.WriteLine("[Firebase iOS] CrossFirebase initialized successfully");
+            _ = SendDiagnosticAsync("CrossFirebase.Initialize", "SUCCESS", "CrossFirebase initialized successfully");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Firebase iOS] CrossFirebase initialization error: {ex.Message}");
+            _ = SendDiagnosticAsync("CrossFirebase.Initialize", "FAILED", ex.Message, ex.StackTrace);
+        }
 
         // تهيئة خدمة الإسناد
         Task.Run(async () =>
