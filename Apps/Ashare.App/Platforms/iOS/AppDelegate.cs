@@ -22,7 +22,7 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
         // ✅ تهيئة Firebase (مطلوب قبل أي عملية Firebase)
         try
         {
-            App.Configure();
+            Firebase.Core.App.Configure();
             System.Diagnostics.Debug.WriteLine("[Firebase iOS] Firebase configured successfully");
             _ = SendDiagnosticAsync("Firebase.Configure", "SUCCESS", "Firebase configured successfully");
         }
