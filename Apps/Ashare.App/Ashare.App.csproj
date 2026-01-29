@@ -3,11 +3,11 @@
 	<PropertyGroup>
 		<TargetFrameworks>net9.0-android;net9.0-ios</TargetFrameworks>
 
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">
+		<!--<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows')) AND '$(AndroidOnly)'!='true'">
 			$(TargetFrameworks);net9.0-windows10.0.19041.0
-		</TargetFrameworks>
+		</TargetFrameworks>-->
 
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('osx'))">
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('osx')) AND '$(AndroidOnly)'!='true'">
 			$(TargetFrameworks);net9.0-maccatalyst
 		</TargetFrameworks>
 
@@ -25,8 +25,8 @@
 		<ApplicationId>com.ashare.ashare</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>1.207</ApplicationDisplayVersion>
-		<ApplicationVersion>207</ApplicationVersion>
+		<ApplicationDisplayVersion>1.224</ApplicationDisplayVersion>
+		<ApplicationVersion>224</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
