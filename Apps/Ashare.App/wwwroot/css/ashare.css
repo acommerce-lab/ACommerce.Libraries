@@ -186,6 +186,51 @@
     background-color: var(--ashare-white);
 }
 
+/* ─────────────────────────────────────────────────────────────────
+   Mobile Focus Ring Removal - إزالة إطار التركيز للموبايل
+   ───────────────────────────────────────────────────────────────── */
+/* Remove focus outline/ring from all interactive elements on mobile */
+*:focus {
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+*:focus-visible {
+    outline: none !important;
+}
+
+/* Remove blue highlight on tap for iOS/Android */
+a, button, input, select, textarea,
+[role="button"], [tabindex],
+.ac-btn, .ac-bottom-nav-item, .ac-navbar-item,
+.ashare-tab, .ashare-card, .ac-card {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+    outline: none !important;
+}
+
+a:focus, a:active,
+button:focus, button:active,
+input:focus, input:active,
+select:focus, select:active,
+textarea:focus, textarea:active,
+[role="button"]:focus, [role="button"]:active,
+[tabindex]:focus, [tabindex]:active,
+.ac-btn:focus, .ac-btn:active,
+.ac-bottom-nav-item:focus, .ac-bottom-nav-item:active {
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Blazor specific - remove focus from navigation links */
+.nav-link:focus, .nav-link:active,
+nav a:focus, nav a:active,
+.mud-nav-link:focus, .mud-nav-link:active {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
 .ac-dark .ac-navbar {
     background-color: var(--ashare-surface);
     border-bottom-color: var(--ashare-gray-200);
