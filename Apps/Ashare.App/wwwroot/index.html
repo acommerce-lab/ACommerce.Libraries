@@ -29,6 +29,24 @@
     <link rel="stylesheet" href="_content/ACommerce.Templates.Customer/css/acommerce.css" />
     <link rel="stylesheet" href="css/ashare.css" />
 
+    <!-- Mobile Focus Ring Removal - Critical for iOS/Android -->
+    <style>
+        /* Remove ALL focus outlines/rings for mobile apps */
+        *, *:before, *:after {
+            -webkit-tap-highlight-color: transparent !important;
+        }
+        *:focus, *:focus-visible, *:focus-within {
+            outline: none !important;
+            outline-width: 0 !important;
+            box-shadow: none !important;
+        }
+        /* Target Blazor/MAUI specific elements */
+        button, a, input, select, textarea, [tabindex], [role="button"] {
+            outline: none !important;
+            -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+        }
+    </style>
+
     <!-- iOS Splash Screens -->
     <link rel="apple-touch-icon" href="images/icon-512.png" />
 </head>
