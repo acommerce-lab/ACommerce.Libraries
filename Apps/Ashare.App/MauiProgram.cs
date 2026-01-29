@@ -43,10 +43,10 @@ public static class MauiProgram
             .ConfigureLifecycleEvents(events =>
             {
 #if IOS
-                events.AddiOS(ios => ios.WillFinishLaunching((_, __) =>
+                events.AddiOS(ios => ios.FinishedLaunching((app, options) =>
                 {
                     CrossFirebase.Initialize();
-                    return false;
+                    return true;
                 }));
 #elif ANDROID
                 events.AddAndroid(android => android.OnCreate((activity, _) =>
