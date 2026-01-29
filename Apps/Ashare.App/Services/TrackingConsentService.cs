@@ -11,21 +11,59 @@ public class TrackingConsentService : ITrackingConsentService
     private const string ConsentStatusKey = "tracking_consent_status";
     private const string ConsentRequestedKey = "tracking_consent_requested";
 
-    private TrackingConsentStatus _consentStatus = TrackingConsentStatus.NotDetermined;
+    private TrackingConsentStatus? _consentStatus;
+    private bool _isInitialized;
 
     public event Action<TrackingConsentStatus>? ConsentStatusChanged;
 
     public TrackingConsentService()
     {
-        // تحميل الحالة المحفوظة
-        LoadSavedStatus();
+        // لا نقوم بتحميل الحالة في constructor لتجنب crash على iOS
+        // سيتم تحميلها عند أول طلب للحالة
     }
 
-    public TrackingConsentStatus ConsentStatus => _consentStatus;
+    public TrackingConsentStatus ConsentStatus
+    {
+        get
+        {
+            EnsureInitialized();
+            return _consentStatus ?? TrackingConsentStatus.NotDetermined;
+        }
+    }
 
     public bool HasRequestedConsent => Preferences.Get(ConsentRequestedKey, false);
 
-    public bool IsTrackingAllowed => _consentStatus == TrackingConsentStatus.Authorized;
+    public bool IsTrackingAllowed
+    {
+        get
+        {
+            EnsureInitialized();
+            return _consentStatus == TrackingConsentStatus.Authorized;
+        }
+    }
+
+    /// <summary>
+    /// تهيئة الخدمة بشكل آمن (تُستدعى عند أول طلب للحالة)
+    /// </summary>
+    private void EnsureInitialized()
+    {
+        if (_isInitialized)
+            return;
+
+        try
+        {
+            LoadSavedStatus();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[TrackingConsent] Error during initialization: {ex.Message}");
+            _consentStatus = TrackingConsentStatus.NotDetermined;
+        }
+        finally
+        {
+            _isInitialized = true;
+        }
+    }
 
     public async Task<TrackingConsentStatus> RequestConsentAsync()
     {
@@ -44,14 +82,15 @@ public class TrackingConsentService : ITrackingConsentService
 #endif
 
             // حفظ الحالة
-            SaveStatus(_consentStatus);
+            SaveStatus(_consentStatus ?? TrackingConsentStatus.NotDetermined);
             Preferences.Set(ConsentRequestedKey, true);
 
             // إطلاق الحدث
-            ConsentStatusChanged?.Invoke(_consentStatus);
+            var currentStatus = _consentStatus ?? TrackingConsentStatus.NotDetermined;
+            ConsentStatusChanged?.Invoke(currentStatus);
 
-            Console.WriteLine($"[TrackingConsent] Status: {_consentStatus}");
-            return _consentStatus;
+            Console.WriteLine($"[TrackingConsent] Status: {currentStatus}");
+            return currentStatus;
         }
         catch (Exception ex)
         {
