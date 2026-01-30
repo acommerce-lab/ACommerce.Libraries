@@ -2367,6 +2367,23 @@ h1, h2, h3, .ashare-logo-text {
     backdrop-filter: blur(4px);
 }
 
+/* Favorite button in gallery - same row as back button */
+.ashare-gallery-main .ashare-favorite-btn {
+    position: absolute;
+    top: calc(var(--safe-area-top) + var(--ashare-spacing-md));
+    left: var(--ashare-spacing-md);
+    background-color: rgba(255,255,255,0.9);
+    border-radius: var(--ashare-radius-full);
+    backdrop-filter: blur(4px);
+}
+
+/* Share button in gallery - next to favorite button */
+.ashare-gallery-main .ashare-share-btn {
+    position: absolute;
+    top: calc(var(--safe-area-top) + var(--ashare-spacing-md));
+    left: calc(var(--ashare-spacing-md) + 48px);
+}
+
 .ashare-share-btn {
     position: absolute;
     top: calc(var(--safe-area-top) + var(--ashare-spacing-md));
