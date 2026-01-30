@@ -143,32 +143,44 @@
             }
         </div>
 
-        @* Protection Info *@
-        <div class="ashare-details-card ashare-protection-card">
-            <div class="ashare-protection-header">
-                <i class="bi bi-shield-check"></i>
-                <h2>حماية المبلغ</h2>
-            </div>
-            <p>مبلغك محمي بالكامل. لن يتم تحويله للمعلن إلا بعد تأكيدك، ويمكنك استرداده فوراً في أي وقت.</p>
-
-            @if (_booking.Status == BookingStatus.Pending || _booking.Status == BookingStatus.Confirmed)
-            {
-                <div class="ashare-protection-actions">
-                    <button class="ac-btn ac-btn-success" @onclick="ReleaseDeposit" disabled="@(_booking.Status != BookingStatus.Confirmed)">
-                        <i class="bi bi-check-lg"></i>
-                        تأكيد وتحويل للمعلن
-                    </button>
-                    <button class="ac-btn ac-btn-outline-danger" @onclick="RequestRefund">
-                        <i class="bi bi-arrow-counterclockwise"></i>
-                        استرداد المبلغ
-                    </button>
+        @* Protection Info - يظهر فقط للعميل (الحاجز) وليس للمعلن *@
+        @if (!_isHost)
+        {
+            <div class="ashare-details-card ashare-protection-card">
+                <div class="ashare-protection-header">
+                    <i class="bi bi-shield-check"></i>
+                    <h2>حماية المبلغ</h2>
                 </div>
-            }
-        </div>
+                <p>مبلغك محمي بالكامل. لن يتم تحويله للمعلن إلا بعد تأكيدك، ويمكنك استرداده فوراً في أي وقت.</p>
+
+                @* أزرار التأكيد والاسترداد - تظهر فقط بعد تأكيد الحجز من المعلن *@
+                @if (_booking.Status == BookingStatus.Confirmed)
+                {
+                    <div class="ashare-protection-actions">
+                        <button class="ac-btn ac-btn-success" @onclick="ReleaseDeposit">
+                            <i class="bi bi-check-lg"></i>
+                            تأكيد وتحويل للمعلن
+                        </button>
+                        <button class="ac-btn ac-btn-outline-danger" @onclick="RequestRefund">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                            استرداد المبلغ
+                        </button>
+                    </div>
+                }
+                else if (_booking.Status == BookingStatus.Pending)
+                {
+                    <div class="ashare-protection-note">
+                        <i class="bi bi-info-circle"></i>
+                        <span>ستظهر خيارات التأكيد والاسترداد بعد قبول المعلن للحجز</span>
+                    </div>
+                }
+            </div>
+        }
 
         @* Actions *@
         <div class="ashare-details-actions">
-            @if (_booking.Status == BookingStatus.Pending)
+            @* زر إلغاء الحجز - يظهر فقط للعميل عندما يكون الحجز قيد المراجعة *@
+            @if (!_isHost && _booking.Status == BookingStatus.Pending)
             {
                 <button class="ac-btn ac-btn-outline-danger ac-btn-block" @onclick="CancelBooking">
                     <i class="bi bi-x-circle"></i>
@@ -786,6 +798,22 @@
         display: flex;
         flex-direction: column;
         gap: var(--ashare-spacing-sm);
+    }
+
+    .ashare-protection-note {
+        display: flex;
+        align-items: center;
+        gap: var(--ashare-spacing-sm);
+        padding: var(--ashare-spacing-sm) var(--ashare-spacing-md);
+        background: rgba(16, 185, 129, 0.1);
+        border-radius: var(--ashare-radius-md);
+        font-size: 13px;
+        color: #047857;
+    }
+
+    .ashare-protection-note i {
+        font-size: 16px;
+        flex-shrink: 0;
     }
 
     .ashare-details-actions {
