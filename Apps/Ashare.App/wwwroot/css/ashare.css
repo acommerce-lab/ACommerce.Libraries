@@ -187,6 +187,39 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────
+   CRITICAL: Prevent System Font Scaling - منع تكبير الخط من النظام
+   Ensures consistent UI regardless of iOS Dynamic Type or Android
+   accessibility font size settings
+   ───────────────────────────────────────────────────────────────── */
+html {
+    -webkit-text-size-adjust: 100% !important;
+    -moz-text-size-adjust: 100% !important;
+    -ms-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+    font-size: 16px !important;
+}
+
+body {
+    -webkit-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+    font-size: 16px !important;
+}
+
+/* Apply to all elements to prevent any scaling */
+* {
+    -webkit-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+}
+
+/* Ensure fixed font sizes for critical UI elements */
+.ac-navbar, .ac-bottom-nav, .ac-btn,
+.ashare-header, .ashare-title,
+.ac-card-title, .ac-card-subtitle {
+    font-size: inherit !important;
+    -webkit-text-size-adjust: 100% !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────
    Mobile Focus Ring Removal - إزالة إطار التركيز للموبايل
    ───────────────────────────────────────────────────────────────── */
 /* Remove focus outline/ring from all interactive elements on mobile */

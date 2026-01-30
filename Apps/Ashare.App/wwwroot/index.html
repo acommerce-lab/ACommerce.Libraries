@@ -31,6 +31,28 @@
 
     <!-- Mobile Focus Ring Removal - Critical for iOS/Android -->
     <style>
+        /* ═══════════════════════════════════════════════════════════════
+           CRITICAL: Prevent iOS/Android system font scaling
+           This ensures consistent UI regardless of device accessibility settings
+           ═══════════════════════════════════════════════════════════════ */
+        html {
+            -webkit-text-size-adjust: 100% !important;
+            -moz-text-size-adjust: 100% !important;
+            -ms-text-size-adjust: 100% !important;
+            text-size-adjust: 100% !important;
+            font-size: 16px !important;
+        }
+        body {
+            -webkit-text-size-adjust: 100% !important;
+            text-size-adjust: 100% !important;
+            font-size: 16px !important;
+        }
+        /* Prevent Dynamic Type on iOS from scaling text */
+        * {
+            -webkit-text-size-adjust: 100% !important;
+            text-size-adjust: 100% !important;
+        }
+
         /* Remove ALL focus outlines/rings for mobile apps */
         *, *:before, *:after {
             -webkit-tap-highlight-color: transparent !important;
