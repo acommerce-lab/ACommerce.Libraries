@@ -212,24 +212,25 @@
                 </div>
             }
 
-            @* Contact Options *@
-            @{
-                var contactOptions = GetContactOptions();
-            }
-            @if (contactOptions.Any())
+            @* Contact Options - Only show if not own listing *@
+            @if (!_isOwnListing)
             {
-                <div class="ashare-section">
-                    <h2 class="ashare-section-title">@L["ContactMethods"]</h2>
-                    <div class="ashare-contact-options">
-                        @foreach (var option in contactOptions)
-                        {
-                            <button class="ashare-contact-btn @option.Class" @onclick="() => HandleContact(option.Type)">
-                                <i class="bi @option.Icon"></i>
-                                <span>@option.Label</span>
-                            </button>
-                        }
+                var contactOptions = GetContactOptions();
+                if (contactOptions.Any())
+                {
+                    <div class="ashare-section">
+                        <h2 class="ashare-section-title">@L["ContactMethods"]</h2>
+                        <div class="ashare-contact-options">
+                            @foreach (var option in contactOptions)
+                            {
+                                <button class="ashare-contact-btn @option.Class" @onclick="() => HandleContact(option.Type)">
+                                    <i class="bi @option.Icon"></i>
+                                    <span>@option.Label</span>
+                                </button>
+                            }
+                        </div>
                     </div>
-                </div>
+                }
             }
 
             @* Location Map *@
@@ -1131,28 +1132,54 @@
         return options;
     }
 
-    private void HandleContact(string type)
+    private async Task HandleContact(string type)
     {
+        // الحصول على رقم الهاتف من الخصائص أو من بروفايل المالك
+        var phone = GetOwnerPhone();
+
         switch (type)
         {
             case "phone":
-                if (HasAttribute("phone"))
+                if (!string.IsNullOrEmpty(phone))
                 {
-                    Navigation.NavigateTo($"tel:{GetAttribute("phone")}");
+                    // فتح تطبيق الهاتف مع الرقم
+                    await Navigation.OpenExternalAsync($"tel:{phone}");
                 }
                 break;
             case "whatsapp":
-                if (HasAttribute("phone"))
+                if (!string.IsNullOrEmpty(phone))
                 {
-                    var phone = GetAttribute("phone").Replace("+", "").Replace(" ", "");
-                    Navigation.NavigateTo($"https://wa.me/{phone}");
+                    var cleanPhone = phone.Replace("+", "").Replace(" ", "").Replace("-", "");
+                    // إضافة رسالة أولية تشير للإعلان
+                    var message = Uri.EscapeDataString($"مرحباً، أنا مهتم بإعلانك: {_space?.Name ?? ""}");
+                    await Navigation.OpenExternalAsync($"https://wa.me/{cleanPhone}?text={message}");
                 }
                 break;
             case "chat":
             default:
-                ContactOwner();
+                await ContactOwnerWithInitialMessage();
                 break;
         }
+    }
+
+    /// <summary>
+    /// الحصول على رقم هاتف المالك من الخصائص أو البروفايل
+    /// </summary>
+    private string? GetOwnerPhone()
+    {
+        // أولاً: من خاصية contact_phone
+        if (HasAttribute("contact_phone"))
+            return GetAttribute("contact_phone");
+
+        // ثانياً: من خاصية phone
+        if (HasAttribute("phone"))
+            return GetAttribute("phone");
+
+        // ثالثاً: من بروفايل المالك
+        if (!string.IsNullOrEmpty(_ownerProfile?.Phone))
+            return _ownerProfile.Phone;
+
+        return null;
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -1264,6 +1291,23 @@
 
     private async Task ContactOwner()
     {
+        await ContactOwnerWithInitialMessage(null);
+    }
+
+    /// <summary>
+    /// التواصل مع المالك مع إرسال رسالة أولية تشير للإعلان
+    /// </summary>
+    private async Task ContactOwnerWithInitialMessage()
+    {
+        var initialMessage = $"مرحباً، أنا مهتم بإعلانك: {_space?.Name ?? ""}";
+        await ContactOwnerWithInitialMessage(initialMessage);
+    }
+
+    /// <summary>
+    /// التواصل مع المالك مع رسالة مخصصة
+    /// </summary>
+    private async Task ContactOwnerWithInitialMessage(string? initialMessage)
+    {
         if (_space?.OwnerId == null || _space.OwnerId == Guid.Empty)
         {
             Console.WriteLine("[SpaceDetails] Cannot contact owner - OwnerId is null or empty");
@@ -1276,7 +1320,6 @@
             _space.OwnerId.ToString().Equals(currentUserId, StringComparison.OrdinalIgnoreCase))
         {
             Console.WriteLine("[SpaceDetails] Cannot contact yourself - this is your own listing");
-            // يمكن إظهار رسالة للمستخدم هنا
             return;
         }
 
@@ -1287,6 +1330,20 @@
 
             if (conversation != null)
             {
+                // إرسال رسالة أولية إذا كانت موجودة
+                if (!string.IsNullOrEmpty(initialMessage))
+                {
+                    try
+                    {
+                        await ChatsClient.SendMessageAsync(conversation.Id, initialMessage);
+                    }
+                    catch (Exception msgEx)
+                    {
+                        Console.WriteLine($"[SpaceDetails] Error sending initial message: {msgEx.Message}");
+                        // نستمر للتنقل حتى لو فشل إرسال الرسالة
+                    }
+                }
+
                 Navigation.NavigateTo($"/chat/{conversation.Id}");
             }
             else
