@@ -393,10 +393,21 @@
                         <span class="ashare-booking-amount">@GetPriceDisplay()</span>
                     }
                 </div>
-                <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="StartBooking">
-                    <i class="bi bi-calendar-check"></i>
-                    <span>@L["BookNow"]</span>
-                </button>
+                @if (_existingBooking != null)
+                {
+                    @* عرض رسالة وزر للانتقال للحجز الموجود *@
+                    <button class="ac-btn ac-btn-secondary ac-btn-lg" @onclick="ViewExistingBooking">
+                        <i class="bi bi-calendar-check-fill"></i>
+                        <span>عرض حجزك</span>
+                    </button>
+                }
+                else
+                {
+                    <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="StartBooking">
+                        <i class="bi bi-calendar-check"></i>
+                        <span>@L["BookNow"]</span>
+                    </button>
+                }
             </div>
         }
     }
@@ -421,6 +432,7 @@
     private bool _isOwnListing; // هل هذا معلن المستخدم الحالي
     private int _currentImageIndex;
     private bool _isLoading = true;
+    private BookingItem? _existingBooking; // حجز سابق على نفس المكان
 
     private bool _mapInitialized;
 
@@ -502,6 +514,23 @@
                     catch (Exception ex)
                     {
                         Console.WriteLine($"[SpaceDetails] Error loading owner profile: {ex.Message}");
+                    }
+                }
+
+                // التحقق من وجود حجز سابق على نفس المكان
+                if (!_isOwnListing && !string.IsNullOrEmpty(currentUserId))
+                {
+                    try
+                    {
+                        var userBookings = await ApiService.GetBookingsAsync(currentUserId);
+                        // البحث عن حجز نشط (قيد المراجعة أو مؤكد) على نفس المكان
+                        _existingBooking = userBookings.FirstOrDefault(b =>
+                            b.SpaceId == SpaceId &&
+                            (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed));
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[SpaceDetails] Error checking existing bookings: {ex.Message}");
                     }
                 }
             }
@@ -1411,5 +1440,14 @@
     {
         // Navigate to booking page with space ID
         Navigation.NavigateTo($"/book/{SpaceId}");
+    }
+
+    private void ViewExistingBooking()
+    {
+        // Navigate to existing booking details
+        if (_existingBooking != null)
+        {
+            Navigation.NavigateTo($"/booking/{_existingBooking.Id}");
+        }
     }
 }
