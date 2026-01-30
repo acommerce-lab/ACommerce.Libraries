@@ -2373,16 +2373,36 @@ h1, h2, h3, .ashare-logo-text {
     left: 56px;
     width: 40px;
     height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    max-width: 40px;
+    max-height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: rgba(255,255,255,0.9);
     border: none;
-    border-radius: var(--ashare-radius-full);
+    border-radius: 50%;
     color: var(--ashare-gray-700);
     font-size: 18px;
+    line-height: 1;
     cursor: pointer;
     backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    box-sizing: border-box;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: var(--ashare-shadow-sm);
+}
+
+.ashare-share-btn i {
+    font-size: 18px;
+    line-height: 1;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .ashare-gallery-thumbnails {
