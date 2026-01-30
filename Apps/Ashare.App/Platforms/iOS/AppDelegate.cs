@@ -25,7 +25,6 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
         {
             Firebase.Core.App.Configure();
             System.Diagnostics.Debug.WriteLine("[Firebase iOS] Firebase.Core configured successfully");
-            _ = SendDiagnosticAsync("Firebase.Configure", "SUCCESS", "Firebase.Core configured successfully");
         }
         catch (Exception ex)
         {
@@ -40,7 +39,6 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
         {
             CrossFirebase.Initialize();
             System.Diagnostics.Debug.WriteLine("[Firebase iOS] CrossFirebase initialized successfully");
-            _ = SendDiagnosticAsync("CrossFirebase.Initialize", "SUCCESS", "CrossFirebase initialized successfully");
         }
         catch (Exception ex)
         {
@@ -81,8 +79,6 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
     {
         UNUserNotificationCenter.Current.Delegate = this;
 
-        _ = SendDiagnosticAsync("Push.RequestAuthorization", "STARTED", "Requesting notification authorization...");
-
         UNUserNotificationCenter.Current.RequestAuthorization(
             UNAuthorizationOptions.Alert | UNAuthorizationOptions.Badge | UNAuthorizationOptions.Sound,
             (granted, error) =>
@@ -90,12 +86,10 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
                 if (granted)
                 {
                     System.Diagnostics.Debug.WriteLine("[Push iOS] Notification authorization granted");
-                    _ = SendDiagnosticAsync("Push.Authorization", "GRANTED", "User granted notification permission");
 
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
                         application.RegisterForRemoteNotifications();
-                        _ = SendDiagnosticAsync("Push.RegisterForRemote", "CALLED", "RegisterForRemoteNotifications called");
                     });
 
                     // تهيئة خدمة الإشعارات بعد الحصول على الإذن
@@ -107,28 +101,28 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
                             var pushService = IPlatformApplication.Current?.Services.GetService<IPushNotificationService>();
                             if (pushService != null)
                             {
-                                await SendDiagnosticAsync("Push.InitializeService", "STARTED", "Initializing PushNotificationService...");
                                 await pushService.InitializeAsync();
-                                await SendDiagnosticAsync("Push.InitializeService", "COMPLETED", "PushNotificationService initialized");
                                 System.Diagnostics.Debug.WriteLine("[Push iOS] Push notification service initialized");
                             }
                             else
                             {
+                                // تقرير حرج: الخدمة غير موجودة
                                 await SendDiagnosticAsync("Push.InitializeService", "FAILED", "PushNotificationService is NULL!");
                             }
                         }
                         catch (Exception ex)
                         {
                             System.Diagnostics.Debug.WriteLine($"[Push iOS] Init error: {ex.Message}");
+                            // تقرير حرج: خطأ في التهيئة
                             await SendDiagnosticAsync("Push.InitializeService", "ERROR", ex.Message, ex.StackTrace);
                         }
                     });
                 }
                 else
                 {
-                    var errorMsg = error?.LocalizedDescription ?? "Unknown error";
+                    var errorMsg = error?.LocalizedDescription ?? "User denied";
                     System.Diagnostics.Debug.WriteLine($"[Push iOS] Notification authorization denied: {errorMsg}");
-                    _ = SendDiagnosticAsync("Push.Authorization", "DENIED", errorMsg);
+                    // لا نرسل تقرير لأن رفض الإذن ليس خطأ
                 }
             });
     }
@@ -142,7 +136,7 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
         var tokenBytes = deviceToken.ToArray();
         var tokenString = BitConverter.ToString(tokenBytes).Replace("-", "").ToLowerInvariant();
         System.Diagnostics.Debug.WriteLine($"[Push iOS] APNs token received: {tokenString[..Math.Min(20, tokenString.Length)]}...");
-        _ = SendDiagnosticAsync("Push.APNsToken", "RECEIVED", $"APNs token: {tokenString[..Math.Min(40, tokenString.Length)]}...");
+        // لا نرسل تقرير للنجاح
     }
 
     /// <summary>
@@ -152,6 +146,7 @@ public class AppDelegate : MauiUIApplicationDelegate, IUNUserNotificationCenterD
     public void FailedToRegisterForRemoteNotifications(UIApplication application, NSError error)
     {
         System.Diagnostics.Debug.WriteLine($"[Push iOS] Failed to register: {error.LocalizedDescription}");
+        // تقرير حرج: فشل التسجيل للإشعارات
         _ = SendDiagnosticAsync("Push.APNsToken", "FAILED", error.LocalizedDescription, $"Code: {error.Code}, Domain: {error.Domain}");
     }
 
