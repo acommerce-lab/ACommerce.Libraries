@@ -1,0 +1,439 @@
+@page "/login"
+@inject OrderApiService ApiService
+@inject NavigationManager Navigation
+
+<div class="login-page">
+    <div class="login-content">
+        <div class="login-header">
+            <h1 class="app-logo">اوردر</h1>
+            <p class="app-tagline">اكتشف أفضل العروض</p>
+        </div>
+
+        @if (Step == LoginStep.Phone)
+        {
+            <!-- Step 1: Phone Number -->
+            <div class="login-form">
+                <h2>تسجيل الدخول</h2>
+                <p class="form-desc">أدخل رقم هاتفك لإرسال كود التحقق</p>
+
+                <div class="input-group">
+                    <label>رقم الهاتف</label>
+                    <div class="phone-input">
+                        <span class="country-code">+966</span>
+                        <input type="tel" @bind="PhoneNumber" @bind:event="oninput"
+                               placeholder="5XXXXXXXX" maxlength="9"
+                               disabled="@IsLoading" />
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(ErrorMessage))
+                {
+                    <div class="error-message">@ErrorMessage</div>
+                }
+
+                <button class="submit-btn" @onclick="SendCode"
+                        disabled="@(IsLoading || PhoneNumber?.Length < 9)">
+                    @if (IsLoading)
+                    {
+                        <div class="btn-spinner"></div>
+                    }
+                    else
+                    {
+                        <span>إرسال كود التحقق</span>
+                    }
+                </button>
+            </div>
+        }
+        else
+        {
+            <!-- Step 2: Verification Code -->
+            <div class="login-form">
+                <h2>أدخل كود التحقق</h2>
+                <p class="form-desc">تم إرسال الكود إلى @FormattedPhone</p>
+
+                @if (!string.IsNullOrEmpty(DebugCode))
+                {
+                    <div class="debug-code">
+                        🔑 كود التطوير: <strong>@DebugCode</strong>
+                    </div>
+                }
+
+                <div class="input-group">
+                    <label>كود التحقق</label>
+                    <div class="code-inputs">
+                        @for (int i = 0; i < 4; i++)
+                        {
+                            var index = i;
+                            <input type="text" maxlength="1" class="code-digit"
+                                   value="@(VerificationCode.Length > index ? VerificationCode[index].ToString() : "")"
+                                   @oninput="e => OnCodeInput(index, e)"
+                                   @onfocus="() => FocusedIndex = index"
+                                   disabled="@IsLoading" />
+                        }
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(ErrorMessage))
+                {
+                    <div class="error-message">@ErrorMessage</div>
+                }
+
+                <button class="submit-btn" @onclick="VerifyCode"
+                        disabled="@(IsLoading || VerificationCode?.Length < 4)">
+                    @if (IsLoading)
+                    {
+                        <div class="btn-spinner"></div>
+                    }
+                    else
+                    {
+                        <span>تأكيد</span>
+                    }
+                </button>
+
+                <div class="resend-section">
+                    @if (ResendCountdown > 0)
+                    {
+                        <span class="countdown">إعادة الإرسال بعد @ResendCountdown ثانية</span>
+                    }
+                    else
+                    {
+                        <button class="resend-btn" @onclick="ResendCode">إعادة إرسال الكود</button>
+                    }
+                </div>
+
+                <button class="back-link" @onclick="GoBack">← تغيير رقم الهاتف</button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private enum LoginStep { Phone, Code }
+    private LoginStep Step = LoginStep.Phone;
+
+    private string? PhoneNumber;
+    private string VerificationCode = "";
+    private string? DebugCode;
+    private string? ErrorMessage;
+    private bool IsLoading;
+    private int FocusedIndex;
+    private int ResendCountdown;
+
+    private string FormattedPhone => $"+966{PhoneNumber}";
+
+    private async Task SendCode()
+    {
+        if (string.IsNullOrWhiteSpace(PhoneNumber) || PhoneNumber.Length < 9)
+        {
+            ErrorMessage = "الرجاء إدخال رقم هاتف صحيح";
+            return;
+        }
+
+        IsLoading = true;
+        ErrorMessage = null;
+
+        try
+        {
+            var result = await ApiService.SendVerificationCodeAsync(FormattedPhone);
+            if (result != null)
+            {
+                DebugCode = result.DebugCode; // فقط في التطوير
+                Step = LoginStep.Code;
+                StartResendCountdown();
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "حدث خطأ، الرجاء المحاولة مرة أخرى";
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task VerifyCode()
+    {
+        if (string.IsNullOrWhiteSpace(VerificationCode) || VerificationCode.Length < 4)
+        {
+            ErrorMessage = "الرجاء إدخال كود التحقق";
+            return;
+        }
+
+        IsLoading = true;
+        ErrorMessage = null;
+
+        try
+        {
+            var result = await ApiService.VerifyCodeAsync(FormattedPhone, VerificationCode);
+            if (result != null)
+            {
+                // حفظ الـ Token (في MAUI سنستخدم SecureStorage)
+                // TODO: Save token
+                Navigation.NavigateTo("/");
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "الكود غير صحيح، الرجاء المحاولة مرة أخرى";
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void OnCodeInput(int index, ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString() ?? "";
+
+        if (value.Length > 0)
+        {
+            // إضافة الرقم
+            var chars = VerificationCode.PadRight(4).ToCharArray();
+            chars[index] = value[0];
+            VerificationCode = new string(chars).TrimEnd();
+
+            // الانتقال للخانة التالية
+            if (index < 3)
+            {
+                FocusedIndex = index + 1;
+            }
+        }
+    }
+
+    private async Task ResendCode()
+    {
+        VerificationCode = "";
+        await SendCode();
+    }
+
+    private async void StartResendCountdown()
+    {
+        ResendCountdown = 60;
+        while (ResendCountdown > 0)
+        {
+            await Task.Delay(1000);
+            ResendCountdown--;
+            StateHasChanged();
+        }
+    }
+
+    private void GoBack()
+    {
+        Step = LoginStep.Phone;
+        VerificationCode = "";
+        DebugCode = null;
+        ErrorMessage = null;
+    }
+}
+
+<style>
+    .login-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+    }
+
+    .login-content {
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    .app-logo {
+        font-size: 48px;
+        font-weight: bold;
+        color: white;
+        margin: 0;
+    }
+
+    .app-tagline {
+        color: rgba(255,255,255,0.9);
+        margin: 8px 0 0;
+    }
+
+    .login-form {
+        background: white;
+        border-radius: 20px;
+        padding: 32px 24px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+
+    .login-form h2 {
+        font-size: 22px;
+        margin: 0 0 8px;
+        text-align: center;
+    }
+
+    .form-desc {
+        color: #666;
+        text-align: center;
+        margin: 0 0 24px;
+        font-size: 14px;
+    }
+
+    .input-group {
+        margin-bottom: 20px;
+    }
+
+    .input-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    .phone-input {
+        display: flex;
+        border: 2px solid #eee;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: border-color 0.2s;
+    }
+
+    .phone-input:focus-within {
+        border-color: #FF6B35;
+    }
+
+    .country-code {
+        background: #f5f5f5;
+        padding: 14px 16px;
+        color: #333;
+        font-weight: 500;
+    }
+
+    .phone-input input {
+        flex: 1;
+        border: none;
+        padding: 14px;
+        font-size: 18px;
+        letter-spacing: 2px;
+        direction: ltr;
+        text-align: left;
+    }
+
+    .phone-input input:focus {
+        outline: none;
+    }
+
+    .code-inputs {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        direction: ltr;
+    }
+
+    .code-digit {
+        width: 56px;
+        height: 56px;
+        border: 2px solid #eee;
+        border-radius: 12px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        transition: border-color 0.2s;
+    }
+
+    .code-digit:focus {
+        outline: none;
+        border-color: #FF6B35;
+    }
+
+    .debug-code {
+        background: #FFF3E0;
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    .error-message {
+        background: #FFEBEE;
+        color: #C62828;
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        margin-bottom: 16px;
+        font-size: 14px;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 16px;
+        background: #FF6B35;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+        background: #E55A2B;
+    }
+
+    .submit-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+
+    .btn-spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .resend-section {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .countdown {
+        color: #666;
+        font-size: 14px;
+    }
+
+    .resend-btn {
+        background: none;
+        border: none;
+        color: #FF6B35;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .back-link {
+        display: block;
+        width: 100%;
+        text-align: center;
+        margin-top: 16px;
+        background: none;
+        border: none;
+        color: #666;
+        cursor: pointer;
+    }
+</style>

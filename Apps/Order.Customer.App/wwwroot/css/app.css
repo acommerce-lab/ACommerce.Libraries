@@ -1,0 +1,122 @@
+/* Base Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f5f5f5;
+    direction: rtl;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Splash Screen */
+.splash-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+}
+
+.splash-logo {
+    font-size: 48px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 24px;
+}
+
+.splash-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Error UI */
+#blazor-error-ui {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px;
+    background: #C62828;
+    color: white;
+    text-align: center;
+    z-index: 9999;
+}
+
+#blazor-error-ui .reload {
+    color: white;
+    text-decoration: underline;
+}
+
+/* Safe Area for iOS */
+@supports (padding-top: env(safe-area-inset-top)) {
+    body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 2px;
+}
+
+/* Input Styling */
+input, textarea, select {
+    font-family: inherit;
+    font-size: 16px; /* Prevents zoom on iOS */
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+}
+
+/* Button Reset */
+button {
+    font-family: inherit;
+    cursor: pointer;
+}
+
+/* Link Reset */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Image Reset */
+img {
+    max-width: 100%;
+    height: auto;
+}
