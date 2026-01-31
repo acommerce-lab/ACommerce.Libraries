@@ -2327,21 +2327,34 @@ h1, h2, h3, .ashare-logo-text {
     backdrop-filter: blur(4px);
 }
 
-/* Favorite button in gallery - same row as back button */
-.ashare-gallery-main .ashare-favorite-btn {
+/* Container for left buttons (favorite + share) - using flexbox for reliable alignment */
+.ashare-gallery-actions-left {
     position: absolute;
     top: calc(var(--safe-area-top) + var(--ashare-spacing-md));
     left: var(--ashare-spacing-md);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    z-index: 10;
+}
+
+/* Favorite button in flex container */
+.ashare-gallery-actions-left .ashare-favorite-btn {
+    position: relative;
+    top: auto;
+    left: auto;
     background-color: rgba(255,255,255,0.9);
     border-radius: var(--ashare-radius-full);
     backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 
-/* Share button in gallery - next to favorite button */
-.ashare-gallery-main .ashare-share-btn {
-    position: absolute;
-    top: calc(var(--safe-area-top) + var(--ashare-spacing-md));
-    left: calc(var(--ashare-spacing-md) + 48px);
+/* Share button in flex container */
+.ashare-gallery-actions-left .ashare-share-btn {
+    position: relative;
+    top: auto;
+    left: auto;
 }
 
 .ashare-share-btn {
@@ -3645,12 +3658,13 @@ h1, h2, h3, .ashare-logo-text {
 /* Fixed bottom actions for create listing page */
 .ac-create-listing-page .ac-form-actions {
     position: fixed;
-    bottom: 70px; /* Above the bottom navigation */
+    bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom)); /* Above the bottom navigation + safe area */
     left: 0;
     right: 0;
     border-top: 1px solid var(--ashare-gray-100);
     z-index: 100;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    padding-bottom: var(--ashare-spacing-md);
 }
 
 /* Images Section */

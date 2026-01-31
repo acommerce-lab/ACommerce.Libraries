@@ -30,12 +30,14 @@
                 <button class="ashare-back-btn" @onclick="GoBack">
                     <i class="bi bi-arrow-right"></i>
                 </button>
-                <button class="ashare-favorite-btn large" @onclick="ToggleFavorite">
-                    <i class="bi @(_isFavorite ? "bi-heart-fill" : "bi-heart")"></i>
-                </button>
-                <button class="ashare-share-btn" @onclick="ShareSpace">
-                    <i class="bi bi-share"></i>
-                </button>
+                <div class="ashare-gallery-actions-left">
+                    <button class="ashare-favorite-btn large" @onclick="ToggleFavorite">
+                        <i class="bi @(_isFavorite ? "bi-heart-fill" : "bi-heart")"></i>
+                    </button>
+                    <button class="ashare-share-btn" @onclick="ShareSpace">
+                        <i class="bi bi-share"></i>
+                    </button>
+                </div>
             </div>
             @if (_space.Images.Count > 1)
             {
