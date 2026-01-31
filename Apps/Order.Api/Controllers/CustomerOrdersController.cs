@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using ACommerce.SharedKernel.Abstractions.Repositories;
@@ -17,14 +18,23 @@ namespace Order.Api.Controllers;
 [Authorize]
 public class CustomerOrdersController : ControllerBase
 {
-    private readonly IRepositoryFactory _repositoryFactory;
+    private readonly IBaseAsyncRepository<ACommerce.Orders.Entities.Order> _orderRepository;
+    private readonly IBaseAsyncRepository<OrderItem> _orderItemRepository;
+    private readonly IBaseAsyncRepository<ProductListing> _listingRepository;
+    private readonly IBaseAsyncRepository<Vendor> _vendorRepository;
     private readonly ILogger<CustomerOrdersController> _logger;
 
     public CustomerOrdersController(
-        IRepositoryFactory repositoryFactory,
+        IBaseAsyncRepository<ACommerce.Orders.Entities.Order> orderRepository,
+        IBaseAsyncRepository<OrderItem> orderItemRepository,
+        IBaseAsyncRepository<ProductListing> listingRepository,
+        IBaseAsyncRepository<Vendor> vendorRepository,
         ILogger<CustomerOrdersController> logger)
     {
-        _repositoryFactory = repositoryFactory;
+        _orderRepository = orderRepository;
+        _orderItemRepository = orderItemRepository;
+        _listingRepository = listingRepository;
+        _vendorRepository = vendorRepository;
         _logger = logger;
     }
 
@@ -34,99 +44,118 @@ public class CustomerOrdersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request)
     {
-        var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
-        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var profileId))
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
             return Unauthorized(new { Message = "غير مصرح" });
 
         // التحقق من صحة البيانات
         if (request.Items == null || !request.Items.Any())
             return BadRequest(new { Message = "يجب إضافة عنصر واحد على الأقل" });
 
-        var listingRepo = _repositoryFactory.CreateRepository<ProductListing>();
-        var vendorRepo = _repositoryFactory.CreateRepository<Vendor>();
-        var orderRepo = _repositoryFactory.CreateRepository<ACommerce.Orders.Entities.Order>();
-        var orderItemRepo = _repositoryFactory.CreateRepository<OrderItem>();
-
         // التحقق من العروض والمتجر
-        var firstListing = await listingRepo.GetByIdAsync(request.Items.First().OfferId);
+        var firstListing = await _listingRepository.GetByIdAsync(request.Items.First().OfferId);
         if (firstListing == null)
             return BadRequest(new { Message = "العرض غير موجود" });
 
-        var vendor = await vendorRepo.GetByIdAsync(firstListing.VendorId);
+        var vendor = await _vendorRepository.GetByIdAsync(firstListing.VendorId);
         if (vendor == null)
             return BadRequest(new { Message = "المتجر غير موجود" });
 
-        // حساب المجموع
-        decimal totalAmount = 0;
+        // حساب المجموع وإنشاء عناصر الطلب
+        decimal subtotal = 0;
         var orderItems = new List<OrderItem>();
 
         foreach (var item in request.Items)
         {
-            var listing = await listingRepo.GetByIdAsync(item.OfferId);
+            var listing = await _listingRepository.GetByIdAsync(item.OfferId);
             if (listing == null)
                 continue;
 
             if (listing.VendorId != firstListing.VendorId)
                 return BadRequest(new { Message = "جميع العناصر يجب أن تكون من نفس المتجر" });
 
-            var subtotal = listing.Price * item.Quantity;
-            totalAmount += subtotal;
+            var itemTotal = listing.Price * item.Quantity;
+            subtotal += itemTotal;
 
             orderItems.Add(new OrderItem
             {
                 Id = Guid.NewGuid(),
-                ProductListingId = listing.Id,
+                ListingId = listing.Id,
+                VendorId = listing.VendorId,
+                ProductId = listing.ProductId,
+                ProductName = listing.Title,
                 Quantity = item.Quantity,
-                Price = listing.Price,
-                TotalPrice = subtotal,
-                Notes = item.Notes
+                UnitPrice = listing.Price,
+                CreatedAt = DateTime.UtcNow
             });
         }
 
         // إنشاء الطلب
-        var order = new ACommerce.Orders.Entities.Order
+        var orderId = Guid.NewGuid();
+        var orderNumber = $"ORD-{DateTime.UtcNow:yyyyMMdd}-{orderId.ToString()[..6].ToUpper()}";
+
+        // تخزين بيانات التوصيل في الـ Metadata
+        var metadata = new Dictionary<string, string>
         {
-            Id = Guid.NewGuid(),
-            ProfileId = profileId,
-            VendorId = vendor.Id,
-            TotalAmount = totalAmount,
-            Status = ACommerce.Orders.Enums.OrderStatus.Draft, // Pending
-            Notes = request.CustomerNotes,
-            // تخزين بيانات التوصيل في الـ Metadata
-            MetadataJson = JsonSerializer.Serialize(new OrderMetadata
-            {
-                DeliveryType = request.DeliveryType,
-                PaymentMethod = request.PaymentMethod,
-                DeliveryLocation = request.DeliveryLocation,
-                CarInfo = request.CarInfo
-            })
+            ["delivery_type"] = request.DeliveryType.ToString(),
+            ["payment_method"] = request.PaymentMethod.ToString()
         };
 
-        await orderRepo.AddAsync(order);
+        if (request.DeliveryLocation != null)
+        {
+            metadata["delivery_latitude"] = request.DeliveryLocation.Latitude.ToString();
+            metadata["delivery_longitude"] = request.DeliveryLocation.Longitude.ToString();
+            metadata["delivery_description"] = request.DeliveryLocation.LocationDescription ?? "";
+        }
+
+        if (request.CarInfo != null)
+        {
+            metadata["car_model"] = request.CarInfo.Model ?? "";
+            metadata["car_color"] = request.CarInfo.Color ?? "";
+            metadata["car_plate"] = request.CarInfo.PlateNumber ?? "";
+        }
+
+        var order = new ACommerce.Orders.Entities.Order
+        {
+            Id = orderId,
+            OrderNumber = orderNumber,
+            CustomerId = userId,
+            VendorId = vendor.Id,
+            Subtotal = subtotal,
+            Total = subtotal,
+            Currency = "SAR",
+            Status = ACommerce.Orders.Enums.OrderStatus.Pending,
+            CustomerNotes = request.CustomerNotes,
+            PaymentMethod = request.PaymentMethod.ToString(),
+            Metadata = metadata,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _orderRepository.AddAsync(order);
 
         // إضافة العناصر
         foreach (var item in orderItems)
         {
             item.OrderId = order.Id;
-            await orderItemRepo.AddAsync(item);
+            await _orderItemRepository.AddAsync(item);
         }
 
-        _logger.LogInformation("Order {OrderId} created by {ProfileId} for vendor {VendorId}",
-            order.Id, profileId, vendor.Id);
+        _logger.LogInformation("Order {OrderId} created by {CustomerId} for vendor {VendorId}",
+            order.Id, userId, vendor.Id);
 
         return Ok(new
         {
             OrderId = order.Id,
-            OrderNumber = order.Id.ToString()[..8].ToUpper(),
-            TotalAmount = totalAmount,
+            OrderNumber = orderNumber,
+            TotalAmount = subtotal,
             Status = "pending",
             DeliveryType = request.DeliveryType.ToString(),
             PaymentMethod = request.PaymentMethod.ToString(),
             Vendor = new
             {
                 vendor.Id,
-                vendor.Name,
-                vendor.ContactPhone
+                Name = vendor.StoreName,
+                Phone = vendor.Metadata.GetValueOrDefault("phone", "")
             },
             Message = "تم إنشاء الطلب بنجاح"
         });
@@ -138,35 +167,27 @@ public class CustomerOrdersController : ControllerBase
     [HttpPut("{orderId}/location")]
     public async Task<IActionResult> UpdateDeliveryLocation(Guid orderId, [FromBody] UpdateLocationRequest request)
     {
-        var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
-        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var profileId))
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
             return Unauthorized(new { Message = "غير مصرح" });
 
-        var orderRepo = _repositoryFactory.CreateRepository<ACommerce.Orders.Entities.Order>();
-        var order = await orderRepo.GetByIdAsync(orderId);
+        var order = await _orderRepository.GetByIdAsync(orderId);
 
         if (order == null)
             return NotFound(new { Message = "الطلب غير موجود" });
 
-        if (order.ProfileId != profileId)
+        if (order.CustomerId != userId)
             return Forbid();
 
-        // تحديث الموقع
-        var metadata = string.IsNullOrEmpty(order.MetadataJson)
-            ? new OrderMetadata()
-            : JsonSerializer.Deserialize<OrderMetadata>(order.MetadataJson) ?? new OrderMetadata();
+        // تحديث الموقع في Metadata
+        order.Metadata["delivery_latitude"] = request.Latitude.ToString();
+        order.Metadata["delivery_longitude"] = request.Longitude.ToString();
+        order.Metadata["delivery_description"] = request.LocationDescription ?? "";
+        order.Metadata["location_updated_at"] = DateTime.UtcNow.ToString("o");
+        order.Metadata["is_live_location"] = "true";
 
-        metadata.DeliveryLocation = new DeliveryLocation
-        {
-            Latitude = request.Latitude,
-            Longitude = request.Longitude,
-            LocationDescription = request.LocationDescription,
-            IsLiveLocation = true,
-            LastUpdated = DateTime.UtcNow
-        };
-
-        order.MetadataJson = JsonSerializer.Serialize(metadata);
-        await orderRepo.UpdateAsync(order);
+        order.UpdatedAt = DateTime.UtcNow;
+        await _orderRepository.UpdateAsync(order);
 
         _logger.LogInformation("Location updated for order {OrderId}", orderId);
 
@@ -179,42 +200,37 @@ public class CustomerOrdersController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetMyOrders([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
-        var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
-        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var profileId))
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
             return Unauthorized(new { Message = "غير مصرح" });
 
-        var orderRepo = _repositoryFactory.CreateRepository<ACommerce.Orders.Entities.Order>();
-        var vendorRepo = _repositoryFactory.CreateRepository<Vendor>();
+        var orders = await _orderRepository.GetAllWithPredicateAsync(
+            o => o.CustomerId == userId && !o.IsDeleted);
 
-        var orders = await orderRepo.FindAsync(o => o.ProfileId == profileId && !o.IsDeleted);
         var orderedList = orders.OrderByDescending(o => o.CreatedAt).ToList();
 
-        var vendors = (await vendorRepo.GetAllAsync()).ToDictionary(v => v.Id);
+        var vendors = (await _vendorRepository.ListAllAsync()).ToDictionary(v => v.Id);
 
         var results = new List<object>();
         foreach (var order in orderedList.Skip((page - 1) * pageSize).Take(pageSize))
         {
-            var metadata = string.IsNullOrEmpty(order.MetadataJson)
-                ? new OrderMetadata()
-                : JsonSerializer.Deserialize<OrderMetadata>(order.MetadataJson) ?? new OrderMetadata();
-
-            vendors.TryGetValue(order.VendorId, out var vendor);
+            vendors.TryGetValue(order.VendorId ?? Guid.Empty, out var vendor);
 
             results.Add(new
             {
                 order.Id,
-                OrderNumber = order.Id.ToString()[..8].ToUpper(),
-                order.TotalAmount,
+                order.OrderNumber,
+                TotalAmount = order.Total,
                 Status = MapOrderStatus(order.Status),
                 StatusAr = MapOrderStatusArabic(order.Status),
                 order.CreatedAt,
-                metadata.DeliveryType,
-                metadata.PaymentMethod,
+                DeliveryType = order.Metadata.GetValueOrDefault("delivery_type", "Pickup"),
+                PaymentMethod = order.Metadata.GetValueOrDefault("payment_method", "Cash"),
                 Vendor = vendor != null ? new
                 {
                     vendor.Id,
-                    vendor.Name,
-                    vendor.ContactPhone
+                    Name = vendor.StoreName,
+                    Phone = vendor.Metadata.GetValueOrDefault("phone", "")
                 } : null
             });
         }
@@ -234,68 +250,68 @@ public class CustomerOrdersController : ControllerBase
     [HttpGet("{orderId}")]
     public async Task<IActionResult> GetOrderDetails(Guid orderId)
     {
-        var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
-        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var profileId))
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
             return Unauthorized(new { Message = "غير مصرح" });
 
-        var orderRepo = _repositoryFactory.CreateRepository<ACommerce.Orders.Entities.Order>();
-        var orderItemRepo = _repositoryFactory.CreateRepository<OrderItem>();
-        var vendorRepo = _repositoryFactory.CreateRepository<Vendor>();
-        var listingRepo = _repositoryFactory.CreateRepository<ProductListing>();
-
-        var order = await orderRepo.GetByIdAsync(orderId);
+        var order = await _orderRepository.GetByIdAsync(orderId);
         if (order == null)
             return NotFound(new { Message = "الطلب غير موجود" });
 
-        if (order.ProfileId != profileId)
+        if (order.CustomerId != userId)
             return Forbid();
 
-        var vendor = await vendorRepo.GetByIdAsync(order.VendorId);
-        var items = await orderItemRepo.FindAsync(i => i.OrderId == orderId);
+        var vendor = order.VendorId.HasValue
+            ? await _vendorRepository.GetByIdAsync(order.VendorId.Value)
+            : null;
 
-        var metadata = string.IsNullOrEmpty(order.MetadataJson)
-            ? new OrderMetadata()
-            : JsonSerializer.Deserialize<OrderMetadata>(order.MetadataJson) ?? new OrderMetadata();
+        var items = await _orderItemRepository.GetAllWithPredicateAsync(i => i.OrderId == orderId);
 
         var itemDetails = new List<object>();
         foreach (var item in items)
         {
-            var listing = item.ProductListingId.HasValue
-                ? await listingRepo.GetByIdAsync(item.ProductListingId.Value)
-                : null;
+            var listing = await _listingRepository.GetByIdAsync(item.ListingId);
 
             itemDetails.Add(new
             {
                 item.Id,
-                OfferTitle = listing?.Title,
+                OfferTitle = listing?.Title ?? item.ProductName,
                 item.Quantity,
-                item.Price,
-                item.TotalPrice,
-                item.Notes
+                Price = item.UnitPrice,
+                TotalPrice = item.Total
             });
         }
 
         return Ok(new
         {
             order.Id,
-            OrderNumber = order.Id.ToString()[..8].ToUpper(),
-            order.TotalAmount,
+            order.OrderNumber,
+            TotalAmount = order.Total,
             Status = MapOrderStatus(order.Status),
             StatusAr = MapOrderStatusArabic(order.Status),
             order.CreatedAt,
-            order.Notes,
-            DeliveryType = metadata.DeliveryType,
-            PaymentMethod = metadata.PaymentMethod,
-            DeliveryLocation = metadata.DeliveryLocation,
-            CarInfo = metadata.CarInfo,
+            Notes = order.CustomerNotes,
+            DeliveryType = order.Metadata.GetValueOrDefault("delivery_type", "Pickup"),
+            PaymentMethod = order.Metadata.GetValueOrDefault("payment_method", "Cash"),
+            DeliveryLocation = new
+            {
+                Latitude = double.TryParse(order.Metadata.GetValueOrDefault("delivery_latitude", "0"), out var lat) ? lat : 0,
+                Longitude = double.TryParse(order.Metadata.GetValueOrDefault("delivery_longitude", "0"), out var lng) ? lng : 0,
+                Description = order.Metadata.GetValueOrDefault("delivery_description", "")
+            },
+            CarInfo = new
+            {
+                Model = order.Metadata.GetValueOrDefault("car_model", ""),
+                Color = order.Metadata.GetValueOrDefault("car_color", ""),
+                PlateNumber = order.Metadata.GetValueOrDefault("car_plate", "")
+            },
             Vendor = vendor != null ? new
             {
                 vendor.Id,
-                vendor.Name,
-                vendor.NameEn,
-                vendor.ContactPhone,
-                vendor.Latitude,
-                vendor.Longitude
+                Name = vendor.StoreName,
+                Phone = vendor.Metadata.GetValueOrDefault("phone", ""),
+                Latitude = vendor.Metadata.TryGetValue("latitude", out var vlat) && double.TryParse(vlat, out var vlatD) ? vlatD : (double?)null,
+                Longitude = vendor.Metadata.TryGetValue("longitude", out var vlng) && double.TryParse(vlng, out var vlngD) ? vlngD : (double?)null
             } : null,
             Items = itemDetails
         });
@@ -307,25 +323,26 @@ public class CustomerOrdersController : ControllerBase
     [HttpPost("{orderId}/cancel")]
     public async Task<IActionResult> CancelOrder(Guid orderId)
     {
-        var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
-        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var profileId))
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
             return Unauthorized(new { Message = "غير مصرح" });
 
-        var orderRepo = _repositoryFactory.CreateRepository<ACommerce.Orders.Entities.Order>();
-        var order = await orderRepo.GetByIdAsync(orderId);
+        var order = await _orderRepository.GetByIdAsync(orderId);
 
         if (order == null)
             return NotFound(new { Message = "الطلب غير موجود" });
 
-        if (order.ProfileId != profileId)
+        if (order.CustomerId != userId)
             return Forbid();
 
         // لا يمكن إلغاء طلب قيد التحضير أو جاهز
-        if (order.Status != ACommerce.Orders.Enums.OrderStatus.Draft)
+        if (order.Status != ACommerce.Orders.Enums.OrderStatus.Pending)
             return BadRequest(new { Message = "لا يمكن إلغاء هذا الطلب" });
 
         order.Status = ACommerce.Orders.Enums.OrderStatus.Cancelled;
-        await orderRepo.UpdateAsync(order);
+        order.CancelledAt = DateTime.UtcNow;
+        order.UpdatedAt = DateTime.UtcNow;
+        await _orderRepository.UpdateAsync(order);
 
         _logger.LogInformation("Order {OrderId} cancelled by customer", orderId);
 
@@ -334,7 +351,7 @@ public class CustomerOrdersController : ControllerBase
 
     private static string MapOrderStatus(ACommerce.Orders.Enums.OrderStatus status) => status switch
     {
-        ACommerce.Orders.Enums.OrderStatus.Draft => "pending",
+        ACommerce.Orders.Enums.OrderStatus.Pending => "pending",
         ACommerce.Orders.Enums.OrderStatus.Confirmed => "accepted",
         ACommerce.Orders.Enums.OrderStatus.Processing => "preparing",
         ACommerce.Orders.Enums.OrderStatus.Shipped => "ready",
@@ -345,7 +362,7 @@ public class CustomerOrdersController : ControllerBase
 
     private static string MapOrderStatusArabic(ACommerce.Orders.Enums.OrderStatus status) => status switch
     {
-        ACommerce.Orders.Enums.OrderStatus.Draft => "في الانتظار",
+        ACommerce.Orders.Enums.OrderStatus.Pending => "في الانتظار",
         ACommerce.Orders.Enums.OrderStatus.Confirmed => "تم القبول",
         ACommerce.Orders.Enums.OrderStatus.Processing => "قيد التحضير",
         ACommerce.Orders.Enums.OrderStatus.Shipped => "جاهز للاستلام",
@@ -369,7 +386,6 @@ public class OrderItemRequest
 {
     public Guid OfferId { get; set; }
     public int Quantity { get; set; } = 1;
-    public string? Notes { get; set; }
 }
 
 public class UpdateLocationRequest
@@ -377,12 +393,4 @@ public class UpdateLocationRequest
     public double Latitude { get; set; }
     public double Longitude { get; set; }
     public string? LocationDescription { get; set; }
-}
-
-public class OrderMetadata
-{
-    public DeliveryType DeliveryType { get; set; }
-    public PaymentMethod PaymentMethod { get; set; }
-    public DeliveryLocation? DeliveryLocation { get; set; }
-    public CarInfo? CarInfo { get; set; }
 }
