@@ -1,9 +1,10 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using ACommerce.Authentication.JWT;
-using ACommerce.Authentication.Users.Abstractions;
+using ACommerce.Authentication.Abstractions;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using ACommerce.Profiles.Entities;
+using ACommerce.Profiles.Enums;
 
 namespace Order.Api.Controllers;
 
@@ -14,23 +15,20 @@ namespace Order.Api.Controllers;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly IJwtTokenService _tokenService;
-    private readonly IUserProvider _userProvider;
-    private readonly IRepositoryFactory _repositoryFactory;
+    private readonly IAuthenticationProvider _authProvider;
+    private readonly IBaseAsyncRepository<Profile> _profileRepository;
     private readonly ILogger<AuthController> _logger;
 
     // قائمة أكواد التحقق المؤقتة (في الإنتاج ستكون Redis أو Database)
     private static readonly Dictionary<string, (string Code, DateTime Expiry, Guid? ProfileId)> _verificationCodes = new();
 
     public AuthController(
-        IJwtTokenService tokenService,
-        IUserProvider userProvider,
-        IRepositoryFactory repositoryFactory,
+        IAuthenticationProvider authProvider,
+        IBaseAsyncRepository<Profile> profileRepository,
         ILogger<AuthController> logger)
     {
-        _tokenService = tokenService;
-        _userProvider = userProvider;
-        _repositoryFactory = repositoryFactory;
+        _authProvider = authProvider;
+        _profileRepository = profileRepository;
         _logger = logger;
     }
 
@@ -52,8 +50,8 @@ public class AuthController : ControllerBase
         var code = new Random().Next(1000, 9999).ToString();
 
         // البحث عن المستخدم
-        var profileRepo = _repositoryFactory.CreateRepository<Profile>();
-        var profile = (await profileRepo.FindAsync(p => p.PhoneNumber == phone)).FirstOrDefault();
+        var profiles = await _profileRepository.GetAllWithPredicateAsync(p => p.PhoneNumber == phone);
+        var profile = profiles.FirstOrDefault();
 
         // حفظ الكود
         _verificationCodes[phone] = (code, DateTime.UtcNow.AddMinutes(5), profile?.Id);
@@ -102,50 +100,64 @@ public class AuthController : ControllerBase
         _verificationCodes.Remove(phone);
 
         // البحث أو إنشاء Profile
-        var profileRepo = _repositoryFactory.CreateRepository<Profile>();
         Profile? profile;
+        bool isNewUser = false;
 
         if (stored.ProfileId.HasValue)
         {
-            profile = await profileRepo.GetByIdAsync(stored.ProfileId.Value);
+            profile = await _profileRepository.GetByIdAsync(stored.ProfileId.Value);
         }
         else
         {
             // إنشاء مستخدم جديد
+            var profileId = Guid.NewGuid();
             profile = new Profile
             {
-                Id = Guid.NewGuid(),
+                Id = profileId,
+                UserId = profileId.ToString(),
                 PhoneNumber = phone,
-                FirstName = "مستخدم",
-                LastName = "جديد"
+                FullName = "مستخدم جديد",
+                Type = ProfileType.Customer,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
             };
-            await profileRepo.AddAsync(profile);
+            await _profileRepository.AddAsync(profile);
+            isNewUser = true;
             _logger.LogInformation("Created new profile for {Phone}", phone);
         }
 
         if (profile == null)
             return BadRequest(new { Message = "خطأ في تحميل الملف الشخصي" });
 
-        // تسجيل المستخدم في UserProvider
-        var user = new UserInfo(profile.Id.ToString(), profile.PhoneNumber ?? "", "Customer");
-        await _userProvider.RegisterUserAsync(user);
-
-        // إنشاء JWT Token
-        var token = _tokenService.GenerateToken(profile.Id.ToString(), profile.PhoneNumber ?? "", "Customer");
-
-        return Ok(new
+        // إنشاء JWT Token باستخدام AuthenticationProvider
+        var authResult = await _authProvider.AuthenticateAsync(new AuthenticationRequest
         {
-            Token = token,
-            Profile = new
+            Identifier = profile.Id.ToString(),
+            Claims = new Dictionary<string, string>
             {
-                profile.Id,
-                profile.FirstName,
-                profile.LastName,
-                profile.PhoneNumber,
-                profile.Email,
-                profile.AvatarUrl
-            },
-            Message = "تم تسجيل الدخول بنجاح"
+                [ClaimTypes.NameIdentifier] = profile.Id.ToString(),
+                [ClaimTypes.Name] = profile.FullName ?? "",
+                [ClaimTypes.MobilePhone] = phone,
+                ["profile_type"] = "Customer"
+            }
+        });
+
+        if (!authResult.Success)
+        {
+            return BadRequest(new { Message = "فشل إنشاء جلسة الدخول" });
+        }
+
+        return Ok(new LoginResponse
+        {
+            Success = true,
+            Token = authResult.AccessToken ?? "",
+            ProfileId = profile.Id.ToString(),
+            FullName = profile.FullName,
+            PhoneNumber = profile.PhoneNumber,
+            Avatar = profile.Avatar,
+            ExpiresAt = authResult.ExpiresAt?.DateTime ?? DateTime.UtcNow.AddDays(7),
+            Message = isNewUser ? "مرحباً بك! أكمل بياناتك" : "تم تسجيل الدخول بنجاح",
+            IsNewUser = isNewUser
         });
     }
 
@@ -156,24 +168,23 @@ public class AuthController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetCurrentUser()
     {
-        var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var profileId))
             return Unauthorized(new { Message = "غير مصرح" });
 
-        var profileRepo = _repositoryFactory.CreateRepository<Profile>();
-        var profile = await profileRepo.GetByIdAsync(profileId);
+        var profile = await _profileRepository.GetByIdAsync(profileId);
 
         if (profile == null)
             return NotFound(new { Message = "المستخدم غير موجود" });
 
-        return Ok(new
+        return Ok(new ProfileResponse
         {
-            profile.Id,
-            profile.FirstName,
-            profile.LastName,
-            profile.PhoneNumber,
-            profile.Email,
-            profile.AvatarUrl
+            Id = profile.Id.ToString(),
+            FullName = profile.FullName,
+            PhoneNumber = profile.PhoneNumber,
+            Email = profile.Email,
+            Avatar = profile.Avatar,
+            IsVerified = profile.IsVerified
         });
     }
 
@@ -184,40 +195,63 @@ public class AuthController : ControllerBase
     [Authorize]
     public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
     {
-        var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var profileId))
             return Unauthorized(new { Message = "غير مصرح" });
 
-        var profileRepo = _repositoryFactory.CreateRepository<Profile>();
-        var profile = await profileRepo.GetByIdAsync(profileId);
+        var profile = await _profileRepository.GetByIdAsync(profileId);
 
         if (profile == null)
             return NotFound(new { Message = "المستخدم غير موجود" });
 
-        if (!string.IsNullOrWhiteSpace(request.FirstName))
-            profile.FirstName = request.FirstName;
-
-        if (!string.IsNullOrWhiteSpace(request.LastName))
-            profile.LastName = request.LastName;
+        if (!string.IsNullOrWhiteSpace(request.FullName))
+            profile.FullName = request.FullName;
 
         if (!string.IsNullOrWhiteSpace(request.Email))
             profile.Email = request.Email;
 
-        await profileRepo.UpdateAsync(profile);
+        profile.UpdatedAt = DateTime.UtcNow;
+        await _profileRepository.UpdateAsync(profile);
 
-        return Ok(new
+        return Ok(new ProfileResponse
         {
-            profile.Id,
-            profile.FirstName,
-            profile.LastName,
-            profile.PhoneNumber,
-            profile.Email,
-            profile.AvatarUrl,
-            Message = "تم تحديث الملف الشخصي"
+            Id = profile.Id.ToString(),
+            FullName = profile.FullName,
+            PhoneNumber = profile.PhoneNumber,
+            Email = profile.Email,
+            Avatar = profile.Avatar,
+            IsVerified = profile.IsVerified
         });
     }
 }
 
+#region DTOs
+
 public record SendCodeRequest(string PhoneNumber);
 public record VerifyCodeRequest(string PhoneNumber, string Code);
-public record UpdateProfileRequest(string? FirstName, string? LastName, string? Email);
+public record UpdateProfileRequest(string? FullName, string? Email);
+
+public class LoginResponse
+{
+    public bool Success { get; set; }
+    public string? Token { get; set; }
+    public string? ProfileId { get; set; }
+    public string? FullName { get; set; }
+    public string? PhoneNumber { get; set; }
+    public string? Avatar { get; set; }
+    public DateTime? ExpiresAt { get; set; }
+    public string? Message { get; set; }
+    public bool IsNewUser { get; set; }
+}
+
+public class ProfileResponse
+{
+    public string? Id { get; set; }
+    public string? FullName { get; set; }
+    public string? PhoneNumber { get; set; }
+    public string? Email { get; set; }
+    public string? Avatar { get; set; }
+    public bool IsVerified { get; set; }
+}
+
+#endregion
