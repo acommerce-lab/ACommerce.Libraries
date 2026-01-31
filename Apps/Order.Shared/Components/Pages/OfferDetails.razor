@@ -1,0 +1,499 @@
+@page "/offer/{OfferId:guid}"
+@inject OrderApiService ApiService
+@inject NavigationManager Navigation
+
+@if (IsLoading)
+{
+    <div class="loading-page">
+        <div class="spinner"></div>
+        <p>جاري التحميل...</p>
+    </div>
+}
+else if (Offer == null)
+{
+    <div class="error-page">
+        <span>❌</span>
+        <p>العرض غير موجود</p>
+        <button @onclick="GoBack">العودة</button>
+    </div>
+}
+else
+{
+    <div class="offer-details-page">
+        <!-- Header Image -->
+        <div class="offer-hero">
+            @if (!string.IsNullOrEmpty(Offer.ImageUrl))
+            {
+                <img src="@Offer.ImageUrl" alt="@Offer.Title" />
+            }
+            else
+            {
+                <div class="image-placeholder">🍽️</div>
+            }
+            <button class="back-btn" @onclick="GoBack">←</button>
+            @if (Offer.DiscountPercent > 0)
+            {
+                <span class="discount-badge">@Offer.DiscountPercent% خصم</span>
+            }
+        </div>
+
+        <!-- Content -->
+        <div class="offer-body">
+            <h1 class="offer-title">@Offer.Title</h1>
+
+            <!-- Vendor Info -->
+            @if (Offer.Vendor != null)
+            {
+                <div class="vendor-card" @onclick="() => ViewVendor(Offer.Vendor.Id)">
+                    <div class="vendor-info">
+                        @if (!string.IsNullOrEmpty(Offer.Vendor.LogoUrl))
+                        {
+                            <img src="@Offer.Vendor.LogoUrl" class="vendor-logo" />
+                        }
+                        else
+                        {
+                            <div class="vendor-logo-placeholder">🏪</div>
+                        }
+                        <div>
+                            <h3 class="vendor-name">@Offer.Vendor.Name</h3>
+                            <div class="vendor-status">
+                                @if (Offer.Vendor.IsOpen)
+                                {
+                                    <span class="open-badge">مفتوح الآن</span>
+                                }
+                                else
+                                {
+                                    <span class="closed-badge">مغلق</span>
+                                }
+                                @if (Offer.Vendor.Distance.HasValue)
+                                {
+                                    <span class="distance">📍 @Offer.Vendor.Distance كم</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <span class="arrow">←</span>
+                </div>
+            }
+
+            <!-- Price -->
+            <div class="price-section">
+                <div class="price-info">
+                    <span class="current-price">@Offer.Price ر.س</span>
+                    @if (Offer.OriginalPrice.HasValue && Offer.OriginalPrice > Offer.Price)
+                    {
+                        <span class="original-price">@Offer.OriginalPrice ر.س</span>
+                        <span class="savings">وفر @((Offer.OriginalPrice - Offer.Price).Value.ToString("0.00")) ر.س</span>
+                    }
+                </div>
+            </div>
+
+            <!-- Description -->
+            @if (!string.IsNullOrEmpty(Offer.Description))
+            {
+                <div class="description-section">
+                    <h2>تفاصيل العرض</h2>
+                    <p>@Offer.Description</p>
+                </div>
+            }
+
+            <!-- Quantity -->
+            <div class="quantity-section">
+                <h2>الكمية</h2>
+                <div class="quantity-selector">
+                    <button class="qty-btn" @onclick="DecreaseQuantity" disabled="@(Quantity <= 1)">-</button>
+                    <span class="qty-value">@Quantity</span>
+                    <button class="qty-btn" @onclick="IncreaseQuantity">+</button>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="notes-section">
+                <h2>ملاحظات (اختياري)</h2>
+                <textarea @bind="CustomerNotes" placeholder="أضف ملاحظاتك هنا..."></textarea>
+            </div>
+        </div>
+
+        <!-- Order Button -->
+        <div class="order-footer">
+            <div class="total-info">
+                <span class="total-label">المجموع</span>
+                <span class="total-amount">@((Offer.Price * Quantity).ToString("0.00")) ر.س</span>
+            </div>
+            <button class="order-btn" @onclick="ProceedToOrder" disabled="@(!Offer.Vendor?.IsOpen ?? true)">
+                @if (Offer.Vendor?.IsOpen == true)
+                {
+                    <span>اطلب الآن</span>
+                }
+                else
+                {
+                    <span>المتجر مغلق</span>
+                }
+            </button>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid OfferId { get; set; }
+
+    private OfferDto? Offer;
+    private bool IsLoading = true;
+    private int Quantity = 1;
+    private string? CustomerNotes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOffer();
+    }
+
+    private async Task LoadOffer()
+    {
+        IsLoading = true;
+        try
+        {
+            Offer = await ApiService.GetOfferAsync(OfferId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading offer: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void IncreaseQuantity()
+    {
+        if (Quantity < 99)
+            Quantity++;
+    }
+
+    private void DecreaseQuantity()
+    {
+        if (Quantity > 1)
+            Quantity--;
+    }
+
+    private void ProceedToOrder()
+    {
+        // نخزن البيانات في SessionStorage أو نمررها كـ Query Parameters
+        var orderData = $"offerId={OfferId}&qty={Quantity}&notes={Uri.EscapeDataString(CustomerNotes ?? "")}";
+        Navigation.NavigateTo($"/order/create?{orderData}");
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private void ViewVendor(Guid vendorId)
+    {
+        Navigation.NavigateTo($"/vendor/{vendorId}");
+    }
+}
+
+<style>
+    .loading-page, .error-page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #f0f0f0;
+        border-top-color: #FF6B35;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 16px;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .offer-details-page {
+        padding-bottom: 100px;
+    }
+
+    .offer-hero {
+        position: relative;
+        height: 250px;
+        background: #f0f0f0;
+    }
+
+    .offer-hero img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .offer-hero .image-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 80px;
+        background: linear-gradient(135deg, #FFE5D9 0%, #FFD7C4 100%);
+    }
+
+    .back-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: white;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .offer-hero .discount-badge {
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+        background: #FF3B30;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    .offer-body {
+        padding: 20px;
+    }
+
+    .offer-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 0 0 16px;
+        color: #333;
+    }
+
+    .vendor-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #f8f8f8;
+        padding: 12px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        cursor: pointer;
+    }
+
+    .vendor-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .vendor-logo, .vendor-logo-placeholder {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        object-fit: cover;
+    }
+
+    .vendor-logo-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #ddd;
+        font-size: 24px;
+    }
+
+    .vendor-name {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 4px;
+    }
+
+    .vendor-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+    }
+
+    .open-badge {
+        background: #34C759;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+    }
+
+    .closed-badge {
+        background: #FF3B30;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+    }
+
+    .distance {
+        color: #666;
+    }
+
+    .arrow {
+        font-size: 20px;
+        color: #999;
+    }
+
+    .price-section {
+        background: linear-gradient(135deg, #FFF5F0 0%, #FFEEE5 100%);
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+
+    .current-price {
+        font-size: 28px;
+        font-weight: bold;
+        color: #FF6B35;
+    }
+
+    .original-price {
+        font-size: 18px;
+        color: #999;
+        text-decoration: line-through;
+        margin-right: 12px;
+    }
+
+    .savings {
+        display: block;
+        font-size: 14px;
+        color: #34C759;
+        margin-top: 4px;
+    }
+
+    .description-section, .quantity-section, .notes-section {
+        margin-bottom: 20px;
+    }
+
+    .description-section h2, .quantity-section h2, .notes-section h2 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 12px;
+        color: #333;
+    }
+
+    .description-section p {
+        color: #666;
+        line-height: 1.6;
+        margin: 0;
+        white-space: pre-line;
+    }
+
+    .quantity-selector {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .qty-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        border: 1px solid #ddd;
+        background: white;
+        font-size: 20px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .qty-btn:hover:not(:disabled) {
+        background: #FF6B35;
+        color: white;
+        border-color: #FF6B35;
+    }
+
+    .qty-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .qty-value {
+        font-size: 20px;
+        font-weight: 600;
+        min-width: 40px;
+        text-align: center;
+    }
+
+    .notes-section textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        font-size: 14px;
+        resize: vertical;
+        min-height: 80px;
+        font-family: inherit;
+    }
+
+    .notes-section textarea:focus {
+        outline: none;
+        border-color: #FF6B35;
+    }
+
+    .order-footer {
+        position: fixed;
+        bottom: 70px;
+        left: 0;
+        right: 0;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        background: white;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    }
+
+    .total-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .total-label {
+        font-size: 12px;
+        color: #666;
+    }
+
+    .total-amount {
+        font-size: 20px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .order-btn {
+        flex: 1;
+        padding: 14px 24px;
+        background: #FF6B35;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .order-btn:hover:not(:disabled) {
+        background: #E55A2B;
+    }
+
+    .order-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+</style>

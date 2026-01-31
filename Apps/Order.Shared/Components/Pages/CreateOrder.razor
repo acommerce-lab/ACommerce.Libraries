@@ -1,0 +1,615 @@
+@page "/order/create"
+@inject OrderApiService ApiService
+@inject NavigationManager Navigation
+
+<div class="create-order-page">
+    <header class="page-header">
+        <button class="back-btn" @onclick="GoBack">←</button>
+        <h1>تأكيد الطلب</h1>
+    </header>
+
+    @if (IsLoading)
+    {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>جاري التحميل...</p>
+        </div>
+    }
+    else if (Offer == null)
+    {
+        <div class="error-state">
+            <p>خطأ في تحميل العرض</p>
+        </div>
+    }
+    else
+    {
+        <div class="order-content">
+            <!-- Order Summary -->
+            <section class="order-summary">
+                <h2>ملخص الطلب</h2>
+                <div class="summary-item">
+                    <div class="item-info">
+                        <span class="item-name">@Offer.Title</span>
+                        <span class="item-qty">× @Quantity</span>
+                    </div>
+                    <span class="item-price">@((Offer.Price * Quantity).ToString("0.00")) ر.س</span>
+                </div>
+                <div class="summary-total">
+                    <span>المجموع</span>
+                    <span class="total-price">@((Offer.Price * Quantity).ToString("0.00")) ر.س</span>
+                </div>
+            </section>
+
+            <!-- Delivery Type -->
+            <section class="delivery-section">
+                <h2>طريقة الاستلام</h2>
+                <div class="delivery-options">
+                    <div class="delivery-option @(SelectedDeliveryType == DeliveryType.Pickup ? "selected" : "")"
+                         @onclick="() => SelectDeliveryType(DeliveryType.Pickup)">
+                        <span class="option-icon">🚶</span>
+                        <div class="option-content">
+                            <span class="option-title">استلام من الكاشير</span>
+                            <span class="option-desc">اذهب للمتجر واستلم طلبك</span>
+                        </div>
+                        <span class="check-mark">@(SelectedDeliveryType == DeliveryType.Pickup ? "✓" : "")</span>
+                    </div>
+
+                    <div class="delivery-option @(SelectedDeliveryType == DeliveryType.CarDelivery ? "selected" : "")"
+                         @onclick="() => SelectDeliveryType(DeliveryType.CarDelivery)">
+                        <span class="option-icon">🚗</span>
+                        <div class="option-content">
+                            <span class="option-title">توصيل للسيارة</span>
+                            <span class="option-desc">شارك موقعك وسنوصل لك</span>
+                        </div>
+                        <span class="check-mark">@(SelectedDeliveryType == DeliveryType.CarDelivery ? "✓" : "")</span>
+                    </div>
+                </div>
+
+                @if (SelectedDeliveryType == DeliveryType.CarDelivery)
+                {
+                    <!-- Location Sharing -->
+                    <div class="location-section">
+                        <h3>موقع التوصيل</h3>
+
+                        @if (CurrentLocation != null)
+                        {
+                            <div class="location-info">
+                                <span class="location-icon">📍</span>
+                                <div class="location-details">
+                                    <span class="location-status">تم تحديد موقعك</span>
+                                    <span class="location-coords">
+                                        @CurrentLocation.Value.Lat.ToString("0.0000"), @CurrentLocation.Value.Lng.ToString("0.0000")
+                                    </span>
+                                </div>
+                                <button class="refresh-btn" @onclick="RefreshLocation">🔄</button>
+                            </div>
+                        }
+                        else
+                        {
+                            <button class="share-location-btn" @onclick="GetCurrentLocation">
+                                <span>📍</span>
+                                <span>مشاركة موقعي</span>
+                            </button>
+                        }
+
+                        <div class="location-note-input">
+                            <label>وصف إضافي للموقع (اختياري)</label>
+                            <input type="text" @bind="LocationDescription"
+                                   placeholder="مثال: أمام البوابة الرئيسية، الموقف رقم 5" />
+                        </div>
+
+                        <!-- Car Info -->
+                        <div class="car-info">
+                            <h3>معلومات السيارة (اختياري)</h3>
+                            <div class="car-inputs">
+                                <div class="input-group">
+                                    <label>نوع السيارة</label>
+                                    <input type="text" @bind="CarModel" placeholder="مثال: كامري 2024" />
+                                </div>
+                                <div class="input-group">
+                                    <label>اللون</label>
+                                    <input type="text" @bind="CarColor" placeholder="مثال: أبيض" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </section>
+
+            <!-- Payment Method -->
+            <section class="payment-section">
+                <h2>طريقة الدفع</h2>
+                <div class="payment-options">
+                    <div class="payment-option @(SelectedPaymentMethod == PaymentMethod.Cash ? "selected" : "")"
+                         @onclick="() => SelectPaymentMethod(PaymentMethod.Cash)">
+                        <span class="option-icon">💵</span>
+                        <span class="option-title">نقدي (كاش)</span>
+                        <span class="check-mark">@(SelectedPaymentMethod == PaymentMethod.Cash ? "✓" : "")</span>
+                    </div>
+
+                    <div class="payment-option @(SelectedPaymentMethod == PaymentMethod.Card ? "selected" : "")"
+                         @onclick="() => SelectPaymentMethod(PaymentMethod.Card)">
+                        <span class="option-icon">💳</span>
+                        <span class="option-title">بطاقة</span>
+                        <span class="check-mark">@(SelectedPaymentMethod == PaymentMethod.Card ? "✓" : "")</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Notes -->
+            @if (!string.IsNullOrEmpty(CustomerNotes))
+            {
+                <section class="notes-section">
+                    <h2>ملاحظاتك</h2>
+                    <p class="notes-text">@CustomerNotes</p>
+                </section>
+            }
+        </div>
+
+        <!-- Submit Button -->
+        <div class="submit-footer">
+            @if (IsSubmitting)
+            {
+                <button class="submit-btn" disabled>
+                    <div class="btn-spinner"></div>
+                    <span>جاري إرسال الطلب...</span>
+                </button>
+            }
+            else
+            {
+                <button class="submit-btn" @onclick="SubmitOrder"
+                        disabled="@(SelectedDeliveryType == DeliveryType.CarDelivery && CurrentLocation == null)">
+                    <span>تأكيد الطلب</span>
+                    <span class="btn-price">@((Offer.Price * Quantity).ToString("0.00")) ر.س</span>
+                </button>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public Guid OfferId { get; set; }
+
+    [SupplyParameterFromQuery(Name = "qty")]
+    public int Quantity { get; set; } = 1;
+
+    [SupplyParameterFromQuery(Name = "notes")]
+    public string? CustomerNotes { get; set; }
+
+    private OfferDto? Offer;
+    private bool IsLoading = true;
+    private bool IsSubmitting = false;
+
+    private DeliveryType SelectedDeliveryType = DeliveryType.Pickup;
+    private PaymentMethod SelectedPaymentMethod = PaymentMethod.Cash;
+
+    private (double Lat, double Lng)? CurrentLocation;
+    private string? LocationDescription;
+    private string? CarModel;
+    private string? CarColor;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Quantity < 1) Quantity = 1;
+        CustomerNotes = Uri.UnescapeDataString(CustomerNotes ?? "");
+
+        await LoadOffer();
+    }
+
+    private async Task LoadOffer()
+    {
+        IsLoading = true;
+        try
+        {
+            Offer = await ApiService.GetOfferAsync(OfferId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading offer: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void SelectDeliveryType(DeliveryType type)
+    {
+        SelectedDeliveryType = type;
+    }
+
+    private void SelectPaymentMethod(PaymentMethod method)
+    {
+        SelectedPaymentMethod = method;
+    }
+
+    private async Task GetCurrentLocation()
+    {
+        // في MAUI سنستخدم Geolocation API
+        // حالياً موقع افتراضي للاختبار
+        await Task.Delay(500); // محاكاة التأخير
+        CurrentLocation = (24.7136, 46.6753);
+    }
+
+    private async Task RefreshLocation()
+    {
+        CurrentLocation = null;
+        await GetCurrentLocation();
+    }
+
+    private async Task SubmitOrder()
+    {
+        if (Offer == null) return;
+
+        IsSubmitting = true;
+        try
+        {
+            var request = new CreateOrderRequest
+            {
+                Items = new List<OrderItemRequest>
+                {
+                    new OrderItemRequest
+                    {
+                        OfferId = Offer.Id,
+                        Quantity = Quantity,
+                        Notes = CustomerNotes
+                    }
+                },
+                DeliveryType = SelectedDeliveryType,
+                PaymentMethod = SelectedPaymentMethod,
+                CustomerNotes = CustomerNotes,
+                DeliveryLocation = CurrentLocation.HasValue ? new DeliveryLocationDto
+                {
+                    Latitude = CurrentLocation.Value.Lat,
+                    Longitude = CurrentLocation.Value.Lng,
+                    LocationDescription = LocationDescription,
+                    IsLiveLocation = true
+                } : null,
+                CarInfo = !string.IsNullOrEmpty(CarModel) || !string.IsNullOrEmpty(CarColor) ? new CarInfoDto
+                {
+                    CarModel = CarModel,
+                    CarColor = CarColor
+                } : null
+            };
+
+            var result = await ApiService.CreateOrderAsync(request);
+
+            if (result != null)
+            {
+                // الانتقال لصفحة تأكيد الطلب
+                Navigation.NavigateTo($"/order/success/{result.OrderId}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating order: {ex.Message}");
+            // يمكن إظهار رسالة خطأ للمستخدم
+        }
+        finally
+        {
+            IsSubmitting = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo($"/offer/{OfferId}");
+    }
+}
+
+<style>
+    .create-order-page {
+        min-height: 100vh;
+        background: #f5f5f5;
+        padding-bottom: 100px;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        background: white;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .page-header h1 {
+        font-size: 18px;
+        margin: 0;
+    }
+
+    .back-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #f0f0f0;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+    }
+
+    .loading-state, .error-state {
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .spinner, .btn-spinner {
+        width: 24px;
+        height: 24px;
+        border: 2px solid #f0f0f0;
+        border-top-color: #FF6B35;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+
+    .btn-spinner {
+        width: 20px;
+        height: 20px;
+        border-color: rgba(255,255,255,0.3);
+        border-top-color: white;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .order-content {
+        padding: 16px;
+    }
+
+    .order-content section {
+        background: white;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+
+    .order-content h2 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 16px;
+        color: #333;
+    }
+
+    .order-content h3 {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 16px 0 12px;
+        color: #333;
+    }
+
+    /* Order Summary */
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .item-info {
+        display: flex;
+        gap: 8px;
+    }
+
+    .item-name {
+        font-weight: 500;
+    }
+
+    .item-qty {
+        color: #666;
+    }
+
+    .item-price {
+        font-weight: 500;
+    }
+
+    .summary-total {
+        display: flex;
+        justify-content: space-between;
+        padding-top: 12px;
+        font-weight: 600;
+    }
+
+    .total-price {
+        color: #FF6B35;
+        font-size: 18px;
+    }
+
+    /* Delivery & Payment Options */
+    .delivery-options, .payment-options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .delivery-option, .payment-option {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        border: 2px solid #eee;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .delivery-option.selected, .payment-option.selected {
+        border-color: #FF6B35;
+        background: #FFF5F0;
+    }
+
+    .option-icon {
+        font-size: 24px;
+    }
+
+    .option-content {
+        flex: 1;
+    }
+
+    .option-title {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+
+    .option-desc {
+        font-size: 12px;
+        color: #666;
+    }
+
+    .check-mark {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #FF6B35;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+
+    /* Location Section */
+    .location-section {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #eee;
+    }
+
+    .location-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: #E8F5E9;
+        border-radius: 12px;
+    }
+
+    .location-icon {
+        font-size: 24px;
+    }
+
+    .location-details {
+        flex: 1;
+    }
+
+    .location-status {
+        display: block;
+        font-weight: 500;
+        color: #2E7D32;
+    }
+
+    .location-coords {
+        font-size: 12px;
+        color: #666;
+    }
+
+    .refresh-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: white;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+    }
+
+    .share-location-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 14px;
+        background: #FF6B35;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .location-note-input, .input-group {
+        margin-top: 12px;
+    }
+
+    .location-note-input label, .input-group label {
+        display: block;
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 6px;
+    }
+
+    .location-note-input input, .input-group input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .car-inputs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    /* Notes */
+    .notes-text {
+        color: #666;
+        margin: 0;
+        padding: 12px;
+        background: #f8f8f8;
+        border-radius: 8px;
+    }
+
+    /* Submit Footer */
+    .submit-footer {
+        position: fixed;
+        bottom: 70px;
+        left: 0;
+        right: 0;
+        padding: 16px;
+        background: white;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    }
+
+    .submit-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        width: 100%;
+        padding: 16px;
+        background: #FF6B35;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+        background: #E55A2B;
+    }
+
+    .submit-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+
+    .btn-price {
+        background: rgba(0,0,0,0.1);
+        padding: 4px 12px;
+        border-radius: 20px;
+    }
+</style>

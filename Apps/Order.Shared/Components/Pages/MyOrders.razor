@@ -1,0 +1,317 @@
+@page "/orders"
+@inject OrderApiService ApiService
+@inject NavigationManager Navigation
+
+<div class="orders-page">
+    <header class="page-header">
+        <h1>طلباتي</h1>
+    </header>
+
+    @if (IsLoading)
+    {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>جاري التحميل...</p>
+        </div>
+    }
+    else if (Orders?.Items?.Any() == true)
+    {
+        <div class="orders-list">
+            @foreach (var order in Orders.Items)
+            {
+                <div class="order-card" @onclick="() => ViewOrder(order.Id)">
+                    <div class="order-header">
+                        <span class="order-number">#@order.OrderNumber</span>
+                        <span class="order-status @GetStatusClass(order.Status)">@order.StatusAr</span>
+                    </div>
+                    <div class="order-body">
+                        @if (order.Vendor != null)
+                        {
+                            <span class="vendor-name">@order.Vendor.Name</span>
+                        }
+                        <span class="order-date">@order.CreatedAt.ToString("dd MMM yyyy - hh:mm tt")</span>
+                    </div>
+                    <div class="order-footer">
+                        <div class="delivery-info">
+                            <span class="delivery-type">
+                                @(order.DeliveryType == DeliveryType.Pickup ? "🚶 كاشير" : "🚗 سيارة")
+                            </span>
+                            <span class="payment-method">
+                                @(order.PaymentMethod == PaymentMethod.Cash ? "💵 نقدي" : "💳 بطاقة")
+                            </span>
+                        </div>
+                        <span class="order-total">@order.TotalAmount ر.س</span>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (Orders.Total > Orders.Items.Count)
+        {
+            <button class="load-more-btn" @onclick="LoadMore">
+                تحميل المزيد (@(Orders.Total - Orders.Items.Count) طلب)
+            </button>
+        }
+    }
+    else
+    {
+        <div class="empty-state">
+            <span class="empty-icon">📋</span>
+            <h2>لا توجد طلبات</h2>
+            <p>ابدأ بتصفح العروض واطلب الآن!</p>
+            <button class="browse-btn" @onclick="GoHome">تصفح العروض</button>
+        </div>
+    }
+</div>
+
+@code {
+    private OrdersResponse? Orders;
+    private bool IsLoading = true;
+    private int CurrentPage = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrders();
+    }
+
+    private async Task LoadOrders()
+    {
+        IsLoading = true;
+        try
+        {
+            Orders = await ApiService.GetMyOrdersAsync(CurrentPage);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading orders: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task LoadMore()
+    {
+        CurrentPage++;
+        try
+        {
+            var moreOrders = await ApiService.GetMyOrdersAsync(CurrentPage);
+            if (moreOrders?.Items != null && Orders?.Items != null)
+            {
+                Orders.Items.AddRange(moreOrders.Items);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading more orders: {ex.Message}");
+        }
+    }
+
+    private void ViewOrder(Guid orderId)
+    {
+        Navigation.NavigateTo($"/orders/{orderId}");
+    }
+
+    private void GoHome()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private string GetStatusClass(string? status) => status switch
+    {
+        "pending" => "status-pending",
+        "accepted" => "status-accepted",
+        "preparing" => "status-preparing",
+        "ready" => "status-ready",
+        "delivered" => "status-delivered",
+        "cancelled" => "status-cancelled",
+        _ => ""
+    };
+}
+
+<style>
+    .orders-page {
+        min-height: 100vh;
+        background: #f5f5f5;
+    }
+
+    .page-header {
+        padding: 16px;
+        background: white;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .page-header h1 {
+        font-size: 20px;
+        margin: 0;
+    }
+
+    .loading-state {
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #f0f0f0;
+        border-top-color: #FF6B35;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .orders-list {
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .order-card {
+        background: white;
+        border-radius: 12px;
+        padding: 16px;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .order-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .order-number {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .order-status {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .status-pending {
+        background: #FFF3E0;
+        color: #E65100;
+    }
+
+    .status-accepted, .status-preparing {
+        background: #E3F2FD;
+        color: #1565C0;
+    }
+
+    .status-ready {
+        background: #E8F5E9;
+        color: #2E7D32;
+    }
+
+    .status-delivered {
+        background: #F3E5F5;
+        color: #7B1FA2;
+    }
+
+    .status-cancelled {
+        background: #FFEBEE;
+        color: #C62828;
+    }
+
+    .order-body {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 12px;
+    }
+
+    .vendor-name {
+        font-weight: 500;
+        color: #333;
+    }
+
+    .order-date {
+        font-size: 13px;
+        color: #666;
+    }
+
+    .order-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 12px;
+        border-top: 1px solid #eee;
+    }
+
+    .delivery-info {
+        display: flex;
+        gap: 12px;
+        font-size: 13px;
+        color: #666;
+    }
+
+    .order-total {
+        font-weight: 600;
+        color: #FF6B35;
+        font-size: 16px;
+    }
+
+    .load-more-btn {
+        display: block;
+        width: calc(100% - 32px);
+        margin: 0 16px 16px;
+        padding: 12px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        color: #666;
+        cursor: pointer;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .empty-icon {
+        font-size: 64px;
+        display: block;
+        margin-bottom: 16px;
+    }
+
+    .empty-state h2 {
+        font-size: 20px;
+        color: #333;
+        margin: 0 0 8px;
+    }
+
+    .empty-state p {
+        color: #666;
+        margin: 0 0 24px;
+    }
+
+    .browse-btn {
+        padding: 12px 32px;
+        background: #FF6B35;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+</style>
