@@ -135,31 +135,23 @@
     {
         try
         {
-            // Load chat info
-            var chat = await ChatsClient.GetConversationAsync(ChatId);
+            // Get current user ID first (sync operation)
+            _currentUserId = TokenManager.GetUserIdFromToken();
 
-            // تعيين بيانات أولية
+            // تحميل معلومات المحادثة والرسائل بالتوازي
+            var chatTask = ChatsClient.GetConversationAsync(ChatId);
+            var messagesTask = ChatsClient.GetMessagesAsync(ChatId);
+
+            // انتظار كلاهما بالتوازي
+            await Task.WhenAll(chatTask, messagesTask);
+
+            var chat = await chatTask;
+            var messages = await messagesTask;
+
+            // تعيين بيانات المحادثة
             var otherPartyId = chat?.OtherPartyId;
             var displayName = "مستخدم";
             string? avatar = chat?.OtherPartyAvatar;
-
-            // جلب اسم المستخدم الحقيقي من البروفايل
-            if (!string.IsNullOrEmpty(otherPartyId))
-            {
-                try
-                {
-                    var profile = await ProfilesClient.GetByUserIdAsync(otherPartyId);
-                    if (profile != null)
-                    {
-                        displayName = profile.FullName ?? profile.BusinessName ?? "مستخدم";
-                        avatar = profile.Avatar ?? avatar;
-                    }
-                }
-                catch
-                {
-                    // إذا فشل جلب البروفايل، نستخدم الاسم الافتراضي
-                }
-            }
 
             _chat = new()
             {
@@ -168,48 +160,86 @@
                 Name = displayName
             };
 
-            // Load messages
-            var messages = await ChatsClient.GetMessagesAsync(ChatId);
-
-            // Get current user ID to calculate IsMine correctly
-            _currentUserId = TokenManager.GetUserIdFromToken();
-
+            // تحويل الرسائل
             _messages = messages?
-            .Select(message =>
-            new ChatMessage
-            {
-                Content = message.Content,
-                Id = message.Id,
-                IsFailed = false,
-                // Calculate IsMine by comparing SenderId with current user ID
-                IsMine = !string.IsNullOrEmpty(_currentUserId) && message.SenderId == _currentUserId,
-                IsRead = message.IsRead,
-                SentAt = message.SentAt,
-                Type = message.Type
-            })
-            .ToList() ?? [];
+                .Select(message => new ChatMessage
+                {
+                    Content = message.Content,
+                    Id = message.Id,
+                    IsFailed = false,
+                    IsMine = !string.IsNullOrEmpty(_currentUserId) && message.SenderId == _currentUserId,
+                    IsRead = message.IsRead,
+                    SentAt = message.SentAt,
+                    Type = message.Type
+                })
+                .ToList() ?? [];
 
-            // Subscribe to real-time updates (connect to chat hub with auth token)
-            var accessToken = await TokenManager.GetTokenAsync();
-            await RealtimeClient.ConnectAsync("Marketplace", "/hubs/chat", accessToken);
+            // إظهار الرسائل فوراً
+            _isLoading = false;
+            StateHasChanged();
 
-            // Join the chat group to receive messages for this conversation
-            await RealtimeClient.SendAsync("JoinChat", ChatId.ToString());
-
-            // Subscribe to "ReceiveMessage" event (the method name on IChatClient)
-            // Server calls: client.ReceiveMessage("MessageReceived", message)
-            _messageSubscription = RealtimeClient.On<string, object>("ReceiveMessage", HandleNewMessage);
-
-            // Mark as read
-            await ChatsClient.MarkAsReadAsync(ChatId);
+            // تحميل البروفايل والاتصال بـ SignalR في الخلفية (لا ينتظر)
+            _ = InitializeBackgroundTasksAsync(otherPartyId, avatar);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[ChatRoom] Error loading chat: {ex.Message}");
-        }
-        finally
-        {
             _isLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// تهيئة المهام الخلفية: جلب البروفايل، الاتصال بـ SignalR، تحديث حالة القراءة
+    /// </summary>
+    private async Task InitializeBackgroundTasksAsync(string? otherPartyId, string? avatar)
+    {
+        try
+        {
+            // جلب اسم المستخدم الحقيقي من البروفايل
+            if (!string.IsNullOrEmpty(otherPartyId))
+            {
+                try
+                {
+                    var profile = await ProfilesClient.GetByUserIdAsync(otherPartyId);
+                    if (profile != null && _chat != null)
+                    {
+                        _chat.Name = profile.FullName ?? profile.BusinessName ?? "مستخدم";
+                        _chat.Avatar = profile.Avatar ?? avatar ?? "";
+                        await InvokeAsync(StateHasChanged);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[ChatRoom] Error loading profile: {ex.Message}");
+                }
+            }
+
+            // الاتصال بـ SignalR في الخلفية
+            try
+            {
+                var accessToken = await TokenManager.GetTokenAsync();
+                await RealtimeClient.ConnectAsync("Marketplace", "/hubs/chat", accessToken);
+                await RealtimeClient.SendAsync("JoinChat", ChatId.ToString());
+                _messageSubscription = RealtimeClient.On<string, object>("ReceiveMessage", HandleNewMessage);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ChatRoom] Error connecting to SignalR: {ex.Message}");
+            }
+
+            // تحديث حالة القراءة
+            try
+            {
+                await ChatsClient.MarkAsReadAsync(ChatId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ChatRoom] Error marking as read: {ex.Message}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ChatRoom] Error in background tasks: {ex.Message}");
         }
     }
 
