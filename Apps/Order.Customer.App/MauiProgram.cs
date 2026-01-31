@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Order.Shared.Services;
 
-namespace Order.Customer.App;
+namespace com.order.app;
 
 public static class MauiProgram
 {

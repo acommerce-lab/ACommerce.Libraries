@@ -2,7 +2,7 @@ using Android.App;
 using Android.Content.PM;
 using Android.OS;
 
-namespace Order.Customer.App;
+namespace com.order.app;
 
 [Activity(
     Theme = "@style/Maui.SplashTheme",
