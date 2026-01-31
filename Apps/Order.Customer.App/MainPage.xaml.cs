@@ -1,4 +1,4 @@
-namespace Order.Customer.App;
+namespace com.order.app;
 
 public partial class MainPage : ContentPage
 {

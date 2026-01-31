@@ -1,6 +1,6 @@
 using UIKit;
 
-namespace Order.Customer.App;
+namespace com.order.app;
 
 public class Program
 {

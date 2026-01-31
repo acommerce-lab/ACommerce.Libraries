@@ -1,6 +1,6 @@
 using Foundation;
 
-namespace Order.Customer.App;
+namespace com.order.app;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate
