@@ -2,165 +2,350 @@
 @inject OrderApiService ApiService
 @inject NavigationManager Navigation
 
-<div class="create-order-page">
-    <header class="page-header">
-        <button class="back-btn" @onclick="GoBack">←</button>
-        <h1>تأكيد الطلب</h1>
+<div class="checkout-page">
+    <!-- Header -->
+    <header class="checkout-header">
+        <button class="btn-back" @onclick="GoBack">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18l6-6-6-6"/>
+            </svg>
+        </button>
+        <h1>إتمام الطلب</h1>
+        <div class="header-spacer"></div>
     </header>
 
     @if (IsLoading)
     {
-        <div class="loading-state">
-            <div class="spinner"></div>
+        <div class="loading-container">
+            <div class="loader"></div>
             <p>جاري التحميل...</p>
         </div>
     }
     else if (Offer == null)
     {
-        <div class="error-state">
-            <p>خطأ في تحميل العرض</p>
+        <div class="error-container">
+            <div class="error-icon">!</div>
+            <p>عذراً، لم نتمكن من تحميل العرض</p>
+            <button class="btn-retry" @onclick="LoadOffer">إعادة المحاولة</button>
         </div>
     }
     else
     {
-        <div class="order-content">
-            <!-- Order Summary -->
-            <section class="order-summary">
-                <h2>ملخص الطلب</h2>
-                <div class="summary-item">
-                    <div class="item-info">
-                        <span class="item-name">@Offer.Title</span>
-                        <span class="item-qty">× @Quantity</span>
+        <div class="checkout-content">
+            <!-- Order Items Card -->
+            <div class="card order-card">
+                <div class="card-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <path d="M16 10a4 4 0 01-8 0"/>
+                    </svg>
+                    <span>تفاصيل الطلب</span>
+                </div>
+                <div class="order-item">
+                    <div class="item-image">
+                        @if (!string.IsNullOrEmpty(Offer.ImageUrl))
+                        {
+                            <img src="@Offer.ImageUrl" alt="@Offer.Title" />
+                        }
+                        else
+                        {
+                            <div class="item-placeholder">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                            </div>
+                        }
                     </div>
-                    <span class="item-price">@((Offer.Price * Quantity).ToString("0.00")) ر.س</span>
+                    <div class="item-details">
+                        <h3>@Offer.Title</h3>
+                        <p class="item-vendor">@Offer.Vendor?.Name</p>
+                        <div class="item-qty-price">
+                            <span class="qty-badge">@Quantity ×</span>
+                            <span class="item-price">@Offer.Price.ToString("0.00") ر.س</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="summary-total">
-                    <span>المجموع</span>
-                    <span class="total-price">@((Offer.Price * Quantity).ToString("0.00")) ر.س</span>
+                <div class="order-total-row">
+                    <span>الإجمالي</span>
+                    <span class="total-value">@TotalAmount.ToString("0.00") ر.س</span>
                 </div>
-            </section>
+            </div>
 
-            <!-- Delivery Type -->
-            <section class="delivery-section">
-                <h2>طريقة الاستلام</h2>
-                <div class="delivery-options">
-                    <div class="delivery-option @(SelectedDeliveryType == DeliveryType.Pickup ? "selected" : "")"
+            <!-- Delivery Method Card -->
+            <div class="card">
+                <div class="card-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="10" r="3"/>
+                        <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 10-16 0c0 3 2.7 7 8 11.7z"/>
+                    </svg>
+                    <span>طريقة الاستلام</span>
+                </div>
+
+                <div class="options-grid">
+                    <div class="option-card @(SelectedDeliveryType == DeliveryType.Pickup ? "selected" : "")"
                          @onclick="() => SelectDeliveryType(DeliveryType.Pickup)">
-                        <span class="option-icon">🚶</span>
-                        <div class="option-content">
-                            <span class="option-title">استلام من الكاشير</span>
-                            <span class="option-desc">اذهب للمتجر واستلم طلبك</span>
+                        <div class="option-radio @(SelectedDeliveryType == DeliveryType.Pickup ? "checked" : "")">
+                            @if (SelectedDeliveryType == DeliveryType.Pickup)
+                            {
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                </svg>
+                            }
                         </div>
-                        <span class="check-mark">@(SelectedDeliveryType == DeliveryType.Pickup ? "✓" : "")</span>
+                        <div class="option-icon pickup-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                                <polyline points="9,22 9,12 15,12 15,22"/>
+                            </svg>
+                        </div>
+                        <div class="option-text">
+                            <span class="option-title">استلام من المتجر</span>
+                            <span class="option-subtitle">اذهب واستلم طلبك</span>
+                        </div>
                     </div>
 
-                    <div class="delivery-option @(SelectedDeliveryType == DeliveryType.CarDelivery ? "selected" : "")"
+                    <div class="option-card @(SelectedDeliveryType == DeliveryType.CarDelivery ? "selected" : "")"
                          @onclick="() => SelectDeliveryType(DeliveryType.CarDelivery)">
-                        <span class="option-icon">🚗</span>
-                        <div class="option-content">
-                            <span class="option-title">توصيل للسيارة</span>
-                            <span class="option-desc">شارك موقعك وسنوصل لك</span>
+                        <div class="option-radio @(SelectedDeliveryType == DeliveryType.CarDelivery ? "checked" : "")">
+                            @if (SelectedDeliveryType == DeliveryType.CarDelivery)
+                            {
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                </svg>
+                            }
                         </div>
-                        <span class="check-mark">@(SelectedDeliveryType == DeliveryType.CarDelivery ? "✓" : "")</span>
+                        <div class="option-icon car-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M5 17h14v-5H5v5zm2.5 1.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm9 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM5 12l2-5h10l2 5"/>
+                            </svg>
+                        </div>
+                        <div class="option-text">
+                            <span class="option-title">توصيل للسيارة</span>
+                            <span class="option-subtitle">نوصل لك عند سيارتك</span>
+                        </div>
                     </div>
                 </div>
 
                 @if (SelectedDeliveryType == DeliveryType.CarDelivery)
                 {
-                    <!-- Location Sharing -->
-                    <div class="location-section">
-                        <h3>موقع التوصيل</h3>
-
-                        @if (CurrentLocation != null)
-                        {
-                            <div class="location-info">
-                                <span class="location-icon">📍</span>
-                                <div class="location-details">
-                                    <span class="location-status">تم تحديد موقعك</span>
-                                    <span class="location-coords">
-                                        @CurrentLocation.Value.Lat.ToString("0.0000"), @CurrentLocation.Value.Lng.ToString("0.0000")
-                                    </span>
+                    <div class="car-delivery-section">
+                        <!-- Location -->
+                        <div class="location-box">
+                            @if (CurrentLocation != null)
+                            {
+                                <div class="location-confirmed">
+                                    <div class="location-pin">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#10B981">
+                                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="location-text">
+                                        <span class="location-label">تم تحديد موقعك</span>
+                                        <span class="location-coords">@CurrentLocation.Value.Lat.ToString("0.####")، @CurrentLocation.Value.Lng.ToString("0.####")</span>
+                                    </div>
+                                    <button class="btn-icon" @onclick="RefreshLocation">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M23 4v6h-6M1 20v-6h6"/>
+                                            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                                        </svg>
+                                    </button>
                                 </div>
-                                <button class="refresh-btn" @onclick="RefreshLocation">🔄</button>
-                            </div>
-                        }
-                        else
-                        {
-                            <button class="share-location-btn" @onclick="GetCurrentLocation">
-                                <span>📍</span>
-                                <span>مشاركة موقعي</span>
-                            </button>
-                        }
+                            }
+                            else
+                            {
+                                <button class="btn-location" @onclick="GetCurrentLocation">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                        <line x1="12" y1="2" x2="12" y2="4"/>
+                                        <line x1="12" y1="20" x2="12" y2="22"/>
+                                        <line x1="2" y1="12" x2="4" y2="12"/>
+                                        <line x1="20" y1="12" x2="22" y2="12"/>
+                                    </svg>
+                                    <span>تحديد موقعي الحالي</span>
+                                </button>
+                            }
+                        </div>
 
-                        <div class="location-note-input">
-                            <label>وصف إضافي للموقع (اختياري)</label>
+                        <!-- Location Description -->
+                        <div class="form-group">
+                            <label>وصف الموقع <span class="optional">(اختياري)</span></label>
                             <input type="text" @bind="LocationDescription"
-                                   placeholder="مثال: أمام البوابة الرئيسية، الموقف رقم 5" />
+                                   placeholder="مثال: أمام البوابة الشمالية، موقف رقم A5" />
                         </div>
 
                         <!-- Car Info -->
-                        <div class="car-info">
-                            <h3>معلومات السيارة (اختياري)</h3>
-                            <div class="car-inputs">
-                                <div class="input-group">
-                                    <label>نوع السيارة</label>
-                                    <input type="text" @bind="CarModel" placeholder="مثال: كامري 2024" />
-                                </div>
-                                <div class="input-group">
-                                    <label>اللون</label>
-                                    <input type="text" @bind="CarColor" placeholder="مثال: أبيض" />
-                                </div>
+                        <div class="car-info-grid">
+                            <div class="form-group">
+                                <label>نوع السيارة</label>
+                                <input type="text" @bind="CarModel" placeholder="مثال: كامري" />
+                            </div>
+                            <div class="form-group">
+                                <label>اللون</label>
+                                <input type="text" @bind="CarColor" placeholder="مثال: أبيض" />
                             </div>
                         </div>
                     </div>
                 }
-            </section>
+            </div>
 
-            <!-- Payment Method -->
-            <section class="payment-section">
-                <h2>طريقة الدفع</h2>
+            <!-- Payment Method Card -->
+            <div class="card">
+                <div class="card-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                        <line x1="1" y1="10" x2="23" y2="10"/>
+                    </svg>
+                    <span>طريقة الدفع</span>
+                </div>
+
                 <div class="payment-options">
                     <div class="payment-option @(SelectedPaymentMethod == PaymentMethod.Cash ? "selected" : "")"
                          @onclick="() => SelectPaymentMethod(PaymentMethod.Cash)">
-                        <span class="option-icon">💵</span>
-                        <span class="option-title">نقدي (كاش)</span>
-                        <span class="check-mark">@(SelectedPaymentMethod == PaymentMethod.Cash ? "✓" : "")</span>
+                        <div class="option-radio @(SelectedPaymentMethod == PaymentMethod.Cash ? "checked" : "")">
+                            @if (SelectedPaymentMethod == PaymentMethod.Cash)
+                            {
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                </svg>
+                            }
+                        </div>
+                        <div class="payment-icon cash">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                            </svg>
+                        </div>
+                        <span class="payment-label">نقداً (كاش)</span>
                     </div>
 
                     <div class="payment-option @(SelectedPaymentMethod == PaymentMethod.Card ? "selected" : "")"
                          @onclick="() => SelectPaymentMethod(PaymentMethod.Card)">
-                        <span class="option-icon">💳</span>
-                        <span class="option-title">بطاقة</span>
-                        <span class="check-mark">@(SelectedPaymentMethod == PaymentMethod.Card ? "✓" : "")</span>
+                        <div class="option-radio @(SelectedPaymentMethod == PaymentMethod.Card ? "checked" : "")">
+                            @if (SelectedPaymentMethod == PaymentMethod.Card)
+                            {
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                </svg>
+                            }
+                        </div>
+                        <div class="payment-icon card">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                            </svg>
+                        </div>
+                        <span class="payment-label">بطاقة ائتمان</span>
                     </div>
                 </div>
-            </section>
 
-            <!-- Notes -->
+                @if (SelectedPaymentMethod == PaymentMethod.Cash)
+                {
+                    <!-- Cash Amount Section -->
+                    <div class="cash-amount-section">
+                        <div class="cash-amount-header">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span>كم ستدفع؟</span>
+                        </div>
+                        <p class="cash-hint">أدخل المبلغ الذي ستدفعه ليجهز الكاشير الباقي</p>
+
+                        <div class="cash-input-wrapper">
+                            <input type="number"
+                                   @bind="CashAmount"
+                                   @bind:event="oninput"
+                                   placeholder="0.00"
+                                   min="@TotalAmount"
+                                   step="0.5"
+                                   class="cash-input" />
+                            <span class="currency-label">ر.س</span>
+                        </div>
+
+                        <!-- Quick Amount Buttons -->
+                        <div class="quick-amounts">
+                            @foreach (var amount in GetQuickAmounts())
+                            {
+                                <button class="quick-amount-btn @(CashAmount == amount ? "selected" : "")"
+                                        @onclick="() => SetCashAmount(amount)">
+                                    @amount.ToString("0") ر.س
+                                </button>
+                            }
+                        </div>
+
+                        @if (CashAmount.HasValue && CashAmount >= TotalAmount)
+                        {
+                            <div class="change-display">
+                                <div class="change-row">
+                                    <span>المبلغ المدفوع</span>
+                                    <span>@CashAmount.Value.ToString("0.00") ر.س</span>
+                                </div>
+                                <div class="change-row">
+                                    <span>إجمالي الطلب</span>
+                                    <span>@TotalAmount.ToString("0.00") ر.س</span>
+                                </div>
+                                <div class="change-row total">
+                                    <span>الباقي</span>
+                                    <span class="change-value">@ChangeAmount.ToString("0.00") ر.س</span>
+                                </div>
+                            </div>
+                        }
+                        else if (CashAmount.HasValue && CashAmount < TotalAmount)
+                        {
+                            <div class="cash-error">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                                </svg>
+                                <span>المبلغ أقل من إجمالي الطلب</span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
             @if (!string.IsNullOrEmpty(CustomerNotes))
             {
-                <section class="notes-section">
-                    <h2>ملاحظاتك</h2>
-                    <p class="notes-text">@CustomerNotes</p>
-                </section>
+                <!-- Notes Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                            <polyline points="14,2 14,8 20,8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                        <span>ملاحظاتك</span>
+                    </div>
+                    <p class="notes-content">@CustomerNotes</p>
+                </div>
             }
         </div>
 
-        <!-- Submit Button -->
-        <div class="submit-footer">
+        <!-- Bottom Action Bar -->
+        <div class="checkout-footer">
+            <div class="footer-summary">
+                <span class="footer-label">الإجمالي</span>
+                <span class="footer-total">@TotalAmount.ToString("0.00") ر.س</span>
+            </div>
+
             @if (IsSubmitting)
             {
-                <button class="submit-btn" disabled>
-                    <div class="btn-spinner"></div>
-                    <span>جاري إرسال الطلب...</span>
+                <button class="btn-submit" disabled>
+                    <div class="btn-loader"></div>
+                    <span>جاري الإرسال...</span>
                 </button>
             }
             else
             {
-                <button class="submit-btn" @onclick="SubmitOrder"
-                        disabled="@(SelectedDeliveryType == DeliveryType.CarDelivery && CurrentLocation == null)">
+                <button class="btn-submit @(CanSubmit ? "" : "disabled")"
+                        @onclick="SubmitOrder"
+                        disabled="@(!CanSubmit)">
                     <span>تأكيد الطلب</span>
-                    <span class="btn-price">@((Offer.Price * Quantity).ToString("0.00")) ر.س</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                        <polyline points="12,5 19,12 12,19"/>
+                    </svg>
                 </button>
             }
         </div>
@@ -189,11 +374,20 @@
     private string? CarModel;
     private string? CarColor;
 
+    private decimal? CashAmount;
+
+    private decimal TotalAmount => Offer != null ? Offer.Price * Quantity : 0;
+    private decimal ChangeAmount => CashAmount.HasValue ? CashAmount.Value - TotalAmount : 0;
+
+    private bool CanSubmit =>
+        Offer != null &&
+        (SelectedDeliveryType != DeliveryType.CarDelivery || CurrentLocation != null) &&
+        (SelectedPaymentMethod != PaymentMethod.Cash || !CashAmount.HasValue || CashAmount >= TotalAmount);
+
     protected override async Task OnInitializedAsync()
     {
         if (Quantity < 1) Quantity = 1;
         CustomerNotes = Uri.UnescapeDataString(CustomerNotes ?? "");
-
         await LoadOffer();
     }
 
@@ -203,6 +397,11 @@
         try
         {
             Offer = await ApiService.GetOfferAsync(OfferId);
+            // Set initial cash amount to a rounded value
+            if (Offer != null)
+            {
+                CashAmount = Math.Ceiling(TotalAmount / 10) * 10;
+            }
         }
         catch (Exception ex)
         {
@@ -226,9 +425,7 @@
 
     private async Task GetCurrentLocation()
     {
-        // في MAUI سنستخدم Geolocation API
-        // حالياً موقع افتراضي للاختبار
-        await Task.Delay(500); // محاكاة التأخير
+        await Task.Delay(500);
         CurrentLocation = (24.7136, 46.6753);
     }
 
@@ -238,9 +435,20 @@
         await GetCurrentLocation();
     }
 
+    private decimal[] GetQuickAmounts()
+    {
+        var baseAmount = Math.Ceiling(TotalAmount / 10) * 10;
+        return new[] { baseAmount, baseAmount + 10, baseAmount + 20, baseAmount + 50 };
+    }
+
+    private void SetCashAmount(decimal amount)
+    {
+        CashAmount = amount;
+    }
+
     private async Task SubmitOrder()
     {
-        if (Offer == null) return;
+        if (Offer == null || !CanSubmit) return;
 
         IsSubmitting = true;
         try
@@ -259,6 +467,7 @@
                 DeliveryType = SelectedDeliveryType,
                 PaymentMethod = SelectedPaymentMethod,
                 CustomerNotes = CustomerNotes,
+                CashAmount = SelectedPaymentMethod == PaymentMethod.Cash ? CashAmount : null,
                 DeliveryLocation = CurrentLocation.HasValue ? new DeliveryLocationDto
                 {
                     Latitude = CurrentLocation.Value.Lat,
@@ -277,14 +486,12 @@
 
             if (result != null)
             {
-                // الانتقال لصفحة تأكيد الطلب
                 Navigation.NavigateTo($"/order/success/{result.OrderId}");
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error creating order: {ex.Message}");
-            // يمكن إظهار رسالة خطأ للمستخدم
         }
         finally
         {
@@ -299,317 +506,686 @@
 }
 
 <style>
-    .create-order-page {
+    .checkout-page {
         min-height: 100vh;
-        background: #f5f5f5;
-        padding-bottom: 100px;
+        background: linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%);
+        padding-bottom: 140px;
     }
 
-    .page-header {
+    /* Header */
+    .checkout-header {
         display: flex;
         align-items: center;
-        gap: 16px;
-        padding: 16px;
+        justify-content: space-between;
+        padding: 16px 20px;
         background: white;
+        border-bottom: 1px solid #E2E8F0;
         position: sticky;
         top: 0;
         z-index: 100;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 
-    .page-header h1 {
+    .checkout-header h1 {
         font-size: 18px;
+        font-weight: 700;
         margin: 0;
+        color: #1E293B;
     }
 
-    .back-btn {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: #f0f0f0;
+    .btn-back {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: #F1F5F9;
         border: none;
-        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748B;
         cursor: pointer;
+        transition: all 0.2s;
     }
 
-    .loading-state, .error-state {
+    .btn-back:active {
+        transform: scale(0.95);
+        background: #E2E8F0;
+    }
+
+    .header-spacer {
+        width: 40px;
+    }
+
+    /* Loading & Error States */
+    .loading-container, .error-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
+        padding: 40px;
         text-align: center;
-        padding: 40px 20px;
     }
 
-    .spinner, .btn-spinner {
-        width: 24px;
-        height: 24px;
-        border: 2px solid #f0f0f0;
-        border-top-color: #FF6B35;
+    .loader {
+        width: 48px;
+        height: 48px;
+        border: 4px solid #E2E8F0;
+        border-top-color: #F97316;
         border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin: 0 auto;
+        animation: spin 0.8s linear infinite;
     }
 
-    .btn-spinner {
-        width: 20px;
-        height: 20px;
-        border-color: rgba(255,255,255,0.3);
-        border-top-color: white;
+    .error-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: #FEE2E2;
+        color: #DC2626;
+        font-size: 32px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+    }
+
+    .btn-retry {
+        margin-top: 16px;
+        padding: 12px 24px;
+        background: #F97316;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
     }
 
     @@keyframes spin {
         to { transform: rotate(360deg); }
     }
 
-    .order-content {
+    /* Content */
+    .checkout-content {
         padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
     }
 
-    .order-content section {
+    /* Card Styles */
+    .card {
         background: white;
-        border-radius: 12px;
-        padding: 16px;
-        margin-bottom: 16px;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
     }
 
-    .order-content h2 {
-        font-size: 16px;
-        font-weight: 600;
-        margin: 0 0 16px;
-        color: #333;
-    }
-
-    .order-content h3 {
-        font-size: 14px;
-        font-weight: 600;
-        margin: 16px 0 12px;
-        color: #333;
-    }
-
-    /* Order Summary */
-    .summary-item {
+    .card-header {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px solid #eee;
+        gap: 10px;
+        margin-bottom: 16px;
+        color: #1E293B;
+        font-weight: 600;
+        font-size: 15px;
     }
 
-    .item-info {
+    .card-header svg {
+        color: #64748B;
+    }
+
+    /* Order Card */
+    .order-card .order-item {
         display: flex;
+        gap: 14px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #F1F5F9;
+    }
+
+    .item-image {
+        width: 72px;
+        height: 72px;
+        border-radius: 12px;
+        overflow: hidden;
+        flex-shrink: 0;
+        background: #F8FAFC;
+    }
+
+    .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .item-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #CBD5E1;
+    }
+
+    .item-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .item-details h3 {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1E293B;
+        margin: 0 0 4px;
+        line-height: 1.4;
+    }
+
+    .item-vendor {
+        font-size: 13px;
+        color: #64748B;
+        margin: 0 0 8px;
+    }
+
+    .item-qty-price {
+        display: flex;
+        align-items: center;
         gap: 8px;
     }
 
-    .item-name {
+    .qty-badge {
+        background: #F1F5F9;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 13px;
+        color: #64748B;
         font-weight: 500;
-    }
-
-    .item-qty {
-        color: #666;
     }
 
     .item-price {
-        font-weight: 500;
+        font-weight: 600;
+        color: #1E293B;
     }
 
-    .summary-total {
+    .order-total-row {
         display: flex;
         justify-content: space-between;
-        padding-top: 12px;
-        font-weight: 600;
-    }
-
-    .total-price {
-        color: #FF6B35;
-        font-size: 18px;
-    }
-
-    /* Delivery & Payment Options */
-    .delivery-options, .payment-options {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .delivery-option, .payment-option {
-        display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 16px;
-        border: 2px solid #eee;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .delivery-option.selected, .payment-option.selected {
-        border-color: #FF6B35;
-        background: #FFF5F0;
-    }
-
-    .option-icon {
-        font-size: 24px;
-    }
-
-    .option-content {
-        flex: 1;
-    }
-
-    .option-title {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 2px;
-    }
-
-    .option-desc {
-        font-size: 12px;
-        color: #666;
-    }
-
-    .check-mark {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: #FF6B35;
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-    }
-
-    /* Location Section */
-    .location-section {
-        margin-top: 16px;
         padding-top: 16px;
-        border-top: 1px solid #eee;
+        font-size: 15px;
+        color: #64748B;
     }
 
-    .location-info {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px;
-        background: #E8F5E9;
-        border-radius: 12px;
+    .total-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: #F97316;
     }
 
-    .location-icon {
-        font-size: 24px;
-    }
-
-    .location-details {
-        flex: 1;
-    }
-
-    .location-status {
-        display: block;
-        font-weight: 500;
-        color: #2E7D32;
-    }
-
-    .location-coords {
-        font-size: 12px;
-        color: #666;
-    }
-
-    .refresh-btn {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: white;
-        border: none;
-        font-size: 18px;
-        cursor: pointer;
-    }
-
-    .share-location-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        width: 100%;
-        padding: 14px;
-        background: #FF6B35;
-        color: white;
-        border: none;
-        border-radius: 12px;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-    }
-
-    .location-note-input, .input-group {
-        margin-top: 12px;
-    }
-
-    .location-note-input label, .input-group label {
-        display: block;
-        font-size: 12px;
-        color: #666;
-        margin-bottom: 6px;
-    }
-
-    .location-note-input input, .input-group input {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        font-size: 14px;
-    }
-
-    .car-inputs {
+    /* Options Grid */
+    .options-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 12px;
     }
 
-    /* Notes */
-    .notes-text {
-        color: #666;
-        margin: 0;
-        padding: 12px;
-        background: #f8f8f8;
-        border-radius: 8px;
+    .option-card {
+        position: relative;
+        padding: 16px 12px;
+        border: 2px solid #E2E8F0;
+        border-radius: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 10px;
     }
 
-    /* Submit Footer */
-    .submit-footer {
-        position: fixed;
-        bottom: 70px;
-        left: 0;
-        right: 0;
-        padding: 16px;
-        background: white;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    .option-card.selected {
+        border-color: #F97316;
+        background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
     }
 
-    .submit-btn {
+    .option-radio {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid #CBD5E1;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 12px;
+        transition: all 0.2s;
+    }
+
+    .option-radio.checked {
+        background: #F97316;
+        border-color: #F97316;
+    }
+
+    .option-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .pickup-icon {
+        background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%);
+        color: #2563EB;
+    }
+
+    .car-icon {
+        background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+        color: #059669;
+    }
+
+    .option-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .option-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1E293B;
+    }
+
+    .option-subtitle {
+        font-size: 11px;
+        color: #64748B;
+    }
+
+    /* Car Delivery Section */
+    .car-delivery-section {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #F1F5F9;
+    }
+
+    .location-box {
+        margin-bottom: 16px;
+    }
+
+    .btn-location {
         width: 100%;
-        padding: 16px;
-        background: #FF6B35;
+        padding: 14px;
+        background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
         color: white;
         border: none;
         border-radius: 12px;
-        font-size: 16px;
         font-weight: 600;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .btn-location:active {
+        transform: scale(0.98);
+    }
+
+    .location-confirmed {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px;
+        background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+        border-radius: 12px;
+        border: 1px solid #A7F3D0;
+    }
+
+    .location-pin {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .location-text {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .location-label {
+        font-weight: 600;
+        color: #059669;
+        font-size: 14px;
+    }
+
+    .location-coords {
+        font-size: 12px;
+        color: #64748B;
+    }
+
+    .btn-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: white;
+        border: none;
+        color: #64748B;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    /* Form Groups */
+    .form-group {
+        margin-bottom: 14px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        color: #64748B;
+        margin-bottom: 6px;
+    }
+
+    .optional {
+        color: #94A3B8;
+        font-weight: 400;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 10px;
+        font-size: 14px;
+        transition: all 0.2s;
+        background: #FAFBFC;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: #F97316;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+    }
+
+    .car-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    /* Payment Options */
+    .payment-options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .payment-option {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px;
+        border: 2px solid #E2E8F0;
+        border-radius: 14px;
         cursor: pointer;
         transition: all 0.2s;
     }
 
-    .submit-btn:hover:not(:disabled) {
-        background: #E55A2B;
+    .payment-option.selected {
+        border-color: #F97316;
+        background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
     }
 
-    .submit-btn:disabled {
-        background: #ccc;
+    .payment-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .payment-icon.cash {
+        background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+        color: #059669;
+    }
+
+    .payment-icon.card {
+        background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
+        color: #4F46E5;
+    }
+
+    .payment-label {
+        flex: 1;
+        font-weight: 600;
+        color: #1E293B;
+    }
+
+    /* Cash Amount Section */
+    .cash-amount-section {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #F1F5F9;
+    }
+
+    .cash-amount-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        color: #1E293B;
+        margin-bottom: 6px;
+    }
+
+    .cash-hint {
+        font-size: 13px;
+        color: #64748B;
+        margin: 0 0 16px;
+    }
+
+    .cash-input-wrapper {
+        position: relative;
+        margin-bottom: 14px;
+    }
+
+    .cash-input {
+        width: 100%;
+        padding: 16px 60px 16px 16px;
+        border: 2px solid #E2E8F0;
+        border-radius: 14px;
+        font-size: 24px;
+        font-weight: 700;
+        text-align: center;
+        color: #1E293B;
+        background: #FAFBFC;
+        transition: all 0.2s;
+    }
+
+    .cash-input:focus {
+        outline: none;
+        border-color: #F97316;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+    }
+
+    .cash-input::placeholder {
+        color: #CBD5E1;
+    }
+
+    .currency-label {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 16px;
+        font-weight: 600;
+        color: #64748B;
+    }
+
+    /* Quick Amounts */
+    .quick-amounts {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+    }
+
+    .quick-amount-btn {
+        flex: 1;
+        min-width: 70px;
+        padding: 10px 12px;
+        background: #F1F5F9;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748B;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .quick-amount-btn:hover {
+        background: #E2E8F0;
+    }
+
+    .quick-amount-btn.selected {
+        background: #FFF7ED;
+        border-color: #F97316;
+        color: #F97316;
+    }
+
+    /* Change Display */
+    .change-display {
+        background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+        border: 1px solid #BBF7D0;
+        border-radius: 14px;
+        padding: 16px;
+    }
+
+    .change-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        font-size: 14px;
+        color: #64748B;
+    }
+
+    .change-row.total {
+        border-top: 1px dashed #A7F3D0;
+        margin-top: 8px;
+        padding-top: 12px;
+        font-weight: 600;
+        color: #1E293B;
+    }
+
+    .change-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: #059669;
+    }
+
+    .cash-error {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px;
+        background: #FEF2F2;
+        border: 1px solid #FECACA;
+        border-radius: 10px;
+        color: #DC2626;
+        font-size: 13px;
+    }
+
+    /* Notes */
+    .notes-content {
+        margin: 0;
+        padding: 14px;
+        background: #F8FAFC;
+        border-radius: 10px;
+        color: #64748B;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    /* Footer */
+    .checkout-footer {
+        position: fixed;
+        bottom: 70px;
+        left: 0;
+        right: 0;
+        padding: 16px 20px;
+        background: white;
+        border-top: 1px solid #E2E8F0;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+    }
+
+    .footer-summary {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .footer-label {
+        font-size: 12px;
+        color: #64748B;
+    }
+
+    .footer-total {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1E293B;
+    }
+
+    .btn-submit {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 16px 24px;
+        background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
+    }
+
+    .btn-submit:active:not(:disabled) {
+        transform: scale(0.98);
+    }
+
+    .btn-submit.disabled, .btn-submit:disabled {
+        background: #CBD5E1;
+        box-shadow: none;
         cursor: not-allowed;
     }
 
-    .btn-price {
-        background: rgba(0,0,0,0.1);
-        padding: 4px 12px;
-        border-radius: 20px;
+    .btn-loader {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
     }
 </style>

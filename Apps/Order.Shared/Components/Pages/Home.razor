@@ -3,46 +3,119 @@
 @inject NavigationManager Navigation
 
 <div class="home-page">
-    <!-- Header -->
-    <header class="home-header">
-        <div class="header-content">
-            <h1 class="app-title">اوردر</h1>
-            <p class="app-subtitle">اكتشف أفضل العروض القريبة منك</p>
-        </div>
-        @if (UserLocation != null)
-        {
-            <div class="location-badge">
-                <span>📍</span>
-                <span>موقعك محدد</span>
+    <!-- Top Header -->
+    <header class="top-header">
+        <div class="header-left">
+            <div class="location-selector">
+                <div class="location-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#F97316">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                </div>
+                <div class="location-text">
+                    <span class="location-label">توصيل إلى</span>
+                    <span class="location-address">الموقع الحالي ▾</span>
+                </div>
             </div>
-        }
+        </div>
+        <div class="header-right">
+            <button class="icon-btn notification-btn">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 01-3.46 0"/>
+                </svg>
+                <span class="notification-badge">2</span>
+            </button>
+        </div>
     </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="hero-brand">اوردر</span>
+                <span class="hero-tagline">عروض يومية حصرية</span>
+            </h1>
+            <p class="hero-subtitle">اكتشف أفضل العروض من المطاعم والكافيهات القريبة منك</p>
+        </div>
+        <div class="hero-illustration">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
+                <circle cx="50" cy="50" r="45" fill="#FFF7ED"/>
+                <circle cx="50" cy="50" r="35" fill="#FFEDD5"/>
+                <path d="M35 45c0-8.28 6.72-15 15-15s15 6.72 15 15c0 12.5-15 25-15 25s-15-12.5-15-25z" fill="#F97316"/>
+                <circle cx="50" cy="45" r="6" fill="white"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <div class="search-bar">
+            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" placeholder="ابحث عن عرض أو مطعم..." class="search-input" />
+        </div>
+    </div>
+
+    <!-- Quick Filters -->
+    <section class="quick-filters">
+        <button class="filter-chip active">
+            <span class="filter-icon">🔥</span>
+            <span>الأكثر طلباً</span>
+        </button>
+        <button class="filter-chip">
+            <span class="filter-icon">⚡</span>
+            <span>توصيل سريع</span>
+        </button>
+        <button class="filter-chip">
+            <span class="filter-icon">💰</span>
+            <span>أفضل الأسعار</span>
+        </button>
+        <button class="filter-chip">
+            <span class="filter-icon">⭐</span>
+            <span>الأعلى تقييماً</span>
+        </button>
+    </section>
 
     <!-- Categories -->
     <section class="categories-section">
-        <h2 class="section-title">التصنيفات</h2>
+        <div class="section-header">
+            <h2>التصنيفات</h2>
+            <button class="see-all-btn">عرض الكل</button>
+        </div>
         <div class="categories-scroll">
-            <button class="category-chip @(SelectedCategory == null ? "active" : "")"
+            <button class="category-card @(SelectedCategory == null ? "active" : "")"
                     @onclick="() => SelectCategory(null)">
-                الكل
+                <div class="category-icon all">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/>
+                    </svg>
+                </div>
+                <span class="category-name">الكل</span>
             </button>
+
             @if (Categories != null)
             {
                 @foreach (var category in Categories)
                 {
-                    <button class="category-chip @(SelectedCategory == category.Id ? "active" : "")"
+                    <button class="category-card @(SelectedCategory == category.Id ? "active" : "")"
                             @onclick="() => SelectCategory(category.Id)">
-                        @category.Name
+                        <div class="category-icon">
+                            @GetCategoryIcon(category.Name)
+                        </div>
+                        <span class="category-name">@category.Name</span>
                     </button>
                 }
             }
         </div>
     </section>
 
-    <!-- Offers Grid -->
+    <!-- Offers Section -->
     <section class="offers-section">
         <div class="section-header">
-            <h2 class="section-title">العروض المتاحة</h2>
+            <h2>العروض المتاحة</h2>
             @if (Offers?.Total > 0)
             {
                 <span class="offers-count">@Offers.Total عرض</span>
@@ -51,9 +124,20 @@
 
         @if (IsLoading)
         {
-            <div class="loading-state">
-                <div class="spinner"></div>
-                <p>جاري التحميل...</p>
+            <div class="loading-container">
+                <div class="skeleton-grid">
+                    @for (int i = 0; i < 4; i++)
+                    {
+                        <div class="skeleton-card">
+                            <div class="skeleton-image"></div>
+                            <div class="skeleton-content">
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line short"></div>
+                                <div class="skeleton-line shorter"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
         }
         else if (Offers?.Items?.Any() == true)
@@ -61,62 +145,117 @@
             <div class="offers-grid">
                 @foreach (var offer in Offers.Items)
                 {
-                    <div class="offer-card" @onclick="() => ViewOffer(offer.Id)">
-                        <div class="offer-image">
+                    <article class="offer-card" @onclick="() => ViewOffer(offer.Id)">
+                        <div class="card-image-wrapper">
                             @if (!string.IsNullOrEmpty(offer.ImageUrl))
                             {
-                                <img src="@offer.ImageUrl" alt="@offer.Title" />
+                                <img src="@offer.ImageUrl" alt="@offer.Title" class="card-image" loading="lazy" />
                             }
                             else
                             {
-                                <div class="image-placeholder">🍽️</div>
+                                <div class="card-placeholder">
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="#CBD5E1">
+                                        <path d="M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.2-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 13l1.47-1.47z"/>
+                                    </svg>
+                                </div>
                             }
                             @if (offer.DiscountPercent > 0)
                             {
-                                <span class="discount-badge">@offer.DiscountPercent% خصم</span>
+                                <div class="discount-tag">
+                                    <span>@offer.DiscountPercent%</span>
+                                    <span>خصم</span>
+                                </div>
                             }
+                            <button class="favorite-btn">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                                </svg>
+                            </button>
                         </div>
-                        <div class="offer-content">
-                            <h3 class="offer-title">@offer.Title</h3>
-                            <div class="offer-vendor">
-                                @if (offer.Vendor?.IsOpen == true)
+
+                        <div class="card-content">
+                            <div class="vendor-row">
+                                @if (!string.IsNullOrEmpty(offer.Vendor?.LogoUrl))
                                 {
-                                    <span class="open-badge">مفتوح</span>
+                                    <img src="@offer.Vendor.LogoUrl" class="vendor-avatar" alt="" />
                                 }
                                 else
                                 {
-                                    <span class="closed-badge">مغلق</span>
+                                    <div class="vendor-avatar-placeholder">
+                                        @(offer.Vendor?.Name?.Substring(0, 1) ?? "م")
+                                    </div>
                                 }
                                 <span class="vendor-name">@offer.Vendor?.Name</span>
-                                @if (offer.Vendor?.Distance.HasValue == true)
+                                @if (offer.Vendor?.IsOpen == true)
                                 {
-                                    <span class="distance">@offer.Vendor.Distance كم</span>
+                                    <span class="status-dot open"></span>
+                                }
+                                else
+                                {
+                                    <span class="status-dot closed"></span>
                                 }
                             </div>
-                            <div class="offer-price">
-                                <span class="current-price">@offer.Price ر.س</span>
+
+                            <h3 class="offer-title">@offer.Title</h3>
+
+                            <div class="offer-meta">
+                                @if (offer.Vendor?.Distance.HasValue == true)
+                                {
+                                    <span class="meta-item">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                        </svg>
+                                        @offer.Vendor.Distance.Value.ToString("0.0") كم
+                                    </span>
+                                }
+                                <span class="meta-item">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                                    </svg>
+                                    15-25 د
+                                </span>
+                            </div>
+
+                            <div class="price-row">
+                                <div class="price-group">
+                                    <span class="current-price">@offer.Price.ToString("0.00")</span>
+                                    <span class="currency">ر.س</span>
+                                </div>
                                 @if (offer.OriginalPrice.HasValue && offer.OriginalPrice > offer.Price)
                                 {
-                                    <span class="original-price">@offer.OriginalPrice ر.س</span>
+                                    <span class="original-price">@offer.OriginalPrice.Value.ToString("0.00") ر.س</span>
                                 }
                             </div>
                         </div>
-                    </div>
+                    </article>
                 }
             </div>
 
             @if (Offers.Page < Offers.TotalPages)
             {
                 <button class="load-more-btn" @onclick="LoadMore">
-                    تحميل المزيد
+                    <span>تحميل المزيد</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
                 </button>
             }
         }
         else
         {
             <div class="empty-state">
-                <span class="empty-icon">🔍</span>
-                <p>لا توجد عروض متاحة حالياً</p>
+                <div class="empty-illustration">
+                    <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+                        <circle cx="60" cy="60" r="50" fill="#F1F5F9"/>
+                        <circle cx="60" cy="55" r="25" stroke="#CBD5E1" stroke-width="3" fill="none"/>
+                        <line x1="78" y1="73" x2="95" y2="90" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round"/>
+                        <circle cx="55" cy="50" r="3" fill="#CBD5E1"/>
+                        <circle cx="65" cy="50" r="3" fill="#CBD5E1"/>
+                        <path d="M52 62c0 0 4 4 8 4s8-4 8-4" stroke="#CBD5E1" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h3>لا توجد عروض متاحة</h3>
+                <p>جرب تغيير التصنيف أو تحقق لاحقاً</p>
             </div>
         }
     </section>
@@ -132,17 +271,13 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // محاولة الحصول على موقع المستخدم
         await TryGetUserLocation();
-
         await LoadCategories();
         await LoadOffers();
     }
 
     private async Task TryGetUserLocation()
     {
-        // في MAUI سنستخدم Geolocation API
-        // حالياً نستخدم موقع افتراضي (الرياض)
         UserLocation = (24.7136, 46.6753);
     }
 
@@ -217,58 +352,273 @@
     {
         Navigation.NavigateTo($"/offer/{offerId}");
     }
+
+    private MarkupString GetCategoryIcon(string name)
+    {
+        var icon = name?.ToLower() switch
+        {
+            "قهوة" or "كافيه" or "coffee" => "<svg width='24' height='24' viewBox='0 0 24 24' fill='currentColor'><path d='M2 21v-2h18v2H2zm2-4v-5q0-2.075 1.463-3.538Q6.925 7 9 7h1V3h2v4h1q2.075 0 3.538 1.462Q18 9.925 18 12v5H4zm14-5V7h2q.825 0 1.413.587Q22 8.175 22 9v3q0 .825-.587 1.413Q20.825 14 20 14h-2z'/></svg>",
+            "وجبات" or "طعام" or "food" => "<svg width='24' height='24' viewBox='0 0 24 24' fill='currentColor'><path d='M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.2-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 13l1.47-1.47z'/></svg>",
+            "حلويات" or "desserts" => "<svg width='24' height='24' viewBox='0 0 24 24' fill='currentColor'><path d='M12 2C9.01 2 6.42 3.54 5.02 5.87L7.14 6.5C8.14 4.97 9.97 4 12 4s3.86.97 4.86 2.5l2.12-.63C17.58 3.54 14.99 2 12 2zm-1 4h2v2h-2V6zM3.5 11c0 4.69 3.81 8.5 8.5 8.5s8.5-3.81 8.5-8.5c0-.74-.09-1.45-.26-2.14l-2.12.63c.05.5.08 1 .08 1.51 0 3.41-2.79 6.2-6.2 6.2S5.8 14.41 5.8 11c0-.51.03-1.01.08-1.51l-2.12-.63c-.17.69-.26 1.4-.26 2.14zm8.5 1c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z'/></svg>",
+            "مشروبات" or "drinks" => "<svg width='24' height='24' viewBox='0 0 24 24' fill='currentColor'><path d='M5 2v2h2l3 9H6v2h8.5l.5 2H5v2h11l1 4h2l-4-16h4V2H5zm5 9l-1-3h6l1 3H10z'/></svg>",
+            _ => "<svg width='24' height='24' viewBox='0 0 24 24' fill='currentColor'><path d='M12 2l-5.5 9h11L12 2zm0 3.84L13.93 9h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zM3 21.5h8v-8H3v8zm2-6h4v4H5v-4z'/></svg>"
+        };
+        return new MarkupString(icon);
+    }
 }
 
 <style>
     .home-page {
-        padding: 16px;
+        min-height: 100vh;
+        background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+        padding-bottom: 90px;
     }
 
-    .home-header {
-        background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
-        color: white;
-        padding: 24px 16px;
-        border-radius: 16px;
-        margin-bottom: 20px;
-    }
-
-    .app-title {
-        font-size: 28px;
-        font-weight: bold;
-        margin: 0;
-    }
-
-    .app-subtitle {
-        font-size: 14px;
-        opacity: 0.9;
-        margin: 4px 0 0;
-    }
-
-    .location-badge {
-        display: inline-flex;
+    /* Top Header */
+    .top-header {
+        display: flex;
         align-items: center;
-        gap: 4px;
+        justify-content: space-between;
+        padding: 16px 20px;
+        background: white;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        border-bottom: 1px solid #F1F5F9;
+    }
+
+    .location-selector {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+    }
+
+    .location-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .location-text {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .location-label {
+        font-size: 11px;
+        color: #94A3B8;
+        font-weight: 500;
+    }
+
+    .location-address {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1E293B;
+    }
+
+    .icon-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        background: #F8FAFC;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748B;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s;
+    }
+
+    .icon-btn:active {
+        transform: scale(0.95);
+    }
+
+    .notification-badge {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 18px;
+        height: 18px;
+        background: #EF4444;
+        color: white;
+        border-radius: 50%;
+        font-size: 10px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Hero Section */
+    .hero-section {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 24px 20px;
+        background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+        margin: 16px;
+        border-radius: 24px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .hero-content {
+        flex: 1;
+    }
+
+    .hero-title {
+        display: flex;
+        flex-direction: column;
+        margin: 0 0 8px;
+    }
+
+    .hero-brand {
+        font-size: 32px;
+        font-weight: 800;
+        color: white;
+        letter-spacing: -1px;
+    }
+
+    .hero-tagline {
+        font-size: 14px;
+        font-weight: 500;
+        color: rgba(255,255,255,0.9);
         background: rgba(255,255,255,0.2);
         padding: 4px 12px;
         border-radius: 20px;
-        font-size: 12px;
-        margin-top: 12px;
+        display: inline-block;
+        width: fit-content;
+        margin-top: 6px;
     }
 
-    .section-title {
-        font-size: 18px;
-        font-weight: 600;
-        margin: 0 0 12px;
-        color: #333;
+    .hero-subtitle {
+        font-size: 13px;
+        color: rgba(255,255,255,0.85);
+        margin: 0;
+        line-height: 1.5;
+        max-width: 200px;
     }
 
+    .hero-illustration {
+        opacity: 0.9;
+    }
+
+    /* Search */
+    .search-container {
+        padding: 0 16px 16px;
+    }
+
+    .search-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: white;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 16px;
+        padding: 14px 18px;
+        transition: all 0.2s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .search-bar:focus-within {
+        border-color: #F97316;
+        box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+    }
+
+    .search-input {
+        flex: 1;
+        border: none;
+        background: none;
+        font-size: 15px;
+        color: #1E293B;
+    }
+
+    .search-input::placeholder {
+        color: #94A3B8;
+    }
+
+    .search-input:focus {
+        outline: none;
+    }
+
+    /* Quick Filters */
+    .quick-filters {
+        display: flex;
+        gap: 10px;
+        padding: 0 16px 20px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .quick-filters::-webkit-scrollbar {
+        display: none;
+    }
+
+    .filter-chip {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 16px;
+        background: white;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #64748B;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .filter-chip.active {
+        background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+        border-color: #F97316;
+        color: #EA580C;
+    }
+
+    .filter-icon {
+        font-size: 14px;
+    }
+
+    /* Categories */
     .categories-section {
-        margin-bottom: 20px;
+        padding: 0 16px 20px;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+    }
+
+    .section-header h2 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1E293B;
+        margin: 0;
+    }
+
+    .see-all-btn {
+        font-size: 13px;
+        font-weight: 600;
+        color: #F97316;
+        background: none;
+        border: none;
+        cursor: pointer;
     }
 
     .categories-scroll {
         display: flex;
-        gap: 8px;
+        gap: 12px;
         overflow-x: auto;
         padding-bottom: 8px;
         -webkit-overflow-scrolling: touch;
@@ -278,199 +628,363 @@
         display: none;
     }
 
-    .category-chip {
-        flex-shrink: 0;
-        padding: 8px 16px;
-        border: 1px solid #ddd;
-        border-radius: 20px;
+    .category-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 16px;
         background: white;
-        font-size: 14px;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 16px;
         cursor: pointer;
+        transition: all 0.2s;
+        min-width: 80px;
+        flex-shrink: 0;
+    }
+
+    .category-card.active {
+        background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+        border-color: transparent;
+        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+    }
+
+    .category-card.active .category-icon {
+        background: rgba(255,255,255,0.2);
+        color: white;
+    }
+
+    .category-card.active .category-name {
+        color: white;
+    }
+
+    .category-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748B;
         transition: all 0.2s;
     }
 
-    .category-chip.active {
-        background: #FF6B35;
-        color: white;
-        border-color: #FF6B35;
+    .category-icon.all {
+        background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+        color: #F97316;
     }
 
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
+    .category-name {
+        font-size: 12px;
+        font-weight: 600;
+        color: #475569;
+        text-align: center;
+    }
+
+    /* Offers Section */
+    .offers-section {
+        padding: 0 16px;
     }
 
     .offers-count {
-        font-size: 14px;
-        color: #666;
+        font-size: 13px;
+        color: #94A3B8;
+        font-weight: 500;
     }
 
     .offers-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
     }
 
+    /* Offer Card */
     .offer-card {
         background: white;
-        border-radius: 12px;
+        border-radius: 20px;
         overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
         cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .offer-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    .offer-card:active {
+        transform: scale(0.98);
     }
 
-    .offer-image {
+    .card-image-wrapper {
         position: relative;
-        height: 120px;
-        background: #f0f0f0;
+        height: 130px;
+        background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
     }
 
-    .offer-image img {
+    .card-image {
         width: 100%;
         height: 100%;
         object-fit: cover;
     }
 
-    .image-placeholder {
+    .card-placeholder {
         width: 100%;
         height: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 40px;
-        background: linear-gradient(135deg, #FFE5D9 0%, #FFD7C4 100%);
+        background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
     }
 
-    .discount-badge {
+    .discount-tag {
         position: absolute;
-        top: 8px;
-        right: 8px;
-        background: #FF3B30;
+        top: 10px;
+        right: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
         color: white;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: 600;
+        padding: 6px 10px;
+        border-radius: 10px;
+        font-weight: 700;
+        line-height: 1.1;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
     }
 
-    .offer-content {
-        padding: 12px;
+    .discount-tag span:first-child {
+        font-size: 16px;
+    }
+
+    .discount-tag span:last-child {
+        font-size: 9px;
+    }
+
+    .favorite-btn {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #CBD5E1;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: all 0.2s;
+    }
+
+    .favorite-btn:active {
+        transform: scale(0.9);
+        color: #EF4444;
+    }
+
+    .card-content {
+        padding: 14px;
+    }
+
+    .vendor-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .vendor-avatar {
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        object-fit: cover;
+    }
+
+    .vendor-avatar-placeholder {
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .vendor-name {
+        flex: 1;
+        font-size: 11px;
+        color: #64748B;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+
+    .status-dot.open {
+        background: #22C55E;
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+    }
+
+    .status-dot.closed {
+        background: #EF4444;
     }
 
     .offer-title {
         font-size: 14px;
         font-weight: 600;
+        color: #1E293B;
         margin: 0 0 8px;
-        color: #333;
-        line-height: 1.3;
+        line-height: 1.4;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        min-height: 39px;
     }
 
-    .offer-vendor {
+    .offer-meta {
         display: flex;
         align-items: center;
-        gap: 6px;
-        font-size: 12px;
-        color: #666;
-        margin-bottom: 8px;
-        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 10px;
     }
 
-    .open-badge {
-        background: #34C759;
-        color: white;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-size: 10px;
-    }
-
-    .closed-badge {
-        background: #FF3B30;
-        color: white;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-size: 10px;
-    }
-
-    .vendor-name {
-        font-weight: 500;
-    }
-
-    .distance {
-        color: #999;
-    }
-
-    .offer-price {
+    .meta-item {
         display: flex;
         align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        color: #94A3B8;
+    }
+
+    .price-row {
+        display: flex;
+        align-items: baseline;
         gap: 8px;
     }
 
+    .price-group {
+        display: flex;
+        align-items: baseline;
+        gap: 3px;
+    }
+
     .current-price {
-        font-size: 16px;
-        font-weight: bold;
-        color: #FF6B35;
+        font-size: 18px;
+        font-weight: 800;
+        color: #F97316;
+    }
+
+    .currency {
+        font-size: 12px;
+        font-weight: 600;
+        color: #F97316;
     }
 
     .original-price {
-        font-size: 13px;
-        color: #999;
+        font-size: 12px;
+        color: #94A3B8;
         text-decoration: line-through;
     }
 
-    .loading-state, .empty-state {
-        text-align: center;
-        padding: 40px 20px;
-        color: #666;
+    /* Loading Skeleton */
+    .skeleton-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
     }
 
-    .spinner {
-        width: 40px;
-        height: 40px;
-        border: 3px solid #f0f0f0;
-        border-top-color: #FF6B35;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin: 0 auto 16px;
-    }
-
-    @@keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    .empty-icon {
-        font-size: 48px;
-        display: block;
-        margin-bottom: 12px;
-    }
-
-    .load-more-btn {
-        display: block;
-        width: 100%;
-        padding: 12px;
-        margin-top: 16px;
+    .skeleton-card {
         background: white;
-        border: 1px solid #FF6B35;
-        color: #FF6B35;
-        border-radius: 8px;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .skeleton-image {
+        height: 130px;
+        background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+    }
+
+    .skeleton-content {
+        padding: 14px;
+    }
+
+    .skeleton-line {
+        height: 12px;
+        background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 6px;
+        margin-bottom: 10px;
+    }
+
+    .skeleton-line.short {
+        width: 70%;
+    }
+
+    .skeleton-line.shorter {
+        width: 50%;
+    }
+
+    @@keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .empty-illustration {
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1E293B;
+        margin: 0 0 8px;
+    }
+
+    .empty-state p {
         font-size: 14px;
+        color: #94A3B8;
+        margin: 0;
+    }
+
+    /* Load More */
+    .load-more-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 14px;
+        margin-top: 20px;
+        background: white;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 14px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #64748B;
         cursor: pointer;
         transition: all 0.2s;
     }
 
-    .load-more-btn:hover {
-        background: #FF6B35;
-        color: white;
+    .load-more-btn:active {
+        background: #F8FAFC;
+        transform: scale(0.98);
     }
 </style>
