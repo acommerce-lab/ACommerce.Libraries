@@ -1,0 +1,103 @@
+@namespace ACommerce.Templates.Customer.Pages
+
+<div class="ac-page ac-locations-page">
+    @* Header *@
+    <div class="ac-page-header">
+        <h1>عناويني المحفوظة</h1>
+        <button class="ac-btn-icon" @onclick="HandleAddLocation">
+            <i class="bi bi-plus-lg"></i>
+        </button>
+    </div>
+
+    @* Locations List *@
+    @if (IsLoading)
+    {
+        <div class="ac-loading-container">
+            <AcSpinner Text="جاري تحميل العناوين..." />
+        </div>
+    }
+    else if (Locations == null || !Locations.Any())
+    {
+        <AcEmptyState Icon="bi-geo-alt"
+                      Title="لا توجد عناوين محفوظة"
+                      Description="أضف عنوانك الأول لتسهيل عملية الطلب"
+                      ActionText="إضافة عنوان"
+                      OnAction="HandleAddLocation" />
+    }
+    else
+    {
+        <div class="ac-locations-list">
+            @foreach (var location in Locations.OrderByDescending(l => l.IsDefault))
+            {
+                <div class="ac-location-card @(location.IsDefault ? "default" : "")"
+                     @onclick="() => HandleLocationClick(location.Id)">
+                    <div class="ac-location-icon">
+                        <i class="bi @LocationTypes.GetIcon(location.Type)"></i>
+                    </div>
+
+                    <div class="ac-location-info">
+                        <div class="ac-location-header">
+                            <span class="ac-location-label">@location.Label</span>
+                            @if (location.IsDefault)
+                            {
+                                <span class="ac-default-badge">الافتراضي</span>
+                            }
+                        </div>
+                        <p class="ac-location-address">@location.Address</p>
+                        @if (!string.IsNullOrEmpty(location.BuildingNumber) || !string.IsNullOrEmpty(location.Floor))
+                        {
+                            <span class="ac-location-details">
+                                @if (!string.IsNullOrEmpty(location.BuildingNumber))
+                                {
+                                    <span>مبنى @location.BuildingNumber</span>
+                                }
+                                @if (!string.IsNullOrEmpty(location.Floor))
+                                {
+                                    <span>الدور @location.Floor</span>
+                                }
+                                @if (!string.IsNullOrEmpty(location.Apartment))
+                                {
+                                    <span>شقة @location.Apartment</span>
+                                }
+                            </span>
+                        }
+                    </div>
+
+                    <div class="ac-location-actions">
+                        <button class="ac-btn-icon" @onclick:stopPropagation @onclick="() => HandleEditLocation(location.Id)">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="ac-btn-icon ac-btn-danger" @onclick:stopPropagation @onclick="() => HandleDeleteLocation(location.Id)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @* Add Location Button *@
+        <div class="ac-add-location-footer">
+            <AcButton Text="إضافة عنوان جديد"
+                      Icon="bi-plus-lg"
+                      Variant="ButtonVariant.Primary"
+                      Outline="true"
+                      Block="true"
+                      OnClick="HandleAddLocation" />
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<SavedLocation>? Locations { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+
+    [Parameter] public EventCallback OnAddLocation { get; set; }
+    [Parameter] public EventCallback<string> OnLocationClick { get; set; }
+    [Parameter] public EventCallback<string> OnEditLocation { get; set; }
+    [Parameter] public EventCallback<string> OnDeleteLocation { get; set; }
+
+    private async Task HandleAddLocation() => await OnAddLocation.InvokeAsync();
+    private async Task HandleLocationClick(string id) => await OnLocationClick.InvokeAsync(id);
+    private async Task HandleEditLocation(string id) => await OnEditLocation.InvokeAsync(id);
+    private async Task HandleDeleteLocation(string id) => await OnDeleteLocation.InvokeAsync(id);
+}

@@ -1,0 +1,257 @@
+@namespace ACommerce.Templates.Customer.Pages
+
+<div class="ac-page ac-order-detail-page">
+    @* Header *@
+    <div class="ac-page-header ac-header-with-back">
+        <button class="ac-back-btn" @onclick="HandleBack">
+            <i class="bi bi-arrow-right"></i>
+        </button>
+        <div class="ac-header-content">
+            <h1>طلب #@Order?.Number</h1>
+            @if (Order != null)
+            {
+                <span class="ac-order-status ac-status-@OrderStatuses.GetColor(Order.Status)">
+                    <i class="bi @OrderStatuses.GetIcon(Order.Status)"></i>
+                    @Order.StatusLabel
+                </span>
+            }
+        </div>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="ac-loading-container">
+            <AcSpinner Text="جاري تحميل تفاصيل الطلب..." />
+        </div>
+    }
+    else if (Order == null)
+    {
+        <AcEmptyState Icon="bi-exclamation-triangle"
+                      Title="الطلب غير موجود"
+                      Description="لم نتمكن من العثور على هذا الطلب"
+                      ActionText="العودة للطلبات"
+                      OnAction="HandleBack" />
+    }
+    else
+    {
+        @* Status Timeline *@
+        @if (Order.StatusHistory.Any())
+        {
+            <div class="ac-status-timeline">
+                @foreach (var status in Order.StatusHistory.OrderByDescending(s => s.Timestamp))
+                {
+                    <div class="ac-timeline-item @(status.Status == Order.Status ? "active" : "")">
+                        <div class="ac-timeline-icon">
+                            <i class="bi @OrderStatuses.GetIcon(status.Status)"></i>
+                        </div>
+                        <div class="ac-timeline-content">
+                            <span class="ac-timeline-status">@status.StatusLabel</span>
+                            <span class="ac-timeline-time">@status.Timestamp.ToString("yyyy/MM/dd HH:mm")</span>
+                            @if (!string.IsNullOrEmpty(status.Note))
+                            {
+                                <p class="ac-timeline-note">@status.Note</p>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        @* Vendor Card *@
+        @if (Order.Vendor != null)
+        {
+            <div class="ac-section-card">
+                <h3 class="ac-section-title">المتجر</h3>
+                <div class="ac-vendor-card" @onclick="() => HandleVendorClick(Order.Vendor.Id)">
+                    @if (!string.IsNullOrEmpty(Order.Vendor.Logo))
+                    {
+                        <img src="@Order.Vendor.Logo" alt="@Order.Vendor.Name" class="ac-vendor-logo" />
+                    }
+                    else
+                    {
+                        <div class="ac-vendor-placeholder">
+                            <i class="bi bi-shop"></i>
+                        </div>
+                    }
+                    <div class="ac-vendor-info">
+                        <span class="ac-vendor-name">@Order.Vendor.Name</span>
+                        @if (Order.Vendor.Rating.HasValue)
+                        {
+                            <span class="ac-vendor-rating">
+                                <i class="bi bi-star-fill"></i>
+                                @Order.Vendor.Rating.Value.ToString("F1")
+                            </span>
+                        }
+                    </div>
+                    @if (Order.CanChat)
+                    {
+                        <button class="ac-btn-icon" @onclick:stopPropagation @onclick="HandleChat">
+                            <i class="bi bi-chat-dots"></i>
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+
+        @* Delivery Address *@
+        @if (Order.Address != null)
+        {
+            <div class="ac-section-card">
+                <h3 class="ac-section-title">عنوان التوصيل</h3>
+                <div class="ac-address-card">
+                    <i class="bi bi-geo-alt"></i>
+                    <div class="ac-address-info">
+                        <span class="ac-address-label">@Order.Address.Label</span>
+                        <p class="ac-address-full">@Order.Address.FullAddress</p>
+                        @if (!string.IsNullOrEmpty(Order.Address.Notes))
+                        {
+                            <p class="ac-address-notes">@Order.Address.Notes</p>
+                        }
+                    </div>
+                    @if (Order.CanTrack && Order.Address.Latitude.HasValue)
+                    {
+                        <button class="ac-btn-icon" @onclick="HandleTrack">
+                            <i class="bi bi-map"></i>
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+
+        @* Order Items *@
+        <div class="ac-section-card">
+            <h3 class="ac-section-title">المنتجات (@Order.Items.Count)</h3>
+            <div class="ac-items-list">
+                @foreach (var item in Order.Items)
+                {
+                    <div class="ac-order-item">
+                        @if (!string.IsNullOrEmpty(item.Image))
+                        {
+                            <img src="@item.Image" alt="@item.Name" class="ac-item-image" />
+                        }
+                        else
+                        {
+                            <div class="ac-item-placeholder">
+                                <i class="bi bi-box"></i>
+                            </div>
+                        }
+                        <div class="ac-item-info">
+                            <span class="ac-item-name">@item.Name</span>
+                            @if (item.Options != null && item.Options.Any())
+                            {
+                                <span class="ac-item-options">
+                                    @string.Join(" • ", item.Options.Select(o => $"{o.Name}: {o.Value}"))
+                                </span>
+                            }
+                            <span class="ac-item-qty">x@item.Quantity</span>
+                        </div>
+                        <span class="ac-item-price">@item.Total.ToString("N2")</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @* Payment Summary *@
+        <div class="ac-section-card">
+            <h3 class="ac-section-title">ملخص الدفع</h3>
+            <div class="ac-payment-summary">
+                <div class="ac-summary-row">
+                    <span>المجموع الفرعي</span>
+                    <span>@Order.Subtotal.ToString("N2") @Order.Currency</span>
+                </div>
+                <div class="ac-summary-row">
+                    <span>رسوم التوصيل</span>
+                    <span>@(Order.DeliveryFee == 0 ? "مجاني" : $"{Order.DeliveryFee:N2} {Order.Currency}")</span>
+                </div>
+                @if (Order.Discount > 0)
+                {
+                    <div class="ac-summary-row ac-discount">
+                        <span>الخصم</span>
+                        <span>-@Order.Discount.ToString("N2") @Order.Currency</span>
+                    </div>
+                }
+                @if (Order.Tax > 0)
+                {
+                    <div class="ac-summary-row">
+                        <span>الضريبة</span>
+                        <span>@Order.Tax.ToString("N2") @Order.Currency</span>
+                    </div>
+                }
+                <div class="ac-summary-row ac-total">
+                    <span>الإجمالي</span>
+                    <span>@Order.Total.ToString("N2") @Order.Currency</span>
+                </div>
+                <div class="ac-payment-method">
+                    <span>طريقة الدفع:</span>
+                    <span>@Order.PaymentMethodLabel</span>
+                    @if (Order.IsPaid)
+                    {
+                        <span class="ac-paid-badge">
+                            <i class="bi bi-check-circle-fill"></i>
+                            مدفوع
+                        </span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @* Action Buttons *@
+        <div class="ac-actions-container">
+            @if (Order.CanCancel)
+            {
+                <AcButton Text="إلغاء الطلب"
+                          Icon="bi-x-circle"
+                          Variant="ButtonVariant.Danger"
+                          Outline="true"
+                          Block="true"
+                          OnClick="HandleCancel" />
+            }
+            @if (Order.CanReorder)
+            {
+                <AcButton Text="إعادة الطلب"
+                          Icon="bi-arrow-repeat"
+                          Variant="ButtonVariant.Primary"
+                          Block="true"
+                          OnClick="HandleReorder" />
+            }
+            @if (Order.CanReview)
+            {
+                <AcButton Text="تقييم الطلب"
+                          Icon="bi-star"
+                          Variant="ButtonVariant.Secondary"
+                          Block="true"
+                          OnClick="HandleReview" />
+            }
+            @if (Order.CanCreateTicket)
+            {
+                <button class="ac-link-btn" @onclick="HandleCreateTicket">
+                    <i class="bi bi-flag"></i>
+                    الإبلاغ عن مشكلة
+                </button>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public OrderDetail? Order { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+
+    [Parameter] public EventCallback OnBack { get; set; }
+    [Parameter] public EventCallback<string> OnVendorClick { get; set; }
+    [Parameter] public EventCallback OnChat { get; set; }
+    [Parameter] public EventCallback OnTrack { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback OnReorder { get; set; }
+    [Parameter] public EventCallback OnReview { get; set; }
+    [Parameter] public EventCallback OnCreateTicket { get; set; }
+
+    private async Task HandleBack() => await OnBack.InvokeAsync();
+    private async Task HandleVendorClick(string vendorId) => await OnVendorClick.InvokeAsync(vendorId);
+    private async Task HandleChat() => await OnChat.InvokeAsync();
+    private async Task HandleTrack() => await OnTrack.InvokeAsync();
+    private async Task HandleCancel() => await OnCancel.InvokeAsync();
+    private async Task HandleReorder() => await OnReorder.InvokeAsync();
+    private async Task HandleReview() => await OnReview.InvokeAsync();
+    private async Task HandleCreateTicket() => await OnCreateTicket.InvokeAsync();
+}

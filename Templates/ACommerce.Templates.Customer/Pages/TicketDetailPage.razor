@@ -1,0 +1,180 @@
+@namespace ACommerce.Templates.Customer.Pages
+
+<div class="ac-page ac-ticket-detail-page">
+    @* Header *@
+    <div class="ac-page-header ac-header-with-back">
+        <button class="ac-back-btn" @onclick="HandleBack">
+            <i class="bi bi-arrow-right"></i>
+        </button>
+        <div class="ac-header-content">
+            <h1>تذكرة #@Ticket?.Number</h1>
+            @if (Ticket != null)
+            {
+                <span class="ac-ticket-status ac-status-@TicketStatuses.GetColor(Ticket.Status)">
+                    @Ticket.StatusLabel
+                </span>
+            }
+        </div>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="ac-loading-container">
+            <AcSpinner Text="جاري التحميل..." />
+        </div>
+    }
+    else if (Ticket == null)
+    {
+        <AcEmptyState Icon="bi-exclamation-triangle"
+                      Title="التذكرة غير موجودة"
+                      Description="لم نتمكن من العثور على هذه التذكرة"
+                      ActionText="العودة للقائمة"
+                      OnAction="HandleBack" />
+    }
+    else
+    {
+        @* Ticket Info Card *@
+        <div class="ac-ticket-info-card">
+            <h2 class="ac-ticket-subject">@Ticket.Subject</h2>
+            <div class="ac-ticket-details">
+                <div class="ac-detail-item">
+                    <i class="bi @TicketCategories.GetIcon(Ticket.Category)"></i>
+                    <span>@Ticket.CategoryLabel</span>
+                </div>
+                <div class="ac-detail-item">
+                    <i class="bi bi-calendar3"></i>
+                    <span>@Ticket.CreatedAt.ToString("yyyy/MM/dd HH:mm")</span>
+                </div>
+                @if (!string.IsNullOrEmpty(Ticket.LinkedOrderNumber))
+                {
+                    <div class="ac-detail-item ac-clickable" @onclick="HandleOrderClick">
+                        <i class="bi bi-box-seam"></i>
+                        <span>طلب #@Ticket.LinkedOrderNumber</span>
+                        <i class="bi bi-chevron-left"></i>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @* Messages Thread *@
+        <div class="ac-messages-container">
+            @foreach (var message in Ticket.Messages)
+            {
+                <div class="ac-message @(message.IsFromSupport ? "ac-message-support" : "ac-message-user")">
+                    @if (message.IsFromSupport)
+                    {
+                        <div class="ac-message-avatar">
+                            <i class="bi bi-headset"></i>
+                        </div>
+                    }
+                    <div class="ac-message-bubble">
+                        @if (message.IsFromSupport && !string.IsNullOrEmpty(message.SupportAgentName))
+                        {
+                            <span class="ac-agent-name">@message.SupportAgentName</span>
+                        }
+                        <p class="ac-message-text">@message.Content</p>
+                        @if (message.Attachments != null && message.Attachments.Any())
+                        {
+                            <div class="ac-message-attachments">
+                                @foreach (var attachment in message.Attachments)
+                                {
+                                    <a href="@attachment.Url" target="_blank" class="ac-attachment">
+                                        <i class="bi bi-paperclip"></i>
+                                        @attachment.Name
+                                    </a>
+                                }
+                            </div>
+                        }
+                        <span class="ac-message-time">@message.SentAt.ToString("HH:mm")</span>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @* Reply Input *@
+        @if (Ticket.Status != TicketStatuses.Closed)
+        {
+            <div class="ac-reply-container">
+                <div class="ac-reply-input-wrapper">
+                    <textarea class="ac-reply-input"
+                              @bind="ReplyMessage"
+                              placeholder="اكتب ردك هنا..."
+                              rows="1"></textarea>
+                    <div class="ac-reply-actions">
+                        <button class="ac-attach-btn" @onclick="HandleAttachment">
+                            <i class="bi bi-paperclip"></i>
+                        </button>
+                        <button class="ac-send-btn" @onclick="HandleSendReply" disabled="@(string.IsNullOrWhiteSpace(ReplyMessage) || IsSending)">
+                            @if (IsSending)
+                            {
+                                <AcSpinner Size="SpinnerSize.Small" />
+                            }
+                            else
+                            {
+                                <i class="bi bi-send-fill"></i>
+                            }
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="ac-ticket-closed-banner">
+                <i class="bi bi-check-circle"></i>
+                <span>تم إغلاق هذه التذكرة</span>
+                <button class="ac-reopen-btn" @onclick="HandleReopen">إعادة فتح</button>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public TicketDetail? Ticket { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool IsSending { get; set; }
+
+    [Parameter] public EventCallback OnBack { get; set; }
+    [Parameter] public EventCallback<TicketReplyArgs> OnReply { get; set; }
+    [Parameter] public EventCallback OnAttachment { get; set; }
+    [Parameter] public EventCallback OnReopen { get; set; }
+    [Parameter] public EventCallback<string> OnOrderClick { get; set; }
+
+    private string? ReplyMessage { get; set; }
+
+    private async Task HandleBack()
+    {
+        await OnBack.InvokeAsync();
+    }
+
+    private async Task HandleSendReply()
+    {
+        if (string.IsNullOrWhiteSpace(ReplyMessage) || Ticket == null) return;
+
+        await OnReply.InvokeAsync(new TicketReplyArgs
+        {
+            TicketId = Ticket.Id,
+            Message = ReplyMessage
+        });
+
+        ReplyMessage = string.Empty;
+    }
+
+    private async Task HandleAttachment()
+    {
+        await OnAttachment.InvokeAsync();
+    }
+
+    private async Task HandleReopen()
+    {
+        await OnReopen.InvokeAsync();
+    }
+
+    private async Task HandleOrderClick()
+    {
+        if (Ticket?.LinkedOrderId != null)
+        {
+            await OnOrderClick.InvokeAsync(Ticket.LinkedOrderId);
+        }
+    }
+}

@@ -1,0 +1,138 @@
+@namespace ACommerce.Templates.Customer.Pages
+
+<div class="ac-page ac-tickets-page">
+    @* Header *@
+    <div class="ac-page-header">
+        <h1>الشكاوى والمقترحات</h1>
+        <button class="ac-btn-icon" @onclick="HandleCreateTicket">
+            <i class="bi bi-plus-lg"></i>
+        </button>
+    </div>
+
+    @* Filter Tabs *@
+    <div class="ac-tabs">
+        <button class="ac-tab @(ActiveFilter == "all" ? "active" : "")" @onclick='() => SetFilter("all")'>
+            الكل
+        </button>
+        <button class="ac-tab @(ActiveFilter == "open" ? "active" : "")" @onclick='() => SetFilter("open")'>
+            المفتوحة
+            @if (OpenCount > 0)
+            {
+                <span class="ac-tab-badge">@OpenCount</span>
+            }
+        </button>
+        <button class="ac-tab @(ActiveFilter == "closed" ? "active" : "")" @onclick='() => SetFilter("closed")'>
+            المغلقة
+        </button>
+    </div>
+
+    @* Tickets List *@
+    @if (IsLoading)
+    {
+        <div class="ac-loading-container">
+            <AcSpinner Text="جاري التحميل..." />
+        </div>
+    }
+    else if (FilteredTickets == null || !FilteredTickets.Any())
+    {
+        <AcEmptyState Icon="bi-ticket-detailed"
+                      Title="لا توجد تذاكر"
+                      Description="@(ActiveFilter == "all" ? "لم تقم بإنشاء أي تذكرة بعد" : $"لا توجد تذاكر {(ActiveFilter == "open" ? "مفتوحة" : "مغلقة")}")"
+                      ActionText="إنشاء تذكرة جديدة"
+                      OnAction="HandleCreateTicket" />
+    }
+    else
+    {
+        <div class="ac-tickets-list">
+            @foreach (var ticket in FilteredTickets)
+            {
+                <div class="ac-ticket-card" @onclick="() => HandleTicketClick(ticket.Id)">
+                    <div class="ac-ticket-header">
+                        <span class="ac-ticket-number">#@ticket.Number</span>
+                        <span class="ac-ticket-status ac-status-@TicketStatuses.GetColor(ticket.Status)">
+                            @ticket.StatusLabel
+                        </span>
+                    </div>
+
+                    <h3 class="ac-ticket-subject">@ticket.Subject</h3>
+
+                    <div class="ac-ticket-meta">
+                        <span class="ac-ticket-category">
+                            <i class="bi @TicketCategories.GetIcon(ticket.Category)"></i>
+                            @ticket.CategoryLabel
+                        </span>
+                        <span class="ac-ticket-date">
+                            <i class="bi bi-clock"></i>
+                            @FormatDate(ticket.UpdatedAt)
+                        </span>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(ticket.LastMessage))
+                    {
+                        <p class="ac-ticket-preview">@ticket.LastMessage</p>
+                    }
+
+                    @if (ticket.UnreadReplies > 0)
+                    {
+                        <div class="ac-ticket-unread">
+                            <span class="ac-unread-badge">@ticket.UnreadReplies رد جديد</span>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(ticket.LinkedOrderNumber))
+                    {
+                        <div class="ac-ticket-order">
+                            <i class="bi bi-link-45deg"></i>
+                            طلب #@ticket.LinkedOrderNumber
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<TicketListItem>? Tickets { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string ActiveFilter { get; set; } = "all";
+
+    [Parameter] public EventCallback<string> OnFilterChange { get; set; }
+    [Parameter] public EventCallback<string> OnTicketClick { get; set; }
+    [Parameter] public EventCallback OnCreateTicket { get; set; }
+
+    private int OpenCount => Tickets?.Count(t => t.Status == TicketStatuses.Open || t.Status == TicketStatuses.InProgress) ?? 0;
+
+    private IEnumerable<TicketListItem>? FilteredTickets => ActiveFilter switch
+    {
+        "open" => Tickets?.Where(t => t.Status == TicketStatuses.Open || t.Status == TicketStatuses.InProgress),
+        "closed" => Tickets?.Where(t => t.Status == TicketStatuses.Resolved || t.Status == TicketStatuses.Closed),
+        _ => Tickets
+    };
+
+    private async Task SetFilter(string filter)
+    {
+        ActiveFilter = filter;
+        await OnFilterChange.InvokeAsync(filter);
+    }
+
+    private async Task HandleTicketClick(string ticketId)
+    {
+        await OnTicketClick.InvokeAsync(ticketId);
+    }
+
+    private async Task HandleCreateTicket()
+    {
+        await OnCreateTicket.InvokeAsync();
+    }
+
+    private string FormatDate(DateTime date)
+    {
+        var diff = DateTime.Now - date;
+        if (diff.TotalMinutes < 1) return "الآن";
+        if (diff.TotalMinutes < 60) return $"منذ {(int)diff.TotalMinutes} دقيقة";
+        if (diff.TotalHours < 24) return $"منذ {(int)diff.TotalHours} ساعة";
+        if (diff.TotalDays < 7) return $"منذ {(int)diff.TotalDays} يوم";
+        return date.ToString("yyyy/MM/dd");
+    }
+}

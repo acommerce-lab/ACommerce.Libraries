@@ -1,3 +1,4 @@
+using ACommerce.Client.Core.Storage;
 using ACommerce.Templates.Customer.Themes;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,6 +23,11 @@ public static class ServiceExtensions
         // Register ThemeService as singleton
         services.AddSingleton(sp => new ThemeService(themeOptions));
 
+        // Register state management services
+        services.AddScoped<AuthStateService>();
+        services.AddScoped<AppSettingsService>();
+        services.AddScoped<GuestModeService>();
+
         return services;
     }
 
@@ -33,6 +39,31 @@ public static class ServiceExtensions
         ThemeOptions themeOptions)
     {
         services.AddSingleton(sp => new ThemeService(themeOptions));
+
+        // Register state management services
+        services.AddScoped<AuthStateService>();
+        services.AddScoped<AppSettingsService>();
+        services.AddScoped<GuestModeService>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Adds storage service (required for AuthStateService and AppSettingsService)
+    /// </summary>
+    public static IServiceCollection AddACommerceStorage<TStorage>(this IServiceCollection services)
+        where TStorage : class, IStorageService
+    {
+        services.AddScoped<IStorageService, TStorage>();
+        return services;
+    }
+
+    /// <summary>
+    /// Adds in-memory storage (for testing or platforms without persistent storage)
+    /// </summary>
+    public static IServiceCollection AddACommerceInMemoryStorage(this IServiceCollection services)
+    {
+        services.AddScoped<IStorageService, InMemoryStorageService>();
         return services;
     }
 }

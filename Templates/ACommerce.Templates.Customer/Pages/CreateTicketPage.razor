@@ -1,0 +1,176 @@
+@namespace ACommerce.Templates.Customer.Pages
+
+<div class="ac-page ac-create-ticket-page">
+    @* Header *@
+    <div class="ac-page-header ac-header-with-back">
+        <button class="ac-back-btn" @onclick="HandleCancel">
+            <i class="bi bi-arrow-right"></i>
+        </button>
+        <h1>تذكرة جديدة</h1>
+    </div>
+
+    <form class="ac-ticket-form" @onsubmit="HandleSubmit" @onsubmit:preventDefault>
+        @* Category Selection *@
+        <div class="ac-form-section">
+            <label class="ac-form-label">نوع المشكلة</label>
+            <div class="ac-category-grid">
+                @foreach (var category in TicketCategories.All)
+                {
+                    <button type="button"
+                            class="ac-category-btn @(SelectedCategory == category.Value ? "selected" : "")"
+                            @onclick="() => SelectCategory(category.Value)">
+                        <i class="bi @category.Icon"></i>
+                        <span>@category.Label</span>
+                    </button>
+                }
+            </div>
+        </div>
+
+        @* Link to Order (Optional) *@
+        @if (Orders != null && Orders.Any())
+        {
+            <div class="ac-form-section">
+                <label class="ac-form-label">
+                    ربط بطلب <span class="ac-optional">(اختياري)</span>
+                </label>
+                <select class="ac-select" @bind="SelectedOrderId">
+                    <option value="">-- اختر طلب --</option>
+                    @foreach (var order in Orders)
+                    {
+                        <option value="@order.Id">طلب #@order.Number - @order.Date.ToString("yyyy/MM/dd")</option>
+                    }
+                </select>
+            </div>
+        }
+
+        @* Subject *@
+        <div class="ac-form-section">
+            <label class="ac-form-label">عنوان المشكلة</label>
+            <input type="text"
+                   class="ac-input"
+                   @bind="Subject"
+                   placeholder="اكتب عنوان مختصر للمشكلة"
+                   maxlength="100" />
+        </div>
+
+        @* Message *@
+        <div class="ac-form-section">
+            <label class="ac-form-label">وصف المشكلة</label>
+            <textarea class="ac-textarea"
+                      @bind="Message"
+                      placeholder="اشرح المشكلة بالتفصيل..."
+                      rows="5"></textarea>
+        </div>
+
+        @* Attachments *@
+        <div class="ac-form-section">
+            <label class="ac-form-label">
+                المرفقات <span class="ac-optional">(اختياري)</span>
+            </label>
+            <button type="button" class="ac-attach-button" @onclick="HandleAddAttachment">
+                <i class="bi bi-paperclip"></i>
+                <span>إضافة صور أو ملفات</span>
+            </button>
+            @if (Attachments != null && Attachments.Any())
+            {
+                <div class="ac-attachments-list">
+                    @foreach (var attachment in Attachments)
+                    {
+                        <div class="ac-attachment-item">
+                            <i class="bi bi-file-earmark"></i>
+                            <span>@attachment</span>
+                            <button type="button" class="ac-remove-btn" @onclick="() => RemoveAttachment(attachment)">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        @* Submit Button *@
+        <div class="ac-form-actions">
+            <AcButton Text="إرسال التذكرة"
+                      Type="submit"
+                      Variant="ButtonVariant.Primary"
+                      Block="true"
+                      Size="ButtonSize.Large"
+                      Loading="IsSubmitting"
+                      Disabled="@(!IsFormValid)" />
+        </div>
+    </form>
+</div>
+
+@code {
+    [Parameter] public List<OrderSummary>? Orders { get; set; }
+    [Parameter] public bool IsSubmitting { get; set; }
+    [Parameter] public string? PreselectedOrderId { get; set; }
+    [Parameter] public string? PreselectedCategory { get; set; }
+
+    [Parameter] public EventCallback<CreateTicketArgs> OnSubmit { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback OnAddAttachment { get; set; }
+
+    private string? SelectedCategory { get; set; }
+    private string? SelectedOrderId { get; set; }
+    private string? Subject { get; set; }
+    private string? Message { get; set; }
+    private List<string> Attachments { get; set; } = new();
+
+    private bool IsFormValid =>
+        !string.IsNullOrWhiteSpace(SelectedCategory) &&
+        !string.IsNullOrWhiteSpace(Subject) &&
+        !string.IsNullOrWhiteSpace(Message);
+
+    protected override void OnInitialized()
+    {
+        SelectedOrderId = PreselectedOrderId;
+        SelectedCategory = PreselectedCategory;
+    }
+
+    private void SelectCategory(string category)
+    {
+        SelectedCategory = category;
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (!IsFormValid) return;
+
+        await OnSubmit.InvokeAsync(new CreateTicketArgs
+        {
+            Category = SelectedCategory!,
+            Subject = Subject!,
+            Message = Message!,
+            LinkedOrderId = SelectedOrderId
+        });
+    }
+
+    private async Task HandleCancel()
+    {
+        await OnCancel.InvokeAsync();
+    }
+
+    private async Task HandleAddAttachment()
+    {
+        await OnAddAttachment.InvokeAsync();
+    }
+
+    private void RemoveAttachment(string attachment)
+    {
+        Attachments.Remove(attachment);
+    }
+
+    public void AddAttachment(string fileName)
+    {
+        Attachments.Add(fileName);
+        StateHasChanged();
+    }
+}
+
+public class OrderSummary
+{
+    public string Id { get; set; } = string.Empty;
+    public string Number { get; set; } = string.Empty;
+    public DateTime Date { get; set; }
+}
