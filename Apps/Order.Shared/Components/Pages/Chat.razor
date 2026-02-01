@@ -1,325 +1,42 @@
-@page "/chat/{OrderId}"
 @page "/chats"
-@inject OrderApiService ApiService
-@inject AuthStateService AuthState
+@page "/chat/{OrderId}"
 @inject NavigationManager Navigation
-@inject IJSRuntime JS
+@inject OrderApiService ApiService
 
 @if (string.IsNullOrEmpty(OrderId))
 {
-    <!-- Chats List View -->
-    <div class="chats-page">
-        <header class="chats-header">
-            <h1>المحادثات</h1>
-        </header>
-
-        <div class="chats-content">
-            @if (IsLoading)
-            {
-                <div class="loading-skeleton">
-                    @for (int i = 0; i < 4; i++)
-                    {
-                        <div class="skeleton-chat">
-                            <div class="skeleton-avatar"></div>
-                            <div class="skeleton-info">
-                                <div class="skeleton-line"></div>
-                                <div class="skeleton-line short"></div>
-                            </div>
-                        </div>
-                    }
-                </div>
-            }
-            else if (!ChatsList.Any())
-            {
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
-                        </svg>
-                    </div>
-                    <h2>لا توجد محادثات</h2>
-                    <p>عند إنشاء طلب، يمكنك التواصل مع المتجر هنا</p>
-                </div>
-            }
-            else
-            {
-                <div class="chats-list">
-                    @foreach (var chat in ChatsList)
-                    {
-                        <button class="chat-item @(chat.UnreadCount > 0 ? "unread" : "")"
-                                @onclick="() => OpenChat(chat.OrderId)">
-                            <div class="chat-avatar">
-                                @if (!string.IsNullOrEmpty(chat.VendorLogo))
-                                {
-                                    <img src="@chat.VendorLogo" alt="@chat.VendorName" />
-                                }
-                                else
-                                {
-                                    <span class="avatar-initials">@GetInitials(chat.VendorName)</span>
-                                }
-                                @if (chat.IsVendorOnline)
-                                {
-                                    <span class="online-indicator"></span>
-                                }
-                            </div>
-                            <div class="chat-info">
-                                <div class="chat-top-row">
-                                    <span class="vendor-name">@chat.VendorName</span>
-                                    <span class="chat-time">@FormatTime(chat.LastMessageTime)</span>
-                                </div>
-                                <div class="chat-bottom-row">
-                                    <span class="order-number">طلب #@chat.OrderNumber</span>
-                                    <span class="order-status @chat.OrderStatus">@GetStatusText(chat.OrderStatus)</span>
-                                </div>
-                                <p class="last-message">
-                                    @if (chat.IsLastMessageFromMe)
-                                    {
-                                        <span class="you-prefix">أنت: </span>
-                                    }
-                                    @chat.LastMessage
-                                </p>
-                            </div>
-                            @if (chat.UnreadCount > 0)
-                            {
-                                <span class="unread-badge">@chat.UnreadCount</span>
-                            }
-                        </button>
-                    }
-                </div>
-            }
-        </div>
-    </div>
+    @* Chat List *@
+    <ChatListPage Chats="@Chats"
+                  IsLoading="@IsLoading"
+                  OnChatClick="HandleChatClick" />
 }
 else
 {
-    <!-- Single Chat View -->
-    <div class="chat-page">
-        <header class="chat-header">
-            <button class="btn-back" @onclick="GoBack">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 18l6-6-6-6"/>
-                </svg>
-            </button>
-            <div class="chat-info">
-                <div class="chat-avatar">
-                    @if (!string.IsNullOrEmpty(CurrentChat?.VendorLogo))
-                    {
-                        <img src="@CurrentChat.VendorLogo" alt="@CurrentChat.VendorName" />
-                    }
-                    else
-                    {
-                        <span class="avatar-initials">@GetInitials(CurrentChat?.VendorName ?? "")</span>
-                    }
-                    @if (CurrentChat?.IsVendorOnline == true)
-                    {
-                        <span class="online-indicator"></span>
-                    }
-                </div>
-                <div class="chat-details">
-                    <h1>@CurrentChat?.VendorName</h1>
-                    <span class="chat-status">
-                        @if (IsTyping)
-                        {
-                            <span class="typing">يكتب...</span>
-                        }
-                        else
-                        {
-                            <span>طلب #@CurrentChat?.OrderNumber</span>
-                        }
-                    </span>
-                </div>
-            </div>
-            <button class="btn-order-details" @onclick="ViewOrderDetails">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
-                    <rect x="9" y="3" width="6" height="4" rx="1"/>
-                </svg>
-            </button>
-        </header>
-
-        <!-- Order Status Banner -->
-        @if (CurrentChat != null)
-        {
-            <div class="order-status-banner @CurrentChat.OrderStatus">
-                <div class="status-icon">
-                    @GetStatusIcon(CurrentChat.OrderStatus)
-                </div>
-                <div class="status-info">
-                    <span class="status-text">@GetStatusText(CurrentChat.OrderStatus)</span>
-                    <span class="status-detail">@GetStatusDetail(CurrentChat.OrderStatus)</span>
-                </div>
-            </div>
-        }
-
-        <div class="chat-messages" @ref="messagesContainer">
-            @if (IsLoading)
-            {
-                <div class="loading-container">
-                    <div class="loader"></div>
-                </div>
-            }
-            else
-            {
-                @foreach (var group in GroupMessagesByDate())
-                {
-                    <div class="date-separator">
-                        <span>@group.Key</span>
-                    </div>
-
-                    @foreach (var message in group.Value)
-                    {
-                        <div class="message @(message.IsFromMe ? "sent" : "received")">
-                            @if (!message.IsFromMe)
-                            {
-                                <div class="message-avatar">
-                                    <span class="avatar-initials small">@GetInitials(CurrentChat?.VendorName ?? "")</span>
-                                </div>
-                            }
-                            <div class="message-bubble">
-                                @if (message.Type == "order_update")
-                                {
-                                    <div class="order-update-message">
-                                        <div class="update-icon">
-                                            @GetStatusIcon(message.StatusUpdate ?? "")
-                                        </div>
-                                        <span>@message.Content</span>
-                                    </div>
-                                }
-                                else if (message.Type == "image")
-                                {
-                                    <div class="message-image">
-                                        <img src="@message.Content" alt="صورة" />
-                                    </div>
-                                }
-                                else if (message.Type == "location")
-                                {
-                                    <div class="location-message" @onclick="() => OpenLocation(message)">
-                                        <div class="location-preview">
-                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="#F97316">
-                                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                                            </svg>
-                                        </div>
-                                        <span>عرض الموقع على الخريطة</span>
-                                    </div>
-                                }
-                                else
-                                {
-                                    <p class="message-text">@message.Content</p>
-                                }
-                                <span class="message-time">
-                                    @message.Timestamp.ToString("HH:mm")
-                                    @if (message.IsFromMe)
-                                    {
-                                        @if (message.IsRead)
-                                        {
-                                            <svg class="read-status" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2">
-                                                <polyline points="20,6 9,17 4,12"/>
-                                            </svg>
-                                        }
-                                        else
-                                        {
-                                            <svg class="read-status" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <polyline points="20,6 9,17 4,12"/>
-                                            </svg>
-                                        }
-                                    }
-                                </span>
-                            </div>
-                        </div>
-                    }
-                }
-
-                @if (IsTyping)
-                {
-                    <div class="message received">
-                        <div class="message-avatar">
-                            <span class="avatar-initials small">@GetInitials(CurrentChat?.VendorName ?? "")</span>
-                        </div>
-                        <div class="message-bubble typing">
-                            <div class="typing-dots">
-                                <span></span><span></span><span></span>
-                            </div>
-                        </div>
-                    </div>
-                }
-            }
-        </div>
-
-        <!-- Quick Actions -->
-        @if (ShowQuickActions)
-        {
-            <div class="quick-actions">
-                <button class="quick-action" @onclick="SendLocation">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
-                        <circle cx="12" cy="10" r="3"/>
-                    </svg>
-                    <span>إرسال موقعي</span>
-                </button>
-                <button class="quick-action" @onclick='() => SendQuickMessage("وصلت")'>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-                        <polyline points="22,4 12,14.01 9,11.01"/>
-                    </svg>
-                    <span>وصلت</span>
-                </button>
-                <button class="quick-action" @onclick='() => SendQuickMessage("أين طلبي؟")'>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/>
-                        <line x1="12" y1="17" x2="12.01" y2="17"/>
-                    </svg>
-                    <span>أين طلبي؟</span>
-                </button>
-            </div>
-        }
-
-        <!-- Message Input -->
-        <div class="chat-input-container">
-            <button class="btn-attach" @onclick="ToggleQuickActions">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="12" y1="8" x2="12" y2="16"/>
-                    <line x1="8" y1="12" x2="16" y2="12"/>
-                </svg>
-            </button>
-            <div class="input-wrapper">
-                <input type="text"
-                       @bind="NewMessage"
-                       @bind:event="oninput"
-                       @onkeydown="OnKeyDown"
-                       placeholder="اكتب رسالتك..." />
-            </div>
-            @if (!string.IsNullOrWhiteSpace(NewMessage))
-            {
-                <button class="btn-send" @onclick="SendMessage">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-                    </svg>
-                </button>
-            }
-        </div>
-    </div>
+    @* Single Chat *@
+    <ChatPage Chat="@CurrentChat"
+              Messages="@Messages"
+              IsLoading="@IsLoading"
+              IsSending="@IsSending"
+              OnBack="HandleBack"
+              OnSend="HandleSend"
+              OnAttachment="HandleAttachment" />
 }
 
 @code {
-    [Parameter]
-    public string? OrderId { get; set; }
+    [Parameter] public string? OrderId { get; set; }
 
-    private ElementReference messagesContainer;
-    private List<ChatListItem> ChatsList = new();
-    private ChatDetails? CurrentChat;
-    private List<ChatMessage> Messages = new();
-    private string NewMessage = "";
+    private List<ChatListInfo>? Chats;
+    private ChatInfo? CurrentChat;
+    private List<ChatMessageInfo>? Messages;
+
     private bool IsLoading = true;
-    private bool IsTyping = false;
-    private bool ShowQuickActions = false;
+    private bool IsSending;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         if (string.IsNullOrEmpty(OrderId))
         {
-            await LoadChatsList();
+            await LoadChats();
         }
         else
         {
@@ -327,934 +44,112 @@ else
         }
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!string.IsNullOrEmpty(OrderId) && Messages.Any())
-        {
-            await ScrollToBottom();
-        }
-    }
-
-    private async Task LoadChatsList()
+    private async Task LoadChats()
     {
         IsLoading = true;
-        await Task.Delay(500);
-
-        // Simulated chats list
-        ChatsList = new List<ChatListItem>
+        try
         {
-            new ChatListItem
+            var result = await ApiService.GetChatsAsync();
+            Chats = result.Select(c => new ChatListInfo
             {
-                OrderId = "order-1",
-                OrderNumber = "ORD-240201-ABC",
-                VendorName = "كوفي شوب",
-                VendorLogo = "",
-                IsVendorOnline = true,
-                LastMessage = "طلبك جاهز للاستلام",
-                LastMessageTime = DateTime.Now.AddMinutes(-5),
-                IsLastMessageFromMe = false,
-                UnreadCount = 2,
-                OrderStatus = "ready"
-            },
-            new ChatListItem
-            {
-                OrderId = "order-2",
-                OrderNumber = "ORD-240131-XYZ",
-                VendorName = "مطعم البيك",
-                VendorLogo = "",
-                IsVendorOnline = false,
-                LastMessage = "شكراً لك",
-                LastMessageTime = DateTime.Now.AddHours(-3),
-                IsLastMessageFromMe = true,
-                UnreadCount = 0,
-                OrderStatus = "delivered"
-            }
-        };
-
-        IsLoading = false;
+                Id = c.Id,
+                OrderId = c.OrderId,
+                OrderNumber = c.OrderNumber,
+                VendorName = c.VendorName,
+                VendorLogo = c.VendorLogo,
+                LastMessage = c.LastMessage,
+                LastMessageTime = c.LastMessageTime,
+                UnreadCount = c.UnreadCount,
+                IsVendorOnline = c.IsVendorOnline
+            }).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading chats: {ex.Message}");
+            Chats = new List<ChatListInfo>();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     private async Task LoadChat()
     {
         IsLoading = true;
-        await Task.Delay(500);
-
-        CurrentChat = new ChatDetails
-        {
-            OrderId = OrderId!,
-            OrderNumber = "ORD-240201-ABC",
-            VendorName = "كوفي شوب",
-            VendorLogo = "",
-            IsVendorOnline = true,
-            OrderStatus = "preparing"
-        };
-
-        Messages = new List<ChatMessage>
-        {
-            new ChatMessage
-            {
-                Id = "1",
-                Type = "order_update",
-                Content = "تم استلام طلبك",
-                StatusUpdate = "pending",
-                IsFromMe = false,
-                Timestamp = DateTime.Now.AddMinutes(-30),
-                IsRead = true
-            },
-            new ChatMessage
-            {
-                Id = "2",
-                Type = "text",
-                Content = "مرحباً! استلمنا طلبك وجاري التحضير",
-                IsFromMe = false,
-                Timestamp = DateTime.Now.AddMinutes(-28),
-                IsRead = true
-            },
-            new ChatMessage
-            {
-                Id = "3",
-                Type = "text",
-                Content = "شكراً! كم الوقت المتوقع؟",
-                IsFromMe = true,
-                Timestamp = DateTime.Now.AddMinutes(-25),
-                IsRead = true
-            },
-            new ChatMessage
-            {
-                Id = "4",
-                Type = "text",
-                Content = "تقريباً 15-20 دقيقة",
-                IsFromMe = false,
-                Timestamp = DateTime.Now.AddMinutes(-23),
-                IsRead = true
-            },
-            new ChatMessage
-            {
-                Id = "5",
-                Type = "order_update",
-                Content = "جاري تحضير طلبك",
-                StatusUpdate = "preparing",
-                IsFromMe = false,
-                Timestamp = DateTime.Now.AddMinutes(-20),
-                IsRead = true
-            }
-        };
-
-        IsLoading = false;
-    }
-
-    private Dictionary<string, List<ChatMessage>> GroupMessagesByDate()
-    {
-        return Messages
-            .GroupBy(m => m.Timestamp.Date == DateTime.Today ? "اليوم" :
-                         m.Timestamp.Date == DateTime.Today.AddDays(-1) ? "أمس" :
-                         m.Timestamp.ToString("dd/MM/yyyy"))
-            .ToDictionary(g => g.Key, g => g.ToList());
-    }
-
-    private async Task SendMessage()
-    {
-        if (string.IsNullOrWhiteSpace(NewMessage)) return;
-
-        var message = new ChatMessage
-        {
-            Id = Guid.NewGuid().ToString(),
-            Type = "text",
-            Content = NewMessage,
-            IsFromMe = true,
-            Timestamp = DateTime.Now,
-            IsRead = false
-        };
-
-        Messages.Add(message);
-        NewMessage = "";
-        ShowQuickActions = false;
-
-        await ScrollToBottom();
-
-        // Simulate delivery
-        await Task.Delay(500);
-        message.IsRead = true;
-        StateHasChanged();
-    }
-
-    private async Task SendQuickMessage(string text)
-    {
-        NewMessage = text;
-        await SendMessage();
-    }
-
-    private async Task SendLocation()
-    {
-        var message = new ChatMessage
-        {
-            Id = Guid.NewGuid().ToString(),
-            Type = "location",
-            Content = "24.7136,46.6753",
-            IsFromMe = true,
-            Timestamp = DateTime.Now,
-            IsRead = false
-        };
-
-        Messages.Add(message);
-        ShowQuickActions = false;
-        await ScrollToBottom();
-    }
-
-    private void ToggleQuickActions()
-    {
-        ShowQuickActions = !ShowQuickActions;
-    }
-
-    private async Task OnKeyDown(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter" && !e.ShiftKey)
-        {
-            await SendMessage();
-        }
-    }
-
-    private async Task ScrollToBottom()
-    {
         try
         {
-            await JS.InvokeVoidAsync("eval", "document.querySelector('.chat-messages')?.scrollTo({ top: document.querySelector('.chat-messages')?.scrollHeight, behavior: 'smooth' })");
+            var chat = await ApiService.GetChatAsync(OrderId!);
+            CurrentChat = new ChatInfo
+            {
+                Id = chat.Id,
+                OrderId = chat.OrderId,
+                OrderNumber = chat.OrderNumber,
+                OrderStatus = chat.OrderStatus,
+                VendorName = chat.VendorName,
+                VendorLogo = chat.VendorLogo,
+                IsVendorOnline = chat.IsVendorOnline
+            };
+
+            Messages = chat.Messages.Select(m => new ChatMessageInfo
+            {
+                Id = m.Id,
+                Content = m.Content,
+                SentAt = m.SentAt,
+                IsFromMe = m.IsFromMe,
+                IsRead = m.IsRead,
+                Type = m.Type
+            }).ToList();
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading chat: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
-    private string GetInitials(string name)
-    {
-        if (string.IsNullOrEmpty(name)) return "?";
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return parts.Length >= 2 ? $"{parts[0][0]}{parts[1][0]}" : name[0].ToString();
-    }
-
-    private string FormatTime(DateTime time)
-    {
-        var diff = DateTime.Now - time;
-        if (diff.TotalMinutes < 1) return "الآن";
-        if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes} د";
-        if (diff.TotalHours < 24) return time.ToString("HH:mm");
-        return time.ToString("dd/MM");
-    }
-
-    private string GetStatusText(string status) => status switch
-    {
-        "pending" => "في الانتظار",
-        "accepted" => "تم القبول",
-        "preparing" => "جاري التحضير",
-        "ready" => "جاهز للاستلام",
-        "delivered" => "تم التسليم",
-        "cancelled" => "ملغي",
-        _ => status
-    };
-
-    private string GetStatusDetail(string status) => status switch
-    {
-        "pending" => "في انتظار قبول المتجر",
-        "accepted" => "المتجر قبل طلبك",
-        "preparing" => "طلبك قيد التحضير الآن",
-        "ready" => "طلبك جاهز، توجه للاستلام",
-        "delivered" => "تم تسليم الطلب بنجاح",
-        _ => ""
-    };
-
-    private RenderFragment GetStatusIcon(string status) => status switch
-    {
-        "pending" => @<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>,
-        "accepted" => @<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>,
-        "preparing" => @<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>,
-        "ready" => @<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>,
-        "delivered" => @<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>,
-        _ => @<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
-    };
-
-    private void OpenChat(string orderId)
+    private void HandleChatClick(string orderId)
     {
         Navigation.NavigateTo($"/chat/{orderId}");
     }
 
-    private void ViewOrderDetails()
-    {
-        if (CurrentChat != null)
-        {
-            Navigation.NavigateTo($"/order/{CurrentChat.OrderId}");
-        }
-    }
-
-    private void OpenLocation(ChatMessage message)
-    {
-        // Open map with coordinates
-    }
-
-    private void GoBack()
+    private void HandleBack()
     {
         Navigation.NavigateTo("/chats");
     }
+
+    private async Task HandleSend(string message)
+    {
+        IsSending = true;
+        try
+        {
+            await ApiService.SendChatMessageAsync(OrderId!, message);
+            Messages?.Add(new ChatMessageInfo
+            {
+                Id = Guid.NewGuid().ToString(),
+                Content = message,
+                SentAt = DateTime.Now,
+                IsFromMe = true,
+                IsRead = false,
+                Type = "text"
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error sending message: {ex.Message}");
+        }
+        finally
+        {
+            IsSending = false;
+        }
+    }
+
+    private Task HandleAttachment()
+    {
+        // Open attachment picker
+        return Task.CompletedTask;
+    }
 }
-
-public class ChatListItem
-{
-    public string OrderId { get; set; } = "";
-    public string OrderNumber { get; set; } = "";
-    public string VendorName { get; set; } = "";
-    public string? VendorLogo { get; set; }
-    public bool IsVendorOnline { get; set; }
-    public string LastMessage { get; set; } = "";
-    public DateTime LastMessageTime { get; set; }
-    public bool IsLastMessageFromMe { get; set; }
-    public int UnreadCount { get; set; }
-    public string OrderStatus { get; set; } = "";
-}
-
-public class ChatDetails
-{
-    public string OrderId { get; set; } = "";
-    public string OrderNumber { get; set; } = "";
-    public string VendorName { get; set; } = "";
-    public string? VendorLogo { get; set; }
-    public bool IsVendorOnline { get; set; }
-    public string OrderStatus { get; set; } = "";
-}
-
-public class ChatMessage
-{
-    public string Id { get; set; } = "";
-    public string Type { get; set; } = "text";
-    public string Content { get; set; } = "";
-    public string? StatusUpdate { get; set; }
-    public bool IsFromMe { get; set; }
-    public DateTime Timestamp { get; set; }
-    public bool IsRead { get; set; }
-}
-
-<style>
-    /* Chats List Page */
-    .chats-page {
-        min-height: 100vh;
-        background: #F8FAFC;
-        padding-bottom: 100px;
-    }
-
-    .chats-header {
-        padding: 20px;
-        background: white;
-        border-bottom: 1px solid #E2E8F0;
-    }
-
-    .chats-header h1 {
-        font-size: 24px;
-        font-weight: 700;
-        color: #1E293B;
-        margin: 0;
-    }
-
-    .chats-content {
-        padding: 16px;
-    }
-
-    .chats-list {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .chat-item {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 16px;
-        background: white;
-        border: none;
-        border-radius: 16px;
-        cursor: pointer;
-        transition: all 0.2s;
-        width: 100%;
-        text-align: start;
-    }
-
-    .chat-item:active {
-        transform: scale(0.98);
-    }
-
-    .chat-item.unread {
-        background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
-    }
-
-    .chat-avatar {
-        position: relative;
-        width: 52px;
-        height: 52px;
-        border-radius: 16px;
-        background: linear-gradient(135deg, #F97316, #EA580C);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        overflow: hidden;
-    }
-
-    .chat-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .avatar-initials {
-        color: white;
-        font-weight: 600;
-        font-size: 16px;
-    }
-
-    .avatar-initials.small {
-        font-size: 12px;
-    }
-
-    .online-indicator {
-        position: absolute;
-        bottom: 2px;
-        right: 2px;
-        width: 12px;
-        height: 12px;
-        background: #22C55E;
-        border: 2px solid white;
-        border-radius: 50%;
-    }
-
-    .chat-info {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .chat-top-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 4px;
-    }
-
-    .vendor-name {
-        font-size: 15px;
-        font-weight: 600;
-        color: #1E293B;
-    }
-
-    .chat-time {
-        font-size: 12px;
-        color: #94A3B8;
-    }
-
-    .chat-bottom-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 4px;
-    }
-
-    .order-number {
-        font-size: 12px;
-        color: #64748B;
-    }
-
-    .order-status {
-        font-size: 11px;
-        padding: 2px 8px;
-        border-radius: 6px;
-        font-weight: 500;
-    }
-
-    .order-status.pending { background: #FEF3C7; color: #D97706; }
-    .order-status.preparing { background: #DBEAFE; color: #2563EB; }
-    .order-status.ready { background: #D1FAE5; color: #059669; }
-    .order-status.delivered { background: #F1F5F9; color: #64748B; }
-
-    .last-message {
-        font-size: 13px;
-        color: #64748B;
-        margin: 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .you-prefix {
-        color: #94A3B8;
-    }
-
-    .unread-badge {
-        min-width: 22px;
-        height: 22px;
-        padding: 0 6px;
-        background: #F97316;
-        color: white;
-        border-radius: 11px;
-        font-size: 12px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    /* Single Chat Page */
-    .chat-page {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        background: #F0F2F5;
-    }
-
-    .chat-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 16px;
-        background: white;
-        border-bottom: 1px solid #E2E8F0;
-    }
-
-    .btn-back, .btn-order-details {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        background: #F1F5F9;
-        border: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #64748B;
-        cursor: pointer;
-    }
-
-    .chat-details {
-        flex: 1;
-    }
-
-    .chat-details h1 {
-        font-size: 16px;
-        font-weight: 600;
-        color: #1E293B;
-        margin: 0;
-    }
-
-    .chat-status {
-        font-size: 12px;
-        color: #64748B;
-    }
-
-    .chat-status .typing {
-        color: #22C55E;
-    }
-
-    /* Order Status Banner */
-    .order-status-banner {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 16px;
-        margin: 12px;
-        border-radius: 12px;
-    }
-
-    .order-status-banner.pending {
-        background: linear-gradient(135deg, #FEF3C7, #FDE68A);
-        color: #92400E;
-    }
-
-    .order-status-banner.preparing {
-        background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
-        color: #1E40AF;
-    }
-
-    .order-status-banner.ready {
-        background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
-        color: #065F46;
-    }
-
-    .status-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        background: rgba(255,255,255,0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .status-info {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .status-text {
-        font-weight: 600;
-        font-size: 14px;
-    }
-
-    .status-detail {
-        font-size: 12px;
-        opacity: 0.8;
-    }
-
-    /* Messages */
-    .chat-messages {
-        flex: 1;
-        overflow-y: auto;
-        padding: 16px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .date-separator {
-        display: flex;
-        justify-content: center;
-        padding: 12px 0;
-    }
-
-    .date-separator span {
-        background: rgba(0,0,0,0.1);
-        color: #64748B;
-        font-size: 12px;
-        padding: 4px 12px;
-        border-radius: 8px;
-    }
-
-    .message {
-        display: flex;
-        gap: 8px;
-        max-width: 80%;
-    }
-
-    .message.sent {
-        align-self: flex-start;
-        flex-direction: row-reverse;
-    }
-
-    .message.received {
-        align-self: flex-end;
-    }
-
-    .message-avatar {
-        width: 28px;
-        height: 28px;
-        border-radius: 8px;
-        background: linear-gradient(135deg, #94A3B8, #64748B);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        align-self: flex-end;
-    }
-
-    .message-bubble {
-        padding: 10px 14px;
-        border-radius: 18px;
-    }
-
-    .message.sent .message-bubble {
-        background: linear-gradient(135deg, #F97316, #EA580C);
-        border-bottom-left-radius: 6px;
-    }
-
-    .message.received .message-bubble {
-        background: white;
-        border-bottom-right-radius: 6px;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    }
-
-    .message-text {
-        margin: 0;
-        font-size: 15px;
-        line-height: 1.4;
-    }
-
-    .message.sent .message-text {
-        color: white;
-    }
-
-    .message.received .message-text {
-        color: #1E293B;
-    }
-
-    .message-time {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        font-size: 11px;
-        margin-top: 4px;
-    }
-
-    .message.sent .message-time {
-        color: rgba(255,255,255,0.7);
-        justify-content: flex-end;
-    }
-
-    .message.received .message-time {
-        color: #94A3B8;
-    }
-
-    /* Order Update Message */
-    .order-update-message {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 12px;
-        background: rgba(0,0,0,0.05);
-        border-radius: 10px;
-        font-size: 13px;
-    }
-
-    .update-icon {
-        width: 28px;
-        height: 28px;
-        border-radius: 8px;
-        background: rgba(255,255,255,0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    /* Location Message */
-    .location-message {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px;
-        background: rgba(0,0,0,0.05);
-        border-radius: 10px;
-        cursor: pointer;
-    }
-
-    .location-preview {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        background: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    /* Typing */
-    .message-bubble.typing {
-        padding: 14px 18px;
-    }
-
-    .typing-dots {
-        display: flex;
-        gap: 4px;
-    }
-
-    .typing-dots span {
-        width: 8px;
-        height: 8px;
-        background: #94A3B8;
-        border-radius: 50%;
-        animation: typing 1.4s infinite;
-    }
-
-    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-
-    @@keyframes typing {
-        0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-        30% { transform: translateY(-4px); opacity: 1; }
-    }
-
-    /* Quick Actions */
-    .quick-actions {
-        display: flex;
-        gap: 8px;
-        padding: 12px 16px;
-        overflow-x: auto;
-        background: white;
-        border-top: 1px solid #E2E8F0;
-    }
-
-    .quick-action {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 10px 16px;
-        background: #F8FAFC;
-        border: 1px solid #E2E8F0;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: 500;
-        color: #1E293B;
-        cursor: pointer;
-        white-space: nowrap;
-        flex-shrink: 0;
-    }
-
-    .quick-action:active {
-        background: #F97316;
-        border-color: #F97316;
-        color: white;
-    }
-
-    .quick-action svg {
-        color: #64748B;
-    }
-
-    .quick-action:active svg {
-        color: white;
-    }
-
-    /* Input */
-    .chat-input-container {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 12px 16px 24px;
-        background: white;
-        border-top: 1px solid #E2E8F0;
-    }
-
-    .btn-attach {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        background: transparent;
-        border: none;
-        color: #F97316;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .input-wrapper {
-        flex: 1;
-    }
-
-    .input-wrapper input {
-        width: 100%;
-        padding: 12px 16px;
-        background: #F1F5F9;
-        border: none;
-        border-radius: 24px;
-        font-size: 15px;
-        color: #1E293B;
-        outline: none;
-    }
-
-    .input-wrapper input::placeholder {
-        color: #94A3B8;
-    }
-
-    .btn-send {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #F97316, #EA580C);
-        border: none;
-        color: white;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
-    }
-
-    /* Loading & Empty */
-    .loading-container {
-        display: flex;
-        justify-content: center;
-        padding: 40px;
-    }
-
-    .loader {
-        width: 32px;
-        height: 32px;
-        border: 3px solid #E2E8F0;
-        border-top-color: #F97316;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-    }
-
-    @@keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    .empty-state {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 60px 40px;
-        text-align: center;
-    }
-
-    .empty-icon {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        background: #F1F5F9;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #94A3B8;
-        margin-bottom: 20px;
-    }
-
-    .empty-state h2 {
-        font-size: 18px;
-        font-weight: 600;
-        color: #1E293B;
-        margin: 0 0 8px;
-    }
-
-    .empty-state p {
-        font-size: 14px;
-        color: #64748B;
-        margin: 0;
-    }
-
-    .loading-skeleton {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .skeleton-chat {
-        display: flex;
-        gap: 14px;
-        padding: 16px;
-        background: white;
-        border-radius: 16px;
-    }
-
-    .skeleton-avatar {
-        width: 52px;
-        height: 52px;
-        border-radius: 16px;
-        background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
-        background-size: 200% 100%;
-        animation: shimmer 1.5s infinite;
-    }
-
-    .skeleton-info {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .skeleton-line {
-        height: 14px;
-        background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
-        background-size: 200% 100%;
-        animation: shimmer 1.5s infinite;
-        border-radius: 4px;
-    }
-
-    .skeleton-line.short {
-        width: 60%;
-    }
-
-    @@keyframes shimmer {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }
-</style>

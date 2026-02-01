@@ -1,1366 +1,247 @@
 @page "/tickets"
 @page "/ticket/{TicketId}"
-@inject OrderApiService ApiService
-@inject AuthStateService AuthState
+@page "/tickets/new"
 @inject NavigationManager Navigation
+@inject OrderApiService ApiService
 
-@if (string.IsNullOrEmpty(TicketId))
+@if (Mode == PageMode.List)
 {
-    <!-- Tickets List -->
-    <div class="tickets-page">
-        <header class="tickets-header">
-            <h1>التذاكر والشكاوى</h1>
-            <button class="btn-new-ticket" @onclick="ShowNewTicketModal">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="12" y1="5" x2="12" y2="19"/>
-                    <line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-            </button>
-        </header>
-
-        <div class="tickets-content">
-            <!-- Filter Tabs -->
-            <div class="filter-tabs">
-                <button class="tab @(SelectedFilter == "all" ? "active" : "")" @onclick='() => SetFilter("all")'>
-                    الكل
-                    <span class="tab-count">@Tickets.Count</span>
-                </button>
-                <button class="tab @(SelectedFilter == "open" ? "active" : "")" @onclick='() => SetFilter("open")'>
-                    مفتوحة
-                    <span class="tab-count">@Tickets.Count(t => t.Status == "open" || t.Status == "in_progress")</span>
-                </button>
-                <button class="tab @(SelectedFilter == "closed" ? "active" : "")" @onclick='() => SetFilter("closed")'>
-                    مغلقة
-                    <span class="tab-count">@Tickets.Count(t => t.Status == "closed" || t.Status == "resolved")</span>
-                </button>
-            </div>
-
-            @if (IsLoading)
-            {
-                <div class="loading-skeleton">
-                    @for (int i = 0; i < 3; i++)
-                    {
-                        <div class="skeleton-ticket">
-                            <div class="skeleton-header">
-                                <div class="skeleton-line w-60"></div>
-                                <div class="skeleton-badge"></div>
-                            </div>
-                            <div class="skeleton-line w-full"></div>
-                            <div class="skeleton-line w-40"></div>
-                        </div>
-                    }
-                </div>
-            }
-            else if (!FilteredTickets.Any())
-            {
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
-                            <rect x="9" y="3" width="6" height="4" rx="1"/>
-                            <path d="M9 12h6"/>
-                            <path d="M9 16h6"/>
-                        </svg>
-                    </div>
-                    <h2>لا توجد تذاكر</h2>
-                    <p>لم تقم بإنشاء أي تذاكر دعم حتى الآن</p>
-                    <button class="btn-create" @onclick="ShowNewTicketModal">
-                        إنشاء تذكرة جديدة
-                    </button>
-                </div>
-            }
-            else
-            {
-                <div class="tickets-list">
-                    @foreach (var ticket in FilteredTickets)
-                    {
-                        <button class="ticket-card" @onclick="() => OpenTicket(ticket.Id)">
-                            <div class="ticket-header">
-                                <span class="ticket-number">#@ticket.Number</span>
-                                <span class="ticket-status @ticket.Status">@GetStatusText(ticket.Status)</span>
-                            </div>
-                            <h3 class="ticket-subject">@ticket.Subject</h3>
-                            <p class="ticket-preview">@ticket.LastMessage</p>
-                            <div class="ticket-footer">
-                                <span class="ticket-category">
-                                    @GetCategoryIcon(ticket.Category)
-                                    @GetCategoryText(ticket.Category)
-                                </span>
-                                <span class="ticket-date">@FormatDate(ticket.UpdatedAt)</span>
-                            </div>
-                            @if (ticket.UnreadReplies > 0)
-                            {
-                                <span class="unread-badge">@ticket.UnreadReplies</span>
-                            }
-                        </button>
-                    }
-                </div>
-            }
-        </div>
-    </div>
+    <TicketsListPage Tickets="@Tickets"
+                     IsLoading="@IsLoading"
+                     ActiveFilter="@ActiveFilter"
+                     OnFilterChange="HandleFilterChange"
+                     OnTicketClick="HandleTicketClick"
+                     OnCreateTicket="HandleCreateTicket" />
 }
-else
+else if (Mode == PageMode.Detail && CurrentTicket != null)
 {
-    <!-- Single Ticket View -->
-    <div class="ticket-detail-page">
-        <header class="ticket-header">
-            <button class="btn-back" @onclick="GoBack">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 18l6-6-6-6"/>
-                </svg>
-            </button>
-            <div class="ticket-info">
-                <span class="ticket-number">#@CurrentTicket?.Number</span>
-                <span class="ticket-status @CurrentTicket?.Status">@GetStatusText(CurrentTicket?.Status ?? "")</span>
-            </div>
-            <button class="btn-menu">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="1"/>
-                    <circle cx="12" cy="5" r="1"/>
-                    <circle cx="12" cy="19" r="1"/>
-                </svg>
-            </button>
-        </header>
-
-        <!-- Ticket Subject -->
-        <div class="ticket-subject-section">
-            <span class="category-badge @CurrentTicket?.Category">
-                @GetCategoryIcon(CurrentTicket?.Category ?? "")
-                @GetCategoryText(CurrentTicket?.Category ?? "")
-            </span>
-            <h1>@CurrentTicket?.Subject</h1>
-            @if (!string.IsNullOrEmpty(CurrentTicket?.OrderNumber))
-            {
-                <button class="order-link" @onclick="ViewOrder">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
-                        <rect x="9" y="3" width="6" height="4" rx="1"/>
-                    </svg>
-                    طلب #@CurrentTicket.OrderNumber
-                </button>
-            }
-        </div>
-
-        <!-- Messages -->
-        <div class="ticket-messages">
-            @foreach (var message in TicketMessages)
-            {
-                <div class="message-item @(message.IsFromSupport ? "support" : "user")">
-                    <div class="message-avatar">
-                        @if (message.IsFromSupport)
-                        {
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
-                            </svg>
-                        }
-                        else
-                        {
-                            <span>@GetInitials(AuthState.CurrentUser?.FullName ?? "")</span>
-                        }
-                    </div>
-                    <div class="message-content">
-                        <div class="message-header">
-                            <span class="sender-name">
-                                @(message.IsFromSupport ? "فريق الدعم" : "أنت")
-                            </span>
-                            <span class="message-time">@FormatDateTime(message.CreatedAt)</span>
-                        </div>
-                        <div class="message-body">
-                            @message.Content
-                        </div>
-                        @if (message.Attachments?.Any() == true)
-                        {
-                            <div class="message-attachments">
-                                @foreach (var attachment in message.Attachments)
-                                {
-                                    <a href="@attachment.Url" target="_blank" class="attachment-item">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
-                                        </svg>
-                                        @attachment.Name
-                                    </a>
-                                }
-                            </div>
-                        }
-                    </div>
-                </div>
-            }
-        </div>
-
-        <!-- Reply Input -->
-        @if (CurrentTicket?.Status != "closed" && CurrentTicket?.Status != "resolved")
-        {
-            <div class="reply-section">
-                <div class="reply-input-wrapper">
-                    <textarea @bind="ReplyText" placeholder="اكتب ردك هنا..." rows="3"></textarea>
-                    <div class="reply-actions">
-                        <button class="btn-attach">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
-                            </svg>
-                        </button>
-                        <button class="btn-send" @onclick="SendReply" disabled="@(string.IsNullOrWhiteSpace(ReplyText) || IsSending)">
-                            @if (IsSending)
-                            {
-                                <div class="btn-loader"></div>
-                            }
-                            else
-                            {
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-                                </svg>
-                            }
-                        </button>
-                    </div>
-                </div>
-            </div>
-        }
-        else
-        {
-            <div class="closed-notice">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                    <path d="M7 11V7a5 5 0 0110 0v4"/>
-                </svg>
-                <span>هذه التذكرة مغلقة</span>
-                <button class="btn-reopen" @onclick="ReopenTicket">إعادة فتح</button>
-            </div>
-        }
-    </div>
+    <TicketDetailPage Ticket="@CurrentTicket"
+                      IsLoading="@IsLoading"
+                      IsSending="@IsSending"
+                      OnBack="HandleBack"
+                      OnReply="HandleReply"
+                      OnAttachment="HandleAttachment"
+                      OnReopen="HandleReopen"
+                      OnOrderClick="HandleOrderClick" />
 }
-
-<!-- New Ticket Modal -->
-@if (ShowNewTicket)
+else if (Mode == PageMode.Create)
 {
-    <div class="modal-overlay" @onclick="HideNewTicketModal">
-        <div class="new-ticket-modal" @onclick:stopPropagation>
-            <div class="modal-header">
-                <h2>تذكرة جديدة</h2>
-                <button class="btn-close" @onclick="HideNewTicketModal">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"/>
-                        <line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
-                </button>
-            </div>
-
-            <div class="modal-body">
-                <!-- Category Selection -->
-                <div class="form-group">
-                    <label>نوع المشكلة</label>
-                    <div class="category-grid">
-                        @foreach (var cat in TicketCategories)
-                        {
-                            <button class="category-option @(NewTicketCategory == cat.Key ? "selected" : "")"
-                                    @onclick="() => NewTicketCategory = cat.Key">
-                                @GetCategoryIcon(cat.Key)
-                                <span>@cat.Value</span>
-                            </button>
-                        }
-                    </div>
-                </div>
-
-                <!-- Order Selection (if applicable) -->
-                @if (NewTicketCategory == "order_issue" || NewTicketCategory == "refund")
-                {
-                    <div class="form-group">
-                        <label>الطلب المتعلق (اختياري)</label>
-                        <select @bind="NewTicketOrderId">
-                            <option value="">اختر الطلب</option>
-                            @foreach (var order in RecentOrders)
-                            {
-                                <option value="@order.Id">#@order.Number - @order.VendorName</option>
-                            }
-                        </select>
-                    </div>
-                }
-
-                <!-- Subject -->
-                <div class="form-group">
-                    <label>عنوان المشكلة</label>
-                    <input type="text" @bind="NewTicketSubject" placeholder="صف مشكلتك باختصار" />
-                </div>
-
-                <!-- Description -->
-                <div class="form-group">
-                    <label>التفاصيل</label>
-                    <textarea @bind="NewTicketDescription" placeholder="اشرح مشكلتك بالتفصيل..." rows="4"></textarea>
-                </div>
-
-                <!-- Attachments -->
-                <div class="form-group">
-                    <label>المرفقات (اختياري)</label>
-                    <button class="btn-upload">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                            <polyline points="17,8 12,3 7,8"/>
-                            <line x1="12" y1="3" x2="12" y2="15"/>
-                        </svg>
-                        إضافة صورة أو ملف
-                    </button>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-cancel" @onclick="HideNewTicketModal">إلغاء</button>
-                <button class="btn-submit" @onclick="CreateTicket" disabled="@(!CanCreateTicket || IsCreating)">
-                    @if (IsCreating)
-                    {
-                        <div class="btn-loader"></div>
-                        <span>جاري الإنشاء...</span>
-                    }
-                    else
-                    {
-                        <span>إرسال التذكرة</span>
-                    }
-                </button>
-            </div>
-        </div>
-    </div>
+    <CreateTicketPage Orders="@RecentOrders"
+                      IsSubmitting="@IsSubmitting"
+                      PreselectedOrderId="@PreselectedOrderId"
+                      OnSubmit="HandleSubmit"
+                      OnCancel="HandleBack"
+                      OnAddAttachment="HandleAttachment" />
 }
 
 @code {
-    [Parameter]
-    public string? TicketId { get; set; }
+    [Parameter] public string? TicketId { get; set; }
 
-    private List<TicketItem> Tickets = new();
+    private enum PageMode { List, Detail, Create }
+    private PageMode Mode = PageMode.List;
+
+    private List<TicketListItem>? Tickets;
     private TicketDetail? CurrentTicket;
-    private List<TicketMessage> TicketMessages = new();
-    private List<OrderSummary> RecentOrders = new();
+    private List<OrderSummary>? RecentOrders;
 
-    private string SelectedFilter = "all";
     private bool IsLoading = true;
-    private bool ShowNewTicket = false;
+    private bool IsSending;
+    private bool IsSubmitting;
+    private string ActiveFilter = "all";
+    private string? PreselectedOrderId;
 
-    // New Ticket Form
-    private string NewTicketCategory = "";
-    private string? NewTicketOrderId;
-    private string NewTicketSubject = "";
-    private string NewTicketDescription = "";
-    private bool IsCreating = false;
-
-    // Reply
-    private string ReplyText = "";
-    private bool IsSending = false;
-
-    private Dictionary<string, string> TicketCategories = new()
+    protected override async Task OnParametersSetAsync()
     {
-        { "order_issue", "مشكلة في الطلب" },
-        { "payment", "مشكلة في الدفع" },
-        { "refund", "طلب استرداد" },
-        { "app_bug", "مشكلة تقنية" },
-        { "suggestion", "اقتراح" },
-        { "other", "أخرى" }
-    };
+        var uri = new Uri(Navigation.Uri);
 
-    private IEnumerable<TicketItem> FilteredTickets => SelectedFilter switch
-    {
-        "open" => Tickets.Where(t => t.Status == "open" || t.Status == "in_progress"),
-        "closed" => Tickets.Where(t => t.Status == "closed" || t.Status == "resolved"),
-        _ => Tickets
-    };
-
-    private bool CanCreateTicket => !string.IsNullOrWhiteSpace(NewTicketCategory) &&
-                                    !string.IsNullOrWhiteSpace(NewTicketSubject) &&
-                                    !string.IsNullOrWhiteSpace(NewTicketDescription);
-
-    protected override async Task OnInitializedAsync()
-    {
-        if (string.IsNullOrEmpty(TicketId))
+        if (uri.AbsolutePath.EndsWith("/new"))
         {
-            await LoadTickets();
+            Mode = PageMode.Create;
+            await LoadRecentOrders();
+        }
+        else if (!string.IsNullOrEmpty(TicketId))
+        {
+            Mode = PageMode.Detail;
+            await LoadTicketDetail();
         }
         else
         {
-            await LoadTicketDetail();
+            Mode = PageMode.List;
+            await LoadTickets();
         }
     }
 
     private async Task LoadTickets()
     {
         IsLoading = true;
-        await Task.Delay(500);
-
-        Tickets = new List<TicketItem>
+        try
         {
-            new TicketItem
+            var result = await ApiService.GetTicketsAsync();
+            Tickets = result.Select(t => new TicketListItem
             {
-                Id = "ticket-1",
-                Number = "TKT-2401-001",
-                Subject = "لم استلم طلبي",
-                Category = "order_issue",
-                Status = "in_progress",
-                LastMessage = "نحن نتابع مشكلتك مع المتجر...",
-                CreatedAt = DateTime.Now.AddDays(-2),
-                UpdatedAt = DateTime.Now.AddHours(-3),
-                UnreadReplies = 1
-            },
-            new TicketItem
-            {
-                Id = "ticket-2",
-                Number = "TKT-2401-002",
-                Subject = "طلب استرداد مبلغ",
-                Category = "refund",
-                Status = "resolved",
-                LastMessage = "تم استرداد المبلغ بنجاح",
-                CreatedAt = DateTime.Now.AddDays(-5),
-                UpdatedAt = DateTime.Now.AddDays(-4),
-                UnreadReplies = 0
-            }
-        };
-
-        IsLoading = false;
+                Id = t.Id,
+                Number = t.Number,
+                Subject = t.Subject,
+                Category = t.Category,
+                CategoryLabel = TicketCategories.GetLabel(t.Category),
+                Status = t.Status,
+                StatusLabel = TicketStatuses.GetLabel(t.Status),
+                LastMessage = t.LastMessage,
+                CreatedAt = t.CreatedAt,
+                UpdatedAt = t.UpdatedAt,
+                UnreadReplies = t.UnreadReplies,
+                LinkedOrderNumber = t.LinkedOrderNumber
+            }).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading tickets: {ex.Message}");
+            Tickets = new List<TicketListItem>();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     private async Task LoadTicketDetail()
     {
         IsLoading = true;
-        await Task.Delay(500);
-
-        CurrentTicket = new TicketDetail
+        try
         {
-            Id = TicketId!,
-            Number = "TKT-2401-001",
-            Subject = "لم استلم طلبي",
-            Category = "order_issue",
-            Status = "in_progress",
-            OrderId = "order-123",
-            OrderNumber = "ORD-240130-XYZ",
-            CreatedAt = DateTime.Now.AddDays(-2)
-        };
-
-        TicketMessages = new List<TicketMessage>
-        {
-            new TicketMessage
+            var t = await ApiService.GetTicketAsync(TicketId!);
+            CurrentTicket = new TicketDetail
             {
-                Id = "msg-1",
-                Content = "مرحباً، قمت بالطلب قبل ساعتين ولم يصلني حتى الآن. رقم الطلب ORD-240130-XYZ",
-                IsFromSupport = false,
-                CreatedAt = DateTime.Now.AddDays(-2)
-            },
-            new TicketMessage
-            {
-                Id = "msg-2",
-                Content = "مرحباً بك، نعتذر عن التأخير. سنتواصل مع المتجر للتأكد من حالة الطلب وسنرد عليك في أقرب وقت.",
-                IsFromSupport = true,
-                CreatedAt = DateTime.Now.AddDays(-2).AddHours(1)
-            },
-            new TicketMessage
-            {
-                Id = "msg-3",
-                Content = "تم التواصل مع المتجر وأفادونا بأن الطلب في الطريق إليك. من المتوقع وصوله خلال 15 دقيقة.",
-                IsFromSupport = true,
-                CreatedAt = DateTime.Now.AddHours(-3)
-            }
-        };
-
-        IsLoading = false;
-    }
-
-    private void SetFilter(string filter)
-    {
-        SelectedFilter = filter;
-    }
-
-    private void ShowNewTicketModal()
-    {
-        NewTicketCategory = "";
-        NewTicketOrderId = null;
-        NewTicketSubject = "";
-        NewTicketDescription = "";
-        ShowNewTicket = true;
-    }
-
-    private void HideNewTicketModal()
-    {
-        ShowNewTicket = false;
-    }
-
-    private async Task CreateTicket()
-    {
-        if (!CanCreateTicket) return;
-
-        IsCreating = true;
-        await Task.Delay(1000);
-
-        // Add new ticket to list
-        var newTicket = new TicketItem
+                Id = t.Id,
+                Number = t.Number,
+                Subject = t.Subject,
+                Category = t.Category,
+                CategoryLabel = TicketCategories.GetLabel(t.Category),
+                Status = t.Status,
+                StatusLabel = TicketStatuses.GetLabel(t.Status),
+                CreatedAt = t.CreatedAt,
+                LinkedOrderId = t.LinkedOrderId,
+                LinkedOrderNumber = t.LinkedOrderNumber,
+                Messages = t.Messages.Select(m => new TicketMessage
+                {
+                    Id = m.Id,
+                    Content = m.Content,
+                    SentAt = m.SentAt,
+                    IsFromSupport = m.IsFromSupport,
+                    SupportAgentName = m.AgentName
+                }).ToList()
+            };
+        }
+        catch (Exception ex)
         {
-            Id = Guid.NewGuid().ToString(),
-            Number = $"TKT-{DateTime.Now:yyMM}-{Tickets.Count + 1:D3}",
-            Subject = NewTicketSubject,
-            Category = NewTicketCategory,
-            Status = "open",
-            LastMessage = NewTicketDescription,
-            CreatedAt = DateTime.Now,
-            UpdatedAt = DateTime.Now,
-            UnreadReplies = 0
-        };
-
-        Tickets.Insert(0, newTicket);
-        IsCreating = false;
-        ShowNewTicket = false;
-
-        // Navigate to the new ticket
-        Navigation.NavigateTo($"/ticket/{newTicket.Id}");
-    }
-
-    private async Task SendReply()
-    {
-        if (string.IsNullOrWhiteSpace(ReplyText)) return;
-
-        IsSending = true;
-        await Task.Delay(500);
-
-        TicketMessages.Add(new TicketMessage
+            Console.WriteLine($"Error loading ticket: {ex.Message}");
+        }
+        finally
         {
-            Id = Guid.NewGuid().ToString(),
-            Content = ReplyText,
-            IsFromSupport = false,
-            CreatedAt = DateTime.Now
-        });
-
-        ReplyText = "";
-        IsSending = false;
-    }
-
-    private async Task ReopenTicket()
-    {
-        if (CurrentTicket != null)
-        {
-            CurrentTicket.Status = "open";
+            IsLoading = false;
         }
     }
 
-    private void OpenTicket(string ticketId)
+    private async Task LoadRecentOrders()
+    {
+        try
+        {
+            var orders = await ApiService.GetRecentOrdersAsync();
+            RecentOrders = orders.Select(o => new OrderSummary
+            {
+                Id = o.Id,
+                Number = o.Number,
+                Date = o.CreatedAt
+            }).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading orders: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private Task HandleFilterChange(string filter)
+    {
+        ActiveFilter = filter;
+        return Task.CompletedTask;
+    }
+
+    private void HandleTicketClick(string ticketId)
     {
         Navigation.NavigateTo($"/ticket/{ticketId}");
     }
 
-    private void ViewOrder()
+    private void HandleCreateTicket()
     {
-        if (CurrentTicket != null)
-        {
-            Navigation.NavigateTo($"/order/{CurrentTicket.OrderId}");
-        }
+        Navigation.NavigateTo("/tickets/new");
     }
 
-    private void GoBack()
+    private void HandleBack()
     {
         Navigation.NavigateTo("/tickets");
     }
 
-    private string GetStatusText(string status) => status switch
+    private async Task HandleReply(TicketReplyArgs args)
     {
-        "open" => "مفتوحة",
-        "in_progress" => "قيد المراجعة",
-        "resolved" => "تم الحل",
-        "closed" => "مغلقة",
-        _ => status
-    };
+        IsSending = true;
+        try
+        {
+            await ApiService.ReplyToTicketAsync(args.TicketId, args.Message);
+            await LoadTicketDetail();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error sending reply: {ex.Message}");
+        }
+        finally
+        {
+            IsSending = false;
+        }
+    }
 
-    private string GetCategoryText(string category) => TicketCategories.GetValueOrDefault(category, category);
-
-    private MarkupString GetCategoryIcon(string category) => category switch
+    private Task HandleAttachment()
     {
-        "order_issue" => new MarkupString("<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2'/><rect x='9' y='3' width='6' height='4' rx='1'/></svg>"),
-        "payment" => new MarkupString("<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><rect x='1' y='4' width='22' height='16' rx='2' ry='2'/><line x1='1' y1='10' x2='23' y2='10'/></svg>"),
-        "refund" => new MarkupString("<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><polyline points='23,4 23,10 17,10'/><path d='M20.49 15a9 9 0 11-2.12-9.36L23 10'/></svg>"),
-        "app_bug" => new MarkupString("<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><rect x='3' y='11' width='18' height='10' rx='2'/><path d='M12 11V3'/><path d='M8 7l4 4 4-4'/></svg>"),
-        "suggestion" => new MarkupString("<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z'/></svg>"),
-        _ => new MarkupString("<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><circle cx='12' cy='12' r='10'/><path d='M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3'/><line x1='12' y1='17' x2='12.01' y2='17'/></svg>")
-    };
+        // Open file picker
+        return Task.CompletedTask;
+    }
 
-    private string FormatDate(DateTime date)
+    private async Task HandleReopen()
     {
-        var diff = DateTime.Now - date;
-        if (diff.TotalMinutes < 60) return $"منذ {(int)diff.TotalMinutes} دقيقة";
-        if (diff.TotalHours < 24) return $"منذ {(int)diff.TotalHours} ساعة";
-        if (diff.TotalDays < 7) return $"منذ {(int)diff.TotalDays} يوم";
-        return date.ToString("dd/MM/yyyy");
+        try
+        {
+            await ApiService.ReopenTicketAsync(TicketId!);
+            await LoadTicketDetail();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error reopening ticket: {ex.Message}");
+        }
     }
 
-    private string FormatDateTime(DateTime date)
+    private void HandleOrderClick(string orderId)
     {
-        if (date.Date == DateTime.Today)
-            return $"اليوم {date:HH:mm}";
-        if (date.Date == DateTime.Today.AddDays(-1))
-            return $"أمس {date:HH:mm}";
-        return date.ToString("dd/MM/yyyy HH:mm");
+        Navigation.NavigateTo($"/order/{orderId}");
     }
 
-    private string GetInitials(string name)
+    private async Task HandleSubmit(CreateTicketArgs args)
     {
-        if (string.IsNullOrEmpty(name)) return "؟";
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return parts.Length >= 2 ? $"{parts[0][0]}{parts[1][0]}" : name[0].ToString();
+        IsSubmitting = true;
+        try
+        {
+            var ticketId = await ApiService.CreateTicketAsync(args.Category, args.Subject, args.Message, args.LinkedOrderId);
+            Navigation.NavigateTo($"/ticket/{ticketId}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating ticket: {ex.Message}");
+        }
+        finally
+        {
+            IsSubmitting = false;
+        }
     }
 }
-
-public class TicketItem
-{
-    public string Id { get; set; } = "";
-    public string Number { get; set; } = "";
-    public string Subject { get; set; } = "";
-    public string Category { get; set; } = "";
-    public string Status { get; set; } = "";
-    public string LastMessage { get; set; } = "";
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
-    public int UnreadReplies { get; set; }
-}
-
-public class TicketDetail
-{
-    public string Id { get; set; } = "";
-    public string Number { get; set; } = "";
-    public string Subject { get; set; } = "";
-    public string Category { get; set; } = "";
-    public string Status { get; set; } = "";
-    public string? OrderId { get; set; }
-    public string? OrderNumber { get; set; }
-    public DateTime CreatedAt { get; set; }
-}
-
-public class TicketMessage
-{
-    public string Id { get; set; } = "";
-    public string Content { get; set; } = "";
-    public bool IsFromSupport { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public List<TicketAttachment>? Attachments { get; set; }
-}
-
-public class TicketAttachment
-{
-    public string Name { get; set; } = "";
-    public string Url { get; set; } = "";
-}
-
-public class OrderSummary
-{
-    public string Id { get; set; } = "";
-    public string Number { get; set; } = "";
-    public string VendorName { get; set; } = "";
-}
-
-<style>
-    .tickets-page {
-        min-height: 100vh;
-        background: #F8FAFC;
-        padding-bottom: 100px;
-    }
-
-    .tickets-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 20px;
-        background: white;
-        border-bottom: 1px solid #E2E8F0;
-    }
-
-    .tickets-header h1 {
-        font-size: 20px;
-        font-weight: 700;
-        color: #1E293B;
-        margin: 0;
-    }
-
-    .btn-new-ticket {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #F97316, #EA580C);
-        border: none;
-        color: white;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
-    }
-
-    .tickets-content {
-        padding: 16px;
-    }
-
-    /* Filter Tabs */
-    .filter-tabs {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 16px;
-        background: white;
-        padding: 6px;
-        border-radius: 14px;
-    }
-
-    .tab {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 10px 16px;
-        background: transparent;
-        border: none;
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 500;
-        color: #64748B;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .tab.active {
-        background: linear-gradient(135deg, #F97316, #EA580C);
-        color: white;
-    }
-
-    .tab-count {
-        font-size: 12px;
-        padding: 2px 8px;
-        background: rgba(0,0,0,0.1);
-        border-radius: 10px;
-    }
-
-    .tab.active .tab-count {
-        background: rgba(255,255,255,0.2);
-    }
-
-    /* Tickets List */
-    .tickets-list {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .ticket-card {
-        position: relative;
-        background: white;
-        border: none;
-        border-radius: 16px;
-        padding: 16px;
-        text-align: start;
-        cursor: pointer;
-        transition: all 0.2s;
-        width: 100%;
-    }
-
-    .ticket-card:active {
-        transform: scale(0.98);
-    }
-
-    .ticket-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 8px;
-    }
-
-    .ticket-number {
-        font-size: 12px;
-        color: #94A3B8;
-        font-weight: 500;
-    }
-
-    .ticket-status {
-        font-size: 11px;
-        padding: 4px 10px;
-        border-radius: 8px;
-        font-weight: 500;
-    }
-
-    .ticket-status.open {
-        background: #FEF3C7;
-        color: #D97706;
-    }
-
-    .ticket-status.in_progress {
-        background: #DBEAFE;
-        color: #2563EB;
-    }
-
-    .ticket-status.resolved {
-        background: #D1FAE5;
-        color: #059669;
-    }
-
-    .ticket-status.closed {
-        background: #F1F5F9;
-        color: #64748B;
-    }
-
-    .ticket-subject {
-        font-size: 15px;
-        font-weight: 600;
-        color: #1E293B;
-        margin: 0 0 6px;
-    }
-
-    .ticket-preview {
-        font-size: 13px;
-        color: #64748B;
-        margin: 0 0 12px;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    .ticket-footer {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .ticket-category {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 12px;
-        color: #64748B;
-    }
-
-    .ticket-date {
-        font-size: 12px;
-        color: #94A3B8;
-    }
-
-    .unread-badge {
-        position: absolute;
-        top: 16px;
-        left: 16px;
-        min-width: 20px;
-        height: 20px;
-        padding: 0 6px;
-        background: #F97316;
-        color: white;
-        border-radius: 10px;
-        font-size: 11px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    /* Ticket Detail */
-    .ticket-detail-page {
-        min-height: 100vh;
-        background: #F8FAFC;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .ticket-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 16px;
-        background: white;
-        border-bottom: 1px solid #E2E8F0;
-    }
-
-    .btn-back, .btn-menu {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        background: #F1F5F9;
-        border: none;
-        color: #64748B;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .ticket-info {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .ticket-subject-section {
-        padding: 20px;
-        background: white;
-        border-bottom: 1px solid #E2E8F0;
-    }
-
-    .category-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-size: 12px;
-        font-weight: 500;
-        margin-bottom: 10px;
-    }
-
-    .category-badge.order_issue { background: #FEF3C7; color: #D97706; }
-    .category-badge.payment { background: #E0E7FF; color: #4F46E5; }
-    .category-badge.refund { background: #FCE7F3; color: #DB2777; }
-    .category-badge.app_bug { background: #FEE2E2; color: #DC2626; }
-    .category-badge.suggestion { background: #D1FAE5; color: #059669; }
-    .category-badge.other { background: #F1F5F9; color: #64748B; }
-
-    .ticket-subject-section h1 {
-        font-size: 18px;
-        font-weight: 600;
-        color: #1E293B;
-        margin: 0 0 10px;
-    }
-
-    .order-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 8px 12px;
-        background: #F8FAFC;
-        border: 1px solid #E2E8F0;
-        border-radius: 8px;
-        font-size: 13px;
-        color: #64748B;
-        cursor: pointer;
-    }
-
-    /* Messages */
-    .ticket-messages {
-        flex: 1;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-    }
-
-    .message-item {
-        display: flex;
-        gap: 12px;
-    }
-
-    .message-avatar {
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .message-item.support .message-avatar {
-        background: linear-gradient(135deg, #F97316, #EA580C);
-        color: white;
-    }
-
-    .message-item.user .message-avatar {
-        background: #E2E8F0;
-        color: #64748B;
-    }
-
-    .message-content {
-        flex: 1;
-        background: white;
-        border-radius: 14px;
-        padding: 14px;
-    }
-
-    .message-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 8px;
-    }
-
-    .sender-name {
-        font-size: 13px;
-        font-weight: 600;
-        color: #1E293B;
-    }
-
-    .message-time {
-        font-size: 11px;
-        color: #94A3B8;
-    }
-
-    .message-body {
-        font-size: 14px;
-        color: #475569;
-        line-height: 1.6;
-    }
-
-    .message-attachments {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 12px;
-    }
-
-    .attachment-item {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 8px 12px;
-        background: #F8FAFC;
-        border-radius: 8px;
-        font-size: 12px;
-        color: #64748B;
-        text-decoration: none;
-    }
-
-    /* Reply Section */
-    .reply-section {
-        padding: 16px;
-        background: white;
-        border-top: 1px solid #E2E8F0;
-    }
-
-    .reply-input-wrapper {
-        background: #F8FAFC;
-        border: 1px solid #E2E8F0;
-        border-radius: 14px;
-        overflow: hidden;
-    }
-
-    .reply-input-wrapper textarea {
-        width: 100%;
-        padding: 14px;
-        border: none;
-        background: transparent;
-        font-size: 14px;
-        color: #1E293B;
-        resize: none;
-        outline: none;
-    }
-
-    .reply-actions {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 10px 14px;
-        border-top: 1px solid #E2E8F0;
-    }
-
-    .btn-attach {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        background: transparent;
-        border: none;
-        color: #64748B;
-        cursor: pointer;
-    }
-
-    .btn-send {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #F97316, #EA580C);
-        border: none;
-        color: white;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .btn-send:disabled {
-        background: #CBD5E1;
-    }
-
-    /* Closed Notice */
-    .closed-notice {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        padding: 16px;
-        background: #F1F5F9;
-        color: #64748B;
-        font-size: 14px;
-    }
-
-    .btn-reopen {
-        padding: 8px 16px;
-        background: white;
-        border: 1px solid #E2E8F0;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 500;
-        color: #F97316;
-        cursor: pointer;
-    }
-
-    /* New Ticket Modal */
-    .modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.5);
-        display: flex;
-        align-items: flex-end;
-        justify-content: center;
-        z-index: 1000;
-    }
-
-    .new-ticket-modal {
-        width: 100%;
-        max-width: 500px;
-        max-height: 90vh;
-        background: white;
-        border-radius: 24px 24px 0 0;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .modal-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 20px;
-        border-bottom: 1px solid #E2E8F0;
-    }
-
-    .modal-header h2 {
-        font-size: 18px;
-        font-weight: 700;
-        color: #1E293B;
-        margin: 0;
-    }
-
-    .btn-close {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        background: #F1F5F9;
-        border: none;
-        color: #64748B;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .modal-body {
-        padding: 20px;
-        overflow-y: auto;
-        flex: 1;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-group label {
-        display: block;
-        font-size: 14px;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 10px;
-    }
-
-    .category-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
-
-    .category-option {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 14px;
-        background: #F8FAFC;
-        border: 2px solid #E2E8F0;
-        border-radius: 12px;
-        font-size: 13px;
-        color: #64748B;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .category-option.selected {
-        background: #FFF7ED;
-        border-color: #F97316;
-        color: #EA580C;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        width: 100%;
-        padding: 14px;
-        background: #F8FAFC;
-        border: 2px solid #E2E8F0;
-        border-radius: 12px;
-        font-size: 14px;
-        color: #1E293B;
-        outline: none;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-        border-color: #F97316;
-        background: white;
-    }
-
-    .btn-upload {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        width: 100%;
-        padding: 14px;
-        background: #F8FAFC;
-        border: 2px dashed #E2E8F0;
-        border-radius: 12px;
-        font-size: 14px;
-        color: #64748B;
-        cursor: pointer;
-    }
-
-    .modal-footer {
-        display: flex;
-        gap: 12px;
-        padding: 16px 20px;
-        border-top: 1px solid #E2E8F0;
-    }
-
-    .btn-cancel,
-    .btn-submit {
-        flex: 1;
-        padding: 14px;
-        border-radius: 12px;
-        font-size: 15px;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-    }
-
-    .btn-cancel {
-        background: #F1F5F9;
-        border: none;
-        color: #64748B;
-    }
-
-    .btn-submit {
-        background: linear-gradient(135deg, #F97316, #EA580C);
-        border: none;
-        color: white;
-    }
-
-    .btn-submit:disabled {
-        background: #CBD5E1;
-    }
-
-    .btn-create {
-        padding: 14px 28px;
-        background: linear-gradient(135deg, #F97316, #EA580C);
-        border: none;
-        border-radius: 12px;
-        font-size: 15px;
-        font-weight: 600;
-        color: white;
-        cursor: pointer;
-        margin-top: 16px;
-    }
-
-    /* Empty & Loading */
-    .empty-state {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 60px 40px;
-        text-align: center;
-    }
-
-    .empty-icon {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        background: #F1F5F9;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #94A3B8;
-        margin-bottom: 20px;
-    }
-
-    .empty-state h2 {
-        font-size: 18px;
-        font-weight: 600;
-        color: #1E293B;
-        margin: 0 0 8px;
-    }
-
-    .empty-state p {
-        font-size: 14px;
-        color: #64748B;
-        margin: 0;
-    }
-
-    .loading-skeleton {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .skeleton-ticket {
-        background: white;
-        border-radius: 16px;
-        padding: 16px;
-    }
-
-    .skeleton-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 12px;
-    }
-
-    .skeleton-line {
-        height: 14px;
-        background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
-        background-size: 200% 100%;
-        animation: shimmer 1.5s infinite;
-        border-radius: 4px;
-        margin-bottom: 8px;
-    }
-
-    .skeleton-line.w-60 { width: 60%; }
-    .skeleton-line.w-40 { width: 40%; }
-    .skeleton-line.w-full { width: 100%; }
-
-    .skeleton-badge {
-        width: 60px;
-        height: 24px;
-        background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
-        background-size: 200% 100%;
-        animation: shimmer 1.5s infinite;
-        border-radius: 8px;
-    }
-
-    .btn-loader {
-        width: 20px;
-        height: 20px;
-        border: 2px solid rgba(255,255,255,0.3);
-        border-top-color: white;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-    }
-
-    @@keyframes shimmer {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }
-
-    @@keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-</style>

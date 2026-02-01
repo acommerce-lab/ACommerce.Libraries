@@ -34,3 +34,39 @@ public class RelatedOrderInfo
     public string OrderNumber { get; set; } = string.Empty;
     public string StatusText { get; set; } = string.Empty;
 }
+
+// Chat list models for order-based vendor communication
+public class ChatListInfo
+{
+    public string Id { get; set; } = string.Empty;
+    public string OrderId { get; set; } = string.Empty;
+    public string OrderNumber { get; set; } = string.Empty;
+    public string VendorName { get; set; } = string.Empty;
+    public string? VendorLogo { get; set; }
+    public string? LastMessage { get; set; }
+    public DateTime? LastMessageTime { get; set; }
+    public int UnreadCount { get; set; }
+    public bool IsVendorOnline { get; set; }
+}
+
+public class ChatInfo
+{
+    public string Id { get; set; } = string.Empty;
+    public string OrderId { get; set; } = string.Empty;
+    public string OrderNumber { get; set; } = string.Empty;
+    public string OrderStatus { get; set; } = string.Empty;
+    public string VendorName { get; set; } = string.Empty;
+    public string? VendorLogo { get; set; }
+    public bool IsVendorOnline { get; set; }
+}
+
+public class ChatMessageInfo
+{
+    public string Id { get; set; } = string.Empty;
+    public string Content { get; set; } = string.Empty;
+    public DateTime SentAt { get; set; }
+    public bool IsFromMe { get; set; }
+    public bool IsRead { get; set; }
+    public string Type { get; set; } = "text";
+    public string? MediaUrl { get; set; }
+}

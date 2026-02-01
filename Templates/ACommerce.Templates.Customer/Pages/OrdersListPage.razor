@@ -1,0 +1,183 @@
+@namespace ACommerce.Templates.Customer.Pages
+
+<div class="ac-page ac-orders-page">
+    @* Header *@
+    <div class="ac-page-header">
+        <h1>طلباتي</h1>
+    </div>
+
+    @* Filter Tabs *@
+    <div class="ac-tabs">
+        <button class="ac-tab @(ActiveFilter == "all" ? "active" : "")" @onclick='() => SetFilter("all")'>
+            الكل
+        </button>
+        <button class="ac-tab @(ActiveFilter == "active" ? "active" : "")" @onclick='() => SetFilter("active")'>
+            الجارية
+            @if (ActiveCount > 0)
+            {
+                <span class="ac-tab-badge">@ActiveCount</span>
+            }
+        </button>
+        <button class="ac-tab @(ActiveFilter == "completed" ? "active" : "")" @onclick='() => SetFilter("completed")'>
+            المكتملة
+        </button>
+    </div>
+
+    @* Orders List *@
+    @if (IsLoading)
+    {
+        <div class="ac-loading-container">
+            <AcSpinner Text="جاري تحميل الطلبات..." />
+        </div>
+    }
+    else if (FilteredOrders == null || !FilteredOrders.Any())
+    {
+        <AcEmptyState Icon="bi-bag"
+                      Title="لا توجد طلبات"
+                      Description="@(ActiveFilter == "all" ? "لم تقم بأي طلب بعد" : $"لا توجد طلبات {(ActiveFilter == "active" ? "جارية" : "مكتملة")}")"
+                      ActionText="تصفح المنتجات"
+                      OnAction="HandleBrowse" />
+    }
+    else
+    {
+        <div class="ac-orders-list">
+            @foreach (var order in FilteredOrders)
+            {
+                <div class="ac-order-card" @onclick="() => HandleOrderClick(order.Id)">
+                    @* Order Header *@
+                    <div class="ac-order-header">
+                        <div class="ac-order-info">
+                            <span class="ac-order-number">طلب #@order.Number</span>
+                            <span class="ac-order-date">@FormatDate(order.CreatedAt)</span>
+                        </div>
+                        <span class="ac-order-status ac-status-@OrderStatuses.GetColor(order.Status)">
+                            <i class="bi @OrderStatuses.GetIcon(order.Status)"></i>
+                            @order.StatusLabel
+                        </span>
+                    </div>
+
+                    @* Vendor Info *@
+                    @if (!string.IsNullOrEmpty(order.VendorName))
+                    {
+                        <div class="ac-order-vendor">
+                            @if (!string.IsNullOrEmpty(order.VendorLogo))
+                            {
+                                <img src="@order.VendorLogo" alt="@order.VendorName" class="ac-vendor-logo" />
+                            }
+                            else
+                            {
+                                <div class="ac-vendor-placeholder">
+                                    <i class="bi bi-shop"></i>
+                                </div>
+                            }
+                            <span class="ac-vendor-name">@order.VendorName</span>
+                        </div>
+                    }
+
+                    @* Order Items Preview *@
+                    <div class="ac-order-items">
+                        @if (!string.IsNullOrEmpty(order.FirstItemImage))
+                        {
+                            <img src="@order.FirstItemImage" alt="" class="ac-item-image" />
+                        }
+                        <div class="ac-items-info">
+                            <span class="ac-item-name">@order.FirstItemName</span>
+                            @if (order.ItemsCount > 1)
+                            {
+                                <span class="ac-items-more">و @(order.ItemsCount - 1) منتجات أخرى</span>
+                            }
+                        </div>
+                    </div>
+
+                    @* Order Footer *@
+                    <div class="ac-order-footer">
+                        <span class="ac-order-total">
+                            @order.Total.ToString("N2") <small>@order.Currency</small>
+                        </span>
+
+                        <div class="ac-order-actions">
+                            @if (order.CanTrack)
+                            {
+                                <button class="ac-btn-sm ac-btn-outline" @onclick:stopPropagation @onclick="() => HandleTrack(order.Id)">
+                                    <i class="bi bi-geo-alt"></i>
+                                    تتبع
+                                </button>
+                            }
+                            @if (order.CanReorder)
+                            {
+                                <button class="ac-btn-sm ac-btn-primary" @onclick:stopPropagation @onclick="() => HandleReorder(order.Id)">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                    إعادة الطلب
+                                </button>
+                            }
+                            @if (order.CanChat)
+                            {
+                                <button class="ac-btn-sm ac-btn-icon" @onclick:stopPropagation @onclick="() => HandleChat(order.Id)">
+                                    <i class="bi bi-chat-dots"></i>
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @* Load More *@
+        @if (HasMore)
+        {
+            <div class="ac-load-more">
+                <AcButton Text="تحميل المزيد"
+                          Variant="ButtonVariant.Secondary"
+                          Outline="true"
+                          Loading="IsLoadingMore"
+                          OnClick="HandleLoadMore" />
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public List<OrderListItem>? Orders { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool IsLoadingMore { get; set; }
+    [Parameter] public bool HasMore { get; set; }
+    [Parameter] public string ActiveFilter { get; set; } = "all";
+
+    [Parameter] public EventCallback<string> OnFilterChange { get; set; }
+    [Parameter] public EventCallback<string> OnOrderClick { get; set; }
+    [Parameter] public EventCallback<string> OnReorder { get; set; }
+    [Parameter] public EventCallback<string> OnTrack { get; set; }
+    [Parameter] public EventCallback<string> OnChat { get; set; }
+    [Parameter] public EventCallback OnBrowse { get; set; }
+    [Parameter] public EventCallback OnLoadMore { get; set; }
+
+    private int ActiveCount => Orders?.Count(o => OrderStatuses.IsActive(o.Status)) ?? 0;
+
+    private IEnumerable<OrderListItem>? FilteredOrders => ActiveFilter switch
+    {
+        "active" => Orders?.Where(o => OrderStatuses.IsActive(o.Status)),
+        "completed" => Orders?.Where(o => !OrderStatuses.IsActive(o.Status)),
+        _ => Orders
+    };
+
+    private async Task SetFilter(string filter)
+    {
+        ActiveFilter = filter;
+        await OnFilterChange.InvokeAsync(filter);
+    }
+
+    private async Task HandleOrderClick(string orderId) => await OnOrderClick.InvokeAsync(orderId);
+    private async Task HandleReorder(string orderId) => await OnReorder.InvokeAsync(orderId);
+    private async Task HandleTrack(string orderId) => await OnTrack.InvokeAsync(orderId);
+    private async Task HandleChat(string orderId) => await OnChat.InvokeAsync(orderId);
+    private async Task HandleBrowse() => await OnBrowse.InvokeAsync();
+    private async Task HandleLoadMore() => await OnLoadMore.InvokeAsync();
+
+    private string FormatDate(DateTime date)
+    {
+        var diff = DateTime.Now - date;
+        if (diff.TotalHours < 24) return date.ToString("HH:mm");
+        if (diff.TotalDays < 7) return date.ToString("dddd", new System.Globalization.CultureInfo("ar-SA"));
+        return date.ToString("yyyy/MM/dd");
+    }
+}
