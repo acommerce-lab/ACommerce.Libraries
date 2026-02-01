@@ -64,6 +64,11 @@ public class CreateOrderRequest
     public string? CustomerNotes { get; set; }
     public DeliveryLocationDto? DeliveryLocation { get; set; }
     public CarInfoDto? CarInfo { get; set; }
+
+    /// <summary>
+    /// المبلغ النقدي الذي سيدفعه العميل (لحساب الباقي)
+    /// </summary>
+    public decimal? CashAmount { get; set; }
 }
 
 /// <summary>
@@ -94,6 +99,16 @@ public class OrderDto
     public CarInfoDto? CarInfo { get; set; }
     public VendorDto? Vendor { get; set; }
     public List<OrderItemDto>? Items { get; set; }
+
+    /// <summary>
+    /// المبلغ النقدي المدفوع
+    /// </summary>
+    public decimal? CashAmount { get; set; }
+
+    /// <summary>
+    /// مبلغ الباقي
+    /// </summary>
+    public decimal? ChangeAmount { get; set; }
 }
 
 /// <summary>
