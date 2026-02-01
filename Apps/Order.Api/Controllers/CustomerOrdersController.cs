@@ -110,9 +110,16 @@ public class CustomerOrdersController : ControllerBase
 
         if (request.CarInfo != null)
         {
-            metadata["car_model"] = request.CarInfo.Model ?? "";
-            metadata["car_color"] = request.CarInfo.Color ?? "";
+            metadata["car_model"] = request.CarInfo.CarModel ?? "";
+            metadata["car_color"] = request.CarInfo.CarColor ?? "";
             metadata["car_plate"] = request.CarInfo.PlateNumber ?? "";
+        }
+
+        // Store cash amount if provided
+        if (request.CashAmount.HasValue)
+        {
+            metadata["cash_amount"] = request.CashAmount.Value.ToString();
+            metadata["change_amount"] = (request.CashAmount.Value - subtotal).ToString();
         }
 
         var order = new ACommerce.Orders.Entities.Order
@@ -226,11 +233,14 @@ public class CustomerOrdersController : ControllerBase
                 order.CreatedAt,
                 DeliveryType = order.Metadata.GetValueOrDefault("delivery_type", "Pickup"),
                 PaymentMethod = order.Metadata.GetValueOrDefault("payment_method", "Cash"),
+                CashAmount = decimal.TryParse(order.Metadata.GetValueOrDefault("cash_amount", ""), out var cashAmt) ? cashAmt : (decimal?)null,
+                ChangeAmount = decimal.TryParse(order.Metadata.GetValueOrDefault("change_amount", ""), out var changeAmt) ? changeAmt : (decimal?)null,
                 Vendor = vendor != null ? new
                 {
                     vendor.Id,
                     Name = vendor.StoreName,
-                    Phone = vendor.Metadata.GetValueOrDefault("phone", "")
+                    LogoUrl = vendor.Metadata.GetValueOrDefault("logo_url", ""),
+                    ContactPhone = vendor.Metadata.GetValueOrDefault("phone", "")
                 } : null
             });
         }
@@ -293,6 +303,8 @@ public class CustomerOrdersController : ControllerBase
             Notes = order.CustomerNotes,
             DeliveryType = order.Metadata.GetValueOrDefault("delivery_type", "Pickup"),
             PaymentMethod = order.Metadata.GetValueOrDefault("payment_method", "Cash"),
+            CashAmount = decimal.TryParse(order.Metadata.GetValueOrDefault("cash_amount", ""), out var cashAmt) ? cashAmt : (decimal?)null,
+            ChangeAmount = decimal.TryParse(order.Metadata.GetValueOrDefault("change_amount", ""), out var changeAmt) ? changeAmt : (decimal?)null,
             DeliveryLocation = new
             {
                 Latitude = double.TryParse(order.Metadata.GetValueOrDefault("delivery_latitude", "0"), out var lat) ? lat : 0,
@@ -301,15 +313,15 @@ public class CustomerOrdersController : ControllerBase
             },
             CarInfo = new
             {
-                Model = order.Metadata.GetValueOrDefault("car_model", ""),
-                Color = order.Metadata.GetValueOrDefault("car_color", ""),
+                CarModel = order.Metadata.GetValueOrDefault("car_model", ""),
+                CarColor = order.Metadata.GetValueOrDefault("car_color", ""),
                 PlateNumber = order.Metadata.GetValueOrDefault("car_plate", "")
             },
             Vendor = vendor != null ? new
             {
                 vendor.Id,
                 Name = vendor.StoreName,
-                Phone = vendor.Metadata.GetValueOrDefault("phone", ""),
+                ContactPhone = vendor.Metadata.GetValueOrDefault("phone", ""),
                 Latitude = vendor.Metadata.TryGetValue("latitude", out var vlat) && double.TryParse(vlat, out var vlatD) ? vlatD : (double?)null,
                 Longitude = vendor.Metadata.TryGetValue("longitude", out var vlng) && double.TryParse(vlng, out var vlngD) ? vlngD : (double?)null
             } : null,
@@ -380,6 +392,7 @@ public class CreateOrderRequest
     public string? CustomerNotes { get; set; }
     public DeliveryLocation? DeliveryLocation { get; set; }
     public CarInfo? CarInfo { get; set; }
+    public decimal? CashAmount { get; set; }
 }
 
 public class OrderItemRequest

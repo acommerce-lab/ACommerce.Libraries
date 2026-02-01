@@ -250,28 +250,35 @@
                             </svg>
                             <span>كم ستدفع؟</span>
                         </div>
-                        <p class="cash-hint">أدخل المبلغ الذي ستدفعه ليجهز الكاشير الباقي</p>
+                        <p class="cash-hint">اختر الفئة النقدية أو أدخل مبلغ مخصص</p>
 
-                        <div class="cash-input-wrapper">
-                            <input type="number"
-                                   @bind="CashAmount"
-                                   @bind:event="oninput"
-                                   placeholder="0.00"
-                                   min="@TotalAmount"
-                                   step="0.5"
-                                   class="cash-input" />
-                            <span class="currency-label">ر.س</span>
-                        </div>
-
-                        <!-- Quick Amount Buttons -->
-                        <div class="quick-amounts">
-                            @foreach (var amount in GetQuickAmounts())
+                        <!-- Currency Denomination Buttons -->
+                        <div class="denomination-grid">
+                            @foreach (var denomination in CurrencyDenominations)
                             {
-                                <button class="quick-amount-btn @(CashAmount == amount ? "selected" : "")"
-                                        @onclick="() => SetCashAmount(amount)">
-                                    @amount.ToString("0") ر.س
+                                var isDisabled = denomination < TotalAmount;
+                                <button class="denomination-btn @(CashAmount == denomination ? "selected" : "") @(isDisabled ? "disabled" : "")"
+                                        @onclick="() => SetCashAmount(denomination)"
+                                        disabled="@isDisabled">
+                                    <span class="denom-value">@denomination</span>
+                                    <span class="denom-currency">ر.س</span>
                                 </button>
                             }
+                        </div>
+
+                        <!-- Custom Amount Input -->
+                        <div class="custom-amount-section">
+                            <label class="custom-label">أو أدخل مبلغ آخر:</label>
+                            <div class="cash-input-wrapper @(IsCustomAmount ? "active" : "")">
+                                <input type="number"
+                                       value="@CustomCashInput"
+                                       @oninput="OnCustomAmountInput"
+                                       @onfocus="OnCustomAmountFocus"
+                                       placeholder="مبلغ مخصص"
+                                       min="@TotalAmount"
+                                       class="cash-input" />
+                                <span class="currency-label">ر.س</span>
+                            </div>
                         </div>
 
                         @if (CashAmount.HasValue && CashAmount >= TotalAmount)
@@ -279,15 +286,15 @@
                             <div class="change-display">
                                 <div class="change-row">
                                     <span>المبلغ المدفوع</span>
-                                    <span>@CashAmount.Value.ToString("0.00") ر.س</span>
+                                    <span>@CashAmount.Value.ToString("0") ر.س</span>
                                 </div>
                                 <div class="change-row">
                                     <span>إجمالي الطلب</span>
-                                    <span>@TotalAmount.ToString("0.00") ر.س</span>
+                                    <span>@TotalAmount.ToString("0") ر.س</span>
                                 </div>
                                 <div class="change-row total">
                                     <span>الباقي</span>
-                                    <span class="change-value">@ChangeAmount.ToString("0.00") ر.س</span>
+                                    <span class="change-value">@ChangeAmount.ToString("0") ر.س</span>
                                 </div>
                             </div>
                         }
@@ -297,7 +304,7 @@
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                                 </svg>
-                                <span>المبلغ أقل من إجمالي الطلب</span>
+                                <span>المبلغ أقل من إجمالي الطلب (@TotalAmount.ToString("0") ر.س)</span>
                             </div>
                         }
                     </div>
@@ -375,6 +382,10 @@
     private string? CarColor;
 
     private decimal? CashAmount;
+    private decimal? CustomCashInput;
+    private bool IsCustomAmount = false;
+
+    private static readonly decimal[] CurrencyDenominations = { 5, 10, 20, 50, 100, 200, 500 };
 
     private decimal TotalAmount => Offer != null ? Offer.Price * Quantity : 0;
     private decimal ChangeAmount => CashAmount.HasValue ? CashAmount.Value - TotalAmount : 0;
@@ -397,10 +408,11 @@
         try
         {
             Offer = await ApiService.GetOfferAsync(OfferId);
-            // Set initial cash amount to a rounded value
+            // Set initial cash amount to the first suitable denomination
             if (Offer != null)
             {
-                CashAmount = Math.Ceiling(TotalAmount / 10) * 10;
+                CashAmount = CurrencyDenominations.FirstOrDefault(d => d >= TotalAmount);
+                if (CashAmount == 0) CashAmount = null;
             }
         }
         catch (Exception ex)
@@ -435,15 +447,34 @@
         await GetCurrentLocation();
     }
 
-    private decimal[] GetQuickAmounts()
-    {
-        var baseAmount = Math.Ceiling(TotalAmount / 10) * 10;
-        return new[] { baseAmount, baseAmount + 10, baseAmount + 20, baseAmount + 50 };
-    }
-
     private void SetCashAmount(decimal amount)
     {
         CashAmount = amount;
+        IsCustomAmount = false;
+        CustomCashInput = null;
+    }
+
+    private void OnCustomAmountFocus()
+    {
+        IsCustomAmount = true;
+    }
+
+    private void OnCustomAmountInput(ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), out var value))
+        {
+            CustomCashInput = value;
+            CashAmount = value;
+            IsCustomAmount = true;
+        }
+        else
+        {
+            CustomCashInput = null;
+            if (IsCustomAmount)
+            {
+                CashAmount = null;
+            }
+        }
     }
 
     private async Task SubmitOrder()
@@ -1035,36 +1066,79 @@
         color: #64748B;
     }
 
-    /* Quick Amounts */
-    .quick-amounts {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-bottom: 16px;
+    /* Currency Denominations */
+    .denomination-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 20px;
     }
 
-    .quick-amount-btn {
-        flex: 1;
-        min-width: 70px;
-        padding: 10px 12px;
-        background: #F1F5F9;
-        border: 2px solid transparent;
-        border-radius: 10px;
-        font-size: 13px;
-        font-weight: 600;
-        color: #64748B;
+    .denomination-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 8px;
+        background: #F8FAFC;
+        border: 2px solid #E2E8F0;
+        border-radius: 14px;
         cursor: pointer;
         transition: all 0.2s;
     }
 
-    .quick-amount-btn:hover {
-        background: #E2E8F0;
+    .denomination-btn:hover:not(.disabled) {
+        background: #F1F5F9;
+        border-color: #CBD5E1;
     }
 
-    .quick-amount-btn.selected {
-        background: #FFF7ED;
+    .denomination-btn.selected {
+        background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
         border-color: #F97316;
+    }
+
+    .denomination-btn.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    .denom-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1E293B;
+    }
+
+    .denomination-btn.selected .denom-value {
+        color: #EA580C;
+    }
+
+    .denom-currency {
+        font-size: 11px;
+        color: #94A3B8;
+        margin-top: 2px;
+    }
+
+    .denomination-btn.selected .denom-currency {
         color: #F97316;
+    }
+
+    /* Custom Amount */
+    .custom-amount-section {
+        margin-bottom: 16px;
+    }
+
+    .custom-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        color: #64748B;
+        margin-bottom: 8px;
+    }
+
+    .cash-input-wrapper.active {
+        border-color: #F97316;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
     }
 
     /* Change Display */

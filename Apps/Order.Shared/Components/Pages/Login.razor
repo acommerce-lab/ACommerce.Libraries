@@ -1,6 +1,7 @@
 @page "/login"
 @inject OrderApiService ApiService
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <div class="login-page">
     <!-- Background Decoration -->
@@ -120,12 +121,14 @@
                             {
                                 var index = i;
                                 <input type="text"
+                                       id="otp-@index"
                                        maxlength="1"
                                        inputmode="numeric"
                                        pattern="[0-9]"
                                        class="otp-digit @(FocusedIndex == index ? "focused" : "")"
                                        value="@(VerificationCode.Length > index ? VerificationCode[index].ToString() : "")"
                                        @oninput="e => OnCodeInput(index, e)"
+                                       @onkeydown="e => OnCodeKeyDown(index, e)"
                                        @onfocus="() => FocusedIndex = index"
                                        disabled="@IsLoading" />
                             }
@@ -269,7 +272,7 @@
         }
     }
 
-    private void OnCodeInput(int index, ChangeEventArgs e)
+    private async Task OnCodeInput(int index, ChangeEventArgs e)
     {
         var value = e.Value?.ToString() ?? "";
 
@@ -282,6 +285,33 @@
             if (index < 3)
             {
                 FocusedIndex = index + 1;
+                await JS.InvokeVoidAsync("eval", $"document.getElementById('otp-{index + 1}')?.focus()");
+            }
+            else if (VerificationCode.Length == 4)
+            {
+                // Auto-submit when all 4 digits entered
+                await VerifyCode();
+            }
+        }
+    }
+
+    private async Task OnCodeKeyDown(int index, KeyboardEventArgs e)
+    {
+        if (e.Key == "Backspace" && index > 0)
+        {
+            var currentValue = VerificationCode.Length > index ? VerificationCode[index].ToString() : "";
+            if (string.IsNullOrEmpty(currentValue))
+            {
+                // Move to previous input
+                FocusedIndex = index - 1;
+                // Clear previous digit
+                if (VerificationCode.Length >= index)
+                {
+                    var chars = VerificationCode.PadRight(4).ToCharArray();
+                    chars[index - 1] = ' ';
+                    VerificationCode = new string(chars).TrimEnd();
+                }
+                await JS.InvokeVoidAsync("eval", $"document.getElementById('otp-{index - 1}')?.focus()");
             }
         }
     }
