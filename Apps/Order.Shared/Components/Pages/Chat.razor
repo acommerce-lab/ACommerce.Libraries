@@ -1,0 +1,800 @@
+@page "/chat/{ChatId?}"
+@inject OrderApiService ApiService
+@inject AuthStateService AuthState
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<div class="chat-page">
+    <header class="chat-header">
+        <button class="btn-back" @onclick="GoBack">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18l6-6-6-6"/>
+            </svg>
+        </button>
+        <div class="chat-info">
+            <div class="chat-avatar">
+                @if (!string.IsNullOrEmpty(ChatPartner?.Avatar))
+                {
+                    <img src="@ChatPartner.Avatar" alt="@ChatPartner.Name" />
+                }
+                else
+                {
+                    <span class="avatar-initials">@GetInitials(ChatPartner?.Name ?? "دعم")</span>
+                }
+                @if (ChatPartner?.IsOnline == true)
+                {
+                    <span class="online-dot"></span>
+                }
+            </div>
+            <div class="chat-details">
+                <h1>@(ChatPartner?.Name ?? "الدعم الفني")</h1>
+                <span class="chat-status">
+                    @if (IsTyping)
+                    {
+                        <span class="typing-indicator">يكتب...</span>
+                    }
+                    else if (ChatPartner?.IsOnline == true)
+                    {
+                        <span class="online-status">متصل الآن</span>
+                    }
+                    else
+                    {
+                        <span class="offline-status">آخر ظهور @ChatPartner?.LastSeen</span>
+                    }
+                </span>
+            </div>
+        </div>
+        <button class="btn-menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="1"/>
+                <circle cx="12" cy="5" r="1"/>
+                <circle cx="12" cy="19" r="1"/>
+            </svg>
+        </button>
+    </header>
+
+    <div class="chat-messages" @ref="messagesContainer">
+        @if (IsLoading)
+        {
+            <div class="loading-container">
+                <div class="loader"></div>
+            </div>
+        }
+        else
+        {
+            <!-- Date Separator -->
+            <div class="date-separator">
+                <span>اليوم</span>
+            </div>
+
+            @foreach (var message in Messages)
+            {
+                <div class="message @(message.IsFromMe ? "sent" : "received")">
+                    @if (!message.IsFromMe && Messages.IndexOf(message) == 0 ||
+                         !message.IsFromMe && Messages[Messages.IndexOf(message) - 1].IsFromMe)
+                    {
+                        <div class="message-avatar">
+                            <span class="avatar-initials small">@GetInitials(ChatPartner?.Name ?? "د")</span>
+                        </div>
+                    }
+                    <div class="message-content">
+                        @if (message.Type == "image")
+                        {
+                            <div class="message-image">
+                                <img src="@message.Content" alt="صورة" />
+                            </div>
+                        }
+                        else if (message.Type == "order")
+                        {
+                            <div class="order-card-message">
+                                <div class="order-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                                        <line x1="3" y1="6" x2="21" y2="6"/>
+                                    </svg>
+                                </div>
+                                <div class="order-info">
+                                    <span class="order-number">طلب #@message.OrderNumber</span>
+                                    <span class="order-status">@message.Content</span>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="message-text">@message.Content</p>
+                        }
+                        <span class="message-time">
+                            @message.Timestamp.ToString("HH:mm")
+                            @if (message.IsFromMe)
+                            {
+                                @if (message.IsRead)
+                                {
+                                    <svg class="read-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2">
+                                        <polyline points="20,6 9,17 4,12"/>
+                                        <polyline points="17,6 6,17"/>
+                                    </svg>
+                                }
+                                else if (message.IsDelivered)
+                                {
+                                    <svg class="delivered-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="20,6 9,17 4,12"/>
+                                        <polyline points="17,6 6,17"/>
+                                    </svg>
+                                }
+                                else
+                                {
+                                    <svg class="sent-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="20,6 9,17 4,12"/>
+                                    </svg>
+                                }
+                            }
+                        </span>
+                    </div>
+                </div>
+            }
+
+            @if (IsTyping)
+            {
+                <div class="message received">
+                    <div class="message-avatar">
+                        <span class="avatar-initials small">@GetInitials(ChatPartner?.Name ?? "د")</span>
+                    </div>
+                    <div class="message-content typing">
+                        <div class="typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <!-- Quick Replies -->
+    @if (ShowQuickReplies && QuickReplies.Any())
+    {
+        <div class="quick-replies">
+            @foreach (var reply in QuickReplies)
+            {
+                <button class="quick-reply-btn" @onclick="() => SendQuickReply(reply)">
+                    @reply
+                </button>
+            }
+        </div>
+    }
+
+    <!-- Message Input -->
+    <div class="chat-input-container">
+        <button class="btn-attach">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+            </svg>
+        </button>
+        <div class="input-wrapper">
+            <input type="text"
+                   @bind="NewMessage"
+                   @bind:event="oninput"
+                   @onkeydown="OnKeyDown"
+                   placeholder="اكتب رسالتك..." />
+        </div>
+        @if (!string.IsNullOrWhiteSpace(NewMessage))
+        {
+            <button class="btn-send" @onclick="SendMessage">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22,2 15,22 11,13 2,9"/>
+                </svg>
+            </button>
+        }
+        else
+        {
+            <button class="btn-voice">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
+                    <path d="M19 10v2a7 7 0 01-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="23"/>
+                    <line x1="8" y1="23" x2="16" y2="23"/>
+                </svg>
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string? ChatId { get; set; }
+
+    private ElementReference messagesContainer;
+    private List<ChatMessage> Messages = new();
+    private ChatPartner? ChatPartner;
+    private string NewMessage = "";
+    private bool IsLoading = true;
+    private bool IsTyping = false;
+    private bool ShowQuickReplies = true;
+
+    private List<string> QuickReplies = new()
+    {
+        "مرحبا",
+        "أين طلبي؟",
+        "أحتاج مساعدة",
+        "شكراً"
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadChat();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender || Messages.Any())
+        {
+            await ScrollToBottom();
+        }
+    }
+
+    private async Task LoadChat()
+    {
+        IsLoading = true;
+        await Task.Delay(500);
+
+        // Simulated chat partner
+        ChatPartner = new ChatPartner
+        {
+            Id = ChatId ?? "support",
+            Name = ChatId == "support" ? "الدعم الفني" : "خدمة العملاء",
+            IsOnline = true,
+            LastSeen = "الآن"
+        };
+
+        // Simulated messages
+        Messages = new List<ChatMessage>
+        {
+            new ChatMessage
+            {
+                Id = "1",
+                Content = "مرحباً بك في خدمة دعم اوردر! كيف يمكنني مساعدتك؟",
+                IsFromMe = false,
+                Timestamp = DateTime.Now.AddMinutes(-30),
+                IsRead = true
+            },
+            new ChatMessage
+            {
+                Id = "2",
+                Content = "أهلاً، أريد الاستفسار عن طلبي",
+                IsFromMe = true,
+                Timestamp = DateTime.Now.AddMinutes(-28),
+                IsDelivered = true,
+                IsRead = true
+            },
+            new ChatMessage
+            {
+                Id = "3",
+                Content = "طبعاً! هل يمكنك إعطائي رقم الطلب؟",
+                IsFromMe = false,
+                Timestamp = DateTime.Now.AddMinutes(-25),
+                IsRead = true
+            }
+        };
+
+        IsLoading = false;
+    }
+
+    private async Task SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(NewMessage)) return;
+
+        var message = new ChatMessage
+        {
+            Id = Guid.NewGuid().ToString(),
+            Content = NewMessage,
+            IsFromMe = true,
+            Timestamp = DateTime.Now,
+            IsDelivered = false,
+            IsRead = false
+        };
+
+        Messages.Add(message);
+        NewMessage = "";
+        ShowQuickReplies = false;
+
+        await ScrollToBottom();
+
+        // Simulate delivery
+        await Task.Delay(500);
+        message.IsDelivered = true;
+        StateHasChanged();
+
+        // Simulate typing response
+        await Task.Delay(1000);
+        IsTyping = true;
+        StateHasChanged();
+        await ScrollToBottom();
+
+        // Simulate response
+        await Task.Delay(2000);
+        IsTyping = false;
+
+        var response = new ChatMessage
+        {
+            Id = Guid.NewGuid().ToString(),
+            Content = GetAutoResponse(message.Content),
+            IsFromMe = false,
+            Timestamp = DateTime.Now,
+            IsRead = true
+        };
+
+        Messages.Add(response);
+        message.IsRead = true;
+        StateHasChanged();
+        await ScrollToBottom();
+    }
+
+    private string GetAutoResponse(string message)
+    {
+        if (message.Contains("طلب") || message.Contains("أين"))
+            return "سأتحقق من حالة طلبك الآن. هل يمكنك إعطائي رقم الطلب؟";
+        if (message.Contains("شكر"))
+            return "عفواً! سعيد بخدمتك. هل هناك أي شيء آخر يمكنني مساعدتك به؟";
+        if (message.Contains("مساعدة"))
+            return "بالتأكيد! أنا هنا للمساعدة. ما الذي تحتاجه؟";
+        return "شكراً لتواصلك معنا. كيف يمكنني مساعدتك؟";
+    }
+
+    private async Task SendQuickReply(string reply)
+    {
+        NewMessage = reply;
+        await SendMessage();
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {
+            await SendMessage();
+        }
+    }
+
+    private async Task ScrollToBottom()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("eval", "document.querySelector('.chat-messages')?.scrollTo({ top: document.querySelector('.chat-messages')?.scrollHeight, behavior: 'smooth' })");
+        }
+        catch { }
+    }
+
+    private string GetInitials(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return "?";
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2)
+            return $"{parts[0][0]}{parts[1][0]}";
+        return name[0].ToString();
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/profile");
+    }
+}
+
+public class ChatMessage
+{
+    public string Id { get; set; } = "";
+    public string Content { get; set; } = "";
+    public string Type { get; set; } = "text"; // text, image, order
+    public string? OrderNumber { get; set; }
+    public bool IsFromMe { get; set; }
+    public DateTime Timestamp { get; set; }
+    public bool IsDelivered { get; set; }
+    public bool IsRead { get; set; }
+}
+
+public class ChatPartner
+{
+    public string Id { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string? Avatar { get; set; }
+    public bool IsOnline { get; set; }
+    public string? LastSeen { get; set; }
+}
+
+<style>
+    .chat-page {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background: #F0F2F5;
+    }
+
+    .chat-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        background: white;
+        border-bottom: 1px solid #E2E8F0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .btn-back, .btn-menu {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: transparent;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748B;
+        cursor: pointer;
+    }
+
+    .btn-back:active, .btn-menu:active {
+        background: #F1F5F9;
+    }
+
+    .chat-info {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .chat-avatar {
+        position: relative;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .chat-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-initials {
+        color: white;
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .avatar-initials.small {
+        font-size: 12px;
+    }
+
+    .online-dot {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        width: 12px;
+        height: 12px;
+        background: #22C55E;
+        border: 2px solid white;
+        border-radius: 50%;
+    }
+
+    .chat-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-details h1 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1E293B;
+        margin: 0;
+    }
+
+    .chat-status {
+        font-size: 12px;
+        color: #64748B;
+    }
+
+    .typing-indicator {
+        color: #22C55E;
+    }
+
+    .online-status {
+        color: #22C55E;
+    }
+
+    /* Messages Container */
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .loading-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+    .loader {
+        width: 32px;
+        height: 32px;
+        border: 3px solid #E2E8F0;
+        border-top-color: #F97316;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .date-separator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px 0;
+    }
+
+    .date-separator span {
+        background: rgba(0,0,0,0.1);
+        color: #64748B;
+        font-size: 12px;
+        padding: 4px 12px;
+        border-radius: 8px;
+    }
+
+    /* Message Bubbles */
+    .message {
+        display: flex;
+        gap: 8px;
+        max-width: 85%;
+    }
+
+    .message.sent {
+        align-self: flex-start;
+        flex-direction: row-reverse;
+    }
+
+    .message.received {
+        align-self: flex-end;
+    }
+
+    .message-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #94A3B8 0%, #64748B 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        align-self: flex-end;
+    }
+
+    .message-content {
+        padding: 10px 14px;
+        border-radius: 18px;
+        position: relative;
+    }
+
+    .message.sent .message-content {
+        background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+        border-bottom-left-radius: 6px;
+    }
+
+    .message.received .message-content {
+        background: white;
+        border-bottom-right-radius: 6px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .message-text {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.4;
+        word-wrap: break-word;
+    }
+
+    .message.sent .message-text {
+        color: white;
+    }
+
+    .message.received .message-text {
+        color: #1E293B;
+    }
+
+    .message-time {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        margin-top: 4px;
+    }
+
+    .message.sent .message-time {
+        color: rgba(255,255,255,0.7);
+        justify-content: flex-end;
+    }
+
+    .message.received .message-time {
+        color: #94A3B8;
+    }
+
+    /* Typing Indicator */
+    .message-content.typing {
+        padding: 14px 18px;
+    }
+
+    .typing-dots {
+        display: flex;
+        gap: 4px;
+    }
+
+    .typing-dots span {
+        width: 8px;
+        height: 8px;
+        background: #94A3B8;
+        border-radius: 50%;
+        animation: typing 1.4s infinite;
+    }
+
+    .typing-dots span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .typing-dots span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @@keyframes typing {
+        0%, 60%, 100% {
+            transform: translateY(0);
+            opacity: 0.4;
+        }
+        30% {
+            transform: translateY(-4px);
+            opacity: 1;
+        }
+    }
+
+    /* Quick Replies */
+    .quick-replies {
+        display: flex;
+        gap: 8px;
+        padding: 12px 16px;
+        overflow-x: auto;
+        background: white;
+        border-top: 1px solid #E2E8F0;
+    }
+
+    .quick-reply-btn {
+        flex-shrink: 0;
+        padding: 8px 16px;
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 20px;
+        font-size: 14px;
+        color: #1E293B;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .quick-reply-btn:active {
+        background: #F97316;
+        border-color: #F97316;
+        color: white;
+    }
+
+    /* Input Container */
+    .chat-input-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px 24px;
+        background: white;
+        border-top: 1px solid #E2E8F0;
+    }
+
+    .btn-attach, .btn-voice, .btn-send {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-attach {
+        background: transparent;
+        color: #64748B;
+    }
+
+    .btn-voice {
+        background: transparent;
+        color: #64748B;
+    }
+
+    .btn-send {
+        background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+    }
+
+    .btn-send svg {
+        transform: rotate(180deg);
+    }
+
+    .input-wrapper {
+        flex: 1;
+    }
+
+    .input-wrapper input {
+        width: 100%;
+        padding: 12px 16px;
+        background: #F1F5F9;
+        border: none;
+        border-radius: 24px;
+        font-size: 15px;
+        color: #1E293B;
+        outline: none;
+    }
+
+    .input-wrapper input::placeholder {
+        color: #94A3B8;
+    }
+
+    .input-wrapper input:focus {
+        background: #E2E8F0;
+    }
+
+    /* Order Card in Message */
+    .order-card-message {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: rgba(0,0,0,0.05);
+        border-radius: 12px;
+        margin-bottom: 4px;
+    }
+
+    .order-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #F97316;
+    }
+
+    .order-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .order-number {
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .order-status {
+        font-size: 12px;
+        opacity: 0.8;
+    }
+</style>

@@ -1,0 +1,535 @@
+@page "/notifications"
+@inject OrderApiService ApiService
+@inject NavigationManager Navigation
+
+<div class="notifications-page">
+    <header class="notifications-header">
+        <button class="btn-back" @onclick="GoBack">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18l6-6-6-6"/>
+            </svg>
+        </button>
+        <h1>الإشعارات</h1>
+        @if (Notifications.Any(n => !n.IsRead))
+        {
+            <button class="btn-mark-all" @onclick="MarkAllAsRead">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9,11 12,14 22,4"/>
+                    <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                </svg>
+            </button>
+        }
+        else
+        {
+            <div class="header-spacer"></div>
+        }
+    </header>
+
+    <div class="notifications-content">
+        @if (IsLoading)
+        {
+            <div class="loading-skeleton">
+                @for (int i = 0; i < 5; i++)
+                {
+                    <div class="skeleton-item">
+                        <div class="skeleton-icon"></div>
+                        <div class="skeleton-text">
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line short"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else if (!Notifications.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 01-3.46 0"/>
+                    </svg>
+                </div>
+                <h2>لا توجد إشعارات</h2>
+                <p>ستظهر هنا الإشعارات عند وجود تحديثات على طلباتك</p>
+            </div>
+        }
+        else
+        {
+            <div class="notifications-list">
+                @{
+                    var today = Notifications.Where(n => n.CreatedAt.Date == DateTime.Today).ToList();
+                    var yesterday = Notifications.Where(n => n.CreatedAt.Date == DateTime.Today.AddDays(-1)).ToList();
+                    var older = Notifications.Where(n => n.CreatedAt.Date < DateTime.Today.AddDays(-1)).ToList();
+                }
+
+                @if (today.Any())
+                {
+                    <div class="notification-group">
+                        <h3 class="group-title">اليوم</h3>
+                        @foreach (var notification in today)
+                        {
+                            <div class="notification-item @(!notification.IsRead ? "unread" : "")"
+                                 @onclick="() => HandleNotificationClick(notification)">
+                                <div class="notification-icon @notification.Type">
+                                    @GetNotificationIcon(notification.Type)
+                                </div>
+                                <div class="notification-content">
+                                    <p class="notification-title">@notification.Title</p>
+                                    <p class="notification-body">@notification.Body</p>
+                                    <span class="notification-time">@GetTimeAgo(notification.CreatedAt)</span>
+                                </div>
+                                @if (!notification.IsRead)
+                                {
+                                    <span class="unread-dot"></span>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+
+                @if (yesterday.Any())
+                {
+                    <div class="notification-group">
+                        <h3 class="group-title">أمس</h3>
+                        @foreach (var notification in yesterday)
+                        {
+                            <div class="notification-item @(!notification.IsRead ? "unread" : "")"
+                                 @onclick="() => HandleNotificationClick(notification)">
+                                <div class="notification-icon @notification.Type">
+                                    @GetNotificationIcon(notification.Type)
+                                </div>
+                                <div class="notification-content">
+                                    <p class="notification-title">@notification.Title</p>
+                                    <p class="notification-body">@notification.Body</p>
+                                    <span class="notification-time">@notification.CreatedAt.ToString("HH:mm")</span>
+                                </div>
+                                @if (!notification.IsRead)
+                                {
+                                    <span class="unread-dot"></span>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+
+                @if (older.Any())
+                {
+                    <div class="notification-group">
+                        <h3 class="group-title">سابقاً</h3>
+                        @foreach (var notification in older)
+                        {
+                            <div class="notification-item @(!notification.IsRead ? "unread" : "")"
+                                 @onclick="() => HandleNotificationClick(notification)">
+                                <div class="notification-icon @notification.Type">
+                                    @GetNotificationIcon(notification.Type)
+                                </div>
+                                <div class="notification-content">
+                                    <p class="notification-title">@notification.Title</p>
+                                    <p class="notification-body">@notification.Body</p>
+                                    <span class="notification-time">@notification.CreatedAt.ToString("dd/MM")</span>
+                                </div>
+                                @if (!notification.IsRead)
+                                {
+                                    <span class="unread-dot"></span>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<NotificationItem> Notifications = new();
+    private bool IsLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadNotifications();
+    }
+
+    private async Task LoadNotifications()
+    {
+        IsLoading = true;
+        await Task.Delay(500);
+
+        // Simulated notifications
+        Notifications = new List<NotificationItem>
+        {
+            new NotificationItem
+            {
+                Id = "1",
+                Type = "order_ready",
+                Title = "طلبك جاهز!",
+                Body = "طلبك رقم #ORD-123456 جاهز للاستلام من كوفي شوب",
+                OrderId = "order-1",
+                CreatedAt = DateTime.Now.AddMinutes(-15),
+                IsRead = false
+            },
+            new NotificationItem
+            {
+                Id = "2",
+                Type = "order_accepted",
+                Title = "تم قبول طلبك",
+                Body = "بدأ تحضير طلبك في مطعم البيك",
+                OrderId = "order-2",
+                CreatedAt = DateTime.Now.AddHours(-2),
+                IsRead = false
+            },
+            new NotificationItem
+            {
+                Id = "3",
+                Type = "promo",
+                Title = "عرض خاص!",
+                Body = "احصل على خصم 20% على طلبك القادم باستخدام كود SAVE20",
+                CreatedAt = DateTime.Now.AddDays(-1),
+                IsRead = true
+            },
+            new NotificationItem
+            {
+                Id = "4",
+                Type = "order_delivered",
+                Title = "تم التسليم",
+                Body = "تم تسليم طلبك بنجاح. شكراً لاستخدامك اوردر!",
+                OrderId = "order-3",
+                CreatedAt = DateTime.Now.AddDays(-2),
+                IsRead = true
+            },
+            new NotificationItem
+            {
+                Id = "5",
+                Type = "info",
+                Title = "تحديث التطبيق",
+                Body = "إصدار جديد متوفر مع ميزات محسنة",
+                CreatedAt = DateTime.Now.AddDays(-3),
+                IsRead = true
+            }
+        };
+
+        IsLoading = false;
+    }
+
+    private void HandleNotificationClick(NotificationItem notification)
+    {
+        notification.IsRead = true;
+
+        if (!string.IsNullOrEmpty(notification.OrderId))
+        {
+            Navigation.NavigateTo($"/order/{notification.OrderId}");
+        }
+    }
+
+    private void MarkAllAsRead()
+    {
+        foreach (var notification in Notifications)
+        {
+            notification.IsRead = true;
+        }
+    }
+
+    private RenderFragment GetNotificationIcon(string type) => type switch
+    {
+        "order_ready" => @<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                             <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                             <polyline points="22,4 12,14.01 9,11.01"/>
+                         </svg>,
+        "order_accepted" => @<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>,
+        "order_delivered" => @<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                 <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                                 <polyline points="22,4 12,14.01 9,11.01"/>
+                             </svg>,
+        "promo" => @<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                       <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                       <path d="M2 17l10 5 10-5"/>
+                       <path d="M2 12l10 5 10-5"/>
+                   </svg>,
+        _ => @<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                 <circle cx="12" cy="12" r="10"/>
+                 <line x1="12" y1="16" x2="12" y2="12"/>
+                 <line x1="12" y1="8" x2="12.01" y2="8"/>
+             </svg>
+    };
+
+    private string GetTimeAgo(DateTime time)
+    {
+        var diff = DateTime.Now - time;
+        if (diff.TotalMinutes < 1) return "الآن";
+        if (diff.TotalMinutes < 60) return $"منذ {(int)diff.TotalMinutes} دقيقة";
+        if (diff.TotalHours < 24) return $"منذ {(int)diff.TotalHours} ساعة";
+        return time.ToString("HH:mm");
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/");
+    }
+}
+
+public class NotificationItem
+{
+    public string Id { get; set; } = "";
+    public string Type { get; set; } = "info";
+    public string Title { get; set; } = "";
+    public string Body { get; set; } = "";
+    public string? OrderId { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public bool IsRead { get; set; }
+}
+
+<style>
+    .notifications-page {
+        min-height: 100vh;
+        background: linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%);
+        padding-bottom: 100px;
+    }
+
+    .notifications-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        background: white;
+        border-bottom: 1px solid #E2E8F0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .notifications-header h1 {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+        color: #1E293B;
+    }
+
+    .btn-back {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: #F1F5F9;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748B;
+        cursor: pointer;
+    }
+
+    .btn-mark-all {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: #FFF7ED;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #F97316;
+        cursor: pointer;
+    }
+
+    .header-spacer {
+        width: 40px;
+    }
+
+    .notifications-content {
+        padding: 16px;
+    }
+
+    /* Loading Skeleton */
+    .loading-skeleton {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .skeleton-item {
+        display: flex;
+        gap: 14px;
+        padding: 16px;
+        background: white;
+        border-radius: 14px;
+    }
+
+    .skeleton-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+    }
+
+    .skeleton-text {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .skeleton-line {
+        height: 14px;
+        background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 4px;
+    }
+
+    .skeleton-line.short {
+        width: 60%;
+    }
+
+    @@keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    /* Empty State */
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 40px;
+        text-align: center;
+    }
+
+    .empty-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        color: #94A3B8;
+    }
+
+    .empty-state h2 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1E293B;
+        margin: 0 0 8px;
+    }
+
+    .empty-state p {
+        font-size: 14px;
+        color: #64748B;
+        margin: 0;
+        max-width: 260px;
+    }
+
+    /* Notification Groups */
+    .notification-group {
+        margin-bottom: 24px;
+    }
+
+    .group-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748B;
+        margin: 0 0 12px;
+        padding-right: 4px;
+    }
+
+    /* Notification Item */
+    .notification-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 16px;
+        background: white;
+        border-radius: 14px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+    }
+
+    .notification-item:active {
+        transform: scale(0.98);
+    }
+
+    .notification-item.unread {
+        background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+    }
+
+    .notification-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .notification-icon.order_ready {
+        background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+        color: #059669;
+    }
+
+    .notification-icon.order_accepted {
+        background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%);
+        color: #2563EB;
+    }
+
+    .notification-icon.order_delivered {
+        background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+        color: #059669;
+    }
+
+    .notification-icon.promo {
+        background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+        color: #D97706;
+    }
+
+    .notification-icon.info {
+        background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
+        color: #4F46E5;
+    }
+
+    .notification-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .notification-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1E293B;
+        margin: 0 0 4px;
+    }
+
+    .notification-body {
+        font-size: 13px;
+        color: #64748B;
+        margin: 0 0 6px;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .notification-time {
+        font-size: 12px;
+        color: #94A3B8;
+    }
+
+    .unread-dot {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        width: 10px;
+        height: 10px;
+        background: #F97316;
+        border-radius: 50%;
+    }
+</style>

@@ -36,6 +36,11 @@ public static class MauiProgram
         // API Service
         builder.Services.AddScoped<OrderApiService>();
 
+        // Local Storage & State Services
+        builder.Services.AddScoped<LocalStorageService>();
+        builder.Services.AddScoped<AuthStateService>();
+        builder.Services.AddScoped<AppSettingsService>();
+
         return builder.Build();
     }
 }
