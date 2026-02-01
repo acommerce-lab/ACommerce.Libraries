@@ -18,8 +18,8 @@
                     <line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
                 <input type="text"
-                       @bind="SearchQuery"
-                       @bind:event="oninput"
+                       value="@SearchQuery"
+                       @oninput="OnSearchInput"
                        @onkeyup="HandleKeyUp"
                        placeholder="ابحث عن عروض أو متاجر..."
                        class="search-input"
@@ -39,7 +39,7 @@
     </header>
 
     <div class="search-content">
-        @if (string.IsNullOrEmpty(SearchQuery))
+        @if (string.IsNullOrEmpty(SearchQuery) || (!IsSearching && !HasSearched))
         {
             <!-- Initial State - Show recent and popular -->
             <div class="search-suggestions">
@@ -189,7 +189,9 @@
 @code {
     private string SearchQuery = "";
     private bool IsSearching = false;
+    private bool HasSearched = false;
     private string ActiveFilter = "all";
+    private System.Timers.Timer? _debounceTimer;
 
     private List<string> RecentSearches = new()
     {
@@ -225,10 +227,39 @@
         _ => SearchResults
     };
 
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        SearchQuery = e.Value?.ToString() ?? "";
+
+        // Reset search state when query changes
+        if (string.IsNullOrWhiteSpace(SearchQuery))
+        {
+            HasSearched = false;
+            SearchResults.Clear();
+            IsSearching = false;
+            _debounceTimer?.Stop();
+            return;
+        }
+
+        // Debounce auto-search
+        _debounceTimer?.Stop();
+        _debounceTimer = new System.Timers.Timer(500);
+        _debounceTimer.Elapsed += async (s, e) =>
+        {
+            _debounceTimer?.Stop();
+            await InvokeAsync(async () =>
+            {
+                await PerformSearch();
+            });
+        };
+        _debounceTimer.Start();
+    }
+
     private async Task HandleKeyUp(KeyboardEventArgs e)
     {
         if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(SearchQuery))
         {
+            _debounceTimer?.Stop();
             await PerformSearch();
         }
     }
@@ -238,6 +269,7 @@
         if (string.IsNullOrWhiteSpace(SearchQuery)) return;
 
         IsSearching = true;
+        HasSearched = true;
         StateHasChanged();
 
         // Add to recent searches
@@ -251,18 +283,30 @@
         }
 
         // Simulate API call
-        await Task.Delay(800);
+        await Task.Delay(600);
 
-        // Mock results
-        SearchResults = new List<SearchResult>
+        // Mock results - filter based on query
+        var query = SearchQuery.ToLower();
+        var allResults = new List<SearchResult>
         {
             new("offer", "عرض القهوة المثلجة", "ستاربكس", "/images/coffee.jpg", 15, 25, 40),
             new("vendor", "ستاربكس", "كافيه • مشروبات", "/images/starbucks.jpg", 0, 0, 0),
             new("offer", "كومبو الفطور", "دانكن", "/images/breakfast.jpg", 25, 35, 29),
             new("offer", "بيتزا مارجريتا", "بيتزا هت", "/images/pizza.jpg", 35, 45, 22),
+            new("offer", "قهوة لاتيه", "كافيه نيرو", "/images/latte.jpg", 18, 22, 18),
+            new("vendor", "بيتزا هت", "مطعم • بيتزا", "/images/pizzahut.jpg", 0, 0, 0),
         };
 
+        // Simple search matching
+        SearchResults = allResults.Where(r =>
+            r.Title.Contains(query) ||
+            r.Subtitle.Contains(query) ||
+            r.Title.Contains(SearchQuery) ||
+            r.Subtitle.Contains(SearchQuery)
+        ).ToList();
+
         IsSearching = false;
+        StateHasChanged();
     }
 
     private void ApplySearch(string query)
@@ -275,6 +319,9 @@
     {
         SearchQuery = "";
         SearchResults.Clear();
+        HasSearched = false;
+        IsSearching = false;
+        _debounceTimer?.Stop();
     }
 
     private void ClearRecentSearches()
