@@ -1,0 +1,763 @@
+@page "/location"
+@page "/location/{OrderId:guid}"
+@inject NavigationManager Navigation
+
+<div class="location-page">
+    <!-- Header -->
+    <header class="page-header">
+        <button class="back-btn" @onclick="GoBack">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+        </button>
+        <h1>@(OrderId.HasValue ? "تحديث موقع السيارة" : "حدد موقعك")</h1>
+        <div class="header-spacer"></div>
+    </header>
+
+    <!-- Map Area (Placeholder) -->
+    <div class="map-container">
+        <div class="map-placeholder">
+            <div class="map-grid"></div>
+
+            <!-- Center Marker -->
+            <div class="center-marker">
+                <div class="marker-pin">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                </div>
+                <div class="marker-shadow"></div>
+            </div>
+
+            <!-- Locate Me Button -->
+            <button class="locate-btn" @onclick="GetCurrentLocation">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="3"/>
+                    <line x1="12" y1="2" x2="12" y2="4"/>
+                    <line x1="12" y1="20" x2="12" y2="22"/>
+                    <line x1="2" y1="12" x2="4" y2="12"/>
+                    <line x1="20" y1="12" x2="22" y2="12"/>
+                </svg>
+            </button>
+
+            <!-- Map Attribution -->
+            <div class="map-attribution">
+                <span>الخريطة ستظهر هنا</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Sheet -->
+    <div class="bottom-sheet @(IsExpanded ? "expanded" : "")">
+        <div class="sheet-handle" @onclick="() => IsExpanded = !IsExpanded">
+            <div class="handle-bar"></div>
+        </div>
+
+        <div class="sheet-content">
+            <!-- Current Location Display -->
+            <div class="current-location">
+                <div class="location-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                </div>
+                <div class="location-details">
+                    <span class="location-label">الموقع المحدد</span>
+                    @if (!string.IsNullOrEmpty(SelectedAddress))
+                    {
+                        <span class="location-address">@SelectedAddress</span>
+                    }
+                    else if (IsLoadingLocation)
+                    {
+                        <span class="location-loading">جاري تحديد الموقع...</span>
+                    }
+                    else
+                    {
+                        <span class="location-placeholder">حرك الخريطة لتحديد الموقع</span>
+                    }
+                </div>
+            </div>
+
+            <!-- Car Details Section (for car delivery) -->
+            @if (OrderId.HasValue || ShowCarDetails)
+            {
+                <div class="car-details-section">
+                    <h3>تفاصيل السيارة</h3>
+                    <p class="section-hint">أدخل معلومات سيارتك ليتمكن الموظف من الوصول إليك</p>
+
+                    <div class="input-group">
+                        <label>لون السيارة</label>
+                        <div class="color-picker">
+                            @foreach (var color in CarColors)
+                            {
+                                <button class="color-option @(SelectedCarColor == color.Name ? "selected" : "")"
+                                        style="--color: @color.Value"
+                                        @onclick="() => SelectedCarColor = color.Name">
+                                    @if (SelectedCarColor == color.Name)
+                                    {
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                                            <polyline points="20 6 9 17 4 12"/>
+                                        </svg>
+                                    }
+                                </button>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>نوع السيارة</label>
+                        <input type="text"
+                               @bind="CarType"
+                               placeholder="مثال: تويوتا كامري"
+                               class="text-input" />
+                    </div>
+
+                    <div class="input-group">
+                        <label>رقم اللوحة (اختياري)</label>
+                        <input type="text"
+                               @bind="PlateNumber"
+                               placeholder="مثال: ABC 1234"
+                               class="text-input ltr" />
+                    </div>
+
+                    <div class="input-group">
+                        <label>ملاحظات إضافية (اختياري)</label>
+                        <textarea @bind="Notes"
+                                  placeholder="مثال: بجانب المدخل الرئيسي"
+                                  class="text-input notes"></textarea>
+                    </div>
+                </div>
+            }
+
+            <!-- Saved Locations -->
+            @if (!OrderId.HasValue && SavedLocations.Any())
+            {
+                <div class="saved-locations">
+                    <h3>المواقع المحفوظة</h3>
+                    <div class="locations-list">
+                        @foreach (var location in SavedLocations)
+                        {
+                            <button class="saved-location-item" @onclick="() => SelectSavedLocation(location)">
+                                <div class="location-type-icon @location.Type">
+                                    @if (location.Type == "home")
+                                    {
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                            <polyline points="9 22 9 12 15 12 15 22"/>
+                                        </svg>
+                                    }
+                                    else if (location.Type == "work")
+                                    {
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                                        </svg>
+                                    }
+                                    else
+                                    {
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                            <circle cx="12" cy="10" r="3"/>
+                                        </svg>
+                                    }
+                                </div>
+                                <div class="location-item-details">
+                                    <span class="location-name">@location.Name</span>
+                                    <span class="location-addr">@location.Address</span>
+                                </div>
+                                <svg class="arrow-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"/>
+                                </svg>
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Confirm Button -->
+        <div class="confirm-section">
+            <button class="confirm-btn @(CanConfirm ? "" : "disabled")"
+                    @onclick="ConfirmLocation"
+                    disabled="@(!CanConfirm)">
+                @if (IsSaving)
+                {
+                    <div class="btn-loader"></div>
+                    <span>جاري الحفظ...</span>
+                }
+                else
+                {
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>@(OrderId.HasValue ? "تحديث الموقع" : "تأكيد الموقع")</span>
+                }
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Guid? OrderId { get; set; }
+
+    private bool IsExpanded = false;
+    private bool IsLoadingLocation = false;
+    private bool IsSaving = false;
+    private bool ShowCarDetails = true;
+
+    private string? SelectedAddress;
+    private string? SelectedCarColor;
+    private string? CarType;
+    private string? PlateNumber;
+    private string? Notes;
+    private double Latitude;
+    private double Longitude;
+
+    private bool CanConfirm => !string.IsNullOrEmpty(SelectedAddress) &&
+                               (!ShowCarDetails || (!string.IsNullOrEmpty(SelectedCarColor) && !string.IsNullOrEmpty(CarType)));
+
+    private List<CarColor> CarColors = new()
+    {
+        new("أبيض", "#FFFFFF"),
+        new("أسود", "#1F2937"),
+        new("رمادي", "#6B7280"),
+        new("فضي", "#9CA3AF"),
+        new("أحمر", "#DC2626"),
+        new("أزرق", "#2563EB"),
+        new("أخضر", "#16A34A"),
+        new("بيج", "#D4A574"),
+    };
+
+    private List<SavedLocation> SavedLocations = new()
+    {
+        new("المنزل", "home", "شارع الملك فهد، حي العليا، الرياض"),
+        new("العمل", "work", "برج المملكة، طريق الملك فهد، الرياض"),
+    };
+
+    protected override void OnInitialized()
+    {
+        // Simulate getting current location
+        SelectedAddress = "شارع الأمير محمد بن عبدالعزيز، حي العليا";
+        Latitude = 24.7136;
+        Longitude = 46.6753;
+    }
+
+    private void GetCurrentLocation()
+    {
+        IsLoadingLocation = true;
+        StateHasChanged();
+
+        // Simulate location fetch
+        Task.Delay(1500).ContinueWith(_ =>
+        {
+            SelectedAddress = "موقعك الحالي - شارع التحلية، حي العليا";
+            Latitude = 24.7136;
+            Longitude = 46.6753;
+            IsLoadingLocation = false;
+            InvokeAsync(StateHasChanged);
+        });
+    }
+
+    private void SelectSavedLocation(SavedLocation location)
+    {
+        SelectedAddress = location.Address;
+        IsExpanded = false;
+    }
+
+    private async Task ConfirmLocation()
+    {
+        if (!CanConfirm) return;
+
+        IsSaving = true;
+        await Task.Delay(1000); // Simulate API call
+
+        if (OrderId.HasValue)
+        {
+            // Update order location
+            Navigation.NavigateTo($"/orders/{OrderId}");
+        }
+        else
+        {
+            // Go back to previous page with location data
+            Navigation.NavigateTo("/");
+        }
+    }
+
+    private void GoBack()
+    {
+        if (OrderId.HasValue)
+        {
+            Navigation.NavigateTo($"/orders/{OrderId}");
+        }
+        else
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
+
+    private record CarColor(string Name, string Value);
+    private record SavedLocation(string Name, string Type, string Address);
+}
+
+<style>
+    .location-page {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: #F3F4F6;
+    }
+
+    /* Header */
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
+        background: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 200;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .back-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        border: none;
+        background: #F3F4F6;
+        color: #374151;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .back-btn:hover {
+        background: #E5E7EB;
+    }
+
+    .page-header h1 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1F2937;
+        margin: 0;
+    }
+
+    .header-spacer {
+        width: 44px;
+    }
+
+    /* Map Container */
+    .map-container {
+        flex: 1;
+        margin-top: 76px;
+        position: relative;
+    }
+
+    .map-placeholder {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, #E0F2FE, #DBEAFE);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .map-grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+        background-size: 40px 40px;
+    }
+
+    /* Center Marker */
+    .center-marker {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -100%);
+        z-index: 10;
+    }
+
+    .marker-pin {
+        color: #F97316;
+        filter: drop-shadow(0 4px 8px rgba(249, 115, 22, 0.4));
+        animation: bounce 2s ease infinite;
+    }
+
+    @@keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+
+    .marker-shadow {
+        width: 20px;
+        height: 6px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 50%;
+        margin: 4px auto 0;
+        animation: shadow-bounce 2s ease infinite;
+    }
+
+    @@keyframes shadow-bounce {
+        0%, 100% { transform: scale(1); opacity: 0.3; }
+        50% { transform: scale(0.8); opacity: 0.2; }
+    }
+
+    /* Locate Button */
+    .locate-btn {
+        position: absolute;
+        bottom: 200px;
+        right: 16px;
+        width: 52px;
+        height: 52px;
+        background: white;
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        color: #2563EB;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        z-index: 10;
+    }
+
+    .locate-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .map-attribution {
+        position: absolute;
+        bottom: 180px;
+        left: 16px;
+        font-size: 12px;
+        color: #6B7280;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+
+    /* Bottom Sheet */
+    .bottom-sheet {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        border-radius: 24px 24px 0 0;
+        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.15);
+        z-index: 100;
+        max-height: 65vh;
+        transition: max-height 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .bottom-sheet.expanded {
+        max-height: 85vh;
+    }
+
+    .sheet-handle {
+        padding: 12px;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+    }
+
+    .handle-bar {
+        width: 40px;
+        height: 4px;
+        background: #D1D5DB;
+        border-radius: 2px;
+    }
+
+    .sheet-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0 20px;
+    }
+
+    /* Current Location */
+    .current-location {
+        display: flex;
+        gap: 14px;
+        padding: 16px;
+        background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
+        border-radius: 16px;
+        margin-bottom: 20px;
+    }
+
+    .location-icon {
+        width: 48px;
+        height: 48px;
+        background: white;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #F97316;
+        flex-shrink: 0;
+    }
+
+    .location-details {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        justify-content: center;
+    }
+
+    .location-label {
+        font-size: 12px;
+        color: #9CA3AF;
+    }
+
+    .location-address {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1F2937;
+    }
+
+    .location-loading,
+    .location-placeholder {
+        font-size: 14px;
+        color: #6B7280;
+    }
+
+    /* Car Details Section */
+    .car-details-section {
+        margin-bottom: 24px;
+    }
+
+    .car-details-section h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1F2937;
+        margin: 0 0 4px;
+    }
+
+    .section-hint {
+        font-size: 13px;
+        color: #6B7280;
+        margin: 0 0 16px;
+    }
+
+    .input-group {
+        margin-bottom: 16px;
+    }
+
+    .input-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+    }
+
+    /* Color Picker */
+    .color-picker {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .color-option {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        border: 3px solid transparent;
+        background: var(--color);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+    }
+
+    .color-option:hover {
+        transform: scale(1.1);
+    }
+
+    .color-option.selected {
+        border-color: #F97316;
+        box-shadow: 0 0 0 2px white, 0 0 0 4px #F97316;
+    }
+
+    /* Text Inputs */
+    .text-input {
+        width: 100%;
+        padding: 14px 16px;
+        border: 2px solid #E5E7EB;
+        border-radius: 14px;
+        font-size: 15px;
+        color: #1F2937;
+        background: #F9FAFB;
+        transition: all 0.2s;
+    }
+
+    .text-input:focus {
+        outline: none;
+        border-color: #F97316;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+    }
+
+    .text-input::placeholder {
+        color: #9CA3AF;
+    }
+
+    .text-input.ltr {
+        direction: ltr;
+        text-align: left;
+    }
+
+    .text-input.notes {
+        min-height: 80px;
+        resize: vertical;
+    }
+
+    /* Saved Locations */
+    .saved-locations {
+        margin-bottom: 20px;
+    }
+
+    .saved-locations h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1F2937;
+        margin: 0 0 12px;
+    }
+
+    .locations-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .saved-location-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px;
+        background: #F9FAFB;
+        border: none;
+        border-radius: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: right;
+        width: 100%;
+    }
+
+    .saved-location-item:hover {
+        background: #F3F4F6;
+    }
+
+    .location-type-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .location-type-icon.home {
+        background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
+        color: #2563EB;
+    }
+
+    .location-type-icon.work {
+        background: linear-gradient(135deg, #E0E7FF, #C7D2FE);
+        color: #4F46E5;
+    }
+
+    .location-type-icon.other {
+        background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
+        color: #059669;
+    }
+
+    .location-item-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .location-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1F2937;
+    }
+
+    .location-addr {
+        font-size: 13px;
+        color: #6B7280;
+    }
+
+    .arrow-icon {
+        color: #D1D5DB;
+    }
+
+    /* Confirm Section */
+    .confirm-section {
+        padding: 16px 20px 24px;
+        background: white;
+        border-top: 1px solid #F3F4F6;
+    }
+
+    .confirm-btn {
+        width: 100%;
+        padding: 16px 24px;
+        background: linear-gradient(135deg, #F97316, #EA580C);
+        color: white;
+        border: none;
+        border-radius: 16px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.2s;
+        box-shadow: 0 8px 24px rgba(249, 115, 22, 0.35);
+    }
+
+    .confirm-btn:hover:not(.disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px rgba(249, 115, 22, 0.4);
+    }
+
+    .confirm-btn.disabled {
+        background: #D1D5DB;
+        box-shadow: none;
+        cursor: not-allowed;
+    }
+
+    .btn-loader {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>

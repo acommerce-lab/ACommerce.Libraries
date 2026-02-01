@@ -3,107 +3,192 @@
 @inject NavigationManager Navigation
 
 <div class="login-page">
-    <div class="login-content">
-        <div class="login-header">
-            <h1 class="app-logo">اوردر</h1>
-            <p class="app-tagline">اكتشف أفضل العروض</p>
+    <!-- Background Decoration -->
+    <div class="bg-decoration">
+        <div class="bg-circle bg-circle-1"></div>
+        <div class="bg-circle bg-circle-2"></div>
+        <div class="bg-circle bg-circle-3"></div>
+    </div>
+
+    <div class="login-container">
+        <!-- Logo Section -->
+        <div class="logo-section">
+            <div class="logo-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 0 1-8 0"/>
+                </svg>
+            </div>
+            <h1 class="logo-text">اوردر</h1>
+            <p class="logo-tagline">اكتشف أفضل العروض اليومية</p>
         </div>
 
-        @if (Step == LoginStep.Phone)
-        {
-            <!-- Step 1: Phone Number -->
-            <div class="login-form">
-                <h2>تسجيل الدخول</h2>
-                <p class="form-desc">أدخل رقم هاتفك لإرسال كود التحقق</p>
-
-                <div class="input-group">
-                    <label>رقم الهاتف</label>
-                    <div class="phone-input">
-                        <span class="country-code">+966</span>
-                        <input type="tel" @bind="PhoneNumber" @bind:event="oninput"
-                               placeholder="5XXXXXXXX" maxlength="9"
-                               disabled="@IsLoading" />
+        <!-- Login Card -->
+        <div class="login-card">
+            @if (Step == LoginStep.Phone)
+            {
+                <!-- Phone Number Step -->
+                <div class="step-content">
+                    <div class="step-header">
+                        <h2>مرحباً بك</h2>
+                        <p>أدخل رقم هاتفك للمتابعة</p>
                     </div>
-                </div>
 
-                @if (!string.IsNullOrEmpty(ErrorMessage))
-                {
-                    <div class="error-message">@ErrorMessage</div>
-                }
-
-                <button class="submit-btn" @onclick="SendCode"
-                        disabled="@(IsLoading || PhoneNumber?.Length < 9)">
-                    @if (IsLoading)
-                    {
-                        <div class="btn-spinner"></div>
-                    }
-                    else
-                    {
-                        <span>إرسال كود التحقق</span>
-                    }
-                </button>
-            </div>
-        }
-        else
-        {
-            <!-- Step 2: Verification Code -->
-            <div class="login-form">
-                <h2>أدخل كود التحقق</h2>
-                <p class="form-desc">تم إرسال الكود إلى @FormattedPhone</p>
-
-                @if (!string.IsNullOrEmpty(DebugCode))
-                {
-                    <div class="debug-code">
-                        🔑 كود التطوير: <strong>@DebugCode</strong>
+                    <div class="input-container">
+                        <label class="input-label">رقم الهاتف</label>
+                        <div class="phone-input-wrapper @(IsFocused ? "focused" : "") @(!string.IsNullOrEmpty(ErrorMessage) ? "error" : "")">
+                            <div class="country-code-box">
+                                <span class="flag">🇸🇦</span>
+                                <span class="code">+966</span>
+                            </div>
+                            <input type="tel"
+                                   @bind="PhoneNumber"
+                                   @bind:event="oninput"
+                                   @onfocus="() => IsFocused = true"
+                                   @onblur="() => IsFocused = false"
+                                   placeholder="5XXXXXXXX"
+                                   maxlength="9"
+                                   disabled="@IsLoading"
+                                   class="phone-input" />
+                        </div>
+                        <p class="input-hint">سنرسل لك رمز التحقق عبر SMS</p>
                     </div>
-                }
 
-                <div class="input-group">
-                    <label>كود التحقق</label>
-                    <div class="code-inputs">
-                        @for (int i = 0; i < 4; i++)
+                    @if (!string.IsNullOrEmpty(ErrorMessage))
+                    {
+                        <div class="error-alert">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span>@ErrorMessage</span>
+                        </div>
+                    }
+
+                    <button class="submit-btn @(IsLoading || PhoneNumber?.Length < 9 ? "disabled" : "")"
+                            @onclick="SendCode"
+                            disabled="@(IsLoading || PhoneNumber?.Length < 9)">
+                        @if (IsLoading)
                         {
-                            var index = i;
-                            <input type="text" maxlength="1" class="code-digit"
-                                   value="@(VerificationCode.Length > index ? VerificationCode[index].ToString() : "")"
-                                   @oninput="e => OnCodeInput(index, e)"
-                                   @onfocus="() => FocusedIndex = index"
-                                   disabled="@IsLoading" />
+                            <div class="btn-loader"></div>
+                            <span>جاري الإرسال...</span>
+                        }
+                        else
+                        {
+                            <span>إرسال رمز التحقق</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <polyline points="12 5 19 12 12 19"/>
+                            </svg>
+                        }
+                    </button>
+                </div>
+            }
+            else
+            {
+                <!-- Verification Code Step -->
+                <div class="step-content">
+                    <button class="back-btn" @onclick="GoBack">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="19" y1="12" x2="5" y2="12"/>
+                            <polyline points="12 19 5 12 12 5"/>
+                        </svg>
+                    </button>
+
+                    <div class="step-header">
+                        <h2>أدخل رمز التحقق</h2>
+                        <p>تم إرسال رمز مكون من 4 أرقام إلى</p>
+                        <p class="phone-display">@FormattedPhone</p>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(DebugCode))
+                    {
+                        <div class="debug-banner">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                            <span>رمز التطوير: <strong>@DebugCode</strong></span>
+                        </div>
+                    }
+
+                    <div class="otp-container">
+                        <div class="otp-inputs">
+                            @for (int i = 0; i < 4; i++)
+                            {
+                                var index = i;
+                                <input type="text"
+                                       maxlength="1"
+                                       inputmode="numeric"
+                                       pattern="[0-9]"
+                                       class="otp-digit @(FocusedIndex == index ? "focused" : "")"
+                                       value="@(VerificationCode.Length > index ? VerificationCode[index].ToString() : "")"
+                                       @oninput="e => OnCodeInput(index, e)"
+                                       @onfocus="() => FocusedIndex = index"
+                                       disabled="@IsLoading" />
+                            }
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(ErrorMessage))
+                    {
+                        <div class="error-alert">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span>@ErrorMessage</span>
+                        </div>
+                    }
+
+                    <button class="submit-btn @(IsLoading || VerificationCode?.Length < 4 ? "disabled" : "")"
+                            @onclick="VerifyCode"
+                            disabled="@(IsLoading || VerificationCode?.Length < 4)">
+                        @if (IsLoading)
+                        {
+                            <div class="btn-loader"></div>
+                            <span>جاري التحقق...</span>
+                        }
+                        else
+                        {
+                            <span>تأكيد</span>
+                        }
+                    </button>
+
+                    <div class="resend-section">
+                        @if (ResendCountdown > 0)
+                        {
+                            <p class="countdown-text">
+                                إعادة الإرسال بعد
+                                <span class="countdown-number">@ResendCountdown</span>
+                                ثانية
+                            </p>
+                        }
+                        else
+                        {
+                            <button class="resend-btn" @onclick="ResendCode">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="23 4 23 10 17 10"/>
+                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                                </svg>
+                                إعادة إرسال الرمز
+                            </button>
                         }
                     </div>
                 </div>
+            }
+        </div>
 
-                @if (!string.IsNullOrEmpty(ErrorMessage))
-                {
-                    <div class="error-message">@ErrorMessage</div>
-                }
-
-                <button class="submit-btn" @onclick="VerifyCode"
-                        disabled="@(IsLoading || VerificationCode?.Length < 4)">
-                    @if (IsLoading)
-                    {
-                        <div class="btn-spinner"></div>
-                    }
-                    else
-                    {
-                        <span>تأكيد</span>
-                    }
-                </button>
-
-                <div class="resend-section">
-                    @if (ResendCountdown > 0)
-                    {
-                        <span class="countdown">إعادة الإرسال بعد @ResendCountdown ثانية</span>
-                    }
-                    else
-                    {
-                        <button class="resend-btn" @onclick="ResendCode">إعادة إرسال الكود</button>
-                    }
-                </div>
-
-                <button class="back-link" @onclick="GoBack">← تغيير رقم الهاتف</button>
-            </div>
-        }
+        <!-- Terms -->
+        <p class="terms-text">
+            بالمتابعة، أنت توافق على
+            <a href="#">شروط الاستخدام</a>
+            و
+            <a href="#">سياسة الخصوصية</a>
+        </p>
     </div>
 </div>
 
@@ -116,10 +201,11 @@
     private string? DebugCode;
     private string? ErrorMessage;
     private bool IsLoading;
+    private bool IsFocused;
     private int FocusedIndex;
     private int ResendCountdown;
 
-    private string FormattedPhone => $"+966{PhoneNumber}";
+    private string FormattedPhone => $"+966 {PhoneNumber}";
 
     private async Task SendCode()
     {
@@ -134,10 +220,10 @@
 
         try
         {
-            var result = await ApiService.SendVerificationCodeAsync(FormattedPhone);
+            var result = await ApiService.SendVerificationCodeAsync($"+966{PhoneNumber}");
             if (result != null)
             {
-                DebugCode = result.DebugCode; // فقط في التطوير
+                DebugCode = result.DebugCode;
                 Step = LoginStep.Code;
                 StartResendCountdown();
             }
@@ -157,7 +243,7 @@
     {
         if (string.IsNullOrWhiteSpace(VerificationCode) || VerificationCode.Length < 4)
         {
-            ErrorMessage = "الرجاء إدخال كود التحقق";
+            ErrorMessage = "الرجاء إدخال رمز التحقق";
             return;
         }
 
@@ -166,17 +252,15 @@
 
         try
         {
-            var result = await ApiService.VerifyCodeAsync(FormattedPhone, VerificationCode);
+            var result = await ApiService.VerifyCodeAsync($"+966{PhoneNumber}", VerificationCode);
             if (result != null)
             {
-                // حفظ الـ Token (في MAUI سنستخدم SecureStorage)
-                // TODO: Save token
                 Navigation.NavigateTo("/");
             }
         }
         catch (Exception ex)
         {
-            ErrorMessage = "الكود غير صحيح، الرجاء المحاولة مرة أخرى";
+            ErrorMessage = "الرمز غير صحيح، الرجاء المحاولة مرة أخرى";
             Console.WriteLine($"Error: {ex.Message}");
         }
         finally
@@ -189,14 +273,12 @@
     {
         var value = e.Value?.ToString() ?? "";
 
-        if (value.Length > 0)
+        if (value.Length > 0 && char.IsDigit(value[0]))
         {
-            // إضافة الرقم
             var chars = VerificationCode.PadRight(4).ToCharArray();
             chars[index] = value[0];
             VerificationCode = new string(chars).TrimEnd();
 
-            // الانتقال للخانة التالية
             if (index < 3)
             {
                 FocusedIndex = index + 1;
@@ -236,204 +318,388 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
-        background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+        padding: 24px;
+        background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 50%, #FED7AA 100%);
+        position: relative;
+        overflow: hidden;
     }
 
-    .login-content {
+    /* Background Decoration */
+    .bg-decoration {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+    }
+
+    .bg-circle {
+        position: absolute;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(249, 115, 22, 0.05));
+    }
+
+    .bg-circle-1 {
+        width: 300px;
+        height: 300px;
+        top: -100px;
+        right: -100px;
+    }
+
+    .bg-circle-2 {
+        width: 200px;
+        height: 200px;
+        bottom: 10%;
+        left: -80px;
+    }
+
+    .bg-circle-3 {
+        width: 150px;
+        height: 150px;
+        bottom: -50px;
+        right: 20%;
+    }
+
+    .login-container {
         width: 100%;
         max-width: 400px;
+        position: relative;
+        z-index: 1;
     }
 
-    .login-header {
+    /* Logo Section */
+    .logo-section {
         text-align: center;
         margin-bottom: 32px;
     }
 
-    .app-logo {
-        font-size: 48px;
-        font-weight: bold;
+    .logo-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #F97316, #EA580C);
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
         color: white;
+        box-shadow: 0 12px 32px rgba(249, 115, 22, 0.4);
+    }
+
+    .logo-text {
+        font-size: 36px;
+        font-weight: 800;
+        color: #1F2937;
+        margin: 0 0 8px;
+    }
+
+    .logo-tagline {
+        font-size: 16px;
+        color: #6B7280;
         margin: 0;
     }
 
-    .app-tagline {
-        color: rgba(255,255,255,0.9);
-        margin: 8px 0 0;
-    }
-
-    .login-form {
+    /* Login Card */
+    .login-card {
         background: white;
-        border-radius: 20px;
+        border-radius: 24px;
         padding: 32px 24px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
     }
 
-    .login-form h2 {
-        font-size: 22px;
+    .step-content {
+        position: relative;
+    }
+
+    .back-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        border: none;
+        background: #F3F4F6;
+        color: #6B7280;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .back-btn:hover {
+        background: #E5E7EB;
+        color: #374151;
+    }
+
+    .step-header {
+        text-align: center;
+        margin-bottom: 28px;
+    }
+
+    .step-header h2 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1F2937;
         margin: 0 0 8px;
-        text-align: center;
     }
 
-    .form-desc {
-        color: #666;
-        text-align: center;
-        margin: 0 0 24px;
-        font-size: 14px;
+    .step-header p {
+        font-size: 15px;
+        color: #6B7280;
+        margin: 0;
     }
 
-    .input-group {
-        margin-bottom: 20px;
+    .phone-display {
+        font-size: 18px !important;
+        font-weight: 600;
+        color: #1F2937 !important;
+        direction: ltr;
+        margin-top: 8px !important;
     }
 
-    .input-group label {
+    /* Input Container */
+    .input-container {
+        margin-bottom: 24px;
+    }
+
+    .input-label {
         display: block;
         font-size: 14px;
-        font-weight: 500;
+        font-weight: 600;
+        color: #374151;
         margin-bottom: 8px;
-        color: #333;
+    }
+
+    .phone-input-wrapper {
+        display: flex;
+        border: 2px solid #E5E7EB;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.2s;
+        background: #F9FAFB;
+    }
+
+    .phone-input-wrapper.focused {
+        border-color: #F97316;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+    }
+
+    .phone-input-wrapper.error {
+        border-color: #EF4444;
+    }
+
+    .country-code-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 16px;
+        background: #F3F4F6;
+        border-left: 1px solid #E5E7EB;
+    }
+
+    .flag {
+        font-size: 20px;
+    }
+
+    .code {
+        font-size: 15px;
+        font-weight: 600;
+        color: #374151;
     }
 
     .phone-input {
-        display: flex;
-        border: 2px solid #eee;
-        border-radius: 12px;
-        overflow: hidden;
-        transition: border-color 0.2s;
-    }
-
-    .phone-input:focus-within {
-        border-color: #FF6B35;
-    }
-
-    .country-code {
-        background: #f5f5f5;
-        padding: 14px 16px;
-        color: #333;
-        font-weight: 500;
-    }
-
-    .phone-input input {
         flex: 1;
         border: none;
-        padding: 14px;
+        padding: 16px;
         font-size: 18px;
+        font-weight: 500;
         letter-spacing: 2px;
         direction: ltr;
         text-align: left;
+        background: transparent;
     }
 
-    .phone-input input:focus {
+    .phone-input:focus {
         outline: none;
     }
 
-    .code-inputs {
+    .phone-input::placeholder {
+        color: #9CA3AF;
+        letter-spacing: 1px;
+    }
+
+    .input-hint {
+        font-size: 13px;
+        color: #9CA3AF;
+        margin: 8px 0 0;
+    }
+
+    /* OTP Container */
+    .otp-container {
+        margin-bottom: 24px;
+    }
+
+    .otp-inputs {
         display: flex;
         gap: 12px;
         justify-content: center;
         direction: ltr;
     }
 
-    .code-digit {
-        width: 56px;
-        height: 56px;
-        border: 2px solid #eee;
-        border-radius: 12px;
+    .otp-digit {
+        width: 64px;
+        height: 64px;
+        border: 2px solid #E5E7EB;
+        border-radius: 16px;
         text-align: center;
-        font-size: 24px;
-        font-weight: bold;
-        transition: border-color 0.2s;
+        font-size: 28px;
+        font-weight: 700;
+        color: #1F2937;
+        background: #F9FAFB;
+        transition: all 0.2s;
     }
 
-    .code-digit:focus {
+    .otp-digit:focus,
+    .otp-digit.focused {
         outline: none;
-        border-color: #FF6B35;
+        border-color: #F97316;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
     }
 
-    .debug-code {
-        background: #FFF3E0;
-        padding: 12px;
-        border-radius: 8px;
-        text-align: center;
+    /* Debug Banner */
+    .debug-banner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+        padding: 12px 16px;
+        border-radius: 12px;
         margin-bottom: 20px;
         font-size: 14px;
+        color: #92400E;
     }
 
-    .error-message {
-        background: #FFEBEE;
-        color: #C62828;
-        padding: 12px;
-        border-radius: 8px;
-        text-align: center;
-        margin-bottom: 16px;
+    .debug-banner strong {
+        font-size: 18px;
+        letter-spacing: 4px;
+    }
+
+    /* Error Alert */
+    .error-alert {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #FEF2F2;
+        border: 1px solid #FECACA;
+        padding: 12px 16px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        color: #DC2626;
         font-size: 14px;
     }
 
+    /* Submit Button */
     .submit-btn {
         width: 100%;
-        padding: 16px;
-        background: #FF6B35;
+        padding: 16px 24px;
+        background: linear-gradient(135deg, #F97316, #EA580C);
         color: white;
         border: none;
-        border-radius: 12px;
+        border-radius: 16px;
         font-size: 16px;
         font-weight: 600;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
+        gap: 10px;
         transition: all 0.2s;
+        box-shadow: 0 8px 24px rgba(249, 115, 22, 0.35);
     }
 
-    .submit-btn:hover:not(:disabled) {
-        background: #E55A2B;
+    .submit-btn:hover:not(.disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px rgba(249, 115, 22, 0.4);
     }
 
-    .submit-btn:disabled {
-        background: #ccc;
+    .submit-btn.disabled {
+        background: #D1D5DB;
+        box-shadow: none;
         cursor: not-allowed;
     }
 
-    .btn-spinner {
+    .btn-loader {
         width: 20px;
         height: 20px;
-        border: 2px solid rgba(255,255,255,0.3);
+        border: 2px solid rgba(255, 255, 255, 0.3);
         border-top-color: white;
         border-radius: 50%;
-        animation: spin 1s linear infinite;
+        animation: spin 0.8s linear infinite;
     }
 
     @@keyframes spin {
         to { transform: rotate(360deg); }
     }
 
+    /* Resend Section */
     .resend-section {
+        margin-top: 24px;
         text-align: center;
-        margin-top: 20px;
     }
 
-    .countdown {
-        color: #666;
+    .countdown-text {
         font-size: 14px;
+        color: #6B7280;
+        margin: 0;
+    }
+
+    .countdown-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        height: 28px;
+        background: #F3F4F6;
+        border-radius: 8px;
+        font-weight: 700;
+        color: #374151;
+        margin: 0 4px;
     }
 
     .resend-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
         background: none;
         border: none;
-        color: #FF6B35;
-        font-weight: 500;
+        color: #F97316;
+        font-size: 15px;
+        font-weight: 600;
         cursor: pointer;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.2s;
     }
 
-    .back-link {
-        display: block;
-        width: 100%;
+    .resend-btn:hover {
+        background: #FFF7ED;
+    }
+
+    /* Terms */
+    .terms-text {
         text-align: center;
-        margin-top: 16px;
-        background: none;
-        border: none;
-        color: #666;
-        cursor: pointer;
+        font-size: 13px;
+        color: #9CA3AF;
+        margin: 24px 0 0;
+    }
+
+    .terms-text a {
+        color: #F97316;
+        text-decoration: none;
+        font-weight: 500;
     }
 </style>
