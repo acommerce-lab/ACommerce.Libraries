@@ -1,5 +1,6 @@
 @page "/login"
 @inject OrderApiService ApiService
+@inject AuthStateService AuthState
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 
@@ -256,9 +257,30 @@
         try
         {
             var result = await ApiService.VerifyCodeAsync($"+966{PhoneNumber}", VerificationCode);
-            if (result != null)
+            if (result != null && !string.IsNullOrEmpty(result.Token))
             {
-                Navigation.NavigateTo("/");
+                // Save authentication state
+                var userData = new UserData
+                {
+                    Id = result.Profile?.Id.ToString() ?? "",
+                    FullName = result.Profile?.FullName ?? "",
+                    PhoneNumber = result.Profile?.PhoneNumber ?? $"+966{PhoneNumber}",
+                    Email = result.Profile?.Email,
+                    Avatar = result.Profile?.AvatarUrl,
+                    IsNewUser = string.IsNullOrEmpty(result.Profile?.FullName)
+                };
+
+                await AuthState.LoginAsync(result.Token, userData);
+
+                // Navigate to home or profile if new user
+                if (userData.IsNewUser)
+                {
+                    Navigation.NavigateTo("/profile");
+                }
+                else
+                {
+                    Navigation.NavigateTo("/");
+                }
             }
         }
         catch (Exception ex)
