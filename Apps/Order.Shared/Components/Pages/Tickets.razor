@@ -6,7 +6,7 @@
 
 @if (Mode == PageMode.List)
 {
-    <TicketsListPage Tickets="@Tickets"
+    <TicketsListPage Tickets="@TicketsList"
                      IsLoading="@IsLoading"
                      ActiveFilter="@ActiveFilter"
                      OnFilterChange="HandleFilterChange"
@@ -40,7 +40,7 @@ else if (Mode == PageMode.Create)
     private enum PageMode { List, Detail, Create }
     private PageMode Mode = PageMode.List;
 
-    private List<TicketListItem>? Tickets;
+    private List<TicketListItem>? TicketsList;
     private TicketDetail? CurrentTicket;
     private List<OrderSummary>? RecentOrders;
 
@@ -77,7 +77,7 @@ else if (Mode == PageMode.Create)
         try
         {
             var result = await ApiService.GetTicketsAsync();
-            Tickets = result.Select(t => new TicketListItem
+            TicketsList = result.Select(t => new TicketListItem
             {
                 Id = t.Id,
                 Number = t.Number,
@@ -96,7 +96,7 @@ else if (Mode == PageMode.Create)
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading tickets: {ex.Message}");
-            Tickets = new List<TicketListItem>();
+            TicketsList = new List<TicketListItem>();
         }
         finally
         {

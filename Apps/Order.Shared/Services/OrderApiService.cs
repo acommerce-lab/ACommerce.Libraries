@@ -215,25 +215,25 @@ public class OrderApiService
             var result = await GetMyOrdersAsync(page);
             return new OrdersListResponse
             {
-                Items = result?.Orders?.Select(o => new OrderListItemDto
+                Items = result?.Items?.Select(o => new OrderListItemDto
                 {
                     Id = o.Id.ToString(),
                     Number = o.OrderNumber ?? "",
                     Status = o.Status ?? "",
                     Total = o.TotalAmount,
                     CreatedAt = o.CreatedAt,
-                    VendorName = o.VendorName,
-                    VendorLogo = o.VendorLogoUrl,
+                    VendorName = o.Vendor?.Name,
+                    VendorLogo = o.Vendor?.LogoUrl,
                     ItemsCount = o.Items?.Count ?? 0,
-                    FirstItemName = o.Items?.FirstOrDefault()?.Name,
-                    FirstItemImage = o.Items?.FirstOrDefault()?.ImageUrl,
+                    FirstItemName = o.Items?.FirstOrDefault()?.OfferTitle,
+                    FirstItemImage = null,
                     CanReorder = true,
                     CanCancel = o.Status == "pending",
                     CanTrack = o.Status == "out_for_delivery",
                     CanReview = o.Status == "delivered",
                     CanChat = true
                 }).ToList() ?? new List<OrderListItemDto>(),
-                HasMore = (result?.TotalCount ?? 0) > page * 20
+                HasMore = (result?.Total ?? 0) > page * 20
             };
         }
         catch
