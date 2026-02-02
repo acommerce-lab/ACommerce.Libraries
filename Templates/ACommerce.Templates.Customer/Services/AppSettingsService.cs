@@ -1,3 +1,4 @@
+using System.Text.Json;
 using ACommerce.Client.Core.Storage;
 
 namespace ACommerce.Templates.Customer.Services;
@@ -26,10 +27,14 @@ public class AppSettingsService
 
         try
         {
-            var saved = await _storage.GetAsync<AppSettings>(SettingsKey);
-            if (saved != null)
+            var json = await _storage.GetAsync(SettingsKey);
+            if (!string.IsNullOrEmpty(json))
             {
-                Settings = saved;
+                var saved = JsonSerializer.Deserialize<AppSettings>(json);
+                if (saved != null)
+                {
+                    Settings = saved;
+                }
             }
         }
         catch
@@ -81,7 +86,7 @@ public class AppSettingsService
 
     private async Task SaveSettingsAsync()
     {
-        await _storage.SetAsync(SettingsKey, Settings);
+        await _storage.SetAsync(SettingsKey, JsonSerializer.Serialize(Settings));
         NotifySettingsChanged();
     }
 
