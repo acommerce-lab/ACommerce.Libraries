@@ -27,7 +27,7 @@ else
 
     private List<ChatListInfo>? Chats;
     private ChatInfo? CurrentChat;
-    private List<ChatMessageInfo>? Messages;
+    private List<ChatMessageItem>? Messages;
 
     private bool IsLoading = true;
     private bool IsSending;
@@ -91,14 +91,14 @@ else
                 IsVendorOnline = chat.IsVendorOnline
             };
 
-            Messages = chat.Messages.Select(m => new ChatMessageInfo
+            Messages = chat.Messages.Select(m => new ChatMessageItem
             {
-                Id = m.Id,
-                Content = m.Content,
-                SentAt = m.SentAt,
-                IsFromMe = m.IsFromMe,
+                Id = Guid.Parse(m.Id),
+                Text = m.Content,
+                Timestamp = m.SentAt,
+                IsSent = m.IsFromMe,
                 IsRead = m.IsRead,
-                Type = m.Type
+                Type = ChatMessageType.Text
             }).ToList();
         }
         catch (Exception ex)
@@ -127,14 +127,14 @@ else
         try
         {
             await ApiService.SendChatMessageAsync(OrderId!, message);
-            Messages?.Add(new ChatMessageInfo
+            Messages?.Add(new ChatMessageItem
             {
-                Id = Guid.NewGuid().ToString(),
-                Content = message,
-                SentAt = DateTime.Now,
-                IsFromMe = true,
+                Id = Guid.NewGuid(),
+                Text = message,
+                Timestamp = DateTime.Now,
+                IsSent = true,
                 IsRead = false,
-                Type = "text"
+                Type = ChatMessageType.Text
             });
         }
         catch (Exception ex)
