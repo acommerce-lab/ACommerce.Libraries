@@ -2,14 +2,14 @@
 @inject NavigationManager Navigation
 @inject OrderApiService ApiService
 
-<NotificationsPage Notifications="@Notifications"
+<NotificationsPage Notifications="@NotificationsList"
                    IsLoading="@IsLoading"
                    OnNotificationClick="HandleNotificationClick"
                    OnMarkAllRead="HandleMarkAllRead"
                    OnLoadMore="HandleLoadMore" />
 
 @code {
-    private List<NotificationItem>? Notifications;
+    private List<NotificationItem>? NotificationsList;
     private bool IsLoading = true;
     private bool HasMore;
 
@@ -24,7 +24,7 @@
         try
         {
             var result = await ApiService.GetNotificationsAsync();
-            Notifications = result.Select(n => new NotificationItem
+            NotificationsList = result.Select(n => new NotificationItem
             {
                 Id = n.Id,
                 Title = n.Title,
@@ -38,7 +38,7 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading notifications: {ex.Message}");
-            Notifications = new List<NotificationItem>();
+            NotificationsList = new List<NotificationItem>();
         }
         finally
         {
@@ -67,9 +67,9 @@
         try
         {
             await ApiService.MarkAllNotificationsReadAsync();
-            if (Notifications != null)
+            if (NotificationsList != null)
             {
-                foreach (var n in Notifications)
+                foreach (var n in NotificationsList)
                 {
                     n.IsRead = true;
                 }
