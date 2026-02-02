@@ -58,6 +58,13 @@ public class CreateTicketArgs
     public string? LinkedOrderId { get; set; }
 }
 
+public class OrderSummary
+{
+    public string Id { get; set; } = string.Empty;
+    public string Number { get; set; } = string.Empty;
+    public DateTime Date { get; set; }
+}
+
 public class TicketReplyArgs
 {
     public string TicketId { get; set; } = string.Empty;
