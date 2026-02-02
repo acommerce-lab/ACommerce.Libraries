@@ -1,3 +1,4 @@
+using System.Text.Json;
 using ACommerce.Client.Core.Storage;
 
 namespace ACommerce.Templates.Customer.Services;
@@ -29,8 +30,12 @@ public class AuthStateService
 
         try
         {
-            Token = await _storage.GetAsync<string>(TokenKey);
-            CurrentUser = await _storage.GetAsync<UserData>(UserKey);
+            Token = await _storage.GetAsync(TokenKey);
+            var userJson = await _storage.GetAsync(UserKey);
+            if (!string.IsNullOrEmpty(userJson))
+            {
+                CurrentUser = JsonSerializer.Deserialize<UserData>(userJson);
+            }
             IsAuthenticated = !string.IsNullOrEmpty(Token) && CurrentUser != null;
         }
         catch
@@ -51,7 +56,7 @@ public class AuthStateService
         IsAuthenticated = true;
 
         await _storage.SetAsync(TokenKey, token);
-        await _storage.SetAsync(UserKey, user);
+        await _storage.SetAsync(UserKey, JsonSerializer.Serialize(user));
 
         NotifyStateChanged();
     }
@@ -59,7 +64,7 @@ public class AuthStateService
     public async Task UpdateUserAsync(UserData user)
     {
         CurrentUser = user;
-        await _storage.SetAsync(UserKey, user);
+        await _storage.SetAsync(UserKey, JsonSerializer.Serialize(user));
         NotifyStateChanged();
     }
 
