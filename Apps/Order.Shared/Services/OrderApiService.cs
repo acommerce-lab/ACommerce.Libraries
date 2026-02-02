@@ -85,6 +85,14 @@ public class OrderApiService
     }
 
     /// <summary>
+    /// البحث عن العروض
+    /// </summary>
+    public async Task<OffersResponse?> SearchOffersAsync(string query, int page = 1, int pageSize = 20)
+    {
+        return await GetOffersAsync(search: query, page: page, pageSize: pageSize);
+    }
+
+    /// <summary>
     /// الحصول على تفاصيل عرض
     /// </summary>
     public async Task<OfferDto?> GetOfferAsync(Guid id)

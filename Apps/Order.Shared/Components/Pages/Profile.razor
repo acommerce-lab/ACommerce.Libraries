@@ -3,22 +3,190 @@
 @inject AuthStateService AuthState
 @inject OrderApiService ApiService
 
-<ProfilePage User="@UserInfo"
-             OrdersCount="@OrdersCount"
-             WishlistCount="0"
-             ReviewsCount="0"
-             AddressesCount="@AddressesCount"
-             PendingOrdersCount="@PendingOrdersCount"
-             AppVersion="1.0.0"
-             OnAvatarClick="HandleAvatarClick"
-             OnOrdersClick="() => Navigate('/orders')"
-             OnWishlistClick="() => {}"
-             OnReviewsClick="() => {}"
-             OnLogout="HandleLogout" />
+<div class="profile-page">
+    <!-- Profile Header -->
+    <header class="profile-header">
+        <div class="profile-avatar" @onclick="HandleAvatarClick">
+            @if (!string.IsNullOrEmpty(UserInfo?.AvatarUrl))
+            {
+                <img src="@UserInfo.AvatarUrl" alt="@UserInfo.Name" />
+            }
+            else
+            {
+                <span class="avatar-letter">@(UserInfo?.Name?.FirstOrDefault() ?? 'م')</span>
+            }
+            <div class="avatar-edit">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                </svg>
+            </div>
+        </div>
+        <h1 class="profile-name">@(UserInfo?.Name ?? "مرحباً بك")</h1>
+        <p class="profile-email">@(UserInfo?.Email ?? "قم بتسجيل الدخول")</p>
+    </header>
+
+    <!-- Quick Stats -->
+    <div class="profile-stats">
+        <div class="stat-item" @onclick='() => Navigation.NavigateTo("/orders")'>
+            <span class="stat-value">@OrdersCount</span>
+            <span class="stat-label">طلب</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+            <span class="stat-value">@FavoritesCount</span>
+            <span class="stat-label">المفضلة</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+            <span class="stat-value">@ReviewsCount</span>
+            <span class="stat-label">تقييم</span>
+        </div>
+    </div>
+
+    <!-- Menu Sections -->
+    <div class="menu-container">
+        <!-- Account Section -->
+        <section class="menu-section">
+            <h3 class="section-title">الحساب</h3>
+
+            <a href="/profile/edit" class="menu-item">
+                <div class="menu-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                </div>
+                <span class="menu-text">معلومات الحساب</span>
+                <svg class="menu-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </a>
+
+            <a href="/locations" class="menu-item">
+                <div class="menu-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                </div>
+                <span class="menu-text">العناوين المحفوظة</span>
+                @if (AddressesCount > 0)
+                {
+                    <span class="menu-badge">@AddressesCount</span>
+                }
+                <svg class="menu-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </a>
+        </section>
+
+        <!-- Orders Section -->
+        <section class="menu-section">
+            <h3 class="section-title">الطلبات</h3>
+
+            <a href="/orders" class="menu-item">
+                <div class="menu-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                    </svg>
+                </div>
+                <span class="menu-text">طلباتي</span>
+                @if (PendingOrdersCount > 0)
+                {
+                    <span class="menu-badge warning">@PendingOrdersCount</span>
+                }
+                <svg class="menu-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </a>
+
+            <a href="/favorites" class="menu-item">
+                <div class="menu-icon favorite">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                </div>
+                <span class="menu-text">المفضلة</span>
+                <svg class="menu-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </a>
+        </section>
+
+        <!-- Support Section -->
+        <section class="menu-section">
+            <h3 class="section-title">الدعم</h3>
+
+            <a href="/tickets" class="menu-item">
+                <div class="menu-icon support">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/>
+                    </svg>
+                </div>
+                <span class="menu-text">تذاكر الدعم</span>
+                <svg class="menu-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </a>
+
+            <a href="/notifications" class="menu-item">
+                <div class="menu-icon notification">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+                    </svg>
+                </div>
+                <span class="menu-text">الإشعارات</span>
+                <svg class="menu-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </a>
+
+            <a href="/settings" class="menu-item">
+                <div class="menu-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                    </svg>
+                </div>
+                <span class="menu-text">الإعدادات</span>
+                <svg class="menu-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </a>
+        </section>
+
+        <!-- App Info -->
+        <section class="menu-section">
+            <a href="/about" class="menu-item">
+                <div class="menu-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                    </svg>
+                </div>
+                <span class="menu-text">عن التطبيق</span>
+                <span class="menu-value">v1.0.0</span>
+                <svg class="menu-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </a>
+        </section>
+    </div>
+
+    <!-- Logout Button -->
+    <div class="logout-section">
+        <button class="logout-btn" @onclick="HandleLogout">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            <span>تسجيل الخروج</span>
+        </button>
+    </div>
+</div>
 
 @code {
     private UserProfileInfo? UserInfo;
     private int OrdersCount;
+    private int FavoritesCount;
+    private int ReviewsCount;
     private int AddressesCount;
     private int PendingOrdersCount;
 
@@ -41,7 +209,6 @@
                 };
             }
 
-            // Load counts from API
             var stats = await ApiService.GetUserStatsAsync();
             OrdersCount = stats.TotalOrders;
             AddressesCount = stats.SavedAddresses;
@@ -55,13 +222,7 @@
 
     private void HandleAvatarClick()
     {
-        // Open image picker or navigate to edit profile
         Navigation.NavigateTo("/profile/edit");
-    }
-
-    private void Navigate(string url)
-    {
-        Navigation.NavigateTo(url);
     }
 
     private async Task HandleLogout()
@@ -69,4 +230,233 @@
         await AuthState.LogoutAsync();
         Navigation.NavigateTo("/login");
     }
+
+    public class UserProfileInfo
+    {
+        public string? Name { get; set; }
+        public string? Email { get; set; }
+        public string? AvatarUrl { get; set; }
+    }
 }
+
+<style>
+    .profile-page {
+        min-height: 100vh;
+        background: #F8FAFC;
+        padding-bottom: 100px;
+    }
+
+    /* Header */
+    .profile-header {
+        background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+        padding: 40px 20px 30px;
+        text-align: center;
+    }
+
+    .profile-avatar {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: white;
+        margin: 0 auto 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .avatar-letter {
+        font-size: 36px;
+        font-weight: 700;
+        color: #F97316;
+    }
+
+    .avatar-edit {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #F97316;
+        border: 2px solid white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .profile-name {
+        font-size: 22px;
+        font-weight: 700;
+        color: white;
+        margin: 0 0 4px;
+    }
+
+    .profile-email {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.85);
+        margin: 0;
+    }
+
+    /* Stats */
+    .profile-stats {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        margin: -20px 16px 20px;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .stat-item {
+        flex: 1;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    .stat-value {
+        display: block;
+        font-size: 24px;
+        font-weight: 800;
+        color: #1E293B;
+    }
+
+    .stat-label {
+        font-size: 13px;
+        color: #64748B;
+        margin-top: 4px;
+    }
+
+    .stat-divider {
+        width: 1px;
+        height: 40px;
+        background: #E2E8F0;
+    }
+
+    /* Menu */
+    .menu-container {
+        padding: 0 16px;
+    }
+
+    .menu-section {
+        background: white;
+        border-radius: 16px;
+        padding: 4px 0;
+        margin-bottom: 16px;
+        overflow: hidden;
+    }
+
+    .section-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #94A3B8;
+        padding: 12px 16px 8px;
+        margin: 0;
+    }
+
+    .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 16px;
+        text-decoration: none;
+        color: #1E293B;
+        transition: background 0.2s;
+    }
+
+    .menu-item:active {
+        background: #F8FAFC;
+    }
+
+    .menu-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: #F1F5F9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748B;
+    }
+
+    .menu-icon.favorite {
+        background: #FEE2E2;
+        color: #EF4444;
+    }
+
+    .menu-icon.support {
+        background: #DBEAFE;
+        color: #3B82F6;
+    }
+
+    .menu-icon.notification {
+        background: #FEF3C7;
+        color: #F59E0B;
+    }
+
+    .menu-text {
+        flex: 1;
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+    .menu-badge {
+        background: #F1F5F9;
+        color: #64748B;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 12px;
+    }
+
+    .menu-badge.warning {
+        background: #FEF3C7;
+        color: #D97706;
+    }
+
+    .menu-value {
+        font-size: 13px;
+        color: #94A3B8;
+    }
+
+    .menu-arrow {
+        color: #CBD5E1;
+    }
+
+    /* Logout */
+    .logout-section {
+        padding: 16px;
+    }
+
+    .logout-btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 16px;
+        background: white;
+        border: 1.5px solid #FEE2E2;
+        border-radius: 14px;
+        font-size: 15px;
+        font-weight: 600;
+        color: #EF4444;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .logout-btn:active {
+        background: #FEE2E2;
+    }
+</style>
