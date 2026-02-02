@@ -1,4 +1,7 @@
 using Microsoft.Extensions.Logging;
+using ACommerce.Client.Core.Storage;
+using ACommerce.Templates.Customer.Services;
+using com.order.app.Services;
 using Order.Shared.Services;
 
 namespace com.order.app;
@@ -36,10 +39,11 @@ public static class MauiProgram
         // API Service
         builder.Services.AddScoped<OrderApiService>();
 
-        // Local Storage & State Services
-        builder.Services.AddScoped<LocalStorageService>();
-        builder.Services.AddScoped<AuthStateService>();
-        builder.Services.AddScoped<AppSettingsService>();
+        // Storage Service (MAUI SecureStorage + Preferences)
+        builder.Services.AddScoped<IStorageService, MauiStorageService>();
+
+        // Template Services (AuthState, AppSettings, GuestMode)
+        builder.Services.AddACommerceCustomerTemplate();
 
         return builder.Build();
     }
