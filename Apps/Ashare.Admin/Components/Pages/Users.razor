@@ -1,14 +1,17 @@
 @page "/users"
 @inject AdminApiService ApiService
+@inject NavigationManager NavigationManager
 
 <div class="users-page">
     <div class="page-header">
         <div class="search-filters">
             <SfTextBox Placeholder="بحث بالاسم أو البريد..." @bind-Value="SearchTerm" Width="250px" />
-            <SfDropDownList TItem="string" TValue="string" Placeholder="الحالة" Width="150px" 
+            <SfDropDownList TItem="string" TValue="string" Placeholder="الحالة" Width="150px"
                             DataSource="@StatusOptions" @bind-Value="SelectedStatus" />
-            <SfDropDownList TItem="string" TValue="string" Placeholder="الدور" Width="150px" 
+            <SfDropDownList TItem="string" TValue="string" Placeholder="الدور" Width="150px"
                             DataSource="@RoleOptions" @bind-Value="SelectedRole" />
+            <SfDropDownList TItem="string" TValue="string" Placeholder="الباقة" Width="150px"
+                            DataSource="@SubscriptionOptions" @bind-Value="SelectedSubscription" />
             <SfButton CssClass="e-primary" OnClick="SearchUsers">بحث</SfButton>
         </div>
         <SfButton CssClass="e-success" IconCss="e-icons e-plus">إضافة مستخدم</SfButton>
@@ -18,33 +21,89 @@
         <SfGrid DataSource="@UserItems" AllowPaging="true" AllowSorting="true">
             <GridPageSettings PageSize="10" />
             <GridColumns>
-                <GridColumn Field="@nameof(UserDto.Id)" HeaderText="الرقم" Width="80" />
-                <GridColumn Field="@nameof(UserDto.Name)" HeaderText="الاسم" Width="150" />
-                <GridColumn Field="@nameof(UserDto.Email)" HeaderText="البريد الإلكتروني" Width="200" />
-                <GridColumn Field="@nameof(UserDto.Phone)" HeaderText="الهاتف" Width="130" />
-                <GridColumn Field="@nameof(UserDto.Role)" HeaderText="الدور" Width="100">
+                <GridColumn Field="@nameof(UserWithSubscriptionDto.Name)" HeaderText="الاسم" Width="150">
                     <Template>
                         @{
-                            var user = (context as UserDto);
+                            var user = (context as UserWithSubscriptionDto);
+                            <a href="/users/@user?.Id" class="user-link">@user?.Name</a>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(UserWithSubscriptionDto.Email)" HeaderText="البريد" Width="180" />
+                <GridColumn Field="@nameof(UserWithSubscriptionDto.Phone)" HeaderText="الهاتف" Width="120" />
+                <GridColumn Field="@nameof(UserWithSubscriptionDto.Role)" HeaderText="الدور" Width="80">
+                    <Template>
+                        @{
+                            var user = (context as UserWithSubscriptionDto);
                             <span class="role-badge @GetRoleClass(user?.Role)">@user?.Role</span>
                         }
                     </Template>
                 </GridColumn>
-                <GridColumn Field="@nameof(UserDto.Status)" HeaderText="الحالة" Width="100">
+                <GridColumn Field="@nameof(UserWithSubscriptionDto.PlanName)" HeaderText="الباقة" Width="100">
                     <Template>
                         @{
-                            var user = (context as UserDto);
-                            <span class="status-badge @GetStatusClass(user?.Status)">@user?.Status</span>
+                            var user = (context as UserWithSubscriptionDto);
+                            <span class="plan-badge @GetPlanClass(user?.PlanName)">@(user?.PlanName ?? "بدون باقة")</span>
                         }
                     </Template>
                 </GridColumn>
-                <GridColumn Field="@nameof(UserDto.CreatedAt)" HeaderText="تاريخ التسجيل" Width="130" Format="d" />
-                <GridColumn HeaderText="الإجراءات" Width="150">
+                <GridColumn HeaderText="العروض" Width="120">
                     <Template>
                         @{
-                            var user = (context as UserDto);
+                            var user = (context as UserWithSubscriptionDto);
+                            @if (user?.MaxListings > 0 || user?.MaxListings == -1)
+                            {
+                                <div class="listings-info">
+                                    <span class="current">@user?.CurrentListings</span>
+                                    <span class="separator">/</span>
+                                    <span class="max">@(user?.MaxListings == -1 ? "∞" : user?.MaxListings.ToString())</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: @GetProgressWidth(user)%"></div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="no-subscription">-</span>
+                            }
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn HeaderText="المتبقي" Width="80">
+                    <Template>
+                        @{
+                            var user = (context as UserWithSubscriptionDto);
+                            @if (user?.MaxListings > 0)
+                            {
+                                <span class="remaining @GetRemainingClass(user)">@user?.RemainingListings</span>
+                            }
+                            else if (user?.MaxListings == -1)
+                            {
+                                <span class="remaining unlimited">∞</span>
+                            }
+                            else
+                            {
+                                <span class="no-subscription">-</span>
+                            }
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(UserWithSubscriptionDto.SubscriptionStatus)" HeaderText="حالة الاشتراك" Width="100">
+                    <Template>
+                        @{
+                            var user = (context as UserWithSubscriptionDto);
+                            <span class="status-badge @GetSubscriptionStatusClass(user?.SubscriptionStatus)">
+                                @GetSubscriptionStatusText(user?.SubscriptionStatus)
+                            </span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn HeaderText="الإجراءات" Width="130">
+                    <Template>
+                        @{
+                            var user = (context as UserWithSubscriptionDto);
                             <div class="action-buttons">
-                                <SfButton CssClass="e-flat e-primary" IconCss="e-icons e-eye" Title="عرض" />
+                                <SfButton CssClass="e-flat e-primary" IconCss="e-icons e-eye" Title="عرض التفاصيل" OnClick="() => ViewUser(user)" />
                                 <SfButton CssClass="e-flat e-warning" IconCss="e-icons e-edit" Title="تعديل" />
                                 <SfButton CssClass="e-flat e-danger" IconCss="e-icons e-trash" Title="حذف" />
                             </div>
@@ -57,6 +116,16 @@
 </div>
 
 <style>
+    .user-link {
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .user-link:hover {
+        text-decoration: underline;
+    }
+
     .role-badge {
         padding: 4px 10px;
         border-radius: 20px;
@@ -66,7 +135,82 @@
     .role-badge.admin { background: rgba(147, 51, 234, 0.1); color: #9333ea; }
     .role-badge.vendor { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
     .role-badge.customer { background: rgba(100, 116, 139, 0.1); color: #64748b; }
-    
+
+    .plan-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    .plan-badge.basic { background: rgba(100, 116, 139, 0.1); color: #64748b; }
+    .plan-badge.professional { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+    .plan-badge.business { background: rgba(147, 51, 234, 0.1); color: #9333ea; }
+    .plan-badge.enterprise { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    .plan-badge.none { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+    .listings-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .listings-info .current {
+        font-weight: 600;
+        color: #3b82f6;
+    }
+
+    .listings-info .separator {
+        color: #9ca3af;
+        margin: 0 2px;
+    }
+
+    .listings-info .max {
+        color: #6b7280;
+    }
+
+    .progress-bar {
+        width: 60px;
+        height: 4px;
+        background: #e5e7eb;
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: #3b82f6;
+        border-radius: 2px;
+        transition: width 0.3s ease;
+    }
+
+    .remaining {
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 8px;
+    }
+
+    .remaining.high { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .remaining.medium { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    .remaining.low { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+    .remaining.unlimited { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+
+    .no-subscription {
+        color: #9ca3af;
+    }
+
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .status-badge.active { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .status-badge.expired { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+    .status-badge.cancelled { background: rgba(107, 114, 128, 0.1); color: #6b7280; }
+    .status-badge.none { background: rgba(156, 163, 175, 0.1); color: #9ca3af; }
+
     .action-buttons {
         display: flex;
         gap: 4px;
@@ -74,36 +218,86 @@
 </style>
 
 @code {
-    private List<UserDto> UserItems { get; set; } = new();
+    private List<UserWithSubscriptionDto> UserItems { get; set; } = new();
     private string SearchTerm { get; set; } = string.Empty;
     private string SelectedStatus { get; set; } = string.Empty;
     private string SelectedRole { get; set; } = string.Empty;
+    private string SelectedSubscription { get; set; } = string.Empty;
 
     private List<string> StatusOptions = new() { "الكل", "نشط", "معلق", "محظور" };
     private List<string> RoleOptions = new() { "الكل", "عميل", "بائع", "مدير" };
+    private List<string> SubscriptionOptions = new() { "الكل", "بدون باقة", "الأساسية", "الاحترافية", "الأعمال", "المؤسسات" };
 
     protected override async Task OnInitializedAsync()
     {
-        UserItems = await ApiService.GetUsersAsync();
+        UserItems = await ApiService.GetUsersWithSubscriptionsAsync();
     }
 
     private async Task SearchUsers()
     {
-        UserItems = await ApiService.GetUsersAsync();
+        UserItems = await ApiService.GetUsersWithSubscriptionsAsync();
     }
 
-    private string GetStatusClass(string? status) => status switch
+    private void ViewUser(UserWithSubscriptionDto? user)
     {
-        "نشط" => "success",
-        "معلق" => "warning",
-        "محظور" => "danger",
-        _ => "primary"
-    };
+        if (user != null)
+        {
+            NavigationManager.NavigateTo($"/users/{user.Id}");
+        }
+    }
 
     private string GetRoleClass(string? role) => role switch
     {
         "مدير" => "admin",
         "بائع" => "vendor",
         _ => "customer"
+    };
+
+    private string GetPlanClass(string? planName)
+    {
+        if (string.IsNullOrEmpty(planName)) return "none";
+        return planName.ToLower() switch
+        {
+            "الأساسية" => "basic",
+            "الاحترافية" => "professional",
+            "الأعمال" => "business",
+            "المؤسسات" => "enterprise",
+            _ => "basic"
+        };
+    }
+
+    private int GetProgressWidth(UserWithSubscriptionDto? user)
+    {
+        if (user == null || user.MaxListings <= 0) return 0;
+        if (user.MaxListings == -1) return 50; // Unlimited shows half
+        return Math.Min(100, (int)((double)user.CurrentListings / user.MaxListings * 100));
+    }
+
+    private string GetRemainingClass(UserWithSubscriptionDto? user)
+    {
+        if (user == null || user.MaxListings <= 0) return "";
+        var percentage = (double)user.RemainingListings / user.MaxListings * 100;
+        return percentage switch
+        {
+            > 50 => "high",
+            > 20 => "medium",
+            _ => "low"
+        };
+    }
+
+    private string GetSubscriptionStatusClass(string? status) => status?.ToLower() switch
+    {
+        "active" => "active",
+        "expired" => "expired",
+        "cancelled" => "cancelled",
+        _ => "none"
+    };
+
+    private string GetSubscriptionStatusText(string? status) => status?.ToLower() switch
+    {
+        "active" => "نشط",
+        "expired" => "منتهي",
+        "cancelled" => "ملغي",
+        _ => "بدون"
     };
 }

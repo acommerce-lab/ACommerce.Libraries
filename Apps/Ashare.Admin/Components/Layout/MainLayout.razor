@@ -55,6 +55,7 @@
     {
         new() { Title = "لوحة التحكم", Url = "/", Icon = "📊", IsActive = IsCurrentPage("/") },
         new() { Title = "المستخدمين", Url = "/users", Icon = "👥", IsActive = IsCurrentPage("/users") },
+        new() { Title = "الباقات", Url = "/subscriptions", Icon = "💎", IsActive = IsCurrentPage("/subscriptions") },
         new() { Title = "العروض", Url = "/listings", Icon = "🏢", IsActive = IsCurrentPage("/listings"), Badge = 23 },
         new() { Title = "الطلبات", Url = "/orders", Icon = "📦", IsActive = IsCurrentPage("/orders") },
         new() { Title = "الإشعارات", Url = "/notifications", Icon = "🔔", IsActive = IsCurrentPage("/notifications") },
@@ -75,10 +76,16 @@
     private string GetPageTitle()
     {
         var currentPath = new Uri(NavigationManager.Uri).AbsolutePath;
+
+        // Handle user details page
+        if (currentPath.StartsWith("/users/"))
+            return "تفاصيل المستخدم";
+
         return currentPath switch
         {
             "/" => "لوحة التحكم",
             "/users" => "إدارة المستخدمين",
+            "/subscriptions" => "إدارة الباقات",
             "/listings" => "إدارة العروض",
             "/orders" => "إدارة الطلبات",
             "/notifications" => "إرسال الإشعارات",
