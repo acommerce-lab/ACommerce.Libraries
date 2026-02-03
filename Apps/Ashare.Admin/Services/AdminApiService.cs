@@ -402,22 +402,26 @@ public class AdminApiService
     }
 
     // ============================================================================
-    // Subscription Methods
+    // Subscription Methods - Using real API endpoints
     // ============================================================================
 
+    /// <summary>
+    /// Get all subscription plans from the real API
+    /// Endpoint: GET /api/subscriptions/plans
+    /// </summary>
     public async Task<List<SubscriptionPlanDto>> GetSubscriptionPlansAsync()
     {
         try
         {
             await SetAuthHeaderAsync();
-            var response = await _httpClient.GetAsync("/api/admin/subscriptions/plans");
+            var response = await _httpClient.GetAsync("/api/subscriptions/plans");
 
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<List<SubscriptionPlanDto>>();
-                if (result != null)
+                var apiPlans = await response.Content.ReadFromJsonAsync<List<ApiSubscriptionPlanDto>>();
+                if (apiPlans != null)
                 {
-                    return result;
+                    return apiPlans.Select(MapToSubscriptionPlanDto).ToList();
                 }
             }
 
@@ -428,63 +432,180 @@ public class AdminApiService
             _logger.LogError(ex, "Error fetching subscription plans");
         }
 
-        return GetMockSubscriptionPlans();
+        return new List<SubscriptionPlanDto>();
     }
 
+    /// <summary>
+    /// Get users (profiles) with their subscription info
+    /// Endpoint: POST /api/profiles/search
+    /// </summary>
     public async Task<List<UserWithSubscriptionDto>> GetUsersWithSubscriptionsAsync(int page = 1, int pageSize = 20)
     {
         try
         {
             await SetAuthHeaderAsync();
-            var response = await _httpClient.GetAsync($"/api/admin/users/subscriptions?page={page}&pageSize={pageSize}");
+
+            // Search profiles using the standard search endpoint
+            var searchRequest = new ProfileSearchRequest
+            {
+                PageNumber = page,
+                PageSize = pageSize,
+                SortBy = "CreatedAt",
+                SortDescending = true
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("/api/profiles/search", searchRequest);
 
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<UsersWithSubscriptionsResponse>();
+                var result = await response.Content.ReadFromJsonAsync<ApiPagedResult<ApiProfileDto>>();
                 if (result?.Items != null)
                 {
-                    return result.Items;
+                    var users = new List<UserWithSubscriptionDto>();
+
+                    foreach (var profile in result.Items)
+                    {
+                        var user = MapToUserWithSubscriptionDto(profile);
+
+                        // Try to get subscription info for vendor profiles
+                        if (profile.Type == "Vendor" && Guid.TryParse(profile.Id, out var vendorId))
+                        {
+                            try
+                            {
+                                var subResponse = await _httpClient.GetAsync($"/api/subscriptions/vendor/{vendorId}");
+                                if (subResponse.IsSuccessStatusCode)
+                                {
+                                    var subscription = await subResponse.Content.ReadFromJsonAsync<ApiSubscriptionDto>();
+                                    if (subscription != null)
+                                    {
+                                        user.PlanName = subscription.Plan?.Name;
+                                        user.MaxListings = subscription.MaxListings;
+                                        user.CurrentListings = subscription.CurrentListingsCount;
+                                        user.SubscriptionStatus = subscription.Status;
+                                        user.SubscriptionEndDate = subscription.CurrentPeriodEnd;
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning(ex, "Failed to get subscription for vendor {VendorId}", vendorId);
+                            }
+                        }
+
+                        users.Add(user);
+                    }
+
+                    return users;
                 }
             }
 
-            _logger.LogWarning("Failed to fetch users with subscriptions: {StatusCode}", response.StatusCode);
+            _logger.LogWarning("Failed to fetch users: {StatusCode}", response.StatusCode);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error fetching users with subscriptions");
         }
 
-        return GetMockUsersWithSubscriptions();
+        return new List<UserWithSubscriptionDto>();
     }
 
+    /// <summary>
+    /// Get user details with subscription history
+    /// Endpoints: GET /api/profiles/{id}, GET /api/subscriptions/vendor/{vendorId}
+    /// </summary>
     public async Task<UserDetailsDto?> GetUserDetailsAsync(string userId)
     {
         try
         {
             await SetAuthHeaderAsync();
-            var response = await _httpClient.GetAsync($"/api/admin/users/{userId}/details");
 
-            if (response.IsSuccessStatusCode)
+            // Get profile details
+            var profileResponse = await _httpClient.GetAsync($"/api/profiles/{userId}");
+            if (!profileResponse.IsSuccessStatusCode)
             {
-                return await response.Content.ReadFromJsonAsync<UserDetailsDto>();
+                _logger.LogWarning("Failed to fetch profile: {StatusCode}", profileResponse.StatusCode);
+                return null;
             }
 
-            _logger.LogWarning("Failed to fetch user details: {StatusCode}", response.StatusCode);
+            var profile = await profileResponse.Content.ReadFromJsonAsync<ApiProfileDto>();
+            if (profile == null) return null;
+
+            var userDetails = new UserDetailsDto
+            {
+                Id = profile.Id ?? userId,
+                Name = profile.FullName ?? profile.BusinessName ?? "غير معروف",
+                Email = profile.Email ?? "",
+                Phone = profile.PhoneNumber ?? "",
+                Role = profile.Type == "Vendor" ? "بائع" : "عميل",
+                Status = profile.IsActive ? "نشط" : "غير نشط",
+                CreatedAt = profile.CreatedAt
+            };
+
+            // Get subscription info for vendors
+            if (profile.Type == "Vendor" && Guid.TryParse(profile.Id, out var vendorId))
+            {
+                try
+                {
+                    var subResponse = await _httpClient.GetAsync($"/api/subscriptions/vendor/{vendorId}");
+                    if (subResponse.IsSuccessStatusCode)
+                    {
+                        var subscription = await subResponse.Content.ReadFromJsonAsync<ApiSubscriptionDto>();
+                        if (subscription != null)
+                        {
+                            userDetails.CurrentSubscription = new UserSubscriptionDto
+                            {
+                                Id = subscription.Id?.ToString() ?? "",
+                                UserId = userId,
+                                PlanId = subscription.PlanId?.ToString() ?? "",
+                                PlanName = subscription.Plan?.Name ?? "",
+                                MaxListings = subscription.MaxListings,
+                                CurrentListings = subscription.CurrentListingsCount,
+                                Status = subscription.Status ?? "",
+                                StartDate = subscription.StartDate,
+                                EndDate = subscription.CurrentPeriodEnd,
+                                CreatedAt = subscription.StartDate
+                            };
+                        }
+                    }
+
+                    // Get usage stats
+                    var usageResponse = await _httpClient.GetAsync($"/api/subscriptions/vendor/{vendorId}/usage");
+                    if (usageResponse.IsSuccessStatusCode)
+                    {
+                        var usage = await usageResponse.Content.ReadFromJsonAsync<ApiVendorUsageStatsDto>();
+                        if (usage != null && userDetails.CurrentSubscription != null)
+                        {
+                            userDetails.CurrentSubscription.CurrentListings = usage.ListingsUsed;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to get subscription details for vendor {VendorId}", vendorId);
+                }
+            }
+
+            return userDetails;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error fetching user details for {UserId}", userId);
         }
 
-        return GetMockUserDetails(userId);
+        return null;
     }
 
+    /// <summary>
+    /// Create subscription plan
+    /// Endpoint: POST /api/subscriptions/plans (Admin only)
+    /// </summary>
     public async Task<bool> CreateSubscriptionPlanAsync(SubscriptionPlanDto plan)
     {
         try
         {
             await SetAuthHeaderAsync();
-            var response = await _httpClient.PostAsJsonAsync("/api/admin/subscriptions/plans", plan);
+            var createDto = MapToCreateSubscriptionPlanDto(plan);
+            var response = await _httpClient.PostAsJsonAsync("/api/subscriptions/plans", createDto);
             return response.IsSuccessStatusCode;
         }
         catch (Exception ex)
@@ -494,12 +615,17 @@ public class AdminApiService
         }
     }
 
+    /// <summary>
+    /// Update subscription plan
+    /// Endpoint: PUT /api/subscriptions/plans/{planId} (Admin only)
+    /// </summary>
     public async Task<bool> UpdateSubscriptionPlanAsync(string planId, SubscriptionPlanDto plan)
     {
         try
         {
             await SetAuthHeaderAsync();
-            var response = await _httpClient.PutAsJsonAsync($"/api/admin/subscriptions/plans/{planId}", plan);
+            var updateDto = MapToUpdateSubscriptionPlanDto(plan);
+            var response = await _httpClient.PutAsJsonAsync($"/api/subscriptions/plans/{planId}", updateDto);
             return response.IsSuccessStatusCode;
         }
         catch (Exception ex)
@@ -509,12 +635,16 @@ public class AdminApiService
         }
     }
 
+    /// <summary>
+    /// Delete subscription plan
+    /// Endpoint: DELETE /api/subscriptions/plans/{planId} (Admin only)
+    /// </summary>
     public async Task<bool> DeleteSubscriptionPlanAsync(string planId)
     {
         try
         {
             await SetAuthHeaderAsync();
-            var response = await _httpClient.DeleteAsync($"/api/admin/subscriptions/plans/{planId}");
+            var response = await _httpClient.DeleteAsync($"/api/subscriptions/plans/{planId}");
             return response.IsSuccessStatusCode;
         }
         catch (Exception ex)
@@ -524,55 +654,64 @@ public class AdminApiService
         }
     }
 
-    private List<SubscriptionPlanDto> GetMockSubscriptionPlans() => new()
+    // ============================================================================
+    // Mapping Helpers
+    // ============================================================================
+
+    private static SubscriptionPlanDto MapToSubscriptionPlanDto(ApiSubscriptionPlanDto api) => new()
     {
-        new() { Id = "1", Name = "Basic", NameAr = "الأساسية", Description = "باقة للمبتدئين", Price = 0, DurationDays = 365, MaxListings = 1, PlanType = "residential", IsActive = true, SubscribersCount = 150, CreatedAt = DateTime.Now.AddMonths(-6) },
-        new() { Id = "2", Name = "Professional", NameAr = "الاحترافية", Description = "للمستخدمين المحترفين", Price = 299, DurationDays = 30, MaxListings = 5, PlanType = "residential", IsActive = true, SubscribersCount = 85, CreatedAt = DateTime.Now.AddMonths(-6) },
-        new() { Id = "3", Name = "Business", NameAr = "الأعمال", Description = "للشركات والمؤسسات", Price = 999, DurationDays = 30, MaxListings = 20, PlanType = "commercial", IsActive = true, SubscribersCount = 32, CreatedAt = DateTime.Now.AddMonths(-6) },
-        new() { Id = "4", Name = "Enterprise", NameAr = "المؤسسات", Description = "عروض غير محدودة", Price = 2499, DurationDays = 30, MaxListings = -1, PlanType = "all", IsActive = true, SubscribersCount = 12, CreatedAt = DateTime.Now.AddMonths(-6) },
+        Id = api.Id?.ToString() ?? "",
+        Name = api.NameEn ?? api.Name ?? "",
+        NameAr = api.Name ?? "",
+        Description = api.Description,
+        Price = api.MonthlyPrice,
+        DurationDays = 30, // Default to monthly
+        MaxListings = api.MaxListings,
+        PlanType = api.IsDefault ? "default" : "standard",
+        IsActive = true,
+        SubscribersCount = 0, // Would need separate API call
+        CreatedAt = DateTime.UtcNow
     };
 
-    private List<UserWithSubscriptionDto> GetMockUsersWithSubscriptions() => new()
+    private static UserWithSubscriptionDto MapToUserWithSubscriptionDto(ApiProfileDto profile) => new()
     {
-        new() { Id = "1", Name = "أحمد محمد", Email = "ahmed@example.com", Phone = "0501234567", Role = "بائع", Status = "نشط", CreatedAt = DateTime.Now.AddMonths(-3), PlanName = "الاحترافية", MaxListings = 5, CurrentListings = 3, SubscriptionStatus = "active", SubscriptionEndDate = DateTime.Now.AddDays(15) },
-        new() { Id = "2", Name = "سارة العلي", Email = "sara@example.com", Phone = "0559876543", Role = "بائع", Status = "نشط", CreatedAt = DateTime.Now.AddMonths(-2), PlanName = "الأعمال", MaxListings = 20, CurrentListings = 8, SubscriptionStatus = "active", SubscriptionEndDate = DateTime.Now.AddDays(45) },
-        new() { Id = "3", Name = "خالد السعيد", Email = "khaled@example.com", Phone = "0551112233", Role = "بائع", Status = "نشط", CreatedAt = DateTime.Now.AddMonths(-1), PlanName = "الأساسية", MaxListings = 1, CurrentListings = 1, SubscriptionStatus = "active", SubscriptionEndDate = DateTime.Now.AddDays(120) },
-        new() { Id = "4", Name = "نورة الأحمد", Email = "noura@example.com", Phone = "0554443322", Role = "عميل", Status = "نشط", CreatedAt = DateTime.Now.AddMonths(-4), PlanName = null, MaxListings = 0, CurrentListings = 0, SubscriptionStatus = null },
+        Id = profile.Id ?? "",
+        Name = profile.FullName ?? profile.BusinessName ?? "غير معروف",
+        Email = profile.Email ?? "",
+        Phone = profile.PhoneNumber ?? "",
+        Role = profile.Type == "Vendor" ? "بائع" : "عميل",
+        Status = profile.IsActive ? "نشط" : "غير نشط",
+        CreatedAt = profile.CreatedAt
     };
 
-    private UserDetailsDto GetMockUserDetails(string userId) => new()
+    private static object MapToCreateSubscriptionPlanDto(SubscriptionPlanDto plan) => new
     {
-        Id = userId,
-        Name = "أحمد محمد",
-        Email = "ahmed@example.com",
-        Phone = "0501234567",
-        Role = "بائع",
-        Status = "نشط",
-        CreatedAt = DateTime.Now.AddMonths(-3),
-        CurrentSubscription = new UserSubscriptionDto
-        {
-            Id = "sub-1",
-            UserId = userId,
-            PlanId = "2",
-            PlanName = "الاحترافية",
-            MaxListings = 5,
-            CurrentListings = 3,
-            Status = "active",
-            StartDate = DateTime.Now.AddDays(-15),
-            EndDate = DateTime.Now.AddDays(15),
-            CreatedAt = DateTime.Now.AddDays(-15)
-        },
-        SubscriptionHistory = new List<UserSubscriptionDto>
-        {
-            new() { Id = "sub-0", UserId = userId, PlanId = "1", PlanName = "الأساسية", MaxListings = 1, CurrentListings = 1, Status = "expired", StartDate = DateTime.Now.AddMonths(-4), EndDate = DateTime.Now.AddMonths(-3), CreatedAt = DateTime.Now.AddMonths(-4) },
-            new() { Id = "sub-1", UserId = userId, PlanId = "2", PlanName = "الاحترافية", MaxListings = 5, CurrentListings = 3, Status = "active", StartDate = DateTime.Now.AddDays(-15), EndDate = DateTime.Now.AddDays(15), CreatedAt = DateTime.Now.AddDays(-15) }
-        },
-        Listings = new List<ListingDto>
-        {
-            new() { Id = "1", Title = "شقة للإيجار - الرياض", VendorName = "أحمد محمد", Price = 2500m, Status = "نشط", Category = "سكني", CreatedAt = DateTime.Now.AddDays(-10) },
-            new() { Id = "2", Title = "فيلا للبيع - جدة", VendorName = "أحمد محمد", Price = 1500000m, Status = "نشط", Category = "سكني", CreatedAt = DateTime.Now.AddDays(-5) },
-            new() { Id = "3", Title = "مكتب للإيجار", VendorName = "أحمد محمد", Price = 5000m, Status = "معلق", Category = "تجاري", CreatedAt = DateTime.Now.AddDays(-2) },
-        }
+        Name = plan.NameAr,
+        NameEn = plan.Name,
+        Slug = plan.Name.ToLower().Replace(" ", "-"),
+        Description = plan.Description,
+        MonthlyPrice = plan.Price,
+        MaxListings = plan.MaxListings,
+        MaxImagesPerListing = 10,
+        ListingDurationDays = plan.DurationDays,
+        IsDefault = false,
+        IsRecommended = false
+    };
+
+    private static object MapToUpdateSubscriptionPlanDto(SubscriptionPlanDto plan) => new
+    {
+        Id = Guid.Parse(plan.Id),
+        Name = plan.NameAr,
+        NameEn = plan.Name,
+        Slug = plan.Name.ToLower().Replace(" ", "-"),
+        Description = plan.Description,
+        MonthlyPrice = plan.Price,
+        MaxListings = plan.MaxListings,
+        MaxImagesPerListing = 10,
+        ListingDurationDays = plan.DurationDays,
+        IsActive = plan.IsActive,
+        IsDefault = false,
+        IsRecommended = false
     };
 
     private string TranslateOrderStatus(string? status)
@@ -1112,4 +1251,299 @@ public class UsersWithSubscriptionsResponse
 
     [JsonPropertyName("pageSize")]
     public int PageSize { get; set; }
+}
+
+// ============================================================================
+// API Response DTOs - Match real API structure
+// ============================================================================
+
+/// <summary>
+/// DTO matching the real SubscriptionPlanDto from the API
+/// </summary>
+public class ApiSubscriptionPlanDto
+{
+    [JsonPropertyName("id")]
+    public Guid? Id { get; set; }
+
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    [JsonPropertyName("nameEn")]
+    public string? NameEn { get; set; }
+
+    [JsonPropertyName("slug")]
+    public string? Slug { get; set; }
+
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    [JsonPropertyName("descriptionEn")]
+    public string? DescriptionEn { get; set; }
+
+    [JsonPropertyName("icon")]
+    public string? Icon { get; set; }
+
+    [JsonPropertyName("color")]
+    public string? Color { get; set; }
+
+    [JsonPropertyName("sortOrder")]
+    public int SortOrder { get; set; }
+
+    [JsonPropertyName("isDefault")]
+    public bool IsDefault { get; set; }
+
+    [JsonPropertyName("isRecommended")]
+    public bool IsRecommended { get; set; }
+
+    [JsonPropertyName("monthlyPrice")]
+    public decimal MonthlyPrice { get; set; }
+
+    [JsonPropertyName("quarterlyPrice")]
+    public decimal? QuarterlyPrice { get; set; }
+
+    [JsonPropertyName("semiAnnualPrice")]
+    public decimal? SemiAnnualPrice { get; set; }
+
+    [JsonPropertyName("annualPrice")]
+    public decimal? AnnualPrice { get; set; }
+
+    [JsonPropertyName("currency")]
+    public string Currency { get; set; } = "SAR";
+
+    [JsonPropertyName("trialDays")]
+    public int TrialDays { get; set; }
+
+    [JsonPropertyName("maxListings")]
+    public int MaxListings { get; set; }
+
+    [JsonPropertyName("maxImagesPerListing")]
+    public int MaxImagesPerListing { get; set; }
+
+    [JsonPropertyName("maxFeaturedListings")]
+    public int MaxFeaturedListings { get; set; }
+
+    [JsonPropertyName("storageLimitMB")]
+    public int StorageLimitMB { get; set; }
+
+    [JsonPropertyName("listingDurationDays")]
+    public int ListingDurationDays { get; set; }
+
+    [JsonPropertyName("commissionPercentage")]
+    public decimal CommissionPercentage { get; set; }
+
+    [JsonPropertyName("hasVerifiedBadge")]
+    public bool HasVerifiedBadge { get; set; }
+}
+
+/// <summary>
+/// DTO matching the real ProfileResponseDto from the API
+/// </summary>
+public class ApiProfileDto
+{
+    [JsonPropertyName("id")]
+    public string? Id { get; set; }
+
+    [JsonPropertyName("userId")]
+    public string? UserId { get; set; }
+
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    [JsonPropertyName("fullName")]
+    public string? FullName { get; set; }
+
+    [JsonPropertyName("businessName")]
+    public string? BusinessName { get; set; }
+
+    [JsonPropertyName("phoneNumber")]
+    public string? PhoneNumber { get; set; }
+
+    [JsonPropertyName("email")]
+    public string? Email { get; set; }
+
+    [JsonPropertyName("avatar")]
+    public string? Avatar { get; set; }
+
+    [JsonPropertyName("address")]
+    public string? Address { get; set; }
+
+    [JsonPropertyName("city")]
+    public string? City { get; set; }
+
+    [JsonPropertyName("country")]
+    public string? Country { get; set; }
+
+    [JsonPropertyName("isActive")]
+    public bool IsActive { get; set; }
+
+    [JsonPropertyName("isVerified")]
+    public bool IsVerified { get; set; }
+
+    [JsonPropertyName("createdAt")]
+    public DateTime CreatedAt { get; set; }
+}
+
+/// <summary>
+/// DTO matching the real SubscriptionDto from the API
+/// </summary>
+public class ApiSubscriptionDto
+{
+    [JsonPropertyName("id")]
+    public Guid? Id { get; set; }
+
+    [JsonPropertyName("vendorId")]
+    public Guid? VendorId { get; set; }
+
+    [JsonPropertyName("planId")]
+    public Guid? PlanId { get; set; }
+
+    [JsonPropertyName("plan")]
+    public ApiSubscriptionPlanSummaryDto? Plan { get; set; }
+
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+
+    [JsonPropertyName("billingCycle")]
+    public string? BillingCycle { get; set; }
+
+    [JsonPropertyName("startDate")]
+    public DateTime StartDate { get; set; }
+
+    [JsonPropertyName("currentPeriodEnd")]
+    public DateTime CurrentPeriodEnd { get; set; }
+
+    [JsonPropertyName("trialEndDate")]
+    public DateTime? TrialEndDate { get; set; }
+
+    [JsonPropertyName("cancelledAt")]
+    public DateTime? CancelledAt { get; set; }
+
+    [JsonPropertyName("price")]
+    public decimal Price { get; set; }
+
+    [JsonPropertyName("currency")]
+    public string Currency { get; set; } = "SAR";
+
+    [JsonPropertyName("maxListings")]
+    public int MaxListings { get; set; }
+
+    [JsonPropertyName("currentListingsCount")]
+    public int CurrentListingsCount { get; set; }
+
+    [JsonPropertyName("isActive")]
+    public bool IsActive { get; set; }
+
+    [JsonPropertyName("daysRemaining")]
+    public int DaysRemaining { get; set; }
+}
+
+public class ApiSubscriptionPlanSummaryDto
+{
+    [JsonPropertyName("id")]
+    public Guid? Id { get; set; }
+
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    [JsonPropertyName("nameEn")]
+    public string? NameEn { get; set; }
+
+    [JsonPropertyName("slug")]
+    public string? Slug { get; set; }
+
+    [JsonPropertyName("monthlyPrice")]
+    public decimal MonthlyPrice { get; set; }
+
+    [JsonPropertyName("maxListings")]
+    public int MaxListings { get; set; }
+}
+
+/// <summary>
+/// DTO matching the real VendorUsageStatsDto from the API
+/// </summary>
+public class ApiVendorUsageStatsDto
+{
+    [JsonPropertyName("vendorId")]
+    public Guid VendorId { get; set; }
+
+    [JsonPropertyName("subscriptionId")]
+    public Guid SubscriptionId { get; set; }
+
+    [JsonPropertyName("planName")]
+    public string? PlanName { get; set; }
+
+    [JsonPropertyName("listingsUsed")]
+    public int ListingsUsed { get; set; }
+
+    [JsonPropertyName("listingsLimit")]
+    public int ListingsLimit { get; set; }
+
+    [JsonPropertyName("listingsUsagePercentage")]
+    public decimal ListingsUsagePercentage { get; set; }
+
+    [JsonPropertyName("featuredUsed")]
+    public int FeaturedUsed { get; set; }
+
+    [JsonPropertyName("featuredLimit")]
+    public int FeaturedLimit { get; set; }
+
+    [JsonPropertyName("storageUsedMB")]
+    public decimal StorageUsedMB { get; set; }
+
+    [JsonPropertyName("storageLimitMB")]
+    public int StorageLimitMB { get; set; }
+}
+
+/// <summary>
+/// Generic paged result DTO
+/// </summary>
+public class ApiPagedResult<T>
+{
+    [JsonPropertyName("items")]
+    public List<T>? Items { get; set; }
+
+    [JsonPropertyName("totalCount")]
+    public int TotalCount { get; set; }
+
+    [JsonPropertyName("pageNumber")]
+    public int PageNumber { get; set; }
+
+    [JsonPropertyName("pageSize")]
+    public int PageSize { get; set; }
+
+    [JsonPropertyName("totalPages")]
+    public int TotalPages { get; set; }
+}
+
+/// <summary>
+/// Profile search request matching the SmartSearchRequest
+/// </summary>
+public class ProfileSearchRequest
+{
+    [JsonPropertyName("pageNumber")]
+    public int PageNumber { get; set; } = 1;
+
+    [JsonPropertyName("pageSize")]
+    public int PageSize { get; set; } = 20;
+
+    [JsonPropertyName("sortBy")]
+    public string? SortBy { get; set; }
+
+    [JsonPropertyName("sortDescending")]
+    public bool SortDescending { get; set; }
+
+    [JsonPropertyName("filters")]
+    public List<SearchFilter>? Filters { get; set; }
+}
+
+public class SearchFilter
+{
+    [JsonPropertyName("propertyName")]
+    public string PropertyName { get; set; } = string.Empty;
+
+    [JsonPropertyName("value")]
+    public object? Value { get; set; }
+
+    [JsonPropertyName("operator")]
+    public string Operator { get; set; } = "Equals";
 }
