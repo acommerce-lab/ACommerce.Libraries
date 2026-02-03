@@ -1,0 +1,416 @@
+@page "/subscriptions"
+@inject AdminApiService ApiService
+
+<div class="subscriptions-page">
+    <div class="page-header">
+        <div class="header-actions">
+            <SfButton CssClass="e-success" IconCss="e-icons e-plus" OnClick="ShowAddPlanDialog">إضافة باقة</SfButton>
+        </div>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon plans">
+                <i class="bi bi-box-seam"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value">@Plans.Count</span>
+                <span class="stat-label">إجمالي الباقات</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon active">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value">@Plans.Count(p => p.IsActive)</span>
+                <span class="stat-label">الباقات النشطة</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon subscribers">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value">@Plans.Sum(p => p.SubscribersCount)</span>
+                <span class="stat-label">إجمالي المشتركين</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon revenue">
+                <i class="bi bi-currency-dollar"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value">@CalculateMonthlyRevenue().ToString("N0") ر.س</span>
+                <span class="stat-label">الإيرادات الشهرية المتوقعة</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <SfGrid DataSource="@Plans" AllowPaging="true" AllowSorting="true">
+            <GridPageSettings PageSize="10" />
+            <GridColumns>
+                <GridColumn Field="@nameof(SubscriptionPlanDto.NameAr)" HeaderText="اسم الباقة" Width="150">
+                    <Template>
+                        @{
+                            var plan = (context as SubscriptionPlanDto);
+                            <div class="plan-name">
+                                <span class="name-ar">@plan?.NameAr</span>
+                                <span class="name-en">@plan?.Name</span>
+                            </div>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(SubscriptionPlanDto.Price)" HeaderText="السعر" Width="120">
+                    <Template>
+                        @{
+                            var plan = (context as SubscriptionPlanDto);
+                            <span class="price">@(plan?.Price == 0 ? "مجاني" : $"{plan?.Price:N0} ر.س")</span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(SubscriptionPlanDto.DurationDays)" HeaderText="المدة" Width="100">
+                    <Template>
+                        @{
+                            var plan = (context as SubscriptionPlanDto);
+                            <span>@GetDurationText(plan?.DurationDays ?? 0)</span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(SubscriptionPlanDto.MaxListings)" HeaderText="عدد العروض" Width="120">
+                    <Template>
+                        @{
+                            var plan = (context as SubscriptionPlanDto);
+                            <span class="listings-limit">@(plan?.MaxListings == -1 ? "غير محدود" : plan?.MaxListings.ToString())</span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(SubscriptionPlanDto.PlanType)" HeaderText="النوع" Width="100">
+                    <Template>
+                        @{
+                            var plan = (context as SubscriptionPlanDto);
+                            <span class="plan-type @plan?.PlanType">@GetPlanTypeText(plan?.PlanType)</span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(SubscriptionPlanDto.SubscribersCount)" HeaderText="المشتركين" Width="100" />
+                <GridColumn Field="@nameof(SubscriptionPlanDto.IsActive)" HeaderText="الحالة" Width="100">
+                    <Template>
+                        @{
+                            var plan = (context as SubscriptionPlanDto);
+                            <span class="status-badge @(plan?.IsActive == true ? "active" : "inactive")">
+                                @(plan?.IsActive == true ? "نشط" : "معطل")
+                            </span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn HeaderText="الإجراءات" Width="150">
+                    <Template>
+                        @{
+                            var plan = (context as SubscriptionPlanDto);
+                            <div class="action-buttons">
+                                <SfButton CssClass="e-flat e-primary" IconCss="e-icons e-edit" Title="تعديل" OnClick="() => EditPlan(plan)" />
+                                <SfButton CssClass="e-flat e-warning" IconCss="e-icons e-eye" Title="المشتركين" />
+                                <SfButton CssClass="e-flat e-danger" IconCss="e-icons e-trash" Title="حذف" OnClick="() => DeletePlan(plan)" />
+                            </div>
+                        }
+                    </Template>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </div>
+</div>
+
+@* Add/Edit Plan Dialog *@
+<SfDialog @bind-Visible="ShowPlanDialog" Width="500px" IsModal="true" ShowCloseIcon="true">
+    <DialogTemplates>
+        <Header>@(IsEditMode ? "تعديل الباقة" : "إضافة باقة جديدة")</Header>
+        <Content>
+            <div class="dialog-form">
+                <div class="form-group">
+                    <label>اسم الباقة (عربي)</label>
+                    <SfTextBox @bind-Value="EditingPlan.NameAr" Placeholder="مثال: الباقة الأساسية" />
+                </div>
+                <div class="form-group">
+                    <label>اسم الباقة (إنجليزي)</label>
+                    <SfTextBox @bind-Value="EditingPlan.Name" Placeholder="Example: Basic Plan" />
+                </div>
+                <div class="form-group">
+                    <label>الوصف</label>
+                    <SfTextBox @bind-Value="EditingPlan.Description" Placeholder="وصف مختصر للباقة" Multiline="true" />
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>السعر (ر.س)</label>
+                        <SfNumericTextBox TValue="decimal" @bind-Value="EditingPlan.Price" Min="0" Format="N0" />
+                    </div>
+                    <div class="form-group">
+                        <label>المدة (أيام)</label>
+                        <SfNumericTextBox TValue="int" @bind-Value="EditingPlan.DurationDays" Min="1" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>عدد العروض المسموح</label>
+                        <SfNumericTextBox TValue="int" @bind-Value="EditingPlan.MaxListings" Min="-1" />
+                        <small class="hint">استخدم -1 للعروض غير المحدودة</small>
+                    </div>
+                    <div class="form-group">
+                        <label>نوع الباقة</label>
+                        <SfDropDownList TItem="string" TValue="string" @bind-Value="EditingPlan.PlanType"
+                                        DataSource="@PlanTypes" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <SfCheckBox @bind-Checked="EditingPlan.IsActive" Label="الباقة نشطة" />
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <SfButton CssClass="e-flat" OnClick="ClosePlanDialog">إلغاء</SfButton>
+            <SfButton CssClass="e-primary" OnClick="SavePlan">@(IsEditMode ? "حفظ التغييرات" : "إضافة")</SfButton>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<style>
+    .subscriptions-page {
+        padding: 0;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 20px;
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    .stat-icon.plans { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+    .stat-icon.active { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .stat-icon.subscribers { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+    .stat-icon.revenue { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+
+    .stat-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .stat-label {
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .plan-name {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .plan-name .name-ar {
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .plan-name .name-en {
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    .price {
+        font-weight: 600;
+        color: #10b981;
+    }
+
+    .listings-limit {
+        font-weight: 500;
+    }
+
+    .plan-type {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .plan-type.residential { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+    .plan-type.commercial { background: rgba(147, 51, 234, 0.1); color: #9333ea; }
+    .plan-type.all { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .status-badge.active { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .status-badge.inactive { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+    .action-buttons {
+        display: flex;
+        gap: 4px;
+    }
+
+    .dialog-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .form-group label {
+        font-weight: 500;
+        color: #374151;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .hint {
+        color: #6b7280;
+        font-size: 12px;
+    }
+</style>
+
+@code {
+    private List<SubscriptionPlanDto> Plans { get; set; } = new();
+    private bool ShowPlanDialog { get; set; } = false;
+    private bool IsEditMode { get; set; } = false;
+    private SubscriptionPlanDto EditingPlan { get; set; } = new();
+
+    private List<string> PlanTypes = new() { "residential", "commercial", "all" };
+
+    protected override async Task OnInitializedAsync()
+    {
+        Plans = await ApiService.GetSubscriptionPlansAsync();
+    }
+
+    private decimal CalculateMonthlyRevenue()
+    {
+        return Plans.Sum(p => p.Price * p.SubscribersCount);
+    }
+
+    private string GetDurationText(int days)
+    {
+        return days switch
+        {
+            30 => "شهر",
+            90 => "3 أشهر",
+            180 => "6 أشهر",
+            365 => "سنة",
+            _ => $"{days} يوم"
+        };
+    }
+
+    private string GetPlanTypeText(string? type)
+    {
+        return type switch
+        {
+            "residential" => "سكني",
+            "commercial" => "تجاري",
+            "all" => "الكل",
+            _ => type ?? ""
+        };
+    }
+
+    private void ShowAddPlanDialog()
+    {
+        IsEditMode = false;
+        EditingPlan = new SubscriptionPlanDto { IsActive = true, DurationDays = 30, MaxListings = 1, PlanType = "residential" };
+        ShowPlanDialog = true;
+    }
+
+    private void EditPlan(SubscriptionPlanDto? plan)
+    {
+        if (plan == null) return;
+        IsEditMode = true;
+        EditingPlan = new SubscriptionPlanDto
+        {
+            Id = plan.Id,
+            Name = plan.Name,
+            NameAr = plan.NameAr,
+            Description = plan.Description,
+            Price = plan.Price,
+            DurationDays = plan.DurationDays,
+            MaxListings = plan.MaxListings,
+            PlanType = plan.PlanType,
+            IsActive = plan.IsActive
+        };
+        ShowPlanDialog = true;
+    }
+
+    private void ClosePlanDialog()
+    {
+        ShowPlanDialog = false;
+    }
+
+    private async Task SavePlan()
+    {
+        bool success;
+        if (IsEditMode)
+        {
+            success = await ApiService.UpdateSubscriptionPlanAsync(EditingPlan.Id, EditingPlan);
+        }
+        else
+        {
+            success = await ApiService.CreateSubscriptionPlanAsync(EditingPlan);
+        }
+
+        if (success)
+        {
+            Plans = await ApiService.GetSubscriptionPlansAsync();
+            ShowPlanDialog = false;
+        }
+    }
+
+    private async Task DeletePlan(SubscriptionPlanDto? plan)
+    {
+        if (plan == null) return;
+
+        var success = await ApiService.DeleteSubscriptionPlanAsync(plan.Id);
+        if (success)
+        {
+            Plans = await ApiService.GetSubscriptionPlansAsync();
+        }
+    }
+}

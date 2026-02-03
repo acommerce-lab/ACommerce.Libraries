@@ -401,6 +401,180 @@ public class AdminApiService
         return null;
     }
 
+    // ============================================================================
+    // Subscription Methods
+    // ============================================================================
+
+    public async Task<List<SubscriptionPlanDto>> GetSubscriptionPlansAsync()
+    {
+        try
+        {
+            await SetAuthHeaderAsync();
+            var response = await _httpClient.GetAsync("/api/admin/subscriptions/plans");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<List<SubscriptionPlanDto>>();
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+
+            _logger.LogWarning("Failed to fetch subscription plans: {StatusCode}", response.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching subscription plans");
+        }
+
+        return GetMockSubscriptionPlans();
+    }
+
+    public async Task<List<UserWithSubscriptionDto>> GetUsersWithSubscriptionsAsync(int page = 1, int pageSize = 20)
+    {
+        try
+        {
+            await SetAuthHeaderAsync();
+            var response = await _httpClient.GetAsync($"/api/admin/users/subscriptions?page={page}&pageSize={pageSize}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<UsersWithSubscriptionsResponse>();
+                if (result?.Items != null)
+                {
+                    return result.Items;
+                }
+            }
+
+            _logger.LogWarning("Failed to fetch users with subscriptions: {StatusCode}", response.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching users with subscriptions");
+        }
+
+        return GetMockUsersWithSubscriptions();
+    }
+
+    public async Task<UserDetailsDto?> GetUserDetailsAsync(string userId)
+    {
+        try
+        {
+            await SetAuthHeaderAsync();
+            var response = await _httpClient.GetAsync($"/api/admin/users/{userId}/details");
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<UserDetailsDto>();
+            }
+
+            _logger.LogWarning("Failed to fetch user details: {StatusCode}", response.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching user details for {UserId}", userId);
+        }
+
+        return GetMockUserDetails(userId);
+    }
+
+    public async Task<bool> CreateSubscriptionPlanAsync(SubscriptionPlanDto plan)
+    {
+        try
+        {
+            await SetAuthHeaderAsync();
+            var response = await _httpClient.PostAsJsonAsync("/api/admin/subscriptions/plans", plan);
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating subscription plan");
+            return false;
+        }
+    }
+
+    public async Task<bool> UpdateSubscriptionPlanAsync(string planId, SubscriptionPlanDto plan)
+    {
+        try
+        {
+            await SetAuthHeaderAsync();
+            var response = await _httpClient.PutAsJsonAsync($"/api/admin/subscriptions/plans/{planId}", plan);
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating subscription plan {PlanId}", planId);
+            return false;
+        }
+    }
+
+    public async Task<bool> DeleteSubscriptionPlanAsync(string planId)
+    {
+        try
+        {
+            await SetAuthHeaderAsync();
+            var response = await _httpClient.DeleteAsync($"/api/admin/subscriptions/plans/{planId}");
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting subscription plan {PlanId}", planId);
+            return false;
+        }
+    }
+
+    private List<SubscriptionPlanDto> GetMockSubscriptionPlans() => new()
+    {
+        new() { Id = "1", Name = "Basic", NameAr = "الأساسية", Description = "باقة للمبتدئين", Price = 0, DurationDays = 365, MaxListings = 1, PlanType = "residential", IsActive = true, SubscribersCount = 150, CreatedAt = DateTime.Now.AddMonths(-6) },
+        new() { Id = "2", Name = "Professional", NameAr = "الاحترافية", Description = "للمستخدمين المحترفين", Price = 299, DurationDays = 30, MaxListings = 5, PlanType = "residential", IsActive = true, SubscribersCount = 85, CreatedAt = DateTime.Now.AddMonths(-6) },
+        new() { Id = "3", Name = "Business", NameAr = "الأعمال", Description = "للشركات والمؤسسات", Price = 999, DurationDays = 30, MaxListings = 20, PlanType = "commercial", IsActive = true, SubscribersCount = 32, CreatedAt = DateTime.Now.AddMonths(-6) },
+        new() { Id = "4", Name = "Enterprise", NameAr = "المؤسسات", Description = "عروض غير محدودة", Price = 2499, DurationDays = 30, MaxListings = -1, PlanType = "all", IsActive = true, SubscribersCount = 12, CreatedAt = DateTime.Now.AddMonths(-6) },
+    };
+
+    private List<UserWithSubscriptionDto> GetMockUsersWithSubscriptions() => new()
+    {
+        new() { Id = "1", Name = "أحمد محمد", Email = "ahmed@example.com", Phone = "0501234567", Role = "بائع", Status = "نشط", CreatedAt = DateTime.Now.AddMonths(-3), PlanName = "الاحترافية", MaxListings = 5, CurrentListings = 3, SubscriptionStatus = "active", SubscriptionEndDate = DateTime.Now.AddDays(15) },
+        new() { Id = "2", Name = "سارة العلي", Email = "sara@example.com", Phone = "0559876543", Role = "بائع", Status = "نشط", CreatedAt = DateTime.Now.AddMonths(-2), PlanName = "الأعمال", MaxListings = 20, CurrentListings = 8, SubscriptionStatus = "active", SubscriptionEndDate = DateTime.Now.AddDays(45) },
+        new() { Id = "3", Name = "خالد السعيد", Email = "khaled@example.com", Phone = "0551112233", Role = "بائع", Status = "نشط", CreatedAt = DateTime.Now.AddMonths(-1), PlanName = "الأساسية", MaxListings = 1, CurrentListings = 1, SubscriptionStatus = "active", SubscriptionEndDate = DateTime.Now.AddDays(120) },
+        new() { Id = "4", Name = "نورة الأحمد", Email = "noura@example.com", Phone = "0554443322", Role = "عميل", Status = "نشط", CreatedAt = DateTime.Now.AddMonths(-4), PlanName = null, MaxListings = 0, CurrentListings = 0, SubscriptionStatus = null },
+    };
+
+    private UserDetailsDto GetMockUserDetails(string userId) => new()
+    {
+        Id = userId,
+        Name = "أحمد محمد",
+        Email = "ahmed@example.com",
+        Phone = "0501234567",
+        Role = "بائع",
+        Status = "نشط",
+        CreatedAt = DateTime.Now.AddMonths(-3),
+        CurrentSubscription = new UserSubscriptionDto
+        {
+            Id = "sub-1",
+            UserId = userId,
+            PlanId = "2",
+            PlanName = "الاحترافية",
+            MaxListings = 5,
+            CurrentListings = 3,
+            Status = "active",
+            StartDate = DateTime.Now.AddDays(-15),
+            EndDate = DateTime.Now.AddDays(15),
+            CreatedAt = DateTime.Now.AddDays(-15)
+        },
+        SubscriptionHistory = new List<UserSubscriptionDto>
+        {
+            new() { Id = "sub-0", UserId = userId, PlanId = "1", PlanName = "الأساسية", MaxListings = 1, CurrentListings = 1, Status = "expired", StartDate = DateTime.Now.AddMonths(-4), EndDate = DateTime.Now.AddMonths(-3), CreatedAt = DateTime.Now.AddMonths(-4) },
+            new() { Id = "sub-1", UserId = userId, PlanId = "2", PlanName = "الاحترافية", MaxListings = 5, CurrentListings = 3, Status = "active", StartDate = DateTime.Now.AddDays(-15), EndDate = DateTime.Now.AddDays(15), CreatedAt = DateTime.Now.AddDays(-15) }
+        },
+        Listings = new List<ListingDto>
+        {
+            new() { Id = "1", Title = "شقة للإيجار - الرياض", VendorName = "أحمد محمد", Price = 2500m, Status = "نشط", Category = "سكني", CreatedAt = DateTime.Now.AddDays(-10) },
+            new() { Id = "2", Title = "فيلا للبيع - جدة", VendorName = "أحمد محمد", Price = 1500000m, Status = "نشط", Category = "سكني", CreatedAt = DateTime.Now.AddDays(-5) },
+            new() { Id = "3", Title = "مكتب للإيجار", VendorName = "أحمد محمد", Price = 5000m, Status = "معلق", Category = "تجاري", CreatedAt = DateTime.Now.AddDays(-2) },
+        }
+    };
+
     private string TranslateOrderStatus(string? status)
     {
         return status?.ToLower() switch
@@ -771,4 +945,171 @@ public class NotificationUsersResponse
 
     [JsonPropertyName("totalPages")]
     public int TotalPages { get; set; }
+}
+
+// ============================================================================
+// Subscription DTOs
+// ============================================================================
+
+public class SubscriptionPlanDto
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = string.Empty;
+
+    [JsonPropertyName("nameAr")]
+    public string NameAr { get; set; } = string.Empty;
+
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    [JsonPropertyName("price")]
+    public decimal Price { get; set; }
+
+    [JsonPropertyName("durationDays")]
+    public int DurationDays { get; set; }
+
+    [JsonPropertyName("maxListings")]
+    public int MaxListings { get; set; }
+
+    [JsonPropertyName("planType")]
+    public string PlanType { get; set; } = string.Empty;
+
+    [JsonPropertyName("isActive")]
+    public bool IsActive { get; set; }
+
+    [JsonPropertyName("subscribersCount")]
+    public int SubscribersCount { get; set; }
+
+    [JsonPropertyName("createdAt")]
+    public DateTime CreatedAt { get; set; }
+}
+
+public class UserSubscriptionDto
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonPropertyName("userId")]
+    public string UserId { get; set; } = string.Empty;
+
+    [JsonPropertyName("planId")]
+    public string PlanId { get; set; } = string.Empty;
+
+    [JsonPropertyName("planName")]
+    public string PlanName { get; set; } = string.Empty;
+
+    [JsonPropertyName("maxListings")]
+    public int MaxListings { get; set; }
+
+    [JsonPropertyName("currentListings")]
+    public int CurrentListings { get; set; }
+
+    [JsonPropertyName("remainingListings")]
+    public int RemainingListings => MaxListings == -1 ? -1 : MaxListings - CurrentListings;
+
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = string.Empty;
+
+    [JsonPropertyName("startDate")]
+    public DateTime StartDate { get; set; }
+
+    [JsonPropertyName("endDate")]
+    public DateTime? EndDate { get; set; }
+
+    [JsonPropertyName("createdAt")]
+    public DateTime CreatedAt { get; set; }
+}
+
+public class UserWithSubscriptionDto
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = string.Empty;
+
+    [JsonPropertyName("email")]
+    public string Email { get; set; } = string.Empty;
+
+    [JsonPropertyName("phone")]
+    public string Phone { get; set; } = string.Empty;
+
+    [JsonPropertyName("role")]
+    public string Role { get; set; } = string.Empty;
+
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = string.Empty;
+
+    [JsonPropertyName("createdAt")]
+    public DateTime CreatedAt { get; set; }
+
+    // Subscription Info
+    [JsonPropertyName("planName")]
+    public string? PlanName { get; set; }
+
+    [JsonPropertyName("maxListings")]
+    public int MaxListings { get; set; }
+
+    [JsonPropertyName("currentListings")]
+    public int CurrentListings { get; set; }
+
+    [JsonPropertyName("remainingListings")]
+    public int RemainingListings => MaxListings == -1 ? -1 : MaxListings - CurrentListings;
+
+    [JsonPropertyName("subscriptionStatus")]
+    public string? SubscriptionStatus { get; set; }
+
+    [JsonPropertyName("subscriptionEndDate")]
+    public DateTime? SubscriptionEndDate { get; set; }
+}
+
+public class UserDetailsDto
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = string.Empty;
+
+    [JsonPropertyName("email")]
+    public string Email { get; set; } = string.Empty;
+
+    [JsonPropertyName("phone")]
+    public string Phone { get; set; } = string.Empty;
+
+    [JsonPropertyName("role")]
+    public string Role { get; set; } = string.Empty;
+
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = string.Empty;
+
+    [JsonPropertyName("createdAt")]
+    public DateTime CreatedAt { get; set; }
+
+    [JsonPropertyName("currentSubscription")]
+    public UserSubscriptionDto? CurrentSubscription { get; set; }
+
+    [JsonPropertyName("subscriptionHistory")]
+    public List<UserSubscriptionDto> SubscriptionHistory { get; set; } = new();
+
+    [JsonPropertyName("listings")]
+    public List<ListingDto> Listings { get; set; } = new();
+}
+
+public class UsersWithSubscriptionsResponse
+{
+    [JsonPropertyName("items")]
+    public List<UserWithSubscriptionDto>? Items { get; set; }
+
+    [JsonPropertyName("totalCount")]
+    public int TotalCount { get; set; }
+
+    [JsonPropertyName("page")]
+    public int Page { get; set; }
+
+    [JsonPropertyName("pageSize")]
+    public int PageSize { get; set; }
 }
