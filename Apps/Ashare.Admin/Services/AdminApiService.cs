@@ -467,8 +467,8 @@ public class AdminApiService
                     {
                         var user = MapToUserWithSubscriptionDto(profile);
 
-                        // Try to get subscription info for vendor profiles
-                        if (profile.Type == "Vendor" && Guid.TryParse(profile.Id, out var vendorId))
+                        // Try to get subscription info for vendor profiles (Type=2 is Vendor)
+                        if (profile.IsVendor && Guid.TryParse(profile.Id, out var vendorId))
                         {
                             try
                             {
@@ -536,13 +536,13 @@ public class AdminApiService
                 Name = profile.FullName ?? profile.BusinessName ?? "غير معروف",
                 Email = profile.Email ?? "",
                 Phone = profile.PhoneNumber ?? "",
-                Role = profile.Type == "Vendor" ? "بائع" : "عميل",
+                Role = profile.RoleName,
                 Status = profile.IsActive ? "نشط" : "غير نشط",
                 CreatedAt = profile.CreatedAt
             };
 
-            // Get subscription info for vendors
-            if (profile.Type == "Vendor" && Guid.TryParse(profile.Id, out var vendorId))
+            // Get subscription info for vendors (Type=2 is Vendor)
+            if (profile.IsVendor && Guid.TryParse(profile.Id, out var vendorId))
             {
                 try
                 {
@@ -679,7 +679,7 @@ public class AdminApiService
         Name = profile.FullName ?? profile.BusinessName ?? "غير معروف",
         Email = profile.Email ?? "",
         Phone = profile.PhoneNumber ?? "",
-        Role = profile.Type == "Vendor" ? "بائع" : "عميل",
+        Role = profile.RoleName,
         Status = profile.IsActive ? "نشط" : "غير نشط",
         CreatedAt = profile.CreatedAt
     };
@@ -1337,6 +1337,7 @@ public class ApiSubscriptionPlanDto
 
 /// <summary>
 /// DTO matching the real ProfileResponseDto from the API
+/// ProfileType enum: Customer=1, Vendor=2, Admin=3, Employee=4, Support=5
 /// </summary>
 public class ApiProfileDto
 {
@@ -1347,7 +1348,25 @@ public class ApiProfileDto
     public string? UserId { get; set; }
 
     [JsonPropertyName("type")]
-    public string? Type { get; set; }
+    public int Type { get; set; }
+
+    /// <summary>
+    /// Returns true if profile type is Vendor (2)
+    /// </summary>
+    public bool IsVendor => Type == 2;
+
+    /// <summary>
+    /// Returns the role name in Arabic based on profile type
+    /// </summary>
+    public string RoleName => Type switch
+    {
+        1 => "عميل",
+        2 => "بائع",
+        3 => "مدير",
+        4 => "موظف",
+        5 => "دعم فني",
+        _ => "عميل"
+    };
 
     [JsonPropertyName("fullName")]
     public string? FullName { get; set; }
