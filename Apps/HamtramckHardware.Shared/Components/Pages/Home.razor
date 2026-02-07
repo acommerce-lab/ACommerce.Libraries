@@ -11,6 +11,26 @@
         <input type="text" class="hh-search-input" placeholder="Search tools, plumbing, electrical..." readonly />
     </div>
 
+    <!-- Feature Cards -->
+    <div class="hh-feature-cards">
+        <div class="hh-feature-card">
+            <i class="bi bi-truck"></i>
+            <span>Free Shipping $50+</span>
+        </div>
+        <div class="hh-feature-card">
+            <i class="bi bi-shield-check"></i>
+            <span>2-Year Warranty</span>
+        </div>
+        <div class="hh-feature-card">
+            <i class="bi bi-headset"></i>
+            <span>Expert Help</span>
+        </div>
+        <div class="hh-feature-card">
+            <i class="bi bi-clock-history"></i>
+            <span>Same Day Pickup</span>
+        </div>
+    </div>
+
     <!-- Categories Scroll -->
     <div class="hh-category-scroll" style="padding: 0 16px;">
         @foreach (var category in _categories)
@@ -41,10 +61,15 @@
             @foreach (var product in _featuredProducts)
             {
                 <div class="hh-product-card" @onclick="() => ViewProduct(product.Id)">
+                    @if (product.DiscountPercent > 0)
+                    {
+                        <span class="hh-sale-badge">-@product.DiscountPercent%</span>
+                    }
                     <img src="@(product.ImageUrl ?? "/images/placeholder-product.png")"
                          alt="@product.Name"
                          class="hh-product-image" />
                     <div class="hh-product-info">
+                        <span class="hh-product-brand">@product.Brand</span>
                         <div class="hh-product-name">@product.Name</div>
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span class="hh-product-price">$@product.Price.ToString("0.00")</span>
@@ -53,6 +78,14 @@
                                 <span class="hh-product-original-price">$@product.OriginalPrice.Value.ToString("0.00")</span>
                             }
                         </div>
+                        @if (product.Rating.HasValue)
+                        {
+                            <div class="hh-product-rating">
+                                <i class="bi bi-star-fill"></i>
+                                <span>@product.Rating.Value.ToString("0.0")</span>
+                                <span style="color: var(--hh-text-secondary);">(@product.ReviewCount)</span>
+                            </div>
+                        }
                         <span class="hh-stock-badge @(product.InStock ? "in-stock" : "out-of-stock")">
                             @(product.InStock ? L["InStock"] : L["OutOfStock"])
                         </span>
@@ -61,6 +94,32 @@
             }
         </div>
     }
+
+    <!-- Deals of the Week -->
+    <div class="hh-section-header">
+        <span class="hh-section-title"><i class="bi bi-fire" style="color: var(--hh-accent);"></i> Deals of the Week</span>
+        <a href="/products?sort=deals" class="hh-section-link">@L["SeeAll"] →</a>
+    </div>
+
+    <div class="hh-products-grid">
+        @foreach (var product in _dealsOfWeek)
+        {
+            <div class="hh-product-card" @onclick="() => ViewProduct(product.Id)">
+                <span class="hh-sale-badge">-@product.DiscountPercent%</span>
+                <img src="@(product.ImageUrl ?? "/images/placeholder-product.png")"
+                     alt="@product.Name"
+                     class="hh-product-image" />
+                <div class="hh-product-info">
+                    <span class="hh-product-brand">@product.Brand</span>
+                    <div class="hh-product-name">@product.Name</div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="hh-product-price">$@product.Price.ToString("0.00")</span>
+                        <span class="hh-product-original-price">$@product.OriginalPrice?.ToString("0.00")</span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 
     <!-- Best Sellers Section -->
     <div class="hh-section-header">
@@ -76,8 +135,17 @@
                      alt="@product.Name"
                      class="hh-product-image" />
                 <div class="hh-product-info">
+                    <span class="hh-product-brand">@product.Brand</span>
                     <div class="hh-product-name">@product.Name</div>
                     <span class="hh-product-price">$@product.Price.ToString("0.00")</span>
+                    @if (product.Rating.HasValue)
+                    {
+                        <div class="hh-product-rating">
+                            <i class="bi bi-star-fill"></i>
+                            <span>@product.Rating.Value.ToString("0.0")</span>
+                            <span style="color: var(--hh-text-secondary);">(@product.ReviewCount)</span>
+                        </div>
+                    }
                 </div>
             </div>
         }
@@ -88,15 +156,39 @@
         <h3 style="margin-bottom: 8px;">
             <i class="bi bi-shop"></i> Visit Our Store
         </h3>
+        <p style="color: var(--hh-text-secondary); margin-bottom: 4px; font-weight: 600;">
+            Hamtramck Hardware & Building Supply
+        </p>
         <p style="color: var(--hh-text-secondary); margin-bottom: 8px;">
-            @L["StoreAddress"]
+            9033 Joseph Campau Ave, Hamtramck, MI 48212
         </p>
         <p style="color: var(--hh-text-secondary); margin-bottom: 16px;">
-            <i class="bi bi-clock"></i> @L["StoreHours"]
+            <i class="bi bi-clock"></i> Mon-Sat 7AM-7PM | Sun 9AM-5PM
         </p>
-        <a href="tel:+13133652400" class="hh-btn hh-btn-primary">
-            <i class="bi bi-telephone"></i> Call Us
-        </a>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <a href="tel:+13133652400" class="hh-btn hh-btn-primary">
+                <i class="bi bi-telephone"></i> (313) 365-2400
+            </a>
+            <a href="https://maps.google.com/?q=9033+Joseph+Campau+Ave+Hamtramck+MI" target="_blank" class="hh-btn hh-btn-secondary">
+                <i class="bi bi-geo-alt"></i> Get Directions
+            </a>
+        </div>
+    </div>
+
+    <!-- Newsletter Signup -->
+    <div class="hh-card" style="margin: 16px; text-align: center; background: linear-gradient(135deg, var(--hh-primary) 0%, var(--hh-primary-dark) 100%); color: white;">
+        <h3 style="margin-bottom: 8px;">
+            <i class="bi bi-envelope-paper"></i> Get Exclusive Deals
+        </h3>
+        <p style="opacity: 0.9; margin-bottom: 16px;">
+            Sign up for our newsletter and get 10% off your first order!
+        </p>
+        <div style="display: flex; gap: 8px; max-width: 400px; margin: 0 auto;">
+            <input type="email" placeholder="Enter your email" class="hh-input" style="flex: 1; background: white; color: var(--hh-text);" />
+            <button class="hh-btn" style="background: var(--hh-accent); color: white;">
+                Subscribe
+            </button>
+        </div>
     </div>
 </div>
 
@@ -106,13 +198,11 @@
     private List<CategoryItem> _categories = new();
     private List<ProductItem> _featuredProducts = new();
     private List<ProductItem> _bestSellers = new();
+    private List<ProductItem> _dealsOfWeek = new();
 
     protected override async Task OnInitializedAsync()
     {
-        // Initialize with default categories
         _categories = GetDefaultCategories();
-
-        // Load products
         await LoadProducts();
     }
 
@@ -121,13 +211,15 @@
         return new List<CategoryItem>
         {
             new("plumbing", "Plumbing", "bi bi-droplet"),
-            new("electrical", "Electrical", "bi bi-lightning"),
-            new("tools", "Tools", "bi bi-tools"),
+            new("electrical", "Electrical", "bi bi-lightning-charge"),
+            new("tools", "Power Tools", "bi bi-tools"),
+            new("hand-tools", "Hand Tools", "bi bi-wrench"),
             new("lawn", "Lawn & Garden", "bi bi-flower1"),
             new("paint", "Paint", "bi bi-palette"),
             new("lumber", "Lumber", "bi bi-box"),
             new("flooring", "Flooring", "bi bi-grid-3x3"),
             new("hardware", "Hardware", "bi bi-nut"),
+            new("heating", "Heating & Cooling", "bi bi-thermometer-half"),
         };
     }
 
@@ -136,13 +228,11 @@
         try
         {
             _isLoading = true;
+            await Task.Delay(300);
 
-            // In production, this would call the actual API
-            // For now, we'll use mock data
-            await Task.Delay(500); // Simulate API call
-
-            _featuredProducts = GetMockProducts();
-            _bestSellers = GetMockProducts().Take(4).ToList();
+            _featuredProducts = GetFeaturedProducts();
+            _bestSellers = GetBestSellers();
+            _dealsOfWeek = GetDealsOfWeek();
         }
         catch (Exception ex)
         {
@@ -154,18 +244,40 @@
         }
     }
 
-    private List<ProductItem> GetMockProducts()
+    private List<ProductItem> GetFeaturedProducts()
     {
         return new List<ProductItem>
         {
-            new(Guid.NewGuid(), "DeWalt 20V MAX Cordless Drill", 149.99m, null, true, "/images/products/drill.jpg"),
-            new(Guid.NewGuid(), "Copper Pipe Fittings Set", 24.99m, 29.99m, true, "/images/products/fittings.jpg"),
-            new(Guid.NewGuid(), "LED Shop Light 4ft", 39.99m, null, true, "/images/products/light.jpg"),
-            new(Guid.NewGuid(), "Milwaukee Hammer Drill", 299.99m, 349.99m, true, "/images/products/hammer-drill.jpg"),
-            new(Guid.NewGuid(), "PVC Pipe 10ft Bundle", 18.99m, null, true, "/images/products/pvc.jpg"),
-            new(Guid.NewGuid(), "Electrical Wire 100ft", 45.99m, null, true, "/images/products/wire.jpg"),
-            new(Guid.NewGuid(), "Socket Wrench Set 40pc", 79.99m, 99.99m, true, "/images/products/socket-set.jpg"),
-            new(Guid.NewGuid(), "Garden Hose 50ft", 29.99m, null, false, "/images/products/hose.jpg"),
+            new(Guid.NewGuid(), "DeWalt", "20V MAX XR Brushless Drill/Driver Kit", 149.99m, 179.99m, true, "/images/products/drill.jpg", 4.8m, 1247, 17),
+            new(Guid.NewGuid(), "Milwaukee", "M18 FUEL 1/2\" Hammer Drill", 299.99m, 349.99m, true, "/images/products/hammer-drill.jpg", 4.9m, 892, 14),
+            new(Guid.NewGuid(), "Makita", "18V LXT Brushless Impact Driver", 179.99m, null, true, "/images/products/impact.jpg", 4.7m, 654, 0),
+            new(Guid.NewGuid(), "Bosch", "12V Max Flexiclick 5-In-1 Drill System", 199.99m, 229.99m, true, "/images/products/flexiclick.jpg", 4.6m, 423, 13),
+            new(Guid.NewGuid(), "Stanley", "FatMax Premium Copper Pipe Cutter", 34.99m, null, true, "/images/products/pipe-cutter.jpg", 4.5m, 312, 0),
+            new(Guid.NewGuid(), "Southwire", "Romex 12/2 NM-B Wire 250ft", 89.99m, 99.99m, true, "/images/products/romex.jpg", 4.8m, 567, 10),
+        };
+    }
+
+    private List<ProductItem> GetBestSellers()
+    {
+        return new List<ProductItem>
+        {
+            new(Guid.NewGuid(), "3M", "Scotch Blue Painter's Tape 1.88\"", 8.99m, null, true, "/images/products/tape.jpg", 4.9m, 2341, 0),
+            new(Guid.NewGuid(), "Gorilla", "Heavy Duty Construction Adhesive", 7.49m, null, true, "/images/products/adhesive.jpg", 4.7m, 1823, 0),
+            new(Guid.NewGuid(), "WD-40", "Multi-Use Product 12oz", 6.99m, null, true, "/images/products/wd40.jpg", 4.8m, 3156, 0),
+            new(Guid.NewGuid(), "SharkBite", "1/2\" Push-to-Connect Coupling", 12.99m, null, true, "/images/products/sharkbite.jpg", 4.6m, 892, 0),
+            new(Guid.NewGuid(), "Leviton", "15A Tamper-Resistant Outlet (10-Pack)", 24.99m, null, true, "/images/products/outlets.jpg", 4.7m, 1567, 0),
+            new(Guid.NewGuid(), "Klein Tools", "11-in-1 Screwdriver/Nut Driver", 24.99m, null, true, "/images/products/klein-screwdriver.jpg", 4.9m, 2089, 0),
+        };
+    }
+
+    private List<ProductItem> GetDealsOfWeek()
+    {
+        return new List<ProductItem>
+        {
+            new(Guid.NewGuid(), "Ryobi", "ONE+ 18V 6-Tool Combo Kit", 299.99m, 449.99m, true, "/images/products/ryobi-kit.jpg", 4.7m, 1456, 33),
+            new(Guid.NewGuid(), "CRAFTSMAN", "320-Piece Mechanic's Tool Set", 199.99m, 299.99m, true, "/images/products/craftsman-set.jpg", 4.8m, 987, 33),
+            new(Guid.NewGuid(), "Husky", "52\" 15-Drawer Tool Chest & Cabinet", 599.99m, 899.99m, true, "/images/products/tool-chest.jpg", 4.6m, 423, 33),
+            new(Guid.NewGuid(), "RIDGID", "12-Gallon Shop Vacuum", 79.99m, 119.99m, true, "/images/products/shop-vac.jpg", 4.5m, 678, 33),
         };
     }
 
@@ -180,7 +292,6 @@
         Navigation.NavigateTo($"/product/{id}");
     }
 
-    // Inner classes
     private record CategoryItem(string Code, string Name, string Icon);
-    private record ProductItem(Guid Id, string Name, decimal Price, decimal? OriginalPrice, bool InStock, string? ImageUrl);
+    private record ProductItem(Guid Id, string Brand, string Name, decimal Price, decimal? OriginalPrice, bool InStock, string? ImageUrl, decimal? Rating, int ReviewCount, int DiscountPercent);
 }

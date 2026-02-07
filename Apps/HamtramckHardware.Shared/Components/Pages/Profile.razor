@@ -38,10 +38,32 @@
             <div class="hh-profile-info">
                 <h2>@(_user?.Name ?? "Customer")</h2>
                 <p>@(_user?.Email ?? "")</p>
+                @if (_user?.MemberSince != null)
+                {
+                    <p style="font-size: 0.75rem; color: var(--hh-text-secondary);">
+                        <i class="bi bi-award"></i> Member since @_user.MemberSince.ToString("MMMM yyyy")
+                    </p>
+                }
             </div>
             <button class="hh-btn hh-btn-secondary hh-btn-sm" @onclick="EditProfile">
                 <i class="bi bi-pencil"></i> Edit
             </button>
+        </div>
+
+        <!-- Pro Membership Banner -->
+        <div class="hh-card" style="background: linear-gradient(135deg, var(--hh-primary) 0%, var(--hh-primary-dark) 100%); color: white; margin: 16px 0;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <div style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-gem" style="font-size: 1.5rem;"></i>
+                </div>
+                <div style="flex: 1;">
+                    <h4 style="margin: 0 0 4px;">Become a Pro Member</h4>
+                    <p style="margin: 0; opacity: 0.9; font-size: 0.875rem;">Get 10% off all purchases + free shipping</p>
+                </div>
+                <button class="hh-btn" style="background: var(--hh-accent); color: white;">
+                    Join Pro
+                </button>
+            </div>
         </div>
 
         <!-- Account Menu -->
@@ -49,7 +71,7 @@
             <h3 class="hh-menu-title">My Account</h3>
 
             <div class="hh-menu-item" @onclick='() => Navigation.NavigateTo("/orders")'>
-                <div class="hh-menu-icon" style="background-color: #E65100;">
+                <div class="hh-menu-icon" style="background-color: #1E40AF;">
                     <i class="bi bi-box-seam"></i>
                 </div>
                 <div class="hh-menu-content">
@@ -193,8 +215,11 @@
             await Task.Delay(100);
 
             _user = new UserModel(
-                "John Smith",
-                "john.smith@example.com",
+                "Michael Johnson",
+                "michael.johnson@email.com",
+                "(313) 555-0147",
+                "9241 Conant St, Hamtramck, MI 48212",
+                DateTime.Now.AddMonths(-8),
                 null
             );
         }
@@ -234,5 +259,5 @@
         Navigation.NavigateTo("/register");
     }
 
-    private record UserModel(string Name, string Email, string? AvatarUrl);
+    private record UserModel(string Name, string Email, string? Phone, string? Address, DateTime MemberSince, string? AvatarUrl);
 }

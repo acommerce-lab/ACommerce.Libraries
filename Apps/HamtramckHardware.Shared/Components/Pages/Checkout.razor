@@ -1,0 +1,992 @@
+@page "/checkout"
+@inject ILocalizationService L
+@inject IAppNavigationService Navigation
+@inject CartClient CartClient
+
+<div class="hh-page-content">
+    <h1 class="hh-page-title">
+        <i class="bi bi-credit-card"></i> Checkout
+    </h1>
+
+    @if (_isLoading)
+    {
+        <div class="hh-loading-container">
+            <div class="hh-spinner"></div>
+            <p>Loading checkout...</p>
+        </div>
+    }
+    else if (_orderPlaced)
+    {
+        <!-- Order Confirmation -->
+        <div class="hh-card" style="text-align: center; padding: 32px;">
+            <div style="width: 80px; height: 80px; background: var(--hh-success); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                <i class="bi bi-check-lg" style="font-size: 40px; color: white;"></i>
+            </div>
+            <h2 style="color: var(--hh-success); margin-bottom: 8px;">Order Confirmed!</h2>
+            <p style="color: var(--hh-text-secondary); margin-bottom: 16px;">
+                Thank you for your order. Your order number is:
+            </p>
+            <div style="background: var(--hh-bg-secondary); padding: 12px 24px; border-radius: 8px; display: inline-block; margin-bottom: 16px;">
+                <strong style="font-size: 1.25rem; letter-spacing: 2px;">HH-@_orderNumber</strong>
+            </div>
+            <p style="color: var(--hh-text-secondary); margin-bottom: 24px;">
+                A confirmation email has been sent to <strong>@_email</strong>
+            </p>
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                <button class="hh-btn hh-btn-primary" @onclick='() => Navigation.NavigateTo("/orders")'>
+                    <i class="bi bi-box-seam"></i> View Orders
+                </button>
+                <button class="hh-btn hh-btn-secondary" @onclick='() => Navigation.NavigateTo("/")'>
+                    <i class="bi bi-house"></i> Continue Shopping
+                </button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="hh-checkout-layout">
+            <!-- Left Column - Forms -->
+            <div class="hh-checkout-forms">
+                <!-- Step Indicator -->
+                <div class="hh-checkout-steps">
+                    <div class="hh-step @(_currentStep >= 1 ? "active" : "") @(_currentStep > 1 ? "completed" : "")">
+                        <span class="hh-step-number">1</span>
+                        <span class="hh-step-label">Shipping</span>
+                    </div>
+                    <div class="hh-step-line @(_currentStep > 1 ? "active" : "")"></div>
+                    <div class="hh-step @(_currentStep >= 2 ? "active" : "") @(_currentStep > 2 ? "completed" : "")">
+                        <span class="hh-step-number">2</span>
+                        <span class="hh-step-label">Payment</span>
+                    </div>
+                    <div class="hh-step-line @(_currentStep > 2 ? "active" : "")"></div>
+                    <div class="hh-step @(_currentStep >= 3 ? "active" : "")">
+                        <span class="hh-step-number">3</span>
+                        <span class="hh-step-label">Review</span>
+                    </div>
+                </div>
+
+                @if (_currentStep == 1)
+                {
+                    <!-- Shipping Information -->
+                    <div class="hh-card">
+                        <h3 class="hh-card-title"><i class="bi bi-truck"></i> Shipping Information</h3>
+
+                        <div class="hh-form-row">
+                            <div class="hh-form-group">
+                                <label class="hh-label">First Name *</label>
+                                <input type="text" class="hh-input" @bind="_firstName" placeholder="John" />
+                            </div>
+                            <div class="hh-form-group">
+                                <label class="hh-label">Last Name *</label>
+                                <input type="text" class="hh-input" @bind="_lastName" placeholder="Smith" />
+                            </div>
+                        </div>
+
+                        <div class="hh-form-group">
+                            <label class="hh-label">Email Address *</label>
+                            <input type="email" class="hh-input" @bind="_email" placeholder="john@example.com" />
+                        </div>
+
+                        <div class="hh-form-group">
+                            <label class="hh-label">Phone Number *</label>
+                            <input type="tel" class="hh-input" @bind="_phone" placeholder="(313) 555-0123" />
+                        </div>
+
+                        <div class="hh-form-group">
+                            <label class="hh-label">Street Address *</label>
+                            <input type="text" class="hh-input" @bind="_address" placeholder="123 Main Street" />
+                        </div>
+
+                        <div class="hh-form-group">
+                            <label class="hh-label">Apt, Suite, Unit (Optional)</label>
+                            <input type="text" class="hh-input" @bind="_address2" placeholder="Apt 4B" />
+                        </div>
+
+                        <div class="hh-form-row">
+                            <div class="hh-form-group" style="flex: 2;">
+                                <label class="hh-label">City *</label>
+                                <input type="text" class="hh-input" @bind="_city" placeholder="Hamtramck" />
+                            </div>
+                            <div class="hh-form-group">
+                                <label class="hh-label">State *</label>
+                                <select class="hh-input" @bind="_state">
+                                    <option value="">Select</option>
+                                    <option value="MI">Michigan</option>
+                                    <option value="OH">Ohio</option>
+                                    <option value="IN">Indiana</option>
+                                    <option value="IL">Illinois</option>
+                                </select>
+                            </div>
+                            <div class="hh-form-group">
+                                <label class="hh-label">ZIP *</label>
+                                <input type="text" class="hh-input" @bind="_zip" placeholder="48212" />
+                            </div>
+                        </div>
+
+                        <!-- Shipping Method -->
+                        <h4 style="margin-top: 24px; margin-bottom: 12px;">Shipping Method</h4>
+
+                        <div class="hh-shipping-options">
+                            <label class="hh-shipping-option @(_shippingMethod == "standard" ? "selected" : "")">
+                                <input type="radio" name="shipping" value="standard" checked="@(_shippingMethod == "standard")" @onchange='() => _shippingMethod = "standard"' />
+                                <div class="hh-shipping-info">
+                                    <span class="hh-shipping-name">Standard Shipping</span>
+                                    <span class="hh-shipping-time">5-7 Business Days</span>
+                                </div>
+                                <span class="hh-shipping-price">@(_subtotal >= 50 ? "FREE" : "$5.99")</span>
+                            </label>
+
+                            <label class="hh-shipping-option @(_shippingMethod == "express" ? "selected" : "")">
+                                <input type="radio" name="shipping" value="express" checked="@(_shippingMethod == "express")" @onchange='() => _shippingMethod = "express"' />
+                                <div class="hh-shipping-info">
+                                    <span class="hh-shipping-name">Express Shipping</span>
+                                    <span class="hh-shipping-time">2-3 Business Days</span>
+                                </div>
+                                <span class="hh-shipping-price">$12.99</span>
+                            </label>
+
+                            <label class="hh-shipping-option @(_shippingMethod == "pickup" ? "selected" : "")">
+                                <input type="radio" name="shipping" value="pickup" checked="@(_shippingMethod == "pickup")" @onchange='() => _shippingMethod = "pickup"' />
+                                <div class="hh-shipping-info">
+                                    <span class="hh-shipping-name">Store Pickup</span>
+                                    <span class="hh-shipping-time">Ready in 2 Hours</span>
+                                </div>
+                                <span class="hh-shipping-price">FREE</span>
+                            </label>
+                        </div>
+
+                        <button class="hh-btn hh-btn-primary hh-btn-block" style="margin-top: 24px;" @onclick="GoToPayment">
+                            Continue to Payment <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                }
+                else if (_currentStep == 2)
+                {
+                    <!-- Payment Method -->
+                    <div class="hh-card">
+                        <h3 class="hh-card-title"><i class="bi bi-credit-card"></i> Payment Method</h3>
+
+                        <div class="hh-payment-options">
+                            <label class="hh-payment-option @(_paymentMethod == "paypal" ? "selected" : "")">
+                                <input type="radio" name="payment" value="paypal" checked="@(_paymentMethod == "paypal")" @onchange='() => _paymentMethod = "paypal"' />
+                                <div class="hh-payment-logo">
+                                    <i class="bi bi-paypal" style="font-size: 24px; color: #003087;"></i>
+                                </div>
+                                <div class="hh-payment-info">
+                                    <span class="hh-payment-name">PayPal</span>
+                                    <span class="hh-payment-desc">Fast, secure checkout</span>
+                                </div>
+                            </label>
+
+                            <label class="hh-payment-option @(_paymentMethod == "card" ? "selected" : "")">
+                                <input type="radio" name="payment" value="card" checked="@(_paymentMethod == "card")" @onchange='() => _paymentMethod = "card"' />
+                                <div class="hh-payment-logo">
+                                    <i class="bi bi-credit-card" style="font-size: 24px; color: var(--hh-primary);"></i>
+                                </div>
+                                <div class="hh-payment-info">
+                                    <span class="hh-payment-name">Credit/Debit Card</span>
+                                    <span class="hh-payment-desc">Visa, Mastercard, Amex, Discover</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        @if (_paymentMethod == "card")
+                        {
+                            <div style="margin-top: 20px;">
+                                <div class="hh-form-group">
+                                    <label class="hh-label">Card Number *</label>
+                                    <input type="text" class="hh-input" @bind="_cardNumber" placeholder="1234 5678 9012 3456" />
+                                </div>
+
+                                <div class="hh-form-row">
+                                    <div class="hh-form-group">
+                                        <label class="hh-label">Expiry Date *</label>
+                                        <input type="text" class="hh-input" @bind="_cardExpiry" placeholder="MM/YY" />
+                                    </div>
+                                    <div class="hh-form-group">
+                                        <label class="hh-label">CVV *</label>
+                                        <input type="text" class="hh-input" @bind="_cardCvv" placeholder="123" />
+                                    </div>
+                                </div>
+
+                                <div class="hh-form-group">
+                                    <label class="hh-label">Name on Card *</label>
+                                    <input type="text" class="hh-input" @bind="_cardName" placeholder="John Smith" />
+                                </div>
+                            </div>
+                        }
+                        else if (_paymentMethod == "paypal")
+                        {
+                            <div class="hh-paypal-info" style="margin-top: 20px; padding: 16px; background: #FFF8E1; border-radius: 8px; text-align: center;">
+                                <i class="bi bi-info-circle" style="color: #F59E0B;"></i>
+                                <p style="margin: 8px 0 0; color: var(--hh-text-secondary);">
+                                    You will be redirected to PayPal to complete your payment securely.
+                                </p>
+                            </div>
+                        }
+
+                        <div style="display: flex; gap: 12px; margin-top: 24px;">
+                            <button class="hh-btn hh-btn-secondary" @onclick="() => _currentStep = 1">
+                                <i class="bi bi-arrow-left"></i> Back
+                            </button>
+                            <button class="hh-btn hh-btn-primary" style="flex: 1;" @onclick="GoToReview">
+                                Review Order <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+                else if (_currentStep == 3)
+                {
+                    <!-- Order Review -->
+                    <div class="hh-card">
+                        <h3 class="hh-card-title"><i class="bi bi-clipboard-check"></i> Review Your Order</h3>
+
+                        <!-- Shipping Address -->
+                        <div class="hh-review-section">
+                            <div class="hh-review-header">
+                                <h4>Shipping Address</h4>
+                                <button class="hh-link-btn" @onclick="() => _currentStep = 1">Edit</button>
+                            </div>
+                            <p>@_firstName @_lastName</p>
+                            <p>@_address @_address2</p>
+                            <p>@_city, @_state @_zip</p>
+                            <p>@_phone</p>
+                        </div>
+
+                        <!-- Shipping Method -->
+                        <div class="hh-review-section">
+                            <div class="hh-review-header">
+                                <h4>Shipping Method</h4>
+                                <button class="hh-link-btn" @onclick="() => _currentStep = 1">Edit</button>
+                            </div>
+                            <p>@GetShippingMethodName()</p>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div class="hh-review-section">
+                            <div class="hh-review-header">
+                                <h4>Payment Method</h4>
+                                <button class="hh-link-btn" @onclick="() => _currentStep = 2">Edit</button>
+                            </div>
+                            @if (_paymentMethod == "paypal")
+                            {
+                                <p><i class="bi bi-paypal" style="color: #003087;"></i> PayPal</p>
+                            }
+                            else
+                            {
+                                <p><i class="bi bi-credit-card"></i> Card ending in @_cardNumber?.TakeLast(4).ToString()</p>
+                            }
+                        </div>
+
+                        <!-- Order Items -->
+                        <div class="hh-review-section">
+                            <h4>Order Items (@_cartItems.Count)</h4>
+                            @foreach (var item in _cartItems)
+                            {
+                                <div class="hh-review-item">
+                                    <img src="@(item.ImageUrl ?? "/images/placeholder-product.png")" alt="@item.Name" />
+                                    <div class="hh-review-item-info">
+                                        <span class="hh-review-item-name">@item.Name</span>
+                                        <span class="hh-review-item-qty">Qty: @item.Quantity</span>
+                                    </div>
+                                    <span class="hh-review-item-price">$@((item.Price * item.Quantity).ToString("0.00"))</span>
+                                </div>
+                            }
+                        </div>
+
+                        <div style="display: flex; gap: 12px; margin-top: 24px;">
+                            <button class="hh-btn hh-btn-secondary" @onclick="() => _currentStep = 2">
+                                <i class="bi bi-arrow-left"></i> Back
+                            </button>
+                            @if (_paymentMethod == "paypal")
+                            {
+                                <button class="hh-btn hh-paypal-btn" style="flex: 1;" @onclick="PlaceOrderPayPal" disabled="@_isProcessing">
+                                    @if (_isProcessing)
+                                    {
+                                        <span class="hh-spinner-sm"></span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-paypal"></i>
+                                        <span>Pay with PayPal</span>
+                                    }
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="hh-btn hh-btn-primary" style="flex: 1;" @onclick="PlaceOrder" disabled="@_isProcessing">
+                                    @if (_isProcessing)
+                                    {
+                                        <span class="hh-spinner-sm"></span>
+                                        <span>Processing...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-lock"></i>
+                                        <span>Place Order - $@_total.ToString("0.00")</span>
+                                    }
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Right Column - Order Summary -->
+            <div class="hh-checkout-summary">
+                <div class="hh-card hh-sticky">
+                    <h3 class="hh-card-title">Order Summary</h3>
+
+                    <!-- Cart Items Preview -->
+                    <div class="hh-summary-items">
+                        @foreach (var item in _cartItems)
+                        {
+                            <div class="hh-summary-item">
+                                <div class="hh-summary-item-img">
+                                    <img src="@(item.ImageUrl ?? "/images/placeholder-product.png")" alt="@item.Name" />
+                                    <span class="hh-summary-item-qty">@item.Quantity</span>
+                                </div>
+                                <div class="hh-summary-item-info">
+                                    <span class="hh-summary-item-name">@item.Name</span>
+                                    <span class="hh-summary-item-price">$@((item.Price * item.Quantity).ToString("0.00"))</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <hr style="margin: 16px 0; border-color: var(--hh-border);" />
+
+                    <!-- Promo Code -->
+                    <div class="hh-promo-input">
+                        <input type="text" class="hh-input" placeholder="Promo code" @bind="_promoCode" />
+                        <button class="hh-btn hh-btn-secondary" @onclick="ApplyPromo">Apply</button>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(_promoMessage))
+                    {
+                        <p class="hh-promo-message @(_promoApplied ? "success" : "error")">
+                            <i class="bi @(_promoApplied ? "bi-check-circle" : "bi-x-circle")"></i>
+                            @_promoMessage
+                        </p>
+                    }
+
+                    <hr style="margin: 16px 0; border-color: var(--hh-border);" />
+
+                    <!-- Totals -->
+                    <div class="hh-summary-row">
+                        <span>Subtotal</span>
+                        <span>$@_subtotal.ToString("0.00")</span>
+                    </div>
+
+                    @if (_discount > 0)
+                    {
+                        <div class="hh-summary-row hh-discount">
+                            <span>Discount</span>
+                            <span>-$@_discount.ToString("0.00")</span>
+                        </div>
+                    }
+
+                    <div class="hh-summary-row">
+                        <span>Shipping</span>
+                        <span>@GetShippingCostDisplay()</span>
+                    </div>
+
+                    <div class="hh-summary-row">
+                        <span>Tax (6%)</span>
+                        <span>$@_tax.ToString("0.00")</span>
+                    </div>
+
+                    <hr style="margin: 16px 0; border-color: var(--hh-border);" />
+
+                    <div class="hh-summary-row hh-total">
+                        <span>Total</span>
+                        <span>$@_total.ToString("0.00")</span>
+                    </div>
+
+                    <!-- Security Badges -->
+                    <div class="hh-security-badges">
+                        <i class="bi bi-shield-lock"></i>
+                        <span>Secure Checkout</span>
+                    </div>
+
+                    <div class="hh-accepted-payments">
+                        <span>We accept:</span>
+                        <div class="hh-payment-icons">
+                            <i class="bi bi-credit-card"></i>
+                            <i class="bi bi-paypal"></i>
+                            <i class="bi bi-wallet2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .hh-checkout-layout {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 24px;
+        align-items: start;
+    }
+
+    @@media (max-width: 900px) {
+        .hh-checkout-layout {
+            grid-template-columns: 1fr;
+        }
+        .hh-checkout-summary {
+            order: -1;
+        }
+    }
+
+    .hh-checkout-steps {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 24px;
+        padding: 16px;
+        background: var(--hh-bg-secondary);
+        border-radius: 12px;
+    }
+
+    .hh-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .hh-step-number {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--hh-border);
+        color: var(--hh-text-secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+    }
+
+    .hh-step.active .hh-step-number {
+        background: var(--hh-primary);
+        color: white;
+    }
+
+    .hh-step.completed .hh-step-number {
+        background: var(--hh-success);
+        color: white;
+    }
+
+    .hh-step-label {
+        font-size: 0.75rem;
+        color: var(--hh-text-secondary);
+    }
+
+    .hh-step.active .hh-step-label {
+        color: var(--hh-primary);
+        font-weight: 600;
+    }
+
+    .hh-step-line {
+        width: 60px;
+        height: 2px;
+        background: var(--hh-border);
+        margin: 0 8px 16px;
+    }
+
+    .hh-step-line.active {
+        background: var(--hh-success);
+    }
+
+    .hh-card-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .hh-form-row {
+        display: flex;
+        gap: 12px;
+    }
+
+    .hh-form-row .hh-form-group {
+        flex: 1;
+    }
+
+    .hh-form-group {
+        margin-bottom: 16px;
+    }
+
+    .hh-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 6px;
+        color: var(--hh-text);
+    }
+
+    .hh-shipping-options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .hh-shipping-option {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        border: 2px solid var(--hh-border);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .hh-shipping-option:hover {
+        border-color: var(--hh-primary-light);
+    }
+
+    .hh-shipping-option.selected {
+        border-color: var(--hh-primary);
+        background: rgba(30, 64, 175, 0.05);
+    }
+
+    .hh-shipping-option input {
+        accent-color: var(--hh-primary);
+    }
+
+    .hh-shipping-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .hh-shipping-name {
+        font-weight: 600;
+    }
+
+    .hh-shipping-time {
+        font-size: 0.875rem;
+        color: var(--hh-text-secondary);
+    }
+
+    .hh-shipping-price {
+        font-weight: 600;
+        color: var(--hh-primary);
+    }
+
+    .hh-payment-options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .hh-payment-option {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        border: 2px solid var(--hh-border);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .hh-payment-option:hover {
+        border-color: var(--hh-primary-light);
+    }
+
+    .hh-payment-option.selected {
+        border-color: var(--hh-primary);
+        background: rgba(30, 64, 175, 0.05);
+    }
+
+    .hh-payment-option input {
+        accent-color: var(--hh-primary);
+    }
+
+    .hh-payment-logo {
+        width: 48px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .hh-payment-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .hh-payment-name {
+        font-weight: 600;
+    }
+
+    .hh-payment-desc {
+        font-size: 0.875rem;
+        color: var(--hh-text-secondary);
+    }
+
+    .hh-review-section {
+        padding: 16px 0;
+        border-bottom: 1px solid var(--hh-border);
+    }
+
+    .hh-review-section:last-of-type {
+        border-bottom: none;
+    }
+
+    .hh-review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .hh-review-header h4 {
+        margin: 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--hh-text-secondary);
+    }
+
+    .hh-review-section p {
+        margin: 4px 0;
+        color: var(--hh-text);
+    }
+
+    .hh-review-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 0;
+    }
+
+    .hh-review-item img {
+        width: 48px;
+        height: 48px;
+        object-fit: cover;
+        border-radius: 6px;
+    }
+
+    .hh-review-item-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .hh-review-item-name {
+        font-weight: 500;
+        font-size: 0.875rem;
+    }
+
+    .hh-review-item-qty {
+        font-size: 0.75rem;
+        color: var(--hh-text-secondary);
+    }
+
+    .hh-review-item-price {
+        font-weight: 600;
+    }
+
+    .hh-sticky {
+        position: sticky;
+        top: 80px;
+    }
+
+    .hh-summary-items {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .hh-summary-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 0;
+    }
+
+    .hh-summary-item-img {
+        position: relative;
+    }
+
+    .hh-summary-item-img img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 6px;
+    }
+
+    .hh-summary-item-qty {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 20px;
+        height: 20px;
+        background: var(--hh-primary);
+        color: white;
+        border-radius: 50%;
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .hh-summary-item-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .hh-summary-item-name {
+        font-size: 0.875rem;
+        font-weight: 500;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .hh-summary-item-price {
+        font-size: 0.875rem;
+        color: var(--hh-text-secondary);
+    }
+
+    .hh-promo-input {
+        display: flex;
+        gap: 8px;
+    }
+
+    .hh-promo-input .hh-input {
+        flex: 1;
+    }
+
+    .hh-promo-message {
+        font-size: 0.875rem;
+        margin-top: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .hh-promo-message.success {
+        color: var(--hh-success);
+    }
+
+    .hh-promo-message.error {
+        color: var(--hh-error);
+    }
+
+    .hh-security-badges {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 16px;
+        color: var(--hh-success);
+        font-size: 0.875rem;
+    }
+
+    .hh-accepted-payments {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+        color: var(--hh-text-secondary);
+        font-size: 0.75rem;
+    }
+
+    .hh-payment-icons {
+        display: flex;
+        gap: 12px;
+        font-size: 1.25rem;
+    }
+</style>
+
+@code {
+    private bool _isLoading = true;
+    private bool _isProcessing = false;
+    private bool _orderPlaced = false;
+    private int _currentStep = 1;
+    private string _orderNumber = "";
+
+    // Cart
+    private List<CartItemModel> _cartItems = new();
+    private decimal _subtotal = 0;
+    private decimal _discount = 0;
+    private decimal _tax = 0;
+    private decimal _shipping = 0;
+    private decimal _total = 0;
+
+    // Shipping Info
+    private string _firstName = "";
+    private string _lastName = "";
+    private string _email = "";
+    private string _phone = "";
+    private string _address = "";
+    private string _address2 = "";
+    private string _city = "";
+    private string _state = "MI";
+    private string _zip = "";
+    private string _shippingMethod = "standard";
+
+    // Payment Info
+    private string _paymentMethod = "paypal";
+    private string _cardNumber = "";
+    private string _cardExpiry = "";
+    private string _cardCvv = "";
+    private string _cardName = "";
+
+    // Promo
+    private string _promoCode = "";
+    private string _promoMessage = "";
+    private bool _promoApplied = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCart();
+    }
+
+    private async Task LoadCart()
+    {
+        try
+        {
+            _isLoading = true;
+            await Task.Delay(300);
+
+            // Mock cart data
+            _cartItems = new List<CartItemModel>
+            {
+                new(Guid.NewGuid(), "DeWalt 20V MAX XR Brushless Drill/Driver Kit", 149.99m, 1, "/images/products/drill.jpg", null),
+                new(Guid.NewGuid(), "Stanley FatMax Copper Pipe Cutter", 34.99m, 1, "/images/products/pipe-cutter.jpg", null),
+                new(Guid.NewGuid(), "Southwire Romex 12/2 NM-B Wire 250ft", 89.99m, 2, "/images/products/romex.jpg", "250ft"),
+            };
+
+            CalculateTotals();
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void CalculateTotals()
+    {
+        _subtotal = _cartItems.Sum(i => i.Price * i.Quantity);
+        _shipping = GetShippingCost();
+        _tax = (_subtotal - _discount) * 0.06m;
+        _total = _subtotal - _discount + _shipping + _tax;
+    }
+
+    private decimal GetShippingCost()
+    {
+        return _shippingMethod switch
+        {
+            "express" => 12.99m,
+            "pickup" => 0m,
+            _ => _subtotal >= 50 ? 0m : 5.99m
+        };
+    }
+
+    private string GetShippingCostDisplay()
+    {
+        var cost = GetShippingCost();
+        return cost == 0 ? "FREE" : $"${cost:0.00}";
+    }
+
+    private string GetShippingMethodName()
+    {
+        return _shippingMethod switch
+        {
+            "express" => "Express Shipping (2-3 Business Days) - $12.99",
+            "pickup" => "Store Pickup (Ready in 2 Hours) - FREE",
+            _ => _subtotal >= 50 ? "Standard Shipping (5-7 Business Days) - FREE" : "Standard Shipping (5-7 Business Days) - $5.99"
+        };
+    }
+
+    private void GoToPayment()
+    {
+        // Basic validation
+        if (string.IsNullOrWhiteSpace(_firstName) || string.IsNullOrWhiteSpace(_lastName) ||
+            string.IsNullOrWhiteSpace(_email) || string.IsNullOrWhiteSpace(_address) ||
+            string.IsNullOrWhiteSpace(_city) || string.IsNullOrWhiteSpace(_state) ||
+            string.IsNullOrWhiteSpace(_zip))
+        {
+            return;
+        }
+        _currentStep = 2;
+    }
+
+    private void GoToReview()
+    {
+        if (_paymentMethod == "card")
+        {
+            if (string.IsNullOrWhiteSpace(_cardNumber) || string.IsNullOrWhiteSpace(_cardExpiry) ||
+                string.IsNullOrWhiteSpace(_cardCvv) || string.IsNullOrWhiteSpace(_cardName))
+            {
+                return;
+            }
+        }
+        _currentStep = 3;
+    }
+
+    private void ApplyPromo()
+    {
+        if (string.IsNullOrWhiteSpace(_promoCode))
+        {
+            _promoMessage = "Please enter a promo code";
+            _promoApplied = false;
+            return;
+        }
+
+        // Mock promo codes
+        if (_promoCode.ToUpper() == "SAVE10")
+        {
+            _discount = _subtotal * 0.10m;
+            _promoMessage = "10% discount applied!";
+            _promoApplied = true;
+            CalculateTotals();
+        }
+        else if (_promoCode.ToUpper() == "HARDWARE20")
+        {
+            _discount = _subtotal * 0.20m;
+            _promoMessage = "20% discount applied!";
+            _promoApplied = true;
+            CalculateTotals();
+        }
+        else
+        {
+            _promoMessage = "Invalid promo code";
+            _promoApplied = false;
+        }
+    }
+
+    private async Task PlaceOrder()
+    {
+        _isProcessing = true;
+        await Task.Delay(2000); // Simulate payment processing
+
+        _orderNumber = new Random().Next(100000, 999999).ToString();
+        _orderPlaced = true;
+        _isProcessing = false;
+    }
+
+    private async Task PlaceOrderPayPal()
+    {
+        _isProcessing = true;
+        await Task.Delay(1500); // Simulate PayPal redirect
+
+        // In production, this would redirect to PayPal
+        // For demo, we simulate successful payment
+        _orderNumber = new Random().Next(100000, 999999).ToString();
+        _orderPlaced = true;
+        _isProcessing = false;
+    }
+
+    private record CartItemModel(Guid Id, string Name, decimal Price, int Quantity, string? ImageUrl, string? Variant);
+}
