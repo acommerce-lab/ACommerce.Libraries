@@ -82,12 +82,12 @@
                                Price="@product.Price" OldPrice="@product.OldPrice"
                                Currency="$" CurrencyBeforePrice="true"
                                DiscountPercent="@(product.OldPrice > 0 ? (int)Math.Round((product.OldPrice - product.Price) / product.OldPrice * 100) : 0)"
-                               Rating="@product.Rating" StockQuantity="@product.InStock"
+                               Rating="@product.Rating"
                                ShowQuickActions="false"
                                FeaturedLabel="Featured" NewLabel="New"
                                InStockLabel="In Stock ({0})" OutOfStockLabel="Out of Stock"
                                AddToCartLabel="Add to Cart" AddToWishlistLabel="Add to Wishlist"
-                               OnClick="@(id => Navigation.NavigateTo($"/product/{product.Id}"))" />
+                               OnClick="NavigateToProduct" />
             }
         </div>
     }
@@ -151,7 +151,7 @@
 
         if (_minPrice.HasValue) result = result.Where(p => p.Price >= _minPrice.Value);
         if (_maxPrice.HasValue) result = result.Where(p => p.Price <= _maxPrice.Value);
-        if (_inStockOnly) result = result.Where(p => p.InStock > 0);
+        // Note: _inStockOnly filter removed - HomeProductItem doesn't have InStock property
         if (_onSaleOnly) result = result.Where(p => p.OldPrice > 0);
 
         return _sortBy switch
@@ -168,4 +168,5 @@
     private async Task ClearFilters() { _minPrice = _maxPrice = null; _inStockOnly = _onSaleOnly = false; _categoryId = null; _currentCategory = null; await LoadProducts(); }
     private async Task ApplySort() => await LoadProducts();
     private void FilterByCategory(Guid id) { _categoryId = id.ToString(); _currentCategory = _categories.FirstOrDefault(c => c.Id == id); Navigation.NavigateTo($"/products?category={id}"); }
+    private void NavigateToProduct(Guid productId) => Navigation.NavigateTo($"/product/{productId}");
 }

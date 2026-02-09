@@ -33,7 +33,7 @@
             <div class="hh-category-grid">
                 @foreach (var category in _categories)
                 {
-                    <div class="hh-category-card" @onclick="() => Navigation.NavigateTo($"/products?category={category.Id}")">
+                    <div class="hh-category-card" @onclick="() => NavigateToCategory(category.Id)">
                         <i class="@category.Icon"></i>
                         <span>@category.Name</span>
                     </div>
@@ -60,7 +60,7 @@
                                FeaturedLabel="Featured" NewLabel="New"
                                InStockLabel="In Stock ({0})" OutOfStockLabel="Out of Stock"
                                AddToCartLabel="Add to Cart" AddToWishlistLabel="Add to Wishlist"
-                               OnClick="@(id => Navigation.NavigateTo($"/product/{product.Id}"))" />
+                               OnClick="NavigateToProduct" />
             }
         </div>
     }
@@ -99,4 +99,7 @@
         _results = DataService.SearchProducts(_searchQuery);
         _isLoading = false;
     }
+
+    private void NavigateToCategory(Guid categoryId) => Navigation.NavigateTo($"/products?category={categoryId}");
+    private void NavigateToProduct(Guid productId) => Navigation.NavigateTo($"/product/{productId}");
 }

@@ -117,8 +117,8 @@
         <p class="hh-store-address">9033 Joseph Campau Ave, Hamtramck, MI 48212</p>
         <p class="hh-store-hours"><i class="bi bi-clock"></i> Mon-Sat 7AM-7PM | Sun 9AM-5PM</p>
         <div class="hh-store-actions">
-            <AcButton Text="(313) 365-2400" Icon="bi-telephone" Variant="ButtonVariant.Primary" OnClick="() => Navigation.NavigateTo(\"tel:+13133652400\")" />
-            <AcButton Text="Get Directions" Icon="bi-geo-alt" Variant="ButtonVariant.Secondary" OnClick="() => Navigation.NavigateTo(\"https://maps.google.com/?q=9033+Joseph+Campau+Ave+Hamtramck+MI\")" />
+            <AcButton Text="(313) 365-2400" Icon="bi-telephone" Variant="ButtonVariant.Primary" OnClick="CallStore" />
+            <AcButton Text="Get Directions" Icon="bi-geo-alt" Variant="ButtonVariant.Secondary" OnClick="GetDirections" />
         </div>
     </section>
 </div>
@@ -159,4 +159,6 @@
     private async Task HandleSearch(string query) => Navigation.NavigateTo($"/search?q={Uri.EscapeDataString(query)}");
     private async Task HandleProductClick(Guid productId) => Navigation.NavigateTo($"/product/{productId}");
     private async Task HandleAddToCart(Guid productId) => Console.WriteLine($"Added product {productId} to cart");
+    private void CallStore() => Navigation.NavigateTo("tel:+13133652400");
+    private void GetDirections() => Navigation.NavigateTo("https://maps.google.com/?q=9033+Joseph+Campau+Ave+Hamtramck+MI");
 }

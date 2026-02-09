@@ -141,7 +141,7 @@
                                            Price="@product.Price" Currency="$" CurrencyBeforePrice="true" ShowQuickActions="false"
                                            FeaturedLabel="Featured" NewLabel="New" InStockLabel="In Stock ({0})" OutOfStockLabel="Out of Stock"
                                            AddToCartLabel="Add to Cart" AddToWishlistLabel="Add to Wishlist"
-                                           OnClick="@(id => Navigation.NavigateTo($"/product/{product.Id}"))" />
+                                           OnClick="NavigateToProduct" />
                         </div>
                     }
                 </div>
@@ -181,4 +181,6 @@
         _addedToCart = false;
         _isAddingToCart = false;
     }
+
+    private void NavigateToProduct(Guid productId) => Navigation.NavigateTo($"/product/{productId}");
 }
