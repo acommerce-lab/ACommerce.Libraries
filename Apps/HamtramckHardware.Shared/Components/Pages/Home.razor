@@ -147,12 +147,12 @@
     private List<HomeProductItem> _bestSellers = new();
     private List<HomeProductItem> _dealsProducts = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        _categories = DataService.GetCategories();
-        _featuredProducts = DataService.GetFeaturedProducts();
-        _bestSellers = DataService.GetBestSellers();
-        _dealsProducts = DataService.GetDealsProducts();
+        _categories = await DataService.GetCategoriesAsync();
+        _featuredProducts = await DataService.GetFeaturedProductsAsync();
+        _bestSellers = await DataService.GetBestSellersAsync();
+        _dealsProducts = await DataService.GetDealsProductsAsync();
     }
 
     private void SelectCategory(Guid categoryId) => Navigation.NavigateTo($"/products?category={categoryId}");

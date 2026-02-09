@@ -164,9 +164,8 @@
         _isLoading = true;
         _quantity = 1;
         _selectedImageIndex = 0;
-        await Task.Delay(200);
-        _product = DataService.GetProductDetails(ProductId);
-        _relatedProducts = DataService.GetRelatedProducts(ProductId, 4);
+        _product = await DataService.GetProductDetailsAsync(ProductId);
+        _relatedProducts = await DataService.GetRelatedProductsAsync(ProductId, 4);
         _isLoading = false;
     }
 

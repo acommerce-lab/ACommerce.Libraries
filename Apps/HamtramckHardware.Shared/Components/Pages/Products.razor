@@ -119,7 +119,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _categories = DataService.GetCategories();
+        _categories = await DataService.GetCategoriesAsync();
         _categoryId = Category;
         _sortBy = Sort ?? "featured";
 
@@ -132,9 +132,8 @@
     private async Task LoadProducts()
     {
         _isLoading = true;
-        await Task.Delay(200);
 
-        var allProducts = DataService.GetAllProducts();
+        var allProducts = await DataService.GetAllProductsAsync();
         _products = ApplyFiltersAndSort(allProducts);
         _isLoading = false;
     }

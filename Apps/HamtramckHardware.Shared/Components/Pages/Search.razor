@@ -83,7 +83,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _categories = DataService.GetCategories();
+        _categories = await DataService.GetCategoriesAsync();
         _searchQuery = Query;
         if (!string.IsNullOrWhiteSpace(_searchQuery)) await PerformSearch();
     }
@@ -95,8 +95,7 @@
     {
         if (string.IsNullOrWhiteSpace(_searchQuery)) { _results.Clear(); return; }
         _isLoading = true;
-        await Task.Delay(200);
-        _results = DataService.SearchProducts(_searchQuery);
+        _results = await DataService.SearchProductsAsync(_searchQuery);
         _isLoading = false;
     }
 
