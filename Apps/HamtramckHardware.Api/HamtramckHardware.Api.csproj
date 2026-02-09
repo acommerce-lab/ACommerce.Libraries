@@ -28,6 +28,7 @@
     <!-- Catalog (Products & Categories) -->
     <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Products\ACommerce.Catalog.Products.csproj" />
     <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Products.Api\ACommerce.Catalog.Products.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Currencies\ACommerce.Catalog.Currencies.csproj" />
 
     <!-- Cart & Orders -->
     <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Cart\ACommerce.Cart.csproj" />
