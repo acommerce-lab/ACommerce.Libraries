@@ -30,8 +30,9 @@ builder.Services.AddACommerceCustomerTemplate(options =>
     options.Mode = ThemeMode.Light;
 });
 
-// API Configuration
-var apiConfig = ApiConfiguration.ForWeb(useLocalApi: false);
+// API Configuration - Use local API in development
+var useLocalApi = builder.Environment.IsDevelopment();
+var apiConfig = ApiConfiguration.ForWeb(useLocalApi: useLocalApi);
 Console.WriteLine($"[HamtramckHardware.Web] API Base URL: {apiConfig.BaseUrl}");
 
 // Storage & Auth
