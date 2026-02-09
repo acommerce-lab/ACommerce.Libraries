@@ -1,9 +1,8 @@
 @page "/"
 @using ACommerce.Templates.Customer.Pages
-@inject ILocalizationService L
+@using HamtramckHardware.Shared.Services
+@inject HamtramckDataService DataService
 @inject IAppNavigationService Navigation
-@inject CategoriesClient CategoriesClient
-@inject ProductsClient ProductsClient
 
 <div class="ac-page hh-home">
     <!-- Hero Banner -->
@@ -17,30 +16,16 @@
     <!-- Search Box -->
     <section class="ac-hero-section">
         <AcSearchBox Placeholder="Search tools, plumbing, electrical..."
-                     Value="@_searchQuery"
-                     ValueChanged="s => _searchQuery = s"
                      OnSearch="HandleSearch"
                      ShowVoiceSearch="false" />
     </section>
 
     <!-- Feature Cards -->
     <div class="hh-feature-cards">
-        <div class="hh-feature-card">
-            <i class="bi bi-truck"></i>
-            <span>Free Shipping $50+</span>
-        </div>
-        <div class="hh-feature-card">
-            <i class="bi bi-shield-check"></i>
-            <span>2-Year Warranty</span>
-        </div>
-        <div class="hh-feature-card">
-            <i class="bi bi-headset"></i>
-            <span>Expert Help</span>
-        </div>
-        <div class="hh-feature-card">
-            <i class="bi bi-clock-history"></i>
-            <span>Same Day Pickup</span>
-        </div>
+        <div class="hh-feature-card"><i class="bi bi-truck"></i><span>Free Shipping $50+</span></div>
+        <div class="hh-feature-card"><i class="bi bi-shield-check"></i><span>2-Year Warranty</span></div>
+        <div class="hh-feature-card"><i class="bi bi-headset"></i><span>Expert Help</span></div>
+        <div class="hh-feature-card"><i class="bi bi-clock-history"></i><span>Same Day Pickup</span></div>
     </div>
 
     <!-- Categories Section -->
@@ -53,9 +38,7 @@
             @foreach (var category in _categories)
             {
                 <div class="ac-category-item" @onclick="() => SelectCategory(category.Id)">
-                    <div class="ac-category-icon">
-                        <i class="@category.Icon"></i>
-                    </div>
+                    <div class="ac-category-icon"><i class="@category.Icon"></i></div>
                     <span class="ac-category-name">@category.Name</span>
                 </div>
             }
@@ -68,40 +51,19 @@
             <h2 class="ac-section-title">Featured Products</h2>
             <a href="/products?featured=true" class="ac-section-link">See All</a>
         </div>
-
-        @if (_isLoading)
-        {
-            <div class="ac-loading-overlay">
-                <AcSpinner Size="SpinnerSize.Large" Text="Loading products..." />
-            </div>
-        }
-        else
-        {
-            <div class="ac-products-scroll">
-                @foreach (var product in _featuredProducts)
-                {
-                    <AcProductCard Id="@product.Id"
-                                   Name="@product.Name"
-                                   ImageUrl="@product.Image"
-                                   Price="@product.Price"
-                                   OldPrice="@product.OldPrice"
-                                   Rating="@product.Rating"
-                                   ReviewCount="@product.ReviewCount"
-                                   IsFeatured="true"
-                                   Currency="$"
-                                   CurrencyBeforePrice="true"
-                                   FeaturedLabel="Featured"
-                                   NewLabel="New"
-                                   InStockLabel="In Stock ({0})"
-                                   OutOfStockLabel="Out of Stock"
-                                   AddToCartLabel="Add to Cart"
-                                   AddToWishlistLabel="Add to Wishlist"
-                                   DynamicAttributes="@product.Attributes"
-                                   OnClick="HandleProductClick"
-                                   OnAddToCart="HandleAddToCart" />
-                }
-            </div>
-        }
+        <div class="ac-products-scroll">
+            @foreach (var product in _featuredProducts)
+            {
+                <AcProductCard Id="@product.Id" Name="@product.Name" ImageUrl="@product.Image"
+                               Price="@product.Price" OldPrice="@product.OldPrice"
+                               Rating="@product.Rating" ReviewCount="@product.ReviewCount"
+                               IsFeatured="true" Currency="$" CurrencyBeforePrice="true"
+                               FeaturedLabel="Featured" NewLabel="New"
+                               InStockLabel="In Stock ({0})" OutOfStockLabel="Out of Stock"
+                               AddToCartLabel="Add to Cart" AddToWishlistLabel="Add to Wishlist"
+                               OnClick="HandleProductClick" OnAddToCart="HandleAddToCart" />
+            }
+        </div>
     </section>
 
     <!-- Deals of the Week -->
@@ -113,23 +75,15 @@
         <div class="ac-products-scroll">
             @foreach (var product in _dealsProducts)
             {
-                <AcProductCard Id="@product.Id"
-                               Name="@product.Name"
-                               ImageUrl="@product.Image"
-                               Price="@product.Price"
-                               OldPrice="@product.OldPrice"
+                <AcProductCard Id="@product.Id" Name="@product.Name" ImageUrl="@product.Image"
+                               Price="@product.Price" OldPrice="@product.OldPrice"
                                Rating="@product.Rating"
                                DiscountPercent="@(product.OldPrice > 0 ? (int)Math.Round((product.OldPrice - product.Price) / product.OldPrice * 100) : 0)"
-                               Currency="$"
-                               CurrencyBeforePrice="true"
-                               FeaturedLabel="Featured"
-                               NewLabel="New"
-                               InStockLabel="In Stock ({0})"
-                               OutOfStockLabel="Out of Stock"
-                               AddToCartLabel="Add to Cart"
-                               AddToWishlistLabel="Add to Wishlist"
-                               OnClick="HandleProductClick"
-                               OnAddToCart="HandleAddToCart" />
+                               Currency="$" CurrencyBeforePrice="true"
+                               FeaturedLabel="Featured" NewLabel="New"
+                               InStockLabel="In Stock ({0})" OutOfStockLabel="Out of Stock"
+                               AddToCartLabel="Add to Cart" AddToWishlistLabel="Add to Wishlist"
+                               OnClick="HandleProductClick" OnAddToCart="HandleAddToCart" />
             }
         </div>
     </section>
@@ -143,24 +97,14 @@
         <div class="ac-products-grid">
             @foreach (var product in _bestSellers.Take(6))
             {
-                <AcProductCard Id="@product.Id"
-                               Name="@product.Name"
-                               ImageUrl="@product.Image"
-                               Price="@product.Price"
-                               OldPrice="@product.OldPrice"
-                               Rating="@product.Rating"
-                               ReviewCount="@product.ReviewCount"
-                               Currency="$"
-                               CurrencyBeforePrice="true"
-                               FeaturedLabel="Featured"
-                               NewLabel="New"
-                               InStockLabel="In Stock ({0})"
-                               OutOfStockLabel="Out of Stock"
-                               AddToCartLabel="Add to Cart"
-                               AddToWishlistLabel="Add to Wishlist"
-                               DynamicAttributes="@product.Attributes"
-                               OnClick="HandleProductClick"
-                               OnAddToCart="HandleAddToCart" />
+                <AcProductCard Id="@product.Id" Name="@product.Name" ImageUrl="@product.Image"
+                               Price="@product.Price" OldPrice="@product.OldPrice"
+                               Rating="@product.Rating" ReviewCount="@product.ReviewCount"
+                               Currency="$" CurrencyBeforePrice="true"
+                               FeaturedLabel="Featured" NewLabel="New"
+                               InStockLabel="In Stock ({0})" OutOfStockLabel="Out of Stock"
+                               AddToCartLabel="Add to Cart" AddToWishlistLabel="Add to Wishlist"
+                               OnClick="HandleProductClick" OnAddToCart="HandleAddToCart" />
             }
         </div>
     </section>
@@ -173,294 +117,46 @@
         <p class="hh-store-address">9033 Joseph Campau Ave, Hamtramck, MI 48212</p>
         <p class="hh-store-hours"><i class="bi bi-clock"></i> Mon-Sat 7AM-7PM | Sun 9AM-5PM</p>
         <div class="hh-store-actions">
-            <AcButton Text="(313) 365-2400"
-                      Icon="bi-telephone"
-                      Variant="ButtonVariant.Primary"
-                      OnClick="HandleCallStore" />
-            <AcButton Text="Get Directions"
-                      Icon="bi-geo-alt"
-                      Variant="ButtonVariant.Secondary"
-                      OnClick="HandleGetDirections" />
-        </div>
-    </section>
-
-    <!-- Newsletter Signup -->
-    <section class="hh-newsletter">
-        <i class="bi bi-envelope-paper"></i>
-        <h3>Get Exclusive Deals</h3>
-        <p>Sign up for our newsletter and get 10% off your first order!</p>
-        <div class="hh-newsletter-form">
-            <AcInput Placeholder="Enter your email"
-                     @bind-Value="_newsletterEmail"
-                     Type="email" />
-            <AcButton Text="Subscribe"
-                      Variant="ButtonVariant.Warning"
-                      OnClick="HandleSubscribe" />
+            <AcButton Text="(313) 365-2400" Icon="bi-telephone" Variant="ButtonVariant.Primary" OnClick="() => Navigation.NavigateTo(\"tel:+13133652400\")" />
+            <AcButton Text="Get Directions" Icon="bi-geo-alt" Variant="ButtonVariant.Secondary" OnClick="() => Navigation.NavigateTo(\"https://maps.google.com/?q=9033+Joseph+Campau+Ave+Hamtramck+MI\")" />
         </div>
     </section>
 </div>
 
 <style>
-    .hh-home {
-        padding-bottom: 80px;
-    }
-
-    /* Hero Banner */
-    .hh-hero {
-        background: linear-gradient(135deg, var(--ac-primary) 0%, var(--ac-primary-dark) 100%);
-        color: white;
-        padding: 32px 16px;
-        text-align: center;
-    }
-
-    .hh-hero h1 {
-        font-size: 1.75rem;
-        font-weight: 800;
-        margin-bottom: 8px;
-        color: white;
-    }
-
-    .hh-hero p {
-        opacity: 0.9;
-        margin: 0;
-    }
-
-    /* Feature Cards */
-    .hh-feature-cards {
-        display: flex;
-        gap: 8px;
-        padding: 16px;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
+    .hh-home { padding-bottom: 80px; }
+    .hh-hero { background: linear-gradient(135deg, var(--ac-primary) 0%, var(--ac-primary-dark) 100%); color: white; padding: 32px 16px; text-align: center; }
+    .hh-hero h1 { font-size: 1.75rem; font-weight: 800; margin-bottom: 8px; color: white; }
+    .hh-hero p { opacity: 0.9; margin: 0; }
+    .hh-feature-cards { display: flex; gap: 8px; padding: 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .hh-feature-cards::-webkit-scrollbar { display: none; }
-
-    .hh-feature-card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-        padding: 12px 16px;
-        background: var(--ac-surface);
-        border-radius: var(--ac-radius-lg);
-        box-shadow: var(--ac-shadow-sm);
-        font-size: 0.75rem;
-        white-space: nowrap;
-        flex-shrink: 0;
-        color: var(--ac-text-secondary);
-    }
-
-    .hh-feature-card i {
-        font-size: 1.25rem;
-        color: var(--ac-primary);
-    }
-
-    /* Deals Section */
-    .hh-deals-section {
-        background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
-        padding: 16px;
-        margin: 16px;
-        border-radius: var(--ac-radius-xl);
-    }
-
-    /* Store Info */
-    .hh-store-info {
-        margin: 16px;
-        padding: 24px;
-        text-align: center;
-    }
-
-    .hh-store-icon {
-        font-size: 2.5rem;
-        color: var(--ac-primary);
-        margin-bottom: 12px;
-    }
-
-    .hh-store-info h3 {
-        margin-bottom: 12px;
-    }
-
-    .hh-store-name {
-        font-weight: 600;
-        color: var(--ac-text);
-        margin-bottom: 4px;
-    }
-
-    .hh-store-address, .hh-store-hours {
-        color: var(--ac-text-secondary);
-        font-size: 0.875rem;
-        margin-bottom: 8px;
-    }
-
-    .hh-store-actions {
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        margin-top: 16px;
-        flex-wrap: wrap;
-    }
-
-    /* Newsletter */
-    .hh-newsletter {
-        margin: 16px;
-        padding: 24px;
-        background: linear-gradient(135deg, var(--ac-primary) 0%, var(--ac-primary-dark) 100%);
-        border-radius: var(--ac-radius-xl);
-        color: white;
-        text-align: center;
-    }
-
-    .hh-newsletter i {
-        font-size: 2rem;
-        margin-bottom: 8px;
-    }
-
-    .hh-newsletter h3 {
-        color: white;
-        margin-bottom: 8px;
-    }
-
-    .hh-newsletter p {
-        opacity: 0.9;
-        margin-bottom: 16px;
-    }
-
-    .hh-newsletter-form {
-        display: flex;
-        gap: 8px;
-        max-width: 400px;
-        margin: 0 auto;
-    }
-
-    .hh-newsletter-form .ac-input {
-        flex: 1;
-    }
+    .hh-feature-card { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 16px; background: var(--ac-surface); border-radius: var(--ac-radius-lg); box-shadow: var(--ac-shadow-sm); font-size: 0.75rem; white-space: nowrap; flex-shrink: 0; color: var(--ac-text-secondary); }
+    .hh-feature-card i { font-size: 1.25rem; color: var(--ac-primary); }
+    .hh-deals-section { background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); padding: 16px; margin: 16px; border-radius: var(--ac-radius-xl); }
+    .hh-store-info { margin: 16px; padding: 24px; text-align: center; }
+    .hh-store-icon { font-size: 2.5rem; color: var(--ac-primary); margin-bottom: 12px; }
+    .hh-store-info h3 { margin-bottom: 12px; }
+    .hh-store-name { font-weight: 600; color: var(--ac-text); margin-bottom: 4px; }
+    .hh-store-address, .hh-store-hours { color: var(--ac-text-secondary); font-size: 0.875rem; margin-bottom: 8px; }
+    .hh-store-actions { display: flex; gap: 12px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
 </style>
 
 @code {
-    private bool _isLoading = true;
-    private string? _searchQuery;
-    private string? _newsletterEmail;
-
     private List<HomeCategoryItem> _categories = new();
     private List<HomeProductItem> _featuredProducts = new();
     private List<HomeProductItem> _bestSellers = new();
     private List<HomeProductItem> _dealsProducts = new();
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        _categories = GetDefaultCategories();
-        await LoadProducts();
+        _categories = DataService.GetCategories();
+        _featuredProducts = DataService.GetFeaturedProducts();
+        _bestSellers = DataService.GetBestSellers();
+        _dealsProducts = DataService.GetDealsProducts();
     }
 
-    private List<HomeCategoryItem> GetDefaultCategories()
-    {
-        return new List<HomeCategoryItem>
-        {
-            new() { Id = Guid.NewGuid(), Name = "Plumbing", Icon = "bi bi-droplet" },
-            new() { Id = Guid.NewGuid(), Name = "Electrical", Icon = "bi bi-lightning-charge" },
-            new() { Id = Guid.NewGuid(), Name = "Power Tools", Icon = "bi bi-tools" },
-            new() { Id = Guid.NewGuid(), Name = "Hand Tools", Icon = "bi bi-wrench" },
-            new() { Id = Guid.NewGuid(), Name = "Lawn & Garden", Icon = "bi bi-flower1" },
-            new() { Id = Guid.NewGuid(), Name = "Paint", Icon = "bi bi-palette" },
-            new() { Id = Guid.NewGuid(), Name = "Lumber", Icon = "bi bi-box" },
-            new() { Id = Guid.NewGuid(), Name = "Hardware", Icon = "bi bi-nut" },
-        };
-    }
-
-    private async Task LoadProducts()
-    {
-        try
-        {
-            _isLoading = true;
-            await Task.Delay(300);
-
-            _featuredProducts = GetFeaturedProducts();
-            _bestSellers = GetBestSellers();
-            _dealsProducts = GetDealsProducts();
-        }
-        finally
-        {
-            _isLoading = false;
-        }
-    }
-
-    private List<HomeProductItem> GetFeaturedProducts()
-    {
-        // These IDs match the backend seed data for consistent navigation
-        return new List<HomeProductItem>
-        {
-            new() { Id = Guid.Parse("a0000001-0000-0000-0000-000000000001"), Name = "DeWalt 20V MAX XR Brushless Drill", Image = "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400&h=400&fit=crop", Price = 149.99m, OldPrice = 179.99m, Rating = 4.8, ReviewCount = 1247, Attributes = new() { { "Brand", "DeWalt" } } },
-            new() { Id = Guid.Parse("a0000002-0000-0000-0000-000000000002"), Name = "Milwaukee M18 FUEL Hammer Drill", Image = "https://images.unsplash.com/photo-1580901368919-7738efb0f87e?w=400&h=400&fit=crop", Price = 299.99m, OldPrice = 349.99m, Rating = 4.9, ReviewCount = 892, Attributes = new() { { "Brand", "Milwaukee" } } },
-            new() { Id = Guid.Parse("a0000003-0000-0000-0000-000000000003"), Name = "Makita 18V LXT Impact Driver", Image = "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=400&h=400&fit=crop", Price = 179.99m, Rating = 4.7, ReviewCount = 654, Attributes = new() { { "Brand", "Makita" } } },
-            new() { Id = Guid.Parse("a0000004-0000-0000-0000-000000000004"), Name = "Bosch Flexiclick 5-In-1 Drill", Image = "https://images.unsplash.com/photo-1590122959498-1ccae0d48bc8?w=400&h=400&fit=crop", Price = 199.99m, OldPrice = 229.99m, Rating = 4.6, ReviewCount = 423, Attributes = new() { { "Brand", "Bosch" } } },
-            new() { Id = Guid.Parse("a0000012-0000-0000-0000-000000000012"), Name = "Stanley Copper Pipe Cutter", Image = "https://images.unsplash.com/photo-1581147036324-c17ac41f3f2c?w=400&h=400&fit=crop", Price = 34.99m, Rating = 4.5, ReviewCount = 312, Attributes = new() { { "Brand", "Stanley" } } },
-            new() { Id = Guid.Parse("a0000014-0000-0000-0000-000000000014"), Name = "Southwire Romex 12/2 Wire 250ft", Image = "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop", Price = 89.99m, OldPrice = 99.99m, Rating = 4.8, ReviewCount = 567, Attributes = new() { { "Brand", "Southwire" } } },
-        };
-    }
-
-    private List<HomeProductItem> GetBestSellers()
-    {
-        return new List<HomeProductItem>
-        {
-            new() { Id = Guid.Parse("a0000019-0000-0000-0000-000000000019"), Name = "3M Scotch Blue Painter's Tape", Image = "https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=400&h=400&fit=crop", Price = 8.99m, Rating = 4.9, ReviewCount = 2341, Attributes = new() { { "Brand", "3M" } } },
-            new() { Id = Guid.Parse("a0000020-0000-0000-0000-000000000020"), Name = "Gorilla Construction Adhesive", Image = "https://images.unsplash.com/photo-1557166983-5939644c3b5e?w=400&h=400&fit=crop", Price = 7.49m, Rating = 4.7, ReviewCount = 1823, Attributes = new() { { "Brand", "Gorilla" } } },
-            new() { Id = Guid.Parse("a0000021-0000-0000-0000-000000000021"), Name = "WD-40 Multi-Use Product 12oz", Image = "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=400&h=400&fit=crop", Price = 6.99m, Rating = 4.8, ReviewCount = 3156, Attributes = new() { { "Brand", "WD-40" } } },
-            new() { Id = Guid.Parse("a0000011-0000-0000-0000-000000000011"), Name = "SharkBite Push-to-Connect Coupling", Image = "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400&h=400&fit=crop", Price = 12.99m, Rating = 4.6, ReviewCount = 892, Attributes = new() { { "Brand", "SharkBite" } } },
-            new() { Id = Guid.Parse("a0000016-0000-0000-0000-000000000016"), Name = "Leviton Outlet 10-Pack", Image = "https://images.unsplash.com/photo-1558402529-d2638a7023e9?w=400&h=400&fit=crop", Price = 24.99m, Rating = 4.7, ReviewCount = 1567, Attributes = new() { { "Brand", "Leviton" } } },
-            new() { Id = Guid.Parse("a0000007-0000-0000-0000-000000000007"), Name = "Klein Tools 11-in-1 Screwdriver", Image = "https://images.unsplash.com/photo-1426927308491-6380b6a9936f?w=400&h=400&fit=crop", Price = 24.99m, Rating = 4.9, ReviewCount = 2089, Attributes = new() { { "Brand", "Klein" } } },
-        };
-    }
-
-    private List<HomeProductItem> GetDealsProducts()
-    {
-        return new List<HomeProductItem>
-        {
-            new() { Id = Guid.Parse("a0000006-0000-0000-0000-000000000006"), Name = "Ryobi ONE+ 18V 6-Tool Combo Kit", Image = "https://images.unsplash.com/photo-1616401784845-180882ba9ba8?w=400&h=400&fit=crop", Price = 299.99m, OldPrice = 449.99m, Rating = 4.7, ReviewCount = 1456 },
-            new() { Id = Guid.Parse("a0000008-0000-0000-0000-000000000008"), Name = "CRAFTSMAN 320-Piece Tool Set", Image = "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=400&h=400&fit=crop", Price = 199.99m, OldPrice = 299.99m, Rating = 4.8, ReviewCount = 987 },
-            new() { Id = Guid.Parse("a0000009-0000-0000-0000-000000000009"), Name = "Husky 52\" Tool Chest & Cabinet", Image = "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400&h=400&fit=crop", Price = 599.99m, OldPrice = 899.99m, Rating = 4.6, ReviewCount = 423 },
-            new() { Id = Guid.Parse("a0000022-0000-0000-0000-000000000022"), Name = "RIDGID 12-Gallon Shop Vacuum", Image = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop", Price = 79.99m, OldPrice = 119.99m, Rating = 4.5, ReviewCount = 678 },
-        };
-    }
-
-    private void SelectCategory(Guid categoryId)
-    {
-        Navigation.NavigateTo($"/products?category={categoryId}");
-    }
-
-    private async Task HandleSearch(string query)
-    {
-        Navigation.NavigateTo($"/search?q={Uri.EscapeDataString(query)}");
-    }
-
-    private async Task HandleProductClick(Guid productId)
-    {
-        Navigation.NavigateTo($"/product/{productId}");
-    }
-
-    private async Task HandleAddToCart(Guid productId)
-    {
-        // TODO: Add to cart implementation
-        Console.WriteLine($"Added product {productId} to cart");
-    }
-
-    private void HandleCallStore()
-    {
-        Navigation.NavigateTo("tel:+13133652400");
-    }
-
-    private void HandleGetDirections()
-    {
-        Navigation.NavigateTo("https://maps.google.com/?q=9033+Joseph+Campau+Ave+Hamtramck+MI");
-    }
-
-    private void HandleSubscribe()
-    {
-        if (!string.IsNullOrWhiteSpace(_newsletterEmail))
-        {
-            // TODO: Newsletter subscription
-            Console.WriteLine($"Subscribed: {_newsletterEmail}");
-        }
-    }
+    private void SelectCategory(Guid categoryId) => Navigation.NavigateTo($"/products?category={categoryId}");
+    private async Task HandleSearch(string query) => Navigation.NavigateTo($"/search?q={Uri.EscapeDataString(query)}");
+    private async Task HandleProductClick(Guid productId) => Navigation.NavigateTo($"/product/{productId}");
+    private async Task HandleAddToCart(Guid productId) => Console.WriteLine($"Added product {productId} to cart");
 }

@@ -1,50 +1,38 @@
 @page "/products"
 @using ACommerce.Templates.Customer.Components
-@inject ILocalizationService L
+@using HamtramckHardware.Shared.Services
+@inject HamtramckDataService DataService
 @inject IAppNavigationService Navigation
-@inject ProductsClient ProductsClient
 
 <div class="ac-page hh-products-page" style="direction: ltr;">
-    <!-- Page Header -->
     <div class="ac-page-header" style="padding: 16px;">
         <h1 class="ac-page-title">@(_currentCategory?.Name ?? "All Products")</h1>
         <p style="color: var(--ac-text-muted); margin: 0;">@_products.Count products</p>
     </div>
 
-    <!-- Filter Bar -->
     <div class="ac-filter-bar" style="display: flex; justify-content: space-between; align-items: center; padding: 0 16px 16px;">
         <AcButton Text="@($"Filters{(_activeFiltersCount > 0 ? $" ({_activeFiltersCount})" : "")}")"
-                  Icon="bi-funnel"
-                  Variant="ButtonVariant.Secondary"
-                  Size="ButtonSize.Small"
-                  OnClick="ToggleFilters" />
-
+                  Icon="bi-funnel" Variant="ButtonVariant.Secondary" Size="ButtonSize.Small" OnClick="ToggleFilters" />
         <select class="ac-select" style="padding: 8px 12px; border-radius: var(--ac-radius-md); border: 1px solid var(--ac-border);" @bind="_sortBy" @bind:after="ApplySort">
             <option value="featured">Featured</option>
             <option value="price-low">Price: Low to High</option>
             <option value="price-high">Price: High to Low</option>
-            <option value="newest">Newest</option>
-            <option value="bestselling">Best Selling</option>
             <option value="rating">Top Rated</option>
         </select>
     </div>
 
-    <!-- Category Pills (when no category selected) -->
-    @if (string.IsNullOrEmpty(_categoryCode))
+    @if (string.IsNullOrEmpty(_categoryId))
     {
         <div class="hh-category-scroll">
             @foreach (var category in _categories)
             {
-                <button class="hh-category-pill @(_categoryCode == category.Code ? "active" : "")"
-                        @onclick="() => FilterByCategory(category.Code)">
-                    <i class="@category.Icon"></i>
-                    @category.Name
+                <button class="hh-category-pill" @onclick="() => FilterByCategory(category.Id)">
+                    <i class="@category.Icon"></i> @category.Name
                 </button>
             }
         </div>
     }
 
-    <!-- Filter Panel (shown when toggled) -->
     @if (_showFilters)
     {
         <div class="ac-card" style="margin: 0 16px 16px; padding: 16px;">
@@ -52,8 +40,6 @@
                 <h3 style="margin: 0; font-size: 1.125rem;">Filters</h3>
                 <button class="ac-link-btn" @onclick="ClearFilters">Clear All</button>
             </div>
-
-            <!-- Price Range -->
             <div style="margin-bottom: 16px;">
                 <h4 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 8px;">Price Range</h4>
                 <div style="display: flex; align-items: center; gap: 8px;">
@@ -62,264 +48,123 @@
                     <input type="number" placeholder="Max" @bind="_maxPrice" style="flex: 1; padding: 8px; border-radius: var(--ac-radius-sm); border: 1px solid var(--ac-border);" />
                 </div>
             </div>
-
-            <!-- Brands -->
-            <div style="margin-bottom: 16px;">
-                <h4 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 8px;">Brands</h4>
-                @foreach (var brand in _brands)
-                {
-                    <label class="ac-checkbox" style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px; cursor: pointer;">
-                        <input type="checkbox"
-                               checked="@_selectedBrands.Contains(brand)"
-                               @onchange="e => ToggleBrand(brand, (bool)(e.Value ?? false))" />
-                        <span>@brand</span>
-                    </label>
-                }
-            </div>
-
-            <!-- In Stock Only -->
             <div style="margin-bottom: 8px;">
                 <label class="ac-checkbox" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                    <input type="checkbox" @bind="_inStockOnly" />
-                    <span>In Stock Only</span>
+                    <input type="checkbox" @bind="_inStockOnly" /><span>In Stock Only</span>
                 </label>
             </div>
-
-            <!-- On Sale -->
             <div style="margin-bottom: 16px;">
                 <label class="ac-checkbox" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                    <input type="checkbox" @bind="_onSaleOnly" />
-                    <span>On Sale</span>
+                    <input type="checkbox" @bind="_onSaleOnly" /><span>On Sale</span>
                 </label>
             </div>
-
-            <AcButton Text="Apply Filters"
-                      Variant="ButtonVariant.Primary"
-                      Block="true"
-                      OnClick="ApplyFilters" />
+            <AcButton Text="Apply Filters" Variant="ButtonVariant.Primary" Block="true" OnClick="ApplyFilters" />
         </div>
     }
 
-    <!-- Products Grid -->
     @if (_isLoading)
     {
-        <div class="ac-loading-container">
-            <AcSpinner />
-            <p>Loading products...</p>
-        </div>
+        <div class="ac-loading-container"><AcSpinner /><p>Loading products...</p></div>
     }
     else if (!_products.Any())
     {
-        <AcEmptyState Icon="bi-box-seam"
-                      Title="No Products Found"
+        <AcEmptyState Icon="bi-box-seam" Title="No Products Found"
                       Description="Try adjusting your filters or browse our categories."
-                      ActionText="Clear Filters"
-                      OnAction="ClearFilters" />
+                      ActionText="Clear Filters" OnAction="ClearFilters" />
     }
     else
     {
         <div class="ac-products-grid">
             @foreach (var product in _products)
             {
-                <AcProductCard Id="product.Id"
-                               Name="@product.Name"
-                               ImageUrl="@product.ImageUrl"
-                               Category="@product.Brand"
-                               Price="product.Price"
-                               OldPrice="@(product.OriginalPrice ?? 0)"
-                               Currency="$"
-                               CurrencyBeforePrice="true"
-                               DiscountPercent="@(product.OriginalPrice.HasValue && product.OriginalPrice > product.Price ? (int)Math.Round((product.OriginalPrice.Value - product.Price) / product.OriginalPrice.Value * 100) : 0)"
-                               Rating="@((double)(product.Rating ?? 0))"
-                               StockQuantity="@(product.InStock ? 10 : 0)"
+                <AcProductCard Id="product.Id" Name="@product.Name" ImageUrl="@product.Image"
+                               Price="product.Price" OldPrice="@product.OldPrice"
+                               Currency="$" CurrencyBeforePrice="true"
+                               DiscountPercent="@(product.OldPrice > 0 ? (int)Math.Round((product.OldPrice - product.Price) / product.OldPrice * 100) : 0)"
+                               Rating="@product.Rating" StockQuantity="@product.InStock"
                                ShowQuickActions="false"
-                               FeaturedLabel="Featured"
-                               NewLabel="New"
-                               InStockLabel="In Stock ({0})"
-                               OutOfStockLabel="Out of Stock"
-                               AddToCartLabel="Add to Cart"
-                               AddToWishlistLabel="Add to Wishlist"
-                               OnClick="@(id => ViewProduct(product.Id))" />
+                               FeaturedLabel="Featured" NewLabel="New"
+                               InStockLabel="In Stock ({0})" OutOfStockLabel="Out of Stock"
+                               AddToCartLabel="Add to Cart" AddToWishlistLabel="Add to Wishlist"
+                               OnClick="@(id => Navigation.NavigateTo($\"/product/{product.Id}\"))" />
             }
         </div>
-
-        <!-- Load More -->
-        @if (_hasMore)
-        {
-            <div style="padding: 16px; text-align: center;">
-                <AcButton Text="@(_isLoadingMore ? "Loading..." : "Load More")"
-                          Variant="ButtonVariant.Secondary"
-                          Disabled="_isLoadingMore"
-                          OnClick="LoadMore" />
-            </div>
-        }
     }
 </div>
 
-@code {
-    [SupplyParameterFromQuery]
-    public string? Category { get; set; }
+<style>
+    .hh-category-scroll { display: flex; gap: 8px; padding: 0 16px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .hh-category-scroll::-webkit-scrollbar { display: none; }
+    .hh-category-pill { display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--ac-surface); border: 1px solid var(--ac-border); border-radius: 20px; font-size: 0.875rem; white-space: nowrap; cursor: pointer; }
+    .hh-category-pill:hover { background: var(--ac-surface-hover); border-color: var(--ac-primary); }
+    .hh-category-pill i { color: var(--ac-primary); }
+</style>
 
-    [SupplyParameterFromQuery]
-    public string? Sort { get; set; }
+@code {
+    [SupplyParameterFromQuery] public string? Category { get; set; }
+    [SupplyParameterFromQuery] public string? Sort { get; set; }
 
     private bool _isLoading = true;
-    private bool _isLoadingMore = false;
     private bool _showFilters = false;
-    private bool _hasMore = true;
-    private int _page = 1;
-
-    private string? _categoryCode;
-    private CategoryInfo? _currentCategory;
+    private string? _categoryId;
+    private HomeCategoryItem? _currentCategory;
     private string _sortBy = "featured";
-    private decimal? _minPrice;
-    private decimal? _maxPrice;
-    private bool _inStockOnly = false;
-    private bool _onSaleOnly = false;
-    private List<string> _selectedBrands = new();
-    private int _activeFiltersCount => (_minPrice.HasValue ? 1 : 0) + (_maxPrice.HasValue ? 1 : 0) +
-                                        (_inStockOnly ? 1 : 0) + (_onSaleOnly ? 1 : 0) + _selectedBrands.Count;
+    private decimal? _minPrice, _maxPrice;
+    private bool _inStockOnly = false, _onSaleOnly = false;
+    private int _activeFiltersCount => (_minPrice.HasValue ? 1 : 0) + (_maxPrice.HasValue ? 1 : 0) + (_inStockOnly ? 1 : 0) + (_onSaleOnly ? 1 : 0);
 
-    private List<ProductItem> _products = new();
-    private List<CategoryInfo> _categories = new();
-    private List<string> _brands = new() { "DeWalt", "Milwaukee", "Makita", "Bosch", "Ryobi", "Stanley" };
+    private List<HomeProductItem> _products = new();
+    private List<HomeCategoryItem> _categories = new();
 
     protected override async Task OnInitializedAsync()
     {
-        _categories = GetCategories();
-        _categoryCode = Category;
+        _categories = DataService.GetCategories();
+        _categoryId = Category;
         _sortBy = Sort ?? "featured";
 
-        if (!string.IsNullOrEmpty(_categoryCode))
-        {
-            _currentCategory = _categories.FirstOrDefault(c => c.Code == _categoryCode);
-        }
+        if (!string.IsNullOrEmpty(_categoryId) && Guid.TryParse(_categoryId, out var catId))
+            _currentCategory = _categories.FirstOrDefault(c => c.Id == catId);
 
         await LoadProducts();
-    }
-
-    private List<CategoryInfo> GetCategories()
-    {
-        return new List<CategoryInfo>
-        {
-            new("plumbing", "Plumbing", "bi bi-droplet"),
-            new("electrical", "Electrical", "bi bi-lightning-charge"),
-            new("tools", "Tools", "bi bi-tools"),
-            new("lawn", "Lawn & Garden", "bi bi-flower1"),
-            new("paint", "Paint", "bi bi-palette"),
-            new("lumber", "Lumber", "bi bi-box"),
-            new("flooring", "Flooring", "bi bi-grid-3x3"),
-            new("hardware", "Hardware", "bi bi-nut"),
-        };
     }
 
     private async Task LoadProducts()
     {
-        try
-        {
-            _isLoading = true;
+        _isLoading = true;
+        await Task.Delay(200);
 
-            // Simulate API call
-            await Task.Delay(300);
-
-            _products = GetMockProducts();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error loading products: {ex.Message}");
-        }
-        finally
-        {
-            _isLoading = false;
-        }
+        var allProducts = DataService.GetAllProducts();
+        _products = ApplyFiltersAndSort(allProducts);
+        _isLoading = false;
     }
 
-    private List<ProductItem> GetMockProducts()
+    private List<HomeProductItem> ApplyFiltersAndSort(List<HomeProductItem> products)
     {
-        // IDs match backend seed data for consistent navigation
-        return new List<ProductItem>
+        var result = products.AsEnumerable();
+
+        if (_currentCategory != null)
         {
-            new(Guid.Parse("a0000001-0000-0000-0000-000000000001"), "DeWalt", "DeWalt 20V MAX Cordless Drill", 149.99m, 179.99m, true, 4.7m, "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400&h=400&fit=crop"),
-            new(Guid.Parse("a0000003-0000-0000-0000-000000000003"), "Makita", "Makita 18V LXT Impact Driver", 179.99m, null, true, 4.8m, "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=400&h=400&fit=crop"),
-            new(Guid.Parse("a0000010-0000-0000-0000-000000000010"), "Stanley", "Copper Pipe Fittings Set", 24.99m, 29.99m, true, 4.2m, "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400&h=400&fit=crop"),
-            new(Guid.Parse("a0000015-0000-0000-0000-000000000015"), "Lithonia", "LED Shop Light 4ft", 39.99m, null, true, 4.5m, "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=400&h=400&fit=crop"),
-            new(Guid.Parse("a0000002-0000-0000-0000-000000000002"), "Milwaukee", "Milwaukee Hammer Drill", 299.99m, 349.99m, true, 4.9m, "https://images.unsplash.com/photo-1580901368919-7738efb0f87e?w=400&h=400&fit=crop"),
-            new(Guid.Parse("a0000013-0000-0000-0000-000000000013"), "Charlotte", "PVC Pipe 10ft Bundle", 18.99m, null, true, 4.0m, "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=400&h=400&fit=crop"),
-            new(Guid.Parse("a0000014-0000-0000-0000-000000000014"), "Southwire", "Southwire Romex 12/2 Wire", 89.99m, 99.99m, true, 4.3m, "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop"),
-            new(Guid.Parse("a0000008-0000-0000-0000-000000000008"), "CRAFTSMAN", "CRAFTSMAN 320-Piece Tool Set", 199.99m, 299.99m, true, 4.6m, "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=400&h=400&fit=crop"),
-            new(Guid.Parse("a0000017-0000-0000-0000-000000000017"), "Flexzilla", "Garden Hose 50ft", 29.99m, null, false, 4.4m, "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=400&fit=crop"),
-            new(Guid.Parse("a0000005-0000-0000-0000-000000000005"), "DeWalt", "DeWalt Circular Saw", 159.99m, null, true, 4.7m, "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=400&h=400&fit=crop"),
-            new(Guid.Parse("a0000018-0000-0000-0000-000000000018"), "Ryobi", "Ryobi Leaf Blower", 89.99m, 109.99m, true, 4.1m, "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop"),
-            new(Guid.Parse("a0000023-0000-0000-0000-000000000023"), "Bosch", "Bosch Router Kit", 199.99m, null, true, 4.8m, "https://images.unsplash.com/photo-1590122959498-1ccae0d48bc8?w=400&h=400&fit=crop"),
+            var slug = _currentCategory.Name.ToLower().Replace(" & ", "-").Replace(" ", "-");
+            result = result.Where(p => p.Attributes?.TryGetValue("Category", out var cat) == true && cat == slug);
+        }
+
+        if (_minPrice.HasValue) result = result.Where(p => p.Price >= _minPrice.Value);
+        if (_maxPrice.HasValue) result = result.Where(p => p.Price <= _maxPrice.Value);
+        if (_inStockOnly) result = result.Where(p => p.InStock > 0);
+        if (_onSaleOnly) result = result.Where(p => p.OldPrice > 0);
+
+        return _sortBy switch
+        {
+            "price-low" => result.OrderBy(p => p.Price).ToList(),
+            "price-high" => result.OrderByDescending(p => p.Price).ToList(),
+            "rating" => result.OrderByDescending(p => p.Rating).ToList(),
+            _ => result.ToList()
         };
     }
 
-    private void ToggleFilters()
-    {
-        _showFilters = !_showFilters;
-    }
-
-    private void ToggleBrand(string brand, bool isChecked)
-    {
-        if (isChecked)
-            _selectedBrands.Add(brand);
-        else
-            _selectedBrands.Remove(brand);
-    }
-
-    private async Task ApplyFilters()
-    {
-        _showFilters = false;
-        _page = 1;
-        await LoadProducts();
-    }
-
-    private async Task ClearFilters()
-    {
-        _minPrice = null;
-        _maxPrice = null;
-        _inStockOnly = false;
-        _onSaleOnly = false;
-        _selectedBrands.Clear();
-        _categoryCode = null;
-        _currentCategory = null;
-        _page = 1;
-        await LoadProducts();
-    }
-
-    private async Task ApplySort()
-    {
-        _page = 1;
-        await LoadProducts();
-    }
-
-    private void FilterByCategory(string code)
-    {
-        _categoryCode = code;
-        _currentCategory = _categories.FirstOrDefault(c => c.Code == code);
-        Navigation.NavigateTo($"/products?category={code}");
-    }
-
-    private async Task LoadMore()
-    {
-        _isLoadingMore = true;
-        _page++;
-
-        // Simulate API call
-        await Task.Delay(500);
-
-        // Add more products
-        _products.AddRange(GetMockProducts().Take(4));
-
-        _isLoadingMore = false;
-        _hasMore = _page < 3; // Limit for demo
-    }
-
-    private void ViewProduct(Guid id)
-    {
-        Navigation.NavigateTo($"/product/{id}");
-    }
-
-    private record CategoryInfo(string Code, string Name, string Icon);
-    private record ProductItem(Guid Id, string Brand, string Name, decimal Price, decimal? OriginalPrice, bool InStock, decimal? Rating, string? ImageUrl);
+    private void ToggleFilters() => _showFilters = !_showFilters;
+    private async Task ApplyFilters() { _showFilters = false; await LoadProducts(); }
+    private async Task ClearFilters() { _minPrice = _maxPrice = null; _inStockOnly = _onSaleOnly = false; _categoryId = null; _currentCategory = null; await LoadProducts(); }
+    private async Task ApplySort() => await LoadProducts();
+    private void FilterByCategory(Guid id) { _categoryId = id.ToString(); _currentCategory = _categories.FirstOrDefault(c => c.Id == id); Navigation.NavigateTo($"/products?category={id}"); }
 }

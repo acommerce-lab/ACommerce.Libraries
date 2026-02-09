@@ -1,66 +1,53 @@
 @page "/product/{ProductId:guid}"
 @using ACommerce.Templates.Customer.Components
-@inject ILocalizationService L
+@using HamtramckHardware.Shared.Services
+@inject HamtramckDataService DataService
 @inject IAppNavigationService Navigation
-@inject ProductsClient ProductsClient
-@inject CartClient CartClient
 
-<div class="ac-page hh-product-details">
+<div class="ac-page hh-product-details" style="direction: ltr;">
     @if (_isLoading)
     {
-        <div class="ac-loading-container">
-            <AcSpinner />
-        </div>
+        <div class="ac-loading-container"><AcSpinner /></div>
     }
     else if (_product == null)
     {
-        <AcEmptyState Icon="bi-box-seam"
-                      Title="Product Not Found"
-                      Description="The product you're looking for doesn't exist or has been removed."
-                      ActionText="Go Back"
-                      ActionIcon="bi-arrow-left"
-                      OnAction="GoBack" />
+        <AcEmptyState Icon="bi-box-seam" Title="Product Not Found"
+                      Description="The product you're looking for doesn't exist."
+                      ActionText="Go Back" ActionIcon="bi-arrow-left" OnAction='() => Navigation.NavigateTo("/")' />
     }
     else
     {
         <!-- Product Images -->
-        <div class="ac-product-gallery" style="padding: 16px;">
+        <div style="padding: 16px;">
             <img src="@(_product.Images.FirstOrDefault() ?? "/images/placeholder-product.png")"
-                 alt="@_product.Name"
-                 style="width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--ac-radius-lg); background: var(--ac-surface);" />
+                 alt="@_product.Name" style="width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--ac-radius-lg); background: var(--ac-surface);" />
             @if (_product.Images.Count > 1)
             {
                 <div style="display: flex; gap: 8px; margin-top: 12px; overflow-x: auto;">
                     @foreach (var (image, index) in _product.Images.Select((img, i) => (img, i)))
                     {
-                        <img src="@image"
-                             alt="@_product.Name @(index + 1)"
+                        <img src="@image" alt="@_product.Name @(index + 1)"
                              style="width: 64px; height: 64px; object-fit: cover; border-radius: var(--ac-radius-sm); cursor: pointer; border: 2px solid @(_selectedImageIndex == index ? "var(--ac-primary)" : "transparent");"
-                             @onclick="() => SelectImage(index)" />
+                             @onclick="() => _selectedImageIndex = index" />
                     }
                 </div>
             }
         </div>
 
         <!-- Product Info -->
-        <div class="ac-product-info-section" style="padding: 0 16px;">
-            <div style="margin-bottom: 16px;">
-                <span style="color: var(--ac-primary); font-size: 0.875rem; font-weight: 500;">@_product.Brand</span>
-                <h1 style="font-size: 1.5rem; font-weight: 700; margin: 8px 0;">@_product.Name</h1>
-                <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; color: var(--ac-text-muted); font-size: 0.875rem;">
-                    <span>SKU: @_product.Sku</span>
-                    @if (_product.Rating.HasValue)
-                    {
-                        <span style="display: flex; align-items: center; gap: 4px;">
-                            <i class="bi bi-star-fill" style="color: #FFC107;"></i>
-                            @_product.Rating.Value.ToString("0.0")
-                            <span>(@_product.ReviewCount reviews)</span>
-                        </span>
-                    }
-                </div>
+        <div style="padding: 0 16px;">
+            <span style="color: var(--ac-primary); font-size: 0.875rem; font-weight: 500;">@_product.Brand</span>
+            <h1 style="font-size: 1.5rem; font-weight: 700; margin: 8px 0;">@_product.Name</h1>
+            <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; color: var(--ac-text-muted); font-size: 0.875rem;">
+                <span>SKU: @_product.Sku</span>
+                <span style="display: flex; align-items: center; gap: 4px;">
+                    <i class="bi bi-star-fill" style="color: #FFC107;"></i>
+                    @_product.Rating.ToString("0.0")
+                    <span>(@_product.ReviewCount reviews)</span>
+                </span>
             </div>
 
-            <div style="margin-bottom: 16px;">
+            <div style="margin: 16px 0;">
                 <span style="font-size: 1.75rem; font-weight: 700; color: var(--ac-primary);">$@_product.Price.ToString("0.00")</span>
                 @if (_product.OriginalPrice.HasValue && _product.OriginalPrice > _product.Price)
                 {
@@ -75,12 +62,8 @@
                 @if (_product.InStock)
                 {
                     <span class="ac-badge" style="background: var(--ac-success-light); color: var(--ac-success);">
-                        <i class="bi bi-check-circle"></i> In Stock
+                        <i class="bi bi-check-circle"></i> In Stock (@_product.StockQuantity)
                     </span>
-                    @if (_product.StockQuantity.HasValue && _product.StockQuantity < 10)
-                    {
-                        <span style="color: var(--ac-warning); font-size: 0.875rem; margin-left: 8px;">Only @_product.StockQuantity left!</span>
-                    }
                 }
                 else
                 {
@@ -90,48 +73,28 @@
                 }
             </div>
 
-            <!-- Quantity Selector -->
             @if (_product.InStock)
             {
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
                     <span>Quantity:</span>
-                    <div style="display: flex; align-items: center; gap: 0; border: 1px solid var(--ac-border); border-radius: var(--ac-radius-md);">
-                        <button style="width: 40px; height: 40px; border: none; background: transparent; cursor: pointer;" @onclick="DecreaseQuantity" disabled="@(_quantity <= 1)">
-                            <i class="bi bi-dash"></i>
-                        </button>
+                    <div style="display: flex; align-items: center; border: 1px solid var(--ac-border); border-radius: var(--ac-radius-md);">
+                        <button style="width: 40px; height: 40px; border: none; background: transparent; cursor: pointer;" @onclick="() => { if (_quantity > 1) _quantity--; }" disabled="@(_quantity <= 1)"><i class="bi bi-dash"></i></button>
                         <span style="min-width: 40px; text-align: center; font-weight: 600;">@_quantity</span>
-                        <button style="width: 40px; height: 40px; border: none; background: transparent; cursor: pointer;" @onclick="IncreaseQuantity">
-                            <i class="bi bi-plus"></i>
-                        </button>
+                        <button style="width: 40px; height: 40px; border: none; background: transparent; cursor: pointer;" @onclick="() => _quantity++"><i class="bi bi-plus"></i></button>
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
                 <div style="display: flex; gap: 12px; margin-bottom: 16px;">
                     <div style="flex: 1;">
-                        <AcButton Text="@(_addedToCart ? "Added!" : "Add to Cart")"
-                                  Icon="@(_isAddingToCart ? "" : "bi-cart-plus")"
-                                  Variant="ButtonVariant.Primary"
-                                  Size="ButtonSize.Large"
-                                  Block="true"
-                                  Loading="_isAddingToCart"
-                                  OnClick="AddToCart" />
+                        <AcButton Text="@(_addedToCart ? "Added!" : "Add to Cart")" Icon="@(_isAddingToCart ? "" : "bi-cart-plus")"
+                                  Variant="ButtonVariant.Primary" Size="ButtonSize.Large" Block="true" Loading="_isAddingToCart" OnClick="AddToCart" />
                     </div>
-                    <button style="width: 48px; height: 48px; border: 1px solid var(--ac-border); background: var(--ac-surface); border-radius: var(--ac-radius-md); cursor: pointer; display: flex; align-items: center; justify-content: center;" @onclick="ToggleFavorite">
+                    <button style="width: 48px; height: 48px; border: 1px solid var(--ac-border); background: var(--ac-surface); border-radius: var(--ac-radius-md); cursor: pointer;" @onclick="() => _isFavorite = !_isFavorite">
                         <i class="@(_isFavorite ? "bi bi-heart-fill" : "bi bi-heart")" style="font-size: 1.25rem; color: @(_isFavorite ? "var(--ac-danger)" : "var(--ac-text-secondary)");"></i>
                     </button>
                 </div>
             }
-            else
-            {
-                <AcButton Text="Notify When Available"
-                          Icon="bi-bell"
-                          Variant="ButtonVariant.Secondary"
-                          Block="true"
-                          OnClick="NotifyWhenAvailable" />
-            }
 
-            <!-- Store Pickup -->
             <div class="ac-card" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--ac-surface-secondary);">
                 <i class="bi bi-shop" style="font-size: 1.5rem; color: var(--ac-primary);"></i>
                 <div>
@@ -141,7 +104,7 @@
             </div>
         </div>
 
-        <!-- Product Description -->
+        <!-- Description -->
         <div class="ac-card" style="margin: 16px; padding: 16px;">
             <h3 style="margin: 0 0 12px; font-size: 1.125rem;">Description</h3>
             <p style="margin: 0; color: var(--ac-text-secondary); line-height: 1.6;">@_product.Description</p>
@@ -168,27 +131,16 @@
         @if (_relatedProducts.Any())
         {
             <section class="ac-section" style="margin: 16px;">
-                <div class="ac-section-header">
-                    <h2 class="ac-section-title">Related Products</h2>
-                </div>
+                <div class="ac-section-header"><h2 class="ac-section-title">Related Products</h2></div>
                 <div style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px;">
                     @foreach (var product in _relatedProducts)
                     {
                         <div style="flex-shrink: 0; width: 160px;">
-                            <AcProductCard Id="product.Id"
-                                           Name="@product.Name"
-                                           ImageUrl="@product.ImageUrl"
-                                           Price="product.Price"
-                                           Currency="$"
-                                           CurrencyBeforePrice="true"
-                                           ShowQuickActions="false"
-                                           FeaturedLabel="Featured"
-                                           NewLabel="New"
-                                           InStockLabel="In Stock ({0})"
-                                           OutOfStockLabel="Out of Stock"
-                                           AddToCartLabel="Add to Cart"
-                                           AddToWishlistLabel="Add to Wishlist"
-                                           OnClick="@(id => ViewProduct(product.Id))" />
+                            <AcProductCard Id="product.Id" Name="@product.Name" ImageUrl="@product.Image"
+                                           Price="product.Price" Currency="$" CurrencyBeforePrice="true" ShowQuickActions="false"
+                                           FeaturedLabel="Featured" NewLabel="New" InStockLabel="In Stock ({0})" OutOfStockLabel="Out of Stock"
+                                           AddToCartLabel="Add to Cart" AddToWishlistLabel="Add to Wishlist"
+                                           OnClick="@(id => Navigation.NavigateTo($\"/product/{product.Id}\"))" />
                         </div>
                     }
                 </div>
@@ -198,173 +150,34 @@
 </div>
 
 @code {
-    [Parameter]
-    public Guid ProductId { get; set; }
+    [Parameter] public Guid ProductId { get; set; }
 
     private bool _isLoading = true;
-    private ProductDetailModel? _product;
-    private List<RelatedProductModel> _relatedProducts = new();
-    private int _quantity = 1;
-    private int _selectedImageIndex = 0;
-    private bool _isFavorite = false;
-    private bool _isAddingToCart = false;
-    private bool _addedToCart = false;
+    private HamtramckDataService.ProductDetail? _product;
+    private List<HomeProductItem> _relatedProducts = new();
+    private int _quantity = 1, _selectedImageIndex = 0;
+    private bool _isFavorite = false, _isAddingToCart = false, _addedToCart = false;
 
     protected override async Task OnParametersSetAsync()
     {
-        await LoadProduct();
-    }
-
-    private async Task LoadProduct()
-    {
-        try
-        {
-            _isLoading = true;
-            _quantity = 1;
-            _selectedImageIndex = 0;
-
-            // Simulate API call
-            await Task.Delay(300);
-
-            // Load product from mock data based on ProductId
-            _product = GetProductById(ProductId);
-            _relatedProducts = GetRelatedProducts(ProductId);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error loading product: {ex.Message}");
-        }
-        finally
-        {
-            _isLoading = false;
-        }
-    }
-
-    private ProductDetailModel? GetProductById(Guid id)
-    {
-        // Product data matching backend seed data
-        var products = new Dictionary<Guid, ProductDetailModel>
-        {
-            [Guid.Parse("a0000001-0000-0000-0000-000000000001")] = new(id, "DeWalt", "DeWalt 20V MAX XR Brushless Drill/Driver Kit", "DCD791D2", 149.99m, 179.99m, true, 15, "The DeWalt DCD791D2 20V MAX XR Lithium Ion Brushless Compact Drill/Driver Kit delivers up to 57% more runtime over brushed. The high-speed transmission delivers two speeds for a range of fastening and drilling applications.", new() { "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600&h=600&fit=crop", "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=600&h=600&fit=crop" }, new() { {"Voltage", "20V MAX"}, {"Speed", "0-550/0-2,000 RPM"}, {"Chuck Size", "1/2 inch"}, {"Weight", "3.4 lbs"}, {"Warranty", "3 Years"} }, 4.8m, 1247),
-            [Guid.Parse("a0000002-0000-0000-0000-000000000002")] = new(id, "Milwaukee", "Milwaukee M18 FUEL Hammer Drill/Driver Kit", "2804-22", 299.99m, 349.99m, true, 8, "The M18 FUEL 1/2\" Hammer Drill/Driver is the industry's most powerful drill, providing up to 60% more power. POWERSTATE Brushless Motor delivers 1,200 in-lbs of torque for the most demanding applications.", new() { "https://images.unsplash.com/photo-1580901368919-7738efb0f87e?w=600&h=600&fit=crop", "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=600&h=600&fit=crop" }, new() { {"Voltage", "18V"}, {"Torque", "1,200 in-lbs"}, {"Battery Type", "REDLITHIUM"}, {"Weight", "4.8 lbs"}, {"Warranty", "5 Years"} }, 4.9m, 892),
-            [Guid.Parse("a0000003-0000-0000-0000-000000000003")] = new(id, "Makita", "Makita 18V LXT Brushless Impact Driver", "XDT16Z", 179.99m, null, true, 12, "The 18V LXT Brushless 4-Speed Impact Driver delivers faster driving speed with Quick-Shift Mode for greater control when driving screws. Features 4 speed settings for optimal speed and torque.", new() { "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=600&h=600&fit=crop" }, new() { {"Voltage", "18V LXT"}, {"Speed", "0-3,800 RPM"}, {"Torque", "1,550 in-lbs"}, {"Weight", "3.3 lbs"}, {"Warranty", "3 Years"} }, 4.7m, 654),
-            [Guid.Parse("a0000004-0000-0000-0000-000000000004")] = new(id, "Bosch", "Bosch 12V Flexiclick 5-In-1 Drill System", "GSR12V-300FCB22", 199.99m, 229.99m, true, 6, "The Bosch Flexiclick system features 4 interchangeable attachments that click in and out with ease. The compact head design provides access into tighter spaces than competitive drills.", new() { "https://images.unsplash.com/photo-1590122959498-1ccae0d48bc8?w=600&h=600&fit=crop" }, new() { {"Voltage", "12V MAX"}, {"Speed", "0-400/0-1,300 RPM"}, {"Chuck Size", "1/4 inch hex"}, {"Weight", "2.2 lbs"}, {"Warranty", "3 Years"} }, 4.6m, 423),
-            [Guid.Parse("a0000005-0000-0000-0000-000000000005")] = new(id, "DeWalt", "DeWalt 20V MAX 7-1/4\" Circular Saw", "DCS570B", 159.99m, null, true, 10, "The DeWalt DCS570B 20V MAX 7-1/4\" Circular Saw features a powerful 5200 RPM motor for fast and smooth cuts. The high strength/lightweight magnesium shoe provides jobsite durability.", new() { "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=600&h=600&fit=crop" }, new() { {"Voltage", "20V MAX"}, {"Blade Size", "7-1/4 inch"}, {"Speed", "5,200 RPM"}, {"Bevel Capacity", "57 degrees"}, {"Warranty", "3 Years"} }, 4.7m, 534),
-            [Guid.Parse("a0000006-0000-0000-0000-000000000006")] = new(id, "Ryobi", "Ryobi ONE+ 18V 6-Tool Combo Kit", "P1819", 299.99m, 449.99m, true, 4, "This combo kit includes a drill, impact driver, circular saw, reciprocating saw, multi-tool, and LED worklight. All tools are backed by the RYOBI 3-Year Manufacturer's Warranty.", new() { "https://images.unsplash.com/photo-1616401784845-180882ba9ba8?w=600&h=600&fit=crop" }, new() { {"Voltage", "18V ONE+"}, {"Tools Included", "6"}, {"Batteries", "2x 1.5Ah"}, {"Charger", "Included"}, {"Warranty", "3 Years"} }, 4.7m, 1456),
-            [Guid.Parse("a0000007-0000-0000-0000-000000000007")] = new(id, "Klein Tools", "Klein Tools 11-in-1 Screwdriver/Nut Driver", "32500", 24.99m, null, true, 35, "Multi-bit screwdriver with 8 popular tips and 3 nut driver sizes stored in handle. Cushion-Grip handle for comfort and torque. Made in USA.", new() { "https://images.unsplash.com/photo-1426927308491-6380b6a9936f?w=600&h=600&fit=crop" }, new() { {"Functions", "11"}, {"Phillips", "#1, #2"}, {"Slotted", "3/16\", 1/4\""}, {"Handle", "Cushion-Grip"}, {"Made In", "USA"} }, 4.9m, 2089),
-            [Guid.Parse("a0000008-0000-0000-0000-000000000008")] = new(id, "CRAFTSMAN", "CRAFTSMAN 320-Piece Mechanic's Tool Set", "CMMT12039", 199.99m, 299.99m, true, 7, "This comprehensive 320-piece tool set includes sockets, wrenches, screwdrivers, pliers, and more. Comes in a heavy-duty 3-drawer steel tool chest. Full Lifetime Warranty.", new() { "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=600&h=600&fit=crop" }, new() { {"Total Pieces", "320"}, {"Socket Sizes", "1/4\", 3/8\", 1/2\" Drive"}, {"Material", "Chrome Vanadium"}, {"Warranty", "Lifetime"} }, 4.8m, 987),
-            [Guid.Parse("a0000009-0000-0000-0000-000000000009")] = new(id, "Husky", "Husky 52\" 15-Drawer Mobile Workbench", "H52MWC15", 599.99m, 899.99m, true, 3, "The Husky 52\" Mobile Workbench features 15 drawers and 18,000 cu. in. of storage. The solid wood work surface supports 600 lbs. and the 5\" x 2\" casters allow for easy mobility.", new() { "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=600&h=600&fit=crop" }, new() { {"Width", "52 inches"}, {"Drawers", "15"}, {"Storage", "18,000 cu. in."}, {"Weight Capacity", "600 lbs"}, {"Warranty", "Lifetime"} }, 4.6m, 423),
-            [Guid.Parse("a0000010-0000-0000-0000-000000000010")] = new(id, "Stanley", "Copper Pipe Fittings Set 1/2\" - 25 Pieces", "CPF-25", 24.99m, 29.99m, true, 25, "Professional-grade copper fittings assortment includes elbows, tees, couplings, and caps. Perfect for plumbing repairs and installations. All fittings are lead-free.", new() { "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=600&h=600&fit=crop" }, new() { {"Size", "1/2 inch"}, {"Quantity", "25 Pieces"}, {"Material", "Copper"}, {"Lead Free", "Yes"}, {"NSF Certified", "Yes"} }, 4.2m, 312),
-            [Guid.Parse("a0000011-0000-0000-0000-000000000011")] = new(id, "SharkBite", "SharkBite 1/2\" Push-to-Connect Coupling", "U008LFA", 12.99m, null, true, 50, "SharkBite push-to-connect fittings work with copper, PEX, CPVC, and HDPE pipe. No special tools, crimping, or soldering required. Simply push to connect.", new() { "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=600&h=600&fit=crop" }, new() { {"Size", "1/2 inch"}, {"Connection", "Push-to-Connect"}, {"Compatible Pipes", "Copper, PEX, CPVC"}, {"Pressure Rating", "200 PSI"}, {"Warranty", "25 Years"} }, 4.6m, 892),
-            [Guid.Parse("a0000012-0000-0000-0000-000000000012")] = new(id, "Stanley", "Stanley FatMax Copper Pipe Cutter", "FMHT96545", 34.99m, null, true, 18, "The Stanley FatMax pipe cutter features a quick-adjust mechanism for fast pipe sizing. Cuts copper pipe from 1/8\" to 1-1/8\". Includes spare cutting wheel.", new() { "https://images.unsplash.com/photo-1581147036324-c17ac41f3f2c?w=600&h=600&fit=crop" }, new() { {"Capacity", "1/8\" to 1-1/8\""}, {"Material Cut", "Copper, Brass, Aluminum"}, {"Adjustment", "Quick-Adjust"}, {"Warranty", "Lifetime"} }, 4.5m, 312),
-            [Guid.Parse("a0000013-0000-0000-0000-000000000013")] = new(id, "Charlotte Pipe", "PVC Pipe 10ft Schedule 40 - 3/4\" Bundle of 5", "PVC-1040-5", 18.99m, null, true, 30, "Schedule 40 PVC pipe for plumbing and irrigation applications. NSF certified for potable water. Bundle includes 5 ten-foot lengths.", new() { "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=600&h=600&fit=crop" }, new() { {"Size", "3/4 inch"}, {"Length", "10 ft each"}, {"Schedule", "40"}, {"Quantity", "5 Pack"}, {"NSF Certified", "Yes"} }, 4.0m, 234),
-            [Guid.Parse("a0000014-0000-0000-0000-000000000014")] = new(id, "Southwire", "Southwire Romex 12/2 NM-B Wire 250ft", "63947622", 89.99m, 99.99m, true, 12, "Southwire 12/2 NM-B Romex wire for residential wiring. Features SIMpull technology for easier pulling. UL Listed and NEC compliant.", new() { "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=600&h=600&fit=crop" }, new() { {"Gauge", "12 AWG"}, {"Conductors", "2 + Ground"}, {"Length", "250 ft"}, {"Voltage Rating", "600V"}, {"UL Listed", "Yes"} }, 4.8m, 567),
-            [Guid.Parse("a0000015-0000-0000-0000-000000000015")] = new(id, "Lithonia", "LED Shop Light 4ft Linkable - 2 Pack", "LSLL-4FT-2PK", 39.99m, null, true, 20, "Energy-efficient 4ft LED shop lights deliver 4400 lumens per fixture. Link up to 4 fixtures together. Includes mounting hardware.", new() { "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=600&h=600&fit=crop" }, new() { {"Length", "4 ft"}, {"Lumens", "4,400 per fixture"}, {"Wattage", "40W"}, {"Color Temp", "4000K"}, {"Lifespan", "50,000 hours"} }, 4.5m, 456),
-            [Guid.Parse("a0000016-0000-0000-0000-000000000016")] = new(id, "Leviton", "Leviton 15A Tamper-Resistant Outlet (10-Pack)", "T5320-WMP", 24.99m, null, true, 40, "Tamper-resistant duplex outlets with shutters that prevent foreign objects from being inserted. Meets NEC requirements for residential installations.", new() { "https://images.unsplash.com/photo-1558402529-d2638a7023e9?w=600&h=600&fit=crop" }, new() { {"Amperage", "15A"}, {"Voltage", "125V"}, {"Quantity", "10 Pack"}, {"Tamper Resistant", "Yes"}, {"UL Listed", "Yes"} }, 4.7m, 1567),
-            [Guid.Parse("a0000017-0000-0000-0000-000000000017")] = new(id, "Flexzilla", "Flexzilla Garden Hose 5/8\" x 50ft", "HFZG550YW", 29.99m, null, false, 0, "Flexzilla garden hose is lightweight, flexible, and kink resistant. The patented Flexible Hybrid Polymer material is drinking water safe and won't crack in extreme temperatures.", new() { "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&h=600&fit=crop" }, new() { {"Diameter", "5/8 inch"}, {"Length", "50 ft"}, {"Material", "Hybrid Polymer"}, {"Kink Resistant", "Yes"}, {"Warranty", "Lifetime"} }, 4.4m, 1234),
-            [Guid.Parse("a0000018-0000-0000-0000-000000000018")] = new(id, "Ryobi", "Ryobi ONE+ 18V Cordless Jet Fan Blower", "P21012", 89.99m, 109.99m, true, 11, "The RYOBI 18V ONE+ Jet Fan Blower delivers up to 200 CFM and 150 MPH of clearing force. Variable speed trigger for optimal control.", new() { "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=600&fit=crop" }, new() { {"Voltage", "18V ONE+"}, {"Air Volume", "200 CFM"}, {"Air Speed", "150 MPH"}, {"Weight", "2.0 lbs"}, {"Warranty", "3 Years"} }, 4.1m, 543),
-            [Guid.Parse("a0000019-0000-0000-0000-000000000019")] = new(id, "3M", "3M Scotch Blue Painter's Tape 1.88\" x 60yd", "2090-48A", 8.99m, null, true, 100, "ScotchBlue Original Multi-Surface Painter's Tape provides medium adhesion for most projects. Removes cleanly for up to 14 days.", new() { "https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=600&h=600&fit=crop" }, new() { {"Width", "1.88 inches"}, {"Length", "60 yards"}, {"Adhesion", "Medium"}, {"Clean Removal", "14 days"}, {"Surfaces", "Multi-Surface"} }, 4.9m, 2341),
-            [Guid.Parse("a0000020-0000-0000-0000-000000000020")] = new(id, "Gorilla", "Gorilla Heavy Duty Construction Adhesive 9oz", "8010003", 7.49m, null, true, 60, "Gorilla Heavy Duty Construction Adhesive is a tough, versatile, all-weather adhesive. Bonds virtually anything including wood, stone, metal, ceramic, foam, glass, and more.", new() { "https://images.unsplash.com/photo-1557166983-5939644c3b5e?w=600&h=600&fit=crop" }, new() { {"Size", "9 oz"}, {"Type", "Construction Adhesive"}, {"Indoor/Outdoor", "Both"}, {"Waterproof", "Yes"}, {"Paintable", "Yes"} }, 4.7m, 1823),
-            [Guid.Parse("a0000021-0000-0000-0000-000000000021")] = new(id, "WD-40", "WD-40 Multi-Use Product with Smart Straw 12oz", "490057", 6.99m, null, true, 80, "WD-40 Multi-Use Product protects metal from rust and corrosion, penetrates stuck parts, displaces moisture, and lubricates almost anything.", new() { "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=600&h=600&fit=crop" }, new() { {"Size", "12 oz"}, {"Type", "Multi-Use Lubricant"}, {"Smart Straw", "Yes"}, {"Uses", "Lubricates, Protects, Cleans"}, {"Made In", "USA"} }, 4.8m, 3156),
-            [Guid.Parse("a0000022-0000-0000-0000-000000000022")] = new(id, "RIDGID", "RIDGID 12-Gallon NXT Wet/Dry Shop Vacuum", "HD1200", 79.99m, 119.99m, true, 8, "The RIDGID 12-Gallon NXT Wet/Dry Shop Vacuum features a powerful motor delivering 5.0 Peak HP. The NXT detachable blower port provides 3-in-1 functionality.", new() { "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=600&fit=crop" }, new() { {"Capacity", "12 Gallons"}, {"Peak HP", "5.0"}, {"Hose Length", "7 ft"}, {"Cord Length", "20 ft"}, {"Warranty", "Lifetime"} }, 4.5m, 678),
-            [Guid.Parse("a0000023-0000-0000-0000-000000000023")] = new(id, "Bosch", "Bosch 2.25 HP Combination Plunge & Fixed Base Router", "1617EVSPK", 199.99m, null, true, 5, "This combo kit includes both plunge and fixed bases for maximum versatility. Features soft-start for smooth startups and variable speed.", new() { "https://images.unsplash.com/photo-1590122959498-1ccae0d48bc8?w=600&h=600&fit=crop" }, new() { {"Horsepower", "2.25 HP"}, {"Speed", "8,000-25,000 RPM"}, {"Collet Sizes", "1/4\", 1/2\""}, {"Bases", "Plunge & Fixed"}, {"Warranty", "1 Year"} }, 4.8m, 834),
-            [Guid.Parse("a0000024-0000-0000-0000-000000000024")] = new(id, "DeWalt", "DeWalt 20V MAX XR 5.0Ah Battery 2-Pack", "DCB205-2", 99.99m, null, true, 20, "DeWalt 20V MAX XR 5.0Ah Lithium Ion batteries provide up to 60% more capacity than standard 3.0Ah batteries. 3-LED fuel gauge shows remaining charge.", new() { "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=600&fit=crop" }, new() { {"Voltage", "20V MAX"}, {"Capacity", "5.0Ah"}, {"Quantity", "2 Pack"}, {"Technology", "XR Lithium Ion"}, {"Warranty", "3 Years"} }, 4.9m, 2567),
-            [Guid.Parse("a0000025-0000-0000-0000-000000000025")] = new(id, "DeWalt", "DeWalt Titanium Drill Bit Set 29-Piece", "DW1369", 34.99m, null, true, 25, "DeWalt titanium pilot point drill bits feature a patented split point tip that starts on contact. The titanium oxide coating provides longer life.", new() { "https://images.unsplash.com/photo-1580901368919-7738efb0f87e?w=600&h=600&fit=crop" }, new() { {"Quantity", "29 Pieces"}, {"Size Range", "1/16\" to 1/2\""}, {"Coating", "Titanium"}, {"Point Type", "Pilot Point"}, {"Case", "Included"} }, 4.7m, 1834),
-        };
-
-        return products.TryGetValue(id, out var product) ? product : null;
-    }
-
-    private List<RelatedProductModel> GetRelatedProducts(Guid productId)
-    {
-        // Related products based on brand/category - using consistent IDs
-        return new List<RelatedProductModel>
-        {
-            new(Guid.Parse("a0000024-0000-0000-0000-000000000024"), "DeWalt 20V Battery 2-Pack", 99.99m, "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop"),
-            new(Guid.Parse("a0000025-0000-0000-0000-000000000025"), "Drill Bit Set 29pc", 34.99m, "https://images.unsplash.com/photo-1580901368919-7738efb0f87e?w=300&h=300&fit=crop"),
-            new(Guid.Parse("a0000009-0000-0000-0000-000000000009"), "Husky Tool Chest", 599.99m, "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=300&h=300&fit=crop"),
-        };
-    }
-
-    private void SelectImage(int index)
-    {
-        _selectedImageIndex = index;
-    }
-
-    private void IncreaseQuantity()
-    {
-        if (_product?.StockQuantity == null || _quantity < _product.StockQuantity)
-            _quantity++;
-    }
-
-    private void DecreaseQuantity()
-    {
-        if (_quantity > 1)
-            _quantity--;
+        _isLoading = true;
+        _quantity = 1;
+        _selectedImageIndex = 0;
+        await Task.Delay(200);
+        _product = DataService.GetProductDetails(ProductId);
+        _relatedProducts = DataService.GetRelatedProducts(ProductId, 4);
+        _isLoading = false;
     }
 
     private async Task AddToCart()
     {
         _isAddingToCart = true;
         StateHasChanged();
-
-        try
-        {
-            // Simulate API call
-            await Task.Delay(500);
-
-            _addedToCart = true;
-            StateHasChanged();
-
-            // Reset after delay
-            await Task.Delay(2000);
-            _addedToCart = false;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error adding to cart: {ex.Message}");
-        }
-        finally
-        {
-            _isAddingToCart = false;
-        }
+        await Task.Delay(500);
+        _addedToCart = true;
+        StateHasChanged();
+        await Task.Delay(2000);
+        _addedToCart = false;
+        _isAddingToCart = false;
     }
-
-    private void ToggleFavorite()
-    {
-        _isFavorite = !_isFavorite;
-    }
-
-    private void NotifyWhenAvailable()
-    {
-        // TODO: Implement notification signup
-    }
-
-    private void ViewProduct(Guid id)
-    {
-        Navigation.NavigateTo($"/product/{id}");
-    }
-
-    private void GoBack()
-    {
-        Navigation.NavigateTo("/");
-    }
-
-    private record ProductDetailModel(
-        Guid Id,
-        string Brand,
-        string Name,
-        string Sku,
-        decimal Price,
-        decimal? OriginalPrice,
-        bool InStock,
-        int? StockQuantity,
-        string Description,
-        List<string> Images,
-        Dictionary<string, string> Specifications,
-        decimal? Rating,
-        int ReviewCount
-    );
-
-    private record RelatedProductModel(Guid Id, string Name, decimal Price, string? ImageUrl);
 }

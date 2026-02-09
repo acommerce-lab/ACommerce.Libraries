@@ -70,6 +70,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<ILocalizationService, LocalizationService>();
         services.AddSingleton<ThemeService>();
+        services.AddSingleton<HamtramckDataService>();
 
         return services;
     }
