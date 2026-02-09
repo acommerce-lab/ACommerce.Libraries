@@ -1,9 +1,10 @@
 @page "/search"
+@using ACommerce.Templates.Customer.Components
 @inject ILocalizationService L
 @inject IAppNavigationService Navigation
 @inject ProductsClient ProductsClient
 
-<div class="hh-page-content hh-search-page">
+<div class="ac-page hh-search-page">
     <!-- Search Input -->
     <div class="hh-search-container">
         <div class="hh-search-input-wrapper">
@@ -22,9 +23,10 @@
                 </button>
             }
         </div>
-        <button class="hh-btn hh-btn-primary" @onclick="PerformSearch" disabled="@(string.IsNullOrWhiteSpace(_searchQuery))">
-            Search
-        </button>
+        <AcButton Text="Search"
+                  Variant="ButtonVariant.Primary"
+                  Disabled="@(string.IsNullOrWhiteSpace(_searchQuery))"
+                  OnClick="PerformSearch" />
     </div>
 
     @if (!_hasSearched)
@@ -32,10 +34,10 @@
         <!-- Recent Searches -->
         @if (_recentSearches.Any())
         {
-            <div class="hh-search-section">
-                <div class="hh-section-header">
-                    <span class="hh-section-title">Recent Searches</span>
-                    <button class="hh-link-btn" @onclick="ClearRecentSearches">Clear</button>
+            <section class="ac-section">
+                <div class="ac-section-header">
+                    <h2 class="ac-section-title">Recent Searches</h2>
+                    <button class="ac-link-btn" @onclick="ClearRecentSearches">Clear</button>
                 </div>
                 <div class="hh-recent-searches">
                     @foreach (var search in _recentSearches)
@@ -46,12 +48,14 @@
                         </div>
                     }
                 </div>
-            </div>
+            </section>
         }
 
         <!-- Popular Searches -->
-        <div class="hh-search-section">
-            <h3 class="hh-section-title">Popular Searches</h3>
+        <section class="ac-section">
+            <div class="ac-section-header">
+                <h2 class="ac-section-title">Popular Searches</h2>
+            </div>
             <div class="hh-popular-tags">
                 @foreach (var tag in _popularSearches)
                 {
@@ -60,11 +64,13 @@
                     </button>
                 }
             </div>
-        </div>
+        </section>
 
         <!-- Browse by Department -->
-        <div class="hh-search-section">
-            <h3 class="hh-section-title">Browse Departments</h3>
+        <section class="ac-section">
+            <div class="ac-section-header">
+                <h2 class="ac-section-title">Browse Departments</h2>
+            </div>
             <div class="hh-department-list">
                 @foreach (var dept in _departments)
                 {
@@ -75,58 +81,48 @@
                     </div>
                 }
             </div>
-        </div>
+        </section>
     }
     else if (_isSearching)
     {
-        <div class="hh-loading-container">
-            <div class="hh-spinner"></div>
+        <div class="ac-loading-container">
+            <AcSpinner />
             <p>Searching...</p>
         </div>
     }
     else if (!_searchResults.Any())
     {
-        <div class="hh-empty-state">
-            <i class="bi bi-search"></i>
-            <h2>No Results Found</h2>
-            <p>We couldn't find anything for "@_searchQuery"</p>
-            <div class="hh-search-suggestions">
-                <p>Try:</p>
-                <ul>
-                    <li>Checking your spelling</li>
-                    <li>Using more general terms</li>
-                    <li>Browsing our categories</li>
-                </ul>
-            </div>
+        <AcEmptyState Icon="bi-search"
+                      Title="No Results Found"
+                      Description="@($"We couldn't find anything for \"{_searchQuery}\"")" />
+        <div class="hh-search-suggestions" style="padding: 16px; text-align: center;">
+            <p>Try:</p>
+            <ul style="list-style: none; padding: 0;">
+                <li>Checking your spelling</li>
+                <li>Using more general terms</li>
+                <li>Browsing our categories</li>
+            </ul>
         </div>
     }
     else
     {
         <!-- Search Results -->
-        <div class="hh-search-results">
-            <p class="hh-results-count">@_searchResults.Count results for "@_searchQuery"</p>
+        <div class="ac-search-results">
+            <p class="ac-results-count" style="padding: 0 16px; color: var(--ac-text-secondary);">@_searchResults.Count results for "@_searchQuery"</p>
 
-            <div class="hh-products-grid">
+            <div class="ac-products-grid">
                 @foreach (var product in _searchResults)
                 {
-                    <div class="hh-product-card" @onclick="() => ViewProduct(product.Id)">
-                        <img src="@(product.ImageUrl ?? "/images/placeholder-product.png")"
-                             alt="@product.Name"
-                             class="hh-product-image" />
-                        <div class="hh-product-info">
-                            <div class="hh-product-name">@product.Name</div>
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <span class="hh-product-price">$@product.Price.ToString("0.00")</span>
-                                @if (product.OriginalPrice.HasValue && product.OriginalPrice > product.Price)
-                                {
-                                    <span class="hh-product-original-price">$@product.OriginalPrice.Value.ToString("0.00")</span>
-                                }
-                            </div>
-                            <span class="hh-stock-badge @(product.InStock ? "in-stock" : "out-of-stock")">
-                                @(product.InStock ? L["InStock"] : L["OutOfStock"])
-                            </span>
-                        </div>
-                    </div>
+                    <AcProductCard Id="product.Id"
+                                   Name="@product.Name"
+                                   ImageUrl="@product.ImageUrl"
+                                   Price="product.Price"
+                                   OldPrice="@(product.OriginalPrice ?? 0)"
+                                   Currency="$"
+                                   DiscountPercent="@(product.OriginalPrice.HasValue && product.OriginalPrice > product.Price ? (int)Math.Round((product.OriginalPrice.Value - product.Price) / product.OriginalPrice.Value * 100) : 0)"
+                                   StockQuantity="@(product.InStock ? 10 : 0)"
+                                   ShowQuickActions="false"
+                                   OnClick="@(id => ViewProduct(product.Id))" />
                 }
             </div>
         </div>
