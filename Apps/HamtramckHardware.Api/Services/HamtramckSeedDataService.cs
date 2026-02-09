@@ -67,7 +67,7 @@ public class HamtramckSeedDataService
                 Code = "USD",
                 Name = "US Dollar",
                 Symbol = "$",
-                IsDefault = true,
+                //IsDefault = true,
                 IsActive = true,
                 DecimalPlaces = 2,
                 CreatedAt = DateTime.UtcNow

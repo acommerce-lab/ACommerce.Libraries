@@ -1,0 +1,1134 @@
+2026-02-09 23:17:53.151 +03:00 [INF] Starting Hamtramck Hardware API...
+2026-02-09 23:17:53.522 +03:00 [INF] Listening on port 5200
+2026-02-09 23:17:56.159 +03:00 [INF] Creating database...
+2026-02-09 23:17:56.723 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.ServiceRegistry.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.725 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Profiles.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.725 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.726 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Profiles, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.727 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.728 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Products.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.754 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Orders.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.754 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Orders, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.755 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Recipients.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.756 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Recipients, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.757 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Payments.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.757 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.ServiceRegistry.Server, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.759 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.Infrastructure.EFCores, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.760 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.JWT, Version=1.0.4.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.761 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Users.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.761 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.TwoFactor.SessionStore.InMemory, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.763 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.764 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.765 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.ServiceRegistry.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.765 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Messaging.InMemory, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.766 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Messaging.SignalR.Hub, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.767 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.768 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Channels.InApp, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.768 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Messaging, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.769 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Messaging, Version=1.0.1.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.770 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.770 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.CQRS, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.771 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Realtime.SignalR, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.772 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Realtime.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.772 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.Storage.Local, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.773 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.AspNetCore.Swagger, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.774 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Cart, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.775 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.776 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Marketing.Analytics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.776 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.TwoFactor.Abstractions, Version=1.0.5.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.777 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Messaging.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.778 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.TwoFactor.SMS, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.805 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.806 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Marketing.GoogleConversions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.807 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Marketing.MetaConversions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.808 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Marketing.SnapchatConversions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.809 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Marketing.TikTokConversions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.810 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Marketing.TwitterConversions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.810 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Payments.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.811 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Transactions.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.812 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Vendors, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:17:56.933 +03:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2026-02-09 23:17:57.199 +03:00 [INF] Executed DbCommand (16ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+PRAGMA journal_mode = 'wal';
+2026-02-09 23:17:57.429 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "AttributeDefinitions" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_AttributeDefinitions" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "Name" TEXT NOT NULL,
+    "Code" TEXT NOT NULL,
+    "Type" TEXT NOT NULL,
+    "Description" TEXT NULL,
+    "IsRequired" INTEGER NOT NULL,
+    "IsFilterable" INTEGER NOT NULL,
+    "IsVisibleInList" INTEGER NOT NULL,
+    "IsVisibleInDetail" INTEGER NOT NULL,
+    "SortOrder" INTEGER NOT NULL,
+    "ValidationRules" TEXT NULL,
+    "DefaultValue" TEXT NULL
+);
+2026-02-09 23:17:57.436 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Cart" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_Cart" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "UserIdOrSessionId" TEXT NOT NULL,
+    "CouponCode" TEXT NULL,
+    "DiscountAmount" TEXT NULL,
+    "Notes" TEXT NULL
+);
+2026-02-09 23:17:57.439 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Currencies" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_Currencies" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "Code" TEXT NOT NULL,
+    "Name" TEXT NOT NULL,
+    "Symbol" TEXT NOT NULL,
+    "DecimalPlaces" INTEGER NOT NULL,
+    "SymbolBeforeAmount" INTEGER NOT NULL,
+    "ThousandsSeparator" TEXT NOT NULL,
+    "DecimalSeparator" TEXT NOT NULL,
+    "IsBaseCurrency" INTEGER NOT NULL,
+    "IsActive" INTEGER NOT NULL,
+    "SortOrder" INTEGER NOT NULL
+);
+2026-02-09 23:17:57.441 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "DailyMarketingStats" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_DailyMarketingStats" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "Date" TEXT NOT NULL,
+    "Platform" INTEGER NOT NULL,
+    "Campaign" TEXT NULL,
+    "Visits" INTEGER NOT NULL,
+    "UniqueVisitors" INTEGER NOT NULL,
+    "Registrations" INTEGER NOT NULL,
+    "Purchases" INTEGER NOT NULL,
+    "Revenue" TEXT NOT NULL,
+    "PageViews" INTEGER NOT NULL,
+    "ContentViews" INTEGER NOT NULL,
+    "Searches" INTEGER NOT NULL,
+    "AddToCart" INTEGER NOT NULL,
+    "AddToWishlist" INTEGER NOT NULL
+);
+2026-02-09 23:17:57.444 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "DocumentType" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_DocumentType" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "Name" TEXT NOT NULL,
+    "Code" TEXT NOT NULL,
+    "Category" INTEGER NOT NULL,
+    "Description" TEXT NULL,
+    "Icon" TEXT NULL,
+    "ColorHex" TEXT NULL,
+    "NumberPrefix" TEXT NULL,
+    "NumberLength" INTEGER NOT NULL,
+    "RequiresApproval" INTEGER NOT NULL,
+    "AffectsInventory" INTEGER NOT NULL,
+    "AffectsAccounting" INTEGER NOT NULL,
+    "IsActive" INTEGER NOT NULL,
+    "SortOrder" INTEGER NOT NULL
+);
+2026-02-09 23:17:57.446 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "MarketingAttribution" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_MarketingAttribution" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "UserId" TEXT NULL,
+    "SessionId" TEXT NULL,
+    "Platform" INTEGER NOT NULL,
+    "UtmSource" TEXT NULL,
+    "UtmMedium" TEXT NULL,
+    "UtmCampaign" TEXT NULL,
+    "UtmContent" TEXT NULL,
+    "UtmTerm" TEXT NULL,
+    "ClickId" TEXT NULL,
+    "ReferrerUrl" TEXT NULL,
+    "LandingPage" TEXT NULL,
+    "DeviceType" TEXT NULL,
+    "Country" TEXT NULL,
+    "City" TEXT NULL
+);
+2026-02-09 23:17:57.450 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "MeasurementSystems" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_MeasurementSystems" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "Name" TEXT NOT NULL,
+    "Code" TEXT NOT NULL,
+    "Description" TEXT NULL,
+    "IsDefault" INTEGER NOT NULL
+);
+2026-02-09 23:17:57.457 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Order" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_Order" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "OrderNumber" TEXT NOT NULL,
+    "CustomerId" TEXT NOT NULL,
+    "VendorId" TEXT NULL,
+    "Status" INTEGER NOT NULL,
+    "Subtotal" TEXT NOT NULL,
+    "DiscountAmount" TEXT NOT NULL,
+    "CouponCode" TEXT NULL,
+    "TaxAmount" TEXT NOT NULL,
+    "ShippingCost" TEXT NOT NULL,
+    "Total" TEXT NOT NULL,
+    "Currency" TEXT NOT NULL,
+    "ShippingAddress" TEXT NULL,
+    "BillingAddress" TEXT NULL,
+    "PaymentId" TEXT NULL,
+    "PaymentMethod" TEXT NULL,
+    "ShipmentId" TEXT NULL,
+    "TrackingNumber" TEXT NULL,
+    "CustomerNotes" TEXT NULL,
+    "InternalNotes" TEXT NULL,
+    "ConfirmedAt" TEXT NULL,
+    "ShippedAt" TEXT NULL,
+    "DeliveredAt" TEXT NULL,
+    "CancelledAt" TEXT NULL
+);
+2026-02-09 23:17:57.460 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ProductListing" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_ProductListing" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "VendorId" TEXT NOT NULL,
+    "ProductId" TEXT NOT NULL,
+    "CategoryId" TEXT NULL,
+    "Title" TEXT NOT NULL,
+    "Description" TEXT NULL,
+    "VendorSku" TEXT NULL,
+    "Status" INTEGER NOT NULL,
+    "Price" TEXT NOT NULL,
+    "CompareAtPrice" TEXT NULL,
+    "Cost" TEXT NULL,
+    "CurrencyId" TEXT NULL,
+    "QuantityAvailable" INTEGER NOT NULL,
+    "QuantityReserved" INTEGER NOT NULL,
+    "LowStockThreshold" INTEGER NULL,
+    "ProcessingTime" INTEGER NULL,
+    "VendorNotes" TEXT NULL,
+    "StartsAt" TEXT NULL,
+    "EndsAt" TEXT NULL,
+    "IsActive" INTEGER NOT NULL,
+    "IsFeatured" INTEGER NOT NULL,
+    "IsNew" INTEGER NOT NULL,
+    "TotalSales" INTEGER NOT NULL,
+    "ViewCount" INTEGER NOT NULL,
+    "Rating" TEXT NULL,
+    "ReviewCount" INTEGER NOT NULL,
+    "ImagesJson" TEXT NULL,
+    "FeaturedImage" TEXT NULL,
+    "Latitude" REAL NULL,
+    "Longitude" REAL NULL,
+    "Address" TEXT NULL,
+    "City" TEXT NULL,
+    "Condition" TEXT NULL,
+    "Currency" TEXT NULL,
+    "CommissionPercentage" TEXT NOT NULL,
+    "AttributesJson" TEXT NULL
+);
+2026-02-09 23:17:57.464 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Profile" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_Profile" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "UserId" TEXT NULL,
+    "NationalId" TEXT NULL,
+    "Type" INTEGER NOT NULL,
+    "FullName" TEXT NULL,
+    "BusinessName" TEXT NULL,
+    "PhoneNumber" TEXT NULL,
+    "Email" TEXT NULL,
+    "Avatar" TEXT NULL,
+    "Address" TEXT NULL,
+    "City" TEXT NULL,
+    "Country" TEXT NULL,
+    "PostalCode" TEXT NULL,
+    "Coordinates" TEXT NULL,
+    "IsActive" INTEGER NOT NULL,
+    "IsVerified" INTEGER NOT NULL,
+    "VerifiedAt" TEXT NULL
+);
+2026-02-09 23:17:57.467 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "RecipientGroup" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_RecipientGroup" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "Name" TEXT NOT NULL,
+    "Description" TEXT NULL,
+    "IsActive" INTEGER NOT NULL
+);
+2026-02-09 23:17:57.469 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "UserRecipient" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_UserRecipient" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "UserId" TEXT NOT NULL,
+    "FullName" TEXT NULL,
+    "PreferredLanguage" TEXT NOT NULL,
+    "TimeZone" TEXT NOT NULL,
+    "IsActive" INTEGER NOT NULL
+);
+2026-02-09 23:17:57.472 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Vendor" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_Vendor" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "ProfileId" TEXT NOT NULL,
+    "StoreName" TEXT NOT NULL,
+    "StoreSlug" TEXT NOT NULL,
+    "Description" TEXT NULL,
+    "Logo" TEXT NULL,
+    "BannerImage" TEXT NULL,
+    "Status" INTEGER NOT NULL,
+    "CommissionType" INTEGER NOT NULL,
+    "CommissionValue" TEXT NOT NULL,
+    "AdditionalFee" TEXT NULL,
+    "MinimumPayout" TEXT NOT NULL,
+    "Rating" TEXT NULL,
+    "TotalSales" INTEGER NOT NULL,
+    "AvailableBalance" TEXT NOT NULL,
+    "PendingBalance" TEXT NOT NULL,
+    "BankInfo" TEXT NULL,
+    "TaxInfo" TEXT NULL,
+    "CommercialRegister" TEXT NULL,
+    "TaxNumber" TEXT NULL,
+    "AgreedToTerms" INTEGER NOT NULL,
+    "AgreedToTermsAt" TEXT NULL
+);
+2026-02-09 23:17:57.475 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "AttributeValues" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_AttributeValues" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "AttributeDefinitionId" TEXT NOT NULL,
+    "Value" TEXT NOT NULL,
+    "DisplayName" TEXT NULL,
+    "Code" TEXT NULL,
+    "Description" TEXT NULL,
+    "ColorHex" TEXT NULL,
+    "ImageUrl" TEXT NULL,
+    "SortOrder" INTEGER NOT NULL,
+    "IsActive" INTEGER NOT NULL,
+    CONSTRAINT "FK_AttributeValues_AttributeDefinitions_AttributeDefinitionId" FOREIGN KEY ("AttributeDefinitionId") REFERENCES "AttributeDefinitions" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.478 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "CategoryAttributeMappings" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_CategoryAttributeMappings" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "CategoryId" TEXT NOT NULL,
+    "AttributeDefinitionId" TEXT NOT NULL,
+    "SortOrder" INTEGER NOT NULL,
+    "IsRequiredOverride" INTEGER NULL,
+    "IsActive" INTEGER NOT NULL,
+    CONSTRAINT "FK_CategoryAttributeMappings_AttributeDefinitions_AttributeDefinitionId" FOREIGN KEY ("AttributeDefinitionId") REFERENCES "AttributeDefinitions" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.483 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "CartItem" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_CartItem" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "CartId" TEXT NOT NULL,
+    "ListingId" TEXT NOT NULL,
+    "Quantity" INTEGER NOT NULL,
+    "Price" TEXT NOT NULL,
+    CONSTRAINT "FK_CartItem_Cart_CartId" FOREIGN KEY ("CartId") REFERENCES "Cart" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.486 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ExchangeRates" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_ExchangeRates" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "FromCurrencyId" TEXT NOT NULL,
+    "ToCurrencyId" TEXT NOT NULL,
+    "Rate" TEXT NOT NULL,
+    "RateType" TEXT NULL,
+    "EffectiveFrom" TEXT NOT NULL,
+    "EffectiveTo" TEXT NULL,
+    "Source" TEXT NOT NULL,
+    "IsActive" INTEGER NOT NULL,
+    "Priority" INTEGER NULL,
+    "InverseRate" TEXT NOT NULL,
+    CONSTRAINT "FK_ExchangeRates_Currencies_FromCurrencyId" FOREIGN KEY ("FromCurrencyId") REFERENCES "Currencies" ("Id") ON DELETE RESTRICT,
+    CONSTRAINT "FK_ExchangeRates_Currencies_ToCurrencyId" FOREIGN KEY ("ToCurrencyId") REFERENCES "Currencies" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.488 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "DocumentOperation" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_DocumentOperation" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "DocumentTypeId" TEXT NOT NULL,
+    "Operation" INTEGER NOT NULL,
+    "CustomName" TEXT NULL,
+    "Description" TEXT NULL,
+    "RequiresApproval" INTEGER NOT NULL,
+    "Conditions" TEXT NULL,
+    "IsActive" INTEGER NOT NULL,
+    "SortOrder" INTEGER NOT NULL,
+    "Icon" TEXT NULL,
+    "ColorHex" TEXT NULL,
+    CONSTRAINT "FK_DocumentOperation_DocumentType_DocumentTypeId" FOREIGN KEY ("DocumentTypeId") REFERENCES "DocumentType" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.490 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "DocumentTypeAttribute" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_DocumentTypeAttribute" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "DocumentTypeId" TEXT NOT NULL,
+    "AttributeDefinitionId" TEXT NOT NULL,
+    "IsRequired" INTEGER NOT NULL,
+    "SortOrder" INTEGER NOT NULL,
+    CONSTRAINT "FK_DocumentTypeAttribute_AttributeDefinitions_AttributeDefinitionId" FOREIGN KEY ("AttributeDefinitionId") REFERENCES "AttributeDefinitions" ("Id") ON DELETE RESTRICT,
+    CONSTRAINT "FK_DocumentTypeAttribute_DocumentType_DocumentTypeId" FOREIGN KEY ("DocumentTypeId") REFERENCES "DocumentType" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.492 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "DocumentTypeRelation" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_DocumentTypeRelation" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "SourceDocumentTypeId" TEXT NOT NULL,
+    "TargetDocumentTypeId" TEXT NOT NULL,
+    "RelationType" INTEGER NOT NULL,
+    "IsRequired" INTEGER NOT NULL,
+    "AllowMultiple" INTEGER NOT NULL,
+    "Conditions" TEXT NULL,
+    "Priority" INTEGER NOT NULL,
+    CONSTRAINT "FK_DocumentTypeRelation_DocumentType_SourceDocumentTypeId" FOREIGN KEY ("SourceDocumentTypeId") REFERENCES "DocumentType" ("Id") ON DELETE RESTRICT,
+    CONSTRAINT "FK_DocumentTypeRelation_DocumentType_TargetDocumentTypeId" FOREIGN KEY ("TargetDocumentTypeId") REFERENCES "DocumentType" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.495 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "MarketingEvent" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_MarketingEvent" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "AttributionId" TEXT NULL,
+    "UserId" TEXT NULL,
+    "SessionId" TEXT NULL,
+    "EventType" INTEGER NOT NULL,
+    "EntityId" TEXT NULL,
+    "EntityType" TEXT NULL,
+    "Value" TEXT NULL,
+    "Currency" TEXT NULL,
+    "Metadata" TEXT NULL,
+    CONSTRAINT "FK_MarketingEvent_MarketingAttribution_AttributionId" FOREIGN KEY ("AttributionId") REFERENCES "MarketingAttribution" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.497 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "OrderItem" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_OrderItem" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "OrderId" TEXT NOT NULL,
+    "ListingId" TEXT NOT NULL,
+    "VendorId" TEXT NOT NULL,
+    "ProductId" TEXT NOT NULL,
+    "ProductName" TEXT NOT NULL,
+    "Sku" TEXT NULL,
+    "Quantity" INTEGER NOT NULL,
+    "UnitPrice" TEXT NOT NULL,
+    "ItemDiscount" TEXT NULL,
+    "CommissionAmount" TEXT NOT NULL,
+    "VendorAmount" TEXT NOT NULL,
+    CONSTRAINT "FK_OrderItem_Order_OrderId" FOREIGN KEY ("OrderId") REFERENCES "Order" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.499 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ContactPoint" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_ContactPoint" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "UserId" TEXT NOT NULL,
+    "Type" INTEGER NOT NULL,
+    "Value" TEXT NOT NULL,
+    "IsVerified" INTEGER NOT NULL,
+    "IsPrimary" INTEGER NOT NULL,
+    "UserRecipientId" TEXT NOT NULL,
+    CONSTRAINT "FK_ContactPoint_UserRecipient_UserRecipientId" FOREIGN KEY ("UserRecipientId") REFERENCES "UserRecipient" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.501 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "RecipientGroupUserRecipient" (
+    "GroupsId" TEXT NOT NULL,
+    "MembersId" TEXT NOT NULL,
+    CONSTRAINT "PK_RecipientGroupUserRecipient" PRIMARY KEY ("GroupsId", "MembersId"),
+    CONSTRAINT "FK_RecipientGroupUserRecipient_RecipientGroup_GroupsId" FOREIGN KEY ("GroupsId") REFERENCES "RecipientGroup" ("Id") ON DELETE RESTRICT,
+    CONSTRAINT "FK_RecipientGroupUserRecipient_UserRecipient_MembersId" FOREIGN KEY ("MembersId") REFERENCES "UserRecipient" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.503 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "AttributeValueRelationships" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_AttributeValueRelationships" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "ParentValueId" TEXT NOT NULL,
+    "ChildValueId" TEXT NOT NULL,
+    "Type" INTEGER NOT NULL,
+    "ConversionFactor" TEXT NULL,
+    "ConversionFormula" TEXT NULL,
+    CONSTRAINT "FK_AttributeValueRelationships_AttributeValues_ChildValueId" FOREIGN KEY ("ChildValueId") REFERENCES "AttributeValues" ("Id") ON DELETE RESTRICT,
+    CONSTRAINT "FK_AttributeValueRelationships_AttributeValues_ParentValueId" FOREIGN KEY ("ParentValueId") REFERENCES "AttributeValues" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.604 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "CrossAttributeConstraint" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_CrossAttributeConstraint" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "SourceValueId" TEXT NOT NULL,
+    "TargetValueId" TEXT NOT NULL,
+    "Type" INTEGER NOT NULL,
+    "IsRequired" INTEGER NOT NULL,
+    "Priority" INTEGER NOT NULL,
+    "ErrorMessage" TEXT NULL,
+    CONSTRAINT "FK_CrossAttributeConstraint_AttributeValues_SourceValueId" FOREIGN KEY ("SourceValueId") REFERENCES "AttributeValues" ("Id") ON DELETE RESTRICT,
+    CONSTRAINT "FK_CrossAttributeConstraint_AttributeValues_TargetValueId" FOREIGN KEY ("TargetValueId") REFERENCES "AttributeValues" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.608 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "OperationNotification" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_OperationNotification" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "OperationId" TEXT NOT NULL,
+    "Type" INTEGER NOT NULL,
+    "Template" TEXT NOT NULL,
+    "Subject" TEXT NULL,
+    "IsActive" INTEGER NOT NULL,
+    "DelayMinutes" INTEGER NULL,
+    "Priority" INTEGER NOT NULL,
+    CONSTRAINT "FK_OperationNotification_DocumentOperation_OperationId" FOREIGN KEY ("OperationId") REFERENCES "DocumentOperation" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.613 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ProductAttributes" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_ProductAttributes" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "ProductId" TEXT NOT NULL,
+    "AttributeDefinitionId" TEXT NOT NULL,
+    "AttributeValueId" TEXT NULL,
+    "CustomValue" TEXT NULL,
+    "IsVariant" INTEGER NOT NULL,
+    "SortOrder" INTEGER NOT NULL,
+    CONSTRAINT "FK_ProductAttributes_AttributeDefinitions_AttributeDefinitionId" FOREIGN KEY ("AttributeDefinitionId") REFERENCES "AttributeDefinitions" ("Id") ON DELETE RESTRICT,
+    CONSTRAINT "FK_ProductAttributes_AttributeValues_AttributeValueId" FOREIGN KEY ("AttributeValueId") REFERENCES "AttributeValues" ("Id") ON DELETE RESTRICT,
+    CONSTRAINT "FK_ProductAttributes_Products_ProductId" FOREIGN KEY ("ProductId") REFERENCES "Products" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.616 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ProductBrand" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_ProductBrand" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "Name" TEXT NOT NULL,
+    "Slug" TEXT NOT NULL,
+    "Description" TEXT NULL,
+    "Logo" TEXT NULL,
+    "Website" TEXT NULL,
+    "Country" TEXT NULL,
+    "SortOrder" INTEGER NOT NULL,
+    "IsActive" INTEGER NOT NULL,
+    "ProductId" TEXT NULL,
+    CONSTRAINT "FK_ProductBrand_Products_ProductId" FOREIGN KEY ("ProductId") REFERENCES "Products" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.619 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ProductBrandMapping" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_ProductBrandMapping" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "ProductId" TEXT NOT NULL,
+    "BrandId" TEXT NOT NULL,
+    CONSTRAINT "FK_ProductBrandMapping_ProductBrand_BrandId" FOREIGN KEY ("BrandId") REFERENCES "ProductBrand" ("Id") ON DELETE RESTRICT,
+    CONSTRAINT "FK_ProductBrandMapping_Products_ProductId" FOREIGN KEY ("ProductId") REFERENCES "Products" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.621 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ProductCategory" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_ProductCategory" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "Name" TEXT NOT NULL,
+    "Slug" TEXT NOT NULL,
+    "Description" TEXT NULL,
+    "Image" TEXT NULL,
+    "Icon" TEXT NULL,
+    "ParentCategoryId" TEXT NULL,
+    "SortOrder" INTEGER NOT NULL,
+    "IsActive" INTEGER NOT NULL,
+    "ProductId" TEXT NULL,
+    CONSTRAINT "FK_ProductCategory_ProductCategory_ParentCategoryId" FOREIGN KEY ("ParentCategoryId") REFERENCES "ProductCategory" ("Id") ON DELETE RESTRICT,
+    CONSTRAINT "FK_ProductCategory_Products_ProductId" FOREIGN KEY ("ProductId") REFERENCES "Products" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.624 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ProductCategoryMapping" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_ProductCategoryMapping" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "ProductId" TEXT NOT NULL,
+    "CategoryId" TEXT NOT NULL,
+    "IsPrimary" INTEGER NOT NULL,
+    "SortOrder" INTEGER NOT NULL,
+    CONSTRAINT "FK_ProductCategoryMapping_ProductCategory_CategoryId" FOREIGN KEY ("CategoryId") REFERENCES "ProductCategory" ("Id") ON DELETE RESTRICT,
+    CONSTRAINT "FK_ProductCategoryMapping_Products_ProductId" FOREIGN KEY ("ProductId") REFERENCES "Products" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.626 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ProductInventory" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_ProductInventory" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "ProductId" TEXT NOT NULL,
+    "QuantityInStock" TEXT NOT NULL,
+    "QuantityReserved" TEXT NOT NULL,
+    "LowStockThreshold" TEXT NULL,
+    "Status" INTEGER NOT NULL,
+    "TrackInventory" INTEGER NOT NULL,
+    "AllowBackorder" INTEGER NOT NULL,
+    "Warehouse" TEXT NULL,
+    "ShelfNumber" TEXT NULL,
+    "Location" TEXT NULL,
+    CONSTRAINT "FK_ProductInventory_Products_ProductId" FOREIGN KEY ("ProductId") REFERENCES "Products" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.628 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ProductPrices" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_ProductPrices" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "ProductId" TEXT NOT NULL,
+    "CurrencyId" TEXT NOT NULL,
+    "BasePrice" TEXT NOT NULL,
+    "SalePrice" TEXT NULL,
+    "DiscountPercentage" TEXT NULL,
+    "SaleStartDate" TEXT NULL,
+    "SaleEndDate" TEXT NULL,
+    "Market" TEXT NULL,
+    "CustomerSegment" TEXT NULL,
+    "MinQuantity" INTEGER NOT NULL,
+    "MaxQuantity" INTEGER NULL,
+    "IsActive" INTEGER NOT NULL,
+    CONSTRAINT "FK_ProductPrices_Currencies_CurrencyId" FOREIGN KEY ("CurrencyId") REFERENCES "Currencies" ("Id") ON DELETE RESTRICT,
+    CONSTRAINT "FK_ProductPrices_Products_ProductId" FOREIGN KEY ("ProductId") REFERENCES "Products" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.630 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ProductRelation" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_ProductRelation" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "SourceProductId" TEXT NOT NULL,
+    "RelatedProductId" TEXT NOT NULL,
+    "RelationType" TEXT NOT NULL,
+    "SortOrder" INTEGER NOT NULL,
+    CONSTRAINT "FK_ProductRelation_Products_RelatedProductId" FOREIGN KEY ("RelatedProductId") REFERENCES "Products" ("Id") ON DELETE RESTRICT,
+    CONSTRAINT "FK_ProductRelation_Products_SourceProductId" FOREIGN KEY ("SourceProductId") REFERENCES "Products" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.631 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ProductReview" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_ProductReview" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "ProductId" TEXT NOT NULL,
+    "UserId" TEXT NOT NULL,
+    "UserName" TEXT NOT NULL,
+    "Rating" INTEGER NOT NULL,
+    "Title" TEXT NULL,
+    "Comment" TEXT NULL,
+    "IsRecommended" INTEGER NOT NULL,
+    "IsVerifiedPurchase" INTEGER NOT NULL,
+    "IsApproved" INTEGER NOT NULL,
+    "HelpfulVotes" INTEGER NOT NULL,
+    "UnhelpfulVotes" INTEGER NOT NULL,
+    CONSTRAINT "FK_ProductReview_Products_ProductId" FOREIGN KEY ("ProductId") REFERENCES "Products" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.633 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Products" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_Products" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "Name" TEXT NOT NULL,
+    "Sku" TEXT NOT NULL,
+    "Type" TEXT NOT NULL,
+    "Status" TEXT NOT NULL,
+    "ShortDescription" TEXT NULL,
+    "LongDescription" TEXT NULL,
+    "Barcode" TEXT NULL,
+    "Weight" TEXT NULL,
+    "WeightUnitId" TEXT NULL,
+    "Length" TEXT NULL,
+    "Width" TEXT NULL,
+    "Height" TEXT NULL,
+    "DimensionUnitId" TEXT NULL,
+    "FeaturedImage" TEXT NULL,
+    "SortOrder" INTEGER NOT NULL,
+    "IsFeatured" INTEGER NOT NULL,
+    "IsNew" INTEGER NOT NULL,
+    "NewUntil" TEXT NULL,
+    "ParentProductId" TEXT NULL,
+    CONSTRAINT "FK_Products_Products_ParentProductId" FOREIGN KEY ("ParentProductId") REFERENCES "Products" ("Id") ON DELETE RESTRICT,
+    CONSTRAINT "FK_Products_Units_DimensionUnitId" FOREIGN KEY ("DimensionUnitId") REFERENCES "Units" ("Id") ON DELETE RESTRICT,
+    CONSTRAINT "FK_Products_Units_WeightUnitId" FOREIGN KEY ("WeightUnitId") REFERENCES "Units" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.635 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "UnitCategories" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_UnitCategories" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "Name" TEXT NOT NULL,
+    "Code" TEXT NOT NULL,
+    "Description" TEXT NULL,
+    "BaseUnitId" TEXT NULL,
+    "SortOrder" INTEGER NOT NULL,
+    CONSTRAINT "FK_UnitCategories_Units_BaseUnitId" FOREIGN KEY ("BaseUnitId") REFERENCES "Units" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.637 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Units" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_Units" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "Name" TEXT NOT NULL,
+    "Symbol" TEXT NOT NULL,
+    "UnitCategoryId" TEXT NOT NULL,
+    "MeasurementSystemId" TEXT NOT NULL,
+    "ConversionToBase" TEXT NOT NULL,
+    "ConversionFormula" TEXT NULL,
+    "DecimalPlaces" INTEGER NOT NULL,
+    "IsStandard" INTEGER NOT NULL,
+    "IsActive" INTEGER NOT NULL,
+    "SortOrder" INTEGER NOT NULL,
+    "Description" TEXT NULL,
+    CONSTRAINT "FK_Units_MeasurementSystems_MeasurementSystemId" FOREIGN KEY ("MeasurementSystemId") REFERENCES "MeasurementSystems" ("Id") ON DELETE RESTRICT,
+    CONSTRAINT "FK_Units_UnitCategories_UnitCategoryId" FOREIGN KEY ("UnitCategoryId") REFERENCES "UnitCategories" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.640 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "UnitConversions" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_UnitConversions" PRIMARY KEY,
+    "CreatedAt" TEXT NOT NULL,
+    "UpdatedAt" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "FromUnitId" TEXT NOT NULL,
+    "ToUnitId" TEXT NOT NULL,
+    "ConversionFactor" TEXT NOT NULL,
+    "Formula" TEXT NULL,
+    "Priority" INTEGER NOT NULL,
+    CONSTRAINT "FK_UnitConversions_Units_FromUnitId" FOREIGN KEY ("FromUnitId") REFERENCES "Units" ("Id") ON DELETE RESTRICT,
+    CONSTRAINT "FK_UnitConversions_Units_ToUnitId" FOREIGN KEY ("ToUnitId") REFERENCES "Units" ("Id") ON DELETE RESTRICT
+);
+2026-02-09 23:17:57.643 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_AttributeDefinitions_Code" ON "AttributeDefinitions" ("Code");
+2026-02-09 23:17:57.645 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_AttributeDefinitions_IsDeleted" ON "AttributeDefinitions" ("IsDeleted");
+2026-02-09 23:17:57.647 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_AttributeDefinitions_Name" ON "AttributeDefinitions" ("Name");
+2026-02-09 23:17:57.649 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_AttributeValueRelationships_ChildValueId" ON "AttributeValueRelationships" ("ChildValueId");
+2026-02-09 23:17:57.651 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_AttributeValueRelationships_ParentValueId" ON "AttributeValueRelationships" ("ParentValueId");
+2026-02-09 23:17:57.653 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_AttributeValueRelationships_ParentValueId_ChildValueId" ON "AttributeValueRelationships" ("ParentValueId", "ChildValueId");
+2026-02-09 23:17:57.655 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_AttributeValues_AttributeDefinitionId" ON "AttributeValues" ("AttributeDefinitionId");
+2026-02-09 23:17:57.657 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_AttributeValues_Code" ON "AttributeValues" ("Code");
+2026-02-09 23:17:57.658 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_AttributeValues_IsDeleted" ON "AttributeValues" ("IsDeleted");
+2026-02-09 23:17:57.660 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_CartItem_CartId" ON "CartItem" ("CartId");
+2026-02-09 23:17:57.662 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_CategoryAttributeMappings_AttributeDefinitionId" ON "CategoryAttributeMappings" ("AttributeDefinitionId");
+2026-02-09 23:17:57.663 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_CategoryAttributeMappings_CategoryId" ON "CategoryAttributeMappings" ("CategoryId");
+2026-02-09 23:17:57.665 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_CategoryAttributeMappings_CategoryId_AttributeDefinitionId" ON "CategoryAttributeMappings" ("CategoryId", "AttributeDefinitionId");
+2026-02-09 23:17:57.667 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_CategoryAttributeMappings_CategoryId_SortOrder" ON "CategoryAttributeMappings" ("CategoryId", "SortOrder");
+2026-02-09 23:17:57.669 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_CategoryAttributeMappings_IsDeleted" ON "CategoryAttributeMappings" ("IsDeleted");
+2026-02-09 23:17:57.671 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ContactPoint_UserRecipientId" ON "ContactPoint" ("UserRecipientId");
+2026-02-09 23:17:57.674 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_CrossAttributeConstraint_SourceValueId" ON "CrossAttributeConstraint" ("SourceValueId");
+2026-02-09 23:17:57.676 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_CrossAttributeConstraint_TargetValueId" ON "CrossAttributeConstraint" ("TargetValueId");
+2026-02-09 23:17:57.678 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_Currencies_Code" ON "Currencies" ("Code");
+2026-02-09 23:17:57.679 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Currencies_IsBaseCurrency" ON "Currencies" ("IsBaseCurrency");
+2026-02-09 23:17:57.681 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Currencies_IsDeleted" ON "Currencies" ("IsDeleted");
+2026-02-09 23:17:57.684 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Currencies_Name" ON "Currencies" ("Name");
+2026-02-09 23:17:57.686 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_DocumentOperation_DocumentTypeId" ON "DocumentOperation" ("DocumentTypeId");
+2026-02-09 23:17:57.687 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_DocumentTypeAttribute_AttributeDefinitionId" ON "DocumentTypeAttribute" ("AttributeDefinitionId");
+2026-02-09 23:17:57.689 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_DocumentTypeAttribute_DocumentTypeId" ON "DocumentTypeAttribute" ("DocumentTypeId");
+2026-02-09 23:17:57.690 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_DocumentTypeRelation_SourceDocumentTypeId" ON "DocumentTypeRelation" ("SourceDocumentTypeId");
+2026-02-09 23:17:57.692 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_DocumentTypeRelation_TargetDocumentTypeId" ON "DocumentTypeRelation" ("TargetDocumentTypeId");
+2026-02-09 23:17:57.694 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ExchangeRates_FromCurrencyId" ON "ExchangeRates" ("FromCurrencyId");
+2026-02-09 23:17:57.695 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ExchangeRates_FromCurrencyId_ToCurrencyId_EffectiveFrom" ON "ExchangeRates" ("FromCurrencyId", "ToCurrencyId", "EffectiveFrom");
+2026-02-09 23:17:57.698 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ExchangeRates_IsActive" ON "ExchangeRates" ("IsActive");
+2026-02-09 23:17:57.700 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ExchangeRates_IsDeleted" ON "ExchangeRates" ("IsDeleted");
+2026-02-09 23:17:57.703 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ExchangeRates_ToCurrencyId" ON "ExchangeRates" ("ToCurrencyId");
+2026-02-09 23:17:57.704 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_MarketingEvent_AttributionId" ON "MarketingEvent" ("AttributionId");
+2026-02-09 23:17:57.706 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_MeasurementSystems_Code" ON "MeasurementSystems" ("Code");
+2026-02-09 23:17:57.708 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_MeasurementSystems_IsDeleted" ON "MeasurementSystems" ("IsDeleted");
+2026-02-09 23:17:57.709 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_MeasurementSystems_Name" ON "MeasurementSystems" ("Name");
+2026-02-09 23:17:57.711 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_OperationNotification_OperationId" ON "OperationNotification" ("OperationId");
+2026-02-09 23:17:57.712 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_OrderItem_OrderId" ON "OrderItem" ("OrderId");
+2026-02-09 23:17:57.714 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductAttributes_AttributeDefinitionId" ON "ProductAttributes" ("AttributeDefinitionId");
+2026-02-09 23:17:57.716 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductAttributes_AttributeValueId" ON "ProductAttributes" ("AttributeValueId");
+2026-02-09 23:17:57.718 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductAttributes_IsDeleted" ON "ProductAttributes" ("IsDeleted");
+2026-02-09 23:17:57.719 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductAttributes_ProductId" ON "ProductAttributes" ("ProductId");
+2026-02-09 23:17:57.721 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductAttributes_ProductId_AttributeDefinitionId" ON "ProductAttributes" ("ProductId", "AttributeDefinitionId");
+2026-02-09 23:17:57.723 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductBrand_ProductId" ON "ProductBrand" ("ProductId");
+2026-02-09 23:17:57.725 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductBrandMapping_BrandId" ON "ProductBrandMapping" ("BrandId");
+2026-02-09 23:17:57.726 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductBrandMapping_ProductId" ON "ProductBrandMapping" ("ProductId");
+2026-02-09 23:17:57.728 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductCategory_ParentCategoryId" ON "ProductCategory" ("ParentCategoryId");
+2026-02-09 23:17:57.730 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductCategory_ProductId" ON "ProductCategory" ("ProductId");
+2026-02-09 23:17:57.732 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductCategoryMapping_CategoryId" ON "ProductCategoryMapping" ("CategoryId");
+2026-02-09 23:17:57.734 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductCategoryMapping_ProductId" ON "ProductCategoryMapping" ("ProductId");
+2026-02-09 23:17:57.737 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_ProductInventory_ProductId" ON "ProductInventory" ("ProductId");
+2026-02-09 23:17:57.738 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductListing_CategoryId" ON "ProductListing" ("CategoryId");
+2026-02-09 23:17:57.741 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductListing_CategoryId_IsDeleted_IsActive_Status_CreatedAt" ON "ProductListing" ("CategoryId", "IsDeleted", "IsActive", "Status", "CreatedAt");
+2026-02-09 23:17:57.747 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductListing_CreatedAt" ON "ProductListing" ("CreatedAt");
+2026-02-09 23:17:57.749 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductListing_IsActive" ON "ProductListing" ("IsActive");
+2026-02-09 23:17:57.755 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductListing_IsDeleted" ON "ProductListing" ("IsDeleted");
+2026-02-09 23:17:57.778 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductListing_IsDeleted_IsActive_Status_CreatedAt" ON "ProductListing" ("IsDeleted", "IsActive", "Status", "CreatedAt");
+2026-02-09 23:17:57.867 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductListing_IsDeleted_IsActive_Status_ViewCount" ON "ProductListing" ("IsDeleted", "IsActive", "Status", "ViewCount");
+2026-02-09 23:17:57.913 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductListing_ProductId" ON "ProductListing" ("ProductId");
+2026-02-09 23:17:57.944 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductListing_Status" ON "ProductListing" ("Status");
+2026-02-09 23:17:57.958 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductListing_VendorId" ON "ProductListing" ("VendorId");
+2026-02-09 23:17:57.960 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductListing_VendorId_IsDeleted_IsActive_CreatedAt" ON "ProductListing" ("VendorId", "IsDeleted", "IsActive", "CreatedAt");
+2026-02-09 23:17:57.963 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductListing_ViewCount" ON "ProductListing" ("ViewCount");
+2026-02-09 23:17:57.968 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductPrices_CurrencyId" ON "ProductPrices" ("CurrencyId");
+2026-02-09 23:17:57.971 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductPrices_IsActive" ON "ProductPrices" ("IsActive");
+2026-02-09 23:17:57.973 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductPrices_IsDeleted" ON "ProductPrices" ("IsDeleted");
+2026-02-09 23:17:57.975 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductPrices_ProductId" ON "ProductPrices" ("ProductId");
+2026-02-09 23:17:57.978 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductPrices_ProductId_CurrencyId_Market_CustomerSegment" ON "ProductPrices" ("ProductId", "CurrencyId", "Market", "CustomerSegment");
+2026-02-09 23:17:57.981 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductRelation_RelatedProductId" ON "ProductRelation" ("RelatedProductId");
+2026-02-09 23:17:57.983 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductRelation_SourceProductId" ON "ProductRelation" ("SourceProductId");
+2026-02-09 23:17:57.985 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProductReview_ProductId" ON "ProductReview" ("ProductId");
+2026-02-09 23:17:57.987 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Products_DimensionUnitId" ON "Products" ("DimensionUnitId");
+2026-02-09 23:17:57.988 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Products_IsDeleted" ON "Products" ("IsDeleted");
+2026-02-09 23:17:57.990 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Products_IsFeatured" ON "Products" ("IsFeatured");
+2026-02-09 23:17:57.992 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Products_Name" ON "Products" ("Name");
+2026-02-09 23:17:57.993 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Products_ParentProductId" ON "Products" ("ParentProductId");
+2026-02-09 23:17:57.995 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_Products_Sku" ON "Products" ("Sku");
+2026-02-09 23:17:57.998 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Products_Status" ON "Products" ("Status");
+2026-02-09 23:17:57.999 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Products_Type" ON "Products" ("Type");
+2026-02-09 23:17:58.001 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Products_WeightUnitId" ON "Products" ("WeightUnitId");
+2026-02-09 23:17:58.012 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_RecipientGroupUserRecipient_MembersId" ON "RecipientGroupUserRecipient" ("MembersId");
+2026-02-09 23:17:58.015 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_UnitCategories_BaseUnitId" ON "UnitCategories" ("BaseUnitId");
+2026-02-09 23:17:58.017 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_UnitCategories_Code" ON "UnitCategories" ("Code");
+2026-02-09 23:17:58.019 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_UnitCategories_IsDeleted" ON "UnitCategories" ("IsDeleted");
+2026-02-09 23:17:58.021 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_UnitCategories_Name" ON "UnitCategories" ("Name");
+2026-02-09 23:17:58.022 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_UnitConversions_FromUnitId" ON "UnitConversions" ("FromUnitId");
+2026-02-09 23:17:58.024 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_UnitConversions_FromUnitId_ToUnitId" ON "UnitConversions" ("FromUnitId", "ToUnitId");
+2026-02-09 23:17:58.026 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_UnitConversions_IsDeleted" ON "UnitConversions" ("IsDeleted");
+2026-02-09 23:17:58.028 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_UnitConversions_ToUnitId" ON "UnitConversions" ("ToUnitId");
+2026-02-09 23:17:58.029 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Units_IsDeleted" ON "Units" ("IsDeleted");
+2026-02-09 23:17:58.031 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Units_MeasurementSystemId" ON "Units" ("MeasurementSystemId");
+2026-02-09 23:17:58.032 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Units_Symbol" ON "Units" ("Symbol");
+2026-02-09 23:17:58.034 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Units_UnitCategoryId" ON "Units" ("UnitCategoryId");
+2026-02-09 23:17:58.050 +03:00 [INF] Seeding initial data...
+2026-02-09 23:17:58.382 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "c"."Id", "c"."Code", "c"."CreatedAt", "c"."DecimalPlaces", "c"."DecimalSeparator", "c"."IsActive", "c"."IsBaseCurrency", "c"."IsDeleted", "c"."Name", "c"."SortOrder", "c"."Symbol", "c"."SymbolBeforeAmount", "c"."ThousandsSeparator", "c"."UpdatedAt"
+FROM "Currencies" AS "c"
+WHERE NOT ("c"."IsDeleted")
+2026-02-09 23:17:58.517 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[@p0='97aa818b-51d6-4c75-8533-3a86e80b4162', @p1='USD' (Nullable = false) (Size = 3), @p2='2026-02-09T20:17:58.3906785Z' (DbType = DateTime), @p3='2', @p4='.' (Nullable = false) (Size = 1), @p5='True', @p6='False', @p7='False', @p8='US Dollar' (Nullable = false) (Size = 9), @p9='0', @p10='$' (Nullable = false) (Size = 1), @p11='True', @p12=',' (Nullable = false) (Size = 1), @p13=NULL (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Currencies" ("Id", "Code", "CreatedAt", "DecimalPlaces", "DecimalSeparator", "IsActive", "IsBaseCurrency", "IsDeleted", "Name", "SortOrder", "Symbol", "SymbolBeforeAmount", "ThousandsSeparator", "UpdatedAt")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13);
+2026-02-09 23:17:58.526 +03:00 [INF] Added Currency with id "97aa818b-51d6-4c75-8533-3a86e80b4162"
+2026-02-09 23:17:58.528 +03:00 [INF] Created USD currency
+2026-02-09 23:17:58.535 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."CreatedAt", "p"."Description", "p"."Icon", "p"."Image", "p"."IsActive", "p"."IsDeleted", "p"."Name", "p"."ParentCategoryId", "p"."ProductId", "p"."Slug", "p"."SortOrder", "p"."UpdatedAt"
+FROM "ProductCategory" AS "p"
+WHERE NOT ("p"."IsDeleted")
+2026-02-09 23:17:58.567 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@p0='c0000001-0000-0000-0000-000000000001', @p1='2026-02-09T20:17:58.5386708Z' (DbType = DateTime), @p2='Cordless and corded power tools' (Size = 31), @p3='bi-tools' (Size = 8), @p4=NULL, @p5='True', @p6='False', @p7='Power Tools' (Nullable = false) (Size = 11), @p8=NULL (DbType = Guid), @p9=NULL (DbType = Guid), @p10='power-tools' (Nullable = false) (Size = 11), @p11='1', @p12=NULL (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ProductCategory" ("Id", "CreatedAt", "Description", "Icon", "Image", "IsActive", "IsDeleted", "Name", "ParentCategoryId", "ProductId", "Slug", "SortOrder", "UpdatedAt")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12);
+2026-02-09 23:17:58.569 +03:00 [INF] Added ProductCategory with id "c0000001-0000-0000-0000-000000000001"
+2026-02-09 23:17:58.572 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@p0='c0000002-0000-0000-0000-000000000002', @p1='2026-02-09T20:17:58.5703944Z' (DbType = DateTime), @p2='Manual tools for every job' (Size = 26), @p3='bi-wrench' (Size = 9), @p4=NULL, @p5='True', @p6='False', @p7='Hand Tools' (Nullable = false) (Size = 10), @p8=NULL (DbType = Guid), @p9=NULL (DbType = Guid), @p10='hand-tools' (Nullable = false) (Size = 10), @p11='2', @p12=NULL (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ProductCategory" ("Id", "CreatedAt", "Description", "Icon", "Image", "IsActive", "IsDeleted", "Name", "ParentCategoryId", "ProductId", "Slug", "SortOrder", "UpdatedAt")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12);
+2026-02-09 23:17:58.573 +03:00 [INF] Added ProductCategory with id "c0000002-0000-0000-0000-000000000002"
+2026-02-09 23:17:58.575 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@p0='c0000003-0000-0000-0000-000000000003', @p1='2026-02-09T20:17:58.5744082Z' (DbType = DateTime), @p2='Pipes, fittings, and plumbing supplies' (Size = 38), @p3='bi-droplet' (Size = 10), @p4=NULL, @p5='True', @p6='False', @p7='Plumbing' (Nullable = false) (Size = 8), @p8=NULL (DbType = Guid), @p9=NULL (DbType = Guid), @p10='plumbing' (Nullable = false) (Size = 8), @p11='3', @p12=NULL (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ProductCategory" ("Id", "CreatedAt", "Description", "Icon", "Image", "IsActive", "IsDeleted", "Name", "ParentCategoryId", "ProductId", "Slug", "SortOrder", "UpdatedAt")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12);
+2026-02-09 23:17:58.577 +03:00 [INF] Added ProductCategory with id "c0000003-0000-0000-0000-000000000003"
+2026-02-09 23:17:58.580 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@p0='c0000004-0000-0000-0000-000000000004', @p1='2026-02-09T20:17:58.5785570Z' (DbType = DateTime), @p2='Wire, outlets, and electrical supplies' (Size = 38), @p3='bi-lightning-charge' (Size = 19), @p4=NULL, @p5='True', @p6='False', @p7='Electrical' (Nullable = false) (Size = 10), @p8=NULL (DbType = Guid), @p9=NULL (DbType = Guid), @p10='electrical' (Nullable = false) (Size = 10), @p11='4', @p12=NULL (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ProductCategory" ("Id", "CreatedAt", "Description", "Icon", "Image", "IsActive", "IsDeleted", "Name", "ParentCategoryId", "ProductId", "Slug", "SortOrder", "UpdatedAt")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12);
+2026-02-09 23:17:58.581 +03:00 [INF] Added ProductCategory with id "c0000004-0000-0000-0000-000000000004"
+2026-02-09 23:17:58.583 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@p0='c0000005-0000-0000-0000-000000000005', @p1='2026-02-09T20:17:58.5822137Z' (DbType = DateTime), @p2='Outdoor and gardening equipment' (Size = 31), @p3='bi-flower1' (Size = 10), @p4=NULL, @p5='True', @p6='False', @p7='Lawn & Garden' (Nullable = false) (Size = 13), @p8=NULL (DbType = Guid), @p9=NULL (DbType = Guid), @p10='lawn-garden' (Nullable = false) (Size = 11), @p11='5', @p12=NULL (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ProductCategory" ("Id", "CreatedAt", "Description", "Icon", "Image", "IsActive", "IsDeleted", "Name", "ParentCategoryId", "ProductId", "Slug", "SortOrder", "UpdatedAt")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12);
+2026-02-09 23:17:58.585 +03:00 [INF] Added ProductCategory with id "c0000005-0000-0000-0000-000000000005"
+2026-02-09 23:17:58.587 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@p0='c0000006-0000-0000-0000-000000000006', @p1='2026-02-09T20:17:58.5860767Z' (DbType = DateTime), @p2='Paints, stains, and painting supplies' (Size = 37), @p3='bi-palette' (Size = 10), @p4=NULL, @p5='True', @p6='False', @p7='Paint' (Nullable = false) (Size = 5), @p8=NULL (DbType = Guid), @p9=NULL (DbType = Guid), @p10='paint' (Nullable = false) (Size = 5), @p11='6', @p12=NULL (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ProductCategory" ("Id", "CreatedAt", "Description", "Icon", "Image", "IsActive", "IsDeleted", "Name", "ParentCategoryId", "ProductId", "Slug", "SortOrder", "UpdatedAt")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12);
+2026-02-09 23:17:58.588 +03:00 [INF] Added ProductCategory with id "c0000006-0000-0000-0000-000000000006"
+2026-02-09 23:17:58.591 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@p0='c0000007-0000-0000-0000-000000000007', @p1='2026-02-09T20:17:58.5898835Z' (DbType = DateTime), @p2='Wood and building materials' (Size = 27), @p3='bi-box' (Size = 6), @p4=NULL, @p5='True', @p6='False', @p7='Lumber' (Nullable = false) (Size = 6), @p8=NULL (DbType = Guid), @p9=NULL (DbType = Guid), @p10='lumber' (Nullable = false) (Size = 6), @p11='7', @p12=NULL (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ProductCategory" ("Id", "CreatedAt", "Description", "Icon", "Image", "IsActive", "IsDeleted", "Name", "ParentCategoryId", "ProductId", "Slug", "SortOrder", "UpdatedAt")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12);
+2026-02-09 23:17:58.592 +03:00 [INF] Added ProductCategory with id "c0000007-0000-0000-0000-000000000007"
+2026-02-09 23:17:58.595 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@p0='c0000008-0000-0000-0000-000000000008', @p1='2026-02-09T20:17:58.5935510Z' (DbType = DateTime), @p2='Fasteners, hinges, and general hardware' (Size = 39), @p3='bi-nut' (Size = 6), @p4=NULL, @p5='True', @p6='False', @p7='Hardware' (Nullable = false) (Size = 8), @p8=NULL (DbType = Guid), @p9=NULL (DbType = Guid), @p10='hardware' (Nullable = false) (Size = 8), @p11='8', @p12=NULL (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ProductCategory" ("Id", "CreatedAt", "Description", "Icon", "Image", "IsActive", "IsDeleted", "Name", "ParentCategoryId", "ProductId", "Slug", "SortOrder", "UpdatedAt")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12);
+2026-02-09 23:17:58.596 +03:00 [INF] Added ProductCategory with id "c0000008-0000-0000-0000-000000000008"
+2026-02-09 23:17:58.597 +03:00 [INF] Seeded 8 categories
+2026-02-09 23:17:58.605 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."Barcode", "p"."CreatedAt", "p"."DimensionUnitId", "p"."FeaturedImage", "p"."Height", "p"."IsDeleted", "p"."IsFeatured", "p"."IsNew", "p"."Length", "p"."LongDescription", "p"."Name", "p"."NewUntil", "p"."ParentProductId", "p"."ShortDescription", "p"."Sku", "p"."SortOrder", "p"."Status", "p"."Type", "p"."UpdatedAt", "p"."Weight", "p"."WeightUnitId", "p"."Width"
+FROM "Products" AS "p"
+WHERE NOT ("p"."IsDeleted")
+2026-02-09 23:17:58.609 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."CreatedAt", "p"."Description", "p"."Icon", "p"."Image", "p"."IsActive", "p"."IsDeleted", "p"."Name", "p"."ParentCategoryId", "p"."ProductId", "p"."Slug", "p"."SortOrder", "p"."UpdatedAt"
+FROM "ProductCategory" AS "p"
+WHERE NOT ("p"."IsDeleted")
+2026-02-09 23:17:58.645 +03:00 [ERR] Error seeding data
+System.FormatException: Guid string should only contain hexadecimal characters.
+   at System.Guid.GuidResult.SetFailure(ParseFailure failureKind)
+   at System.Guid.TryParseExactD(ReadOnlySpan`1 guidString, GuidResult& result)
+   at System.Guid.TryParseGuid(ReadOnlySpan`1 guidString, GuidResult& result)
+   at System.Guid.Parse(ReadOnlySpan`1 input)
+   at System.Guid.Parse(String input)
+   at HamtramckHardware.Api.Services.HamtramckSeedDataService.SeedProductsAsync() in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\HamtramckHardware.Api\Services\HamtramckSeedDataService.cs:line 163
+   at HamtramckHardware.Api.Services.HamtramckSeedDataService.SeedAsync() in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\HamtramckHardware.Api\Services\HamtramckSeedDataService.cs:line 48
+2026-02-09 23:17:58.666 +03:00 [INF] Database ready!
+2026-02-09 23:17:58.670 +03:00 [INF] ✅ Service registered: Hamtramck vv1 at http://localhost:5200 (ID: 20de1ee6-b9dd-4cdc-9d80-d10b6fe27d18)
+2026-02-09 23:17:58.672 +03:00 [INF] ✅ Service registered: Marketplace vv1 at http://localhost:5200 (ID: 69a47385-a692-44f1-bee4-9bdc0b637002)
+2026-02-09 23:17:58.674 +03:00 [INF] Service registered at http://localhost:5200
+2026-02-09 23:17:58.674 +03:00 [INF] Hamtramck Hardware API started successfully!
+2026-02-09 23:17:58.693 +03:00 [INF] User profile is available. Using 'C:\Users\i\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-02-09 23:17:58.754 +03:00 [INF] [Notify Messaging] 🎧 Starting notification messaging handler
+2026-02-09 23:17:58.756 +03:00 [INF] [Hamtramck] Subscribed to topic 'notify.commands.send'
+2026-02-09 23:17:58.756 +03:00 [INF] [Auth Messaging] 🎧 Starting handler with channels: InApp
+2026-02-09 23:17:58.757 +03:00 [INF] [Notify Messaging] ✅ Notification messaging handler started
+2026-02-09 23:17:58.757 +03:00 [INF] [Hamtramck] Subscribed to topic 'auth.events.authentication.twofactorsucceeded'
+2026-02-09 23:17:58.758 +03:00 [INF] [Hamtramck] Subscribed to topic 'auth.events.authentication.twofactorfailed'
+2026-02-09 23:17:58.759 +03:00 [INF] [Hamtramck] Subscribed to topic 'auth.events.authentication.twofactorexpired'
+2026-02-09 23:17:58.760 +03:00 [INF] [Auth Messaging] ✅ Handler started
+2026-02-09 23:17:58.860 +03:00 [INF] Now listening on: http://0.0.0.0:5200
+2026-02-09 23:17:58.911 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-02-09 23:17:58.912 +03:00 [INF] Hosting environment: Development
+2026-02-09 23:17:58.913 +03:00 [INF] Content root path: C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\HamtramckHardware.Api
+2026-02-09 23:20:38.684 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5200/ - null null
+2026-02-09 23:20:38.884 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5200/ - 301 null null 207.9977ms
+2026-02-09 23:20:38.889 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5200/index.html - null null
+2026-02-09 23:20:38.955 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5200/index.html - 200 null text/html;charset=utf-8 66.7904ms
+2026-02-09 23:20:38.963 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5200/swagger-ui.css - null null
+2026-02-09 23:20:38.968 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5200/index.css - null null
+2026-02-09 23:20:38.968 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5200/swagger-ui-bundle.js - null null
+2026-02-09 23:20:38.979 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5200/index.css - 200 152 text/css 11.3957ms
+2026-02-09 23:20:38.980 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5200/swagger-ui.css - 200 23647 text/css 17.0512ms
+2026-02-09 23:20:39.020 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5200/swagger-ui-standalone-preset.js - null null
+2026-02-09 23:20:39.023 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5200/index.js - null null
+2026-02-09 23:20:39.027 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5200/swagger-ui-bundle.js - 200 424767 text/javascript 58.9059ms
+2026-02-09 23:20:39.028 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5200/swagger-ui-standalone-preset.js - 200 77352 text/javascript 8.1379ms
+2026-02-09 23:20:39.029 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5200/index.js - 200 null application/javascript;charset=utf-8 5.8033ms
+2026-02-09 23:20:39.035 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5200/_framework/aspnetcore-browser-refresh.js - null null
+2026-02-09 23:20:39.038 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5200/_framework/aspnetcore-browser-refresh.js - 200 16527 application/javascript; charset=utf-8 3.3365ms
+2026-02-09 23:20:39.041 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5200/_vs/browserLink - null null
+2026-02-09 23:20:39.062 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5200/_vs/browserLink - 200 null text/javascript; charset=UTF-8 21.5468ms
+2026-02-09 23:20:39.143 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5200/swagger/v1/swagger.json - null null
+2026-02-09 23:20:39.168 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5200/favicon-32x32.png - null null
+2026-02-09 23:20:39.174 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5200/favicon-32x32.png - 200 628 image/png 6.2523ms
+2026-02-09 23:20:39.281 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5200/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 137.4235ms
+2026-02-09 23:31:46.063 +03:00 [INF] Starting Hamtramck Hardware API...
+2026-02-09 23:31:46.282 +03:00 [INF] Listening on port 5200
+2026-02-09 23:31:47.157 +03:00 [INF] Creating database...
+2026-02-09 23:31:47.566 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.ServiceRegistry.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.567 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Profiles.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.568 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.569 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Profiles, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.570 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.570 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Catalog.Products.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.596 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Orders.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.597 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Orders, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.598 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Recipients.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.598 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Recipients, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.599 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Payments.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.600 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.ServiceRegistry.Server, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.600 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.Infrastructure.EFCores, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.601 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.JWT, Version=1.0.4.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.602 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Users.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.602 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.TwoFactor.SessionStore.InMemory, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.603 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.603 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.604 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.ServiceRegistry.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.605 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Messaging.InMemory, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.605 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Messaging.SignalR.Hub, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.606 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.606 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Channels.InApp, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.607 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Messaging, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.607 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Messaging, Version=1.0.1.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.608 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.609 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.CQRS, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.609 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Realtime.SignalR, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.610 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Realtime.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.610 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.Storage.Local, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.611 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.AspNetCore.Swagger, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.612 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Cart, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.612 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.614 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Marketing.Analytics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.614 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.TwoFactor.Abstractions, Version=1.0.5.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.615 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Messaging.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.616 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.TwoFactor.SMS, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.642 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.643 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Marketing.GoogleConversions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.644 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Marketing.MetaConversions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.645 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Marketing.SnapchatConversions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.646 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Marketing.TikTokConversions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.646 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Marketing.TwitterConversions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.647 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Payments.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.647 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Transactions.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.648 +03:00 [WRN] No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Vendors, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+2026-02-09 23:31:47.753 +03:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2026-02-09 23:31:47.921 +03:00 [INF] Executed DbCommand (18ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "type" = 'table' AND "rootpage" IS NOT NULL;
+2026-02-09 23:31:47.927 +03:00 [INF] Seeding initial data...
+2026-02-09 23:31:48.142 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "c"."Id", "c"."Code", "c"."CreatedAt", "c"."DecimalPlaces", "c"."DecimalSeparator", "c"."IsActive", "c"."IsBaseCurrency", "c"."IsDeleted", "c"."Name", "c"."SortOrder", "c"."Symbol", "c"."SymbolBeforeAmount", "c"."ThousandsSeparator", "c"."UpdatedAt"
+FROM "Currencies" AS "c"
+WHERE NOT ("c"."IsDeleted")
+2026-02-09 23:31:48.157 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."CreatedAt", "p"."Description", "p"."Icon", "p"."Image", "p"."IsActive", "p"."IsDeleted", "p"."Name", "p"."ParentCategoryId", "p"."ProductId", "p"."Slug", "p"."SortOrder", "p"."UpdatedAt"
+FROM "ProductCategory" AS "p"
+WHERE NOT ("p"."IsDeleted")
+2026-02-09 23:31:48.160 +03:00 [INF] Categories already exist, skipping seed
+2026-02-09 23:31:48.181 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."Barcode", "p"."CreatedAt", "p"."DimensionUnitId", "p"."FeaturedImage", "p"."Height", "p"."IsDeleted", "p"."IsFeatured", "p"."IsNew", "p"."Length", "p"."LongDescription", "p"."Name", "p"."NewUntil", "p"."ParentProductId", "p"."ShortDescription", "p"."Sku", "p"."SortOrder", "p"."Status", "p"."Type", "p"."UpdatedAt", "p"."Weight", "p"."WeightUnitId", "p"."Width"
+FROM "Products" AS "p"
+WHERE NOT ("p"."IsDeleted")
+2026-02-09 23:31:48.184 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "p"."Id", "p"."CreatedAt", "p"."Description", "p"."Icon", "p"."Image", "p"."IsActive", "p"."IsDeleted", "p"."Name", "p"."ParentCategoryId", "p"."ProductId", "p"."Slug", "p"."SortOrder", "p"."UpdatedAt"
+FROM "ProductCategory" AS "p"
+WHERE NOT ("p"."IsDeleted")
+2026-02-09 23:31:48.212 +03:00 [ERR] Error seeding data
+System.FormatException: Guid string should only contain hexadecimal characters.
+   at System.Guid.GuidResult.SetFailure(ParseFailure failureKind)
+   at System.Guid.TryParseExactD(ReadOnlySpan`1 guidString, GuidResult& result)
+   at System.Guid.TryParseGuid(ReadOnlySpan`1 guidString, GuidResult& result)
+   at System.Guid.Parse(ReadOnlySpan`1 input)
+   at System.Guid.Parse(String input)
+   at HamtramckHardware.Api.Services.HamtramckSeedDataService.SeedProductsAsync() in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\HamtramckHardware.Api\Services\HamtramckSeedDataService.cs:line 163
+   at HamtramckHardware.Api.Services.HamtramckSeedDataService.SeedAsync() in C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\HamtramckHardware.Api\Services\HamtramckSeedDataService.cs:line 48
+2026-02-09 23:31:48.221 +03:00 [INF] Database ready!
+2026-02-09 23:31:48.226 +03:00 [INF] ✅ Service registered: Hamtramck vv1 at http://localhost:5200 (ID: 19ffffcc-6924-49b7-a099-57b675d28d42)
+2026-02-09 23:31:48.227 +03:00 [INF] ✅ Service registered: Marketplace vv1 at http://localhost:5200 (ID: b3278425-eafd-4425-a03b-9ccc84139fc5)
+2026-02-09 23:31:48.228 +03:00 [INF] Service registered at http://localhost:5200
+2026-02-09 23:31:48.229 +03:00 [INF] Hamtramck Hardware API started successfully!
+2026-02-09 23:31:48.238 +03:00 [INF] User profile is available. Using 'C:\Users\i\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-02-09 23:31:48.275 +03:00 [INF] [Notify Messaging] 🎧 Starting notification messaging handler
+2026-02-09 23:31:48.277 +03:00 [INF] [Hamtramck] Subscribed to topic 'notify.commands.send'
+2026-02-09 23:31:48.278 +03:00 [INF] [Auth Messaging] 🎧 Starting handler with channels: InApp
+2026-02-09 23:31:48.278 +03:00 [INF] [Notify Messaging] ✅ Notification messaging handler started
+2026-02-09 23:31:48.279 +03:00 [INF] [Hamtramck] Subscribed to topic 'auth.events.authentication.twofactorsucceeded'
+2026-02-09 23:31:48.281 +03:00 [INF] [Hamtramck] Subscribed to topic 'auth.events.authentication.twofactorfailed'
+2026-02-09 23:31:48.282 +03:00 [INF] [Hamtramck] Subscribed to topic 'auth.events.authentication.twofactorexpired'
+2026-02-09 23:31:48.287 +03:00 [INF] [Auth Messaging] ✅ Handler started
+2026-02-09 23:31:48.368 +03:00 [INF] Now listening on: http://0.0.0.0:5200
+2026-02-09 23:31:48.418 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-02-09 23:31:48.419 +03:00 [INF] Hosting environment: Development
+2026-02-09 23:31:48.420 +03:00 [INF] Content root path: C:\Users\i\Source\Repos\ACommerce.Libraries\Apps\HamtramckHardware.Api
