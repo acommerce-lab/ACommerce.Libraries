@@ -121,9 +121,16 @@
                                    Price="product.Price"
                                    OldPrice="@(product.OriginalPrice ?? 0)"
                                    Currency="$"
+                                   CurrencyBeforePrice="true"
                                    DiscountPercent="@(product.OriginalPrice.HasValue && product.OriginalPrice > product.Price ? (int)Math.Round((product.OriginalPrice.Value - product.Price) / product.OriginalPrice.Value * 100) : 0)"
                                    StockQuantity="@(product.InStock ? 10 : 0)"
                                    ShowQuickActions="false"
+                                   FeaturedLabel="Featured"
+                                   NewLabel="New"
+                                   InStockLabel="In Stock ({0})"
+                                   OutOfStockLabel="Out of Stock"
+                                   AddToCartLabel="Add to Cart"
+                                   AddToWishlistLabel="Add to Wishlist"
                                    OnClick="@(id => ViewProduct(product.Id))" />
                 }
             </div>
@@ -197,35 +204,36 @@
 
     private List<ProductItem> GetMockSearchResults(string query)
     {
+        // IDs match backend seed data for consistent navigation
         var allProducts = new List<ProductItem>
         {
-            // Power Tools - using picsum.photos for realistic images
-            new(Guid.NewGuid(), "DeWalt 20V MAX XR Brushless Drill/Driver Kit", 149.99m, 179.99m, true, "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "DeWalt 20V MAX Circular Saw", 159.99m, null, true, "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "DeWalt 20V MAX Impact Driver", 99.99m, null, true, "https://images.unsplash.com/photo-1581147036324-c17ac41f3f2c?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Milwaukee M18 FUEL Hammer Drill", 299.99m, 349.99m, true, "https://images.unsplash.com/photo-1580901368919-7738efb0f87e?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Milwaukee M18 Compact Router", 199.99m, null, true, "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Makita 18V LXT Impact Driver", 179.99m, null, true, "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Ryobi ONE+ 18V 6-Tool Combo Kit", 299.99m, 449.99m, true, "https://images.unsplash.com/photo-1616401784845-180882ba9ba8?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Bosch 12V Flexiclick 5-In-1 Drill System", 199.99m, 229.99m, true, "https://images.unsplash.com/photo-1590122959498-1ccae0d48bc8?w=400&h=400&fit=crop"),
+            // Power Tools
+            new(Guid.Parse("p0000001-0000-0000-0000-000000000001"), "DeWalt 20V MAX XR Brushless Drill/Driver Kit", 149.99m, 179.99m, true, "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000005-0000-0000-0000-000000000005"), "DeWalt 20V MAX Circular Saw", 159.99m, null, true, "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000024-0000-0000-0000-000000000024"), "DeWalt 20V MAX XR Battery 2-Pack", 99.99m, null, true, "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000002-0000-0000-0000-000000000002"), "Milwaukee M18 FUEL Hammer Drill", 299.99m, 349.99m, true, "https://images.unsplash.com/photo-1580901368919-7738efb0f87e?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000023-0000-0000-0000-000000000023"), "Bosch Plunge & Fixed Base Router", 199.99m, null, true, "https://images.unsplash.com/photo-1590122959498-1ccae0d48bc8?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000003-0000-0000-0000-000000000003"), "Makita 18V LXT Impact Driver", 179.99m, null, true, "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000006-0000-0000-0000-000000000006"), "Ryobi ONE+ 18V 6-Tool Combo Kit", 299.99m, 449.99m, true, "https://images.unsplash.com/photo-1616401784845-180882ba9ba8?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000004-0000-0000-0000-000000000004"), "Bosch 12V Flexiclick 5-In-1 Drill System", 199.99m, 229.99m, true, "https://images.unsplash.com/photo-1590122959498-1ccae0d48bc8?w=400&h=400&fit=crop"),
             // Plumbing
-            new(Guid.NewGuid(), "Copper Pipe Fittings Set 1/2\"", 24.99m, 29.99m, true, "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "SharkBite 1/2\" Push-to-Connect Coupling", 12.99m, null, true, "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "PVC Pipe 10ft Schedule 40 Bundle", 18.99m, null, true, "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Stanley FatMax Copper Pipe Cutter", 34.99m, null, true, "https://images.unsplash.com/photo-1580901368919-7738efb0f87e?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000010-0000-0000-0000-000000000010"), "Copper Pipe Fittings Set 1/2\"", 24.99m, 29.99m, true, "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000011-0000-0000-0000-000000000011"), "SharkBite 1/2\" Push-to-Connect Coupling", 12.99m, null, true, "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000013-0000-0000-0000-000000000013"), "PVC Pipe 10ft Schedule 40 Bundle", 18.99m, null, true, "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000012-0000-0000-0000-000000000012"), "Stanley FatMax Copper Pipe Cutter", 34.99m, null, true, "https://images.unsplash.com/photo-1581147036324-c17ac41f3f2c?w=400&h=400&fit=crop"),
             // Electrical
-            new(Guid.NewGuid(), "LED Shop Light 4ft Linkable", 39.99m, null, true, "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Southwire Romex 12/2 NM-B Wire 250ft", 89.99m, 99.99m, true, "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Leviton 15A Tamper-Resistant Outlet (10-Pack)", 24.99m, null, true, "https://images.unsplash.com/photo-1558402529-d2638a7023e9?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000015-0000-0000-0000-000000000015"), "LED Shop Light 4ft Linkable", 39.99m, null, true, "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000014-0000-0000-0000-000000000014"), "Southwire Romex 12/2 NM-B Wire 250ft", 89.99m, 99.99m, true, "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000016-0000-0000-0000-000000000016"), "Leviton 15A Tamper-Resistant Outlet (10-Pack)", 24.99m, null, true, "https://images.unsplash.com/photo-1558402529-d2638a7023e9?w=400&h=400&fit=crop"),
             // Hand Tools
-            new(Guid.NewGuid(), "Klein Tools 11-in-1 Screwdriver/Nut Driver", 24.99m, null, true, "https://images.unsplash.com/photo-1426927308491-6380b6a9936f?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "CRAFTSMAN 320-Piece Mechanic's Tool Set", 199.99m, 299.99m, true, "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Husky 52\" 15-Drawer Tool Chest & Cabinet", 599.99m, 899.99m, true, "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000007-0000-0000-0000-000000000007"), "Klein Tools 11-in-1 Screwdriver/Nut Driver", 24.99m, null, true, "https://images.unsplash.com/photo-1426927308491-6380b6a9936f?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000008-0000-0000-0000-000000000008"), "CRAFTSMAN 320-Piece Mechanic's Tool Set", 199.99m, 299.99m, true, "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000009-0000-0000-0000-000000000009"), "Husky 52\" 15-Drawer Tool Chest & Cabinet", 599.99m, 899.99m, true, "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400&h=400&fit=crop"),
             // Other
-            new(Guid.NewGuid(), "3M Scotch Blue Painter's Tape 1.88\"", 8.99m, null, true, "https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "WD-40 Multi-Use Product 12oz", 6.99m, null, true, "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Gorilla Heavy Duty Construction Adhesive", 7.49m, null, true, "https://images.unsplash.com/photo-1557166983-5939644c3b5e?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Flexzilla Garden Hose 50ft", 29.99m, null, false, "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000019-0000-0000-0000-000000000019"), "3M Scotch Blue Painter's Tape 1.88\"", 8.99m, null, true, "https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000021-0000-0000-0000-000000000021"), "WD-40 Multi-Use Product 12oz", 6.99m, null, true, "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000020-0000-0000-0000-000000000020"), "Gorilla Heavy Duty Construction Adhesive", 7.49m, null, true, "https://images.unsplash.com/photo-1557166983-5939644c3b5e?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000017-0000-0000-0000-000000000017"), "Flexzilla Garden Hose 50ft", 29.99m, null, false, "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=400&fit=crop"),
         };
 
         return allProducts

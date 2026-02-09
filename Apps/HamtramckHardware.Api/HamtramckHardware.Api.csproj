@@ -1,0 +1,75 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>HamtramckHardware.Api</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Core Infrastructure -->
+    <ProjectReference Include="..\..\libs\backend\integration\ACommerce.Authentication.AspNetCore.Swagger\ACommerce.Authentication.AspNetCore.Swagger.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.Infrastructure.EFCores\ACommerce.SharedKernel.Infrastructure.EFCores.csproj" />
+    <ProjectReference Include="..\..\libs\backend\integration\ACommerce.SharedKernel.AspNetCore\ACommerce.SharedKernel.AspNetCore.csproj" />
+
+    <!-- Authentication (JWT) -->
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.JWT\ACommerce.Authentication.JWT.csproj" />
+    <ProjectReference Include="..\..\libs\backend\integration\ACommerce.Authentication.AspNetCore\ACommerce.Authentication.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.TwoFactor.SMS\ACommerce.Authentication.TwoFactor.SMS.csproj" />
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.TwoFactor.SessionStore.InMemory\ACommerce.Authentication.TwoFactor.SessionStore.InMemory.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Authentication.Messaging\ACommerce.Authentication.Messaging.csproj" />
+
+    <!-- Profiles -->
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Profiles\ACommerce.Profiles.csproj" />
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Profiles.Api\ACommerce.Profiles.Api.csproj" />
+
+    <!-- Catalog (Products & Categories) -->
+    <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Products\ACommerce.Catalog.Products.csproj" />
+    <ProjectReference Include="..\..\libs\backend\catalog\ACommerce.Catalog.Products.Api\ACommerce.Catalog.Products.Api.csproj" />
+
+    <!-- Cart & Orders -->
+    <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Cart\ACommerce.Cart.csproj" />
+    <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Orders.Api\ACommerce.Orders.Api.csproj" />
+
+    <!-- Payments -->
+    <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Payments.Api\ACommerce.Payments.Api.csproj" />
+
+    <!-- Notifications -->
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notifications.Core\ACommerce.Notifications.Core.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notifications.Recipients.Api\ACommerce.Notifications.Recipients.Api.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notifications.Channels.InApp\ACommerce.Notifications.Channels.InApp.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notifications.Messaging\ACommerce.Notifications.Messaging.csproj" />
+
+    <!-- Real-time (SignalR) -->
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Realtime.SignalR\ACommerce.Realtime.SignalR.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Messaging.InMemory\ACommerce.Messaging.InMemory.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Messaging.SignalR.Hub\ACommerce.Messaging.SignalR.Hub.csproj" />
+
+    <!-- Files -->
+    <ProjectReference Include="..\..\libs\backend\files\ACommerce.Files.Storage.Local\ACommerce.Files.Storage.Local.csproj" />
+    <ProjectReference Include="..\..\libs\backend\integration\ACommerce.Files.AspNetCore\ACommerce.Files.AspNetCore.csproj" />
+
+    <!-- Service Registry -->
+    <ProjectReference Include="..\..\libs\backend\integration\ACommerce.ServiceRegistry.Core\ACommerce.ServiceRegistry.Core.csproj" />
+    <ProjectReference Include="..\..\libs\backend\integration\ACommerce.ServiceRegistry.Server\ACommerce.ServiceRegistry.Server.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
+    <Content Update="appsettings.*.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+</Project>

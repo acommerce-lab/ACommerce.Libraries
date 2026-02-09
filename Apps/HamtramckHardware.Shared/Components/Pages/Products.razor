@@ -128,10 +128,17 @@
                                Price="product.Price"
                                OldPrice="@(product.OriginalPrice ?? 0)"
                                Currency="$"
+                               CurrencyBeforePrice="true"
                                DiscountPercent="@(product.OriginalPrice.HasValue && product.OriginalPrice > product.Price ? (int)Math.Round((product.OriginalPrice.Value - product.Price) / product.OriginalPrice.Value * 100) : 0)"
                                Rating="@((double)(product.Rating ?? 0))"
                                StockQuantity="@(product.InStock ? 10 : 0)"
                                ShowQuickActions="false"
+                               FeaturedLabel="Featured"
+                               NewLabel="New"
+                               InStockLabel="In Stock ({0})"
+                               OutOfStockLabel="Out of Stock"
+                               AddToCartLabel="Add to Cart"
+                               AddToWishlistLabel="Add to Wishlist"
                                OnClick="@(id => ViewProduct(product.Id))" />
             }
         </div>
@@ -229,20 +236,21 @@
 
     private List<ProductItem> GetMockProducts()
     {
+        // IDs match backend seed data for consistent navigation
         return new List<ProductItem>
         {
-            new(Guid.NewGuid(), "DeWalt", "DeWalt 20V MAX Cordless Drill", 149.99m, 179.99m, true, 4.7m, "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Milwaukee", "Milwaukee M18 Impact Driver", 129.99m, null, true, 4.8m, "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Stanley", "Copper Pipe Fittings Set", 24.99m, 29.99m, true, 4.2m, "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Makita", "LED Shop Light 4ft", 39.99m, null, true, 4.5m, "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Milwaukee", "Milwaukee Hammer Drill", 299.99m, 349.99m, true, 4.9m, "https://images.unsplash.com/photo-1580901368919-7738efb0f87e?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Generic", "PVC Pipe 10ft Bundle", 18.99m, null, true, 4.0m, "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Southwire", "Electrical Wire 100ft", 45.99m, null, true, 4.3m, "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Craftsman", "Socket Wrench Set 40pc", 79.99m, 99.99m, true, 4.6m, "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Flexzilla", "Garden Hose 50ft", 29.99m, null, false, 4.4m, "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "DeWalt", "DeWalt Circular Saw", 159.99m, null, true, 4.7m, "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Ryobi", "Ryobi Leaf Blower", 89.99m, 109.99m, true, 4.1m, "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop"),
-            new(Guid.NewGuid(), "Bosch", "Bosch Router Kit", 199.99m, null, true, 4.8m, "https://images.unsplash.com/photo-1590122959498-1ccae0d48bc8?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000001-0000-0000-0000-000000000001"), "DeWalt", "DeWalt 20V MAX Cordless Drill", 149.99m, 179.99m, true, 4.7m, "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000003-0000-0000-0000-000000000003"), "Makita", "Makita 18V LXT Impact Driver", 179.99m, null, true, 4.8m, "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000010-0000-0000-0000-000000000010"), "Stanley", "Copper Pipe Fittings Set", 24.99m, 29.99m, true, 4.2m, "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000015-0000-0000-0000-000000000015"), "Lithonia", "LED Shop Light 4ft", 39.99m, null, true, 4.5m, "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000002-0000-0000-0000-000000000002"), "Milwaukee", "Milwaukee Hammer Drill", 299.99m, 349.99m, true, 4.9m, "https://images.unsplash.com/photo-1580901368919-7738efb0f87e?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000013-0000-0000-0000-000000000013"), "Charlotte", "PVC Pipe 10ft Bundle", 18.99m, null, true, 4.0m, "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000014-0000-0000-0000-000000000014"), "Southwire", "Southwire Romex 12/2 Wire", 89.99m, 99.99m, true, 4.3m, "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000008-0000-0000-0000-000000000008"), "CRAFTSMAN", "CRAFTSMAN 320-Piece Tool Set", 199.99m, 299.99m, true, 4.6m, "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000017-0000-0000-0000-000000000017"), "Flexzilla", "Garden Hose 50ft", 29.99m, null, false, 4.4m, "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000005-0000-0000-0000-000000000005"), "DeWalt", "DeWalt Circular Saw", 159.99m, null, true, 4.7m, "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000018-0000-0000-0000-000000000018"), "Ryobi", "Ryobi Leaf Blower", 89.99m, 109.99m, true, 4.1m, "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop"),
+            new(Guid.Parse("p0000023-0000-0000-0000-000000000023"), "Bosch", "Bosch Router Kit", 199.99m, null, true, 4.8m, "https://images.unsplash.com/photo-1590122959498-1ccae0d48bc8?w=400&h=400&fit=crop"),
         };
     }
 

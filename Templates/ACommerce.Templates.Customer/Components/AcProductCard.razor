@@ -20,21 +20,21 @@
 
         @if (IsNew)
         {
-            <span class="ac-product-badge ac-product-badge-new">جديد</span>
+            <span class="ac-product-badge ac-product-badge-new">@NewLabel</span>
         }
 
         @if (IsFeatured)
         {
-            <span class="ac-product-badge ac-product-badge-featured">مميز</span>
+            <span class="ac-product-badge ac-product-badge-featured">@FeaturedLabel</span>
         }
 
         @if (ShowQuickActions)
         {
             <div class="ac-product-quick-actions">
-                <button class="ac-product-quick-btn" @onclick="HandleAddToCart" @onclick:stopPropagation="true" title="إضافة للسلة">
+                <button class="ac-product-quick-btn" @onclick="HandleAddToCart" @onclick:stopPropagation="true" title="@AddToCartLabel">
                     <i class="bi bi-cart-plus"></i>
                 </button>
-                <button class="ac-product-quick-btn" @onclick="HandleAddToWishlist" @onclick:stopPropagation="true" title="إضافة للمفضلة">
+                <button class="ac-product-quick-btn" @onclick="HandleAddToWishlist" @onclick:stopPropagation="true" title="@AddToWishlistLabel">
                     <i class="bi @(IsInWishlist ? "bi-heart-fill" : "bi-heart")"></i>
                 </button>
             </div>
@@ -84,18 +84,18 @@
         <div class="ac-product-price-row">
             <div class="ac-product-prices">
                 <span class="ac-product-price @(OldPrice > 0 ? "ac-product-price-discounted" : "")">
-                    @Price.ToString("N2") @Currency
+                    @FormatPrice(Price)
                 </span>
                 @if (OldPrice > 0)
                 {
-                    <span class="ac-product-old-price">@OldPrice.ToString("N2") @Currency</span>
+                    <span class="ac-product-old-price">@FormatPrice(OldPrice)</span>
                 }
             </div>
 
             @if (StockQuantity.HasValue)
             {
                 <span class="ac-product-stock @(StockQuantity > 0 ? "ac-in-stock" : "ac-out-of-stock")">
-                    @(StockQuantity > 0 ? $"متوفر ({StockQuantity})" : "غير متوفر")
+                    @(StockQuantity > 0 ? string.Format(InStockLabel, StockQuantity) : OutOfStockLabel)
                 </span>
             }
         </div>
@@ -111,6 +111,7 @@
     [Parameter] public decimal Price { get; set; }
     [Parameter] public decimal OldPrice { get; set; }
     [Parameter] public string Currency { get; set; } = "ر.س";
+    [Parameter] public bool CurrencyBeforePrice { get; set; } = false;
     [Parameter] public int DiscountPercent { get; set; }
     [Parameter] public double Rating { get; set; }
     [Parameter] public int ReviewCount { get; set; }
@@ -122,9 +123,25 @@
     [Parameter] public bool ShowQuickActions { get; set; } = true;
     [Parameter] public Dictionary<string, string>? DynamicAttributes { get; set; }
     [Parameter] public string? Class { get; set; }
+
+    // Localization parameters
+    [Parameter] public string NewLabel { get; set; } = "جديد";
+    [Parameter] public string FeaturedLabel { get; set; } = "مميز";
+    [Parameter] public string AddToCartLabel { get; set; } = "إضافة للسلة";
+    [Parameter] public string AddToWishlistLabel { get; set; } = "إضافة للمفضلة";
+    [Parameter] public string InStockLabel { get; set; } = "متوفر ({0})";
+    [Parameter] public string OutOfStockLabel { get; set; } = "غير متوفر";
+
     [Parameter] public EventCallback<Guid> OnClick { get; set; }
     [Parameter] public EventCallback<Guid> OnAddToCart { get; set; }
     [Parameter] public EventCallback<Guid> OnAddToWishlist { get; set; }
+
+    private string FormatPrice(decimal price)
+    {
+        return CurrencyBeforePrice
+            ? $"{Currency}{price:N2}"
+            : $"{price:N2} {Currency}";
+    }
 
     private async Task HandleClick()
     {
