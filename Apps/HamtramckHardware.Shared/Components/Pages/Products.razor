@@ -1,5 +1,6 @@
 @page "/products"
 @using ACommerce.Templates.Customer.Components
+@using ACommerce.Templates.Customer.Pages
 @using HamtramckHardware.Shared.Services
 @inject HamtramckDataService DataService
 @inject IAppNavigationService Navigation
@@ -77,8 +78,8 @@
         <div class="ac-products-grid">
             @foreach (var product in _products)
             {
-                <AcProductCard Id="product.Id" Name="@product.Name" ImageUrl="@product.Image"
-                               Price="product.Price" OldPrice="@product.OldPrice"
+                <AcProductCard Id="@product.Id" Name="@product.Name" ImageUrl="@product.Image"
+                               Price="@product.Price" OldPrice="@product.OldPrice"
                                Currency="$" CurrencyBeforePrice="true"
                                DiscountPercent="@(product.OldPrice > 0 ? (int)Math.Round((product.OldPrice - product.Price) / product.OldPrice * 100) : 0)"
                                Rating="@product.Rating" StockQuantity="@product.InStock"
@@ -86,7 +87,7 @@
                                FeaturedLabel="Featured" NewLabel="New"
                                InStockLabel="In Stock ({0})" OutOfStockLabel="Out of Stock"
                                AddToCartLabel="Add to Cart" AddToWishlistLabel="Add to Wishlist"
-                               OnClick="@(id => Navigation.NavigateTo($\"/product/{product.Id}\"))" />
+                               OnClick="@(id => Navigation.NavigateTo($"/product/{product.Id}"))" />
             }
         </div>
     }

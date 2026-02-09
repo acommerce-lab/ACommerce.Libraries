@@ -1,5 +1,6 @@
 @page "/product/{ProductId:guid}"
 @using ACommerce.Templates.Customer.Components
+@using ACommerce.Templates.Customer.Pages
 @using HamtramckHardware.Shared.Services
 @inject HamtramckDataService DataService
 @inject IAppNavigationService Navigation
@@ -136,11 +137,11 @@
                     @foreach (var product in _relatedProducts)
                     {
                         <div style="flex-shrink: 0; width: 160px;">
-                            <AcProductCard Id="product.Id" Name="@product.Name" ImageUrl="@product.Image"
-                                           Price="product.Price" Currency="$" CurrencyBeforePrice="true" ShowQuickActions="false"
+                            <AcProductCard Id="@product.Id" Name="@product.Name" ImageUrl="@product.Image"
+                                           Price="@product.Price" Currency="$" CurrencyBeforePrice="true" ShowQuickActions="false"
                                            FeaturedLabel="Featured" NewLabel="New" InStockLabel="In Stock ({0})" OutOfStockLabel="Out of Stock"
                                            AddToCartLabel="Add to Cart" AddToWishlistLabel="Add to Wishlist"
-                                           OnClick="@(id => Navigation.NavigateTo($\"/product/{product.Id}\"))" />
+                                           OnClick="@(id => Navigation.NavigateTo($"/product/{product.Id}"))" />
                         </div>
                     }
                 </div>

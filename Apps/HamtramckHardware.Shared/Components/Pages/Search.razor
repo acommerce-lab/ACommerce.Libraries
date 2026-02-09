@@ -1,5 +1,6 @@
 @page "/search"
 @using ACommerce.Templates.Customer.Components
+@using ACommerce.Templates.Customer.Pages
 @using HamtramckHardware.Shared.Services
 @inject HamtramckDataService DataService
 @inject IAppNavigationService Navigation
@@ -32,7 +33,7 @@
             <div class="hh-category-grid">
                 @foreach (var category in _categories)
                 {
-                    <div class="hh-category-card" @onclick="() => Navigation.NavigateTo($\"/products?category={category.Id}\")">
+                    <div class="hh-category-card" @onclick="() => Navigation.NavigateTo($"/products?category={category.Id}")">
                         <i class="@category.Icon"></i>
                         <span>@category.Name</span>
                     </div>
@@ -51,15 +52,15 @@
         <div class="ac-products-grid" style="padding: 0 16px;">
             @foreach (var product in _results)
             {
-                <AcProductCard Id="product.Id" Name="@product.Name" ImageUrl="@product.Image"
-                               Price="product.Price" OldPrice="@product.OldPrice"
+                <AcProductCard Id="@product.Id" Name="@product.Name" ImageUrl="@product.Image"
+                               Price="@product.Price" OldPrice="@product.OldPrice"
                                Currency="$" CurrencyBeforePrice="true"
                                Rating="@product.Rating" ReviewCount="@product.ReviewCount"
                                ShowQuickActions="false"
                                FeaturedLabel="Featured" NewLabel="New"
                                InStockLabel="In Stock ({0})" OutOfStockLabel="Out of Stock"
                                AddToCartLabel="Add to Cart" AddToWishlistLabel="Add to Wishlist"
-                               OnClick="@(id => Navigation.NavigateTo($\"/product/{product.Id}\"))" />
+                               OnClick="@(id => Navigation.NavigateTo($"/product/{product.Id}"))" />
             }
         </div>
     }
@@ -84,13 +85,13 @@
     {
         _categories = DataService.GetCategories();
         _searchQuery = Query;
-        if (!string.IsNullOrWhiteSpace(_searchQuery)) await Search();
+        if (!string.IsNullOrWhiteSpace(_searchQuery)) await PerformSearch();
     }
 
     private void OnSearchChanged(string value) => _searchQuery = value;
-    private async Task ExecuteSearch(string query) { _searchQuery = query; await Search(); }
+    private async Task ExecuteSearch(string query) { _searchQuery = query; await PerformSearch(); }
 
-    private async Task Search()
+    private async Task PerformSearch()
     {
         if (string.IsNullOrWhiteSpace(_searchQuery)) { _results.Clear(); return; }
         _isLoading = true;

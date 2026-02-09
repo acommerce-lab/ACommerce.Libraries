@@ -1,4 +1,4 @@
-using ACommerce.Templates.Customer.Models;
+using ACommerce.Templates.Customer.Pages;
 
 namespace HamtramckHardware.Shared.Services;
 
