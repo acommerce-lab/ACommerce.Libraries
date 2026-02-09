@@ -1,42 +1,41 @@
 @page "/product/{ProductId:guid}"
+@using ACommerce.Templates.Customer.Components
 @inject ILocalizationService L
 @inject IAppNavigationService Navigation
 @inject ProductsClient ProductsClient
 @inject CartClient CartClient
 
-<div class="hh-page-content hh-product-details">
+<div class="ac-page hh-product-details">
     @if (_isLoading)
     {
-        <div class="hh-loading-container">
-            <div class="hh-spinner"></div>
+        <div class="ac-loading-container">
+            <AcSpinner />
         </div>
     }
     else if (_product == null)
     {
-        <div class="hh-empty-state">
-            <i class="bi bi-box-seam"></i>
-            <h2>Product Not Found</h2>
-            <p>The product you're looking for doesn't exist or has been removed.</p>
-            <button class="hh-btn hh-btn-primary" @onclick="GoBack">
-                <i class="bi bi-arrow-left"></i> Go Back
-            </button>
-        </div>
+        <AcEmptyState Icon="bi-box-seam"
+                      Title="Product Not Found"
+                      Description="The product you're looking for doesn't exist or has been removed."
+                      ActionText="Go Back"
+                      ActionIcon="bi-arrow-left"
+                      OnAction="GoBack" />
     }
     else
     {
         <!-- Product Images -->
-        <div class="hh-product-gallery">
+        <div class="ac-product-gallery" style="padding: 16px;">
             <img src="@(_product.Images.FirstOrDefault() ?? "/images/placeholder-product.png")"
                  alt="@_product.Name"
-                 class="hh-product-main-image" />
+                 style="width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--ac-radius-lg); background: var(--ac-surface);" />
             @if (_product.Images.Count > 1)
             {
-                <div class="hh-product-thumbnails">
+                <div style="display: flex; gap: 8px; margin-top: 12px; overflow-x: auto;">
                     @foreach (var (image, index) in _product.Images.Select((img, i) => (img, i)))
                     {
                         <img src="@image"
                              alt="@_product.Name @(index + 1)"
-                             class="hh-product-thumbnail @(_selectedImageIndex == index ? "active" : "")"
+                             style="width: 64px; height: 64px; object-fit: cover; border-radius: var(--ac-radius-sm); cursor: pointer; border: 2px solid @(_selectedImageIndex == index ? "var(--ac-primary)" : "transparent");"
                              @onclick="() => SelectImage(index)" />
                     }
                 </div>
@@ -44,48 +43,48 @@
         </div>
 
         <!-- Product Info -->
-        <div class="hh-product-info-section">
-            <div class="hh-product-header">
-                <span class="hh-product-brand">@_product.Brand</span>
-                <h1 class="hh-product-title">@_product.Name</h1>
-                <div class="hh-product-meta">
-                    <span class="hh-product-sku">SKU: @_product.Sku</span>
+        <div class="ac-product-info-section" style="padding: 0 16px;">
+            <div style="margin-bottom: 16px;">
+                <span style="color: var(--ac-primary); font-size: 0.875rem; font-weight: 500;">@_product.Brand</span>
+                <h1 style="font-size: 1.5rem; font-weight: 700; margin: 8px 0;">@_product.Name</h1>
+                <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; color: var(--ac-text-muted); font-size: 0.875rem;">
+                    <span>SKU: @_product.Sku</span>
                     @if (_product.Rating.HasValue)
                     {
-                        <span class="hh-product-rating">
-                            <i class="bi bi-star-fill"></i>
+                        <span style="display: flex; align-items: center; gap: 4px;">
+                            <i class="bi bi-star-fill" style="color: #FFC107;"></i>
                             @_product.Rating.Value.ToString("0.0")
-                            <span class="hh-rating-count">(@_product.ReviewCount reviews)</span>
+                            <span>(@_product.ReviewCount reviews)</span>
                         </span>
                     }
                 </div>
             </div>
 
-            <div class="hh-product-pricing">
-                <span class="hh-product-price">$@_product.Price.ToString("0.00")</span>
+            <div style="margin-bottom: 16px;">
+                <span style="font-size: 1.75rem; font-weight: 700; color: var(--ac-primary);">$@_product.Price.ToString("0.00")</span>
                 @if (_product.OriginalPrice.HasValue && _product.OriginalPrice > _product.Price)
                 {
-                    <span class="hh-product-original-price">$@_product.OriginalPrice.Value.ToString("0.00")</span>
-                    <span class="hh-product-discount">
+                    <span style="text-decoration: line-through; color: var(--ac-text-muted); margin-left: 8px;">$@_product.OriginalPrice.Value.ToString("0.00")</span>
+                    <span style="background: var(--ac-success); color: white; padding: 2px 8px; border-radius: var(--ac-radius-sm); font-size: 0.75rem; margin-left: 8px;">
                         Save $@((_product.OriginalPrice.Value - _product.Price).ToString("0.00"))
                     </span>
                 }
             </div>
 
-            <div class="hh-stock-info">
+            <div style="margin-bottom: 16px;">
                 @if (_product.InStock)
                 {
-                    <span class="hh-stock-badge in-stock">
+                    <span class="ac-badge" style="background: var(--ac-success-light); color: var(--ac-success);">
                         <i class="bi bi-check-circle"></i> In Stock
                     </span>
                     @if (_product.StockQuantity.HasValue && _product.StockQuantity < 10)
                     {
-                        <span class="hh-low-stock">Only @_product.StockQuantity left!</span>
+                        <span style="color: var(--ac-warning); font-size: 0.875rem; margin-left: 8px;">Only @_product.StockQuantity left!</span>
                     }
                 }
                 else
                 {
-                    <span class="hh-stock-badge out-of-stock">
+                    <span class="ac-badge" style="background: var(--ac-danger-light); color: var(--ac-danger);">
                         <i class="bi bi-x-circle"></i> Out of Stock
                     </span>
                 }
@@ -94,70 +93,72 @@
             <!-- Quantity Selector -->
             @if (_product.InStock)
             {
-                <div class="hh-quantity-section">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
                     <span>Quantity:</span>
-                    <div class="hh-quantity-control">
-                        <button class="hh-qty-btn" @onclick="DecreaseQuantity" disabled="@(_quantity <= 1)">
+                    <div style="display: flex; align-items: center; gap: 0; border: 1px solid var(--ac-border); border-radius: var(--ac-radius-md);">
+                        <button style="width: 40px; height: 40px; border: none; background: transparent; cursor: pointer;" @onclick="DecreaseQuantity" disabled="@(_quantity <= 1)">
                             <i class="bi bi-dash"></i>
                         </button>
-                        <span class="hh-qty-value">@_quantity</span>
-                        <button class="hh-qty-btn" @onclick="IncreaseQuantity">
+                        <span style="min-width: 40px; text-align: center; font-weight: 600;">@_quantity</span>
+                        <button style="width: 40px; height: 40px; border: none; background: transparent; cursor: pointer;" @onclick="IncreaseQuantity">
                             <i class="bi bi-plus"></i>
                         </button>
                     </div>
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="hh-product-actions">
-                    <button class="hh-btn hh-btn-primary hh-btn-lg hh-btn-block" @onclick="AddToCart" disabled="@_isAddingToCart">
-                        @if (_isAddingToCart)
-                        {
-                            <span class="hh-spinner-sm"></span>
-                        }
-                        else
-                        {
-                            <i class="bi bi-cart-plus"></i>
-                        }
-                        @(_addedToCart ? "Added!" : "Add to Cart")
-                    </button>
-                    <button class="hh-btn hh-btn-secondary hh-btn-icon" @onclick="ToggleFavorite">
-                        <i class="@(_isFavorite ? "bi bi-heart-fill" : "bi bi-heart")"></i>
+                <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                    <div style="flex: 1;">
+                        <AcButton Text="@(_addedToCart ? "Added!" : "Add to Cart")"
+                                  Icon="@(_isAddingToCart ? "" : "bi-cart-plus")"
+                                  Variant="ButtonVariant.Primary"
+                                  Size="ButtonSize.Large"
+                                  Block="true"
+                                  Loading="_isAddingToCart"
+                                  OnClick="AddToCart" />
+                    </div>
+                    <button style="width: 48px; height: 48px; border: 1px solid var(--ac-border); background: var(--ac-surface); border-radius: var(--ac-radius-md); cursor: pointer; display: flex; align-items: center; justify-content: center;" @onclick="ToggleFavorite">
+                        <i class="@(_isFavorite ? "bi bi-heart-fill" : "bi bi-heart")" style="font-size: 1.25rem; color: @(_isFavorite ? "var(--ac-danger)" : "var(--ac-text-secondary)");"></i>
                     </button>
                 </div>
             }
             else
             {
-                <button class="hh-btn hh-btn-secondary hh-btn-block" @onclick="NotifyWhenAvailable">
-                    <i class="bi bi-bell"></i> Notify When Available
-                </button>
+                <AcButton Text="Notify When Available"
+                          Icon="bi-bell"
+                          Variant="ButtonVariant.Secondary"
+                          Block="true"
+                          OnClick="NotifyWhenAvailable" />
             }
 
             <!-- Store Pickup -->
-            <div class="hh-store-pickup hh-card">
-                <i class="bi bi-shop"></i>
+            <div class="ac-card" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--ac-surface-secondary);">
+                <i class="bi bi-shop" style="font-size: 1.5rem; color: var(--ac-primary);"></i>
                 <div>
                     <strong>Store Pickup Available</strong>
-                    <p>Ready in 2 hours at Hamtramck Hardware</p>
+                    <p style="margin: 0; color: var(--ac-text-muted); font-size: 0.875rem;">Ready in 2 hours at Hamtramck Hardware</p>
                 </div>
             </div>
         </div>
 
         <!-- Product Description -->
-        <div class="hh-product-description hh-card">
-            <h3>Description</h3>
-            <p>@_product.Description</p>
+        <div class="ac-card" style="margin: 16px; padding: 16px;">
+            <h3 style="margin: 0 0 12px; font-size: 1.125rem;">Description</h3>
+            <p style="margin: 0; color: var(--ac-text-secondary); line-height: 1.6;">@_product.Description</p>
         </div>
 
         <!-- Specifications -->
         @if (_product.Specifications?.Any() == true)
         {
-            <div class="hh-product-specs hh-card">
-                <h3>Specifications</h3>
-                <dl class="hh-specs-list">
+            <div class="ac-card" style="margin: 16px; padding: 16px;">
+                <h3 style="margin: 0 0 12px; font-size: 1.125rem;">Specifications</h3>
+                <dl style="margin: 0; display: grid; gap: 8px;">
                     @foreach (var spec in _product.Specifications)
                     {
-                        <dt>@spec.Key</dt>
-                        <dd>@spec.Value</dd>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--ac-border);">
+                            <dt style="color: var(--ac-text-muted);">@spec.Key</dt>
+                            <dd style="margin: 0; font-weight: 500;">@spec.Value</dd>
+                        </div>
                     }
                 </dl>
             </div>
@@ -166,23 +167,25 @@
         <!-- Related Products -->
         @if (_relatedProducts.Any())
         {
-            <div class="hh-related-products">
-                <h3>Related Products</h3>
-                <div class="hh-products-scroll">
+            <section class="ac-section" style="margin: 16px;">
+                <div class="ac-section-header">
+                    <h2 class="ac-section-title">Related Products</h2>
+                </div>
+                <div style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px;">
                     @foreach (var product in _relatedProducts)
                     {
-                        <div class="hh-product-card hh-product-card-sm" @onclick="() => ViewProduct(product.Id)">
-                            <img src="@(product.ImageUrl ?? "/images/placeholder-product.png")"
-                                 alt="@product.Name"
-                                 class="hh-product-image" />
-                            <div class="hh-product-info">
-                                <div class="hh-product-name">@product.Name</div>
-                                <span class="hh-product-price">$@product.Price.ToString("0.00")</span>
-                            </div>
+                        <div style="flex-shrink: 0; width: 160px;">
+                            <AcProductCard Id="product.Id"
+                                           Name="@product.Name"
+                                           ImageUrl="@product.ImageUrl"
+                                           Price="product.Price"
+                                           Currency="$"
+                                           ShowQuickActions="false"
+                                           OnClick="@(id => ViewProduct(product.Id))" />
                         </div>
                     }
                 </div>
-            </div>
+            </section>
         }
     }
 </div>

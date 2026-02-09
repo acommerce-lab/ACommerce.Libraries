@@ -1,59 +1,170 @@
 @page "/categories"
+@using ACommerce.Templates.Customer.Components
 @inject ILocalizationService L
 @inject IAppNavigationService Navigation
 @inject CategoriesClient CategoriesClient
 
-<div class="hh-page-content">
-    <h1 class="hh-page-title">Shop by Category</h1>
+<div class="ac-page">
+    <h1 class="ac-page-title">Shop by Category</h1>
 
-    <div class="hh-categories-grid">
+    <div class="ac-categories-list">
         @foreach (var category in _categories)
         {
-            <div class="hh-category-card" @onclick="() => OpenCategory(category.Code)">
-                <div class="hh-category-card-icon" style="background-color: @category.Color;">
+            <div class="ac-category-list-item" @onclick="() => OpenCategory(category.Code)">
+                <div class="ac-category-icon" style="background-color: @category.Color;">
                     <i class="@category.Icon"></i>
                 </div>
-                <div class="hh-category-card-info">
+                <div class="ac-category-info">
                     <h3>@category.Name</h3>
                     <p>@category.Description</p>
                 </div>
-                <i class="bi bi-chevron-right hh-category-arrow"></i>
+                <i class="bi bi-chevron-right"></i>
             </div>
         }
     </div>
 
     <!-- Store Services Section -->
-    <div class="hh-section-header" style="margin-top: 24px;">
-        <span class="hh-section-title">Our Services</span>
-    </div>
+    <section class="ac-section" style="margin-top: 24px;">
+        <div class="ac-section-header">
+            <h2 class="ac-section-title">Our Services</h2>
+        </div>
 
-    <div class="hh-services-grid">
-        <div class="hh-service-card">
-            <i class="bi bi-scissors"></i>
-            <span>Key Cutting</span>
+        <div class="hh-services-grid">
+            <div class="hh-service-card">
+                <i class="bi bi-scissors"></i>
+                <span>Key Cutting</span>
+            </div>
+            <div class="hh-service-card">
+                <i class="bi bi-droplet"></i>
+                <span>Pipe Threading</span>
+            </div>
+            <div class="hh-service-card">
+                <i class="bi bi-palette"></i>
+                <span>Paint Mixing</span>
+            </div>
+            <div class="hh-service-card">
+                <i class="bi bi-truck"></i>
+                <span>Delivery</span>
+            </div>
+            <div class="hh-service-card">
+                <i class="bi bi-tools"></i>
+                <span>Tool Rental</span>
+            </div>
+            <div class="hh-service-card">
+                <i class="bi bi-window"></i>
+                <span>Glass Cutting</span>
+            </div>
         </div>
-        <div class="hh-service-card">
-            <i class="bi bi-droplet"></i>
-            <span>Pipe Threading</span>
-        </div>
-        <div class="hh-service-card">
-            <i class="bi bi-palette"></i>
-            <span>Paint Mixing</span>
-        </div>
-        <div class="hh-service-card">
-            <i class="bi bi-truck"></i>
-            <span>Delivery</span>
-        </div>
-        <div class="hh-service-card">
-            <i class="bi bi-tools"></i>
-            <span>Tool Rental</span>
-        </div>
-        <div class="hh-service-card">
-            <i class="bi bi-window"></i>
-            <span>Glass Cutting</span>
-        </div>
-    </div>
+    </section>
 </div>
+
+<style>
+    .ac-categories-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .ac-category-list-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        background: var(--ac-surface);
+        border-radius: var(--ac-radius-lg);
+        box-shadow: var(--ac-shadow-sm);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .ac-category-list-item:hover {
+        box-shadow: var(--ac-shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .ac-category-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: var(--ac-radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .ac-category-icon i {
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .ac-category-info {
+        flex: 1;
+    }
+
+    .ac-category-info h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0 0 4px;
+    }
+
+    .ac-category-info p {
+        font-size: 0.875rem;
+        color: var(--ac-text-secondary);
+        margin: 0;
+    }
+
+    .ac-category-list-item > .bi-chevron-right {
+        color: var(--ac-text-muted);
+        font-size: 1.25rem;
+    }
+
+    .hh-services-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        padding: 0 16px 16px;
+    }
+
+    .hh-service-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 16px;
+        background: var(--ac-surface);
+        border-radius: var(--ac-radius-lg);
+        box-shadow: var(--ac-shadow-sm);
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .hh-service-card:hover {
+        background: var(--ac-primary);
+        color: white;
+    }
+
+    .hh-service-card i {
+        font-size: 1.5rem;
+        color: var(--ac-primary);
+    }
+
+    .hh-service-card:hover i {
+        color: white;
+    }
+
+    .hh-service-card span {
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    @@media (max-width: 480px) {
+        .hh-services-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
 
 @code {
     private List<CategoryInfo> _categories = new();

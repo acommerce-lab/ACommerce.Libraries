@@ -1,106 +1,103 @@
 @page "/orders"
+@using ACommerce.Templates.Customer.Components
 @inject ILocalizationService L
 @inject IAppNavigationService Navigation
 @inject OrdersClient OrdersClient
 @inject TokenManager TokenManager
 
-<div class="hh-page-content">
-    <h1 class="hh-page-title">
+<div class="ac-page">
+    <h1 class="ac-page-title">
         <i class="bi bi-box-seam"></i> My Orders
     </h1>
 
     @if (!_isLoggedIn)
     {
-        <div class="hh-empty-state">
-            <i class="bi bi-person-lock"></i>
-            <h2>Sign In Required</h2>
-            <p>Please sign in to view your order history.</p>
-            <button class="hh-btn hh-btn-primary" @onclick="GoToLogin">
-                <i class="bi bi-box-arrow-in-right"></i> Sign In
-            </button>
-        </div>
+        <AcEmptyState Icon="bi-person-lock"
+                      Title="Sign In Required"
+                      Description="Please sign in to view your order history."
+                      ActionText="Sign In"
+                      ActionIcon="bi-box-arrow-in-right"
+                      OnAction="GoToLogin" />
     }
     else if (_isLoading)
     {
-        <div class="hh-loading-container">
-            <div class="hh-spinner"></div>
+        <div class="ac-loading-container">
+            <AcSpinner />
             <p>Loading your orders...</p>
         </div>
     }
     else if (!_orders.Any())
     {
-        <div class="hh-empty-state">
-            <i class="bi bi-bag-x"></i>
-            <h2>No Orders Yet</h2>
-            <p>You haven't placed any orders yet.</p>
-            <button class="hh-btn hh-btn-primary" @onclick="GoShopping">
-                <i class="bi bi-bag"></i> Start Shopping
-            </button>
-        </div>
+        <AcEmptyState Icon="bi-bag-x"
+                      Title="No Orders Yet"
+                      Description="You haven't placed any orders yet."
+                      ActionText="Start Shopping"
+                      ActionIcon="bi-bag"
+                      OnAction="GoShopping" />
     }
     else
     {
         <!-- Order Tabs -->
-        <div class="hh-order-tabs">
-            <button class="hh-tab @(_selectedTab == "all" ? "active" : "")" @onclick='() => SelectTab("all")'>
+        <div class="ac-tabs" style="padding: 0 16px; margin-bottom: 16px;">
+            <button class="ac-tab @(_selectedTab == "all" ? "active" : "")" @onclick='() => SelectTab("all")'>
                 All
             </button>
-            <button class="hh-tab @(_selectedTab == "pending" ? "active" : "")" @onclick='() => SelectTab("pending")'>
+            <button class="ac-tab @(_selectedTab == "pending" ? "active" : "")" @onclick='() => SelectTab("pending")'>
                 Pending
             </button>
-            <button class="hh-tab @(_selectedTab == "shipped" ? "active" : "")" @onclick='() => SelectTab("shipped")'>
+            <button class="ac-tab @(_selectedTab == "shipped" ? "active" : "")" @onclick='() => SelectTab("shipped")'>
                 Shipped
             </button>
-            <button class="hh-tab @(_selectedTab == "delivered" ? "active" : "")" @onclick='() => SelectTab("delivered")'>
+            <button class="ac-tab @(_selectedTab == "delivered" ? "active" : "")" @onclick='() => SelectTab("delivered")'>
                 Delivered
             </button>
         </div>
 
         <!-- Orders List -->
-        <div class="hh-orders-list">
+        <div class="ac-orders-list" style="padding: 0 16px; display: flex; flex-direction: column; gap: 12px;">
             @foreach (var order in FilteredOrders)
             {
-                <div class="hh-order-card hh-card">
-                    <div class="hh-order-header">
+                <div class="ac-card" style="padding: 16px;">
+                    <div class="hh-order-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                         <div>
-                            <span class="hh-order-number">Order #@order.OrderNumber</span>
-                            <span class="hh-order-date">@order.Date.ToString("MMM dd, yyyy")</span>
+                            <span style="font-weight: 600;">Order #@order.OrderNumber</span>
+                            <span style="color: var(--ac-text-muted); font-size: 0.875rem; margin-left: 8px;">@order.Date.ToString("MMM dd, yyyy")</span>
                         </div>
-                        <span class="hh-order-status @order.Status.ToLower()">
-                            @GetStatusIcon(order.Status)
+                        <span class="ac-badge ac-badge-@order.Status.ToLower()">
                             @order.Status
                         </span>
                     </div>
 
-                    <div class="hh-order-items">
+                    <div class="hh-order-items" style="display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto;">
                         @foreach (var item in order.Items.Take(3))
                         {
-                            <div class="hh-order-item">
+                            <div class="hh-order-item" style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
                                 <img src="@(item.ImageUrl ?? "/images/placeholder-product.png")"
                                      alt="@item.Name"
-                                     class="hh-order-item-image" />
-                                <div class="hh-order-item-info">
-                                    <span class="hh-order-item-name">@item.Name</span>
-                                    <span class="hh-order-item-qty">Qty: @item.Quantity</span>
+                                     style="width: 48px; height: 48px; object-fit: cover; border-radius: var(--ac-radius-sm);" />
+                                <div style="min-width: 0;">
+                                    <div style="font-size: 0.875rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;">@item.Name</div>
+                                    <div style="font-size: 0.75rem; color: var(--ac-text-muted);">Qty: @item.Quantity</div>
                                 </div>
                             </div>
                         }
                         @if (order.Items.Count > 3)
                         {
-                            <div class="hh-order-more-items">
-                                +@(order.Items.Count - 3) more items
+                            <div style="display: flex; align-items: center; font-size: 0.875rem; color: var(--ac-text-muted);">
+                                +@(order.Items.Count - 3) more
                             </div>
                         }
                     </div>
 
-                    <div class="hh-order-footer">
-                        <div class="hh-order-total">
-                            <span>Total:</span>
-                            <span class="hh-order-amount">$@order.Total.ToString("0.00")</span>
+                    <div class="hh-order-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--ac-border);">
+                        <div>
+                            <span style="color: var(--ac-text-muted);">Total:</span>
+                            <span style="font-weight: 600; margin-left: 4px;">$@order.Total.ToString("0.00")</span>
                         </div>
-                        <button class="hh-btn hh-btn-secondary hh-btn-sm" @onclick="() => ViewOrder(order.Id)">
-                            View Details <i class="bi bi-chevron-right"></i>
-                        </button>
+                        <AcButton Text="View Details"
+                                  Variant="ButtonVariant.Secondary"
+                                  Size="ButtonSize.Small"
+                                  OnClick="@(() => ViewOrder(order.Id))" />
                     </div>
                 </div>
             }

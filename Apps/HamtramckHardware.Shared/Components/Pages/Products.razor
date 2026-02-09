@@ -1,36 +1,32 @@
 @page "/products"
+@using ACommerce.Templates.Customer.Components
 @inject ILocalizationService L
 @inject IAppNavigationService Navigation
 @inject ProductsClient ProductsClient
 
-<div class="hh-page-content hh-products-page">
+<div class="ac-page hh-products-page">
     <!-- Page Header -->
-    <div class="hh-products-header">
-        <h1 class="hh-page-title">@(_currentCategory?.Name ?? "All Products")</h1>
-        <p class="hh-products-count">@_products.Count products</p>
+    <div class="ac-page-header" style="padding: 16px;">
+        <h1 class="ac-page-title">@(_currentCategory?.Name ?? "All Products")</h1>
+        <p style="color: var(--ac-text-muted); margin: 0;">@_products.Count products</p>
     </div>
 
     <!-- Filter Bar -->
-    <div class="hh-filter-bar">
-        <button class="hh-filter-btn" @onclick="ToggleFilters">
-            <i class="bi bi-funnel"></i>
-            Filters
-            @if (_activeFiltersCount > 0)
-            {
-                <span class="hh-filter-badge">@_activeFiltersCount</span>
-            }
-        </button>
+    <div class="ac-filter-bar" style="display: flex; justify-content: space-between; align-items: center; padding: 0 16px 16px;">
+        <AcButton Text="@($"Filters{(_activeFiltersCount > 0 ? $" ({_activeFiltersCount})" : "")}")"
+                  Icon="bi-funnel"
+                  Variant="ButtonVariant.Secondary"
+                  Size="ButtonSize.Small"
+                  OnClick="ToggleFilters" />
 
-        <div class="hh-sort-dropdown">
-            <select @bind="_sortBy" @bind:after="ApplySort">
-                <option value="featured">Featured</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="newest">Newest</option>
-                <option value="bestselling">Best Selling</option>
-                <option value="rating">Top Rated</option>
-            </select>
-        </div>
+        <select class="ac-select" style="padding: 8px 12px; border-radius: var(--ac-radius-md); border: 1px solid var(--ac-border);" @bind="_sortBy" @bind:after="ApplySort">
+            <option value="featured">Featured</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="newest">Newest</option>
+            <option value="bestselling">Best Selling</option>
+            <option value="rating">Top Rated</option>
+        </select>
     </div>
 
     <!-- Category Pills (when no category selected) -->
@@ -51,28 +47,28 @@
     <!-- Filter Panel (shown when toggled) -->
     @if (_showFilters)
     {
-        <div class="hh-filter-panel hh-card">
-            <div class="hh-filter-header">
-                <h3>Filters</h3>
-                <button class="hh-link-btn" @onclick="ClearFilters">Clear All</button>
+        <div class="ac-card" style="margin: 0 16px 16px; padding: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0; font-size: 1.125rem;">Filters</h3>
+                <button class="ac-link-btn" @onclick="ClearFilters">Clear All</button>
             </div>
 
             <!-- Price Range -->
-            <div class="hh-filter-section">
-                <h4>Price Range</h4>
-                <div class="hh-price-inputs">
-                    <input type="number" placeholder="Min" @bind="_minPrice" />
+            <div style="margin-bottom: 16px;">
+                <h4 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 8px;">Price Range</h4>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <input type="number" placeholder="Min" @bind="_minPrice" style="flex: 1; padding: 8px; border-radius: var(--ac-radius-sm); border: 1px solid var(--ac-border);" />
                     <span>to</span>
-                    <input type="number" placeholder="Max" @bind="_maxPrice" />
+                    <input type="number" placeholder="Max" @bind="_maxPrice" style="flex: 1; padding: 8px; border-radius: var(--ac-radius-sm); border: 1px solid var(--ac-border);" />
                 </div>
             </div>
 
             <!-- Brands -->
-            <div class="hh-filter-section">
-                <h4>Brands</h4>
+            <div style="margin-bottom: 16px;">
+                <h4 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 8px;">Brands</h4>
                 @foreach (var brand in _brands)
                 {
-                    <label class="hh-checkbox">
+                    <label class="ac-checkbox" style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px; cursor: pointer;">
                         <input type="checkbox"
                                checked="@_selectedBrands.Contains(brand)"
                                @onchange="e => ToggleBrand(brand, (bool)(e.Value ?? false))" />
@@ -82,95 +78,72 @@
             </div>
 
             <!-- In Stock Only -->
-            <div class="hh-filter-section">
-                <label class="hh-checkbox">
+            <div style="margin-bottom: 8px;">
+                <label class="ac-checkbox" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                     <input type="checkbox" @bind="_inStockOnly" />
                     <span>In Stock Only</span>
                 </label>
             </div>
 
             <!-- On Sale -->
-            <div class="hh-filter-section">
-                <label class="hh-checkbox">
+            <div style="margin-bottom: 16px;">
+                <label class="ac-checkbox" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                     <input type="checkbox" @bind="_onSaleOnly" />
                     <span>On Sale</span>
                 </label>
             </div>
 
-            <button class="hh-btn hh-btn-primary hh-btn-block" @onclick="ApplyFilters">
-                Apply Filters
-            </button>
+            <AcButton Text="Apply Filters"
+                      Variant="ButtonVariant.Primary"
+                      Block="true"
+                      OnClick="ApplyFilters" />
         </div>
     }
 
     <!-- Products Grid -->
     @if (_isLoading)
     {
-        <div class="hh-loading-container">
-            <div class="hh-spinner"></div>
+        <div class="ac-loading-container">
+            <AcSpinner />
             <p>Loading products...</p>
         </div>
     }
     else if (!_products.Any())
     {
-        <div class="hh-empty-state">
-            <i class="bi bi-box-seam"></i>
-            <h2>No Products Found</h2>
-            <p>Try adjusting your filters or browse our categories.</p>
-            <button class="hh-btn hh-btn-secondary" @onclick="ClearFilters">
-                Clear Filters
-            </button>
-        </div>
+        <AcEmptyState Icon="bi-box-seam"
+                      Title="No Products Found"
+                      Description="Try adjusting your filters or browse our categories."
+                      ActionText="Clear Filters"
+                      OnAction="ClearFilters" />
     }
     else
     {
-        <div class="hh-products-grid">
+        <div class="ac-products-grid">
             @foreach (var product in _products)
             {
-                <div class="hh-product-card" @onclick="() => ViewProduct(product.Id)">
-                    @if (product.OriginalPrice.HasValue && product.OriginalPrice > product.Price)
-                    {
-                        <span class="hh-sale-badge">Sale</span>
-                    }
-                    <img src="@(product.ImageUrl ?? "/images/placeholder-product.png")"
-                         alt="@product.Name"
-                         class="hh-product-image" />
-                    <div class="hh-product-info">
-                        <span class="hh-product-brand">@product.Brand</span>
-                        <div class="hh-product-name">@product.Name</div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span class="hh-product-price">$@product.Price.ToString("0.00")</span>
-                            @if (product.OriginalPrice.HasValue && product.OriginalPrice > product.Price)
-                            {
-                                <span class="hh-product-original-price">$@product.OriginalPrice.Value.ToString("0.00")</span>
-                            }
-                        </div>
-                        @if (product.Rating.HasValue)
-                        {
-                            <div class="hh-product-rating">
-                                <i class="bi bi-star-fill"></i>
-                                <span>@product.Rating.Value.ToString("0.0")</span>
-                            </div>
-                        }
-                        <span class="hh-stock-badge @(product.InStock ? "in-stock" : "out-of-stock")">
-                            @(product.InStock ? L["InStock"] : L["OutOfStock"])
-                        </span>
-                    </div>
-                </div>
+                <AcProductCard Id="product.Id"
+                               Name="@product.Name"
+                               ImageUrl="@product.ImageUrl"
+                               Category="@product.Brand"
+                               Price="product.Price"
+                               OldPrice="@(product.OriginalPrice ?? 0)"
+                               Currency="$"
+                               DiscountPercent="@(product.OriginalPrice.HasValue && product.OriginalPrice > product.Price ? (int)Math.Round((product.OriginalPrice.Value - product.Price) / product.OriginalPrice.Value * 100) : 0)"
+                               Rating="@((double)(product.Rating ?? 0))"
+                               StockQuantity="@(product.InStock ? 10 : 0)"
+                               ShowQuickActions="false"
+                               OnClick="@(id => ViewProduct(product.Id))" />
             }
         </div>
 
         <!-- Load More -->
         @if (_hasMore)
         {
-            <div class="hh-load-more">
-                <button class="hh-btn hh-btn-secondary" @onclick="LoadMore" disabled="@_isLoadingMore">
-                    @if (_isLoadingMore)
-                    {
-                        <span class="hh-spinner-sm"></span>
-                    }
-                    Load More
-                </button>
+            <div style="padding: 16px; text-align: center;">
+                <AcButton Text="@(_isLoadingMore ? "Loading..." : "Load More")"
+                          Variant="ButtonVariant.Secondary"
+                          Disabled="_isLoadingMore"
+                          OnClick="LoadMore" />
             </div>
         }
     }
