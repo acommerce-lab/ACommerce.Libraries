@@ -1,135 +1,26 @@
 @page "/cart"
+@using ACommerce.Templates.Customer.Pages
 @inject ILocalizationService L
 @inject IAppNavigationService Navigation
 @inject CartClient CartClient
 
-<div class="hh-page-content">
-    <h1 class="hh-page-title">
-        <i class="bi bi-cart3"></i> Shopping Cart
-        @if (_cartItems.Any())
-        {
-            <span class="hh-cart-item-count">(@_cartItems.Count @(_cartItems.Count == 1 ? "item" : "items"))</span>
-        }
-    </h1>
-
-    @if (_isLoading)
-    {
-        <div class="hh-loading-container">
-            <div class="hh-spinner"></div>
-            <p>Loading your cart...</p>
-        </div>
-    }
-    else if (!_cartItems.Any())
-    {
-        <div class="hh-empty-state">
-            <i class="bi bi-cart-x"></i>
-            <h2>Your Cart is Empty</h2>
-            <p>Looks like you haven't added any items yet.</p>
-            <button class="hh-btn hh-btn-primary" @onclick="GoShopping">
-                <i class="bi bi-bag"></i> Start Shopping
-            </button>
-        </div>
-    }
-    else
-    {
-        <div class="hh-cart-content">
-            <!-- Cart Items -->
-            <div class="hh-cart-items">
-                @foreach (var item in _cartItems)
-                {
-                    <div class="hh-cart-item">
-                        <img src="@(item.ImageUrl ?? "/images/placeholder-product.png")"
-                             alt="@item.Name"
-                             class="hh-cart-item-image" />
-                        <div class="hh-cart-item-details">
-                            <h3 class="hh-cart-item-name">@item.Name</h3>
-                            @if (!string.IsNullOrEmpty(item.Variant))
-                            {
-                                <p class="hh-cart-item-variant">@item.Variant</p>
-                            }
-                            <div class="hh-cart-item-price">$@item.Price.ToString("0.00")</div>
-                        </div>
-                        <div class="hh-cart-item-actions">
-                            <div class="hh-quantity-control">
-                                <button class="hh-qty-btn" @onclick="() => UpdateQuantity(item.Id, item.Quantity - 1)" disabled="@(item.Quantity <= 1)">
-                                    <i class="bi bi-dash"></i>
-                                </button>
-                                <span class="hh-qty-value">@item.Quantity</span>
-                                <button class="hh-qty-btn" @onclick="() => UpdateQuantity(item.Id, item.Quantity + 1)">
-                                    <i class="bi bi-plus"></i>
-                                </button>
-                            </div>
-                            <button class="hh-remove-btn" @onclick="() => RemoveItem(item.Id)">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                }
-            </div>
-
-            <!-- Order Summary -->
-            <div class="hh-cart-summary hh-card">
-                <h3>Order Summary</h3>
-
-                <div class="hh-summary-row">
-                    <span>Subtotal</span>
-                    <span>$@_subtotal.ToString("0.00")</span>
-                </div>
-
-                @if (_discount > 0)
-                {
-                    <div class="hh-summary-row hh-discount">
-                        <span>Discount</span>
-                        <span>-$@_discount.ToString("0.00")</span>
-                    </div>
-                }
-
-                <div class="hh-summary-row">
-                    <span>Estimated Tax</span>
-                    <span>$@_tax.ToString("0.00")</span>
-                </div>
-
-                <div class="hh-summary-row">
-                    <span>Shipping</span>
-                    <span>@(_subtotal >= 50 ? "FREE" : "$5.99")</span>
-                </div>
-
-                @if (_subtotal < 50)
-                {
-                    <div class="hh-free-shipping-notice">
-                        <i class="bi bi-truck"></i>
-                        Add $@((50 - _subtotal).ToString("0.00")) more for FREE shipping!
-                    </div>
-                }
-
-                <hr />
-
-                <div class="hh-summary-row hh-total">
-                    <span>Total</span>
-                    <span>$@_total.ToString("0.00")</span>
-                </div>
-
-                <button class="hh-btn hh-btn-primary hh-btn-block" @onclick="Checkout">
-                    <i class="bi bi-lock"></i> Proceed to Checkout
-                </button>
-
-                <div class="hh-payment-methods">
-                    <span>We accept:</span>
-                    <i class="bi bi-credit-card"></i>
-                    <i class="bi bi-paypal"></i>
-                    <i class="bi bi-wallet2"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Continue Shopping -->
-        <div class="hh-continue-shopping">
-            <a href="/" @onclick:preventDefault @onclick="GoShopping">
-                <i class="bi bi-arrow-left"></i> Continue Shopping
-            </a>
-        </div>
-    }
-</div>
+<CartPage Items="@_cartItems"
+          IsLoading="@_isLoading"
+          Currency="$"
+          Subtotal="@_subtotal"
+          Discount="@_discount"
+          ShippingCost="@_shipping"
+          Tax="@_tax"
+          TaxRate="6"
+          Total="@_total"
+          FreeShippingThreshold="50"
+          AppliedCoupon="@_appliedCoupon"
+          OnQuantityChange="HandleQuantityChange"
+          OnRemoveItem="HandleRemoveItem"
+          OnApplyCoupon="HandleApplyCoupon"
+          OnRemoveCoupon="HandleRemoveCoupon"
+          OnCheckout="HandleCheckout"
+          OnStartShopping="HandleStartShopping" />
 
 @code {
     private bool _isLoading = true;
@@ -139,6 +30,7 @@
     private decimal _tax = 0;
     private decimal _shipping = 0;
     private decimal _total = 0;
+    private CouponModel? _appliedCoupon;
 
     protected override async Task OnInitializedAsync()
     {
@@ -150,15 +42,45 @@
         try
         {
             _isLoading = true;
-
-            // Simulate API call - in production this would call CartClient
             await Task.Delay(300);
 
             // Mock cart data
             _cartItems = new List<CartItemModel>
             {
-                new(Guid.NewGuid(), "DeWalt 20V MAX Cordless Drill", 149.99m, 1, "/images/products/drill.jpg", null),
-                new(Guid.NewGuid(), "Copper Pipe Fittings Set", 24.99m, 2, "/images/products/fittings.jpg", "1/2 inch"),
+                new() {
+                    Id = Guid.NewGuid(),
+                    ProductId = Guid.NewGuid(),
+                    Name = "DeWalt 20V MAX XR Brushless Drill/Driver Kit",
+                    Price = 149.99m,
+                    OldPrice = 179.99m,
+                    Quantity = 1,
+                    MaxQuantity = 10,
+                    ImageUrl = "/images/products/drill.jpg",
+                    Attributes = new() { { "Brand", "DeWalt" }, { "Voltage", "20V" } }
+                },
+                new() {
+                    Id = Guid.NewGuid(),
+                    ProductId = Guid.NewGuid(),
+                    Name = "Copper Pipe Fittings Set 1/2\"",
+                    Price = 24.99m,
+                    Quantity = 2,
+                    MaxQuantity = 50,
+                    ImageUrl = "/images/products/fittings.jpg",
+                    Variant = "1/2 inch",
+                    Attributes = new() { { "Size", "1/2\"" } }
+                },
+                new() {
+                    Id = Guid.NewGuid(),
+                    ProductId = Guid.NewGuid(),
+                    Name = "Southwire Romex 12/2 NM-B Wire 250ft",
+                    Price = 89.99m,
+                    OldPrice = 99.99m,
+                    Quantity = 1,
+                    MaxQuantity = 20,
+                    ImageUrl = "/images/products/romex.jpg",
+                    Variant = "250ft",
+                    Attributes = new() { { "Length", "250ft" }, { "Gauge", "12/2" } }
+                },
             };
 
             CalculateTotals();
@@ -176,40 +98,71 @@
     private void CalculateTotals()
     {
         _subtotal = _cartItems.Sum(i => i.Price * i.Quantity);
-        _tax = _subtotal * 0.06m; // Michigan sales tax
         _shipping = _subtotal >= 50 ? 0 : 5.99m;
-        _total = _subtotal + _tax + _shipping - _discount;
+        _tax = (_subtotal - _discount) * 0.06m; // Michigan sales tax
+        _total = _subtotal - _discount + _shipping + _tax;
     }
 
-    private async Task UpdateQuantity(Guid itemId, int newQuantity)
+    private async Task HandleQuantityChange((Guid ItemId, int Quantity) change)
     {
-        if (newQuantity < 1) return;
-
-        var item = _cartItems.FirstOrDefault(i => i.Id == itemId);
+        var item = _cartItems.FirstOrDefault(i => i.Id == change.ItemId);
         if (item != null)
         {
-            _cartItems = _cartItems.Select(i => i.Id == itemId
-                ? i with { Quantity = newQuantity }
-                : i).ToList();
+            item.Quantity = Math.Max(1, Math.Min(change.Quantity, item.MaxQuantity));
             CalculateTotals();
         }
     }
 
-    private async Task RemoveItem(Guid itemId)
+    private async Task HandleRemoveItem(Guid itemId)
     {
-        _cartItems = _cartItems.Where(i => i.Id != itemId).ToList();
+        _cartItems.RemoveAll(i => i.Id == itemId);
         CalculateTotals();
     }
 
-    private void GoShopping()
+    private async Task HandleApplyCoupon(string code)
     {
-        Navigation.NavigateTo("/");
+        // Mock coupon validation
+        if (code.ToUpper() == "SAVE10")
+        {
+            _appliedCoupon = new CouponModel
+            {
+                Code = code.ToUpper(),
+                DiscountPercent = 10
+            };
+            _discount = _subtotal * 0.10m;
+        }
+        else if (code.ToUpper() == "HARDWARE20")
+        {
+            _appliedCoupon = new CouponModel
+            {
+                Code = code.ToUpper(),
+                DiscountPercent = 20
+            };
+            _discount = _subtotal * 0.20m;
+        }
+        else
+        {
+            _appliedCoupon = null;
+            _discount = 0;
+        }
+
+        CalculateTotals();
     }
 
-    private void Checkout()
+    private async Task HandleRemoveCoupon()
+    {
+        _appliedCoupon = null;
+        _discount = 0;
+        CalculateTotals();
+    }
+
+    private async Task HandleCheckout()
     {
         Navigation.NavigateTo("/checkout");
     }
 
-    private record CartItemModel(Guid Id, string Name, decimal Price, int Quantity, string? ImageUrl, string? Variant);
+    private async Task HandleStartShopping()
+    {
+        Navigation.NavigateTo("/");
+    }
 }

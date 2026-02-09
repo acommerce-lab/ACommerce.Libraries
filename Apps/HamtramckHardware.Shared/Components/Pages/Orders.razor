@@ -142,20 +142,40 @@
             // Simulate API call
             await Task.Delay(300);
 
-            // Mock orders data
+            // Mock orders data - detailed demo content
             _orders = new List<OrderModel>
             {
-                new(Guid.NewGuid(), "HH-2024-001", DateTime.Now.AddDays(-2), "Shipped", 174.98m,
+                new(Guid.NewGuid(), "HH-847291", DateTime.Now.AddDays(-1), "Pending", 364.96m,
                     new List<OrderItemModel>
                     {
-                        new("DeWalt 20V MAX Cordless Drill", 1, "/images/products/drill.jpg"),
-                        new("Copper Pipe Fittings Set", 2, "/images/products/fittings.jpg"),
+                        new("DeWalt 20V MAX XR Brushless Drill/Driver Kit", 1, "/images/products/drill.jpg"),
+                        new("Southwire Romex 12/2 NM-B Wire 250ft", 2, "/images/products/romex.jpg"),
+                        new("Klein Tools 11-in-1 Screwdriver/Nut Driver", 1, "/images/products/klein-screwdriver.jpg"),
                     }),
-                new(Guid.NewGuid(), "HH-2024-002", DateTime.Now.AddDays(-10), "Delivered", 89.97m,
+                new(Guid.NewGuid(), "HH-846582", DateTime.Now.AddDays(-3), "Shipped", 499.99m,
                     new List<OrderItemModel>
                     {
-                        new("LED Shop Light 4ft", 1, "/images/products/light.jpg"),
-                        new("Electrical Wire 100ft", 1, "/images/products/wire.jpg"),
+                        new("Milwaukee M18 FUEL 1/2\" Hammer Drill", 1, "/images/products/hammer-drill.jpg"),
+                        new("CRAFTSMAN 320-Piece Mechanic's Tool Set", 1, "/images/products/craftsman-set.jpg"),
+                    }),
+                new(Guid.NewGuid(), "HH-845123", DateTime.Now.AddDays(-8), "Delivered", 156.97m,
+                    new List<OrderItemModel>
+                    {
+                        new("SharkBite 1/2\" Push-to-Connect Coupling (4-pack)", 2, "/images/products/sharkbite.jpg"),
+                        new("Stanley FatMax Copper Pipe Cutter", 1, "/images/products/pipe-cutter.jpg"),
+                        new("3M Scotch Blue Painter's Tape 1.88\" (3-pack)", 3, "/images/products/tape.jpg"),
+                        new("Gorilla Heavy Duty Construction Adhesive", 2, "/images/products/adhesive.jpg"),
+                    }),
+                new(Guid.NewGuid(), "HH-843987", DateTime.Now.AddDays(-15), "Delivered", 89.99m,
+                    new List<OrderItemModel>
+                    {
+                        new("Makita 18V LXT LED Flashlight", 1, "/images/products/flashlight.jpg"),
+                        new("WD-40 Multi-Use Product 12oz (2-pack)", 1, "/images/products/wd40.jpg"),
+                    }),
+                new(Guid.NewGuid(), "HH-842456", DateTime.Now.AddDays(-22), "Delivered", 749.97m,
+                    new List<OrderItemModel>
+                    {
+                        new("Husky 52\" 15-Drawer Tool Chest & Cabinet", 1, "/images/products/tool-chest.jpg"),
                     }),
             };
         }
