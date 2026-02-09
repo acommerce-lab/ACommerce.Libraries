@@ -1,198 +1,130 @@
 @page "/profile"
 @using ACommerce.Client.Profiles
+@using ACommerce.Templates.Customer.Pages
 @inject ILocalizationService L
 @inject IAppNavigationService Navigation
 @inject TokenManager TokenManager
 @inject ProfilesClient ProfilesClient
 @inject IAppVersionService VersionService
 
-<div class="hh-page-content">
-    @if (!_isLoggedIn)
-    {
-        <div class="hh-empty-state">
-            <i class="bi bi-person-circle"></i>
-            <h2>Welcome to Hamtramck Hardware</h2>
-            <p>Sign in to manage your account, track orders, and more.</p>
-            <button class="hh-btn hh-btn-primary" @onclick="GoToLogin">
-                <i class="bi bi-box-arrow-in-right"></i> Sign In
-            </button>
-            <button class="hh-btn hh-btn-secondary" style="margin-top: 12px;" @onclick="GoToRegister">
-                <i class="bi bi-person-plus"></i> Create Account
-            </button>
+@if (!_isLoggedIn)
+{
+    <div class="ac-page">
+        <AcEmptyState Icon="bi-person-circle"
+                      Title="Welcome to Hamtramck Hardware"
+                      Description="Sign in to manage your account, track orders, and more."
+                      ActionText="Sign In"
+                      ActionIcon="bi-box-arrow-in-right"
+                      OnAction="GoToLogin" />
+
+        <div style="text-align: center; margin-top: 16px;">
+            <AcButton Text="Create Account"
+                      Icon="bi-person-plus"
+                      Variant="ButtonVariant.Secondary"
+                      OnClick="GoToRegister" />
         </div>
+    </div>
+}
+else
+{
+    <ProfilePage User="@_userInfo"
+                 OrdersCount="@_ordersCount"
+                 WishlistCount="@_wishlistCount"
+                 ReviewsCount="@_reviewsCount"
+                 AddressesCount="@_addressesCount"
+                 PendingOrdersCount="@_pendingOrdersCount"
+                 AppVersion="@_appVersion"
+                 OnAvatarClick="HandleAvatarClick"
+                 OnOrdersClick="HandleOrdersClick"
+                 OnWishlistClick="HandleWishlistClick"
+                 OnReviewsClick="HandleReviewsClick"
+                 OnLogout="HandleLogout" />
+
+    <!-- Pro Membership Banner (Custom HamtramckHardware element) -->
+    <div class="hh-pro-banner ac-card" style="margin: 16px;">
+        <div class="hh-pro-content">
+            <div class="hh-pro-icon">
+                <i class="bi bi-gem"></i>
+            </div>
+            <div class="hh-pro-text">
+                <h4>Become a Pro Member</h4>
+                <p>Get 10% off all purchases + free shipping</p>
+            </div>
+            <AcButton Text="Join Pro"
+                      Variant="ButtonVariant.Warning"
+                      OnClick="HandleJoinPro" />
+        </div>
+    </div>
+}
+
+<style>
+    .hh-pro-banner {
+        background: linear-gradient(135deg, var(--ac-primary) 0%, var(--ac-primary-dark) 100%);
+        color: white;
+        padding: 20px;
     }
-    else
-    {
-        <!-- Profile Header -->
-        <div class="hh-profile-header hh-card">
-            <div class="hh-profile-avatar">
-                @if (!string.IsNullOrEmpty(_user?.AvatarUrl))
-                {
-                    <img src="@_user.AvatarUrl" alt="@_user.Name" />
-                }
-                else
-                {
-                    <i class="bi bi-person-fill"></i>
-                }
-            </div>
-            <div class="hh-profile-info">
-                <h2>@(_user?.Name ?? "Customer")</h2>
-                <p>@(_user?.Email ?? "")</p>
-                @if (_user?.MemberSince != null)
-                {
-                    <p style="font-size: 0.75rem; color: var(--hh-text-secondary);">
-                        <i class="bi bi-award"></i> Member since @_user.MemberSince.ToString("MMMM yyyy")
-                    </p>
-                }
-            </div>
-            <button class="hh-btn hh-btn-secondary hh-btn-sm" @onclick="EditProfile">
-                <i class="bi bi-pencil"></i> Edit
-            </button>
-        </div>
 
-        <!-- Pro Membership Banner -->
-        <div class="hh-card" style="background: linear-gradient(135deg, var(--hh-primary) 0%, var(--hh-primary-dark) 100%); color: white; margin: 16px 0;">
-            <div style="display: flex; align-items: center; gap: 16px;">
-                <div style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-gem" style="font-size: 1.5rem;"></i>
-                </div>
-                <div style="flex: 1;">
-                    <h4 style="margin: 0 0 4px;">Become a Pro Member</h4>
-                    <p style="margin: 0; opacity: 0.9; font-size: 0.875rem;">Get 10% off all purchases + free shipping</p>
-                </div>
-                <button class="hh-btn" style="background: var(--hh-accent); color: white;">
-                    Join Pro
-                </button>
-            </div>
-        </div>
-
-        <!-- Account Menu -->
-        <div class="hh-menu-section">
-            <h3 class="hh-menu-title">My Account</h3>
-
-            <div class="hh-menu-item" @onclick='() => Navigation.NavigateTo("/orders")'>
-                <div class="hh-menu-icon" style="background-color: #1E40AF;">
-                    <i class="bi bi-box-seam"></i>
-                </div>
-                <div class="hh-menu-content">
-                    <span>My Orders</span>
-                    <small>Track and manage your orders</small>
-                </div>
-                <i class="bi bi-chevron-right"></i>
-            </div>
-
-            <div class="hh-menu-item" @onclick='() => Navigation.NavigateTo("/addresses")'>
-                <div class="hh-menu-icon" style="background-color: #2196F3;">
-                    <i class="bi bi-geo-alt"></i>
-                </div>
-                <div class="hh-menu-content">
-                    <span>Saved Addresses</span>
-                    <small>Manage delivery addresses</small>
-                </div>
-                <i class="bi bi-chevron-right"></i>
-            </div>
-
-            <div class="hh-menu-item" @onclick='() => Navigation.NavigateTo("/payment-methods")'>
-                <div class="hh-menu-icon" style="background-color: #4CAF50;">
-                    <i class="bi bi-credit-card"></i>
-                </div>
-                <div class="hh-menu-content">
-                    <span>Payment Methods</span>
-                    <small>Manage payment options</small>
-                </div>
-                <i class="bi bi-chevron-right"></i>
-            </div>
-
-            <div class="hh-menu-item" @onclick='() => Navigation.NavigateTo("/favorites")'>
-                <div class="hh-menu-icon" style="background-color: #F44336;">
-                    <i class="bi bi-heart"></i>
-                </div>
-                <div class="hh-menu-content">
-                    <span>Favorites</span>
-                    <small>Your saved items</small>
-                </div>
-                <i class="bi bi-chevron-right"></i>
-            </div>
-        </div>
-
-        <!-- Settings Menu -->
-        <div class="hh-menu-section">
-            <h3 class="hh-menu-title">Settings</h3>
-
-            <div class="hh-menu-item" @onclick='() => Navigation.NavigateTo("/notifications")'>
-                <div class="hh-menu-icon" style="background-color: #9C27B0;">
-                    <i class="bi bi-bell"></i>
-                </div>
-                <div class="hh-menu-content">
-                    <span>Notifications</span>
-                    <small>Manage notification preferences</small>
-                </div>
-                <i class="bi bi-chevron-right"></i>
-            </div>
-
-            <div class="hh-menu-item" @onclick='() => Navigation.NavigateTo("/settings")'>
-                <div class="hh-menu-icon" style="background-color: #607D8B;">
-                    <i class="bi bi-gear"></i>
-                </div>
-                <div class="hh-menu-content">
-                    <span>Settings</span>
-                    <small>App preferences</small>
-                </div>
-                <i class="bi bi-chevron-right"></i>
-            </div>
-        </div>
-
-        <!-- Support Menu -->
-        <div class="hh-menu-section">
-            <h3 class="hh-menu-title">Support</h3>
-
-            <div class="hh-menu-item" @onclick='() => Navigation.NavigateTo("/help")'>
-                <div class="hh-menu-icon" style="background-color: #00BCD4;">
-                    <i class="bi bi-question-circle"></i>
-                </div>
-                <div class="hh-menu-content">
-                    <span>Help & FAQ</span>
-                    <small>Get help with your orders</small>
-                </div>
-                <i class="bi bi-chevron-right"></i>
-            </div>
-
-            <div class="hh-menu-item" @onclick="ContactSupport">
-                <div class="hh-menu-icon" style="background-color: #795548;">
-                    <i class="bi bi-chat-dots"></i>
-                </div>
-                <div class="hh-menu-content">
-                    <span>Contact Us</span>
-                    <small>(313) 365-2400</small>
-                </div>
-                <i class="bi bi-chevron-right"></i>
-            </div>
-
-            <div class="hh-menu-item" @onclick='() => Navigation.NavigateTo("/about")'>
-                <div class="hh-menu-icon" style="background-color: #455A64;">
-                    <i class="bi bi-info-circle"></i>
-                </div>
-                <div class="hh-menu-content">
-                    <span>About</span>
-                    <small>Version @_appVersion</small>
-                </div>
-                <i class="bi bi-chevron-right"></i>
-            </div>
-        </div>
-
-        <!-- Sign Out -->
-        <div class="hh-menu-section">
-            <button class="hh-btn hh-btn-outline-danger hh-btn-block" @onclick="SignOut">
-                <i class="bi bi-box-arrow-left"></i> Sign Out
-            </button>
-        </div>
+    .hh-pro-content {
+        display: flex;
+        align-items: center;
+        gap: 16px;
     }
-</div>
+
+    .hh-pro-icon {
+        width: 48px;
+        height: 48px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .hh-pro-text {
+        flex: 1;
+    }
+
+    .hh-pro-text h4 {
+        margin: 0 0 4px;
+        color: white;
+        font-size: 1rem;
+    }
+
+    .hh-pro-text p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 0.875rem;
+    }
+
+    @@media (max-width: 480px) {
+        .hh-pro-content {
+            flex-wrap: wrap;
+        }
+
+        .hh-pro-text {
+            flex: 1 1 100%;
+            order: -1;
+            margin-bottom: 12px;
+        }
+
+        .hh-pro-icon {
+            order: -2;
+        }
+    }
+</style>
 
 @code {
     private bool _isLoggedIn = false;
-    private UserModel? _user;
+    private UserProfileInfo? _userInfo;
     private string _appVersion = "1.0.0";
+
+    private int _ordersCount = 12;
+    private int _wishlistCount = 5;
+    private int _reviewsCount = 3;
+    private int _addressesCount = 2;
+    private int _pendingOrdersCount = 1;
 
     protected override async Task OnInitializedAsync()
     {
@@ -211,17 +143,14 @@
     {
         try
         {
-            // Simulate API call - in production this would call ProfilesClient
             await Task.Delay(100);
 
-            _user = new UserModel(
-                "Michael Johnson",
-                "michael.johnson@email.com",
-                "(313) 555-0147",
-                "9241 Conant St, Hamtramck, MI 48212",
-                DateTime.Now.AddMonths(-8),
-                null
-            );
+            _userInfo = new UserProfileInfo
+            {
+                Name = "Michael Johnson",
+                Email = "michael.johnson@email.com",
+                AvatarUrl = null
+            };
         }
         catch (Exception ex)
         {
@@ -229,23 +158,31 @@
         }
     }
 
-    private void EditProfile()
+    private async Task HandleAvatarClick()
     {
         Navigation.NavigateTo("/profile/edit");
     }
 
-    private void ContactSupport()
+    private async Task HandleOrdersClick()
     {
-        // In mobile app, this would open the phone dialer
-        // For web, we can show the phone number or open tel: link
-        Navigation.NavigateTo("tel:+13133652400");
+        Navigation.NavigateTo("/orders");
     }
 
-    private void SignOut()
+    private async Task HandleWishlistClick()
+    {
+        Navigation.NavigateTo("/favorites");
+    }
+
+    private async Task HandleReviewsClick()
+    {
+        Navigation.NavigateTo("/reviews");
+    }
+
+    private async Task HandleLogout()
     {
         TokenManager.ClearToken();
         _isLoggedIn = false;
-        _user = null;
+        _userInfo = null;
         Navigation.NavigateTo("/");
     }
 
@@ -259,5 +196,8 @@
         Navigation.NavigateTo("/register");
     }
 
-    private record UserModel(string Name, string Email, string? Phone, string? Address, DateTime MemberSince, string? AvatarUrl);
+    private void HandleJoinPro()
+    {
+        Navigation.NavigateTo("/pro-membership");
+    }
 }

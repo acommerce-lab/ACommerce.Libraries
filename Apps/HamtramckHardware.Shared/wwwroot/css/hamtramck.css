@@ -2,6 +2,65 @@
 /* Professional Steel Blue & Forest Green Industrial Theme */
 
 :root {
+    /* ========================================
+       ACommerce Template Variables Override
+       Maps template colors to Steel Blue theme
+       ======================================== */
+
+    /* Primary Colors - Steel Blue */
+    --ac-primary: #1E40AF;
+    --ac-primary-dark: #1E3A8A;
+    --ac-primary-light: #3B82F6;
+
+    /* Secondary Colors - Slate */
+    --ac-secondary: #334155;
+    --ac-secondary-dark: #1E293B;
+    --ac-secondary-light: #475569;
+
+    /* Accent Colors - Amber */
+    --ac-accent: #F59E0B;
+    --ac-accent-dark: #D97706;
+    --ac-accent-light: #FBBF24;
+
+    /* Background Colors */
+    --ac-bg: #FFFFFF;
+    --ac-bg-alt: #F8FAFC;
+    --ac-surface: #FFFFFF;
+    --ac-surface-alt: #F1F5F9;
+
+    /* Text Colors */
+    --ac-text: #0F172A;
+    --ac-text-secondary: #64748B;
+    --ac-text-muted: #94A3B8;
+    --ac-text-on-primary: #FFFFFF;
+
+    /* State Colors */
+    --ac-success: #059669;
+    --ac-warning: #D97706;
+    --ac-error: #DC2626;
+    --ac-info: #0284C7;
+
+    /* Border Colors */
+    --ac-border: #E2E8F0;
+    --ac-border-light: #F1F5F9;
+    --ac-border-dark: #CBD5E1;
+
+    /* Special Colors */
+    --ac-sale: #DC2626;
+    --ac-new: #059669;
+    --ac-featured: #F59E0B;
+
+    /* Direction - LTR for English */
+    --ac-direction: ltr;
+
+    /* Font */
+    --ac-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --ac-font-family-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+    /* ========================================
+       Hamtramck Hardware Custom Variables
+       ======================================== */
+
     /* Primary - Steel Blue (Professional, Trustworthy) */
     --hh-primary: #1E40AF;
     --hh-primary-dark: #1E3A8A;
