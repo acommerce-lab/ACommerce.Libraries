@@ -1,6 +1,6 @@
 @page "/profile"
 @using ACommerce.Client.Profiles
-@using ACommerce.Templates.Customer.Pages
+@using ACommerce.Templates.Customer.Components
 @inject ILocalizationService L
 @inject IAppNavigationService Navigation
 @inject TokenManager TokenManager
@@ -27,93 +27,167 @@
 }
 else
 {
-    <ProfilePage User="@_userInfo"
-                 OrdersCount="@_ordersCount"
-                 WishlistCount="@_wishlistCount"
-                 ReviewsCount="@_reviewsCount"
-                 AddressesCount="@_addressesCount"
-                 PendingOrdersCount="@_pendingOrdersCount"
-                 AppVersion="@_appVersion"
-                 OnAvatarClick="HandleAvatarClick"
-                 OnOrdersClick="HandleOrdersClick"
-                 OnWishlistClick="HandleWishlistClick"
-                 OnReviewsClick="HandleReviewsClick"
-                 OnLogout="HandleLogout" />
+    <div class="ac-page ac-profile-page" style="direction: ltr;">
+        <!-- Profile Header -->
+        <div style="text-align: center; padding: 24px 16px; background: linear-gradient(135deg, var(--ac-primary) 0%, var(--ac-primary-dark) 100%); color: white;">
+            <div style="width: 80px; height: 80px; border-radius: 50%; background: white; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--ac-primary); font-weight: 700; overflow: hidden;">
+                @if (!string.IsNullOrEmpty(_userInfo?.AvatarUrl))
+                {
+                    <img src="@_userInfo.AvatarUrl" alt="@_userInfo?.Name" style="width: 100%; height: 100%; object-fit: cover;" />
+                }
+                else
+                {
+                    <span>@_userInfo?.Name?.FirstOrDefault()</span>
+                }
+            </div>
+            <h1 style="margin: 0 0 4px; font-size: 1.5rem; font-weight: 700;">@_userInfo?.Name</h1>
+            <p style="margin: 0; opacity: 0.9;">@_userInfo?.Email</p>
+        </div>
 
-    <!-- Pro Membership Banner (Custom HamtramckHardware element) -->
-    <div class="hh-pro-banner ac-card" style="margin: 16px;">
-        <div class="hh-pro-content">
-            <div class="hh-pro-icon">
-                <i class="bi bi-gem"></i>
+        <!-- Quick Stats -->
+        <div style="display: flex; background: var(--ac-surface); border-bottom: 1px solid var(--ac-border);">
+            <div style="flex: 1; padding: 16px; text-align: center; cursor: pointer;" @onclick="HandleOrdersClick">
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--ac-primary);">@_ordersCount</div>
+                <div style="font-size: 0.875rem; color: var(--ac-text-muted);">Orders</div>
             </div>
-            <div class="hh-pro-text">
-                <h4>Become a Pro Member</h4>
-                <p>Get 10% off all purchases + free shipping</p>
+            <div style="flex: 1; padding: 16px; text-align: center; border-left: 1px solid var(--ac-border); border-right: 1px solid var(--ac-border); cursor: pointer;" @onclick="HandleWishlistClick">
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--ac-primary);">@_wishlistCount</div>
+                <div style="font-size: 0.875rem; color: var(--ac-text-muted);">Wishlist</div>
             </div>
-            <AcButton Text="Join Pro"
-                      Variant="ButtonVariant.Warning"
-                      OnClick="HandleJoinPro" />
+            <div style="flex: 1; padding: 16px; text-align: center; cursor: pointer;" @onclick="HandleReviewsClick">
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--ac-primary);">@_reviewsCount</div>
+                <div style="font-size: 0.875rem; color: var(--ac-text-muted);">Reviews</div>
+            </div>
+        </div>
+
+        <!-- Profile Menu -->
+        <div style="padding: 16px;">
+            <!-- Account Section -->
+            <div style="margin-bottom: 24px;">
+                <h3 style="font-size: 0.875rem; font-weight: 600; color: var(--ac-text-muted); text-transform: uppercase; margin: 0 0 12px; padding: 0 4px;">Account</h3>
+                <div class="ac-card" style="overflow: hidden;">
+                    <a href="/profile/edit" style="display: flex; align-items: center; padding: 14px 16px; text-decoration: none; color: inherit; border-bottom: 1px solid var(--ac-border);">
+                        <i class="bi bi-person" style="font-size: 1.25rem; color: var(--ac-primary); width: 32px;"></i>
+                        <span style="flex: 1;">Account Information</span>
+                        <i class="bi bi-chevron-right" style="color: var(--ac-text-muted);"></i>
+                    </a>
+                    <a href="/profile/addresses" style="display: flex; align-items: center; padding: 14px 16px; text-decoration: none; color: inherit; border-bottom: 1px solid var(--ac-border);">
+                        <i class="bi bi-geo-alt" style="font-size: 1.25rem; color: var(--ac-primary); width: 32px;"></i>
+                        <span style="flex: 1;">Addresses</span>
+                        <span style="background: var(--ac-surface-secondary); padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; margin-right: 8px;">@_addressesCount</span>
+                        <i class="bi bi-chevron-right" style="color: var(--ac-text-muted);"></i>
+                    </a>
+                    <a href="/profile/payment-methods" style="display: flex; align-items: center; padding: 14px 16px; text-decoration: none; color: inherit; border-bottom: 1px solid var(--ac-border);">
+                        <i class="bi bi-credit-card" style="font-size: 1.25rem; color: var(--ac-primary); width: 32px;"></i>
+                        <span style="flex: 1;">Payment Methods</span>
+                        <i class="bi bi-chevron-right" style="color: var(--ac-text-muted);"></i>
+                    </a>
+                    <a href="/profile/change-password" style="display: flex; align-items: center; padding: 14px 16px; text-decoration: none; color: inherit;">
+                        <i class="bi bi-lock" style="font-size: 1.25rem; color: var(--ac-primary); width: 32px;"></i>
+                        <span style="flex: 1;">Change Password</span>
+                        <i class="bi bi-chevron-right" style="color: var(--ac-text-muted);"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Orders Section -->
+            <div style="margin-bottom: 24px;">
+                <h3 style="font-size: 0.875rem; font-weight: 600; color: var(--ac-text-muted); text-transform: uppercase; margin: 0 0 12px; padding: 0 4px;">Orders & Purchases</h3>
+                <div class="ac-card" style="overflow: hidden;">
+                    <a href="/orders" style="display: flex; align-items: center; padding: 14px 16px; text-decoration: none; color: inherit; border-bottom: 1px solid var(--ac-border);">
+                        <i class="bi bi-box-seam" style="font-size: 1.25rem; color: var(--ac-primary); width: 32px;"></i>
+                        <span style="flex: 1;">My Orders</span>
+                        @if (_pendingOrdersCount > 0)
+                        {
+                            <span style="background: var(--ac-warning); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; margin-right: 8px;">@_pendingOrdersCount pending</span>
+                        }
+                        <i class="bi bi-chevron-right" style="color: var(--ac-text-muted);"></i>
+                    </a>
+                    <a href="/returns" style="display: flex; align-items: center; padding: 14px 16px; text-decoration: none; color: inherit; border-bottom: 1px solid var(--ac-border);">
+                        <i class="bi bi-arrow-return-left" style="font-size: 1.25rem; color: var(--ac-primary); width: 32px;"></i>
+                        <span style="flex: 1;">Returns & Exchanges</span>
+                        <i class="bi bi-chevron-right" style="color: var(--ac-text-muted);"></i>
+                    </a>
+                    <a href="/wishlist" style="display: flex; align-items: center; padding: 14px 16px; text-decoration: none; color: inherit; border-bottom: 1px solid var(--ac-border);">
+                        <i class="bi bi-heart" style="font-size: 1.25rem; color: var(--ac-danger); width: 32px;"></i>
+                        <span style="flex: 1;">Wishlist</span>
+                        <span style="background: var(--ac-danger-light); color: var(--ac-danger); padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; margin-right: 8px;">@_wishlistCount</span>
+                        <i class="bi bi-chevron-right" style="color: var(--ac-text-muted);"></i>
+                    </a>
+                    <a href="/reviews" style="display: flex; align-items: center; padding: 14px 16px; text-decoration: none; color: inherit;">
+                        <i class="bi bi-star" style="font-size: 1.25rem; color: var(--ac-warning); width: 32px;"></i>
+                        <span style="flex: 1;">My Reviews</span>
+                        <i class="bi bi-chevron-right" style="color: var(--ac-text-muted);"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div style="margin-bottom: 24px;">
+                <h3 style="font-size: 0.875rem; font-weight: 600; color: var(--ac-text-muted); text-transform: uppercase; margin: 0 0 12px; padding: 0 4px;">Settings</h3>
+                <div class="ac-card" style="overflow: hidden;">
+                    <a href="/settings" style="display: flex; align-items: center; padding: 14px 16px; text-decoration: none; color: inherit; border-bottom: 1px solid var(--ac-border);">
+                        <i class="bi bi-gear" style="font-size: 1.25rem; color: var(--ac-primary); width: 32px;"></i>
+                        <span style="flex: 1;">Settings</span>
+                        <i class="bi bi-chevron-right" style="color: var(--ac-text-muted);"></i>
+                    </a>
+                    <a href="/notifications/settings" style="display: flex; align-items: center; padding: 14px 16px; text-decoration: none; color: inherit;">
+                        <i class="bi bi-bell" style="font-size: 1.25rem; color: var(--ac-primary); width: 32px;"></i>
+                        <span style="flex: 1;">Notification Settings</span>
+                        <i class="bi bi-chevron-right" style="color: var(--ac-text-muted);"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Support Section -->
+            <div style="margin-bottom: 24px;">
+                <h3 style="font-size: 0.875rem; font-weight: 600; color: var(--ac-text-muted); text-transform: uppercase; margin: 0 0 12px; padding: 0 4px;">Support</h3>
+                <div class="ac-card" style="overflow: hidden;">
+                    <a href="/help" style="display: flex; align-items: center; padding: 14px 16px; text-decoration: none; color: inherit; border-bottom: 1px solid var(--ac-border);">
+                        <i class="bi bi-question-circle" style="font-size: 1.25rem; color: var(--ac-primary); width: 32px;"></i>
+                        <span style="flex: 1;">Help Center</span>
+                        <i class="bi bi-chevron-right" style="color: var(--ac-text-muted);"></i>
+                    </a>
+                    <a href="/chat/support" style="display: flex; align-items: center; padding: 14px 16px; text-decoration: none; color: inherit; border-bottom: 1px solid var(--ac-border);">
+                        <i class="bi bi-chat-dots" style="font-size: 1.25rem; color: var(--ac-primary); width: 32px;"></i>
+                        <span style="flex: 1;">Contact Us</span>
+                        <i class="bi bi-chevron-right" style="color: var(--ac-text-muted);"></i>
+                    </a>
+                    <a href="/about" style="display: flex; align-items: center; padding: 14px 16px; text-decoration: none; color: inherit;">
+                        <i class="bi bi-info-circle" style="font-size: 1.25rem; color: var(--ac-primary); width: 32px;"></i>
+                        <span style="flex: 1;">About</span>
+                        <span style="color: var(--ac-text-muted); font-size: 0.875rem; margin-right: 8px;">v@_appVersion</span>
+                        <i class="bi bi-chevron-right" style="color: var(--ac-text-muted);"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Pro Membership Banner -->
+            <div class="ac-card" style="background: linear-gradient(135deg, var(--ac-primary) 0%, var(--ac-primary-dark) 100%); color: white; padding: 20px; margin-bottom: 24px;">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div style="width: 48px; height: 48px; background: rgba(255, 255, 255, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                        <i class="bi bi-gem"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <h4 style="margin: 0 0 4px; color: white; font-size: 1rem;">Become a Pro Member</h4>
+                        <p style="margin: 0; opacity: 0.9; font-size: 0.875rem;">Get 10% off all purchases + free shipping</p>
+                    </div>
+                    <AcButton Text="Join Pro"
+                              Variant="ButtonVariant.Warning"
+                              OnClick="HandleJoinPro" />
+                </div>
+            </div>
+
+            <!-- Logout Button -->
+            <AcButton Text="Sign Out"
+                      Icon="bi-box-arrow-right"
+                      Variant="ButtonVariant.Danger"
+                      Outline="true"
+                      Block="true"
+                      OnClick="HandleLogout" />
         </div>
     </div>
 }
-
-<style>
-    .hh-pro-banner {
-        background: linear-gradient(135deg, var(--ac-primary) 0%, var(--ac-primary-dark) 100%);
-        color: white;
-        padding: 20px;
-    }
-
-    .hh-pro-content {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-
-    .hh-pro-icon {
-        width: 48px;
-        height: 48px;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        flex-shrink: 0;
-    }
-
-    .hh-pro-text {
-        flex: 1;
-    }
-
-    .hh-pro-text h4 {
-        margin: 0 0 4px;
-        color: white;
-        font-size: 1rem;
-    }
-
-    .hh-pro-text p {
-        margin: 0;
-        opacity: 0.9;
-        font-size: 0.875rem;
-    }
-
-    @@media (max-width: 480px) {
-        .hh-pro-content {
-            flex-wrap: wrap;
-        }
-
-        .hh-pro-text {
-            flex: 1 1 100%;
-            order: -1;
-            margin-bottom: 12px;
-        }
-
-        .hh-pro-icon {
-            order: -2;
-        }
-    }
-</style>
 
 @code {
     private bool _isLoggedIn = false;
@@ -149,7 +223,7 @@ else
             {
                 Name = "Michael Johnson",
                 Email = "michael.johnson@email.com",
-                AvatarUrl = null
+                AvatarUrl = "https://i.pravatar.cc/150?u=michael"
             };
         }
         catch (Exception ex)
