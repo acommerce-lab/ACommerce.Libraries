@@ -14,14 +14,14 @@ public class ApiConfiguration : ACommerce.Client.Core.Configuration.ApiConfigura
     public const string DefaultProductionUrl = "https://acommerce-marketplace-130415035604.me-central1.run.app";
 
     /// <summary>
-    /// Development URL for Android Emulator (Ashare.Api on port 3000)
+    /// Development URL for Android Emulator (HamtramckHardware.Api on port 5200)
     /// </summary>
-    public const string DefaultAndroidEmulatorUrl = "http://10.0.2.2:3000";
+    public const string DefaultAndroidEmulatorUrl = "http://10.0.2.2:5200";
 
     /// <summary>
-    /// Development URL for localhost (Ashare.Api on port 3000)
+    /// Development URL for localhost (HamtramckHardware.Api on port 5200)
     /// </summary>
-    public const string DefaultLocalhostUrl = "http://localhost:3000";
+    public const string DefaultLocalhostUrl = "http://localhost:5200";
 
     /// <summary>
     /// Hamtramck Hardware API options
