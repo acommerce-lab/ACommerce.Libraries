@@ -83,7 +83,8 @@ try
         .AddApplicationPart(typeof(OrdersController).Assembly)
         .AddApplicationPart(typeof(ContactPointsController).Assembly)
         .AddApplicationPart(typeof(PaymentsController).Assembly)
-        .AddApplicationPart(typeof(RegistryController).Assembly);
+        .AddApplicationPart(typeof(RegistryController).Assembly)
+        .AddApplicationPart(typeof(DiscoveryController).Assembly);
 
     builder.Services.AddEndpointsApiExplorer();
 
