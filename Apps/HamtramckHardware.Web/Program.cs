@@ -4,6 +4,7 @@ using HamtramckHardware.Web.Services;
 using ACommerce.Client.Auth;
 using ACommerce.Client.Core.Interceptors;
 using ACommerce.Client.Core.Storage;
+using ACommerce.ServiceRegistry.Client.Extensions;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Themes;
 
@@ -56,6 +57,9 @@ builder.Services.AddScoped<IAppNavigationService, WebNavigationService>();
 builder.Services.AddScoped<IAppVersionService, WebAppVersionService>();
 
 var app = builder.Build();
+
+// Initialize service cache with predefined services
+app.Services.InitializeServiceCache();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

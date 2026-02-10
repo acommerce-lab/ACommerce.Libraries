@@ -1,6 +1,7 @@
 using ACommerce.Client.Categories;
 using ACommerce.Client.Products;
 using ACommerce.Templates.Customer.Pages;
+using Microsoft.Extensions.Logging;
 
 namespace HamtramckHardware.Shared.Services;
 
@@ -13,11 +14,16 @@ public class HamtramckDataService
 {
     private readonly ProductsClient _productsClient;
     private readonly CategoriesClient _categoriesClient;
+    private readonly ILogger<HamtramckDataService> _logger;
 
-    public HamtramckDataService(ProductsClient productsClient, CategoriesClient categoriesClient)
+    public HamtramckDataService(
+        ProductsClient productsClient,
+        CategoriesClient categoriesClient,
+        ILogger<HamtramckDataService> logger)
     {
         _productsClient = productsClient;
         _categoriesClient = categoriesClient;
+        _logger = logger;
     }
 
     #region Categories
@@ -39,7 +45,10 @@ public class HamtramckDataService
                 }).ToList();
             }
         }
-        catch { /* Fall back to mock data */ }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to fetch categories from API, using mock data");
+        }
 
         return GetMockCategories();
     }
@@ -58,7 +67,7 @@ public class HamtramckDataService
             if (products?.Any() == true)
                 return products.Select(MapToHomeProductItem).ToList();
         }
-        catch { /* Fall back to mock data */ }
+        catch (Exception ex) { _logger.LogWarning(ex, "API call failed, using mock data"); }
 
         return GetMockFeaturedProducts();
     }
@@ -78,7 +87,7 @@ public class HamtramckDataService
             if (result?.Items?.Any() == true)
                 return result.Items.Select(MapToHomeProductItem).ToList();
         }
-        catch { /* Fall back to mock data */ }
+        catch (Exception ex) { _logger.LogWarning(ex, "API call failed, using mock data"); }
 
         return GetMockBestSellers();
     }
@@ -100,7 +109,7 @@ public class HamtramckDataService
             if (result?.Items?.Any() == true)
                 return result.Items.Select(MapToHomeProductItem).ToList();
         }
-        catch { /* Fall back to mock data */ }
+        catch (Exception ex) { _logger.LogWarning(ex, "API call failed, using mock data"); }
 
         return GetMockDealsProducts();
     }
@@ -115,7 +124,7 @@ public class HamtramckDataService
             if (products?.Any() == true)
                 return products.Select(MapToHomeProductItem).ToList();
         }
-        catch { /* Fall back to mock data */ }
+        catch (Exception ex) { _logger.LogWarning(ex, "API call failed, using mock data"); }
 
         return GetMockAllProducts();
     }
@@ -130,7 +139,7 @@ public class HamtramckDataService
             if (product != null)
                 return MapToHomeProductItem(product);
         }
-        catch { /* Fall back to mock data */ }
+        catch (Exception ex) { _logger.LogWarning(ex, "API call failed, using mock data"); }
 
         return GetMockAllProducts().FirstOrDefault(p => p.Id == id);
     }
@@ -149,7 +158,7 @@ public class HamtramckDataService
             if (result?.Items?.Any() == true)
                 return result.Items.Select(MapToHomeProductItem).ToList();
         }
-        catch { /* Fall back to mock data */ }
+        catch (Exception ex) { _logger.LogWarning(ex, "API call failed, using mock data"); }
 
         return GetMockAllProducts()
             .Where(p => p.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
@@ -173,7 +182,7 @@ public class HamtramckDataService
             if (result?.Items?.Any() == true)
                 return result.Items.Select(MapToHomeProductItem).ToList();
         }
-        catch { /* Fall back to mock data */ }
+        catch (Exception ex) { _logger.LogWarning(ex, "API call failed, using mock data"); }
 
         return GetMockAllProducts();
     }
@@ -207,7 +216,7 @@ public class HamtramckDataService
                 );
             }
         }
-        catch { /* Fall back to mock data */ }
+        catch (Exception ex) { _logger.LogWarning(ex, "API call failed, using mock data"); }
 
         return GetMockProductDetails().GetValueOrDefault(id);
     }
