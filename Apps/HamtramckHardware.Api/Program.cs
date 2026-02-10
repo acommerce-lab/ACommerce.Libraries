@@ -38,6 +38,7 @@ using ACommerce.Payments.Api.Controllers;
 
 // Files
 using ACommerce.Files.Storage.Local.Extensions;
+using System.Text.Json.Serialization;
 
 // HamtramckHardware specific
 using HamtramckHardware.Api.Services;
@@ -85,7 +86,11 @@ try
         .AddApplicationPart(typeof(ContactPointsController).Assembly)
         .AddApplicationPart(typeof(PaymentsController).Assembly)
         .AddApplicationPart(typeof(RegistryController).Assembly)
-        .AddApplicationPart(typeof(DiscoveryController).Assembly);
+        .AddApplicationPart(typeof(DiscoveryController).Assembly)
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
 
     builder.Services.AddEndpointsApiExplorer();
 
