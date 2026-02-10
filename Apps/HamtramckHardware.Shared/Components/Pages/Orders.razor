@@ -138,22 +138,26 @@
         {
             _isLoading = true;
 
+            // Get customer ID from token
+            var token = await TokenManager.GetTokenAsync();
+            var customerId = $"user-{token?.GetHashCode():X8}";
+
             // Try to load orders from API
             try
             {
-                var response = await OrdersClient.GetMyOrdersAsync();
-                if (response?.Items != null && response.Items.Any())
+                var ordersList = await OrdersClient.GetMyOrdersAsync(customerId);
+                if (ordersList != null && ordersList.Any())
                 {
-                    _orders = response.Items.Select(o => new OrderModel(
+                    _orders = ordersList.Select(o => new OrderModel(
                         o.Id,
                         o.OrderNumber ?? $"HH-{o.Id.ToString()[..6].ToUpper()}",
                         o.CreatedAt,
                         o.Status ?? "Pending",
-                        o.Total,
+                        o.TotalAmount,
                         o.Items?.Select(i => new OrderItemModel(
                             i.ProductName ?? "Product",
                             i.Quantity,
-                            i.ImageUrl
+                            null // OrderItemDto doesn't have ImageUrl
                         )).ToList() ?? new List<OrderItemModel>()
                     )).ToList();
 

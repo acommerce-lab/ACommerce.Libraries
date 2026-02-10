@@ -181,7 +181,7 @@
             }
             else
             {
-                _errorMessage = response?.Error ?? "Failed to create account. Please try again.";
+                _errorMessage = response?.Message ?? "Failed to create account. Please try again.";
             }
         }
         catch (Exception ex)
