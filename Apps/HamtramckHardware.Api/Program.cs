@@ -31,6 +31,7 @@ using ACommerce.Notifications.Abstractions.Enums;
 // Controllers from libraries
 using ACommerce.Profiles.Api.Controllers;
 using ACommerce.Catalog.Products.Api.Controllers;
+using ACommerce.Catalog.Products.Services;
 using ACommerce.Orders.Api.Controllers;
 using ACommerce.Notifications.Recipients.Api.Controllers;
 using ACommerce.Payments.Api.Controllers;
@@ -127,6 +128,9 @@ try
 
     // CQRS
     builder.Services.AddSharedKernelCQRS(AppDomain.CurrentDomain.GetAssemblies());
+
+    // Product Services
+    builder.Services.AddScoped<IProductService, ProductService>();
 
     // SignalR
     builder.Services.AddACommerceSignalR<NotificationHub, INotificationClient>();
