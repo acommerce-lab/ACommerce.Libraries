@@ -33,7 +33,9 @@ builder.Services.AddACommerceCustomerTemplate(options =>
 
 // API Configuration - Use local API in development
 var useLocalApi = builder.Environment.IsDevelopment();
-var apiConfig = ApiConfiguration.ForWeb(useLocalApi: useLocalApi);
+// Force correct port for HamtramckHardware.Api (5200) in development
+var apiBaseUrl = useLocalApi ? "http://localhost:5200" : ApiConfiguration.HamtramckOptions.ProductionUrl;
+var apiConfig = ApiConfiguration.ForWeb(useLocalApi: useLocalApi, customBaseUrl: apiBaseUrl);
 Console.WriteLine($"[HamtramckHardware.Web] API Base URL: {apiConfig.BaseUrl}");
 
 // Storage & Auth
