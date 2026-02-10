@@ -1207,8 +1207,8 @@
             return GetAttribute("phone");
 
         // ثالثاً: من بروفايل المالك
-        if (!string.IsNullOrEmpty(_ownerProfile?.Phone))
-            return _ownerProfile.Phone;
+        if (!string.IsNullOrEmpty(_ownerProfile?.PhoneNumber))
+            return _ownerProfile.PhoneNumber;
 
         return null;
     }

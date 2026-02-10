@@ -16,12 +16,12 @@ public class ApiConfiguration : ACommerce.Client.Core.Configuration.ApiConfigura
     /// <summary>
     /// Development URL for Android Emulator (HamtramckHardware.Api on port 5200)
     /// </summary>
-    public const string DefaultAndroidEmulatorUrl = "http://10.0.2.2:5200";
+    public const string DefaultAndroidEmulatorUrl = "http://10.0.2.2:8080";
 
     /// <summary>
     /// Development URL for localhost (HamtramckHardware.Api on port 5200)
     /// </summary>
-    public const string DefaultLocalhostUrl = "http://localhost:5200";
+    public const string DefaultLocalhostUrl = "http://localhost:8080";
 
     /// <summary>
     /// Hamtramck Hardware API options
