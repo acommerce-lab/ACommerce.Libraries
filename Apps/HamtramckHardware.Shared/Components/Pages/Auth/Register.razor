@@ -5,109 +5,311 @@
 @inject TokenManager TokenManager
 @inject AuthClient AuthClient
 
-<div class="ac-page ac-auth-page ac-register-page">
-    <div class="ac-auth-card">
-        <div class="ac-auth-header" style="text-align: center;">
-            <i class="bi bi-tools" style="font-size: 3rem; color: var(--ac-primary);"></i>
-            <h1 style="margin-top: 16px;">Create Account</h1>
+<div class="hh-register-page">
+    <div class="hh-register-card">
+        <div class="hh-register-header">
+            <i class="bi bi-tools"></i>
+            <h1>Create Account</h1>
             <p>Join Hamtramck Hardware</p>
         </div>
 
-        <form class="ac-auth-form" @onsubmit="HandleRegister" @onsubmit:preventDefault>
-            @if (!string.IsNullOrEmpty(_errorMessage))
-            {
-                <div class="ac-alert ac-alert-danger">
-                    <i class="bi bi-exclamation-circle"></i>
-                    @_errorMessage
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="hh-alert hh-alert-error">
+                <i class="bi bi-exclamation-circle"></i>
+                @_errorMessage
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(_successMessage))
+        {
+            <div class="hh-alert hh-alert-success">
+                <i class="bi bi-check-circle"></i>
+                @_successMessage
+            </div>
+        }
+
+        <EditForm Model="_model" OnValidSubmit="HandleRegister" FormName="registerForm">
+            <div class="hh-form-row">
+                <div class="hh-form-group">
+                    <label>First Name *</label>
+                    <input type="text" @bind="_model.FirstName" placeholder="John" required />
                 </div>
-            }
-
-            @if (!string.IsNullOrEmpty(_successMessage))
-            {
-                <div class="ac-alert ac-alert-success">
-                    <i class="bi bi-check-circle"></i>
-                    @_successMessage
+                <div class="hh-form-group">
+                    <label>Last Name *</label>
+                    <input type="text" @bind="_model.LastName" placeholder="Doe" required />
                 </div>
-            }
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                <AcInput Label="First Name"
-                         @bind-Value="_model.FirstName"
-                         Placeholder="John"
-                         IconStart="bi-person"
-                         Required="true" />
-
-                <AcInput Label="Last Name"
-                         @bind-Value="_model.LastName"
-                         Placeholder="Doe"
-                         IconStart="bi-person"
-                         Required="true" />
             </div>
 
-            <AcInput Label="Email"
-                     Type="email"
-                     @bind-Value="_model.Email"
-                     Placeholder="you@example.com"
-                     IconStart="bi-envelope"
-                     Required="true" />
+            <div class="hh-form-group">
+                <label>Email *</label>
+                <input type="email" @bind="_model.Email" placeholder="you@example.com" required />
+            </div>
 
-            <AcInput Label="Phone (optional)"
-                     Type="tel"
-                     @bind-Value="_model.Phone"
-                     Placeholder="(313) 555-0123"
-                     IconStart="bi-phone" />
+            <div class="hh-form-group">
+                <label>Phone (optional)</label>
+                <input type="tel" @bind="_model.Phone" placeholder="(313) 555-0123" />
+            </div>
 
-            <AcInput Label="Password"
-                     Type="password"
-                     @bind-Value="_model.Password"
-                     Placeholder="At least 8 characters"
-                     IconStart="bi-lock"
-                     Required="true" />
+            <div class="hh-form-group">
+                <label>Password *</label>
+                <input type="password" @bind="_model.Password" placeholder="At least 8 characters" required />
+            </div>
 
-            <AcInput Label="Confirm Password"
-                     Type="password"
-                     @bind-Value="_model.ConfirmPassword"
-                     Placeholder="Confirm your password"
-                     IconStart="bi-lock-fill"
-                     Required="true" />
+            <div class="hh-form-group">
+                <label>Confirm Password *</label>
+                <input type="password" @bind="_model.ConfirmPassword" placeholder="Confirm password" required />
+            </div>
 
-            <div style="margin: 16px 0;">
-                <label class="ac-checkbox" style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
-                    <input type="checkbox" @bind="_model.AcceptTerms" style="margin-top: 4px;" />
-                    <span style="font-size: 0.875rem;">
-                        I agree to the <a href="/terms" class="ac-link">Terms of Service</a>
-                        and <a href="/privacy" class="ac-link">Privacy Policy</a>
-                    </span>
+            <div class="hh-checkbox-group">
+                <label>
+                    <input type="checkbox" @bind="_model.AcceptTerms" />
+                    <span>I agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a></span>
                 </label>
             </div>
 
-            <AcButton Text="@(_isLoading ? "Creating Account..." : "Create Account")"
-                      Type="submit"
-                      Icon="bi-person-plus"
-                      Variant="ButtonVariant.Primary"
-                      Block="true"
-                      Size="ButtonSize.Large"
-                      Loading="@_isLoading"
-                      Disabled="@_isLoading" />
-        </form>
+            <button type="submit" class="hh-btn hh-btn-primary hh-btn-block" disabled="@_isLoading">
+                @if (_isLoading)
+                {
+                    <span>Creating Account...</span>
+                }
+                else
+                {
+                    <i class="bi bi-person-plus"></i>
+                    <span>Create Account</span>
+                }
+            </button>
+        </EditForm>
 
-        <div class="ac-auth-footer" style="text-align: center; margin-top: 24px;">
+        <div class="hh-register-footer">
             <span>Already have an account?</span>
-            <a href="/login" class="ac-link" style="margin-left: 4px;">Sign In</a>
+            <a href="/login">Sign In</a>
         </div>
 
-        <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--ac-border);">
-            <p style="text-align: center; color: var(--ac-text-muted); margin-bottom: 16px;">Or sign up with</p>
-
-            <AcButton Text="Sign up with Google"
-                      Icon="bi-google"
-                      Variant="ButtonVariant.Secondary"
-                      Outline="true"
-                      Block="true"
-                      OnClick="SignUpWithGoogle" />
+        <div class="hh-divider">
+            <span>Or sign up with</span>
         </div>
+
+        <button type="button" class="hh-btn hh-btn-outline hh-btn-block" @onclick="SignUpWithGoogle">
+            <i class="bi bi-google"></i>
+            <span>Sign up with Google</span>
+        </button>
     </div>
 </div>
+
+<style>
+    .hh-register-page {
+        min-height: calc(100vh - 120px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 16px;
+        background: var(--ac-bg-alt, #f5f5f5);
+    }
+
+    .hh-register-card {
+        width: 100%;
+        max-width: 440px;
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .hh-register-header {
+        text-align: center;
+        margin-bottom: 24px;
+    }
+
+    .hh-register-header i {
+        font-size: 48px;
+        color: var(--ac-primary, #E65100);
+    }
+
+    .hh-register-header h1 {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 12px 0 4px;
+        color: #1a1a1a;
+    }
+
+    .hh-register-header p {
+        color: #666;
+        margin: 0;
+    }
+
+    .hh-alert {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        font-size: 14px;
+    }
+
+    .hh-alert-error {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+
+    .hh-alert-success {
+        background: #f0fdf4;
+        color: #16a34a;
+        border: 1px solid #bbf7d0;
+    }
+
+    .hh-form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .hh-form-group {
+        margin-bottom: 16px;
+    }
+
+    .hh-form-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 6px;
+    }
+
+    .hh-form-group input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 15px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        box-sizing: border-box;
+    }
+
+    .hh-form-group input:focus {
+        outline: none;
+        border-color: var(--ac-primary, #E65100);
+        box-shadow: 0 0 0 3px rgba(230, 81, 0, 0.1);
+    }
+
+    .hh-checkbox-group {
+        margin: 20px 0;
+    }
+
+    .hh-checkbox-group label {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #4b5563;
+    }
+
+    .hh-checkbox-group input[type="checkbox"] {
+        margin-top: 2px;
+        width: 16px;
+        height: 16px;
+        accent-color: var(--ac-primary, #E65100);
+    }
+
+    .hh-checkbox-group a {
+        color: var(--ac-primary, #E65100);
+        text-decoration: none;
+    }
+
+    .hh-checkbox-group a:hover {
+        text-decoration: underline;
+    }
+
+    .hh-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 24px;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+    }
+
+    .hh-btn-block {
+        width: 100%;
+    }
+
+    .hh-btn-primary {
+        background: var(--ac-primary, #E65100);
+        color: white;
+    }
+
+    .hh-btn-primary:hover:not(:disabled) {
+        background: var(--ac-primary-dark, #BF360C);
+    }
+
+    .hh-btn-primary:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .hh-btn-outline {
+        background: white;
+        color: #374151;
+        border: 1px solid #d1d5db;
+    }
+
+    .hh-btn-outline:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
+    }
+
+    .hh-register-footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 14px;
+        color: #6b7280;
+    }
+
+    .hh-register-footer a {
+        color: var(--ac-primary, #E65100);
+        text-decoration: none;
+        font-weight: 500;
+        margin-left: 4px;
+    }
+
+    .hh-divider {
+        display: flex;
+        align-items: center;
+        margin: 24px 0;
+        color: #9ca3af;
+        font-size: 14px;
+    }
+
+    .hh-divider::before,
+    .hh-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #e5e7eb;
+    }
+
+    .hh-divider span {
+        padding: 0 16px;
+    }
+
+    @@media (max-width: 480px) {
+        .hh-form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .hh-register-card {
+            padding: 24px 20px;
+        }
+    }
+</style>
 
 @code {
     private RegisterModel _model = new();

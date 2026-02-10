@@ -461,6 +461,120 @@ a:hover {
 	gap: var(--ac-space-sm);
 }
 
+.ac-navbar-action {
+	position: relative;
+	width: 40px;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+	border: none;
+	border-radius: var(--ac-radius-full);
+	color: var(--ac-primary);
+	font-size: var(--ac-font-lg);
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.ac-navbar-action:hover {
+	background-color: var(--ac-surface-alt);
+	color: var(--ac-primary-dark);
+}
+
+.ac-navbar-action .ac-badge {
+	position: absolute;
+	top: 2px;
+	right: 2px;
+	min-width: 18px;
+	height: 18px;
+	padding: 0 4px;
+	font-size: 10px;
+	line-height: 18px;
+	text-align: center;
+}
+
+/* ==========================================================================
+   Auth Pages
+   ========================================================================== */
+
+.ac-auth-page {
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: var(--ac-space-lg);
+	background-color: var(--ac-bg-alt);
+}
+
+.ac-auth-card {
+	width: 100%;
+	max-width: 440px;
+	background-color: var(--ac-surface);
+	border-radius: var(--ac-radius-xl);
+	padding: var(--ac-space-xl);
+	box-shadow: var(--ac-shadow-lg);
+}
+
+.ac-auth-header {
+	margin-bottom: var(--ac-space-xl);
+}
+
+.ac-auth-header h1 {
+	font-size: var(--ac-font-2xl);
+	font-weight: var(--ac-font-bold);
+	color: var(--ac-text);
+	margin: 0;
+}
+
+.ac-auth-header p {
+	color: var(--ac-text-muted);
+	margin: var(--ac-space-xs) 0 0 0;
+}
+
+.ac-auth-form {
+	display: flex;
+	flex-direction: column;
+	gap: var(--ac-space-md);
+}
+
+.ac-auth-footer {
+	margin-top: var(--ac-space-lg);
+	color: var(--ac-text-secondary);
+}
+
+.ac-auth-footer .ac-link {
+	color: var(--ac-primary);
+	text-decoration: none;
+	font-weight: var(--ac-font-medium);
+}
+
+.ac-auth-footer .ac-link:hover {
+	text-decoration: underline;
+}
+
+/* Alerts */
+.ac-alert {
+	display: flex;
+	align-items: center;
+	gap: var(--ac-space-sm);
+	padding: var(--ac-space-md);
+	border-radius: var(--ac-radius-md);
+	font-size: var(--ac-font-sm);
+}
+
+.ac-alert-danger {
+	background-color: rgba(239, 68, 68, 0.1);
+	color: var(--ac-error);
+	border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.ac-alert-success {
+	background-color: rgba(16, 185, 129, 0.1);
+	color: var(--ac-success);
+	border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
 /* Bottom Navigation (Mobile) */
 .ac-bottom-nav {
 	position: fixed;
