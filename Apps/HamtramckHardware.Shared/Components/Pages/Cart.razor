@@ -57,14 +57,12 @@
                     _cartItems = cartResponse.Items.Select(item => new CartItemModel
                     {
                         Id = item.Id,
-                        ProductId = item.ProductId,
+                        ProductId = item.ListingId,
                         Name = item.ProductName,
                         Price = item.UnitPrice,
-                        OldPrice = item.OldPrice,
                         Quantity = item.Quantity,
-                        MaxQuantity = 99,
-                        ImageUrl = item.ImageUrl,
-                        Variant = item.VariantName
+                        MaxQuantity = item.MaxQuantity,
+                        ImageUrl = item.ImageUrl
                     }).ToList();
 
                     CalculateTotals();
