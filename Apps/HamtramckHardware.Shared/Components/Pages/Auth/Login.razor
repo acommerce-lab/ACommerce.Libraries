@@ -60,12 +60,23 @@
         </div>
 
         <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--ac-border);">
-            <AcButton Text="Continue as Guest"
-                      Icon="bi-person"
+            <p style="text-align: center; color: var(--ac-text-muted); margin-bottom: 16px;">Or continue with</p>
+
+            <AcButton Text="Sign in with Google"
+                      Icon="bi-google"
                       Variant="ButtonVariant.Secondary"
                       Outline="true"
                       Block="true"
-                      OnClick="ContinueAsGuest" />
+                      OnClick="SignInWithGoogle" />
+
+            <div style="margin-top: 12px;">
+                <AcButton Text="Continue as Guest"
+                          Icon="bi-person"
+                          Variant="ButtonVariant.Secondary"
+                          Outline="true"
+                          Block="true"
+                          OnClick="ContinueAsGuest" />
+            </div>
         </div>
     </div>
 </div>
@@ -92,22 +103,37 @@
             _errorMessage = null;
             StateHasChanged();
 
-            await Task.Delay(1000);
+            var response = await AuthClient.LoginAsync(new ACommerce.Client.Auth.Models.LoginRequest
+            {
+                Email = _loginModel.Email,
+                Password = _loginModel.Password
+            });
 
-            var mockToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
-            TokenManager.SetToken(mockToken, DateTime.UtcNow.AddDays(30));
-
-            Navigation.NavigateTo("/");
+            if (response?.Success == true)
+            {
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                _errorMessage = response?.Error ?? "Invalid email or password. Please try again.";
+            }
         }
         catch (Exception ex)
         {
-            _errorMessage = "Invalid email or password. Please try again.";
+            _errorMessage = "Unable to connect to server. Please try again.";
             Console.WriteLine($"[Login] Error: {ex.Message}");
         }
         finally
         {
             _isLoading = false;
         }
+    }
+
+    private async Task SignInWithGoogle()
+    {
+        // TODO: Implement Google OAuth
+        // For now, redirect to a placeholder or show a message
+        _errorMessage = "Google Sign-In coming soon! Please use email/password for now.";
     }
 
     private void ContinueAsGuest()

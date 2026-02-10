@@ -3,6 +3,8 @@
 @inject ILocalizationService L
 @inject IAppNavigationService Navigation
 @inject CartClient CartClient
+@inject TokenManager TokenManager
+@inject ILogger<Cart> Logger
 
 <CartPage Items="@_cartItems"
           IsLoading="@_isLoading"
@@ -42,57 +44,64 @@
         try
         {
             _isLoading = true;
-            await Task.Delay(300);
 
-            // Mock cart data
-            _cartItems = new List<CartItemModel>
+            // Try to get cart from API using session ID
+            var sessionId = await GetOrCreateSessionId();
+
+            try
             {
-                new() {
-                    Id = Guid.NewGuid(),
-                    ProductId = Guid.NewGuid(),
-                    Name = "DeWalt 20V MAX XR Brushless Drill/Driver Kit",
-                    Price = 149.99m,
-                    OldPrice = 179.99m,
-                    Quantity = 1,
-                    MaxQuantity = 10,
-                    ImageUrl = "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=200&h=200&fit=crop",
-                    Attributes = new() { { "Brand", "DeWalt" }, { "Voltage", "20V" } }
-                },
-                new() {
-                    Id = Guid.NewGuid(),
-                    ProductId = Guid.NewGuid(),
-                    Name = "Copper Pipe Fittings Set 1/2\"",
-                    Price = 24.99m,
-                    Quantity = 2,
-                    MaxQuantity = 50,
-                    ImageUrl = "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=200&h=200&fit=crop",
-                    Variant = "1/2 inch",
-                    Attributes = new() { { "Size", "1/2\"" } }
-                },
-                new() {
-                    Id = Guid.NewGuid(),
-                    ProductId = Guid.NewGuid(),
-                    Name = "Southwire Romex 12/2 NM-B Wire 250ft",
-                    Price = 89.99m,
-                    OldPrice = 99.99m,
-                    Quantity = 1,
-                    MaxQuantity = 20,
-                    ImageUrl = "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=200&h=200&fit=crop",
-                    Variant = "250ft",
-                    Attributes = new() { { "Length", "250ft" }, { "Gauge", "12/2" } }
-                },
-            };
+                var cartResponse = await CartClient.GetCartAsync(sessionId);
+                if (cartResponse?.Items != null && cartResponse.Items.Any())
+                {
+                    _cartItems = cartResponse.Items.Select(item => new CartItemModel
+                    {
+                        Id = item.Id,
+                        ProductId = item.ProductId,
+                        Name = item.ProductName,
+                        Price = item.UnitPrice,
+                        OldPrice = item.OldPrice,
+                        Quantity = item.Quantity,
+                        MaxQuantity = 99,
+                        ImageUrl = item.ImageUrl,
+                        Variant = item.VariantName
+                    }).ToList();
 
+                    CalculateTotals();
+                    Logger.LogInformation("Cart loaded from API with {Count} items", _cartItems.Count);
+                    return;
+                }
+            }
+            catch (Exception apiEx)
+            {
+                Logger.LogWarning(apiEx, "Failed to load cart from API, starting with empty cart");
+            }
+
+            // Start with empty cart (no more mock data)
+            _cartItems = new List<CartItemModel>();
             CalculateTotals();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading cart: {ex.Message}");
+            Logger.LogError(ex, "Error loading cart");
         }
         finally
         {
             _isLoading = false;
         }
+    }
+
+    private async Task<string> GetOrCreateSessionId()
+    {
+        // Try to get user token first
+        var token = await TokenManager.GetTokenAsync();
+        if (!string.IsNullOrEmpty(token))
+        {
+            // Parse user ID from token if available
+            return $"user-{token.GetHashCode():X8}";
+        }
+
+        // Use a guest session ID (in production, this should be stored in browser)
+        return $"guest-{Guid.NewGuid():N}";
     }
 
     private void CalculateTotals()

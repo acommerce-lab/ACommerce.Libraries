@@ -1,12 +1,14 @@
 @inherits LayoutComponentBase
 @using ACommerce.Templates.Customer.Components
+@using TemplateThemeService = ACommerce.Templates.Customer.Themes.ThemeService
 @inject ThemeService ThemeService
+@inject TemplateThemeService TemplateTheme
 @inject IAppNavigationService Navigation
 @inject TokenManager TokenManager
 @inject ILocalizationService L
 @implements IDisposable
 
-<div class="ac-app hh-app" style="direction: ltr;">
+<div class="ac-app hh-app" style="@GetThemeStyles()">
     <!-- Top Navbar -->
     <AcNavbar BrandName="Hamtramck Hardware"
               ShowSearch="true"
@@ -87,7 +89,7 @@
 </style>
 
 @code {
-    private int _cartCount = 3;
+    private int _cartCount = 0; // Start with 0, will be updated when cart changes
     private bool _isLoggedIn = false;
     private List<BottomNavItem> _navItems = new();
 
@@ -165,5 +167,11 @@
     public void Dispose()
     {
         ThemeService.OnThemeChanged -= OnThemeChanged;
+    }
+
+    private string GetThemeStyles()
+    {
+        // Apply theme CSS variables from the template theme service
+        return $"direction: ltr; {TemplateTheme.GenerateInlineStyles()}";
     }
 }

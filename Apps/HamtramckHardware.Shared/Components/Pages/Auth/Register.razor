@@ -1,0 +1,214 @@
+@page "/register"
+@using ACommerce.Templates.Customer.Components
+@inject ILocalizationService L
+@inject IAppNavigationService Navigation
+@inject TokenManager TokenManager
+@inject AuthClient AuthClient
+
+<div class="ac-page ac-auth-page ac-register-page">
+    <div class="ac-auth-card">
+        <div class="ac-auth-header" style="text-align: center;">
+            <i class="bi bi-tools" style="font-size: 3rem; color: var(--ac-primary);"></i>
+            <h1 style="margin-top: 16px;">Create Account</h1>
+            <p>Join Hamtramck Hardware</p>
+        </div>
+
+        <form class="ac-auth-form" @onsubmit="HandleRegister" @onsubmit:preventDefault>
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="ac-alert ac-alert-danger">
+                    <i class="bi bi-exclamation-circle"></i>
+                    @_errorMessage
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(_successMessage))
+            {
+                <div class="ac-alert ac-alert-success">
+                    <i class="bi bi-check-circle"></i>
+                    @_successMessage
+                </div>
+            }
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <AcInput Label="First Name"
+                         @bind-Value="_model.FirstName"
+                         Placeholder="John"
+                         IconStart="bi-person"
+                         Required="true" />
+
+                <AcInput Label="Last Name"
+                         @bind-Value="_model.LastName"
+                         Placeholder="Doe"
+                         IconStart="bi-person"
+                         Required="true" />
+            </div>
+
+            <AcInput Label="Email"
+                     Type="email"
+                     @bind-Value="_model.Email"
+                     Placeholder="you@example.com"
+                     IconStart="bi-envelope"
+                     Required="true" />
+
+            <AcInput Label="Phone (optional)"
+                     Type="tel"
+                     @bind-Value="_model.Phone"
+                     Placeholder="(313) 555-0123"
+                     IconStart="bi-phone" />
+
+            <AcInput Label="Password"
+                     Type="password"
+                     @bind-Value="_model.Password"
+                     Placeholder="At least 8 characters"
+                     IconStart="bi-lock"
+                     Required="true" />
+
+            <AcInput Label="Confirm Password"
+                     Type="password"
+                     @bind-Value="_model.ConfirmPassword"
+                     Placeholder="Confirm your password"
+                     IconStart="bi-lock-fill"
+                     Required="true" />
+
+            <div style="margin: 16px 0;">
+                <label class="ac-checkbox" style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" @bind="_model.AcceptTerms" style="margin-top: 4px;" />
+                    <span style="font-size: 0.875rem;">
+                        I agree to the <a href="/terms" class="ac-link">Terms of Service</a>
+                        and <a href="/privacy" class="ac-link">Privacy Policy</a>
+                    </span>
+                </label>
+            </div>
+
+            <AcButton Text="@(_isLoading ? "Creating Account..." : "Create Account")"
+                      Type="submit"
+                      Icon="bi-person-plus"
+                      Variant="ButtonVariant.Primary"
+                      Block="true"
+                      Size="ButtonSize.Large"
+                      Loading="@_isLoading"
+                      Disabled="@_isLoading" />
+        </form>
+
+        <div class="ac-auth-footer" style="text-align: center; margin-top: 24px;">
+            <span>Already have an account?</span>
+            <a href="/login" class="ac-link" style="margin-left: 4px;">Sign In</a>
+        </div>
+
+        <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--ac-border);">
+            <p style="text-align: center; color: var(--ac-text-muted); margin-bottom: 16px;">Or sign up with</p>
+
+            <AcButton Text="Sign up with Google"
+                      Icon="bi-google"
+                      Variant="ButtonVariant.Secondary"
+                      Outline="true"
+                      Block="true"
+                      OnClick="SignUpWithGoogle" />
+        </div>
+    </div>
+</div>
+
+@code {
+    private RegisterModel _model = new();
+    private bool _isLoading = false;
+    private string? _errorMessage = null;
+    private string? _successMessage = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await TokenManager.GetTokenAsync();
+        if (!string.IsNullOrEmpty(token))
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
+
+    private async Task HandleRegister()
+    {
+        try
+        {
+            _isLoading = true;
+            _errorMessage = null;
+            _successMessage = null;
+            StateHasChanged();
+
+            // Validate
+            if (string.IsNullOrWhiteSpace(_model.FirstName) || string.IsNullOrWhiteSpace(_model.LastName))
+            {
+                _errorMessage = "Please enter your first and last name.";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(_model.Email))
+            {
+                _errorMessage = "Please enter your email address.";
+                return;
+            }
+
+            if (_model.Password != _model.ConfirmPassword)
+            {
+                _errorMessage = "Passwords do not match.";
+                return;
+            }
+
+            if (_model.Password.Length < 8)
+            {
+                _errorMessage = "Password must be at least 8 characters long.";
+                return;
+            }
+
+            if (!_model.AcceptTerms)
+            {
+                _errorMessage = "Please accept the Terms of Service and Privacy Policy.";
+                return;
+            }
+
+            var response = await AuthClient.RegisterAsync(new ACommerce.Client.Auth.Models.RegisterRequest
+            {
+                Email = _model.Email,
+                Password = _model.Password,
+                FullName = $"{_model.FirstName} {_model.LastName}".Trim(),
+                PhoneNumber = string.IsNullOrWhiteSpace(_model.Phone) ? null : _model.Phone
+            });
+
+            if (response?.Success == true)
+            {
+                _successMessage = "Account created successfully! Redirecting...";
+                StateHasChanged();
+                await Task.Delay(1000);
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                _errorMessage = response?.Error ?? "Failed to create account. Please try again.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = "Unable to connect to server. Please try again.";
+            Console.WriteLine($"[Register] Error: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task SignUpWithGoogle()
+    {
+        // TODO: Implement Google OAuth
+        _errorMessage = "Google Sign-Up coming soon! Please use email/password for now.";
+    }
+
+    private class RegisterModel
+    {
+        public string FirstName { get; set; } = "";
+        public string LastName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Phone { get; set; } = "";
+        public string Password { get; set; } = "";
+        public string ConfirmPassword { get; set; } = "";
+        public bool AcceptTerms { get; set; } = false;
+    }
+}

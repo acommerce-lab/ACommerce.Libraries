@@ -4,6 +4,7 @@
 @inject IAppNavigationService Navigation
 @inject OrdersClient OrdersClient
 @inject TokenManager TokenManager
+@inject ILogger<Orders> Logger
 
 <div class="ac-page" style="direction: ltr;">
     <h1 class="ac-page-title" style="padding: 16px; margin: 0;">
@@ -136,49 +137,41 @@
         {
             _isLoading = true;
 
-            // Simulate API call
-            await Task.Delay(300);
-
-            // Mock orders data - detailed demo content
-            _orders = new List<OrderModel>
+            // Try to load orders from API
+            try
             {
-                new(Guid.NewGuid(), "HH-847291", DateTime.Now.AddDays(-1), "Pending", 364.96m,
-                    new List<OrderItemModel>
-                    {
-                        new("DeWalt 20V MAX XR Brushless Drill/Driver Kit", 1, "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=100&h=100&fit=crop"),
-                        new("Southwire Romex 12/2 NM-B Wire 250ft", 2, "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=100&h=100&fit=crop"),
-                        new("Klein Tools 11-in-1 Screwdriver/Nut Driver", 1, "https://images.unsplash.com/photo-1426927308491-6380b6a9936f?w=100&h=100&fit=crop"),
-                    }),
-                new(Guid.NewGuid(), "HH-846582", DateTime.Now.AddDays(-3), "Shipped", 499.99m,
-                    new List<OrderItemModel>
-                    {
-                        new("Milwaukee M18 FUEL 1/2\" Hammer Drill", 1, "https://images.unsplash.com/photo-1580901368919-7738efb0f87e?w=100&h=100&fit=crop"),
-                        new("CRAFTSMAN 320-Piece Mechanic's Tool Set", 1, "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=100&h=100&fit=crop"),
-                    }),
-                new(Guid.NewGuid(), "HH-845123", DateTime.Now.AddDays(-8), "Delivered", 156.97m,
-                    new List<OrderItemModel>
-                    {
-                        new("SharkBite 1/2\" Push-to-Connect Coupling (4-pack)", 2, "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=100&h=100&fit=crop"),
-                        new("Stanley FatMax Copper Pipe Cutter", 1, "https://images.unsplash.com/photo-1581147036324-c17ac41f3f2c?w=100&h=100&fit=crop"),
-                        new("3M Scotch Blue Painter's Tape 1.88\" (3-pack)", 3, "https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=100&h=100&fit=crop"),
-                        new("Gorilla Heavy Duty Construction Adhesive", 2, "https://images.unsplash.com/photo-1557166983-5939644c3b5e?w=100&h=100&fit=crop"),
-                    }),
-                new(Guid.NewGuid(), "HH-843987", DateTime.Now.AddDays(-15), "Delivered", 89.99m,
-                    new List<OrderItemModel>
-                    {
-                        new("Makita 18V LXT LED Flashlight", 1, "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=100&h=100&fit=crop"),
-                        new("WD-40 Multi-Use Product 12oz (2-pack)", 1, "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=100&h=100&fit=crop"),
-                    }),
-                new(Guid.NewGuid(), "HH-842456", DateTime.Now.AddDays(-22), "Delivered", 749.97m,
-                    new List<OrderItemModel>
-                    {
-                        new("Husky 52\" 15-Drawer Tool Chest & Cabinet", 1, "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=100&h=100&fit=crop"),
-                    }),
-            };
+                var response = await OrdersClient.GetMyOrdersAsync();
+                if (response?.Items != null && response.Items.Any())
+                {
+                    _orders = response.Items.Select(o => new OrderModel(
+                        o.Id,
+                        o.OrderNumber ?? $"HH-{o.Id.ToString()[..6].ToUpper()}",
+                        o.CreatedAt,
+                        o.Status ?? "Pending",
+                        o.Total,
+                        o.Items?.Select(i => new OrderItemModel(
+                            i.ProductName ?? "Product",
+                            i.Quantity,
+                            i.ImageUrl
+                        )).ToList() ?? new List<OrderItemModel>()
+                    )).ToList();
+
+                    Logger.LogInformation("Orders loaded from API: {Count} orders", _orders.Count);
+                    return;
+                }
+            }
+            catch (Exception apiEx)
+            {
+                Logger.LogWarning(apiEx, "Failed to load orders from API");
+            }
+
+            // No orders found or API failed - show empty state
+            _orders = new List<OrderModel>();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading orders: {ex.Message}");
+            Logger.LogError(ex, "Error loading orders");
+            _orders = new List<OrderModel>();
         }
         finally
         {
