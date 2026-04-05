@@ -399,6 +399,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rukkab.Shared.Customer", "A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rukkab.Shared.Driver", "Apps\Rukkab\Shared\Rukkab.Shared.Driver\Rukkab.Shared.Driver.csproj", "{49A0C786-B8E2-48A4-90B2-5F1E05A8A169}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommerce.AccountingKernel", "libs\backend\core\ACommerce.AccountingKernel\ACommerce.AccountingKernel.csproj", "{A85CB5AF-DC96-49DC-8301-5F98BE7BB0E0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2389,6 +2391,18 @@ Global
 		{49A0C786-B8E2-48A4-90B2-5F1E05A8A169}.Release|x64.Build.0 = Release|Any CPU
 		{49A0C786-B8E2-48A4-90B2-5F1E05A8A169}.Release|x86.ActiveCfg = Release|Any CPU
 		{49A0C786-B8E2-48A4-90B2-5F1E05A8A169}.Release|x86.Build.0 = Release|Any CPU
+		{A85CB5AF-DC96-49DC-8301-5F98BE7BB0E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A85CB5AF-DC96-49DC-8301-5F98BE7BB0E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A85CB5AF-DC96-49DC-8301-5F98BE7BB0E0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A85CB5AF-DC96-49DC-8301-5F98BE7BB0E0}.Debug|x64.Build.0 = Debug|Any CPU
+		{A85CB5AF-DC96-49DC-8301-5F98BE7BB0E0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A85CB5AF-DC96-49DC-8301-5F98BE7BB0E0}.Debug|x86.Build.0 = Debug|Any CPU
+		{A85CB5AF-DC96-49DC-8301-5F98BE7BB0E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A85CB5AF-DC96-49DC-8301-5F98BE7BB0E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A85CB5AF-DC96-49DC-8301-5F98BE7BB0E0}.Release|x64.ActiveCfg = Release|Any CPU
+		{A85CB5AF-DC96-49DC-8301-5F98BE7BB0E0}.Release|x64.Build.0 = Release|Any CPU
+		{A85CB5AF-DC96-49DC-8301-5F98BE7BB0E0}.Release|x86.ActiveCfg = Release|Any CPU
+		{A85CB5AF-DC96-49DC-8301-5F98BE7BB0E0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -2576,6 +2590,7 @@ Global
 		{003A9C6D-7EA3-40C5-96E1-9167C6EB27BB} = {80EEEC49-0EAB-F252-FE40-0627385F8C7E}
 		{E2F26113-5433-4D72-9C2E-A8AC302C7E9D} = {2EE20200-E269-37C1-E57F-D214BB83ACC2}
 		{49A0C786-B8E2-48A4-90B2-5F1E05A8A169} = {2EE20200-E269-37C1-E57F-D214BB83ACC2}
+		{A85CB5AF-DC96-49DC-8301-5F98BE7BB0E0} = {0B36746B-D1C2-4B9E-A747-5A505F629192}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2335E803-317D-466A-9117-E446644730F7}
