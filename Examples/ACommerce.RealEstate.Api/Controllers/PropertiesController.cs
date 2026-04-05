@@ -23,7 +23,7 @@ public class PropertiesController : ControllerBase
     {
         var entry = PropertyEntries.SearchProperties(request, _store);
         var result = await _engine.ExecuteAsync(entry);
-        if (!result.Success) return BadRequest(new { error = result.ErrorMessage });
+        if (!result.Success) return BadRequest(new { error = result.ErrorMessage, errors = result.ValidationErrors });
 
         var ctx = result.Context!;
         return Ok(new
@@ -60,7 +60,7 @@ public class PropertiesController : ControllerBase
 
         var entry = PropertyEntries.ListProperty(property, _store);
         var result = await _engine.ExecuteAsync(entry);
-        if (!result.Success) return BadRequest(new { error = result.ErrorMessage });
+        if (!result.Success) return BadRequest(new { error = result.ErrorMessage, errors = result.ValidationErrors });
 
         var created = result.Context!.Get<Property>("property");
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
@@ -78,7 +78,7 @@ public class PropertiesController : ControllerBase
         }, _store);
 
         var result = await _engine.ExecuteAsync(entry);
-        if (!result.Success) return BadRequest(new { error = result.ErrorMessage });
+        if (!result.Success) return BadRequest(new { error = result.ErrorMessage, errors = result.ValidationErrors });
         return Ok(result.Context!.Get<Property>("property"));
     }
 
@@ -92,7 +92,7 @@ public class PropertiesController : ControllerBase
         };
         var entry = PropertyEntries.SendInquiry(inquiry, _store);
         var result = await _engine.ExecuteAsync(entry);
-        if (!result.Success) return BadRequest(new { error = result.ErrorMessage });
+        if (!result.Success) return BadRequest(new { error = result.ErrorMessage, errors = result.ValidationErrors });
         return Ok(result.Context!.Get<PropertyInquiry>("inquiry"));
     }
 
@@ -101,7 +101,7 @@ public class PropertiesController : ControllerBase
     {
         var entry = PropertyEntries.RemoveProperty(id, _store);
         var result = await _engine.ExecuteAsync(entry);
-        if (!result.Success) return BadRequest(new { error = result.ErrorMessage });
+        if (!result.Success) return BadRequest(new { error = result.ErrorMessage, errors = result.ValidationErrors });
         return Ok(new { removed = true });
     }
 }

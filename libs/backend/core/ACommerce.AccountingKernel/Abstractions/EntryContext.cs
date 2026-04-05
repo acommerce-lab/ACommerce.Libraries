@@ -67,4 +67,26 @@ public class EntryContext
         value = default;
         return false;
     }
+
+    /// <summary>
+    /// إضافة خطأ تحقق واحد (يُجمع تلقائياً في EntryResult.ValidationErrors)
+    /// </summary>
+    public void AddValidationError(string error)
+    {
+        if (!Items.ContainsKey("_validationErrors"))
+            Items["_validationErrors"] = new List<string>();
+        ((List<string>)Items["_validationErrors"]).Add(error);
+        Items["_validationError"] = error; // آخر خطأ كرسالة رئيسية
+    }
+
+    /// <summary>
+    /// إضافة خطأ تحقق مرتبط بحقل (field: message)
+    /// </summary>
+    public void AddValidationError(string field, string message)
+        => AddValidationError($"{field}: {message}");
+
+    /// <summary>
+    /// تنظيف البيانات الكبيرة من السياق بعد الاستخدام (لتوفير الذاكرة)
+    /// </summary>
+    public void Release(string key) => Items.Remove(key);
 }

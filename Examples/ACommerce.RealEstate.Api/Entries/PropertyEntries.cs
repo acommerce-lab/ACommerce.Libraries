@@ -18,9 +18,9 @@ public static class PropertyEntries
             .To("Platform", "Property", 1)
             .Validate(ctx =>
             {
-                if (string.IsNullOrWhiteSpace(property.Title)) { ctx.Set("_validationError", "Title required"); return false; }
-                if (property.Price <= 0) { ctx.Set("_validationError", "Price must be positive"); return false; }
-                if (string.IsNullOrWhiteSpace(property.City)) { ctx.Set("_validationError", "City required"); return false; }
+                if (string.IsNullOrWhiteSpace(property.Title)) { ctx.AddValidationError( "Title required"); return false; }
+                if (property.Price <= 0) { ctx.AddValidationError( "Price must be positive"); return false; }
+                if (string.IsNullOrWhiteSpace(property.City)) { ctx.AddValidationError( "City required"); return false; }
                 return true;
             })
             // طبقة DB: حفظ عبر SharedKernel
@@ -73,7 +73,7 @@ public static class PropertyEntries
             .Validate(async ctx =>
             {
                 var existing = await store.GetByIdAsync(propertyId, ctx.CancellationToken);
-                if (existing == null) { ctx.Set("_validationError", "Not found"); return false; }
+                if (existing == null) { ctx.AddValidationError( "Not found"); return false; }
                 ctx.Set("existing", existing);
                 return true;
             })
@@ -96,8 +96,8 @@ public static class PropertyEntries
             .Validate(async ctx =>
             {
                 var property = await store.GetByIdAsync(inquiry.PropertyId, ctx.CancellationToken);
-                if (property == null) { ctx.Set("_validationError", "Not found"); return false; }
-                if (property.Status != "active") { ctx.Set("_validationError", "Not active"); return false; }
+                if (property == null) { ctx.AddValidationError( "Not found"); return false; }
+                if (property.Status != "active") { ctx.AddValidationError( "Not active"); return false; }
                 return true;
             })
             .Execute(async ctx =>

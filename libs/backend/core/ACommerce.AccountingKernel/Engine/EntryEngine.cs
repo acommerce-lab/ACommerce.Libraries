@@ -56,7 +56,12 @@ public class EntryEngine
             // 2. التحقق المخصص
             if (entry.ValidateFunc != null && !await entry.ValidateFunc(context))
             {
+                // جمع أخطاء التحقق من Context
                 context.TryGet<string>("_validationError", out var err);
+                if (context.TryGet<List<string>>("_validationErrors", out var errors) && errors != null)
+                    result.ValidationErrors = errors;
+                else if (err != null)
+                    result.ValidationErrors.Add(err);
                 return await FailWithCallback(entry, context, result, err ?? "Validation failed");
             }
 
@@ -216,6 +221,7 @@ public class EntryResult
     public bool Success { get; set; }
     public bool IsPartial { get; set; }
     public string? ErrorMessage { get; set; }
+    public List<string> ValidationErrors { get; set; } = new();
     public List<EntryResult> SubResults { get; set; } = new();
 
     /// <summary>
