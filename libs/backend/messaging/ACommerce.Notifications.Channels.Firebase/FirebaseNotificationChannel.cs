@@ -209,7 +209,7 @@ public class FirebaseNotificationChannel : INotificationChannel
 					ChannelId = _options.DefaultChannelId,
 					Sound = _options.DefaultSound,
 					DefaultSound = true,
-					NotificationPriority = NotificationPriority.PRIORITY_HIGH
+					// NotificationPriority removed in FirebaseAdmin 3.x; priority set via AndroidConfig.Priority above
 				}
 			},
 			Apns = new ApnsConfig
