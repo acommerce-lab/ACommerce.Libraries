@@ -30,17 +30,12 @@ public class Entry : IEntry
     internal Func<EntryContext, Exception, Task>? OnErrorFunc { get; set; }
 
     /// <summary>
-    /// أحداث تُطلق عبر MediatR بعد الاكتمال
+    /// مصانع الأحداث التي تُطلق عند الاكتمال
     /// </summary>
     internal List<Func<EntryContext, object>> EventFactories { get; } = new();
 
     /// <summary>
-    /// خيارات التوثيق والحفظ
-    /// </summary>
-    public EntryPersistenceMode PersistenceMode { get; internal set; } = EntryPersistenceMode.ExecuteOnly;
-
-    /// <summary>
-    /// نقاط حفظ الكيانات عبر SharedKernel
+    /// عمليات حفظ الكيانات (يُنفذها المحرك عبر IPersistenceGateway إن كان مفعّلاً)
     /// </summary>
     internal List<EntityOperation> EntityOperations { get; } = new();
 
@@ -68,33 +63,7 @@ public class Entry : IEntry
 }
 
 /// <summary>
-/// أوضاع الحفظ والتوثيق
-/// </summary>
-public enum EntryPersistenceMode
-{
-    /// <summary>
-    /// تنفيذ فقط بدون حفظ القيد نفسه
-    /// </summary>
-    ExecuteOnly,
-
-    /// <summary>
-    /// تنفيذ + توثيق القيد في سجل العمليات
-    /// </summary>
-    ExecuteAndAudit,
-
-    /// <summary>
-    /// تنفيذ + حفظ كيانات عبر SharedKernel Repository
-    /// </summary>
-    ExecuteAndPersist,
-
-    /// <summary>
-    /// تنفيذ + توثيق + حفظ كيانات
-    /// </summary>
-    Full
-}
-
-/// <summary>
-/// عملية على كيان يُنفذها المحرك عبر SharedKernel
+/// عملية على كيان يُنفذها المحرك عبر IPersistenceGateway
 /// </summary>
 public class EntityOperation
 {

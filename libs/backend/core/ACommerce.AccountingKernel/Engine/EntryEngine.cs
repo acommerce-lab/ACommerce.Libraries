@@ -1,34 +1,37 @@
 using ACommerce.AccountingKernel.Abstractions;
 using ACommerce.AccountingKernel.Persistence;
-using MediatR;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ACommerce.AccountingKernel.Engine;
 
 /// <summary>
-/// محرك تنفيذ القيود - يدير دورة الحياة الكاملة:
-/// Validate → Execute EntityOps → Execute Logic → PostValidate → Persist → Events
-///
-/// هذا المحرك لا يهتم بنوع العملية (مالية، إشعار، دردشة، مصادقة).
-/// يهتم فقط بـ: التوازن + دورة الحياة + التوثيق.
+/// محرك تنفيذ القيود.
+/// يسأل EntryEngineOptions: هل أوثّق؟ هل أحفظ كيانات؟ هل أنشر أحداث؟
+/// لا يعتمد على أي مزود محدد (لا EF Core ولا MediatR مباشرة).
 /// </summary>
 public class EntryEngine
 {
     private readonly IServiceProvider _services;
     private readonly IEntryStore _entryStore;
     private readonly IPersistenceGateway _persistenceGateway;
+    private readonly IEventPublisher _eventPublisher;
+    private readonly EntryEngineOptions _options;
     private readonly ILogger<EntryEngine> _logger;
 
     public EntryEngine(
         IServiceProvider services,
         IEntryStore entryStore,
         IPersistenceGateway persistenceGateway,
+        IEventPublisher eventPublisher,
+        IOptions<EntryEngineOptions> options,
         ILogger<EntryEngine> logger)
     {
         _services = services;
         _entryStore = entryStore;
         _persistenceGateway = persistenceGateway;
+        _eventPublisher = eventPublisher;
+        _options = options.Value;
         _logger = logger;
     }
 
@@ -38,186 +41,114 @@ public class EntryEngine
     public async Task<EntryResult> ExecuteAsync(Entry entry, CancellationToken cancellationToken = default)
     {
         var context = new EntryContext(entry, _services, cancellationToken);
-        var result = new EntryResult { EntryId = entry.Id, EntryType = entry.EntryType };
+        var result = new EntryResult { EntryId = entry.Id, EntryType = entry.EntryType, Context = context };
 
-        _logger.LogInformation("Entry [{EntryType}] {EntryId}: Starting execution", entry.EntryType, entry.Id);
+        _logger.LogInformation("[{EntryType}] {Id}: Starting", entry.EntryType, entry.Id);
 
         try
         {
-            // 1. التحقق من التوازن (إذا كان هناك أطراف بقيم)
-            if (entry.Legs.Any(l => l.Value != 0) && !entry.IsBalanced())
+            // 1. فحص التوازن (إن كان مطلوباً)
+            if (_options.EnforceBalance && entry.Legs.Any(l => l.Value != 0) && !entry.IsBalanced())
             {
-                entry.Status = EntryStatus.Failed;
-                result.Success = false;
-                result.ErrorMessage = "Entry is not balanced: sum of debits must equal sum of credits";
-                _logger.LogWarning("Entry [{EntryType}] {EntryId}: Balance check failed", entry.EntryType, entry.Id);
-
-                await AuditIfNeeded(entry, cancellationToken);
-                return result;
+                return Fail(entry, result, "Entry is not balanced: debits must equal credits");
             }
 
-            // 2. التحقق المخصص (Validate)
-            if (entry.ValidateFunc != null)
+            // 2. التحقق المخصص
+            if (entry.ValidateFunc != null && !await entry.ValidateFunc(context))
             {
-                var isValid = await entry.ValidateFunc(context);
-                if (!isValid)
-                {
-                    entry.Status = EntryStatus.Failed;
-                    result.Success = false;
-                    result.ErrorMessage = context.TryGet<string>("_validationError", out var err) ? err : "Validation failed";
-                    _logger.LogWarning("Entry [{EntryType}] {EntryId}: Validation failed: {Error}", entry.EntryType, entry.Id, result.ErrorMessage);
-
-                    if (entry.OnFailedFunc != null)
-                        await entry.OnFailedFunc(context);
-
-                    await AuditIfNeeded(entry, cancellationToken);
-                    return result;
-                }
+                context.TryGet<string>("_validationError", out var err);
+                return await FailWithCallback(entry, context, result, err ?? "Validation failed");
             }
 
-            entry.Status = EntryStatus.Validated;
-
-            // 3. تنفيذ عمليات الكيانات عبر SharedKernel (إن وُجدت)
             entry.Status = EntryStatus.Executing;
-            await ExecuteEntityOperations(entry, context, cancellationToken);
 
-            // 4. تنفيذ المنطق المخصص (Execute)
+            // 3. حفظ كيانات عبر البوابة (إن كان مفعّلاً)
+            if (_options.EnableEntityPersistence)
+                await ExecuteEntityOperations(entry, context, cancellationToken);
+
+            // 4. المنطق المخصص
             if (entry.ExecuteFunc != null)
-            {
                 await entry.ExecuteFunc(context);
-            }
 
             // 5. تحديث حالة الأطراف
-            foreach (var leg in entry.Legs.Cast<Leg>())
-            {
+            foreach (var leg in entry.Legs)
                 if (leg.Status == LegStatus.Pending)
                     leg.Status = LegStatus.Completed;
-            }
 
-            // 6. تنفيذ القيود الفرعية
+            // 6. القيود الفرعية
             var subResults = new List<EntryResult>();
             foreach (var subEntry in entry.SubEntries.Cast<Entry>())
             {
-                var subContext = new EntryContext(subEntry, _services, cancellationToken)
-                {
-                    ParentEntry = entry
-                };
-
-                // نقل البيانات المشتركة من الأب للفرع
+                var subContext = new EntryContext(subEntry, _services, cancellationToken) { ParentEntry = entry };
                 foreach (var item in context.Items)
                     subContext.Items.TryAdd(item.Key, item.Value);
 
-                var subResult = await ExecuteAsync(subEntry, cancellationToken);
-                subResults.Add(subResult);
+                subResults.Add(await ExecuteAsync(subEntry, cancellationToken));
             }
-
             result.SubResults = subResults;
 
-            // 7. التحقق اللاحق (PostValidate)
+            // 7. التحقق اللاحق
             if (entry.PostValidateFunc != null)
-            {
                 await entry.PostValidateFunc(context);
-            }
 
             // 8. تحديد الحالة النهائية
-            var allSubsCompleted = subResults.All(r => r.Success);
-            var anySubCompleted = subResults.Any(r => r.Success);
+            DetermineStatus(entry, result, subResults);
 
-            if (subResults.Count == 0 || allSubsCompleted)
-            {
-                entry.Status = EntryStatus.Completed;
-                entry.CompletedAt = DateTime.UtcNow;
-                result.Success = true;
-            }
-            else if (anySubCompleted)
-            {
-                entry.Status = EntryStatus.PartiallyCompleted;
-                entry.CompletedAt = DateTime.UtcNow;
-                result.Success = true;
-                result.IsPartial = true;
-            }
-            else
-            {
-                entry.Status = EntryStatus.Failed;
-                result.Success = false;
-                result.ErrorMessage = "All sub-entries failed";
-            }
+            // 9. توثيق (إن كان مفعّلاً)
+            if (_options.EnableAudit)
+                await _entryStore.SaveEntryAsync(entry, cancellationToken);
 
-            // 9. توثيق القيد (إن طُلب)
-            await AuditIfNeeded(entry, cancellationToken);
+            // 10. نشر الأحداث (إن كان مفعّلاً)
+            if (_options.EnableEvents && result.Success)
+                await PublishEvents(entry, context, cancellationToken);
 
-            // 10. إطلاق الأحداث عبر MediatR
-            if (result.Success)
-            {
-                await PublishEvents(entry, context);
-
-                if (entry.OnCompletedFunc != null)
-                    await entry.OnCompletedFunc(context);
-            }
-            else if (entry.OnFailedFunc != null)
-            {
+            // 11. callback
+            if (result.Success && entry.OnCompletedFunc != null)
+                await entry.OnCompletedFunc(context);
+            else if (!result.Success && entry.OnFailedFunc != null)
                 await entry.OnFailedFunc(context);
-            }
 
-            _logger.LogInformation(
-                "Entry [{EntryType}] {EntryId}: Completed with status {Status}",
-                entry.EntryType, entry.Id, entry.Status);
+            _logger.LogInformation("[{EntryType}] {Id}: {Status}", entry.EntryType, entry.Id, entry.Status);
         }
         catch (Exception ex)
         {
             entry.Status = EntryStatus.Failed;
             result.Success = false;
             result.ErrorMessage = ex.Message;
-            result.Exception = ex;
-
-            _logger.LogError(ex, "Entry [{EntryType}] {EntryId}: Execution failed", entry.EntryType, entry.Id);
+            _logger.LogError(ex, "[{EntryType}] {Id}: Exception", entry.EntryType, entry.Id);
 
             if (entry.OnErrorFunc != null)
                 await entry.OnErrorFunc(context, ex);
 
-            await AuditIfNeeded(entry, cancellationToken);
+            if (_options.EnableAudit)
+                await _entryStore.SaveEntryAsync(entry, cancellationToken);
         }
 
         return result;
     }
 
-    /// <summary>
-    /// تنفيذ عمليات الكيانات عبر بوابة SharedKernel
-    /// </summary>
     private async Task ExecuteEntityOperations(Entry entry, EntryContext context, CancellationToken ct)
     {
-        if (entry.PersistenceMode is not (EntryPersistenceMode.ExecuteAndPersist or EntryPersistenceMode.Full))
-            return;
-
         foreach (var op in entry.EntityOperations)
         {
             switch (op.Type)
             {
                 case EntityOperationType.Add:
-                    var entity = op.EntityFactory(context);
-                    var saved = await _persistenceGateway.AddAsync(op.EntityType, entity, ct);
+                    var saved = await _persistenceGateway.AddAsync(op.EntityType, op.EntityFactory(context), ct);
                     context.Set($"_entity_{op.EntityType.Name}", saved);
                     break;
-
                 case EntityOperationType.Update:
-                    var toUpdate = op.EntityFactory(context);
-                    await _persistenceGateway.UpdateAsync(op.EntityType, toUpdate, ct);
+                    await _persistenceGateway.UpdateAsync(op.EntityType, op.EntityFactory(context), ct);
                     break;
-
                 case EntityOperationType.PartialUpdate:
-                    var id = op.EntityIdResolver!(context);
-                    var fields = op.UpdateFields!(context);
-                    await _persistenceGateway.PartialUpdateAsync(op.EntityType, id, fields, ct);
+                    await _persistenceGateway.PartialUpdateAsync(op.EntityType, op.EntityIdResolver!(context), op.UpdateFields!(context), ct);
                     break;
-
                 case EntityOperationType.SoftDelete:
                     await _persistenceGateway.SoftDeleteAsync(op.EntityType, op.EntityIdResolver!(context), ct);
                     break;
-
                 case EntityOperationType.HardDelete:
                     await _persistenceGateway.HardDeleteAsync(op.EntityType, op.EntityIdResolver!(context), ct);
                     break;
-
                 case EntityOperationType.Restore:
                     await _persistenceGateway.RestoreAsync(op.EntityType, op.EntityIdResolver!(context), ct);
                     break;
@@ -225,27 +156,53 @@ public class EntryEngine
         }
     }
 
-    private async Task AuditIfNeeded(Entry entry, CancellationToken ct)
+    private async Task PublishEvents(Entry entry, EntryContext context, CancellationToken ct)
     {
-        if (entry.PersistenceMode is EntryPersistenceMode.ExecuteAndAudit or EntryPersistenceMode.Full)
-        {
-            await _entryStore.SaveEntryAsync(entry, ct);
-        }
-    }
-
-    private async Task PublishEvents(Entry entry, EntryContext context)
-    {
-        var mediator = _services.GetService<IMediator>();
-        if (mediator == null) return;
-
         foreach (var factory in entry.EventFactories)
         {
             var evt = factory(context);
-            if (evt is INotification notification)
-            {
-                await mediator.Publish(notification, context.CancellationToken);
-            }
+            await _eventPublisher.PublishAsync(evt, ct);
         }
+    }
+
+    private static void DetermineStatus(Entry entry, EntryResult result, List<EntryResult> subResults)
+    {
+        if (subResults.Count == 0 || subResults.All(r => r.Success))
+        {
+            entry.Status = EntryStatus.Completed;
+            entry.CompletedAt = DateTime.UtcNow;
+            result.Success = true;
+        }
+        else if (subResults.Any(r => r.Success))
+        {
+            entry.Status = EntryStatus.PartiallyCompleted;
+            entry.CompletedAt = DateTime.UtcNow;
+            result.Success = true;
+            result.IsPartial = true;
+        }
+        else
+        {
+            entry.Status = EntryStatus.Failed;
+            result.Success = false;
+            result.ErrorMessage = "All sub-entries failed";
+        }
+    }
+
+    private EntryResult Fail(Entry entry, EntryResult result, string error)
+    {
+        entry.Status = EntryStatus.Failed;
+        result.Success = false;
+        result.ErrorMessage = error;
+        _logger.LogWarning("[{EntryType}] {Id}: {Error}", entry.EntryType, entry.Id, error);
+        return result;
+    }
+
+    private async Task<EntryResult> FailWithCallback(Entry entry, EntryContext ctx, EntryResult result, string error)
+    {
+        Fail(entry, result, error);
+        if (entry.OnFailedFunc != null) await entry.OnFailedFunc(ctx);
+        if (_options.EnableAudit) await _entryStore.SaveEntryAsync(entry, ctx.CancellationToken);
+        return result;
     }
 }
 
@@ -259,6 +216,11 @@ public class EntryResult
     public bool Success { get; set; }
     public bool IsPartial { get; set; }
     public string? ErrorMessage { get; set; }
-    public Exception? Exception { get; set; }
     public List<EntryResult> SubResults { get; set; } = new();
+
+    /// <summary>
+    /// سياق التنفيذ - يحمل البيانات الناتجة عن التنفيذ.
+    /// يستخدمه المتحكم لاستخراج النتائج.
+    /// </summary>
+    public EntryContext? Context { get; internal set; }
 }

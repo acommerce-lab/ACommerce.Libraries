@@ -1,5 +1,4 @@
 using ACommerce.AccountingKernel.Abstractions;
-using MediatR;
 
 namespace ACommerce.AccountingKernel.Builder;
 
@@ -193,7 +192,7 @@ public class EntryBuilder
     /// <summary>
     /// إطلاق حدث MediatR عند اكتمال القيد
     /// </summary>
-    public EntryBuilder PublishEvent<TEvent>(Func<EntryContext, TEvent> eventFactory) where TEvent : INotification
+    public EntryBuilder PublishEvent<TEvent>(Func<EntryContext, TEvent> eventFactory) where TEvent : class
     {
         _entry.EventFactories.Add(ctx => eventFactory(ctx)!);
         return this;
@@ -244,47 +243,6 @@ public class EntryBuilder
             EntityIdResolver = idResolver,
             EntityFactory = _ => null!
         });
-        return this;
-    }
-
-    // ========================================================
-    // خيارات الحفظ والتوثيق
-    // ========================================================
-
-    /// <summary>
-    /// تنفيذ فقط بدون توثيق
-    /// </summary>
-    public EntryBuilder ExecuteOnly()
-    {
-        _entry.PersistenceMode = EntryPersistenceMode.ExecuteOnly;
-        return this;
-    }
-
-    /// <summary>
-    /// تنفيذ مع توثيق القيد في سجل العمليات
-    /// </summary>
-    public EntryBuilder WithAudit()
-    {
-        _entry.PersistenceMode = _entry.PersistenceMode switch
-        {
-            EntryPersistenceMode.ExecuteOnly => EntryPersistenceMode.ExecuteAndAudit,
-            EntryPersistenceMode.ExecuteAndPersist => EntryPersistenceMode.Full,
-            _ => _entry.PersistenceMode
-        };
-        return this;
-    }
-
-    /// <summary>
-    /// تنفيذ مع حفظ كيانات عبر SharedKernel
-    /// </summary>
-    public EntryBuilder WithPersistence()
-    {
-        _entry.PersistenceMode = _entry.PersistenceMode switch
-        {
-            EntryPersistenceMode.ExecuteOnly => EntryPersistenceMode.ExecuteAndPersist,
-            EntryPersistenceMode.ExecuteAndAudit => EntryPersistenceMode.Full,
-            _ => _entry.PersistenceMode
-        };
         return this;
     }
 
