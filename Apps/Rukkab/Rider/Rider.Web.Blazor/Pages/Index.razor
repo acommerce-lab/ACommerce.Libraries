@@ -1,0 +1,16 @@
+@page "/"
+@using ACommerce.Templates.Customer.Components
+
+<h1>Rider Console</h1>
+<div style="display:flex; gap:16px; align-items:flex-start;">
+	<div style="flex:1">
+		<RequestRide />
+		<div style="margin-top:12px"><a href="/myrides">My Rides</a> • <a href="/chats">Chats</a> • <a href="/notifications">Notifications</a></div>
+	</div>
+	<div style="width:360px;">
+		<div style="border:1px solid #eee; border-radius:8px; padding:8px; background:#fafafa">
+			<div style="font-weight:600; margin-bottom:6px">Map (demo)</div>
+			<div style="height:240px; background:linear-gradient(180deg,#e9f0ff,#fff); display:flex;align-items:center;justify-content:center;color:#234">Map stub — click to open in maps</div>
+		</div>
+	</div>
+</div>

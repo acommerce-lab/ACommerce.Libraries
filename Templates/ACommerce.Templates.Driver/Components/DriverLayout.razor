@@ -1,0 +1,39 @@
+@inherits LayoutComponentBase
+@using ACommerce.Client.Auth
+@inject ACommerce.Client.Auth.AuthClient AuthClient
+
+<div class="ac-driver-app">
+    <header class="ac-driver-header">
+        <div class="ac-driver-brand">Driver</div>
+        <div class="ac-driver-actions">
+            @if (IsAuthenticated)
+            {
+                <span class="ac-driver-user">@UserName</span>
+            }
+        </div>
+    </header>
+
+    <main class="ac-driver-main">
+        @Body
+    </main>
+
+    <footer class="ac-driver-footer">© ACommerce Driver</footer>
+</div>
+
+@code {
+    private bool IsAuthenticated => !string.IsNullOrEmpty(UserName);
+    private string? UserName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+    var user = await AuthClient.GetMeAsync();
+    UserName = user?.FullName ?? user?.Id;
+        }
+        catch
+        {
+            // ignore - template should be resilient
+        }
+    }
+}

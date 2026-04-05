@@ -1,0 +1,197 @@
+[STARTUP] Driver.Program starting at 2026-04-04T22:08:18.0401770Z (pid=44725)
+20
+ACommerce.Chats.Core.Entities.ChatACommerce.Chats.Core.Entities.ChatParticipantACommerce.Chats.Core.Entities.MessageACommerce.Chats.Core.Entities.MessageReadACommerce.Profiles.Entities.ProfileACommerce.Orders.Entities.OrderACommerce.Orders.Entities.OrderItemACommerce.Notifications.Recipients.Entities.ContactPointACommerce.Notifications.Recipients.Entities.RecipientGroupACommerce.Notifications.Recipients.Entities.UserRecipientACommerce.Cart.Entities.CartACommerce.Cart.Entities.CartItemACommerce.Marketing.Analytics.Entities.DailyMarketingStatsACommerce.Marketing.Analytics.Entities.MarketingAttributionACommerce.Marketing.Analytics.Entities.MarketingEventACommerce.Locations.Abstractions.Entities.AddressACommerce.Locations.Abstractions.Entities.CityACommerce.Locations.Abstractions.Entities.CountryACommerce.Locations.Abstractions.Entities.NeighborhoodACommerce.Locations.Abstractions.Entities.Regionwarn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.Infrastructure.EFCores, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.RideLifecycle, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Chats.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Realtime.SignalR, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Realtime.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Profiles.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Profiles, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Orders.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Orders, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Locations.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Chats.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Chats.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Recipients.Api, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Recipients, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Payments.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.ServiceRegistry.Server, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.AspNetCore.Swagger, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.JWT, Version=1.0.4.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Users.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Messaging.InMemory, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Messaging.SignalR.Hub, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Channels.InApp, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Messaging, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.Storage.Local, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.SharedKernel.CQRS, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.DriverMatching, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.AspNetCore, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Cart, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Marketing.Analytics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Authentication.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Messaging.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Notifications.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Locations.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Files.Abstractions, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.Payments.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while while scanning assembly 'ACommerce.ServiceRegistry.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT COUNT(*) FROM "sqlite_master" WHERE "type" = 'table' AND "rootpage" IS NOT NULL;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT COUNT(*)
+      FROM "RideCategory" AS "r"
+      WHERE NOT ("r"."IsDeleted")
+info: Rukkab.Driver.Api.Services.RukkabSeedDataService[0]
+      Rukkab seed: categories already present (3), skipping.
+warn: Microsoft.AspNetCore.DataProtection.Repositories.EphemeralXmlRepository[50]
+      Using an in-memory repository. Keys will not be persisted to storage.
+warn: Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager[59]
+      Neither user profile nor HKLM registry available. Using an ephemeral key repository. Protected data will be unavailable when application exits.
+info: Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager[58]
+      Creating key {432fd4ba-e20a-475f-b053-595a8835de65} with creation date 2026-04-04 22:08:20Z, activation date 2026-04-04 22:08:20Z, and expiration date 2026-07-03 22:08:20Z.
+warn: Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager[35]
+      No XML encryptor configured. Key {432fd4ba-e20a-475f-b053-595a8835de65} may be persisted to storage in unencrypted form.
+info: ACommerce.Notifications.Messaging.Handlers.NotificationMessagingHandler[0]
+      [Notify Messaging] 🎧 Starting notification messaging handler
+info: ACommerce.Messaging.InMemory.InMemoryMessageBus[0]
+      [Rukkab] Subscribed to topic 'notify.commands.send'
+info: ACommerce.Notifications.Messaging.Handlers.NotificationMessagingHandler[0]
+      [Notify Messaging] ✅ Notification messaging handler started
+crit: Microsoft.AspNetCore.Hosting.Diagnostics[6]
+      Application startup exception
+      System.InvalidOperationException: Failure to infer one or more parameters.
+      Below is the list of parameters that we found: 
+      
+      Parameter           | Source                        
+      ---------------------------------------------------------------------------------
+      orchestrator        | Body (Inferred)
+      ride                | UNKNOWN        
+      
+      
+      Did you mean to register the "UNKNOWN" parameters as a Service?
+      
+      
+         at Microsoft.AspNetCore.Http.RequestDelegateFactory.CreateArguments(ParameterInfo[] parameters, RequestDelegateFactoryContext factoryContext)
+         at Microsoft.AspNetCore.Http.RequestDelegateFactory.CreateArgumentsAndInferMetadata(MethodInfo methodInfo, RequestDelegateFactoryContext factoryContext)
+         at Microsoft.AspNetCore.Http.RequestDelegateFactory.InferMetadata(MethodInfo methodInfo, RequestDelegateFactoryOptions options)
+         at Microsoft.AspNetCore.Routing.RouteEndpointDataSource.CreateRouteEndpointBuilder(RouteEntry entry, RoutePattern groupPrefix, IReadOnlyList`1 groupConventions, IReadOnlyList`1 groupFinallyConventions)
+         at Microsoft.AspNetCore.Routing.RouteEndpointDataSource.get_Endpoints()
+         at Microsoft.AspNetCore.Routing.CompositeEndpointDataSource.CreateEndpointsUnsynchronized()
+         at Microsoft.AspNetCore.Routing.CompositeEndpointDataSource.HandleChange(Boolean collectionChanged)
+         at System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+         at Microsoft.AspNetCore.Builder.EndpointRoutingApplicationBuilderExtensions.UseEndpoints(IApplicationBuilder builder, Action`1 configure)
+         at Microsoft.AspNetCore.Builder.WebApplicationBuilder.ConfigureApplication(WebHostBuilderContext context, IApplicationBuilder app, Boolean allowDeveloperExceptionPage)
+         at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+fail: Microsoft.Extensions.Hosting.Internal.Host[11]
+      Hosting failed to start
+      System.InvalidOperationException: Failure to infer one or more parameters.
+      Below is the list of parameters that we found: 
+      
+      Parameter           | Source                        
+      ---------------------------------------------------------------------------------
+      orchestrator        | Body (Inferred)
+      ride                | UNKNOWN        
+      
+      
+      Did you mean to register the "UNKNOWN" parameters as a Service?
+      
+      
+         at Microsoft.AspNetCore.Http.RequestDelegateFactory.CreateArguments(ParameterInfo[] parameters, RequestDelegateFactoryContext factoryContext)
+         at Microsoft.AspNetCore.Http.RequestDelegateFactory.CreateArgumentsAndInferMetadata(MethodInfo methodInfo, RequestDelegateFactoryContext factoryContext)
+         at Microsoft.AspNetCore.Http.RequestDelegateFactory.InferMetadata(MethodInfo methodInfo, RequestDelegateFactoryOptions options)
+         at Microsoft.AspNetCore.Routing.RouteEndpointDataSource.CreateRouteEndpointBuilder(RouteEntry entry, RoutePattern groupPrefix, IReadOnlyList`1 groupConventions, IReadOnlyList`1 groupFinallyConventions)
+         at Microsoft.AspNetCore.Routing.RouteEndpointDataSource.get_Endpoints()
+         at Microsoft.AspNetCore.Routing.CompositeEndpointDataSource.CreateEndpointsUnsynchronized()
+         at Microsoft.AspNetCore.Routing.CompositeEndpointDataSource.HandleChange(Boolean collectionChanged)
+         at System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+         at Microsoft.AspNetCore.Builder.EndpointRoutingApplicationBuilderExtensions.UseEndpoints(IApplicationBuilder builder, Action`1 configure)
+         at Microsoft.AspNetCore.Builder.WebApplicationBuilder.ConfigureApplication(WebHostBuilderContext context, IApplicationBuilder app, Boolean allowDeveloperExceptionPage)
+         at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+         at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__14_1(IHostedService service, CancellationToken token)
+         at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+fail: Microsoft.Extensions.Hosting.Internal.Host[9]
+      BackgroundService failed
+      System.Threading.Tasks.TaskCanceledException: A task was canceled.
+         at ACommerce.Notifications.Messaging.Handlers.NotificationMessagingHandler.ExecuteAsync(CancellationToken stoppingToken) in /Users/ashareapp/ACommerce.Libraries/libs/backend/messaging/ACommerce.Notifications.Messaging/Handlers/NotificationMessagingHandler.cs:line 34
+         at Microsoft.Extensions.Hosting.Internal.Host.TryExecuteBackgroundServiceAsync(BackgroundService backgroundService)
+Unhandled exception. crit: Microsoft.Extensions.Hosting.Internal.Host[10]
+      The HostOptions.BackgroundServiceExceptionBehavior is configured to StopHost. A BackgroundService has thrown an unhandled exception, and the IHost instance is stopping. To avoid this behavior, configure this to Ignore; however the BackgroundService will not be restarted.
+      System.Threading.Tasks.TaskCanceledException: A task was canceled.
+         at ACommerce.Notifications.Messaging.Handlers.NotificationMessagingHandler.ExecuteAsync(CancellationToken stoppingToken) in /Users/ashareapp/ACommerce.Libraries/libs/backend/messaging/ACommerce.Notifications.Messaging/Handlers/NotificationMessagingHandler.cs:line 34
+         at Microsoft.Extensions.Hosting.Internal.Host.TryExecuteBackgroundServiceAsync(BackgroundService backgroundService)
+System.InvalidOperationException: Failure to infer one or more parameters.
+Below is the list of parameters that we found: 
+
+Parameter           | Source                        
+---------------------------------------------------------------------------------
+orchestrator        | Body (Inferred)
+ride                | UNKNOWN        
+
+
+Did you mean to register the "UNKNOWN" parameters as a Service?
+
+
+   at Microsoft.AspNetCore.Http.RequestDelegateFactory.CreateArguments(ParameterInfo[] parameters, RequestDelegateFactoryContext factoryContext)
+   at Microsoft.AspNetCore.Http.RequestDelegateFactory.CreateArgumentsAndInferMetadata(MethodInfo methodInfo, RequestDelegateFactoryContext factoryContext)
+   at Microsoft.AspNetCore.Http.RequestDelegateFactory.InferMetadata(MethodInfo methodInfo, RequestDelegateFactoryOptions options)
+   at Microsoft.AspNetCore.Routing.RouteEndpointDataSource.CreateRouteEndpointBuilder(RouteEntry entry, RoutePattern groupPrefix, IReadOnlyList`1 groupConventions, IReadOnlyList`1 groupFinallyConventions)
+   at Microsoft.AspNetCore.Routing.RouteEndpointDataSource.get_Endpoints()
+   at Microsoft.AspNetCore.Routing.CompositeEndpointDataSource.CreateEndpointsUnsynchronized()
+   at Microsoft.AspNetCore.Routing.CompositeEndpointDataSource.HandleChange(Boolean collectionChanged)
+   at System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+   at Microsoft.AspNetCore.Builder.EndpointRoutingApplicationBuilderExtensions.UseEndpoints(IApplicationBuilder builder, Action`1 configure)
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.ConfigureApplication(WebHostBuilderContext context, IApplicationBuilder app, Boolean allowDeveloperExceptionPage)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__14_1(IHostedService service, CancellationToken token)
+   at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+   at Microsoft.Extensions.Hosting.Internal.Host.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.HostingAbstractionsHostExtensions.RunAsync(IHost host, CancellationToken token)
+   at Microsoft.Extensions.Hosting.HostingAbstractionsHostExtensions.RunAsync(IHost host, CancellationToken token)
+   at Microsoft.Extensions.Hosting.HostingAbstractionsHostExtensions.Run(IHost host)
+   at Program.<Main>$(String[] args) in /Users/ashareapp/ACommerce.Libraries/Apps/Rukkab/Driver/Driver.Api/Program.cs:line 262
+   at Program.<Main>(String[] args)

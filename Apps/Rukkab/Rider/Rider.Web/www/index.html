@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Rukkab Rider (PWA)</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#0b5cff" />
+    <style>
+      body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;margin:1rem}
+      button{padding:.6rem 1rem;margin:.5rem}
+      #log{white-space:pre-wrap;background:#f7f7f7;padding:1rem;border-radius:6px;max-height:40vh;overflow:auto}
+    </style>
+  </head>
+  <body>
+    <h1>Rukkab Rider — PWA demo</h1>
+    <p>Installable web app to request rides and view ride state.</p>
+
+    <div>
+      <button id="btnRequest">Request Ride</button>
+    </div>
+
+    <h3>Console</h3>
+    <div id="log">Ready.</div>
+
+    <script>
+      const RIDER_URL = location.origin.replace(/:\d+$/, ':5001');
+      const log = (s) => { const el = document.getElementById('log'); el.textContent = (new Date()).toISOString() + ' ' + s + '\n' + el.textContent; };
+      document.getElementById('btnRequest').onclick = async () => {
+        log('POST ' + RIDER_URL + '/api/rides/request');
+        try{
+          const res = await fetch(RIDER_URL + '/api/rides/request', {method:'POST', headers:{'Content-Type':'application/json','X-Rider-Id':'rider-1'}, body: JSON.stringify({pickupLocation:{latitude:40.72,longitude:-73.995},vehicleType:'car'})});
+          const txt = await res.text();
+          log('HTTP ' + res.status + ' -> ' + txt);
+        }catch(e){ log('ERROR ' + e.message); }
+      };
+
+      if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }
+    </script>
+  </body>
+</html>

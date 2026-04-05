@@ -1,0 +1,71 @@
+@page "/active"
+@using System.Net.Http.Json
+@inject HttpClient Http
+
+<h2>Active Ride</h2>
+<div style="max-width:720px;">
+  <div style="border:1px solid #eee;padding:12px;border-radius:8px;background:#fff">
+    @if (Current == null)
+    {
+      <div>No active ride assigned.</div>
+      <div style="margin-top:8px"><a href="/">Back to Console</a> • <a href="/chats">Chats</a> • <a href="/notifications">Notifications</a></div>
+    }
+    else
+    {
+      <div style="font-weight:600">Ride @Current.Id</div>
+      <div style="color:#666;font-size:13px">Status: @Current.Status</div>
+      <div style="margin-top:8px">Pickup: @Current.Pickup</div>
+      <div>Destination: @Current.Destination</div>
+      <div style="margin-top:10px">
+        <button @onclick="() => UpdateStatusAsync("Arrived")">Arrived</button>
+        <button @onclick="() => UpdateStatusAsync("Started")" style="margin-left:8px">Start</button>
+        <button @onclick="() => UpdateStatusAsync("Completed")" style="margin-left:8px">Complete</button>
+      </div>
+    }
+  </div>
+</div>
+
+@code {
+  private RideDto? Current;
+
+  protected override async Task OnInitializedAsync()
+  {
+    await LoadAsync();
+  }
+
+  private async Task LoadAsync()
+  {
+    try
+    {
+      var res = await Http.GetAsync("http://127.0.0.1:5002/api/rides/active");
+      if (res.IsSuccessStatusCode)
+      {
+        var dto = await res.Content.ReadFromJsonAsync<RideDto>();
+        Current = dto;
+      }
+      else
+      {
+        Current = Sample();
+      }
+    }
+    catch { Current = Sample(); }
+  }
+
+  private async Task UpdateStatusAsync(string status)
+  {
+    if (Current == null) return;
+    try
+    {
+      var res = await Http.PostAsJsonAsync($"http://127.0.0.1:5002/api/rides/{Current.Id}/status", new { status = status });
+      if (res.IsSuccessStatusCode)
+      {
+        Current.Status = status;
+      }
+    }
+    catch { /* ignore - local demo only */ }
+  }
+
+  private RideDto Sample() => new() { Id = "ride-demo-1", Status = "Assigned", Pickup = "Downtown", Destination = "Airport" };
+
+  private class RideDto { public string Id { get; set; } = string.Empty; public string Status { get; set; } = string.Empty; public string Pickup { get; set; } = string.Empty; public string Destination { get; set; } = string.Empty; }
+}

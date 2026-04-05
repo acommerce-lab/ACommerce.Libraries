@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ACommerce.RideLifecycle</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../ACommerce.DriverMatching/ACommerce.DriverMatching.csproj" />
+  <ProjectReference Include="../../libs/backend/messaging/ACommerce.Notifications.Abstractions/ACommerce.Notifications.Abstractions.csproj" />
+  <ProjectReference Include="../../libs/backend/messaging/ACommerce.Chats.Abstractions/ACommerce.Chats.Abstractions.csproj" />
+  <ProjectReference Include="../../libs/backend/catalog/ACommerce.Catalog.Products/ACommerce.Catalog.Products.csproj" />
+  </ItemGroup>
+</Project>

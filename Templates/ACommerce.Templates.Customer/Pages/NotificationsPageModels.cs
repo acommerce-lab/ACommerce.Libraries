@@ -5,8 +5,11 @@ public class NotificationItem
     public string Id { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Message { get; set; } = string.Empty;
-    public string Type { get; set; } = "general";
+    public NotificationType Type { get; set; } = NotificationType.General;
     public DateTime CreatedAt { get; set; }
+
+    // Compatibility property used by templates expecting Timestamp
+    public DateTime Timestamp => CreatedAt;
     public bool IsRead { get; set; }
     public string? ActionUrl { get; set; }
     public string? ImageUrl { get; set; }

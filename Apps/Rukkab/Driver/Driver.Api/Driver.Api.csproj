@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Rukkab.Driver.Api</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Core shared kernel references (minimal set) -->
+  <ProjectReference Include="../../../../libs/backend/core/ACommerce.SharedKernel.Abstractions/ACommerce.SharedKernel.Abstractions.csproj" />
+  <ProjectReference Include="../../../../libs/backend/core/ACommerce.SharedKernel.Infrastructure.EFCores/ACommerce.SharedKernel.Infrastructure.EFCores.csproj" />
+  <ProjectReference Include="../../../../libs/backend/integration/ACommerce.SharedKernel.AspNetCore/ACommerce.SharedKernel.AspNetCore.csproj" />
+  
+    <!-- Swagger integration helper used across the repo -->
+  <ProjectReference Include="../../../../libs/backend/integration/ACommerce.Authentication.AspNetCore.Swagger/ACommerce.Authentication.AspNetCore.Swagger.csproj" />
+
+    <!-- Common integrations to expose real controllers/functionality -->
+  <ProjectReference Include="../../../../libs/backend/integration/ACommerce.Authentication.AspNetCore/ACommerce.Authentication.AspNetCore.csproj" />
+  <ProjectReference Include="../../../../libs/backend/auth/ACommerce.Authentication.JWT/ACommerce.Authentication.JWT.csproj" />
+  <ProjectReference Include="../../../../libs/backend/auth/ACommerce.Profiles.Api/ACommerce.Profiles.Api.csproj" />
+  <ProjectReference Include="../../../../libs/backend/sales/ACommerce.Orders.Api/ACommerce.Orders.Api.csproj" />
+  <ProjectReference Include="../../../../libs/backend/messaging/ACommerce.Notifications.Recipients.Api/ACommerce.Notifications.Recipients.Api.csproj" />
+  <ProjectReference Include="../../../../Other/ACommerce.Locations.Api/ACommerce.Locations.Api.csproj" />
+  <ProjectReference Include="../../../../libs/backend/messaging/ACommerce.Realtime.SignalR/ACommerce.Realtime.SignalR.csproj" />
+  <ProjectReference Include="../../../../libs/backend/messaging/ACommerce.Messaging.InMemory/ACommerce.Messaging.InMemory.csproj" />
+  <ProjectReference Include="../../../../libs/backend/messaging/ACommerce.Messaging.SignalR.Hub/ACommerce.Messaging.SignalR.Hub.csproj" />
+  <ProjectReference Include="../../../../libs/backend/messaging/ACommerce.Notifications.Core/ACommerce.Notifications.Core.csproj" />
+  <ProjectReference Include="../../../../libs/backend/files/ACommerce.Files.Storage.Local/ACommerce.Files.Storage.Local.csproj" />
+
+  <!-- Additional features referenced by Program.cs -->
+  <ProjectReference Include="../../../../libs/backend/messaging/ACommerce.Chats.Core/ACommerce.Chats.Core.csproj" />
+  <ProjectReference Include="../../../../libs/backend/messaging/ACommerce.Chats.Api/ACommerce.Chats.Api.csproj" />
+  <ProjectReference Include="../../../../libs/backend/sales/ACommerce.Payments.Api/ACommerce.Payments.Api.csproj" />
+  <ProjectReference Include="../../../../libs/backend/messaging/ACommerce.Notifications.Channels.InApp/ACommerce.Notifications.Channels.InApp.csproj" />
+  <ProjectReference Include="../../../../libs/backend/messaging/ACommerce.Notifications.Messaging/ACommerce.Notifications.Messaging.csproj" />
+  <ProjectReference Include="../../../../libs/backend/integration/ACommerce.ServiceRegistry.Core/ACommerce.ServiceRegistry.Core.csproj" />
+  <ProjectReference Include="../../../../libs/backend/integration/ACommerce.ServiceRegistry.Server/ACommerce.ServiceRegistry.Server.csproj" />
+  <ProjectReference Include="../../../../libs/backend/auth/ACommerce.Authentication.Users.Abstractions/ACommerce.Authentication.Users.Abstractions.csproj" />
+  <ProjectReference Include="../../../../Other/ACommerce.Locations/ACommerce.Locations.csproj" />
+  <ProjectReference Include="../../../../Other/ACommerce.DriverMatching/ACommerce.DriverMatching.csproj" />
+  <ProjectReference Include="../../../../Other/ACommerce.RideLifecycle/ACommerce.RideLifecycle.csproj" />
+
+    <!-- Rukkab shared domain entities -->
+    <ProjectReference Include="..\..\Shared\Rukkab.Shared.Domain\Rukkab.Shared.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,47 @@
+:root{--accent:#0b5cff;--bg:#ffffff;--muted:#6b7280}
+:root{--accent:#0b69ff;--bg:#f6f8fb;--card:#ffffff;--muted:#6b7280;--border:#e6e9ef}
+html,body{height:100%}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,Helvetica;color:#111;background:var(--bg);margin:0;padding:1rem}
+
+/* Generic card */
+.rukkab-card, .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px; box-shadow:0 6px 18px rgba(11,105,255,0.03); }
+
+.rukkab-row { margin:8px 0 }
+.rukkab-input { padding:10px; width:100%; box-sizing:border-box; border:1px solid var(--border); border-radius:6px }
+.rukkab-btn { padding:9px 14px; background:var(--accent); color:white; border:none; border-radius:8px; cursor:pointer }
+.rukkab-btn:disabled { opacity:0.6; cursor:not-allowed }
+
+/* Ride controls */
+.ride-controls{padding:1rem;border:1px solid var(--border);border-radius:8px;max-width:520px;background:var(--card)}
+.ride-controls input{padding:.6rem;margin:.25rem;width:48%;border:1px solid var(--border);border-radius:6px}
+.ride-controls .btns{margin-top:.6rem}
+.ride-controls button{background:var(--accent);color:#fff;border:none;padding:.5rem .8rem;border-radius:6px;margin-right:.4rem}
+.ride-controls .status{margin-top:.6rem;color:var(--muted)}
+
+/* Chat */
+.chat-card{max-width:720px;border:1px solid var(--border);padding:12px;border-radius:10px;background:var(--card)}
+.chat-log{height:260px;overflow:auto;border:1px solid #f1f3f6;padding:10px;background:#fbfdff;border-radius:6px}
+.chat-entry{margin:8px 0;padding:6px;border-radius:6px}
+.chat-entry strong{color:#0b69ff}
+.chat-meta{color:var(--muted);font-size:12px}
+.chat-send{display:flex;gap:8px;margin-top:8px}
+.chat-send textarea{flex:1;padding:8px;border:1px solid var(--border);border-radius:6px}
+.chat-send button{padding:8px 12px;background:var(--accent);color:#fff;border:none;border-radius:6px}
+
+/* Notifications */
+.notification-list{max-width:720px}
+.notification-item{padding:10px;border-bottom:1px solid #f3f5f8}
+.notification-item .title{font-weight:600}
+.notification-item .time{color:var(--muted);font-size:12px}
+
+/* Layout helpers */
+.map-stub{height:360px;background:linear-gradient(180deg,#f7f9fc,#eef4ff);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--accent);border:1px dashed #dfe8ff}
+.app-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.app-nav a{margin-right:12px;color:#0b69ff;text-decoration:none}
+.app-nav a:hover{text-decoration:underline}
+
+/* Responsive */
+@media (max-width:800px){
+	.ride-controls input{width:100%}
+	.map-stub{height:220px}
+}

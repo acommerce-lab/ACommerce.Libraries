@@ -1,0 +1,10 @@
+:root{--accent:#0b5cff;--bg:#ffffff;--muted:#6b7280}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:#111}
+.ride-controls{padding:1rem;border:1px solid #eee;border-radius:6px;max-width:520px}
+.ride-controls input{padding:.5rem;margin:.2rem;width:48%}
+.ride-controls .btns{margin-top:.6rem}
+.ride-controls button{background:var(--accent);color:#fff;border:none;padding:.5rem .8rem;border-radius:4px;margin-right:.4rem}
+.ride-controls .status{margin-top:.6rem;color:var(--muted)}
+
+.request-ride button{background:var(--accent);color:#fff;padding:.6rem .8rem;border-radius:6px;border:none}
+.request-ride .status{margin-top:.5rem;color:var(--muted)}

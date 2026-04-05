@@ -11,7 +11,14 @@ public class TwoFactorOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
-        var actionName = context.ApiDescription.ActionDescriptor.RouteValues["action"];
+        // Safely retrieve the action route value. Some API descriptions (e.g. mapped root endpoints)
+        // may not contain an 'action' entry which would throw KeyNotFoundException.
+        string? actionName = null;
+        if (context.ApiDescription?.ActionDescriptor?.RouteValues != null &&
+            context.ApiDescription.ActionDescriptor.RouteValues.TryGetValue("action", out var a))
+        {
+            actionName = a;
+        }
 
         switch (actionName?.ToLower())
         {

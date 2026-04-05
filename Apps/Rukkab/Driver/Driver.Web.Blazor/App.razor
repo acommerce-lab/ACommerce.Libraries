@@ -1,0 +1,13 @@
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Routing
+@using ACommerce.Templates.Driver
+@using ACommerce.Templates.Driver.Components
+
+<Router AppAssembly="typeof(App).Assembly">
+  <Found Context="routeData">
+    <RouteView RouteData="routeData" DefaultLayout="null" />
+  </Found>
+  <NotFound>
+    <p>Not found</p>
+  </NotFound>
+</Router>

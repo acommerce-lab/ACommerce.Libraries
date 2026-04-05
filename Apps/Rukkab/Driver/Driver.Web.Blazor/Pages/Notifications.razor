@@ -1,0 +1,94 @@
+@page "/notifications"
+@using Microsoft.AspNetCore.SignalR.Client
+@using System.Net.Http.Json
+@using ACommerce.Client.Realtime
+@inject HttpClient Http
+@inject RealtimeClient? Realtime
+
+<h2>Notifications</h2>
+<div style="max-width:720px;">
+  <div style="border:1px solid #eee;padding:10px;border-radius:8px;background:#fff">
+    @if (NotificationList.Count == 0)
+    {
+      <div>No notifications yet</div>
+    }
+    else
+    {
+      @foreach (var n in NotificationList)
+      {
+        <div style="padding:6px;border-bottom:1px solid #f5f5f5">
+          <div style="font-weight:600">@n.Title</div>
+          <div style="color:#666;font-size:12px">@n.Time.ToLocalTime().ToString("g")</div>
+          <div>@n.Body</div>
+        </div>
+      }
+    }
+  </div>
+</div>
+
+@code {
+  private HubConnection? _hub;
+  private IDisposable? _realtimeHandler;
+  private List<Notif> NotificationList { get; set; } = new();
+
+  protected override async Task OnInitializedAsync()
+  {
+    if (Realtime != null)
+    {
+      try
+      {
+        try { await Realtime.ConnectAsync("Driver.Api", "/hubs/notifications"); }
+        catch { await Realtime.ConnectAsync("Driver", "/hubs/notifications"); }
+
+        _realtimeHandler = Realtime.On<string, string>("ReceiveNotification", (title, body) =>
+        {
+          NotificationList.Insert(0, new Notif { Title = title, Body = body, Time = DateTime.UtcNow });
+          InvokeAsync(StateHasChanged);
+        });
+
+        return;
+      }
+      catch { /* fall through */ }
+    }
+
+    var hubUrl = "http://127.0.0.1:5002/hubs/notifications";
+    try
+    {
+      _hub = new HubConnectionBuilder().WithUrl(hubUrl).WithAutomaticReconnect().Build();
+      _hub.On<string, string>("ReceiveNotification", (title, body) =>
+      {
+        NotificationList.Insert(0, new Notif { Title = title, Body = body, Time = DateTime.UtcNow });
+        InvokeAsync(StateHasChanged);
+      });
+      await _hub.StartAsync();
+    }
+    catch
+    {
+      try
+      {
+        var res = await Http.GetAsync("http://127.0.0.1:5002/api/notifications/recent");
+        if (res.IsSuccessStatusCode)
+        {
+          var list = await res.Content.ReadFromJsonAsync<List<Notif>>();
+          if (list != null) NotificationList = list;
+        }
+      }
+      catch { }
+    }
+  }
+
+  public async ValueTask DisposeAsync()
+  {
+    if (_realtimeHandler != null)
+    {
+      _realtimeHandler.Dispose();
+    }
+
+    if (_hub != null)
+    {
+      await _hub.DisposeAsync();
+    }
+  }
+
+  private class Notif { public string Title { get; set; } = string.Empty; public string Body { get; set; } = string.Empty; public DateTime Time { get; set; } }
+}

@@ -1,0 +1,4 @@
+/* Import shared library css (static web assets) */
+@import url('/_content/Rukkab.UI/css/site.css');
+
+body{padding:1rem;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial}

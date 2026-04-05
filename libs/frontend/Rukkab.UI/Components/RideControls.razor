@@ -1,0 +1,51 @@
+<!-- Rukkab RideControls component - shared UI -->
+@using System.Net.Http.Json
+@inject HttpClient Http
+
+<div class="ride-controls">
+  <input @bind="RideId" placeholder="Ride id" />
+  <input @bind="ActorId" placeholder="Driver/Rider id" />
+  <div class="btns">
+    <button @onclick="Accept">Accept</button>
+    <button @onclick="Arrive">Arrive</button>
+    <button @onclick="Start">Start</button>
+    <button @onclick="Complete">Complete</button>
+  </div>
+  <div class="status">@Status</div>
+</div>
+
+@code {
+  [Parameter]
+  public string? BaseUrl { get; set; }
+
+  private string RideId { get; set; } = string.Empty;
+  private string ActorId { get; set; } = "driver-1";
+  private string Status { get; set; } = "idle";
+
+  private string Resolve(string path)
+  {
+    var baseUrl = string.IsNullOrEmpty(BaseUrl) ? "http://127.0.0.1:5002" : BaseUrl;
+    return baseUrl.TrimEnd('/') + path;
+  }
+
+  private async Task PostAction(string path)
+  {
+    if (string.IsNullOrWhiteSpace(RideId)) { Status = "enter ride id"; return; }
+    var url = Resolve($"/api/assignments/{RideId}/{path}?driverId={ActorId}");
+    Status = "posting...";
+    try
+    {
+      var res = await Http.PostAsJsonAsync(url, new { });
+      Status = $"{res.StatusCode}";
+    }
+    catch (Exception ex)
+    {
+      Status = "error: " + ex.Message;
+    }
+  }
+
+  private Task Accept() => PostAction("accept");
+  private Task Arrive() => PostAction("arrive");
+  private Task Start() => PostAction("start");
+  private Task Complete() => PostAction("complete");
+}

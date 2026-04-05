@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RazorLangVersion>9.0</RazorLangVersion>
+    <RootNamespace>Rukkab.Shared.Customer</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The customer shared project delegates UI/templates to the Customer Template project -->
+    <ProjectReference Include="..\..\..\..\Templates\ACommerce.Templates.Customer\ACommerce.Templates.Customer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.0-*" />
+  </ItemGroup>
+
+</Project>
