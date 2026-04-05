@@ -5,10 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ACommerce.RealEstate.Api.Controllers;
 
-/// <summary>
-/// متحكم العقارات - كل عملية تمر عبر المحرك المحاسبي.
-/// لاحظ: لا يوجد منطق أعمال هنا - فقط بناء القيد وتنفيذه.
-/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class PropertiesController : ControllerBase
@@ -22,87 +18,54 @@ public class PropertiesController : ControllerBase
         _store = store;
     }
 
-    /// <summary>
-    /// البحث عن عقارات (GET /api/properties?city=الرياض&purpose=rent)
-    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Search([FromQuery] PropertySearchRequest request)
     {
         var entry = PropertyEntries.SearchProperties(request, _store);
         var result = await _engine.ExecuteAsync(entry);
-
-        if (!result.Success)
-            return BadRequest(new { error = result.ErrorMessage });
+        if (!result.Success) return BadRequest(new { error = result.ErrorMessage });
 
         var ctx = result.Context!;
         return Ok(new
         {
             items = ctx.Get<List<Property>>("results"),
-            count = ctx.Get<int>("count"),
-            entry = new { id = result.EntryId, type = result.EntryType, success = true }
+            totalCount = ctx.Get<int>("totalCount"),
+            page = request.Page,
+            pageSize = request.PageSize
         });
     }
 
-    /// <summary>
-    /// عرض تفاصيل عقار (GET /api/properties/{id})
-    /// </summary>
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        var entry = PropertyEntries.ViewProperty(id, null, _store);
+        var entry = PropertyEntries.ViewProperty(id, _store);
         var result = await _engine.ExecuteAsync(entry);
-
-        if (!result.Success)
-            return NotFound(new { error = result.ErrorMessage });
-
-        var ctx = result.Context!;
-        return Ok(ctx.Get<Property>("property"));
+        if (!result.Success) return NotFound(new { error = result.ErrorMessage });
+        return Ok(result.Context!.Get<Property>("property"));
     }
 
-    /// <summary>
-    /// نشر عقار جديد (POST /api/properties)
-    /// </summary>
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreatePropertyRequest request)
     {
         var property = new Property
         {
-            Title = request.Title,
-            Description = request.Description,
-            Category = request.Category,
-            PropertyType = request.PropertyType,
-            Purpose = request.Purpose,
-            City = request.City,
-            District = request.District,
-            Price = request.Price,
-            Area = request.Area,
-            Rooms = request.Rooms,
-            Bathrooms = request.Bathrooms,
-            Floor = request.Floor,
+            Title = request.Title, Description = request.Description,
+            Category = request.Category, PropertyType = request.PropertyType, Purpose = request.Purpose,
+            City = request.City, District = request.District,
+            Price = request.Price, Area = request.Area,
+            Rooms = request.Rooms, Bathrooms = request.Bathrooms, Floor = request.Floor,
             Furnished = request.Furnished,
-            OwnerId = request.OwnerId,
-            OwnerName = request.OwnerName,
-            OwnerPhone = request.OwnerPhone
+            OwnerId = request.OwnerId, OwnerName = request.OwnerName, OwnerPhone = request.OwnerPhone
         };
 
         var entry = PropertyEntries.ListProperty(property, _store);
         var result = await _engine.ExecuteAsync(entry);
+        if (!result.Success) return BadRequest(new { error = result.ErrorMessage });
 
-        if (!result.Success)
-            return BadRequest(new { error = result.ErrorMessage, entry = new { id = result.EntryId, type = result.EntryType } });
-
-        var ctx = result.Context!;
-        var created = ctx.Get<Property>("property");
-        return CreatedAtAction(nameof(GetById), new { id = created.Id }, new
-        {
-            property = created,
-            entry = new { id = result.EntryId, type = result.EntryType, success = true }
-        });
+        var created = result.Context!.Get<Property>("property");
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
-    /// <summary>
-    /// تحديث عقار (PUT /api/properties/{id})
-    /// </summary>
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePropertyRequest request)
     {
@@ -115,61 +78,33 @@ public class PropertiesController : ControllerBase
         }, _store);
 
         var result = await _engine.ExecuteAsync(entry);
-
-        if (!result.Success)
-            return BadRequest(new { error = result.ErrorMessage });
-
-        var ctx = result.Context!;
-        return Ok(ctx.Get<Property>("property"));
+        if (!result.Success) return BadRequest(new { error = result.ErrorMessage });
+        return Ok(result.Context!.Get<Property>("property"));
     }
 
-    /// <summary>
-    /// إرسال استفسار عن عقار (POST /api/properties/{id}/inquiries)
-    /// </summary>
     [HttpPost("{id:guid}/inquiries")]
     public async Task<IActionResult> SendInquiry(Guid id, [FromBody] CreateInquiryRequest request)
     {
         var inquiry = new PropertyInquiry
         {
-            PropertyId = id,
-            UserId = request.UserId,
-            UserName = request.UserName,
-            UserPhone = request.UserPhone,
-            Message = request.Message
+            PropertyId = id, UserId = request.UserId,
+            UserName = request.UserName, UserPhone = request.UserPhone, Message = request.Message
         };
-
         var entry = PropertyEntries.SendInquiry(inquiry, _store);
         var result = await _engine.ExecuteAsync(entry);
-
-        if (!result.Success)
-            return BadRequest(new { error = result.ErrorMessage });
-
-        return Ok(new
-        {
-            inquiry = inquiry,
-            entry = new { id = result.EntryId, type = result.EntryType, success = true },
-            subEntries = result.SubResults.Select(s => new { s.EntryId, s.EntryType, s.Success })
-        });
+        if (!result.Success) return BadRequest(new { error = result.ErrorMessage });
+        return Ok(result.Context!.Get<PropertyInquiry>("inquiry"));
     }
 
-    /// <summary>
-    /// حذف عقار (DELETE /api/properties/{id})
-    /// </summary>
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
         var entry = PropertyEntries.RemoveProperty(id, _store);
         var result = await _engine.ExecuteAsync(entry);
-
-        if (!result.Success)
-            return BadRequest(new { error = result.ErrorMessage });
-
-        return Ok(new { removed = true, entry = new { id = result.EntryId, type = result.EntryType } });
+        if (!result.Success) return BadRequest(new { error = result.ErrorMessage });
+        return Ok(new { removed = true });
     }
-
 }
-
-// === DTOs ===
 
 public class CreatePropertyRequest
 {

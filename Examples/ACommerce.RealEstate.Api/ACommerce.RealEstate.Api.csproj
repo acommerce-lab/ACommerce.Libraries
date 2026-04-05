@@ -8,5 +8,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\libs\backend\core\ACommerce.AccountingKernel\ACommerce.AccountingKernel.csproj" />
     <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.Infrastructure.EFCores\ACommerce.SharedKernel.Infrastructure.EFCores.csproj" />
   </ItemGroup>
 </Project>
