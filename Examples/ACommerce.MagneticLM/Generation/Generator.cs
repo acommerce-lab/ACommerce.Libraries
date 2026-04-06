@@ -144,24 +144,24 @@ public class Generator
     {
         var candidates = new List<ScoredCandidate>();
 
-        // كل الكلمات التي لها حافة سياقية من الكلمة الحالية
-        var contextNeighbors = _graph.GetContextualNeighbors(currentWord).ToList();
+        // كل الكلمات التي لها حافة n-gram من الكلمة الحالية
+        var contextKey = currentWord;
+        var contextNeighbors = _graph.NgramCounts.TryGetValue(contextKey, out var edges)
+            ? edges.Keys.ToList() : new List<string>();
 
         // إضافة كلمات مُثارة حتى لو ليست جاراً سياقياً مباشراً
         var excitedWords = _graph.Nodes.Values
             .Where(n => n.Excitation > 0.1 && n.Word != currentWord)
             .Select(n => n.Word);
 
-        var allCandidates = contextNeighbors.Select(n => n.Word)
-            .Union(excitedWords)
-            .Distinct();
+        var allCandidates = contextNeighbors.Union(excitedWords).Distinct();
 
         foreach (var candidate in allCandidates)
         {
             if (!_graph.Nodes.TryGetValue(candidate, out var node)) continue;
 
-            // القوة السياقية: احتمال التتابع
-            var contextual = _graph.GetContextualWeight(currentWord, candidate);
+            // القوة السياقية: احتمال n-gram مع backoff
+            var contextual = _graph.GetInterpolatedProbability(new[] { currentWord }, candidate);
 
             // القوة المعنوية: مجموع جذب كل الكلمات المُثارة
             var semantic = 0.0;

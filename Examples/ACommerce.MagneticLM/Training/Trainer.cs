@@ -2,138 +2,134 @@ using ACommerce.MagneticLM.Graph;
 
 namespace ACommerce.MagneticLM.Training;
 
-/// <summary>
-/// المدرّب: يستقبل جملاً ويسجلها كقيود في الرسم البياني.
-///
-/// لكل جملة:
-/// 1. تسجيل الأوزان السياقية (كلمة→كلمة تالية)
-/// 2. اكتشاف العلاقات المعنوية بعمق ±2
-/// 3. إعادة تقييم العلاقات العابرة (ارتقاء معنوي)
-///
-/// التدريب = تسجيل قيود. لا backpropagation. لا gradient descent.
-/// </summary>
 public class Trainer
 {
     private readonly WordGraph _graph;
-    private readonly double _transitiveDecay;
-    private readonly double _semanticThreshold;
-
-    /// <summary>
-    /// عدد الجمل المدرّبة
-    /// </summary>
     public int SentencesTrained { get; private set; }
 
-    public Trainer(WordGraph graph)
-    {
-        _graph = graph;
-        _transitiveDecay = graph.TransitiveDecay;
-        _semanticThreshold = graph.SemanticThreshold;
-    }
+    public Trainer(WordGraph graph) => _graph = graph;
 
-    /// <summary>
-    /// تدريب على جملة واحدة
-    /// </summary>
     public void TrainSentence(string sentence)
     {
         var words = Tokenize(sentence);
         if (words.Length < 2) return;
 
-        // === المرحلة 1: تسجيل الأوزان السياقية ===
+        // === 1. تسجيل n-grams بكل الأعماق ===
         for (int i = 0; i < words.Length; i++)
         {
             var node = _graph.GetOrCreateNode(words[i]);
             node.Frequency++;
+            _graph.TotalTokens++;
 
             if (i < words.Length - 1)
-                _graph.AddContextualEdge(words[i], words[i + 1]);
+            {
+                var nextWord = words[i + 1];
+
+                // unigram→bigram→trigram→...→MaxNgramOrder
+                for (int order = 1; order <= _graph.MaxNgramOrder && order <= i + 1; order++)
+                {
+                    var context = words[(i + 1 - order)..(i + 1)];
+                    _graph.AddNgram(context, nextWord);
+                }
+            }
         }
 
-        // === المرحلة 2: اكتشاف العلاقات المعنوية بعمق ±2 ===
-        // لكل كلمة: ننظر لأجدادها (i-2, i-1) وأحفادها (i+1, i+2)
-        // الكلمات التي تتشارك أحفاداً/أجداداً → علاقة معنوية
+        // === 2. اكتشاف معنوي + مكافأة/عقوبة (Reward/Penalty) ===
+        // كل جملة تدريب هي أيضاً عملية استدلال:
+        //   - نتوقع الكلمة التالية
+        //   - إذا نجح التوقع → مكافأة (تقوية الوزن المعنوي)
+        //   - إذا فشل → عقوبة (إضعاف الأوزان الخاطئة)
         for (int i = 0; i < words.Length; i++)
         {
-            var current = words[i];
-
-            // جمع نافذة العمق ±2
-            var window = new HashSet<string>();
+            // 2a. أوزان معنوية من نافذة ±2
             for (int d = -2; d <= 2; d++)
             {
                 if (d == 0) continue;
-                int idx = i + d;
-                if (idx >= 0 && idx < words.Length)
-                    window.Add(words[idx]);
+                int j = i + d;
+                if (j < 0 || j >= words.Length) continue;
+                var weight = Math.Abs(d) <= 1 ? 1.0 : _graph.TransitiveDecay;
+                _graph.StrengthSemanticEdge(words[i], words[j], weight * 0.1);
             }
 
-            // كل كلمة في النافذة تكتسب وزناً معنوياً مع الكلمة الحالية
-            foreach (var neighbor in window)
+            // 2b. مكافأة/عقوبة: هل الطبقة المعنوية تتوقع الكلمة التالية بشكل صحيح؟
+            if (i < words.Length - 1)
             {
-                // القوة تعتمد على المسافة: العمق 1 = 1.0, العمق 2 = transitiveDecay
-                var distance = Math.Abs(Array.IndexOf(words, neighbor) - i);
-                var weight = distance <= 1 ? 1.0 : _transitiveDecay;
-                _graph.StrengthSemanticEdge(current, neighbor, weight * 0.1);
+                var actual = words[i + 1];
+                var neighbors = _graph.GetSemanticNeighbors(words[i]).Take(20).ToList();
+
+                foreach (var (neighbor, w) in neighbors)
+                {
+                    if (neighbor == actual)
+                    {
+                        // مكافأة: التوقع المعنوي كان صحيحاً!
+                        _graph.StrengthSemanticEdge(words[i], actual, 0.05);
+                    }
+                    else if (w > 0.5)
+                    {
+                        // عقوبة: وزن معنوي عالي لكلمة لم تظهر فعلاً
+                        _graph.StrengthSemanticEdge(words[i], neighbor, -0.02);
+                    }
+                }
             }
         }
 
-        // === المرحلة 3: إعادة التقييم العابر (Transitive Re-evaluation) ===
-        // إذا A↔B معنوياً و B↔C معنوياً → A↔C تكتسب وزناً (أضعف)
-        // نفعل هذا كل 10 جمل لتوفير الموارد
+        // === 2c. فك ارتباط: إزالة أوزان معنوية وصلت تحت العتبة ===
+        if (SentencesTrained % 500 == 0)
+            PruneWeakSemanticEdges();
+
+        // === 3. إعادة التقييم العابر ===
         SentencesTrained++;
-        if (SentencesTrained % 100 == 0)
+        if (SentencesTrained % 200 == 0)
             PropagateTransitiveRelations(words);
         if (SentencesTrained % 1000 == 0)
             Console.Write($"\r  Training: {SentencesTrained:N0} sentences...");
     }
 
-    /// <summary>
-    /// نشر العلاقات العابرة:
-    /// لكل كلمة في الجملة، ننظر لجيرانها المعنويين.
-    /// إذا جار A مرتبط معنوياً بكلمة C، وC أيضاً جارة لكلمة أخرى B في الجملة
-    /// → A و B يكتسبان وزناً معنوياً عابراً
-    /// </summary>
     private void PropagateTransitiveRelations(string[] words)
     {
-        var wordSet = new HashSet<string>(words);
-
         foreach (var word in words)
         {
-            var semanticNeighbors = _graph.GetSemanticNeighbors(word)
-                .OrderByDescending(n => n.Weight).Take(10).ToList();
+            var neighbors = _graph.GetSemanticNeighbors(word)
+                .OrderByDescending(n => n.Weight).Take(8).ToList();
 
-            foreach (var (neighbor, weight) in semanticNeighbors)
+            foreach (var (neighbor, w1) in neighbors)
             {
-                if (weight < _semanticThreshold) continue;
+                if (w1 < _graph.SemanticThreshold) continue;
 
-                // جيران الجار المعنويين (أقوى 10 فقط لتوفير الموارد)
-                var neighborsOfNeighbor = _graph.GetSemanticNeighbors(neighbor)
-                    .OrderByDescending(n => n.Weight).Take(10);
-                foreach (var (transitive, tWeight) in neighborsOfNeighbor)
+                foreach (var (transitive, w2) in _graph.GetSemanticNeighbors(neighbor)
+                    .OrderByDescending(n => n.Weight).Take(8))
                 {
-                    if (transitive == word) continue;
-                    if (tWeight < _semanticThreshold) continue;
+                    if (transitive == word || w2 < _graph.SemanticThreshold) continue;
 
-                    // العلاقة العابرة: word ↔ transitive عبر neighbor
-                    // بقوة مُضمحلة
-                    var transitiveWeight = weight * tWeight * _transitiveDecay * 0.01;
-                    if (transitiveWeight > 0.001)
-                        _graph.StrengthSemanticEdge(word, transitive, transitiveWeight);
+                    var tw = w1 * w2 * _graph.TransitiveDecay * 0.01;
+                    if (tw > 0.001)
+                        _graph.StrengthSemanticEdge(word, transitive, tw);
                 }
             }
         }
     }
 
     /// <summary>
-    /// تدريب على مجموعة جمل
+    /// فك ارتباط: حذف الأوزان المعنوية التي انخفضت تحت العتبة.
+    /// العقوبات المتكررة تدفع الأوزان الخاطئة للأسفل حتى تُقطع.
     /// </summary>
-    public void TrainBatch(IEnumerable<string> sentences)
+    private void PruneWeakSemanticEdges()
     {
-        foreach (var sentence in sentences)
-            TrainSentence(sentence);
+        var pruneThreshold = _graph.SemanticThreshold * 0.5;
+        foreach (var (word, edges) in _graph.SemanticEdges)
+        {
+            var toRemove = edges.Where(e => e.Value < pruneThreshold).Select(e => e.Key).ToList();
+            foreach (var key in toRemove)
+                edges.Remove(key);
+        }
     }
 
-    /// <summary>
-    /// تحويل جملة إلى كلمات (tokenization بسيط)
-    /// </summary>
+    public void TrainBatch(IEnumerable<string> sentences)
+    {
+        foreach (var s in sentences) TrainSentence(s);
+        if (SentencesTrained >= 1000) Console.WriteLine();
+    }
+
     public static string[] Tokenize(string sentence)
     {
         return sentence
