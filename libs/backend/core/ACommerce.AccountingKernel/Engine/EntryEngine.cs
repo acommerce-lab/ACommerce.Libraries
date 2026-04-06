@@ -45,18 +45,19 @@ public class EntryEngine
 
         _logger.LogInformation("[{EntryType}] {Id}: Starting", entry.EntryType, entry.Id);
 
+        var h = entry.Hooks;
+
         try
         {
-            // 1. فحص التوازن (إن كان مطلوباً)
+            // 1. فحص التوازن
             if (_options.EnforceBalance && entry.Legs.Any(l => l.Value != 0) && !entry.IsBalanced())
-            {
                 return Fail(entry, result, "Entry is not balanced: debits must equal credits");
-            }
 
-            // 2. التحقق المخصص
+            // 2. BeforeValidate → Validate → AfterValidate
+            await h.InvokeAsync(h.BeforeValidate, context);
+
             if (entry.ValidateFunc != null && !await entry.ValidateFunc(context))
             {
-                // جمع أخطاء التحقق من Context
                 context.TryGet<string>("_validationError", out var err);
                 if (context.TryGet<List<string>>("_validationErrors", out var errors) && errors != null)
                     result.ValidationErrors = errors;
@@ -65,53 +66,69 @@ public class EntryEngine
                 return await FailWithCallback(entry, context, result, err ?? "Validation failed");
             }
 
-            entry.Status = EntryStatus.Executing;
+            await h.InvokeAsync(h.AfterValidate, context);
 
-            // 3. حفظ كيانات عبر البوابة (إن كان مفعّلاً)
+            // 3. BeforeExecute → Execute → AfterExecute
+            entry.Status = EntryStatus.Executing;
+            await h.InvokeAsync(h.BeforeExecute, context);
+
             if (_options.EnableEntityPersistence)
                 await ExecuteEntityOperations(entry, context, cancellationToken);
 
-            // 4. المنطق المخصص
             if (entry.ExecuteFunc != null)
                 await entry.ExecuteFunc(context);
 
-            // 5. تحديث حالة الأطراف
             foreach (var leg in entry.Legs)
                 if (leg.Status == LegStatus.Pending)
                     leg.Status = LegStatus.Completed;
 
-            // 6. القيود الفرعية
+            await h.InvokeAsync(h.AfterExecute, context);
+
+            // 4. BeforeSubEntries → SubEntries → AfterSubEntries
+            await h.InvokeAsync(h.BeforeSubEntries, context);
+
             var subResults = new List<EntryResult>();
             foreach (var subEntry in entry.SubEntries.Cast<Entry>())
             {
                 var subContext = new EntryContext(subEntry, _services, cancellationToken) { ParentEntry = entry };
                 foreach (var item in context.Items)
                     subContext.Items.TryAdd(item.Key, item.Value);
-
                 subResults.Add(await ExecuteAsync(subEntry, cancellationToken));
             }
             result.SubResults = subResults;
 
-            // 7. التحقق اللاحق
+            await h.InvokeAsync(h.AfterSubEntries, context);
+
+            // 5. BeforePostValidate → PostValidate → AfterPostValidate
+            await h.InvokeAsync(h.BeforePostValidate, context);
+
             if (entry.PostValidateFunc != null)
                 await entry.PostValidateFunc(context);
 
-            // 8. تحديد الحالة النهائية
+            await h.InvokeAsync(h.AfterPostValidate, context);
+
+            // 6. تحديد الحالة + توثيق + أحداث
             DetermineStatus(entry, result, subResults);
 
-            // 9. توثيق (إن كان مفعّلاً)
             if (_options.EnableAudit)
                 await _entryStore.SaveEntryAsync(entry, cancellationToken);
 
-            // 10. نشر الأحداث (إن كان مفعّلاً)
             if (_options.EnableEvents && result.Success)
                 await PublishEvents(entry, context, cancellationToken);
 
-            // 11. callback
-            if (result.Success && entry.OnCompletedFunc != null)
-                await entry.OnCompletedFunc(context);
-            else if (!result.Success && entry.OnFailedFunc != null)
-                await entry.OnFailedFunc(context);
+            // 7. BeforeComplete/BeforeFail → callback → AfterComplete/AfterFail
+            if (result.Success)
+            {
+                await h.InvokeAsync(h.BeforeComplete, context);
+                if (entry.OnCompletedFunc != null) await entry.OnCompletedFunc(context);
+                await h.InvokeAsync(h.AfterComplete, context);
+            }
+            else
+            {
+                await h.InvokeAsync(h.BeforeFail, context);
+                if (entry.OnFailedFunc != null) await entry.OnFailedFunc(context);
+                await h.InvokeAsync(h.AfterFail, context);
+            }
 
             _logger.LogInformation("[{EntryType}] {Id}: {Status}", entry.EntryType, entry.Id, entry.Status);
         }
@@ -122,8 +139,9 @@ public class EntryEngine
             result.ErrorMessage = ex.Message;
             _logger.LogError(ex, "[{EntryType}] {Id}: Exception", entry.EntryType, entry.Id);
 
-            if (entry.OnErrorFunc != null)
-                await entry.OnErrorFunc(context, ex);
+            await h.InvokeAsync(h.BeforeError, context, ex);
+            if (entry.OnErrorFunc != null) await entry.OnErrorFunc(context, ex);
+            await h.InvokeAsync(h.AfterError, context, ex);
 
             if (_options.EnableAudit)
                 await _entryStore.SaveEntryAsync(entry, cancellationToken);

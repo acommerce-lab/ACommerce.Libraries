@@ -30,6 +30,12 @@ public class Entry : IEntry
     internal Func<EntryContext, Exception, Task>? OnErrorFunc { get; set; }
 
     /// <summary>
+    /// أحداث دورة الحياة - MVVM-style hooks.
+    /// يُربط بها الباني أو المطور لتنفيذ وظائف عند كل مرحلة.
+    /// </summary>
+    public EntryLifecycleHooks Hooks { get; } = new();
+
+    /// <summary>
     /// مصانع الأحداث التي تُطلق عند الاكتمال
     /// </summary>
     internal List<Func<EntryContext, object>> EventFactories { get; } = new();

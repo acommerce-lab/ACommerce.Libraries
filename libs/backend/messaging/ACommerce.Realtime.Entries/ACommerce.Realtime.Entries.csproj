@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>ACommerce.Realtime.Entries</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>ACommerce</Authors>
+    <Description>Realtime messaging library built on BEOM (Balanced Entry Operation Model). Models every realtime interaction as a balanced entry between parties. No dependency on SignalR or any specific provider - pure abstractions.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\core\ACommerce.AccountingKernel\ACommerce.AccountingKernel.csproj" />
+  </ItemGroup>
+</Project>

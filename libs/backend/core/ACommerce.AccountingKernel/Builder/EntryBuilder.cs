@@ -157,6 +157,23 @@ public class EntryBuilder
     }
 
     // ========================================================
+    // أحداث دورة الحياة (Lifecycle Hooks - MVVM-style)
+    // ========================================================
+
+    public EntryBuilder OnBeforeValidate(Func<EntryContext, Task> hook) { _entry.Hooks.BeforeValidate = hook; return this; }
+    public EntryBuilder OnAfterValidate(Func<EntryContext, Task> hook) { _entry.Hooks.AfterValidate = hook; return this; }
+    public EntryBuilder OnBeforeExecute(Func<EntryContext, Task> hook) { _entry.Hooks.BeforeExecute = hook; return this; }
+    public EntryBuilder OnAfterExecute(Func<EntryContext, Task> hook) { _entry.Hooks.AfterExecute = hook; return this; }
+    public EntryBuilder OnBeforeSubEntries(Func<EntryContext, Task> hook) { _entry.Hooks.BeforeSubEntries = hook; return this; }
+    public EntryBuilder OnAfterSubEntries(Func<EntryContext, Task> hook) { _entry.Hooks.AfterSubEntries = hook; return this; }
+    public EntryBuilder OnBeforeComplete(Func<EntryContext, Task> hook) { _entry.Hooks.BeforeComplete = hook; return this; }
+    public EntryBuilder OnAfterComplete(Func<EntryContext, Task> hook) { _entry.Hooks.AfterComplete = hook; return this; }
+    public EntryBuilder OnBeforeFail(Func<EntryContext, Task> hook) { _entry.Hooks.BeforeFail = hook; return this; }
+    public EntryBuilder OnAfterFail(Func<EntryContext, Task> hook) { _entry.Hooks.AfterFail = hook; return this; }
+    public EntryBuilder OnBeforeError(Func<EntryContext, Exception, Task> hook) { _entry.Hooks.BeforeError = hook; return this; }
+    public EntryBuilder OnAfterError(Func<EntryContext, Exception, Task> hook) { _entry.Hooks.AfterError = hook; return this; }
+
+    // ========================================================
     // القيود الفرعية (Sub-Entries)
     // ========================================================
 
