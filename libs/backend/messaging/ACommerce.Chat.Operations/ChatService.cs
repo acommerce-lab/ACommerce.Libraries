@@ -1,3 +1,4 @@
+using ACommerce.Chat.Operations.Abstractions;
 using ACommerce.Chat.Operations.Operations;
 using ACommerce.OperationEngine.Core;
 using ACommerce.Realtime.Operations.Abstractions;
@@ -5,15 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ACommerce.Chat.Operations;
 
-/// <summary>
-/// واجهة الدردشة البسيطة.
-///
-/// services.AddChat&lt;SignalRTransport&gt;();
-///
-/// ثم:
-///   await chat.SendMessageAsync("ahmed", "chat_123", "مرحبا");
-///   await chat.MarkAsReadAsync("sara", "ahmed", "chat_123");
-/// </summary>
 public class ChatService
 {
     private readonly IRealtimeTransport _transport;
@@ -27,71 +19,51 @@ public class ChatService
         _tracker = tracker;
     }
 
-    public async Task<OperationResult> SendMessageAsync(
-        string senderId, string conversationId, string content,
-        string messageType = "text", string? replyToId = null,
-        string[]? recipientIds = null,
+    public Task<OperationResult> SendMessageAsync(
+        PartyId sender, PartyId conversation, string content,
+        MessageType? messageType = null, Guid? replyToId = null,
+        PartyId[]? recipients = null,
         Func<OperationContext, Task>? afterExecute = null,
         CancellationToken ct = default)
     {
-        var op = ChatOps.SendMessage(_transport, senderId, conversationId, content,
-            messageType, replyToId, recipientIds);
-
-        if (afterExecute != null)
-            op.Hooks.AfterExecute = afterExecute;
-
-        return await _engine.ExecuteAsync(op, ct);
+        var op = ChatOps.SendMessage(_transport, sender, conversation, content, messageType, replyToId, recipients);
+        if (afterExecute != null) op.Hooks.AfterExecute = afterExecute;
+        return _engine.ExecuteAsync(op, ct);
     }
 
-    public async Task<OperationResult> AcknowledgeDeliveryAsync(
-        string recipientId, string senderId, string conversationId,
+    public Task<OperationResult> AcknowledgeDeliveryAsync(
+        PartyId recipient, PartyId sender, PartyId conversation,
         Guid? originalOpId = null, CancellationToken ct = default)
-    {
-        var op = ChatOps.AcknowledgeDelivery(_transport, recipientId, senderId, conversationId, originalOpId);
-        return await _engine.ExecuteAsync(op, ct);
-    }
+        => _engine.ExecuteAsync(ChatOps.AcknowledgeDelivery(_transport, recipient, sender, conversation, originalOpId), ct);
 
-    public async Task<OperationResult> MarkAsReadAsync(
-        string readerId, string senderId, string conversationId,
+    public Task<OperationResult> MarkAsReadAsync(
+        PartyId reader, PartyId sender, PartyId conversation,
         Guid? originalOpId = null, CancellationToken ct = default)
-    {
-        var op = ChatOps.MarkAsRead(_transport, readerId, senderId, conversationId, originalOpId);
-        return await _engine.ExecuteAsync(op, ct);
-    }
+        => _engine.ExecuteAsync(ChatOps.MarkAsRead(_transport, reader, sender, conversation, originalOpId), ct);
 
-    public async Task<OperationResult> SendTypingAsync(
-        string userId, string conversationId, bool isTyping, CancellationToken ct = default)
-    {
-        var op = ChatOps.TypingIndicator(_transport, userId, conversationId, isTyping);
-        return await _engine.ExecuteAsync(op, ct);
-    }
+    public Task<OperationResult> SendTypingAsync(
+        PartyId user, PartyId conversation, bool isTyping, CancellationToken ct = default)
+        => _engine.ExecuteAsync(ChatOps.TypingIndicator(_transport, user, conversation, isTyping), ct);
 
-    public async Task<OperationResult> CreateConversationAsync(
-        string creatorId, string type, string? title = null,
-        string[]? participantIds = null,
+    public Task<OperationResult> CreateConversationAsync(
+        PartyId creator, ConversationType type, string? title = null,
+        PartyId[]? participants = null,
         Func<OperationContext, Task>? afterExecute = null,
         CancellationToken ct = default)
     {
-        var op = ChatOps.CreateConversation(creatorId, type, title, participantIds);
-        if (afterExecute != null)
-            op.Hooks.AfterExecute = afterExecute;
-        return await _engine.ExecuteAsync(op, ct);
+        var op = ChatOps.CreateConversation(creator, type, title, participants);
+        if (afterExecute != null) op.Hooks.AfterExecute = afterExecute;
+        return _engine.ExecuteAsync(op, ct);
     }
 
-    public async Task<OperationResult> JoinConversationAsync(
-        string userId, string connectionId, string conversationId,
-        string role = "member", CancellationToken ct = default)
-    {
-        var op = ChatOps.JoinConversation(_transport, userId, connectionId, conversationId, role);
-        return await _engine.ExecuteAsync(op, ct);
-    }
+    public Task<OperationResult> JoinConversationAsync(
+        PartyId user, string connectionId, PartyId conversation,
+        ParticipantRole? role = null, CancellationToken ct = default)
+        => _engine.ExecuteAsync(ChatOps.JoinConversation(_transport, user, connectionId, conversation, role), ct);
 
-    public async Task<OperationResult> UpdatePresenceAsync(
-        string userId, string status, CancellationToken ct = default)
-    {
-        var op = ChatOps.UpdatePresence(_transport, userId, status, _tracker);
-        return await _engine.ExecuteAsync(op, ct);
-    }
+    public Task<OperationResult> UpdatePresenceAsync(
+        PartyId user, PresenceStatus status, CancellationToken ct = default)
+        => _engine.ExecuteAsync(ChatOps.UpdatePresence(_transport, user, status, _tracker), ct);
 }
 
 public static class ChatExtensions
@@ -106,7 +78,6 @@ public static class ChatExtensions
 
     public static IServiceCollection AddChat(this IServiceCollection services)
     {
-        // يفترض أن IRealtimeTransport مُسجل مسبقاً (من AddRealtime)
         services.AddScoped<ChatService>();
         return services;
     }

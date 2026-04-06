@@ -5,134 +5,98 @@ using ACommerce.Realtime.Operations.Abstractions;
 namespace ACommerce.Realtime.Operations.Operations;
 
 /// <summary>
-/// قيود الاتصال والانقطاع والمجموعات.
+/// قيود الاتصال - كل متغير مكتوب (typed).
+/// لا نصوص حرة في أي دالة عامة.
 /// </summary>
 public static class ConnectionOps
 {
-    /// <summary>
-    /// المستخدم يتصل بالنظام.
-    /// From(User) → To(System): المستخدم يُقدّم اتصاله للنظام.
-    /// </summary>
-    public static Operation Connect(string userId, string connectionId, IConnectionTracker? tracker = null)
+    public static Operation Connect(PartyId user, string connectionId, IConnectionTracker? tracker = null)
     {
         return Entry.Create("realtime.connect")
-            .Describe($"{userId} connected")
-            .From($"User:{userId}", 1, (RT.ConnectionId, connectionId))
-            .To("System", 1, (RT.Role, "host"))
-            .Tag(RT.Presence, "online")
+            .Describe($"{user} connected")
+            .From(user, 1, (RT.ConnectionId, connectionId))
+            .To(PartyId.System, 1, (RT.Role, "host"))
+            .Tag(RT.Presence, PresenceStatus.Online)
             .Execute(async ctx =>
             {
                 if (tracker != null)
-                    await tracker.TrackConnectionAsync(userId, connectionId, ctx.CancellationToken);
-                ctx.Set("userId", userId);
+                    await tracker.TrackConnectionAsync(user.Id, connectionId, ctx.CancellationToken);
+                ctx.Set("userId", user.Id);
                 ctx.Set("connectionId", connectionId);
                 ctx.Set("connectedAt", DateTime.UtcNow);
             })
             .Build();
     }
 
-    /// <summary>
-    /// المستخدم ينقطع.
-    /// From(System) → To(User): النظام يُسجّل انقطاع المستخدم.
-    /// </summary>
-    public static Operation Disconnect(string userId, IConnectionTracker? tracker = null)
+    public static Operation Disconnect(PartyId user, IConnectionTracker? tracker = null)
     {
         return Entry.Create("realtime.disconnect")
-            .Describe($"{userId} disconnected")
-            .From("System", 1)
-            .To($"User:{userId}", 1)
-            .Tag(RT.Presence, "offline")
+            .Describe($"{user} disconnected")
+            .From(PartyId.System, 1)
+            .To(user, 1)
+            .Tag(RT.Presence, PresenceStatus.Offline)
             .Execute(async ctx =>
             {
                 if (tracker != null)
-                    await tracker.RemoveConnectionAsync(userId, ctx.CancellationToken);
-                ctx.Set("userId", userId);
+                    await tracker.RemoveConnectionAsync(user.Id, ctx.CancellationToken);
                 ctx.Set("disconnectedAt", DateTime.UtcNow);
             })
             .Build();
     }
 
-    /// <summary>
-    /// المستخدم ينضم لمجموعة.
-    /// From(User) → To(Group): المستخدم يشترك في المجموعة.
-    ///
-    /// القيمة "groupName" تأتي من التطبيق - ليست ثابتاً.
-    /// يمكن أن تكون: "chat_123", "topic_news", "payment_456"
-    /// </summary>
-    public static Operation JoinGroup(string userId, string connectionId, string groupName,
+    public static Operation JoinGroup(PartyId user, string connectionId, PartyId group,
         IRealtimeTransport transport)
     {
         return Entry.Create("realtime.join_group")
-            .Describe($"{userId} joins {groupName}")
-            .From($"User:{userId}", 1, (RT.ConnectionId, connectionId))
-            .To($"Group:{groupName}", 1, (RT.Group, groupName))
+            .Describe($"{user} joins {group}")
+            .From(user, 1, (RT.ConnectionId, connectionId))
+            .To(group, 1, (RT.Group, group.Id))
             .Execute(async ctx =>
             {
-                await transport.AddToGroupAsync(connectionId, groupName, ctx.CancellationToken);
-                ctx.Set("groupName", groupName);
+                await transport.AddToGroupAsync(connectionId, group.Id, ctx.CancellationToken);
+                ctx.Set("groupId", group.Id);
             })
             .Build();
     }
 
-    /// <summary>
-    /// المستخدم يغادر مجموعة.
-    /// From(Group) → To(User): المجموعة تفقد عضواً.
-    /// </summary>
-    public static Operation LeaveGroup(string userId, string connectionId, string groupName,
+    public static Operation LeaveGroup(PartyId user, string connectionId, PartyId group,
         IRealtimeTransport transport)
     {
         return Entry.Create("realtime.leave_group")
-            .Describe($"{userId} leaves {groupName}")
-            .From($"Group:{groupName}", 1, (RT.Group, groupName))
-            .To($"User:{userId}", 1)
+            .From(group, 1, (RT.Group, group.Id))
+            .To(user, 1)
             .Execute(async ctx =>
             {
-                await transport.RemoveFromGroupAsync(connectionId, groupName, ctx.CancellationToken);
-                ctx.Set("groupName", groupName);
+                await transport.RemoveFromGroupAsync(connectionId, group.Id, ctx.CancellationToken);
             })
             .Build();
     }
 
-    /// <summary>
-    /// إرسال رسالة عامة لمستخدم.
-    /// الـ method والـ data يأتيان من التطبيق - ليسا ثوابت.
-    /// </summary>
-    public static Operation SendToUser(string userId, string method, object data,
-        IRealtimeTransport transport, string? senderId = null)
+    public static Operation SendToUser(PartyId recipient, string method, object data,
+        IRealtimeTransport transport, PartyId? sender = null)
     {
         return Entry.Create("realtime.send")
-            .Describe($"Send {method} to {userId}")
-            .From(senderId ?? "System", 1, (RT.Role, "sender"))
-            .To($"User:{userId}", 1, (RT.Role, "recipient"), (RT.Delivery, "pending"))
+            .Describe($"Send {method} to {recipient}")
+            .From(sender ?? PartyId.System, 1, (RT.Role, "sender"))
+            .To(recipient, 1, (RT.Role, "recipient"), (RT.Delivery, DeliveryStatus.Pending))
             .Tag(RT.Method, method)
             .Execute(async ctx =>
             {
-                await transport.SendToUserAsync(userId, method, data, ctx.CancellationToken);
-                // تحديث علامة التسليم على الطرف
-                var recipient = ctx.Operation.GetPartiesByTag(RT.Role, "recipient").FirstOrDefault();
-                if (recipient != null)
-                {
-                    recipient.RemoveTag(RT.Delivery, "pending");
-                    recipient.AddTag(RT.Delivery, "sent");
-                }
+                await transport.SendToUserAsync(recipient.Id, method, data, ctx.CancellationToken);
+                var r = ctx.Operation.GetPartiesByTag(RT.Role, "recipient").FirstOrDefault();
+                if (r != null) { r.RemoveTag(RT.Delivery); r.AddTag(RT.Delivery, DeliveryStatus.Sent); }
                 ctx.Set("delivered", true);
             })
             .Build();
     }
 
-    /// <summary>
-    /// بث عام.
-    /// </summary>
     public static Operation Broadcast(string method, object data, IRealtimeTransport transport)
     {
         return Entry.Create("realtime.broadcast")
-            .From("System", 1)
-            .To("All", 1)
+            .From(PartyId.System, 1)
+            .To(PartyId.All, 1)
             .Tag(RT.Method, method)
-            .Execute(async ctx =>
-            {
-                await transport.BroadcastAsync(method, data, ctx.CancellationToken);
-            })
+            .Execute(async ctx => await transport.BroadcastAsync(method, data, ctx.CancellationToken))
             .Build();
     }
 }

@@ -6,231 +6,157 @@ using ACommerce.Realtime.Operations.Abstractions;
 namespace ACommerce.Chat.Operations.Operations;
 
 /// <summary>
-/// قيود الدردشة - كل تفاعل = قيد بين أطراف.
-///
-/// لا كيانات. لا قاعدة بيانات. المطور يحفظ ما يريد عبر Hooks.
-///
-/// مثال كامل:
-///   var sendMsg = ChatOps.SendMessage(transport, "ahmed", "chat_123", "مرحبا", "text");
-///   sendMsg.Hooks.AfterExecute = async ctx => {
-///       var msg = new MyMessageEntity { ... };
-///       await db.Messages.AddAsync(msg);  // المطور يحفظ بالشكل الذي يريده
-///   };
-///   await engine.ExecuteAsync(sendMsg);
+/// قيود الدردشة - كل متغير مكتوب. لا نصوص حرة.
 /// </summary>
 public static class ChatOps
 {
-    // =========================================================================
-    // إرسال رسالة
-    // =========================================================================
-
-    /// <summary>
-    /// قيد: إرسال رسالة في محادثة.
-    ///
-    /// From(المُرسل) → To(المحادثة)
-    /// + قيد فرعي: تسليم (System → كل مستلم)
-    /// + قيد فرعي مؤجل: إيصال قراءة (المستلم → المُرسل)
-    ///
-    /// العلامات تحمل قيماً من التطبيق:
-    ///   [conversation:chat_123]        ← معرف المحادثة
-    ///   [message_type:text]            ← نوع الرسالة
-    ///   [reply_to:msg_456]             ← رسالة مُرد عليها (اختياري)
-    ///   [delivery:pending → sent → delivered → read]  ← تتغير مع الحالة
-    /// </summary>
     public static Operation SendMessage(
         IRealtimeTransport transport,
-        string senderId,
-        string conversationId,
+        PartyId sender,
+        PartyId conversation,
         string content,
-        string messageType = "text",
-        string? replyToId = null,
-        string[]? recipientIds = null)
+        MessageType? messageType = null,
+        Guid? replyToId = null,
+        PartyId[]? recipients = null)
     {
+        var msgType = messageType ?? MessageType.Text;
+
         var builder = Entry.Create("chat.message.send")
-            .Describe($"{senderId} sends {messageType} to {conversationId}")
-            .From($"User:{senderId}", 1,
-                (RT.Role, "sender"))
-            .To($"Conversation:{conversationId}", 1,
-                (ChatTags.Conversation, conversationId),
-                (ChatTags.ConversationType, "group"))  // يُعدّل لاحقاً حسب النوع
-            .Tag(ChatTags.MessageType, messageType)
-            .Tag(ChatTags.Conversation, conversationId);
+            .Describe($"{sender} sends {msgType} to {conversation}")
+            .From(sender, 1, (RT.Role, "sender"))
+            .To(conversation, 1, (ChatTags.Conversation, conversation.Id))
+            .Tag(ChatTags.MessageType, msgType)
+            .Tag(ChatTags.Conversation, conversation.Id);
 
         if (replyToId != null)
-            builder.Tag(ChatTags.ReplyTo, replyToId);
+            builder.Tag(ChatTags.ReplyTo, replyToId.Value.ToString());
 
         builder.Execute(async ctx =>
         {
-            // بث الرسالة لمجموعة المحادثة
             var payload = new
             {
-                senderId,
-                conversationId,
+                senderId = sender.Id,
+                conversationId = conversation.Id,
                 content,
-                messageType,
+                messageType = msgType.Value,
                 replyToId,
                 sentAt = DateTime.UtcNow
             };
             await transport.SendToGroupAsync(
-                $"chat_{conversationId}", "MessageReceived", payload, ctx.CancellationToken);
-
+                $"chat_{conversation.Id}", "MessageReceived", payload, ctx.CancellationToken);
             ctx.Set("content", content);
             ctx.Set("sentAt", DateTime.UtcNow);
             ctx.Set("payload", payload);
         });
 
-        // قيود فرعية: تسليم لكل مستلم (إن حُددوا)
-        if (recipientIds != null)
+        if (recipients != null)
         {
             builder.WithSub("chat.delivery", sub =>
             {
-                foreach (var recipientId in recipientIds)
-                {
-                    sub.Party($"User:{recipientId}", 1,
-                        ("direction", "credit"),
-                        (RT.Delivery, "pending"),
-                        (RT.Role, "recipient"));
-                }
-                sub.Party("System", recipientIds.Length, ("direction", "debit"));
+                foreach (var r in recipients)
+                    sub.Party(r, 1, ("direction", "credit"),
+                        (RT.Delivery, DeliveryStatus.Pending), (RT.Role, "recipient"));
+                sub.Party(PartyId.System, recipients.Length, ("direction", "debit"));
             });
         }
 
         return builder.Build();
     }
 
-    // =========================================================================
-    // تأكيد الاستلام (✓)
-    // =========================================================================
-
-    /// <summary>
-    /// قيد: المستلم يؤكد استلام الرسالة.
-    /// هذا معكوس جزئي لقيد التسليم.
-    ///
-    /// From(المستلم) → To(المُرسل): "استلمت رسالتك"
-    /// [delivery] تتغير من "pending" إلى "delivered"
-    /// </summary>
     public static Operation AcknowledgeDelivery(
         IRealtimeTransport transport,
-        string recipientId,
-        string senderId,
-        string conversationId,
-        Guid? originalMessageOpId = null)
+        PartyId recipient,
+        PartyId sender,
+        PartyId conversation,
+        Guid? originalOpId = null)
     {
         var builder = Entry.Create("chat.delivery.ack")
-            .Describe($"{recipientId} acknowledges delivery")
-            .From($"User:{recipientId}", 1, (RT.Delivery, "delivered"))
-            .To($"User:{senderId}", 1, (RT.Role, "sender"))
-            .Tag(ChatTags.Conversation, conversationId);
+            .Describe($"{recipient} ack delivery")
+            .From(recipient, 1, (RT.Delivery, DeliveryStatus.Delivered))
+            .To(sender, 1, (RT.Role, "sender"))
+            .Tag(ChatTags.Conversation, conversation.Id);
 
-        if (originalMessageOpId != null)
-            builder.PartiallyFulfills(originalMessageOpId.Value);
+        if (originalOpId != null)
+            builder.PartiallyFulfills(originalOpId.Value);
 
         builder.Execute(async ctx =>
         {
-            // إرسال علامة ✓ للمُرسل
-            await transport.SendToUserAsync(senderId, "DeliveryAck",
-                new { recipientId, conversationId, ack = "delivered" }, ctx.CancellationToken);
+            await transport.SendToUserAsync(sender.Id, "DeliveryAck",
+                new { recipientId = recipient.Id, conversationId = conversation.Id },
+                ctx.CancellationToken);
         });
 
         return builder.Build();
     }
 
-    // =========================================================================
-    // إيصال القراءة (✓✓)
-    // =========================================================================
-
-    /// <summary>
-    /// قيد: المستلم قرأ الرسالة.
-    /// معكوس كلي لقيد التسليم.
-    ///
-    /// [delivery] تتغير من "delivered" إلى "read"
-    /// </summary>
     public static Operation MarkAsRead(
         IRealtimeTransport transport,
-        string readerId,
-        string senderId,
-        string conversationId,
-        Guid? originalDeliveryOpId = null)
+        PartyId reader,
+        PartyId sender,
+        PartyId conversation,
+        Guid? originalOpId = null)
     {
         var builder = Entry.Create("chat.delivery.read")
-            .Describe($"{readerId} read message in {conversationId}")
-            .From($"User:{readerId}", 1, (RT.Delivery, "read"))
-            .To($"User:{senderId}", 1, (RT.Role, "sender"))
-            .Tag(ChatTags.Conversation, conversationId);
+            .Describe($"{reader} read in {conversation}")
+            .From(reader, 1, (RT.Delivery, DeliveryStatus.Read))
+            .To(sender, 1, (RT.Role, "sender"))
+            .Tag(ChatTags.Conversation, conversation.Id);
 
-        if (originalDeliveryOpId != null)
-            builder.Fulfills(originalDeliveryOpId.Value);
+        if (originalOpId != null)
+            builder.Fulfills(originalOpId.Value);
 
         builder.Execute(async ctx =>
         {
-            // إرسال علامة ✓✓ للمُرسل
-            await transport.SendToUserAsync(senderId, "ReadReceipt",
-                new { readerId, conversationId, readAt = DateTime.UtcNow }, ctx.CancellationToken);
+            await transport.SendToUserAsync(sender.Id, "ReadReceipt",
+                new { readerId = reader.Id, conversationId = conversation.Id, readAt = DateTime.UtcNow },
+                ctx.CancellationToken);
         });
 
         return builder.Build();
     }
 
-    // =========================================================================
-    // مؤشر الكتابة
-    // =========================================================================
-
-    /// <summary>
-    /// قيد مؤقت: المستخدم يكتب.
-    /// لا يُحفظ عادةً - فقط يُبث.
-    /// [typing] تحمل القيمة: "typing" أو "stopped"
-    /// </summary>
     public static Operation TypingIndicator(
         IRealtimeTransport transport,
-        string userId,
-        string conversationId,
+        PartyId user,
+        PartyId conversation,
         bool isTyping)
     {
         return Entry.Create("chat.typing")
-            .From($"User:{userId}", 0)  // قيمة 0 = لا يحتاج توازن
-            .To($"Conversation:{conversationId}", 0)
+            .From(user, 0)
+            .To(conversation, 0)
             .Tag(ChatTags.Typing, isTyping ? "typing" : "stopped")
-            .Tag(ChatTags.Conversation, conversationId)
+            .Tag(ChatTags.Conversation, conversation.Id)
             .Execute(async ctx =>
             {
-                await transport.SendToGroupAsync($"chat_{conversationId}", "UserTyping",
-                    new { userId, isTyping }, ctx.CancellationToken);
+                await transport.SendToGroupAsync($"chat_{conversation.Id}", "UserTyping",
+                    new { userId = user.Id, isTyping }, ctx.CancellationToken);
             })
             .Build();
     }
 
-    // =========================================================================
-    // إدارة المحادثات
-    // =========================================================================
-
-    /// <summary>
-    /// قيد: إنشاء محادثة.
-    /// From(المُنشئ) → To(النظام): المُنشئ يُسجّل محادثة جديدة.
-    /// </summary>
     public static Operation CreateConversation(
-        string creatorId,
-        string conversationType,
+        PartyId creator,
+        ConversationType type,
         string? title = null,
-        string[]? participantIds = null)
+        PartyId[]? participants = null)
     {
         var builder = Entry.Create("chat.conversation.create")
-            .Describe($"{creatorId} creates {conversationType} conversation")
-            .From($"User:{creatorId}", 1, (RT.Role, "creator"))
-            .To("System", 1)
-            .Tag(ChatTags.ConversationType, conversationType);
+            .Describe($"{creator} creates {type} conversation")
+            .From(creator, 1, (RT.Role, "creator"))
+            .To(PartyId.System, 1)
+            .Tag(ChatTags.ConversationType, type);
 
         if (title != null)
             builder.Meta("title", title);
 
-        // قيد فرعي لكل مشارك
-        if (participantIds != null)
+        if (participants != null)
         {
-            foreach (var pid in participantIds)
+            foreach (var p in participants)
             {
-                builder.WithSub($"chat.participant.add.{pid}", sub =>
+                builder.WithSub($"chat.participant.add", sub =>
                 {
-                    sub.Party($"User:{pid}", 1, ("direction", "credit"), (RT.Role, "member"));
-                    sub.Party("System", 1, ("direction", "debit"));
+                    sub.Party(p, 1, ("direction", "credit"), (RT.Role, ParticipantRole.Member));
+                    sub.Party(PartyId.System, 1, ("direction", "debit"));
                 });
             }
         }
@@ -238,51 +164,43 @@ public static class ChatOps
         return builder.Build();
     }
 
-    /// <summary>
-    /// قيد: مشارك ينضم لمحادثة.
-    /// </summary>
     public static Operation JoinConversation(
         IRealtimeTransport transport,
-        string userId,
+        PartyId user,
         string connectionId,
-        string conversationId,
-        string role = "member")
+        PartyId conversation,
+        ParticipantRole? role = null)
     {
+        var r = role ?? ParticipantRole.Member;
         return Entry.Create("chat.conversation.join")
-            .From($"User:{userId}", 1, (RT.Role, role))
-            .To($"Conversation:{conversationId}", 1, (ChatTags.Conversation, conversationId))
+            .From(user, 1, (RT.Role, r))
+            .To(conversation, 1, (ChatTags.Conversation, conversation.Id))
             .Execute(async ctx =>
             {
-                // إضافة للمجموعة في النقل
-                await transport.AddToGroupAsync(connectionId, $"chat_{conversationId}", ctx.CancellationToken);
-                // إبلاغ المجموعة
-                await transport.SendToGroupAsync($"chat_{conversationId}", "ParticipantJoined",
-                    new { userId, role }, ctx.CancellationToken);
+                await transport.AddToGroupAsync(connectionId, $"chat_{conversation.Id}", ctx.CancellationToken);
+                await transport.SendToGroupAsync($"chat_{conversation.Id}", "ParticipantJoined",
+                    new { userId = user.Id, role = r.Value }, ctx.CancellationToken);
             })
             .Build();
     }
 
-    /// <summary>
-    /// قيد: تحديث حالة الحضور.
-    /// [presence] تحمل: "online", "offline", "away", "busy"
-    /// </summary>
     public static Operation UpdatePresence(
         IRealtimeTransport transport,
-        string userId,
-        string status,
+        PartyId user,
+        PresenceStatus status,
         IConnectionTracker? tracker = null)
     {
         return Entry.Create("chat.presence.update")
-            .From($"User:{userId}", 0)
-            .To("System", 0)
+            .From(user, 0)
+            .To(PartyId.System, 0)
             .Tag(RT.Presence, status)
             .Execute(async ctx =>
             {
-                if (tracker != null && status == "offline")
-                    await tracker.RemoveConnectionAsync(userId, ctx.CancellationToken);
-
+                if (tracker != null && status == PresenceStatus.Offline)
+                    await tracker.RemoveConnectionAsync(user.Id, ctx.CancellationToken);
                 await transport.BroadcastAsync("PresenceChanged",
-                    new { userId, status, at = DateTime.UtcNow }, ctx.CancellationToken);
+                    new { userId = user.Id, status = status.Value, at = DateTime.UtcNow },
+                    ctx.CancellationToken);
             })
             .Build();
     }

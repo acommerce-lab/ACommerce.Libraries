@@ -5,15 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ACommerce.Realtime.Operations;
 
-/// <summary>
-/// واجهة الزمن الحقيقي البسيطة.
-///
-/// services.AddRealtime(transport);  // مرة واحدة
-///
-/// ثم:
-///   await realtime.SendToUserAsync("user:123", "NewOrder", orderData);
-///   await realtime.BroadcastAsync("SystemAlert", alertData);
-/// </summary>
 public class RealtimeService
 {
     private readonly IRealtimeTransport _transport;
@@ -27,48 +18,27 @@ public class RealtimeService
         _tracker = tracker;
     }
 
-    public async Task<OperationResult> SendToUserAsync(string userId, string method, object data,
-        string? senderId = null, CancellationToken ct = default)
-    {
-        var op = ConnectionOps.SendToUser(userId, method, data, _transport, senderId);
-        return await _engine.ExecuteAsync(op, ct);
-    }
+    public Task<OperationResult> SendToUserAsync(PartyId recipient, string method, object data,
+        PartyId? sender = null, CancellationToken ct = default)
+        => _engine.ExecuteAsync(ConnectionOps.SendToUser(recipient, method, data, _transport, sender), ct);
 
-    public async Task<OperationResult> BroadcastAsync(string method, object data, CancellationToken ct = default)
-    {
-        var op = ConnectionOps.Broadcast(method, data, _transport);
-        return await _engine.ExecuteAsync(op, ct);
-    }
+    public Task<OperationResult> BroadcastAsync(string method, object data, CancellationToken ct = default)
+        => _engine.ExecuteAsync(ConnectionOps.Broadcast(method, data, _transport), ct);
 
-    public async Task<OperationResult> OnConnectedAsync(string userId, string connectionId, CancellationToken ct = default)
-    {
-        var op = ConnectionOps.Connect(userId, connectionId, _tracker);
-        return await _engine.ExecuteAsync(op, ct);
-    }
+    public Task<OperationResult> OnConnectedAsync(PartyId user, string connectionId, CancellationToken ct = default)
+        => _engine.ExecuteAsync(ConnectionOps.Connect(user, connectionId, _tracker), ct);
 
-    public async Task<OperationResult> OnDisconnectedAsync(string userId, CancellationToken ct = default)
-    {
-        var op = ConnectionOps.Disconnect(userId, _tracker);
-        return await _engine.ExecuteAsync(op, ct);
-    }
+    public Task<OperationResult> OnDisconnectedAsync(PartyId user, CancellationToken ct = default)
+        => _engine.ExecuteAsync(ConnectionOps.Disconnect(user, _tracker), ct);
 
-    public async Task<OperationResult> JoinGroupAsync(string userId, string connectionId, string groupName, CancellationToken ct = default)
-    {
-        var op = ConnectionOps.JoinGroup(userId, connectionId, groupName, _transport);
-        return await _engine.ExecuteAsync(op, ct);
-    }
+    public Task<OperationResult> JoinGroupAsync(PartyId user, string connectionId, PartyId group, CancellationToken ct = default)
+        => _engine.ExecuteAsync(ConnectionOps.JoinGroup(user, connectionId, group, _transport), ct);
 
-    public async Task<OperationResult> LeaveGroupAsync(string userId, string connectionId, string groupName, CancellationToken ct = default)
-    {
-        var op = ConnectionOps.LeaveGroup(userId, connectionId, groupName, _transport);
-        return await _engine.ExecuteAsync(op, ct);
-    }
+    public Task<OperationResult> LeaveGroupAsync(PartyId user, string connectionId, PartyId group, CancellationToken ct = default)
+        => _engine.ExecuteAsync(ConnectionOps.LeaveGroup(user, connectionId, group, _transport), ct);
 
-    /// <summary>
-    /// هل المستخدم متصل؟
-    /// </summary>
-    public Task<bool> IsOnlineAsync(string userId, CancellationToken ct = default)
-        => _tracker?.IsOnlineAsync(userId, ct) ?? Task.FromResult(false);
+    public Task<bool> IsOnlineAsync(PartyId user, CancellationToken ct = default)
+        => _tracker?.IsOnlineAsync(user.Id, ct) ?? Task.FromResult(false);
 }
 
 public static class RealtimeExtensions

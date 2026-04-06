@@ -3,22 +3,18 @@ using ACommerce.Notification.Operations.Operations;
 using ACommerce.OperationEngine.Core;
 using ACommerce.Realtime.Operations.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace ACommerce.Notification.Operations;
 
 /// <summary>
-/// تهيئة الإشعارات: تسجيل القنوات + تعريف الأنواع + واجهة بسيطة.
+/// تهيئة الإشعارات.
 ///
 /// services.AddNotifications(config => {
 ///     config.AddChannel(new InAppChannel(transport));
-///     config.AddChannel(new FirebaseChannel(apiKey));
-///     config.DefineType("new_order", ["inapp", "push"], priority: "high");
-///     config.DefineType("marketing", ["email"], priority: "low");
+///     config.AddChannel(new FirebaseChannel(key));
+///     config.DefineType(AppNotifications.NewOrder);
+///     config.DefineType(AppNotifications.Marketing);
 /// });
-///
-/// ثم:
-///   await notifier.SendAsync("new_order", userId, new { orderId = 123 });
 /// </summary>
 public class NotificationConfig
 {
@@ -31,36 +27,21 @@ public class NotificationConfig
         return this;
     }
 
-    public NotificationConfig DefineType(string typeName, string[] channels, string priority = "normal")
+    /// <summary>
+    /// تسجيل نوع إشعار مُعرّف مسبقاً.
+    /// المطور يُنشئ NotificationType ككائن في تطبيقه.
+    /// </summary>
+    public NotificationConfig DefineType(NotificationType type)
     {
-        Types[typeName] = new NotificationType
-        {
-            Name = typeName,
-            ChannelNames = channels,
-            Priority = priority
-        };
+        Types[type.Name] = type;
         return this;
     }
-}
-
-internal class NotificationType
-{
-    public string Name { get; set; } = default!;
-    public string[] ChannelNames { get; set; } = Array.Empty<string>();
-    public string Priority { get; set; } = "normal";
 }
 
 /// <summary>
 /// واجهة المطور البسيطة.
 ///
-///   await notifier.SendAsync("new_order", "user:123", new { orderId = 1 });
-///   // ← يبني القيد + يختار القنوات + ينفذ عبر المحرك + يطلق Hooks
-///
-///   // أو مع hook مخصص:
-///   await notifier.SendAsync("new_order", "user:123", data,
-///       afterComplete: ctx => db.SaveNotificationAsync(...));
-///
-///   // أو للتخصيص الكامل: استخدم NotifyOps مباشرة من البنية التحتية
+///   await notifier.SendAsync(AppNotifications.NewOrder, PartyId.User("123"), data);
 /// </summary>
 public class Notifier
 {
@@ -74,82 +55,70 @@ public class Notifier
     }
 
     /// <summary>
-    /// إرسال إشعار بنوعه. القنوات تُحدد تلقائياً من التهيئة.
+    /// إرسال إشعار بنوعه. القنوات والأولوية تُحدد من NotificationType.
     /// </summary>
     public async Task<OperationResult> SendAsync(
-        string typeName,
-        string userId,
+        NotificationType type,
+        PartyId recipient,
         object? data = null,
-        string? title = null,
-        string? message = null,
+        string? titleOverride = null,
+        string? messageOverride = null,
         Func<OperationContext, Task>? afterComplete = null,
         Func<OperationContext, Task>? afterFail = null,
         CancellationToken ct = default)
     {
-        if (!_config.Types.TryGetValue(typeName, out var type))
-            throw new ArgumentException($"Notification type '{typeName}' not defined. Use config.DefineType().");
+        if (!_config.Types.ContainsKey(type.Name))
+            throw new ArgumentException($"Notification type '{type.Name}' not registered. Use config.DefineType().");
 
-        var channels = type.ChannelNames
+        var registeredType = _config.Types[type.Name];
+        var channels = registeredType.Channels
             .Where(name => _config.Channels.ContainsKey(name))
             .Select(name => _config.Channels[name])
             .ToList();
 
         if (channels.Count == 0)
-            throw new InvalidOperationException($"No channels available for type '{typeName}'. Registered: {string.Join(", ", _config.Channels.Keys)}");
+            throw new InvalidOperationException(
+                $"No channels for '{type.Name}'. Defined: [{string.Join(", ", registeredType.Channels)}]. Registered: [{string.Join(", ", _config.Channels.Keys)}]");
 
         var op = NotifyOps.SendMultiChannel(
-            userId,
-            title ?? typeName,
-            message ?? typeName,
+            recipient,
+            titleOverride ?? registeredType.Title ?? type.Name,
+            messageOverride ?? registeredType.Message ?? type.Name,
             channels,
-            notificationType: typeName,
-            priority: type.Priority,
+            type: registeredType,
+            priority: registeredType.Priority,
             extraData: data);
 
-        if (afterComplete != null)
-            op.Hooks.AfterComplete = afterComplete;
-        if (afterFail != null)
-            op.Hooks.AfterFail = afterFail;
+        if (afterComplete != null) op.Hooks.AfterComplete = afterComplete;
+        if (afterFail != null) op.Hooks.AfterFail = afterFail;
 
         return await _engine.ExecuteAsync(op, ct);
     }
 
     /// <summary>
-    /// إرسال إشعار مباشر (بدون نوع مُسبق) - لحالات خاصة
+    /// إرسال مباشر بدون نوع مُسبق (لحالات خاصة).
     /// </summary>
     public async Task<OperationResult> SendDirectAsync(
-        string userId,
+        PartyId recipient,
         string title,
         string message,
-        string[] channelNames,
-        string priority = "normal",
+        INotificationChannel[] channels,
+        NotificationPriority? priority = null,
         object? data = null,
         CancellationToken ct = default)
     {
-        var channels = channelNames
-            .Where(name => _config.Channels.ContainsKey(name))
-            .Select(name => _config.Channels[name])
-            .ToList();
-
-        var op = NotifyOps.SendMultiChannel(userId, title, message, channels,
-            notificationType: "direct", priority: priority, extraData: data);
-
+        var op = NotifyOps.SendMultiChannel(recipient, title, message, channels,
+            priority: priority, extraData: data);
         return await _engine.ExecuteAsync(op, ct);
     }
 
-    /// <summary>
-    /// تأكيد قراءة إشعار
-    /// </summary>
-    public async Task<OperationResult> MarkReadAsync(string userId, Guid? originalOpId = null, CancellationToken ct = default)
+    public async Task<OperationResult> MarkReadAsync(
+        PartyId user, Guid? originalOpId = null, CancellationToken ct = default)
     {
-        var op = NotifyOps.MarkRead(userId, originalOpId);
-        return await _engine.ExecuteAsync(op, ct);
+        return await _engine.ExecuteAsync(NotifyOps.MarkRead(user, originalOpId), ct);
     }
 }
 
-/// <summary>
-/// تسجيل DI
-/// </summary>
 public static class NotificationExtensions
 {
     public static IServiceCollection AddNotifications(this IServiceCollection services, Action<NotificationConfig> configure)
