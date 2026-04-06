@@ -93,15 +93,14 @@ public static class Benchmark
             var words = Trainer.Tokenize(line);
             if (words.Length < 2) continue;
 
-            // التاريخ الأخير (لـ Cache Model) - آخر 100 كلمة من هذه الوثيقة
-            var recentHistory = new List<string>();
+            // Continuous Cache: نخزن (كلمة + سياقها) وليس الكلمة فقط
+            var cacheEntries = new List<(string Word, string[] Context)>();
 
             for (int i = 1; i < words.Length; i++)
             {
                 var currentWord = words[i];
                 var contextStart = Math.Max(0, i - graph.MaxNgramOrder);
                 var fullContext = words[contextStart..i];
-                var history = recentHistory.TakeLast(100).ToArray();
 
                 double prob;
                 switch (mode)
@@ -121,11 +120,13 @@ public static class Benchmark
                         break;
 
                     case "cache":
-                        prob = graph.GetCachedProbability(fullContext, currentWord, history);
+                        var recentForCache = cacheEntries.Count > 200 ? cacheEntries.GetRange(cacheEntries.Count - 200, 200) : cacheEntries;
+                        prob = graph.GetCachedProbability(fullContext, currentWord, recentForCache);
                         break;
 
                     case "magnetic":
-                        prob = graph.GetMagneticProbability(fullContext, currentWord, history);
+                        var recentForMag = cacheEntries.Count > 200 ? cacheEntries.GetRange(cacheEntries.Count - 200, 200) : cacheEntries;
+                        prob = graph.GetMagneticProbability(fullContext, currentWord, recentForMag);
                         break;
 
                     default:
@@ -137,7 +138,8 @@ public static class Benchmark
                 totalLogProb += Math.Log(prob);
                 totalTokens++;
 
-                recentHistory.Add(currentWord);
+                // إضافة للـ cache مع السياق
+                cacheEntries.Add((currentWord, fullContext));
             }
         }
 

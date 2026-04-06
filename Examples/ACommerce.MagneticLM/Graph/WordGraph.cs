@@ -184,105 +184,168 @@ public class WordGraph
     }
 
     // =========================================================================
-    // Cache Model: كلمات ظهرت مؤخراً في النص أكثر احتمالاً للتكرار
+    // Continuous Cache (مستوحى من Neural Cache Paper + AWD-LSTM Cache)
+    // بدلاً من عدّ تكرارات فقط، نستخدم تشابه السياق:
+    // - كل كلمة في التاريخ لها "بصمة سياقية" (الكلمات حولها)
+    // - نقارن السياق الحالي مع سياقات الكلمة في التاريخ
+    // - تشابه أعلى = احتمال أعلى (pointer mechanism)
     // =========================================================================
 
     /// <summary>
-    /// P_cache(w|history) = count(w in history) / |history|
-    /// المزج: P = (1-λ_cache) * P_KN + λ_cache * P_cache
+    /// Continuous Cache:
+    /// P_cache(w) = Σ sim(current_context, past_context_i) * I(past_word_i == w)
+    /// مطبّع ليكون توزيعاً احتمالياً
     /// </summary>
     public double GetCachedProbability(string[] fullContext, string word,
-        string[] recentHistory, double cacheLambda = 0.1)
+        List<(string Word, string[] Context)>? cacheEntries, double cacheLambda = 0.1, double theta = 0.5)
     {
         var knProb = GetInterpolatedProbability(fullContext, word);
 
-        if (recentHistory == null || recentHistory.Length == 0)
+        if (cacheEntries == null || cacheEntries.Count == 0)
             return knProb;
 
-        // عدد ظهور الكلمة في آخر N كلمة
-        var cacheCount = recentHistory.Count(w => w == word);
-        var cacheProb = (double)cacheCount / recentHistory.Length;
+        // Continuous Cache: تشابه السياق الحالي مع كل ظهور سابق
+        double cacheScore = 0;
+        double totalScore = 0;
 
+        foreach (var (pastWord, pastContext) in cacheEntries)
+        {
+            // تشابه بين السياقين (عدد الكلمات المشتركة / الأقصى)
+            var similarity = ContextSimilarity(fullContext, pastContext);
+            if (similarity <= 0) continue;
+
+            // رفع التشابه لأس θ للتركيز (θ < 1 = أكثر انتشاراً، θ > 1 = أكثر تركيزاً)
+            var weight = Math.Pow(similarity, 1.0 / Math.Max(theta, 0.1));
+            totalScore += weight;
+
+            if (pastWord == word)
+                cacheScore += weight;
+        }
+
+        var cacheProb = totalScore > 0 ? cacheScore / totalScore : 0;
         return (1.0 - cacheLambda) * knProb + cacheLambda * cacheProb;
     }
 
-    // =========================================================================
-    // MagneticLM: KN + Cache + Semantic (الثلاثة معاً)
-    // =========================================================================
-
     /// <summary>
-    /// P_magnetic = (1 - λ_cache - λ_sem) * P_KN
-    ///            + λ_cache * P_cache
-    ///            + λ_sem * P_semantic
-    ///
-    /// الطبقة المعنوية تُستخدم فقط عندما KN غير واثق (entropy عالي)
-    /// → تدفع الاحتمال نحو كلمات مرتبطة معنوياً
-    /// → تطرد عن كلمات مرتبطة سلبياً
+    /// تشابه سياقي بين مصفوفتي كلمات (Jaccard-like + position decay)
+    /// مستوحى من Relative Position في Transformer-XL:
+    /// الكلمات القريبة في السياق أهم من البعيدة
     /// </summary>
-    public double GetMagneticProbability(string[] fullContext, string word,
-        string[]? recentHistory = null, double cacheLambda = 0.1, double semanticLambda = 0.1)
+    private static double ContextSimilarity(string[] ctx1, string[] ctx2)
     {
-        var knProb = GetInterpolatedProbability(fullContext, word);
+        if (ctx1.Length == 0 || ctx2.Length == 0) return 0;
 
-        // === Cache ===
-        double cacheProb = 0;
-        if (recentHistory != null && recentHistory.Length > 0)
-        {
-            var cacheCount = recentHistory.Count(w => w == word);
-            cacheProb = (double)cacheCount / recentHistory.Length;
-        }
+        double score = 0;
+        double maxScore = 0;
 
-        // === Semantic: جمع قوى الجذب/الطرد من كل كلمات السياق ===
-        double semanticBoost = 0;
-        int semanticContributors = 0;
-        foreach (var ctx in fullContext)
+        for (int i = 0; i < ctx1.Length; i++)
         {
-            var sp = GetNormalizedSemanticProb(ctx, word);
-            if (sp != 0)
+            // وزن الموقع: الكلمة الأخيرة (الأقرب) وزنها أعلى
+            var posWeight = 1.0 + (double)i / ctx1.Length;
+            maxScore += posWeight;
+
+            for (int j = 0; j < ctx2.Length; j++)
             {
-                semanticBoost += sp;
-                semanticContributors++;
-            }
-        }
-        // إضافة تأثير الكلمات الأخيرة في التاريخ (ليست فقط السياق المباشر)
-        if (recentHistory != null)
-        {
-            // آخر 5 كلمات غير موجودة في السياق المباشر
-            var extraContext = recentHistory.TakeLast(5)
-                .Where(w => !fullContext.Contains(w)).Distinct();
-            foreach (var ctx in extraContext)
-            {
-                var sp = GetNormalizedSemanticProb(ctx, word);
-                if (sp != 0)
+                if (ctx1[i] == ctx2[j])
                 {
-                    semanticBoost += sp * 0.5; // نصف الوزن للكلمات الأبعد
-                    semanticContributors++;
+                    // تطابق + مكافأة إذا نفس الموقع النسبي
+                    var posBonus = (i == j) ? 1.5 : 1.0;
+                    score += posWeight * posBonus;
+                    break;
                 }
             }
         }
 
-        var semanticProb = semanticContributors > 0 ? semanticBoost / semanticContributors : 0;
+        return maxScore > 0 ? score / maxScore : 0;
+    }
 
-        // مزج تكيّفي: المعنوي يساهم أكثر عندما KN غير واثق
-        var adaptiveSemanticLambda = knProb > 0.05 ? semanticLambda * 0.2 : // KN واثق → قلل المعنوي
-                                    knProb > 0.01 ? semanticLambda * 0.5 : // KN متوسط
-                                                    semanticLambda;         // KN ضعيف → كامل المعنوي
+    // =========================================================================
+    // MagneticLM v4: Modified KN + Continuous Cache + Segment Memory + Semantic
+    //
+    // يدمج أفكار من:
+    //   AWD-LSTM: Continuous Cache بتشابه dot-product
+    //   Transformer-XL: Segment recurrence (ذاكرة عبر الجمل)
+    //   Neural Cache: θ-sharpened cache probability
+    //   + الطبقة المعنوية الأصلية (الجذب/الطرد)
+    // =========================================================================
 
-        // المعنوي السالب (طرد) يُطبّق كعقوبة مباشرة
+    public double GetMagneticProbability(string[] fullContext, string word,
+        List<(string Word, string[] Context)>? cacheEntries = null,
+        double cacheLambda = 0.08, double semanticLambda = 0.1, double theta = 0.5)
+    {
+        var knProb = GetInterpolatedProbability(fullContext, word);
+
+        // === 1. Continuous Cache (مع تشابه السياق) ===
+        double cacheProb = 0;
+        if (cacheEntries != null && cacheEntries.Count > 0)
+        {
+            double cacheScore = 0, totalScore = 0;
+            foreach (var (pastWord, pastContext) in cacheEntries)
+            {
+                var sim = ContextSimilarity(fullContext, pastContext);
+                if (sim <= 0) continue;
+                var weight = Math.Pow(sim, 1.0 / Math.Max(theta, 0.1));
+                totalScore += weight;
+                if (pastWord == word) cacheScore += weight;
+            }
+            cacheProb = totalScore > 0 ? cacheScore / totalScore : 0;
+        }
+
+        // === 2. Semantic: جذب/طرد من السياق الكامل + التاريخ ===
+        double semanticScore = 0;
+        int semCount = 0;
+
+        // السياق المباشر (n-gram window)
+        foreach (var ctx in fullContext)
+        {
+            var sp = GetNormalizedSemanticProb(ctx, word);
+            if (sp != 0) { semanticScore += sp; semCount++; }
+        }
+
+        // Segment Memory: آخر 10 كلمات فريدة من التاريخ (خارج السياق المباشر)
+        // مستوحى من Transformer-XL segment recurrence
+        if (cacheEntries != null)
+        {
+            var recentUnique = cacheEntries.TakeLast(20)
+                .Select(e => e.Word)
+                .Where(w => !fullContext.Contains(w))
+                .Distinct().Take(10);
+
+            foreach (var ctx in recentUnique)
+            {
+                var sp = GetNormalizedSemanticProb(ctx, word);
+                if (sp != 0)
+                {
+                    // اضمحلال: كلمات أبعد في التاريخ أضعف (relative position)
+                    semanticScore += sp * 0.4;
+                    semCount++;
+                }
+            }
+        }
+
+        var semanticProb = semCount > 0 ? semanticScore / semCount : 0;
+
+        // === 3. المزج التكيّفي ===
+        // المعنوي يساهم أكثر عندما KN غير واثق
+        var adaptiveSem = knProb > 0.05 ? semanticLambda * 0.15 :
+                          knProb > 0.01 ? semanticLambda * 0.4 :
+                                          semanticLambda;
+
+        // Cache يساهم أكثر في الوثائق الطويلة
+        var adaptiveCache = cacheEntries != null && cacheEntries.Count > 20
+            ? cacheLambda : cacheLambda * 0.3; // قلل Cache في السياقات القصيرة (PTB)
+
         double result;
         if (semanticProb >= 0)
         {
-            result = (1.0 - cacheLambda - adaptiveSemanticLambda) * knProb
-                   + cacheLambda * cacheProb
-                   + adaptiveSemanticLambda * semanticProb;
+            var remainder = 1.0 - adaptiveCache - adaptiveSem;
+            result = remainder * knProb + adaptiveCache * cacheProb + adaptiveSem * semanticProb;
         }
         else
         {
-            // طرد: يقلل الاحتمال مباشرة (لكن لا يصل للصفر)
-            result = (1.0 - cacheLambda) * knProb
-                   + cacheLambda * cacheProb;
-            result *= (1.0 + semanticProb * adaptiveSemanticLambda); // semanticProb سالب → يقلل
-            result = Math.Max(result, knProb * 0.01); // لا ينزل تحت 1% من KN
+            result = (1.0 - adaptiveCache) * knProb + adaptiveCache * cacheProb;
+            result *= (1.0 + semanticProb * adaptiveSem);
+            result = Math.Max(result, knProb * 0.01);
         }
 
         return (double.IsNaN(result) || result <= 0) ? knProb : result;
