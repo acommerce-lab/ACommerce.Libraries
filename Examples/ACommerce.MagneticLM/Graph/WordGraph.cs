@@ -1,12 +1,19 @@
+using System.Runtime.CompilerServices;
+
 namespace ACommerce.MagneticLM.Graph;
 
 /// <summary>
-/// MagneticLM v5: Modified KN + Emergent Embeddings + Softmax Semantic
-///              + Node Importance + Conceptual Circles + Fixed Cache
+/// MagneticLM v6: Modified KN + Physics-Based Word Positions + Multi-Force System
+///
+/// يدمج أفكار من SemanticForce:
+/// - كل كلمة لها موقع فيزيائي (x,y,z) يتحرك بقوى حتى يستقر
+/// - 5 قوى: سياقية + ترددية + جذب + تنافر + تباطؤ
+/// - Cosine Similarity بين المواقع النهائية = تشابه دلالي
+/// - المواقع المستقرة = emergent embeddings ديناميكية
 /// </summary>
 public class WordGraph
 {
-    // === N-gram storage (unchanged from v4) ===
+    // === N-gram (unchanged) ===
     public Dictionary<string, Dictionary<string, double>> NgramCounts { get; } = new();
     public Dictionary<string, double> NgramTotals { get; } = new();
     public Dictionary<string, HashSet<string>> ContinuationContexts { get; } = new();
@@ -23,27 +30,29 @@ public class WordGraph
     public Dictionary<string, WordNode> Nodes { get; } = new();
     public long TotalTokens { get; set; }
 
-    // === الطبقة المعنوية ===
+    // === الطبقة المعنوية (أوزان العلاقات) ===
     public Dictionary<string, Dictionary<string, double>> SemanticEdges { get; } = new();
     public double SemanticThreshold { get; set; } = 0.1;
     public double TransitiveDecay { get; set; } = 0.5;
 
-    // === Emergent Embeddings ===
-    // كل كلمة لها "متجه" = صف أوزان علاقاتها المعنوية
-    // يُحسب بعد التدريب ويُخزّن مُسبقاً
-    private Dictionary<string, Dictionary<string, double>> _embeddingVectors = new();
-    private Dictionary<string, double> _embeddingNorms = new();
-
-    // === Conceptual Circles (دوائر مفاهيمية) ===
-    // مجموعات كلمات تعزز بعضها البعض (cycles في الرسم)
-    private List<HashSet<string>> _circles = new();
+    // === معاملات القوى الفيزيائية (من SemanticForce) ===
+    public float K_context { get; set; } = 2.0f;
+    public float K_frequency { get; set; } = 1.5f;
+    public float K_attraction { get; set; } = 0.5f;
+    public float K_repulsion { get; set; } = 0.3f;
+    public float DampingCoeff { get; set; } = 0.15f;
+    public float PhysicsLearningRate { get; set; } = 0.02f;
+    public float OptimalDistance { get; set; } = 3.0f;
+    public float MaxRadius { get; set; } = 15.0f;
 
     // === Node Importance ===
-    // أهمية كل كلمة = log(1+connections) * log(1+frequency)
     private Dictionary<string, double> _importance = new();
 
+    // === Conceptual Circles ===
+    private List<HashSet<string>> _circles = new();
+
     // =========================================================================
-    // N-gram registration (unchanged)
+    // N-gram registration
     // =========================================================================
     public void AddNgram(string[] context, string nextWord)
     {
@@ -54,431 +63,382 @@ public class WordGraph
         NgramCounts[key][nextWord] = current + 1.0;
         NgramTotals.TryGetValue(key, out var total);
         NgramTotals[key] = total + 1.0;
-        var newCount = current + 1.0;
-        if (newCount == 1) { NgramsWithCount1.TryGetValue(key, out var v); NgramsWithCount1[key] = v + 1; }
-        if (newCount == 2) { NgramsWithCount1[key]--; NgramsWithCount2.TryGetValue(key, out var v); NgramsWithCount2[key] = v + 1; }
-        if (newCount == 3) { NgramsWithCount2[key]--; }
+        var nc = current + 1.0;
+        if (nc == 1) { NgramsWithCount1.TryGetValue(key, out var v); NgramsWithCount1[key] = v + 1; }
+        if (nc == 2) { NgramsWithCount1[key]--; NgramsWithCount2.TryGetValue(key, out var v); NgramsWithCount2[key] = v + 1; }
+        if (nc == 3) { NgramsWithCount2[key]--; }
         if (isNew)
         {
             if (!ContinuationContexts.ContainsKey(nextWord)) ContinuationContexts[nextWord] = new();
             ContinuationContexts[nextWord].Add(key);
-            UniqueFollowers.TryGetValue(key, out var uf);
-            UniqueFollowers[key] = uf + 1;
+            UniqueFollowers.TryGetValue(key, out var uf); UniqueFollowers[key] = uf + 1;
             if (context.Length == 1) TotalUniqueBigrams++;
         }
     }
 
     public WordNode GetOrCreateNode(string word)
     {
-        if (!Nodes.TryGetValue(word, out var node)) { node = new WordNode(word); Nodes[word] = node; }
+        if (!Nodes.TryGetValue(word, out var node))
+        {
+            node = new WordNode(word);
+            Nodes[word] = node;
+        }
         return node;
     }
 
     // =========================================================================
-    // Post-training: حساب الخصومات + Embeddings + Importance + Circles
+    // Post-training: Discounts + Physics Simulation + Importance + Circles
     // =========================================================================
-    public void ComputeOptimalDiscounts()
-    {
-        long globalN1 = 0, globalN2 = 0, globalN3 = 0;
-        foreach (var (_, counts) in NgramCounts)
-            foreach (var (_, count) in counts)
-            {
-                if (count == 1) globalN1++;
-                else if (count == 2) globalN2++;
-                else if (count == 3) globalN3++;
-            }
-        if (globalN1 == 0 || globalN2 == 0) return;
-        var Y = (double)globalN1 / (globalN1 + 2.0 * globalN2);
-        D1 = Math.Clamp(1.0 - 2.0 * Y * globalN2 / globalN1, 0.1, 0.95);
-        D2 = Math.Clamp(2.0 - 3.0 * Y * globalN3 / globalN2, 0.1, 0.95);
-        D3Plus = Math.Clamp(3.0 - 4.0 * Y * (globalN3 > 0 ? (double)(globalN3 + 1) / globalN3 : 1.0), 0.1, 0.95);
-    }
-
-    /// <summary>
-    /// بناء Emergent Embeddings + Node Importance + Conceptual Circles
-    /// يُستدعى مرة واحدة بعد التدريب
-    /// </summary>
-    public void BuildPostTrainingStructures()
+    public void BuildPostTrainingStructures(int physicsIterations = 50)
     {
         ComputeOptimalDiscounts();
-        BuildEmergentEmbeddings();
+        Console.Write($"  Running physics simulation ({physicsIterations} iterations)...");
+        RunPhysicsSimulation(physicsIterations);
+        Console.WriteLine(" done.");
         ComputeNodeImportance();
         DetectConceptualCircles();
     }
 
-    /// <summary>
-    /// Emergent Embeddings: متجه كل كلمة = صف أوزانها المعنوية
-    /// + حساب الـ norm مسبقاً للسرعة
-    /// </summary>
-    private void BuildEmergentEmbeddings()
+    private void ComputeOptimalDiscounts()
     {
-        _embeddingVectors.Clear();
-        _embeddingNorms.Clear();
+        long n1 = 0, n2 = 0, n3 = 0;
+        foreach (var (_, counts) in NgramCounts)
+            foreach (var (_, c) in counts) { if (c == 1) n1++; else if (c == 2) n2++; else if (c == 3) n3++; }
+        if (n1 == 0 || n2 == 0) return;
+        var Y = (double)n1 / (n1 + 2.0 * n2);
+        D1 = Math.Clamp(1.0 - 2.0 * Y * n2 / n1, 0.1, 0.95);
+        D2 = Math.Clamp(2.0 - 3.0 * Y * n3 / n2, 0.1, 0.95);
+        D3Plus = Math.Clamp(3.0 - 4.0 * Y * (n3 > 0 ? (double)(n3 + 1) / n3 : 1.0), 0.1, 0.95);
+    }
 
-        foreach (var (word, edges) in SemanticEdges)
+    // =========================================================================
+    // المحاكاة الفيزيائية الكاملة (من SemanticForce)
+    // كل كلمة تتحرك بـ 5 قوى حتى تستقر في موقعها الدلالي
+    // =========================================================================
+    private void RunPhysicsSimulation(int iterations)
+    {
+        var nodeList = Nodes.Values.ToArray();
+        var edgeLookup = new Dictionary<string, List<(string Target, double Weight, string Type)>>();
+
+        // بناء فهرس سريع للعلاقات
+        foreach (var (from, edges) in SemanticEdges)
         {
-            // المتجه = فقط العلاقات القوية (فوق العتبة)
-            var vec = new Dictionary<string, double>();
-            double normSq = 0;
-            foreach (var (target, weight) in edges)
+            if (!edgeLookup.ContainsKey(from)) edgeLookup[from] = new();
+            foreach (var (to, weight) in edges)
             {
-                if (Math.Abs(weight) >= SemanticThreshold)
+                if (Math.Abs(weight) < SemanticThreshold) continue;
+                edgeLookup[from].Add((to, weight, weight > 1.0 ? "contextual" : "frequent"));
+            }
+        }
+
+        for (int iter = 0; iter < iterations; iter++)
+        {
+            foreach (var node in nodeList)
+            {
+                var force = CalculateForces(node, nodeList, edgeLookup);
+
+                // قانون نيوتن + تباطؤ
+                node.VX += force.fx * PhysicsLearningRate;
+                node.VY += force.fy * PhysicsLearningRate;
+                node.VZ += force.fz * PhysicsLearningRate;
+
+                node.VX *= (1 - DampingCoeff);
+                node.VY *= (1 - DampingCoeff);
+                node.VZ *= (1 - DampingCoeff);
+
+                node.PX += node.VX * PhysicsLearningRate;
+                node.PY += node.VY * PhysicsLearningRate;
+                node.PZ += node.VZ * PhysicsLearningRate;
+
+                // حدود الفضاء
+                var mag = MathF.Sqrt(node.PX * node.PX + node.PY * node.PY + node.PZ * node.PZ);
+                if (mag > MaxRadius)
                 {
-                    vec[target] = weight;
-                    normSq += weight * weight;
+                    var scale = MaxRadius / mag;
+                    node.PX *= scale; node.PY *= scale; node.PZ *= scale;
+                    node.VX *= 0.5f; node.VY *= 0.5f; node.VZ *= 0.5f;
                 }
             }
-            if (vec.Count > 0)
+        }
+    }
+
+    private (float fx, float fy, float fz) CalculateForces(
+        WordNode target, WordNode[] allNodes,
+        Dictionary<string, List<(string Target, double Weight, string Type)>> edgeLookup)
+    {
+        float fx = 0, fy = 0, fz = 0;
+
+        // === قوى من العلاقات المعنوية ===
+        if (edgeLookup.TryGetValue(target.Word, out var relations))
+        {
+            foreach (var (otherWord, weight, type) in relations)
             {
-                _embeddingVectors[word] = vec;
-                _embeddingNorms[word] = Math.Sqrt(normSq);
+                if (!Nodes.TryGetValue(otherWord, out var other)) continue;
+
+                float dx = other.PX - target.PX;
+                float dy = other.PY - target.PY;
+                float dz = other.PZ - target.PZ;
+                float dist = MathF.Max(MathF.Sqrt(dx * dx + dy * dy + dz * dz), 0.1f);
+                float ux = dx / dist, uy = dy / dist, uz = dz / dist;
+
+                float k = type == "contextual" ? K_context : K_frequency;
+                float f = k * (float)Math.Min(weight, 10) / dist; // cap weight
+
+                fx += f * ux; fy += f * uy; fz += f * uz;
             }
         }
-    }
 
-    /// <summary>
-    /// Cosine Similarity بين "متجهي" كلمتين
-    /// </summary>
-    public double EmbeddingSimilarity(string word1, string word2)
-    {
-        if (!_embeddingVectors.TryGetValue(word1, out var vec1)) return 0;
-        if (!_embeddingVectors.TryGetValue(word2, out var vec2)) return 0;
-        if (!_embeddingNorms.TryGetValue(word1, out var norm1) || norm1 == 0) return 0;
-        if (!_embeddingNorms.TryGetValue(word2, out var norm2) || norm2 == 0) return 0;
+        // === قوى عامة: تنافر + جذب (عيّنة عشوائية لتوفير الوقت) ===
+        var sampleSize = Math.Min(allNodes.Length, 100);
+        var step = Math.Max(1, allNodes.Length / sampleSize);
 
-        // Dot product على المفاتيح المشتركة فقط (sparse)
-        double dot = 0;
-        foreach (var (key, val1) in vec1)
+        for (int i = 0; i < allNodes.Length; i += step)
         {
-            if (vec2.TryGetValue(key, out var val2))
-                dot += val1 * val2;
+            var other = allNodes[i];
+            if (other == target) continue;
+
+            float dx = other.PX - target.PX;
+            float dy = other.PY - target.PY;
+            float dz = other.PZ - target.PZ;
+            float dist = MathF.Max(MathF.Sqrt(dx * dx + dy * dy + dz * dz), 0.1f);
+            float ux = dx / dist, uy = dy / dist, uz = dz / dist;
+
+            // تنافر (يمنع التكدس)
+            float repF = -K_repulsion / (dist * dist + 1);
+            fx += repF * ux; fy += repF * uy; fz += repF * uz;
+
+            // جذب (يحافظ على التماسك)
+            if (dist > OptimalDistance)
+            {
+                float attF = K_attraction * (dist - OptimalDistance) * 0.01f;
+                fx += attF * ux; fy += attF * uy; fz += attF * uz;
+            }
         }
 
-        return dot / (norm1 * norm2);
+        // قوة مركزية (تمنع الانجراف)
+        fx -= 0.01f * target.PX;
+        fy -= 0.01f * target.PY;
+        fz -= 0.01f * target.PZ;
+
+        return (fx, fy, fz);
     }
 
     /// <summary>
-    /// Node Importance: log(1+connections) * log(1+frequency)
-    /// كلمة متصلة بكثير ومتكررة = مهمة
+    /// Cosine Similarity بين موقعي كلمتين في الفضاء الفيزيائي
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public double PositionSimilarity(string word1, string word2)
+    {
+        if (!Nodes.TryGetValue(word1, out var n1) || !Nodes.TryGetValue(word2, out var n2)) return 0;
+
+        float dot = n1.PX * n2.PX + n1.PY * n2.PY + n1.PZ * n2.PZ;
+        float mag1 = MathF.Sqrt(n1.PX * n1.PX + n1.PY * n1.PY + n1.PZ * n1.PZ);
+        float mag2 = MathF.Sqrt(n2.PX * n2.PX + n2.PY * n2.PY + n2.PZ * n2.PZ);
+
+        if (mag1 < 0.001f || mag2 < 0.001f) return 0;
+        return Math.Clamp(dot / (mag1 * mag2), -1.0, 1.0);
+    }
+
+    // =========================================================================
+    // Node Importance + Circles
+    // =========================================================================
     private void ComputeNodeImportance()
     {
         _importance.Clear();
         foreach (var (word, node) in Nodes)
         {
-            var connections = SemanticEdges.TryGetValue(word, out var e) ? e.Count : 0;
-            _importance[word] = Math.Log(1 + connections) * Math.Log(1 + node.Frequency);
+            var conn = SemanticEdges.TryGetValue(word, out var e) ? e.Count : 0;
+            _importance[word] = Math.Log(1 + conn) * Math.Log(1 + node.Frequency);
         }
     }
 
-    public double GetImportance(string word) =>
-        _importance.TryGetValue(word, out var imp) ? imp : 0;
+    public double GetImportance(string w) => _importance.TryGetValue(w, out var v) ? v : 0;
 
-    /// <summary>
-    /// اكتشاف الدوائر المفاهيمية:
-    /// مجموعات كلمات حيث كل كلمة مرتبطة معنوياً بكل الأخريات.
-    /// نستخدم cliques بدل cycles (أسرع وأكثر معنى).
-    /// </summary>
     private void DetectConceptualCircles()
     {
         _circles.Clear();
-
-        // بناء رسم غير موجه من العلاقات المعنوية القوية
         var strongThreshold = SemanticThreshold * 3;
         var neighbors = new Dictionary<string, HashSet<string>>();
-
         foreach (var (word, edges) in SemanticEdges)
-        {
             foreach (var (target, weight) in edges)
-            {
-                if (weight < strongThreshold) continue;
-                // تحقق من ثنائية الاتجاه
-                if (SemanticEdges.TryGetValue(target, out var reverseEdges) &&
-                    reverseEdges.TryGetValue(word, out var reverseWeight) &&
-                    reverseWeight >= strongThreshold)
+                if (weight >= strongThreshold &&
+                    SemanticEdges.TryGetValue(target, out var rev) &&
+                    rev.TryGetValue(word, out var rw) && rw >= strongThreshold)
                 {
                     if (!neighbors.ContainsKey(word)) neighbors[word] = new();
                     neighbors[word].Add(target);
                 }
-            }
-        }
 
-        // اكتشاف cliques (مبسط: مجموعات من 3-5 كلمات مترابطة بالكامل)
         var processed = new HashSet<string>();
-        foreach (var (word, wordNeighbors) in neighbors)
+        foreach (var (word, nbrs) in neighbors)
         {
             if (processed.Contains(word)) continue;
-
-            // ابدأ من الكلمة الحالية، أضف كل جار متصل بكل أعضاء المجموعة
             var clique = new HashSet<string> { word };
-            foreach (var candidate in wordNeighbors)
+            foreach (var cand in nbrs)
             {
-                if (!neighbors.ContainsKey(candidate)) continue;
-                // هل candidate متصل بكل أعضاء الـ clique الحاليين؟
-                if (clique.All(member => neighbors.ContainsKey(member) && neighbors[member].Contains(candidate)))
-                {
-                    clique.Add(candidate);
-                    if (clique.Count >= 5) break; // حد أقصى
-                }
+                if (!neighbors.ContainsKey(cand)) continue;
+                if (clique.All(m => neighbors.ContainsKey(m) && neighbors[m].Contains(cand)))
+                { clique.Add(cand); if (clique.Count >= 5) break; }
             }
-
-            if (clique.Count >= 3) // حد أدنى 3 كلمات
-            {
-                _circles.Add(clique);
-                foreach (var c in clique) processed.Add(c);
-            }
+            if (clique.Count >= 3) { _circles.Add(clique); foreach (var c in clique) processed.Add(c); }
         }
     }
 
-    /// <summary>
-    /// هل كلمتان في نفس الدائرة المفاهيمية؟
-    /// </summary>
-    public double GetCircleBoost(string word1, string word2)
+    public double GetCircleBoost(string w1, string w2)
     {
         foreach (var circle in _circles)
-            if (circle.Contains(word1) && circle.Contains(word2))
-                return 1.5; // تعزيز 50%
-        return 1.0; // لا تعزيز
+            if (circle.Contains(w1) && circle.Contains(w2)) return 1.5;
+        return 1.0;
     }
 
     // =========================================================================
     // Modified Kneser-Ney (unchanged)
     // =========================================================================
-    public double GetInterpolatedProbability(string[] fullContext, string word)
-        => ModifiedKneserNey(fullContext, word, Math.Min(fullContext.Length, MaxNgramOrder));
+    public double GetInterpolatedProbability(string[] ctx, string word)
+        => ModKN(ctx, word, Math.Min(ctx.Length, MaxNgramOrder));
 
-    private double ModifiedKneserNey(string[] fullContext, string word, int order)
+    private double ModKN(string[] ctx, string word, int order)
     {
-        if (order == 0) return GetContinuationProbability(word);
-        var contextStart = Math.Max(fullContext.Length - order, 0);
-        var context = fullContext[contextStart..];
-        var key = string.Join("|", context);
-        if (!NgramTotals.TryGetValue(key, out var total) || total == 0)
-            return ModifiedKneserNey(fullContext, word, order - 1);
+        if (order == 0) return ContProb(word);
+        var start = Math.Max(ctx.Length - order, 0);
+        var key = string.Join("|", ctx[start..]);
+        if (!NgramTotals.TryGetValue(key, out var total) || total == 0) return ModKN(ctx, word, order - 1);
         NgramCounts[key].TryGetValue(word, out var count);
         var d = count <= 0 ? 0 : count == 1 ? D1 : count == 2 ? D2 : D3Plus;
-        var discountedProb = Math.Max(count - d, 0) / total;
+        var disc = Math.Max(count - d, 0) / total;
         NgramsWithCount1.TryGetValue(key, out var n1);
         NgramsWithCount2.TryGetValue(key, out var n2);
-        UniqueFollowers.TryGetValue(key, out var uniqueCount);
-        var n3plus = Math.Max(uniqueCount - n1 - n2, 0);
-        var lambda = (D1 * n1 + D2 * n2 + D3Plus * n3plus) / total;
-        return discountedProb + lambda * ModifiedKneserNey(fullContext, word, order - 1);
+        UniqueFollowers.TryGetValue(key, out var uf);
+        var n3p = Math.Max(uf - n1 - n2, 0);
+        var lambda = (D1 * n1 + D2 * n2 + D3Plus * n3p) / total;
+        return disc + lambda * ModKN(ctx, word, order - 1);
     }
 
-    private double GetContinuationProbability(string word)
+    private double ContProb(string word)
     {
         if (TotalUniqueBigrams == 0) return 1.0 / Math.Max(Nodes.Count, 1);
-        if (!ContinuationContexts.TryGetValue(word, out var contexts)) return 0.5 / TotalUniqueBigrams;
-        return (double)contexts.Count / TotalUniqueBigrams;
+        if (!ContinuationContexts.TryGetValue(word, out var c)) return 0.5 / TotalUniqueBigrams;
+        return (double)c.Count / TotalUniqueBigrams;
     }
 
     // =========================================================================
-    // MagneticLM v5: KN + Embedding Similarity + Softmax Semantic
-    //              + Node Importance + Circle Boost + Fixed Cache
+    // MagneticLM v6: KN + Physics Position Similarity + Importance + Circles + Cache
+    //
+    // الاحتمال النهائي = مزج:
+    //   (1-λ) * P_KN                           ← n-gram الأساسي
+    //   + λ_pos * P_position_similarity          ← تشابه الموقع الفيزيائي
+    //   + λ_cache * P_cache                      ← ذاكرة مستمرة
+    //
+    // كل مكون مضمون أن يكون [0,1] → النتيجة لا تتجاوز 1
     // =========================================================================
-
     public double GetMagneticProbability(string[] fullContext, string word,
         List<(string Word, string[] Context)>? cacheEntries = null,
-        bool isNewSentence = false,
-        double cacheLambda = 0.08, double semanticLambda = 0.12, double embeddingLambda = 0.08)
+        bool isNewSentence = false)
     {
         var knProb = GetInterpolatedProbability(fullContext, word);
 
-        // === 1. Cache (fixed: لا يُستخدم عبر جمل مستقلة في PTB) ===
-        double cacheProb = 0;
-        if (!isNewSentence && cacheEntries != null && cacheEntries.Count > 5)
+        // === 1. Position Similarity: تشابه الموقع الفيزيائي ===
+        // كلمات قريبة في الفضاء 3D → احتمال أعلى (حتى بدون علاقة مباشرة)
+        double posScore = 0;
+        int posCount = 0;
+        foreach (var ctx in fullContext)
         {
-            double cacheScore = 0, totalScore = 0;
-            // آخر 100 فقط
-            var recent = cacheEntries.Count > 100 ? cacheEntries.GetRange(cacheEntries.Count - 100, 100) : cacheEntries;
+            var sim = PositionSimilarity(ctx, word);
+            if (sim > 0.05) // فقط تشابهات ذات معنى
+            {
+                // Node Importance تُرجّح المساهمة
+                var imp = 1.0 + GetImportance(ctx) * 0.05;
+                // Circle Boost
+                var boost = GetCircleBoost(ctx, word);
+                posScore += sim * imp * boost;
+                posCount++;
+            }
+        }
+        // تطبيع ليكون [0, ~0.3]
+        var posProb = posCount > 0 ? Math.Min(posScore / (posCount * 3.0), 0.3) : 0;
+
+        // === 2. Cache ===
+        double cacheProb = 0;
+        if (!isNewSentence && cacheEntries != null && cacheEntries.Count > 10)
+        {
+            double cacheScore = 0, totalCacheWeight = 0;
+            var recent = cacheEntries.Count > 100
+                ? cacheEntries.GetRange(cacheEntries.Count - 100, 100) : cacheEntries;
             foreach (var (pastWord, pastContext) in recent)
             {
                 var sim = ContextSimilarity(fullContext, pastContext);
                 if (sim <= 0) continue;
-                var weight = Math.Pow(sim, 2.0); // θ=0.5 → pow 2 for sharpening
-                totalScore += weight;
-                if (pastWord == word) cacheScore += weight;
+                var w = sim * sim; // sharpening
+                totalCacheWeight += w;
+                if (pastWord == word) cacheScore += w;
             }
-            cacheProb = totalScore > 0 ? cacheScore / totalScore : 0;
+            cacheProb = totalCacheWeight > 0 ? cacheScore / totalCacheWeight : 0;
         }
 
-        // === 2. Semantic with Softmax + Importance + Circle Boost ===
-        double semanticScore = ComputeSoftmaxSemanticScore(fullContext, word, cacheEntries);
+        // === 3. المزج التكيّفي (مضمون [0,1]) ===
+        // الأوزان تعتمد على ثقة KN
+        double posLambda, cacheLambda;
+        if (knProb > 0.05) // KN واثق جداً
+        { posLambda = 0.02; cacheLambda = 0.01; }
+        else if (knProb > 0.005) // KN متوسط
+        { posLambda = 0.06; cacheLambda = 0.03; }
+        else // KN ضعيف → الطبقات الأخرى تساهم أكثر
+        { posLambda = 0.12; cacheLambda = 0.05; }
 
-        // === 3. Embedding Similarity: كلمات مشابهة للسياق (غير مرتبطة مباشرة) ===
-        double embeddingScore = ComputeEmbeddingScore(fullContext, word);
+        if (isNewSentence || cacheEntries == null || cacheEntries.Count < 10)
+            cacheLambda = 0;
 
-        // === 4. المزج التكيّفي ===
-        var adaptiveSem = knProb > 0.05 ? semanticLambda * 0.15 :
-                          knProb > 0.01 ? semanticLambda * 0.4 : semanticLambda;
-        var adaptiveEmb = knProb > 0.05 ? embeddingLambda * 0.1 :
-                          knProb > 0.01 ? embeddingLambda * 0.3 : embeddingLambda;
-        var adaptiveCache = (!isNewSentence && cacheEntries != null && cacheEntries.Count > 20)
-            ? cacheLambda : 0; // إيقاف cache تماماً في السياقات القصيرة
+        var knLambda = 1.0 - posLambda - cacheLambda;
 
-        var remainder = Math.Max(1.0 - adaptiveCache - adaptiveSem - adaptiveEmb, 0.5);
-        var result = remainder * knProb
-                   + adaptiveCache * cacheProb
-                   + adaptiveSem * Math.Max(semanticScore, 0)
-                   + adaptiveEmb * Math.Max(embeddingScore, 0);
+        var result = knLambda * knProb + posLambda * posProb + cacheLambda * cacheProb;
 
-        // طرد معنوي: يقلل الاحتمال مباشرة
-        if (semanticScore < 0)
-            result *= (1.0 + semanticScore * adaptiveSem * 2);
-
-        result = Math.Max(result, knProb * 0.001);
-        // حماية: الاحتمال لا يتجاوز 1 ولا ينزل تحت floor
-        if (double.IsNaN(result) || result <= 0) return knProb;
-        return Math.Min(result, 0.999);
+        // ضمان [floor, 0.999]
+        return Math.Clamp(result, 1e-10, 0.999);
     }
 
-    /// <summary>
-    /// Softmax Semantic: بدل التطبيع الخطي
-    /// + Node Importance يُرجّح المساهمات
-    /// + Circle Boost يُعزز كلمات الدائرة
-    /// </summary>
-    private double ComputeSoftmaxSemanticScore(string[] fullContext, string word,
-        List<(string Word, string[] Context)>? cacheEntries)
-    {
-        double totalScore = 0;
-        double totalWeight = 0;
-
-        // من السياق المباشر
-        foreach (var ctx in fullContext)
-        {
-            var raw = GetRawSemanticWeight(ctx, word);
-            if (raw == 0) continue;
-
-            // أهمية الكلمة المصدر تُرجّح مساهمتها
-            var imp = GetImportance(ctx);
-            var impWeight = 1.0 + imp * 0.1;
-
-            // تعزيز الدائرة المفاهيمية
-            var circleBoost = GetCircleBoost(ctx, word);
-
-            totalScore += raw * impWeight * circleBoost;
-            totalWeight += impWeight;
-        }
-
-        // من التاريخ الأخير (segment memory)
-        if (cacheEntries != null)
-        {
-            var recentWords = cacheEntries.TakeLast(15)
-                .Select(e => e.Word).Where(w => !fullContext.Contains(w)).Distinct().Take(8);
-            foreach (var ctx in recentWords)
-            {
-                var raw = GetRawSemanticWeight(ctx, word);
-                if (raw == 0) continue;
-                totalScore += raw * 0.3; // وزن أقل للتاريخ
-                totalWeight += 0.3;
-            }
-        }
-
-        if (totalWeight == 0) return 0;
-        var avgScore = totalScore / totalWeight;
-
-        // Softmax-like: تطبيع عبر كل الأوزان المعنوية من المصدر
-        // بدل weight/sum → exp(weight)/sum(exp(weights))
-        return SoftmaxNormalize(fullContext[^1], word, avgScore);
-    }
-
-    private double SoftmaxNormalize(string contextWord, string targetWord, double rawScore)
-    {
-        if (!SemanticEdges.TryGetValue(contextWord, out var edges) || edges.Count == 0)
-            return rawScore > 0 ? rawScore * 0.01 : 0;
-
-        // Softmax: exp(score) / Σ exp(scores)
-        var maxWeight = edges.Values.Where(w => Math.Abs(w) >= SemanticThreshold).DefaultIfEmpty(1).Max();
-        if (maxWeight == 0) maxWeight = 1;
-
-        var scaledScore = rawScore / maxWeight; // تطبيع لتجنب overflow
-        var expScore = Math.Exp(scaledScore);
-        var sumExp = edges.Values
-            .Where(w => Math.Abs(w) >= SemanticThreshold)
-            .Sum(w => Math.Exp(w / maxWeight));
-
-        return sumExp > 0 ? expScore / sumExp : 0;
-    }
-
-    /// <summary>
-    /// Embedding Score: تشابه cosine بين الكلمة المرشحة وكلمات السياق
-    /// يلتقط كلمات مشابهة حتى بدون علاقة مباشرة
-    /// </summary>
-    private double ComputeEmbeddingScore(string[] fullContext, string word)
-    {
-        if (_embeddingVectors.Count == 0) return 0;
-
-        double totalSim = 0;
-        int count = 0;
-
-        foreach (var ctx in fullContext)
-        {
-            var sim = EmbeddingSimilarity(ctx, word);
-            if (sim > 0.1) // فقط التشابهات ذات المعنى
-            {
-                totalSim += sim;
-                count++;
-            }
-        }
-
-        if (count == 0) return 0;
-
-        // تطبيع: متوسط التشابه مقسوم على عدد الكلمات في القاموس (ليصبح كالاحتمال)
-        return (totalSim / count) / Math.Log(1 + Nodes.Count);
-    }
-
-    private double GetRawSemanticWeight(string from, string to)
-    {
-        if (!SemanticEdges.TryGetValue(from, out var edges)) return 0;
-        if (!edges.TryGetValue(to, out var weight)) return 0;
-        return Math.Abs(weight) >= SemanticThreshold ? weight : 0;
-    }
-
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static double ContextSimilarity(string[] ctx1, string[] ctx2)
     {
         if (ctx1.Length == 0 || ctx2.Length == 0) return 0;
-        double score = 0, maxScore = 0;
+        double score = 0, max = 0;
         for (int i = 0; i < ctx1.Length; i++)
         {
-            var posWeight = 1.0 + (double)i / ctx1.Length;
-            maxScore += posWeight;
+            var pw = 1.0 + (double)i / ctx1.Length;
+            max += pw;
             for (int j = 0; j < ctx2.Length; j++)
-                if (ctx1[i] == ctx2[j]) { score += posWeight * (i == j ? 1.5 : 1.0); break; }
+                if (ctx1[i] == ctx2[j]) { score += pw * (i == j ? 1.5 : 1.0); break; }
         }
-        return maxScore > 0 ? score / maxScore : 0;
+        return max > 0 ? score / max : 0;
     }
 
     // === Semantic layer ===
     public void StrengthSemanticEdge(string w1, string w2, double amount)
     {
         if (w1 == w2) return;
-        AddSemanticWeight(w1, w2, amount);
-        AddSemanticWeight(w2, w1, amount);
+        AddSW(w1, w2, amount); AddSW(w2, w1, amount);
     }
-    private void AddSemanticWeight(string a, string b, double amount)
+    private void AddSW(string a, string b, double amount)
     {
         if (!SemanticEdges.ContainsKey(a)) SemanticEdges[a] = new();
-        SemanticEdges[a].TryGetValue(b, out var current);
-        SemanticEdges[a][b] = current + amount;
+        SemanticEdges[a].TryGetValue(b, out var c); SemanticEdges[a][b] = c + amount;
     }
     public double GetSemanticWeight(string w1, string w2)
     {
         if (!SemanticEdges.TryGetValue(w1, out var e)) return 0;
         e.TryGetValue(w2, out var w); return w;
     }
+
     public IEnumerable<(string Word, double Weight)> GetSemanticNeighbors(string word)
     {
         if (!SemanticEdges.TryGetValue(word, out var edges)) yield break;
-        foreach (var (to, weight) in edges)
-            if (Math.Abs(weight) >= SemanticThreshold) yield return (to, weight);
+        foreach (var (to, w) in edges) if (Math.Abs(w) >= SemanticThreshold) yield return (to, w);
     }
 
-    public (int Nodes, long NgramEntries, int SemanticEdges, int Circles, int EmbeddingVectors) GetStatsV5()
+    public (int Nodes, long Ngrams, int Semantic, int Circles) GetStats()
     {
-        var nEntries = NgramCounts.Values.Sum(e => (long)e.Count);
-        var sEdges = SemanticEdges.Values.Sum(e => e.Count);
-        return (Nodes.Count, nEntries, sEdges, _circles.Count, _embeddingVectors.Count);
+        var ng = NgramCounts.Values.Sum(e => (long)e.Count);
+        var se = SemanticEdges.Values.Sum(e => e.Count);
+        return (Nodes.Count, ng, se, _circles.Count);
     }
 }
 
@@ -486,7 +446,21 @@ public class WordNode
 {
     public string Word { get; }
     public int Frequency { get; set; }
+    // موقع فيزيائي 3D
+    public float PX, PY, PZ;
+    // سرعة
+    public float VX, VY, VZ;
+    // إثارة مؤقتة (للتوليد)
     public double Excitation { get; set; }
     public double Repulsion { get; set; }
-    public WordNode(string word) => Word = word;
+
+    private static readonly Random _rng = new(42);
+
+    public WordNode(string word)
+    {
+        Word = word;
+        PX = (float)(_rng.NextDouble() * 10 - 5);
+        PY = (float)(_rng.NextDouble() * 10 - 5);
+        PZ = (float)(_rng.NextDouble() * 10 - 5);
+    }
 }

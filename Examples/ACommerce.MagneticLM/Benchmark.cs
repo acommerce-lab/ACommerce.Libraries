@@ -28,10 +28,9 @@ public static class Benchmark
         graph.BuildPostTrainingStructures();
         sw.Stop();
 
-        var (nodes, ngramEntries, sEdges, circles, embVecs) = graph.GetStatsV5();
+        var (nodes, ngramEntries, sEdges, circles) = graph.GetStats();
         Console.WriteLine($"\nTraining: {sw.Elapsed.TotalSeconds:F1}s");
-        Console.WriteLine($"Graph: {nodes:N0} nodes, {ngramEntries:N0} n-gram, {sEdges:N0} semantic");
-        Console.WriteLine($"Embeddings: {embVecs:N0} vectors, Circles: {circles:N0}");
+        Console.WriteLine($"Graph: {nodes:N0} nodes, {ngramEntries:N0} n-gram, {sEdges:N0} semantic, {circles:N0} circles");
         Console.WriteLine($"Tokens: {graph.TotalTokens:N0}");
         Console.WriteLine($"Discounts: D1={graph.D1:F3} D2={graph.D2:F3} D3+={graph.D3Plus:F3}\n");
 
@@ -84,6 +83,9 @@ public static class Benchmark
         int totalTokens = 0;
         double floor = 1e-10;
 
+        // Cache يتراكم عبر الأسطر (مفيد لـ WikiText/مقالات طويلة)
+        var cacheEntries = new List<(string Word, string[] Context)>();
+
         int done = 0;
         foreach (var line in testLines)
         {
@@ -94,9 +96,8 @@ public static class Benchmark
             var words = Trainer.Tokenize(line);
             if (words.Length < 2) continue;
 
-            // Cache مع سياق - يُعاد تعيينه عند بداية كل وثيقة/فقرة
-            var cacheEntries = new List<(string Word, string[] Context)>();
-            bool isNewSentence = (done == 1); // أول جملة = لا cache
+            bool isNewSentence = (cacheEntries.Count < 20);
+            // لا نصفّر الـ cache - يتراكم عبر الجمل (مفيد لـ WikiText)
 
             for (int i = 1; i < words.Length; i++)
             {
@@ -123,8 +124,7 @@ public static class Benchmark
 
                     case "cache":
                         prob = graph.GetMagneticProbability(fullContext, currentWord,
-                            cacheEntries, isNewSentence: isNewSentence,
-                            semanticLambda: 0, embeddingLambda: 0); // cache فقط
+                            cacheEntries, isNewSentence: isNewSentence);
                         break;
 
                     case "magnetic":
@@ -141,6 +141,9 @@ public static class Benchmark
                 totalLogProb += Math.Log(prob);
                 totalTokens++;
                 cacheEntries.Add((currentWord, fullContext));
+                // حد أقصى للـ cache (يحتفظ بآخر 500 فقط)
+                if (cacheEntries.Count > 500)
+                    cacheEntries.RemoveRange(0, cacheEntries.Count - 500);
             }
         }
 
