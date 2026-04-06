@@ -24,13 +24,14 @@ public static class Benchmark
         var sw = Stopwatch.StartNew();
         trainer.TrainBatch(trainLines);
 
-        // حساب الخصومات المثلى من البيانات
-        graph.ComputeOptimalDiscounts();
+        // بناء كل الهياكل بعد التدريب
+        graph.BuildPostTrainingStructures();
         sw.Stop();
 
-        var (nodes, ngramEntries, sEdges) = graph.GetStats();
+        var (nodes, ngramEntries, sEdges, circles, embVecs) = graph.GetStatsV5();
         Console.WriteLine($"\nTraining: {sw.Elapsed.TotalSeconds:F1}s");
         Console.WriteLine($"Graph: {nodes:N0} nodes, {ngramEntries:N0} n-gram, {sEdges:N0} semantic");
+        Console.WriteLine($"Embeddings: {embVecs:N0} vectors, Circles: {circles:N0}");
         Console.WriteLine($"Tokens: {graph.TotalTokens:N0}");
         Console.WriteLine($"Discounts: D1={graph.D1:F3} D2={graph.D2:F3} D3+={graph.D3Plus:F3}\n");
 
@@ -93,8 +94,9 @@ public static class Benchmark
             var words = Trainer.Tokenize(line);
             if (words.Length < 2) continue;
 
-            // Continuous Cache: نخزن (كلمة + سياقها) وليس الكلمة فقط
+            // Cache مع سياق - يُعاد تعيينه عند بداية كل وثيقة/فقرة
             var cacheEntries = new List<(string Word, string[] Context)>();
+            bool isNewSentence = (done == 1); // أول جملة = لا cache
 
             for (int i = 1; i < words.Length; i++)
             {
@@ -120,13 +122,14 @@ public static class Benchmark
                         break;
 
                     case "cache":
-                        var recentForCache = cacheEntries.Count > 200 ? cacheEntries.GetRange(cacheEntries.Count - 200, 200) : cacheEntries;
-                        prob = graph.GetCachedProbability(fullContext, currentWord, recentForCache);
+                        prob = graph.GetMagneticProbability(fullContext, currentWord,
+                            cacheEntries, isNewSentence: isNewSentence,
+                            semanticLambda: 0, embeddingLambda: 0); // cache فقط
                         break;
 
                     case "magnetic":
-                        var recentForMag = cacheEntries.Count > 200 ? cacheEntries.GetRange(cacheEntries.Count - 200, 200) : cacheEntries;
-                        prob = graph.GetMagneticProbability(fullContext, currentWord, recentForMag);
+                        prob = graph.GetMagneticProbability(fullContext, currentWord,
+                            cacheEntries, isNewSentence: isNewSentence);
                         break;
 
                     default:
@@ -137,8 +140,6 @@ public static class Benchmark
                 prob = Math.Max(prob, floor);
                 totalLogProb += Math.Log(prob);
                 totalTokens++;
-
-                // إضافة للـ cache مع السياق
                 cacheEntries.Add((currentWord, fullContext));
             }
         }

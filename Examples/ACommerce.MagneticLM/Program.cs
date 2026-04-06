@@ -160,7 +160,7 @@ var sw = Stopwatch.StartNew();
 trainer.TrainBatch(trainingData);
 
 sw.Stop();
-var (nodes, cEdges, sEdges) = graph.GetStats();
+var (nodes, cEdges, sEdges, _, _) = graph.GetStatsV5();
 Console.WriteLine($"التدريب اكتمل في {sw.ElapsedMilliseconds}ms");
 Console.WriteLine($"الرسم البياني: {nodes} عقدة, {cEdges} حافة سياقية, {sEdges} حافة معنوية");
 Console.WriteLine();
