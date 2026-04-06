@@ -73,9 +73,8 @@ public class Trainer
             }
         }
 
-        // === 2c. فك ارتباط: إزالة أوزان معنوية وصلت تحت العتبة ===
-        if (SentencesTrained % 500 == 0)
-            PruneWeakSemanticEdges();
+        // الأوزان الضعيفة لا تُحذف - تُتجاهل عند الاستعلام فقط
+        // الأوزان السالبة القوية = معرفة طرد مفيدة تبقى
 
         // === 3. إعادة التقييم العابر ===
         SentencesTrained++;
@@ -109,20 +108,7 @@ public class Trainer
         }
     }
 
-    /// <summary>
-    /// فك ارتباط: حذف الأوزان المعنوية التي انخفضت تحت العتبة.
-    /// العقوبات المتكررة تدفع الأوزان الخاطئة للأسفل حتى تُقطع.
-    /// </summary>
-    private void PruneWeakSemanticEdges()
-    {
-        var pruneThreshold = _graph.SemanticThreshold * 0.5;
-        foreach (var (word, edges) in _graph.SemanticEdges)
-        {
-            var toRemove = edges.Where(e => e.Value < pruneThreshold).Select(e => e.Key).ToList();
-            foreach (var key in toRemove)
-                edges.Remove(key);
-        }
-    }
+    // لا نحذف أوزاناً - السالبة القوية = طرد مفيد، الضعيفة تُتجاهل عند الاستعلام
 
     public void TrainBatch(IEnumerable<string> sentences)
     {

@@ -156,16 +156,28 @@ public class WordGraph
     }
 
     /// <summary>
-    /// احتمال معنوي مُطبّع بشكل صحيح
+    /// احتمال معنوي مُطبّع:
+    /// - أوزان ضعيفة (|w| < threshold) → تُتجاهل (ضوضاء)
+    /// - أوزان موجبة قوية → جذب (تزيد الاحتمال)
+    /// - أوزان سالبة قوية → طرد (تُنقص الاحتمال)
     /// </summary>
     private double GetNormalizedSemanticProb(string from, string to)
     {
         if (!SemanticEdges.TryGetValue(from, out var edges)) return 0;
         if (!edges.TryGetValue(to, out var weight)) return 0;
 
-        // تطبيع: نقسم على مجموع كل الأوزان المعنوية للكلمة المصدر
-        var total = edges.Values.Sum();
-        return total > 0 ? weight / total : 0;
+        // تجاهل الضعيفة (ضوضاء)
+        if (Math.Abs(weight) < SemanticThreshold) return 0;
+
+        // التطبيع على الأوزان القوية فقط (موجبة + سالبة)
+        var strongEdges = edges.Values.Where(w => Math.Abs(w) >= SemanticThreshold);
+        var positiveSum = strongEdges.Where(w => w > 0).Sum();
+
+        if (positiveSum <= 0) return 0;
+
+        // الموجبة → احتمال جذب (0 إلى 1)
+        // السالبة → عقوبة (تقلل الاحتمال)
+        return weight / positiveSum; // سالب يعني طرد، موجب يعني جذب
     }
 
     // === Semantic layer (unchanged) ===
@@ -194,7 +206,7 @@ public class WordGraph
     {
         if (!SemanticEdges.TryGetValue(word, out var edges)) yield break;
         foreach (var (to, weight) in edges)
-            if (weight >= SemanticThreshold)
+            if (Math.Abs(weight) >= SemanticThreshold) // قوية فقط: جذب أو طرد
                 yield return (to, weight);
     }
 
