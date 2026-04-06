@@ -19,7 +19,7 @@ public static class Benchmark
         Console.WriteLine($"Test:  {testLines.Length:N0} sentences");
 
         // === Training ===
-        var graph = new WordGraph { MaxNgramOrder = 4, Discount = 0.75, SemanticThreshold = 0.05, TransitiveDecay = 0.5 };
+        var graph = new WordGraph { MaxNgramOrder = 5, Discount = 0.75, SemanticThreshold = 0.05, TransitiveDecay = 0.5 };
         var trainer = new Trainer(graph);
 
         var sw = Stopwatch.StartNew();
@@ -38,10 +38,10 @@ public static class Benchmark
         Console.Write($"\r  Bigram only:                   PPL = {pplBigram:F1}\n");
 
         var pplNgram = ComputePerplexity(graph, testLines, mode: "ngram");
-        Console.Write($"  N-gram interpolated (n={graph.MaxNgramOrder}):     PPL = {pplNgram:F1}\n");
+        Console.Write($"  KN-{graph.MaxNgramOrder}gram (Kneser-Ney):        PPL = {pplNgram:F1}\n");
 
         var pplMagnetic = ComputePerplexity(graph, testLines, mode: "magnetic");
-        Console.Write($"  MagneticLM (n-gram + semantic): PPL = {pplMagnetic:F1}\n");
+        Console.Write($"  MagneticLM (KN + semantic):     PPL = {pplMagnetic:F1}\n");
 
         // === Comparison ===
         Console.WriteLine("\n════════════════════════════════════════════════════");

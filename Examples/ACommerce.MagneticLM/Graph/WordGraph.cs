@@ -1,46 +1,36 @@
 namespace ACommerce.MagneticLM.Graph;
 
 /// <summary>
-/// الرسم البياني للكلمات مع دعم n-gram (حتى 5-gram).
-///
-/// الطبقة 1 (سياقية): أوزان n-gram بأعماق متعددة
-///   - unigram: P(w) = freq(w) / total
-///   - bigram:  P(w|w1) = count(w1,w) / count(w1)
-///   - trigram: P(w|w1,w2) = count(w1,w2,w) / count(w1,w2)
-///   - وهكذا حتى 5-gram
-///
-/// الطبقة 2 (معنوية): علاقات مفاهيمية على عمق ±2
+/// الرسم البياني للكلمات مع دعم n-gram + Kneser-Ney + طبقة معنوية.
 /// </summary>
 public class WordGraph
 {
     // === N-gram storage ===
-    // المفتاح: السياق (كلمة واحدة أو أكثر مفصولة بـ |)
+    // المفتاح: السياق (كلمات مفصولة بـ |)
     // القيمة: [الكلمة التالية → عدد مرات الظهور]
-
-    /// <summary>
-    /// n-gram counts: ["w1|w2"]["w3"] = count of "w1 w2 w3"
-    /// </summary>
     public Dictionary<string, Dictionary<string, double>> NgramCounts { get; } = new();
-
-    /// <summary>
-    /// مجموع العدّ لكل سياق (للتطبيع السريع)
-    /// </summary>
     public Dictionary<string, double> NgramTotals { get; } = new();
 
     /// <summary>
-    /// عدد السياقات الفريدة التي ظهرت فيها كل كلمة كتكملة
-    /// (لحساب Kneser-Ney continuation probability)
+    /// عدد السياقات الفريدة التي ظهرت فيها كلمة كتكملة.
+    /// Kneser-Ney يستخدم هذا: كلمة تظهر بعد سياقات متنوعة → احتمال أعلى في سياقات جديدة.
+    /// مثال: "the" تظهر بعد آلاف السياقات → continuation count عالي
+    ///        "Francisco" تظهر بعد "San" فقط → continuation count = 1
     /// </summary>
-    public Dictionary<string, int> ContinuationCounts { get; } = new();
+    public Dictionary<string, HashSet<string>> ContinuationContexts { get; } = new();
 
     /// <summary>
-    /// أقصى عمق n-gram (افتراضي: 4 = fourgram)
+    /// عدد الأنواع الفريدة التي تلي كل سياق (لحساب lambda في KN).
+    /// |{w : c(context, w) > 0}|
     /// </summary>
-    public int MaxNgramOrder { get; set; } = 4;
+    public Dictionary<string, int> UniqueFollowers { get; } = new();
 
     /// <summary>
-    /// معامل الخصم لـ Kneser-Ney (عادةً 0.75)
+    /// إجمالي عدد السياقات الفريدة في كل رتبة (للتطبيع)
     /// </summary>
+    public int TotalUniqueBigrams { get; set; }
+
+    public int MaxNgramOrder { get; set; } = 5;
     public double Discount { get; set; } = 0.75;
 
     // === العقد ===
@@ -53,13 +43,16 @@ public class WordGraph
     public double TransitiveDecay { get; set; } = 0.5;
 
     /// <summary>
-    /// تسجيل n-gram: سياق + كلمة تالية
+    /// تسجيل n-gram مع تحديث إحصائيات Kneser-Ney
     /// </summary>
     public void AddNgram(string[] context, string nextWord)
     {
         var key = string.Join("|", context);
+
         if (!NgramCounts.ContainsKey(key))
             NgramCounts[key] = new();
+
+        var isNew = !NgramCounts[key].ContainsKey(nextWord) || NgramCounts[key][nextWord] == 0;
 
         NgramCounts[key].TryGetValue(nextWord, out var current);
         NgramCounts[key][nextWord] = current + 1.0;
@@ -67,18 +60,23 @@ public class WordGraph
         NgramTotals.TryGetValue(key, out var total);
         NgramTotals[key] = total + 1.0;
 
-        // تحديث continuation count (عدد السياقات الفريدة لكل كلمة)
-        var contKey = $"{key}→{nextWord}";
-        if (!NgramCounts[key].ContainsKey(nextWord) || current == 0)
+        // تحديث Continuation Counts: في كم سياق فريد ظهرت هذه الكلمة؟
+        if (isNew)
         {
-            ContinuationCounts.TryGetValue(nextWord, out var cont);
-            ContinuationCounts[nextWord] = cont + 1;
+            if (!ContinuationContexts.ContainsKey(nextWord))
+                ContinuationContexts[nextWord] = new();
+            ContinuationContexts[nextWord].Add(key);
+
+            // عدد الكلمات الفريدة بعد هذا السياق
+            UniqueFollowers.TryGetValue(key, out var uf);
+            UniqueFollowers[key] = uf + 1;
+
+            // تحديث إجمالي البيغرامات الفريدة
+            if (context.Length == 1)
+                TotalUniqueBigrams++;
         }
     }
 
-    /// <summary>
-    /// الحصول على عقدة أو إنشاؤها
-    /// </summary>
     public WordNode GetOrCreateNode(string word)
     {
         if (!Nodes.TryGetValue(word, out var node))
@@ -90,97 +88,110 @@ public class WordGraph
     }
 
     /// <summary>
-    /// احتمال n-gram مع Interpolated Backoff:
-    /// P(w|w1,w2,w3) = λ4 * P_4gram + λ3 * P_3gram + λ2 * P_2gram + λ1 * P_1gram
-    /// مع تنعيم مستوحى من Kneser-Ney
+    /// Interpolated Kneser-Ney Smoothing:
+    ///
+    /// P_KN(w|context) = max(count(context,w) - d, 0) / count(context)
+    ///                  + λ(context) * P_KN(w|shorter_context)
+    ///
+    /// حيث:
+    ///   d = معامل الخصم (0.75)
+    ///   λ(context) = d * |{w : count(context,w) > 0}| / count(context)
+    ///   P_continuation(w) = |{v : count(v,w) > 0}| / |total unique bigrams|
+    ///
+    /// هذا هو الفرق الجوهري عن التطبيق السابق:
+    /// - λ محسوب ديناميكياً لكل سياق (ليس أوزاناً ثابتة)
+    /// - المستوى الأدنى يستخدم continuation probability (ليس unigram عادي)
     /// </summary>
     public double GetInterpolatedProbability(string[] fullContext, string word)
     {
-        double prob = 0;
-        double totalWeight = 0;
+        return KneserNeyRecursive(fullContext, word, fullContext.Length);
+    }
 
-        // من الأطول للأقصر (4-gram → 3-gram → bigram → unigram)
-        for (int order = Math.Min(fullContext.Length, MaxNgramOrder); order >= 1; order--)
+    private double KneserNeyRecursive(string[] fullContext, string word, int order)
+    {
+        // الحالة الأساسية: Continuation probability (أو unigram)
+        if (order == 0)
         {
-            var context = fullContext[^order..];
-            var key = string.Join("|", context);
-
-            if (NgramTotals.TryGetValue(key, out var total) && total > 0)
-            {
-                NgramCounts[key].TryGetValue(word, out var count);
-
-                // Discounted probability
-                var discounted = Math.Max(count - Discount, 0) / total;
-
-                // وزن أعلى للسياقات الأطول (أكثر تحديداً)
-                var weight = Math.Pow(2.0, order);
-                prob += weight * discounted;
-                totalWeight += weight;
-            }
+            return GetContinuationProbability(word);
         }
 
-        // Unigram fallback
-        if (Nodes.TryGetValue(word, out var node) && TotalTokens > 0)
+        var contextStart = fullContext.Length - order;
+        if (contextStart < 0) contextStart = 0;
+        var context = fullContext[contextStart..];
+        var key = string.Join("|", context);
+
+        if (!NgramTotals.TryGetValue(key, out var total) || total == 0)
         {
-            var unigramProb = (double)node.Frequency / TotalTokens;
-            prob += 1.0 * unigramProb;
-            totalWeight += 1.0;
+            // سياق لم نره → تراجع مباشرة للرتبة الأقل
+            return KneserNeyRecursive(fullContext, word, order - 1);
         }
 
-        return totalWeight > 0 ? prob / totalWeight : 0;
+        // الاحتمال المخصوم
+        NgramCounts[key].TryGetValue(word, out var count);
+        var discountedProb = Math.Max(count - Discount, 0) / total;
+
+        // lambda: وزن التراجع (backoff weight)
+        // = d * عدد الكلمات الفريدة بعد هذا السياق / مجموع العدّ
+        UniqueFollowers.TryGetValue(key, out var uniqueCount);
+        var lambda = (Discount * uniqueCount) / total;
+
+        // الاحتمال المُركّب: مخصوم + lambda * تراجع
+        return discountedProb + lambda * KneserNeyRecursive(fullContext, word, order - 1);
     }
 
     /// <summary>
-    /// احتمال مع الطبقة المعنوية:
-    /// P_final = (1-λ_sem) * P_ngram + λ_sem * P_semantic
-    /// الطبقة المعنوية تدعم فقط عندما n-gram ضعيف
+    /// Continuation Probability:
+    /// P_cont(w) = |{v : count(v,w) > 0}| / |total unique bigrams|
+    ///
+    /// "كم سياق فريد ظهرت بعده هذه الكلمة؟"
+    /// كلمة تظهر في سياقات متنوعة → احتمال أعلى في سياقات جديدة
+    /// </summary>
+    private double GetContinuationProbability(string word)
+    {
+        if (TotalUniqueBigrams == 0) return 1.0 / Math.Max(Nodes.Count, 1);
+
+        if (!ContinuationContexts.TryGetValue(word, out var contexts))
+            return 0.5 / TotalUniqueBigrams; // تنعيم أدنى
+
+        return (double)contexts.Count / TotalUniqueBigrams;
+    }
+
+    /// <summary>
+    /// احتمال مع الطبقة المعنوية
     /// </summary>
     public double GetMagneticProbability(string[] fullContext, string word, double semanticLambda = 0.15)
     {
         var ngramProb = GetInterpolatedProbability(fullContext, word);
 
-        // الطبقة المعنوية: جمع الجذب من كل كلمات السياق (وليس آخر كلمة فقط)
+        // الطبقة المعنوية: جمع الجذب من كل كلمات السياق
         double semanticProb = 0;
         foreach (var ctx in fullContext)
         {
             semanticProb += GetNormalizedSemanticProb(ctx, word);
         }
-        semanticProb /= fullContext.Length; // متوسط
+        semanticProb /= fullContext.Length;
 
-        // مزج تكيّفي: كلما كان n-gram أقوى، قلّ تأثير المعنوي
+        // مزج تكيّفي
         var adaptiveLambda = ngramProb > 0.01 ? semanticLambda * 0.3 : semanticLambda;
         var result = (1.0 - adaptiveLambda) * ngramProb + adaptiveLambda * semanticProb;
 
-        // حماية
         return double.IsNaN(result) || double.IsInfinity(result) ? ngramProb : result;
     }
 
-    /// <summary>
-    /// احتمال معنوي مُطبّع:
-    /// - أوزان ضعيفة (|w| < threshold) → تُتجاهل (ضوضاء)
-    /// - أوزان موجبة قوية → جذب (تزيد الاحتمال)
-    /// - أوزان سالبة قوية → طرد (تُنقص الاحتمال)
-    /// </summary>
     private double GetNormalizedSemanticProb(string from, string to)
     {
         if (!SemanticEdges.TryGetValue(from, out var edges)) return 0;
         if (!edges.TryGetValue(to, out var weight)) return 0;
-
-        // تجاهل الضعيفة (ضوضاء)
         if (Math.Abs(weight) < SemanticThreshold) return 0;
 
-        // التطبيع على الأوزان القوية فقط (موجبة + سالبة)
         var strongEdges = edges.Values.Where(w => Math.Abs(w) >= SemanticThreshold);
         var positiveSum = strongEdges.Where(w => w > 0).Sum();
-
         if (positiveSum <= 0) return 0;
 
-        // الموجبة → احتمال جذب (0 إلى 1)
-        // السالبة → عقوبة (تقلل الاحتمال)
-        return weight / positiveSum; // سالب يعني طرد، موجب يعني جذب
+        return weight / positiveSum;
     }
 
-    // === Semantic layer (unchanged) ===
+    // === Semantic layer ===
     public void StrengthSemanticEdge(string word1, string word2, double amount)
     {
         if (word1 == word2) return;
@@ -206,7 +217,7 @@ public class WordGraph
     {
         if (!SemanticEdges.TryGetValue(word, out var edges)) yield break;
         foreach (var (to, weight) in edges)
-            if (Math.Abs(weight) >= SemanticThreshold) // قوية فقط: جذب أو طرد
+            if (Math.Abs(weight) >= SemanticThreshold)
                 yield return (to, weight);
     }
 
@@ -224,6 +235,5 @@ public class WordNode
     public int Frequency { get; set; }
     public double Excitation { get; set; }
     public double Repulsion { get; set; }
-
     public WordNode(string word) => Word = word;
 }
