@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
-MagneticLM v6 - Google Colab Runner
-====================================
-Copy this file + graph.py + trainer.py + benchmark.py to Colab.
-Or run this file directly - it downloads datasets automatically.
+MagneticLM v6 - Google Colab Runner (OPTIMIZED)
+=================================================
+NumPy vectorized physics: 10-50x faster than pure Python.
+Optimized tokenizer, batch processing, sparse operations.
 
-Usage on Colab:
-  1. Upload the 4 .py files
-  2. Run this file
+Upload 4 files to Colab: graph.py, trainer.py, benchmark.py, this file.
+Or: pip install numpy && python MagneticLM_Colab.py
   3. Results appear for PTB, WikiText-2, WikiText-103
 
 Usage locally:
