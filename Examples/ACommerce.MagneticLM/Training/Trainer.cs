@@ -79,8 +79,10 @@ public class Trainer
         // إذا A↔B معنوياً و B↔C معنوياً → A↔C تكتسب وزناً (أضعف)
         // نفعل هذا كل 10 جمل لتوفير الموارد
         SentencesTrained++;
-        if (SentencesTrained % 10 == 0)
+        if (SentencesTrained % 100 == 0)
             PropagateTransitiveRelations(words);
+        if (SentencesTrained % 1000 == 0)
+            Console.Write($"\r  Training: {SentencesTrained:N0} sentences...");
     }
 
     /// <summary>
@@ -95,14 +97,16 @@ public class Trainer
 
         foreach (var word in words)
         {
-            var semanticNeighbors = _graph.GetSemanticNeighbors(word).ToList();
+            var semanticNeighbors = _graph.GetSemanticNeighbors(word)
+                .OrderByDescending(n => n.Weight).Take(10).ToList();
 
             foreach (var (neighbor, weight) in semanticNeighbors)
             {
                 if (weight < _semanticThreshold) continue;
 
-                // جيران الجار المعنويين
-                var neighborsOfNeighbor = _graph.GetSemanticNeighbors(neighbor);
+                // جيران الجار المعنويين (أقوى 10 فقط لتوفير الموارد)
+                var neighborsOfNeighbor = _graph.GetSemanticNeighbors(neighbor)
+                    .OrderByDescending(n => n.Weight).Take(10);
                 foreach (var (transitive, tWeight) in neighborsOfNeighbor)
                 {
                     if (transitive == word) continue;

@@ -1,7 +1,18 @@
+using ACommerce.MagneticLM;
 using ACommerce.MagneticLM.Graph;
 using ACommerce.MagneticLM.Training;
 using ACommerce.MagneticLM.Generation;
 using System.Diagnostics;
+
+// === PTB Benchmark mode ===
+if (args.Length >= 2 && args[0] == "--benchmark")
+{
+    var trainPath = args[1];
+    var testPath = args.Length >= 3 ? args[2] : args[1].Replace("train", "test");
+    Benchmark.Run(trainPath, testPath);
+    return;
+}
+
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 Console.WriteLine("╔═══════════════════════════════════════════╗");
