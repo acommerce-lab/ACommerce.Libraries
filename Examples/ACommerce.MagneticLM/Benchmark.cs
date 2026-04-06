@@ -142,8 +142,8 @@ public static class Benchmark
                 totalTokens++;
                 cacheEntries.Add((currentWord, fullContext));
                 // حد أقصى للـ cache (يحتفظ بآخر 500 فقط)
-                if (cacheEntries.Count > 500)
-                    cacheEntries.RemoveRange(0, cacheEntries.Count - 500);
+                if (cacheEntries.Count > 4000)
+                    cacheEntries.RemoveRange(0, cacheEntries.Count - 4000);
             }
         }
 

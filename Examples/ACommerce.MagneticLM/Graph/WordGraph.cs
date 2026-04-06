@@ -357,18 +357,37 @@ public class WordGraph
         // تطبيع ليكون [0, ~0.3]
         var posProb = posCount > 0 ? Math.Min(posScore / (posCount * 3.0), 0.3) : 0;
 
-        // === 2. Cache ===
+        // === 2. Continuous Cache with Logarithmic Decay + Dynamic Theta ===
+        // مستوحى من اقتراح Gemini:
+        // - Logarithmic Decay: الكلمات القديمة = صدى توجيهي وليس إشارة كاملة
+        // - Dynamic Theta: الحدة تتناقص مع المسافة لمنع التداخل الموجي
         double cacheProb = 0;
         if (!isNewSentence && cacheEntries != null && cacheEntries.Count > 10)
         {
             double cacheScore = 0, totalCacheWeight = 0;
-            var recent = cacheEntries.Count > 100
-                ? cacheEntries.GetRange(cacheEntries.Count - 100, 100) : cacheEntries;
-            foreach (var (pastWord, pastContext) in recent)
+            int window = 3785;
+            int startIdx = Math.Max(0, cacheEntries.Count - window);
+            int windowLen = cacheEntries.Count - startIdx;
+
+            for (int ci = startIdx; ci < cacheEntries.Count; ci++)
             {
+                var (pastWord, pastContext) = cacheEntries[ci];
                 var sim = ContextSimilarity(fullContext, pastContext);
                 if (sim <= 0) continue;
-                var w = sim * sim; // sharpening
+
+                // المسافة من الحاضر (0 = الأحدث)
+                int age = cacheEntries.Count - 1 - ci;
+
+                // Logarithmic Decay: وزن = 1 / log(2 + age)
+                // الكلمات الأخيرة (age=0): وزن=1.44
+                // age=10: وزن=0.40  age=100: وزن=0.22  age=1000: وزن=0.14
+                double decay = 1.0 / Math.Log(2.0 + age);
+
+                // Dynamic Theta: الحدة تقل مع المسافة
+                // قريب: theta=2.0 (حاد جداً) → بعيد: theta=0.5 (منتشر)
+                double dynamicTheta = 2.0 / (1.0 + age * 0.01);
+                double w = Math.Pow(sim, dynamicTheta) * decay;
+
                 totalCacheWeight += w;
                 if (pastWord == word) cacheScore += w;
             }
