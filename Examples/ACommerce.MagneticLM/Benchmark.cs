@@ -10,7 +10,7 @@ public static class Benchmark
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         Console.WriteLine("╔═══════════════════════════════════════════════════╗");
-        Console.WriteLine("║  PTB Benchmark: MagneticLM v2 (n-gram + semantic)║");
+        Console.WriteLine("║  MagneticLM v3: Modified KN + Cache + Semantic   ║");
         Console.WriteLine("╚═══════════════════════════════════════════════════╝\n");
 
         var trainLines = File.ReadAllLines(trainPath).Where(l => l.Trim().Length > 0).ToArray();
@@ -18,105 +18,126 @@ public static class Benchmark
         Console.WriteLine($"Train: {trainLines.Length:N0} sentences");
         Console.WriteLine($"Test:  {testLines.Length:N0} sentences");
 
-        // === Training ===
-        var graph = new WordGraph { MaxNgramOrder = 5, Discount = 0.75, SemanticThreshold = 0.05, TransitiveDecay = 0.5 };
+        var graph = new WordGraph { MaxNgramOrder = 5, SemanticThreshold = 0.05, TransitiveDecay = 0.5 };
         var trainer = new Trainer(graph);
 
         var sw = Stopwatch.StartNew();
         trainer.TrainBatch(trainLines);
+
+        // حساب الخصومات المثلى من البيانات
+        graph.ComputeOptimalDiscounts();
         sw.Stop();
 
         var (nodes, ngramEntries, sEdges) = graph.GetStats();
         Console.WriteLine($"\nTraining: {sw.Elapsed.TotalSeconds:F1}s");
-        Console.WriteLine($"Graph: {nodes:N0} nodes, {ngramEntries:N0} n-gram entries, {sEdges:N0} semantic edges");
-        Console.WriteLine($"Total tokens: {graph.TotalTokens:N0}\n");
+        Console.WriteLine($"Graph: {nodes:N0} nodes, {ngramEntries:N0} n-gram, {sEdges:N0} semantic");
+        Console.WriteLine($"Tokens: {graph.TotalTokens:N0}");
+        Console.WriteLine($"Discounts: D1={graph.D1:F3} D2={graph.D2:F3} D3+={graph.D3Plus:F3}\n");
 
-        // === Perplexity computation ===
-        Console.Write("Computing perplexity...");
+        // === Perplexity ===
+        Console.Write("Computing...");
 
         var pplBigram = ComputePerplexity(graph, testLines, mode: "bigram");
-        Console.Write($"\r  Bigram only:                   PPL = {pplBigram:F1}\n");
+        Console.Write($"\r  Bigram:                      PPL = {pplBigram:F1}\n");
 
-        var pplNgram = ComputePerplexity(graph, testLines, mode: "ngram");
-        Console.Write($"  KN-{graph.MaxNgramOrder}gram (Kneser-Ney):        PPL = {pplNgram:F1}\n");
+        var pplKN = ComputePerplexity(graph, testLines, mode: "kn");
+        Console.Write($"  Modified KN-5gram:           PPL = {pplKN:F1}\n");
+
+        var pplCache = ComputePerplexity(graph, testLines, mode: "cache");
+        Console.Write($"  Modified KN + Cache:         PPL = {pplCache:F1}\n");
 
         var pplMagnetic = ComputePerplexity(graph, testLines, mode: "magnetic");
-        Console.Write($"  MagneticLM (KN + semantic):     PPL = {pplMagnetic:F1}\n");
+        Console.Write($"  MagneticLM (KN+Cache+Sem):   PPL = {pplMagnetic:F1}\n");
 
         // === Comparison ===
         Console.WriteLine("\n════════════════════════════════════════════════════");
         Console.WriteLine("  Model                          | Perplexity");
         Console.WriteLine("  ───────────────────────────────┼───────────");
         Console.WriteLine($"  Our Bigram                     | {pplBigram:F1}");
-        Console.WriteLine($"  Our N-gram (interpolated, n=4) | {pplNgram:F1}");
-        Console.WriteLine($"  Our MagneticLM (n-gram+sem)    | {pplMagnetic:F1}");
+        Console.WriteLine($"  Our Modified KN-5gram          | {pplKN:F1}");
+        Console.WriteLine($"  Our KN + Cache                 | {pplCache:F1}");
+        Console.WriteLine($"  Our MagneticLM (KN+Cache+Sem)  | {pplMagnetic:F1}");
         Console.WriteLine("  ───────────────────────────────┼───────────");
-        Console.WriteLine("  5-gram KN (reference)          | ~141");
+        Console.WriteLine("  5-gram KN (published)          | ~141");
         Console.WriteLine("  LSTM (Zaremba 2014)            | ~78");
         Console.WriteLine("  AWD-LSTM (Merity 2018)         | ~57");
         Console.WriteLine("  Transformer-XL (Dai 2019)      | ~54");
         Console.WriteLine("════════════════════════════════════════════════════");
 
-        var ngramImprove = (pplBigram - pplNgram) / pplBigram * 100;
-        var semImprove = (pplNgram - pplMagnetic) / pplNgram * 100;
-        Console.WriteLine($"\n  N-gram vs bigram improvement: {ngramImprove:F1}%");
-        Console.WriteLine($"  Semantic layer improvement:    {semImprove:F1}%");
+        var knImprove = (pplBigram - pplKN) / pplBigram * 100;
+        var cacheImprove = (pplKN - pplCache) / pplKN * 100;
+        var semImprove = (pplCache - pplMagnetic) / pplCache * 100;
+        Console.WriteLine($"\n  KN vs Bigram:      {knImprove:F1}% better");
+        Console.WriteLine($"  Cache vs KN:       {cacheImprove:F1}% better");
+        Console.WriteLine($"  Semantic vs Cache: {semImprove:F1}% better");
+        Console.WriteLine($"  Total vs Bigram:   {(pplBigram - pplMagnetic) / pplBigram * 100:F1}% better");
 
-        if (pplMagnetic < 141) Console.WriteLine("\n  >>> BETTER than 5-gram KN! <<<");
-        else if (pplMagnetic < 200) Console.WriteLine("\n  Close to 5-gram KN - worth continuing");
-        else if (pplMagnetic < 300) Console.WriteLine("\n  Reasonable - needs more data or deeper n-grams");
-        else Console.WriteLine("\n  Needs improvement - consider n=5 or better smoothing");
+        if (pplMagnetic < 78) Console.WriteLine("\n  >>> BEAT LSTM! <<<");
+        else if (pplMagnetic < 100) Console.WriteLine("\n  Between LSTM and 5-gram KN");
+        else if (pplMagnetic < 141) Console.WriteLine("\n  BETTER than 5-gram KN!");
     }
 
     private static double ComputePerplexity(WordGraph graph, string[] testLines, string mode)
     {
         double totalLogProb = 0;
         int totalTokens = 0;
-        double smoothing = 1.0 / (graph.Nodes.Count * 10); // uniform backoff
+        double floor = 1e-10;
 
         int done = 0;
         foreach (var line in testLines)
         {
             done++;
-            if (done % 1000 == 0) Console.Write($"\r  [{mode}] {done}/{testLines.Length}...          ");
+            if (done % 1000 == 0)
+                Console.Write($"\r  [{mode}] {done}/{testLines.Length}...          ");
 
             var words = Trainer.Tokenize(line);
             if (words.Length < 2) continue;
 
+            // التاريخ الأخير (لـ Cache Model) - آخر 100 كلمة من هذه الوثيقة
+            var recentHistory = new List<string>();
+
             for (int i = 1; i < words.Length; i++)
             {
                 var currentWord = words[i];
+                var contextStart = Math.Max(0, i - graph.MaxNgramOrder);
+                var fullContext = words[contextStart..i];
+                var history = recentHistory.TakeLast(100).ToArray();
+
                 double prob;
-
-                if (mode == "bigram")
+                switch (mode)
                 {
-                    // فقط P(w|w-1) bigram
-                    var ctx = new[] { words[i - 1] };
-                    var key = words[i - 1];
-                    if (graph.NgramTotals.TryGetValue(key, out var total) && total > 0)
-                    {
-                        graph.NgramCounts[key].TryGetValue(currentWord, out var count);
-                        prob = count / total;
-                    }
-                    else prob = 0;
-                }
-                else
-                {
-                    // سياق كامل حتى MaxNgramOrder
-                    var contextStart = Math.Max(0, i - graph.MaxNgramOrder);
-                    var fullContext = words[contextStart..i];
+                    case "bigram":
+                        var biKey = words[i - 1];
+                        if (graph.NgramTotals.TryGetValue(biKey, out var biTotal) && biTotal > 0)
+                        {
+                            graph.NgramCounts[biKey].TryGetValue(currentWord, out var biCount);
+                            prob = biCount / biTotal;
+                        }
+                        else prob = 0;
+                        break;
 
-                    if (mode == "magnetic")
-                        prob = graph.GetMagneticProbability(fullContext, currentWord);
-                    else
+                    case "kn":
                         prob = graph.GetInterpolatedProbability(fullContext, currentWord);
+                        break;
+
+                    case "cache":
+                        prob = graph.GetCachedProbability(fullContext, currentWord, history);
+                        break;
+
+                    case "magnetic":
+                        prob = graph.GetMagneticProbability(fullContext, currentWord, history);
+                        break;
+
+                    default:
+                        prob = 0;
+                        break;
                 }
 
-                // Smoothing: ضمان لا صفر
-                prob = Math.Max(prob, smoothing);
-
+                prob = Math.Max(prob, floor);
                 totalLogProb += Math.Log(prob);
                 totalTokens++;
+
+                recentHistory.Add(currentWord);
             }
         }
 
