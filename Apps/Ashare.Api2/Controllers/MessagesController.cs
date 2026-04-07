@@ -19,20 +19,17 @@ public class MessagesController : ControllerBase
     private readonly IBaseAsyncRepository<Listing> _listings;
     private readonly IRealtimeTransport _transport;
     private readonly OpEngine _engine;
-    private readonly SubscriptionGuard _guard;
 
     public MessagesController(
         IRepositoryFactory factory,
         IRealtimeTransport transport,
-        OpEngine engine,
-        SubscriptionGuard guard)
+        OpEngine engine)
     {
         _convs = factory.CreateRepository<Conversation>();
         _msgs = factory.CreateRepository<Message>();
         _listings = factory.CreateRepository<Listing>();
         _transport = transport;
         _engine = engine;
-        _guard = guard;
     }
 
     public record StartConversationRequest(Guid ListingId, Guid CustomerId);
@@ -108,21 +105,20 @@ public class MessagesController : ControllerBase
             MessageType = req.MessageType ?? "text"
         };
 
-        // إذا كان المُرسل مالك العرض، نضيف SubscriptionAnalyzer للقيد
+        // قيد بسيط - المعترضات المحقونة من الـ registry تتدخّل تلقائياً
         var builder = Entry.Create("chat.send")
             .Describe($"Message from User:{req.SenderId} to User:{recipient}")
             .From($"User:{req.SenderId}", 1, ("role", "sender"))
             .To($"User:{recipient}", 1, ("role", "recipient"), ("delivery", "pending"))
             .Tag("conversation_id", conv.Id.ToString())
             .Tag("message_type", msg.MessageType)
-            // محلل: المحتوى لا يكون فارغاً
             .Analyze(new RequiredFieldAnalyzer("content", () => req.Content));
 
+        // إذا كان المُرسل مالك العرض → حصة على الرسائل (المعترض يتدخّل تلقائياً)
         if (req.SenderId == conv.OwnerId)
         {
-            builder.Tag("subscription_check", "send_message");
-            builder.Analyze(new SubscriptionAnalyzer(
-                _guard, req.SenderId, SubscriptionCheckKind.SendMessage));
+            builder.Tag("quota_check", "messages.send");
+            builder.Tag("quota_user_id", req.SenderId.ToString());
         }
 
         var op = builder

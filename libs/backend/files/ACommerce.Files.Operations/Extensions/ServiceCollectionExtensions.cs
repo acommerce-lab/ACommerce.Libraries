@@ -10,7 +10,7 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddFileOperations(this IServiceCollection services)
     {
-        services.AddSingleton<FileService>();
+        services.AddScoped<FileService>();
         return services;
     }
 }

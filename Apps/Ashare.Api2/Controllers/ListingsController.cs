@@ -81,6 +81,11 @@ public class ListingsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateListingRequest req, CancellationToken ct)
     {
+        // نحتاج slug الفئة لمعترض الحصة (للتحقق من النطاق المسموح به)
+        var catRepo = _factory.CreateRepository<Category>();
+        var category = await catRepo.GetByIdAsync(req.CategoryId, ct);
+        if (category == null) return this.NotFoundEnvelope("category_not_found");
+
         var listing = new Listing
         {
             Id = Guid.NewGuid(),
@@ -104,24 +109,25 @@ public class ListingsController : ControllerBase
             Status = ListingStatus.Draft
         };
 
-        // === القيد المحاسبي مع المحلِّلَيْن ===
-        // قيد العرض هو "قيد عكسي" يستهلك من قيد اشتراك مفتوح:
-        //   PreAnalyzer (SubscriptionLinkAnalyzer): يجد أقدم اشتراك له رصيد + يطابق الفئة (FIFO)
-        //   PostAnalyzer (QuotaConsumptionAnalyzer): يربط العرض بالاشتراك ويزيد العدّاد
+        // === قيد بسيط - الجوانب المتقاطعة محقونة من الـ registry ===
+        // المتحكم لا يعرف عن SubscriptionLinkAnalyzer أو QuotaConsumptionAnalyzer.
+        // فقط يضع العلامات المعيارية والمعترضات تتدخّل تلقائياً عبر OpEngine + Registry.
         var op = Entry.Create("listing.create")
             .Describe($"Owner:{req.OwnerId} creates listing in Category:{req.CategoryId}")
             .From($"User:{req.OwnerId}", 1, ("role", "owner"))
             .To($"Category:{req.CategoryId}", 1, ("role", "category"))
             .Tag("listing_id", listing.Id.ToString())
             .Tag("category_id", req.CategoryId.ToString())
-            .Tag("subscription_check", "create_listing")
-            .Analyze(new SubscriptionLinkAnalyzer(_factory, req.OwnerId, req.CategoryId))
-            .PostAnalyze(new QuotaConsumptionAnalyzer(_factory))
+            // ↓↓↓ علامات تُفعّل المعترضات المحقونة:
+            .Tag("quota_check", "listings.create")
+            .Tag("quota_user_id", req.OwnerId.ToString())
+            .Tag("quota_scope_key", "listing_categories")
+            .Tag("quota_scope_value", category.Slug)
             .Execute(async ctx =>
             {
-                // PreAnalyzer ربط العرض باشتراك - نستخدم بياناته
-                ctx.TryGet<Subscription>("linked_subscription", out var sub);
-                ctx.TryGet<Plan>("linked_plan", out var plan);
+                // المعترض ربط العرض باشتراك - نستخدم بياناته من الـ context
+                ctx.TryGet<Ashare.Api2.Entities.Subscription>("linked_subscription", out var sub);
+                ctx.TryGet<Ashare.Api2.Entities.Plan>("linked_plan", out var plan);
 
                 listing.Status = ListingStatus.Published;
                 listing.PublishedAt = DateTime.UtcNow;
@@ -133,9 +139,6 @@ public class ListingsController : ControllerBase
                     listing.BillingPeriodEnd = sub.EndDate;
                 }
                 await _repo.AddAsync(listing, ctx.CancellationToken);
-
-                // مرّر للـ PostAnalyzer
-                ctx.Set("listing", listing);
             })
             .Build();
 

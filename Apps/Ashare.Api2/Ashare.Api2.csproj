@@ -28,6 +28,9 @@
     <!-- OperationEngine -->
     <ProjectReference Include="..\..\libs\backend\core\ACommerce.OperationEngine\ACommerce.OperationEngine.csproj" />
     <ProjectReference Include="..\..\libs\backend\core\ACommerce.OperationEngine.Wire\ACommerce.OperationEngine.Wire.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.OperationEngine.Interceptors\ACommerce.OperationEngine.Interceptors.csproj" />
+    <ProjectReference Include="..\..\libs\backend\marketplace\ACommerce.Subscriptions.Operations\ACommerce.Subscriptions.Operations.csproj" />
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Permissions.Operations\ACommerce.Permissions.Operations.csproj" />
 
     <!-- Auth -->
     <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.Operations\ACommerce.Authentication.Operations.csproj" />

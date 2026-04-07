@@ -1,12 +1,14 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using ACommerce.SharedKernel.Abstractions.Entities;
+using ACommerce.Subscriptions.Operations.Abstractions;
 
 namespace Ashare.Api2.Entities;
 
 /// <summary>
 /// باقة اشتراك (Subscription Plan) - تطابق بنية باقات عشير الحالية.
-/// تحدد الحدود والمميزات والعمولات.
+/// تطبّق IPlan من مكتبة Subscriptions.Operations العامة.
 /// </summary>
-public class Plan : IBaseEntity
+public class Plan : IBaseEntity, IPlan
 {
     public Guid Id { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -73,6 +75,41 @@ public class Plan : IBaseEntity
     /// <summary>CSV من slug الفئات: "residential,looking-for-partner". فارغة = كل الفئات.</summary>
     public string? AllowedCategorySlugs { get; set; }
 
+    // ═══════════════════════════════════════════════════════════════
+    // تطبيق IPlan - يحوّل الحقول الـAshare-specific إلى صيغة عامة
+    // ═══════════════════════════════════════════════════════════════
+
+    /// <summary>الحصص بصيغة عامة - تُبنى من الحقول المحددة لعشير</summary>
+    [NotMapped]
+    public Dictionary<string, int> Quotas => new()
+    {
+        ["listings.create"]      = MaxListings,
+        ["listings.feature"]     = MaxFeaturedListings,
+        ["messages.send"]        = MaxMonthlyMessages,
+        ["api.call"]             = MaxMonthlyApiCalls,
+        ["team.add_member"]      = MaxTeamMembers,
+    };
+
+    /// <summary>النطاقات المسموح بها بصيغة عامة - تربط بين النموذج المحاسبي وحقول عشير</summary>
+    [NotMapped]
+    public Dictionary<string, string> AllowedScopes => new()
+    {
+        ["listing_categories"] = AllowedCategorySlugs ?? string.Empty
+    };
+
+    // ⚠️ Setter بدون عمل لأن التطبيق يحتفظ بالحقول الـ concrete - الـ Quotas/AllowedScopes
+    // تُحسب من الحقول المخصصة. هذه طريقة EF-friendly: لا نخزّن dictionary في DB.
+    Dictionary<string, int> IPlan.Quotas
+    {
+        get => Quotas;
+        set { /* مُحسوبة - غير قابلة للضبط مباشرةً */ }
+    }
+    Dictionary<string, string> IPlan.AllowedScopes
+    {
+        get => AllowedScopes;
+        set { /* مُحسوبة */ }
+    }
+
     /// <summary>الحصول على السعر حسب دورة الفوترة</summary>
     public decimal GetPrice(string billingCycle) => billingCycle switch
     {
@@ -85,9 +122,9 @@ public class Plan : IBaseEntity
 }
 
 /// <summary>
-/// اشتراك مستخدم في باقة معينة.
+/// اشتراك مستخدم في باقة معينة. يطبّق ISubscription من المكتبة العامة.
 /// </summary>
-public class Subscription : IBaseEntity
+public class Subscription : IBaseEntity, ISubscription
 {
     public Guid Id { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -124,6 +161,31 @@ public class Subscription : IBaseEntity
     public bool IsCurrentlyActive =>
         (Status == SubscriptionStatus.Active || Status == SubscriptionStatus.Trial) &&
         EndDate > DateTime.UtcNow;
+
+    // ═══════════════════════════════════════════════════════════════
+    // تطبيق ISubscription من Subscriptions.Operations.Abstractions
+    // ═══════════════════════════════════════════════════════════════
+
+    /// <summary>تحويل العدّادات المحددة إلى dictionary عام</summary>
+    [NotMapped]
+    public Dictionary<string, int> Used
+    {
+        get => new()
+        {
+            ["listings.create"]  = UsedListingsCount,
+            ["listings.feature"] = UsedFeaturedListingsCount,
+            ["messages.send"]    = UsedMonthlyMessages,
+            ["api.call"]         = UsedMonthlyApiCalls
+        };
+        set
+        {
+            // المعترض يكتب القيم - نُحدّث الحقول الـ concrete
+            if (value.TryGetValue("listings.create", out var lc))  UsedListingsCount = lc;
+            if (value.TryGetValue("listings.feature", out var lf)) UsedFeaturedListingsCount = lf;
+            if (value.TryGetValue("messages.send", out var ms))    UsedMonthlyMessages = ms;
+            if (value.TryGetValue("api.call", out var ac))         UsedMonthlyApiCalls = ac;
+        }
+    }
 }
 
 public enum SubscriptionStatus

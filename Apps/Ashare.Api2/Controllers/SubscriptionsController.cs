@@ -15,17 +15,14 @@ public class SubscriptionsController : ControllerBase
 {
     private readonly IBaseAsyncRepository<Subscription> _subs;
     private readonly IBaseAsyncRepository<Plan> _plans;
-    private readonly SubscriptionGuard _guard;
     private readonly OpEngine _engine;
 
     public SubscriptionsController(
         IRepositoryFactory factory,
-        SubscriptionGuard guard,
         OpEngine engine)
     {
         _subs = factory.CreateRepository<Subscription>();
         _plans = factory.CreateRepository<Plan>();
-        _guard = guard;
         _engine = engine;
     }
 
@@ -130,27 +127,15 @@ public class SubscriptionsController : ControllerBase
     [HttpGet("user/{userId:guid}/active")]
     public async Task<IActionResult> ActiveByUser(Guid userId, CancellationToken ct)
     {
-        var sub = await _guard.GetActiveAsync(userId, ct);
+        var subs = await _subs.GetAllWithPredicateAsync(s =>
+            s.UserId == userId &&
+            (s.Status == SubscriptionStatus.Active || s.Status == SubscriptionStatus.Trial));
+
+        var sub = subs.OrderBy(s => s.StartDate).FirstOrDefault(s => s.IsCurrentlyActive);
         if (sub == null) return this.NotFoundEnvelope("no_active_subscription");
 
         var plan = await _plans.GetByIdAsync(sub.PlanId, ct);
         return this.OkEnvelope("subscription.active", new { subscription = sub, plan });
-    }
-
-    [HttpGet("user/{userId:guid}/can-create-listing")]
-    public async Task<IActionResult> CanCreateListing(
-        Guid userId,
-        [FromQuery] Guid categoryId,
-        CancellationToken ct = default)
-    {
-        var check = await _guard.CheckCanCreateListingAsync(userId, categoryId, ct);
-        return this.OkEnvelope("subscription.can_create_listing", new
-        {
-            allowed = check.Allowed,
-            reason = check.Reason,
-            remainingListings = check.RemainingListings,
-            plan = check.Plan != null ? new { check.Plan.Id, check.Plan.Slug, check.Plan.Name } : null
-        });
     }
 
     [HttpPost("{id:guid}/cancel")]

@@ -13,6 +13,7 @@ using ACommerce.Files.Operations.Extensions;
 using ACommerce.Files.Storage.AliyunOSS.Extensions;
 using ACommerce.Files.Storage.Local.Extensions;
 using ACommerce.Notification.Operations.Abstractions;
+using ACommerce.OperationEngine.Interceptors.Extensions;
 using ACommerce.Notification.Providers.Firebase.Extensions;
 using ACommerce.Notification.Providers.InApp.Extensions;
 using ACommerce.OperationEngine.Core;
@@ -117,7 +118,9 @@ builder.Services.AddCors(options =>
 // ─────────────────────────────────────────────────────────
 // Core: OperationEngine
 // ─────────────────────────────────────────────────────────
-builder.Services.AddSingleton<OpEngine>(sp =>
+// OpEngine يجب أن يكون Scoped حتى يلتقط IServiceProvider الخاص بالطلب،
+// مما يسمح للمعترضات الـ Scoped (مثل QuotaInterceptor) بأن تُحلّ من DbContext الحالي.
+builder.Services.AddScoped<OpEngine>(sp =>
     new OpEngine(sp, sp.GetRequiredService<ILogger<OpEngine>>()));
 
 // ─────────────────────────────────────────────────────────
@@ -229,7 +232,7 @@ builder.Services.AddSingleton<AuthConfig>(sp =>
     c.UseIssuer(sp.GetRequiredService<ITokenIssuer>());
     return c;
 });
-builder.Services.AddSingleton<AuthService>();
+builder.Services.AddScoped<AuthService>();
 
 // ─────────────────────────────────────────────────────────
 // 2FA: SMS + Email + Nafath (Nafath إذا كانت بيانات الاعتماد موجودة)
@@ -259,7 +262,7 @@ builder.Services.AddSingleton<TwoFactorConfig>(sp =>
         cfg.AddChannel(ch);
     return cfg;
 });
-builder.Services.AddSingleton<TwoFactorService>();
+builder.Services.AddScoped<TwoFactorService>();
 
 // ─────────────────────────────────────────────────────────
 // Payments: Noon (Live في الإنتاج)
@@ -286,7 +289,7 @@ builder.Services.AddSingleton<PaymentConfig>(sp =>
         cfg.AddGateway(gw);
     return cfg;
 });
-builder.Services.AddSingleton<PaymentService>();
+builder.Services.AddScoped<PaymentService>();
 
 // ─────────────────────────────────────────────────────────
 // Translations + Favorites
@@ -295,11 +298,46 @@ builder.Services.AddTranslationOperations();
 builder.Services.AddFavoriteOperations();
 
 // ─────────────────────────────────────────────────────────
-// Subscriptions: Plan + Subscription entities + Guard service
+// Subscriptions (general lib + cross-cutting interceptors)
 // ─────────────────────────────────────────────────────────
 EntityDiscoveryRegistry.RegisterEntity(typeof(Plan));
 EntityDiscoveryRegistry.RegisterEntity(typeof(Subscription));
-builder.Services.AddScoped<SubscriptionGuard>();
+
+// مزوّد الاشتراكات الـAshare-specific - يجسر كيانات Ashare بواجهات IPlan/ISubscription
+builder.Services.AddScoped<ACommerce.Subscriptions.Operations.Abstractions.ISubscriptionProvider,
+    AshareSubscriptionProvider>();
+
+// تسجيل المعترضات في DI
+builder.Services.AddScoped<ACommerce.Subscriptions.Operations.QuotaInterceptor>();
+builder.Services.AddScoped<ACommerce.Subscriptions.Operations.QuotaConsumptionInterceptor>();
+
+// تسجيل سجل المعترضات + ربط معترضات الاشتراكات
+// نستخدم singleton wrappers تستهلك Scoped عبر IServiceScopeFactory
+builder.Services.AddOperationInterceptors(registry =>
+{
+    // المعترضات نفسها Scoped (تحتاج DbContext) - لذا نلفّها بـ adapter ينشئها لكل عملية
+    registry.Register(new ACommerce.OperationEngine.Interceptors.PredicateInterceptor(
+        name: "QuotaInterceptor",
+        phase: ACommerce.OperationEngine.Interceptors.InterceptorPhase.Pre,
+        appliesTo: op => op.HasTag("quota_check"),
+        intercept: async (ctx, _) =>
+        {
+            var sp = ctx.Services;
+            var inner = sp.GetRequiredService<ACommerce.Subscriptions.Operations.QuotaInterceptor>();
+            return await inner.InterceptAsync(ctx, null);
+        }));
+
+    registry.Register(new ACommerce.OperationEngine.Interceptors.PredicateInterceptor(
+        name: "QuotaConsumptionInterceptor",
+        phase: ACommerce.OperationEngine.Interceptors.InterceptorPhase.Post,
+        appliesTo: op => op.HasTag("quota_check"),
+        intercept: async (ctx, _) =>
+        {
+            var sp = ctx.Services;
+            var inner = sp.GetRequiredService<ACommerce.Subscriptions.Operations.QuotaConsumptionInterceptor>();
+            return await inner.InterceptAsync(ctx, null);
+        }));
+});
 
 // ─────────────────────────────────────────────────────────
 // Rate Limiting (ASP.NET Core 8+)

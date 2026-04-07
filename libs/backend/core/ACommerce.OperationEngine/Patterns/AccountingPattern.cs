@@ -173,6 +173,25 @@ public class AccountingBuilder
         return this;
     }
 
+    /// <summary>
+    /// يختم القيد - يمنع كل المعترضات العامة من الحقن.
+    /// مفيد للقيود الحساسة التي يجب ألا تتأثر بأي طبقة cross-cutting.
+    /// </summary>
+    public AccountingBuilder Sealed()
+    {
+        _inner.Tag("sealed", "true");
+        return this;
+    }
+
+    /// <summary>
+    /// يستثني معترضاً معيناً بالاسم من الحقن في هذا القيد.
+    /// </summary>
+    public AccountingBuilder ExcludeInterceptor(string interceptorName)
+    {
+        _inner.Tag("exclude_interceptor", interceptorName);
+        return this;
+    }
+
     // =========================================================================
     // المحللات الإضافية
     // =========================================================================

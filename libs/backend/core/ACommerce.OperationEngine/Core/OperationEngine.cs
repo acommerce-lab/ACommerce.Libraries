@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace ACommerce.OperationEngine.Core;
@@ -35,13 +36,18 @@ public class OpEngine
 
         _logger.LogInformation("[{Type}] {Id}: Start", op.Type, op.Id);
 
+        // المعترضات المحقونة من DI registry (إن وُجد) - معترضات قبل التنفيذ وبعده
+        var interceptorSource = _services.GetService<IInterceptorSource>();
+        var preInterceptors = interceptorSource?.ResolveAnalyzers(op, "pre").ToList() ?? new();
+        var postInterceptors = interceptorSource?.ResolveAnalyzers(op, "post").ToList() ?? new();
+
         try
         {
-            // === 1. Pre-Analyzers ===
+            // === 1. Pre-Analyzers (المعترضات أولاً ثم محللات القيد المحلية) ===
             op.Status = OperationStatus.Analyzing;
             await h.InvokeAsync(h.BeforeAnalyze, ctx);
 
-            foreach (var analyzer in op.PreAnalyzers)
+            foreach (var analyzer in preInterceptors.Concat(op.PreAnalyzers))
             {
                 // فقط إذا العملية تحتوي علامات يراقبها
                 if (ShouldRun(analyzer, op))
@@ -98,10 +104,10 @@ public class OpEngine
 
             await h.InvokeAsync(h.AfterSubOperations, ctx);
 
-            // === 5. Post-Analyzers ===
+            // === 5. Post-Analyzers (محللات القيد المحلية ثم المعترضات بعد التنفيذ) ===
             await h.InvokeAsync(h.BeforePostAnalyze, ctx);
 
-            foreach (var analyzer in op.PostAnalyzers)
+            foreach (var analyzer in op.PostAnalyzers.Concat(postInterceptors))
             {
                 if (ShouldRun(analyzer, op))
                 {
