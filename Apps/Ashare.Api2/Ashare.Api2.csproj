@@ -11,7 +11,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.10" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,36 +23,41 @@
     <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
     <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.Infrastructure.EFCores\ACommerce.SharedKernel.Infrastructure.EFCores.csproj" />
 
-    <!-- The new accounting-based OperationEngine -->
+    <!-- OperationEngine -->
     <ProjectReference Include="..\..\libs\backend\core\ACommerce.OperationEngine\ACommerce.OperationEngine.csproj" />
 
-    <!-- Authentication (operations + token provider) -->
+    <!-- Auth -->
     <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.Operations\ACommerce.Authentication.Operations.csproj" />
     <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.Providers.Token\ACommerce.Authentication.Providers.Token.csproj" />
 
-    <!-- 2FA (operations + Nafath/SMS/Email providers) -->
+    <!-- 2FA -->
     <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.TwoFactor.Operations\ACommerce.Authentication.TwoFactor.Operations.csproj" />
     <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.TwoFactor.Providers.Nafath\ACommerce.Authentication.TwoFactor.Providers.Nafath.csproj" />
     <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.TwoFactor.Providers.Sms\ACommerce.Authentication.TwoFactor.Providers.Sms.csproj" />
     <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.TwoFactor.Providers.Email\ACommerce.Authentication.TwoFactor.Providers.Email.csproj" />
 
-    <!-- Payments (operations + Noon provider) -->
+    <!-- Payments -->
     <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Payments.Operations\ACommerce.Payments.Operations.csproj" />
     <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Payments.Providers.Noon\ACommerce.Payments.Providers.Noon.csproj" />
 
-    <!-- Realtime (operations + InMemory transport for testing) -->
+    <!-- Realtime -->
     <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Realtime.Operations\ACommerce.Realtime.Operations.csproj" />
     <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Realtime.Providers.InMemory\ACommerce.Realtime.Providers.InMemory.csproj" />
 
-    <!-- Notifications (operations + InApp + Firebase providers) -->
+    <!-- Notifications -->
     <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notification.Operations\ACommerce.Notification.Operations.csproj" />
     <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notification.Providers.InApp\ACommerce.Notification.Providers.InApp.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notification.Providers.Firebase\ACommerce.Notification.Providers.Firebase.csproj" />
 
-    <!-- Chat operations -->
-    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Chat.Operations\ACommerce.Chat.Operations.csproj" />
+    <!-- Files (abstractions + storage providers + operations) -->
+    <ProjectReference Include="..\..\libs\backend\files\ACommerce.Files.Abstractions\ACommerce.Files.Abstractions.csproj" />
+    <ProjectReference Include="..\..\libs\backend\files\ACommerce.Files.Operations\ACommerce.Files.Operations.csproj" />
+    <ProjectReference Include="..\..\libs\backend\files\ACommerce.Files.Storage.AliyunOSS\ACommerce.Files.Storage.AliyunOSS.csproj" />
+    <ProjectReference Include="..\..\libs\backend\files\ACommerce.Files.Storage.GoogleCloud\ACommerce.Files.Storage.GoogleCloud.csproj" />
+    <ProjectReference Include="..\..\libs\backend\files\ACommerce.Files.Storage.Local\ACommerce.Files.Storage.Local.csproj" />
 
-    <!-- Service messaging (in-memory) -->
-    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.ServiceMessaging.Operations\ACommerce.ServiceMessaging.Operations.csproj" />
-    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.ServiceMessaging.InMemory\ACommerce.ServiceMessaging.InMemory.csproj" />
+    <!-- Translations + Favorites -->
+    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Translations.Operations\ACommerce.Translations.Operations.csproj" />
+    <ProjectReference Include="..\..\libs\backend\other\ACommerce.Favorites.Operations\ACommerce.Favorites.Operations.csproj" />
   </ItemGroup>
 </Project>
