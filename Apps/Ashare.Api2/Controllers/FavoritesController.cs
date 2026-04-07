@@ -20,8 +20,8 @@ public class FavoritesController : ControllerBase
             req.UserId, req.EntityType, req.EntityId,
             req.Note, req.ListName ?? "default", ct);
 
-        if (id == null) return BadRequest(new { error = "add_failed" });
-        return Ok(new { favoriteId = id });
+        if (id == null) return this.BadRequestEnvelope("favorite_add_failed");
+        return this.OkEnvelope("favorite.add", new { favoriteId = id });
     }
 
     public record RemoveFavoriteRequest(Guid UserId, string EntityType, Guid EntityId, string? ListName);
@@ -33,7 +33,7 @@ public class FavoritesController : ControllerBase
             req.UserId, req.EntityType, req.EntityId,
             req.ListName ?? "default", ct);
 
-        return Ok(new { removedCount = count });
+        return this.OkEnvelope("favorite.remove", new { removedCount = count });
     }
 
     [HttpGet("user/{userId:guid}")]
@@ -44,7 +44,7 @@ public class FavoritesController : ControllerBase
         CancellationToken ct = default)
     {
         var list = await _service.GetUserFavoritesAsync(userId, entityType, listName, ct);
-        return Ok(list);
+        return this.OkEnvelope("favorite.list", list.ToList());
     }
 
     [HttpGet("check")]
@@ -56,7 +56,7 @@ public class FavoritesController : ControllerBase
         CancellationToken ct = default)
     {
         var isFav = await _service.IsFavoriteAsync(userId, entityType, entityId, listName, ct);
-        return Ok(new { isFavorite = isFav });
+        return this.OkEnvelope("favorite.check", new { isFavorite = isFav });
     }
 
     [HttpGet("count")]
@@ -66,6 +66,6 @@ public class FavoritesController : ControllerBase
         CancellationToken ct = default)
     {
         var count = await _service.CountAsync(entityType, entityId, ct);
-        return Ok(new { count });
+        return this.OkEnvelope("favorite.count", new { count });
     }
 }

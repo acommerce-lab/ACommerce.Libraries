@@ -1,6 +1,7 @@
 using ACommerce.Notification.Operations.Abstractions;
 using ACommerce.OperationEngine.Core;
 using ACommerce.OperationEngine.Patterns;
+using ACommerce.OperationEngine.Wire;
 using ACommerce.Realtime.Operations.Abstractions;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using Ashare.Api2.Entities;
@@ -31,14 +32,14 @@ public class NotificationsController : ControllerBase
     public async Task<IActionResult> ForUser(Guid userId, CancellationToken ct)
     {
         var list = await _repo.GetAllWithPredicateAsync(n => n.UserId == userId);
-        return Ok(list.OrderByDescending(n => n.CreatedAt));
+        return this.OkEnvelope("notification.list", list.OrderByDescending(n => n.CreatedAt).ToList());
     }
 
     [HttpGet("user/{userId:guid}/unread-count")]
     public async Task<IActionResult> UnreadCount(Guid userId, CancellationToken ct)
     {
         var count = await _repo.CountAsync(n => n.UserId == userId && !n.IsRead, cancellationToken: ct);
-        return Ok(new { unreadCount = count });
+        return this.OkEnvelope("notification.unread_count", new { unreadCount = count });
     }
 
     public record SendNotificationRequest(
@@ -58,11 +59,10 @@ public class NotificationsController : ControllerBase
     {
         var channel = _channels.FirstOrDefault(c => c.ChannelName == req.Channel);
         if (channel == null)
-            return BadRequest(new
-            {
-                error = $"channel '{req.Channel}' not registered",
-                available = _channels.Select(c => c.ChannelName).ToArray()
-            });
+            return this.BadRequestEnvelope(
+                "channel_not_registered",
+                $"channel '{req.Channel}' not found",
+                $"available: {string.Join(", ", _channels.Select(c => c.ChannelName))}");
 
         // إنشاء الكيان أولاً
         var entity = new NotificationEntity
@@ -112,26 +112,19 @@ public class NotificationsController : ControllerBase
             })
             .Build();
 
-        var result = await _engine.ExecuteAsync(op, ct);
-
-        return Ok(new
-        {
-            notification = entity,
-            opStatus = (result.Success ? "Success" : (result.IsPartial ? "Partial" : "Failed")),
-            success = result.Success,
-            channel = req.Channel
-        });
+        var envelope = await _engine.ExecuteEnvelopeAsync(op, entity, ct);
+        return Ok(envelope);
     }
 
     [HttpPost("{id:guid}/read")]
     public async Task<IActionResult> MarkAsRead(Guid id, CancellationToken ct)
     {
         var n = await _repo.GetByIdAsync(id, ct);
-        if (n == null) return NotFound();
+        if (n == null) return this.NotFoundEnvelope("notification_not_found");
         n.IsRead = true;
         n.ReadAt = DateTime.UtcNow;
         await _repo.UpdateAsync(n, ct);
-        return Ok(n);
+        return this.OkEnvelope("notification.read", n);
     }
 
     [HttpPost("user/{userId:guid}/mark-all-read")]
@@ -145,6 +138,6 @@ public class NotificationsController : ControllerBase
             n.ReadAt = now;
             await _repo.UpdateAsync(n, ct);
         }
-        return Ok(new { markedCount = unread.Count });
+        return this.OkEnvelope("notification.mark_all_read", new { markedCount = unread.Count });
     }
 }

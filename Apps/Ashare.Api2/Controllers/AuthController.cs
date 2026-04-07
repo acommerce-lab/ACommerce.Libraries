@@ -59,9 +59,9 @@ public class AuthController : ControllerBase
         var result = await _tfa.InitiateAsync("sms", user.Id.ToString(), target: req.PhoneNumber, ct);
 
         if (!result.Succeeded)
-            return BadRequest(new { error = result.Error });
+            return this.BadRequestEnvelope("otp_initiate_failed", result.Error);
 
-        return Ok(new
+        return this.OkEnvelope("auth.sms.request", new
         {
             challengeId = result.ChallengeId,
             userId = user.Id,
@@ -79,20 +79,18 @@ public class AuthController : ControllerBase
             "sms", req.UserId.ToString(), req.ChallengeId, req.Code, ct);
 
         if (!verification.Verified)
-            return Unauthorized(new { error = verification.Reason });
+            return this.UnauthorizedEnvelope("otp_invalid", verification.Reason);
 
-        // تفعيل المستخدم
         var user = await _users.GetByIdAsync(req.UserId, ct);
-        if (user == null) return NotFound(new { error = "user_not_found" });
+        if (user == null) return this.NotFoundEnvelope("user_not_found");
 
         user.IsActive = true;
         await _users.UpdateAsync(user, ct);
 
-        // إصدار رمز
         var principal = new AsharePrincipal { UserId = user.Id.ToString(), DisplayName = user.FullName };
         var token = await _tokenStore.IssueAsync(principal, ct);
 
-        return Ok(new
+        return this.OkEnvelope("auth.sms.verify", new
         {
             userId = user.Id,
             phoneNumber = user.PhoneNumber,
@@ -129,9 +127,9 @@ public class AuthController : ControllerBase
         var result = await _tfa.InitiateAsync("email", user.Id.ToString(), target: req.Email, ct);
 
         if (!result.Succeeded)
-            return BadRequest(new { error = result.Error });
+            return this.BadRequestEnvelope("otp_initiate_failed", result.Error);
 
-        return Ok(new { challengeId = result.ChallengeId, userId = user.Id });
+        return this.OkEnvelope("auth.email.request", new { challengeId = result.ChallengeId, userId = user.Id });
     }
 
     // ─────────────────────────────────────────────────────────
@@ -146,9 +144,9 @@ public class AuthController : ControllerBase
         var result = await _auth.ValidateAsync("token", new TokenCredential(req.AccessToken), ct);
 
         if (!result.Succeeded)
-            return Unauthorized(new { reason = result.Reason });
+            return this.UnauthorizedEnvelope("invalid_token", result.Reason);
 
-        return Ok(new
+        return this.OkEnvelope("auth.token.validate", new
         {
             valid = true,
             userId = result.Principal?.UserId,
@@ -163,9 +161,9 @@ public class AuthController : ControllerBase
     {
         var result = await _auth.RefreshAsync(req.UserId, req.RefreshToken, ct);
         if (!result.Succeeded)
-            return Unauthorized(new { reason = result.Reason });
+            return this.UnauthorizedEnvelope("refresh_failed", result.Reason);
 
-        return Ok(new
+        return this.OkEnvelope("auth.refresh", new
         {
             accessToken = result.Token!.AccessToken,
             refreshToken = result.Token!.RefreshToken,
@@ -176,12 +174,11 @@ public class AuthController : ControllerBase
     [HttpPost("signout")]
     public async Task<IActionResult> SignOut([FromBody] TokenLoginRequest req, CancellationToken ct)
     {
-        // نحتاج userId من الـ token
         var validation = await _auth.ValidateAsync("token", new TokenCredential(req.AccessToken), ct);
         if (!validation.Succeeded || validation.Principal == null)
-            return Unauthorized();
+            return this.UnauthorizedEnvelope();
 
         await _auth.SignOutAsync(validation.Principal.UserId, req.AccessToken, ct);
-        return Ok(new { signedOut = true });
+        return this.OkEnvelope("auth.signout", new { signedOut = true });
     }
 }

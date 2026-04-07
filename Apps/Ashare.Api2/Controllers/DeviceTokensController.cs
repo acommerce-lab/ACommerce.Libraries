@@ -20,7 +20,6 @@ public class DeviceTokensController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterTokenRequest req, CancellationToken ct)
     {
-        // إذا كان موجوداً، نحدّث LastSeen
         var existing = await _repo.GetAllWithPredicateAsync(t => t.Token == req.Token);
         if (existing.Count > 0)
         {
@@ -29,7 +28,7 @@ public class DeviceTokensController : ControllerBase
             t.IsActive = true;
             t.UserId = req.UserId;
             await _repo.UpdateAsync(t, ct);
-            return Ok(t);
+            return this.OkEnvelope("device_token.update", t);
         }
 
         var entity = new DeviceToken
@@ -42,14 +41,14 @@ public class DeviceTokensController : ControllerBase
             LastSeenAt = DateTime.UtcNow
         };
         await _repo.AddAsync(entity, ct);
-        return CreatedAtAction(nameof(GetByUser), new { userId = req.UserId }, entity);
+        return this.OkEnvelope("device_token.register", entity);
     }
 
     [HttpGet("user/{userId:guid}")]
     public async Task<IActionResult> GetByUser(Guid userId, CancellationToken ct)
     {
         var list = await _repo.GetAllWithPredicateAsync(t => t.UserId == userId && t.IsActive);
-        return Ok(list);
+        return this.OkEnvelope("device_token.list", list.ToList());
     }
 
     [HttpDelete("{token}")]
@@ -61,6 +60,6 @@ public class DeviceTokensController : ControllerBase
             t.IsActive = false;
             await _repo.UpdateAsync(t, ct);
         }
-        return NoContent();
+        return this.NoContentEnvelope("device_token.unregister");
     }
 }

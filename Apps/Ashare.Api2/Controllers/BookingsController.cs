@@ -1,6 +1,7 @@
 using ACommerce.OperationEngine.Analyzers;
 using ACommerce.OperationEngine.Core;
 using ACommerce.OperationEngine.Patterns;
+using ACommerce.OperationEngine.Wire;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using Ashare.Api2.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -39,13 +40,13 @@ public class BookingsController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateBookingRequest req, CancellationToken ct)
     {
         var listing = await _listings.GetByIdAsync(req.ListingId, ct);
-        if (listing == null) return NotFound(new { error = "listing_not_found" });
+        if (listing == null) return this.NotFoundEnvelope("listing_not_found");
 
         if (listing.Status != ListingStatus.Published)
-            return BadRequest(new { error = "listing_not_available" });
+            return this.BadRequestEnvelope("listing_not_available");
 
         var customer = await _users.GetByIdAsync(req.CustomerId, ct);
-        if (customer == null) return BadRequest(new { error = "customer_not_found" });
+        if (customer == null) return this.BadRequestEnvelope("customer_not_found");
 
         var totalPrice = listing.Price * Math.Max(1, (req.EndDate - req.StartDate).Days / 30);
 
@@ -102,59 +103,48 @@ public class BookingsController : ControllerBase
             })
             .Build();
 
-        var result = await _engine.ExecuteAsync(op, ct);
+        var envelope = await _engine.ExecuteEnvelopeAsync(op, booking, ct);
 
-        if (!result.Success)
+        if (envelope.Operation.Status != "Success")
         {
-            // إرجاع حالة العرض إذا فشلت العملية
             if (listing.Status == ListingStatus.Reserved)
             {
                 listing.Status = ListingStatus.Published;
                 await _listings.UpdateAsync(listing, ct);
             }
-            return BadRequest(new
-            {
-                error = "booking_failed",
-                operationStatus = (result.Success ? "Success" : (result.IsPartial ? "Partial" : "Failed")),
-                validationErrors = result.Context?.Items.GetValueOrDefault("_errors")
-            });
+            envelope.Error = new OperationError { Code = "booking_failed", Message = envelope.Operation.ErrorMessage };
+            return BadRequest(envelope);
         }
 
-        return CreatedAtAction(nameof(GetById), new { id = booking.Id }, new
-        {
-            booking,
-            operationId = op.Id,
-            opStatus = (result.Success ? "Success" : (result.IsPartial ? "Partial" : "Failed"))
-        });
+        return Created($"/api/bookings/{booking.Id}", envelope);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
         var b = await _bookings.GetByIdAsync(id, ct);
-        return b == null ? NotFound() : Ok(b);
+        return b == null ? this.NotFoundEnvelope("booking_not_found") : this.OkEnvelope("booking.get", b);
     }
 
     [HttpGet("by-customer/{customerId:guid}")]
     public async Task<IActionResult> ByCustomer(Guid customerId, CancellationToken ct)
     {
         var list = await _bookings.GetAllWithPredicateAsync(b => b.CustomerId == customerId);
-        return Ok(list);
+        return this.OkEnvelope("booking.list.by_customer", list.ToList());
     }
 
     [HttpPost("{id:guid}/cancel")]
     public async Task<IActionResult> Cancel(Guid id, CancellationToken ct)
     {
         var booking = await _bookings.GetByIdAsync(id, ct);
-        if (booking == null) return NotFound();
+        if (booking == null) return this.NotFoundEnvelope("booking_not_found");
 
         if (booking.Status == BookingStatus.Paid || booking.Status == BookingStatus.Completed)
-            return BadRequest(new { error = "cannot_cancel_completed" });
+            return this.BadRequestEnvelope("cannot_cancel_completed");
 
         booking.Status = BookingStatus.Cancelled;
         await _bookings.UpdateAsync(booking, ct);
 
-        // إعادة إتاحة العرض
         var listing = await _listings.GetByIdAsync(booking.ListingId, ct);
         if (listing != null && listing.Status == ListingStatus.Reserved)
         {
@@ -162,6 +152,6 @@ public class BookingsController : ControllerBase
             await _listings.UpdateAsync(listing, ct);
         }
 
-        return Ok(booking);
+        return this.OkEnvelope("booking.cancel", booking);
     }
 }

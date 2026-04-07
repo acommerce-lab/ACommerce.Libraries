@@ -67,6 +67,17 @@ public class Listing : IBaseEntity
     public DateTime? PublishedAt { get; set; }
     public int ViewCount { get; set; }
     public bool IsFeatured { get; set; }
+
+    // === ربط محاسبي بالاشتراك (FIFO consumption) ===
+    /// <summary>الاشتراك الذي استُهلكت منه حصة هذا العرض</summary>
+    public Guid? SubscriptionId { get; set; }
+    /// <summary>لقطة من معرّف الباقة وقت الإنشاء (لئلا يتأثر بتغيير لاحق)</summary>
+    public Guid? PlanIdSnapshot { get; set; }
+    /// <summary>بداية ونهاية فترة الاشتراك التي يخصها</summary>
+    public DateTime? BillingPeriodStart { get; set; }
+    public DateTime? BillingPeriodEnd { get; set; }
+    /// <summary>معرّف العملية المحاسبية لإنشاء العرض</summary>
+    public Guid? OperationId { get; set; }
 }
 
 public enum ListingStatus

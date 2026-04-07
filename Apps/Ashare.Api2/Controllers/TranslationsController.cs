@@ -28,8 +28,8 @@ public class TranslationsController : ControllerBase
             req.Language, req.TranslatedText,
             req.TranslatorId, req.IsVerified, ct);
 
-        if (id == null) return BadRequest(new { error = "set_failed" });
-        return Ok(new { translationId = id });
+        if (id == null) return this.BadRequestEnvelope("translation_set_failed");
+        return this.OkEnvelope("translation.set", new { translationId = id });
     }
 
     [HttpGet]
@@ -42,28 +42,30 @@ public class TranslationsController : ControllerBase
         CancellationToken ct = default)
     {
         var text = await _service.GetAsync(entityType, entityId, fieldName, language, fallback, ct);
-        if (text == null) return NotFound();
-        return Ok(new { text, language });
+        if (text == null) return this.NotFoundEnvelope("translation_not_found");
+        return this.OkEnvelope("translation.get", new { text, language });
     }
 
     [HttpGet("entity/{entityType}/{entityId:guid}")]
     public async Task<IActionResult> AllForEntity(string entityType, Guid entityId, CancellationToken ct)
     {
         var list = await _service.GetAllForEntityAsync(entityType, entityId, ct);
-        return Ok(list);
+        return this.OkEnvelope("translation.list.entity", list.ToList());
     }
 
     [HttpGet("field/{entityType}/{entityId:guid}/{fieldName}")]
     public async Task<IActionResult> AllForField(string entityType, Guid entityId, string fieldName, CancellationToken ct)
     {
         var list = await _service.GetAllForFieldAsync(entityType, entityId, fieldName, ct);
-        return Ok(list);
+        return this.OkEnvelope("translation.list.field", list.ToList());
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, [FromQuery] string? actorId, CancellationToken ct)
     {
         var ok = await _service.RemoveAsync(id, actorId, ct);
-        return ok ? NoContent() : NotFound();
+        return ok
+            ? this.NoContentEnvelope("translation.delete")
+            : this.NotFoundEnvelope("translation_not_found");
     }
 }

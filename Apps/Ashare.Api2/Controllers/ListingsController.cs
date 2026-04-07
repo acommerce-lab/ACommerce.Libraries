@@ -1,4 +1,5 @@
 using ACommerce.OperationEngine.Core;
+using ACommerce.OperationEngine.Wire;
 using ACommerce.OperationEngine.Patterns;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using Ashare.Api2.Entities;
@@ -12,13 +13,13 @@ namespace Ashare.Api2.Controllers;
 public class ListingsController : ControllerBase
 {
     private readonly IBaseAsyncRepository<Listing> _repo;
-    private readonly SubscriptionGuard _guard;
+    private readonly IRepositoryFactory _factory;
     private readonly OpEngine _engine;
 
-    public ListingsController(IRepositoryFactory factory, SubscriptionGuard guard, OpEngine engine)
+    public ListingsController(IRepositoryFactory factory, OpEngine engine)
     {
         _repo = factory.CreateRepository<Listing>();
-        _guard = guard;
+        _factory = factory;
         _engine = engine;
     }
 
@@ -44,20 +45,19 @@ public class ListingsController : ControllerBase
             orderBy: l => l.PublishedAt!,
             ascending: false);
 
-        return Ok(result);
+        return this.OkEnvelope("listing.list", result);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
         var listing = await _repo.GetByIdAsync(id, ct);
-        if (listing == null) return NotFound();
+        if (listing == null) return this.NotFoundEnvelope("listing_not_found");
 
-        // عداد المشاهدات
         listing.ViewCount++;
         await _repo.UpdateAsync(listing, ct);
 
-        return Ok(listing);
+        return this.OkEnvelope("listing.get", listing);
     }
 
     public record CreateListingRequest(
@@ -104,8 +104,10 @@ public class ListingsController : ControllerBase
             Status = ListingStatus.Draft
         };
 
-        // === القيد المحاسبي مع SubscriptionAnalyzer كـ PreAnalyzer ===
-        // المالك (مدين) ← الفئة (دائن) - فحص الاشتراك يتم داخل المحرك قبل التنفيذ
+        // === القيد المحاسبي مع المحلِّلَيْن ===
+        // قيد العرض هو "قيد عكسي" يستهلك من قيد اشتراك مفتوح:
+        //   PreAnalyzer (SubscriptionLinkAnalyzer): يجد أقدم اشتراك له رصيد + يطابق الفئة (FIFO)
+        //   PostAnalyzer (QuotaConsumptionAnalyzer): يربط العرض بالاشتراك ويزيد العدّاد
         var op = Entry.Create("listing.create")
             .Describe($"Owner:{req.OwnerId} creates listing in Category:{req.CategoryId}")
             .From($"User:{req.OwnerId}", 1, ("role", "owner"))
@@ -113,55 +115,62 @@ public class ListingsController : ControllerBase
             .Tag("listing_id", listing.Id.ToString())
             .Tag("category_id", req.CategoryId.ToString())
             .Tag("subscription_check", "create_listing")
-            .Analyze(new SubscriptionAnalyzer(
-                _guard, req.OwnerId, SubscriptionCheckKind.CreateListing, req.CategoryId))
+            .Analyze(new SubscriptionLinkAnalyzer(_factory, req.OwnerId, req.CategoryId))
+            .PostAnalyze(new QuotaConsumptionAnalyzer(_factory))
             .Execute(async ctx =>
             {
-                // المحلل تم تشغيله بنجاح قبل وصولنا هنا - الباقة تسمح
+                // PreAnalyzer ربط العرض باشتراك - نستخدم بياناته
+                ctx.TryGet<Subscription>("linked_subscription", out var sub);
+                ctx.TryGet<Plan>("linked_plan", out var plan);
+
                 listing.Status = ListingStatus.Published;
                 listing.PublishedAt = DateTime.UtcNow;
+                if (sub != null)
+                {
+                    listing.SubscriptionId = sub.Id;
+                    listing.PlanIdSnapshot = plan?.Id;
+                    listing.BillingPeriodStart = sub.StartDate;
+                    listing.BillingPeriodEnd = sub.EndDate;
+                }
                 await _repo.AddAsync(listing, ctx.CancellationToken);
+
+                // مرّر للـ PostAnalyzer
+                ctx.Set("listing", listing);
             })
             .Build();
 
-        var result = await _engine.ExecuteAsync(op, ct);
+        var envelope = await _engine.ExecuteEnvelopeAsync(op, listing, ct);
 
-        if (!result.Success)
+        if (envelope.Operation.Status != "Success")
         {
-            // فشل المحلل أو التنفيذ
-            return StatusCode(403, new
+            envelope.Error = new OperationError
             {
-                error = "listing_create_blocked",
-                analyzerErrors = result.ValidationErrors,
-                failedAnalyzer = result.FailedAnalyzer,
-                message = result.ErrorMessage,
-                hint = "اشترك في باقة تدعم هذه الفئة من /api/plans"
-            });
+                Code = "listing_create_blocked",
+                Message = envelope.Operation.ErrorMessage,
+                Hint = "اشترك في باقة تدعم هذه الفئة من /api/plans"
+            };
+            return StatusCode(403, envelope);
         }
 
-        return CreatedAtAction(nameof(GetById), new { id = listing.Id }, new
-        {
-            listing,
-            operationId = op.Id
-        });
+        return Created($"/api/listings/{listing.Id}", envelope);
     }
 
     [HttpPost("{id:guid}/publish")]
     public async Task<IActionResult> Publish(Guid id, CancellationToken ct)
     {
         var listing = await _repo.GetByIdAsync(id, ct);
-        if (listing == null) return NotFound();
+        if (listing == null) return this.NotFoundEnvelope("listing_not_found");
 
         listing.Status = ListingStatus.Published;
         listing.PublishedAt = DateTime.UtcNow;
         await _repo.UpdateAsync(listing, ct);
-        return Ok(listing);
+        return this.OkEnvelope("listing.publish", listing);
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
         await _repo.SoftDeleteAsync(id, ct);
-        return NoContent();
+        return this.NoContentEnvelope("listing.delete");
     }
 }

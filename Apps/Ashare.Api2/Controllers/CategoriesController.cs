@@ -19,14 +19,14 @@ public class CategoriesController : ControllerBase
     public async Task<IActionResult> ListAll(CancellationToken ct)
     {
         var all = await _repo.GetAllWithPredicateAsync(c => c.IsActive);
-        return Ok(all.OrderBy(c => c.SortOrder));
+        return this.OkEnvelope("category.list", all.OrderBy(c => c.SortOrder).ToList());
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
         var c = await _repo.GetByIdAsync(id, ct);
-        return c == null ? NotFound() : Ok(c);
+        return c == null ? this.NotFoundEnvelope("category_not_found") : this.OkEnvelope("category.get", c);
     }
 
     [HttpGet("by-slug/{slug}")]
@@ -34,6 +34,6 @@ public class CategoriesController : ControllerBase
     {
         var matches = await _repo.GetAllWithPredicateAsync(c => c.Slug == slug);
         var c = matches.FirstOrDefault();
-        return c == null ? NotFound() : Ok(c);
+        return c == null ? this.NotFoundEnvelope("category_not_found") : this.OkEnvelope("category.get", c);
     }
 }

@@ -1,5 +1,7 @@
+using ACommerce.OperationEngine.Analyzers;
 using ACommerce.OperationEngine.Core;
 using ACommerce.OperationEngine.Patterns;
+using ACommerce.OperationEngine.Wire;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using Ashare.Api2.Entities;
 using Ashare.Api2.Services;
@@ -37,8 +39,8 @@ public class SubscriptionsController : ControllerBase
     public async Task<IActionResult> Subscribe([FromBody] SubscribeRequest req, CancellationToken ct)
     {
         var plan = await _plans.GetByIdAsync(req.PlanId, ct);
-        if (plan == null) return NotFound(new { error = "plan_not_found" });
-        if (!plan.IsActive) return BadRequest(new { error = "plan_inactive" });
+        if (plan == null) return this.NotFoundEnvelope("plan_not_found");
+        if (!plan.IsActive) return this.BadRequestEnvelope("plan_inactive");
 
         var amount = plan.GetPrice(req.BillingCycle);
 
@@ -77,15 +79,8 @@ public class SubscriptionsController : ControllerBase
             .Tag("subscription_id", subscription.Id.ToString())
             .Tag("billing_cycle", req.BillingCycle)
             .Tag("currency", plan.Currency)
-            .Validate(ctx =>
-            {
-                if (amount < 0)
-                {
-                    ctx.AddValidationError("amount", "negative_amount");
-                    return false;
-                }
-                return true;
-            })
+            // محلل: المبلغ غير سالب
+            .Analyze(new RangeAnalyzer("amount", () => amount, min: 0))
             .Execute(async ctx =>
             {
                 await _subs.AddAsync(subscription, ctx.CancellationToken);
@@ -103,48 +98,43 @@ public class SubscriptionsController : ControllerBase
             })
             .Build();
 
-        var result = await _engine.ExecuteAsync(op, ct);
+        var envelope = await _engine.ExecuteEnvelopeAsync(op, subscription, ct);
 
-        if (!result.Success)
-            return BadRequest(new { error = "subscription_failed" });
+        if (envelope.Operation.Status != "Success")
+            return BadRequest(envelope);
 
-        return CreatedAtAction(nameof(GetById), new { id = subscription.Id }, new
+        envelope.Meta = new Dictionary<string, object>
         {
-            subscription,
-            operationId = op.Id,
-            requiresPayment = subscription.Status == SubscriptionStatus.Pending,
-            amount,
-            plan = new { plan.Id, plan.Slug, plan.Name }
-        });
+            ["requiresPayment"] = subscription.Status == SubscriptionStatus.Pending,
+            ["amount"] = amount,
+            ["plan"] = new { plan.Id, plan.Slug, plan.Name }
+        };
+
+        return Created($"/api/subscriptions/{subscription.Id}", envelope);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
         var s = await _subs.GetByIdAsync(id, ct);
-        return s == null ? NotFound() : Ok(s);
+        return s == null ? this.NotFoundEnvelope("subscription_not_found") : this.OkEnvelope("subscription.get", s);
     }
 
     [HttpGet("user/{userId:guid}")]
     public async Task<IActionResult> ByUser(Guid userId, CancellationToken ct)
     {
         var list = await _subs.GetAllWithPredicateAsync(s => s.UserId == userId);
-        return Ok(list.OrderByDescending(s => s.StartDate));
+        return this.OkEnvelope("subscription.list", list.OrderByDescending(s => s.StartDate).ToList());
     }
 
     [HttpGet("user/{userId:guid}/active")]
     public async Task<IActionResult> ActiveByUser(Guid userId, CancellationToken ct)
     {
         var sub = await _guard.GetActiveAsync(userId, ct);
-        if (sub == null) return NotFound(new { hasActive = false });
+        if (sub == null) return this.NotFoundEnvelope("no_active_subscription");
 
         var plan = await _plans.GetByIdAsync(sub.PlanId, ct);
-        return Ok(new
-        {
-            hasActive = true,
-            subscription = sub,
-            plan
-        });
+        return this.OkEnvelope("subscription.active", new { subscription = sub, plan });
     }
 
     [HttpGet("user/{userId:guid}/can-create-listing")]
@@ -154,7 +144,7 @@ public class SubscriptionsController : ControllerBase
         CancellationToken ct = default)
     {
         var check = await _guard.CheckCanCreateListingAsync(userId, categoryId, ct);
-        return Ok(new
+        return this.OkEnvelope("subscription.can_create_listing", new
         {
             allowed = check.Allowed,
             reason = check.Reason,
@@ -167,10 +157,10 @@ public class SubscriptionsController : ControllerBase
     public async Task<IActionResult> Cancel(Guid id, CancellationToken ct)
     {
         var sub = await _subs.GetByIdAsync(id, ct);
-        if (sub == null) return NotFound();
+        if (sub == null) return this.NotFoundEnvelope("subscription_not_found");
         sub.Status = SubscriptionStatus.Cancelled;
         sub.EndDate = DateTime.UtcNow;
         await _subs.UpdateAsync(sub, ct);
-        return Ok(sub);
+        return this.OkEnvelope("subscription.cancel", sub);
     }
 }

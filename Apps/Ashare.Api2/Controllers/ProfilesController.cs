@@ -21,7 +21,9 @@ public class ProfilesController : ControllerBase
     public async Task<IActionResult> ByUser(Guid userId, CancellationToken ct)
     {
         var matches = await _profiles.GetAllWithPredicateAsync(p => p.UserId == userId);
-        return matches.Count > 0 ? Ok(matches[0]) : NotFound();
+        return matches.Count > 0
+            ? this.OkEnvelope("profile.get", matches[0])
+            : this.NotFoundEnvelope("profile_not_found");
     }
 
     public record UpsertProfileRequest(
@@ -41,7 +43,7 @@ public class ProfilesController : ControllerBase
     public async Task<IActionResult> Upsert([FromBody] UpsertProfileRequest req, CancellationToken ct)
     {
         var user = await _users.GetByIdAsync(req.UserId, ct);
-        if (user == null) return NotFound(new { error = "user_not_found" });
+        if (user == null) return this.NotFoundEnvelope("user_not_found");
 
         var existing = await _profiles.GetAllWithPredicateAsync(p => p.UserId == req.UserId);
         Profile profile;
@@ -82,6 +84,6 @@ public class ProfilesController : ControllerBase
             await _profiles.AddAsync(profile, ct);
         }
 
-        return Ok(profile);
+        return this.OkEnvelope("profile.upsert", profile);
     }
 }

@@ -1,6 +1,7 @@
 using ACommerce.OperationEngine.Analyzers;
 using ACommerce.OperationEngine.Core;
 using ACommerce.OperationEngine.Patterns;
+using ACommerce.OperationEngine.Wire;
 using ACommerce.Realtime.Operations.Abstractions;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using Ashare.Api2.Entities;
@@ -40,19 +41,18 @@ public class MessagesController : ControllerBase
     public async Task<IActionResult> StartConversation([FromBody] StartConversationRequest req, CancellationToken ct)
     {
         var listing = await _listings.GetByIdAsync(req.ListingId, ct);
-        if (listing == null) return NotFound(new { error = "listing_not_found" });
+        if (listing == null) return this.NotFoundEnvelope("listing_not_found");
 
         if (!listing.IsMessagingAllowed)
-            return BadRequest(new { error = "messaging_not_allowed_for_listing" });
+            return this.BadRequestEnvelope("messaging_not_allowed_for_listing");
 
-        // البحث عن محادثة موجودة بين هذين الطرفين على هذا العرض
         var existing = await _convs.GetAllWithPredicateAsync(c =>
             c.ListingId == req.ListingId &&
             c.CustomerId == req.CustomerId &&
             c.OwnerId == listing.OwnerId);
 
         if (existing.Count > 0)
-            return Ok(existing.First());
+            return this.OkEnvelope("conversation.get", existing.First());
 
         var conv = new Conversation
         {
@@ -63,14 +63,14 @@ public class MessagesController : ControllerBase
             OwnerId = listing.OwnerId
         };
         await _convs.AddAsync(conv, ct);
-        return CreatedAtAction(nameof(GetConversation), new { id = conv.Id }, conv);
+        return this.OkEnvelope("conversation.create", conv);
     }
 
     [HttpGet("conversations/{id:guid}")]
     public async Task<IActionResult> GetConversation(Guid id, CancellationToken ct)
     {
         var c = await _convs.GetByIdAsync(id, ct);
-        return c == null ? NotFound() : Ok(c);
+        return c == null ? this.NotFoundEnvelope("conversation_not_found") : this.OkEnvelope("conversation.get", c);
     }
 
     [HttpGet("conversations/by-user/{userId:guid}")]
@@ -78,7 +78,7 @@ public class MessagesController : ControllerBase
     {
         var list = await _convs.GetAllWithPredicateAsync(c =>
             c.CustomerId == userId || c.OwnerId == userId);
-        return Ok(list.OrderByDescending(c => c.LastMessageAt ?? c.CreatedAt));
+        return this.OkEnvelope("conversation.list", list.OrderByDescending(c => c.LastMessageAt ?? c.CreatedAt).ToList());
     }
 
     public record SendMessageRequest(Guid ConversationId, Guid SenderId, string Content, string? MessageType);
@@ -91,10 +91,10 @@ public class MessagesController : ControllerBase
     public async Task<IActionResult> Send([FromBody] SendMessageRequest req, CancellationToken ct)
     {
         var conv = await _convs.GetByIdAsync(req.ConversationId, ct);
-        if (conv == null) return NotFound(new { error = "conversation_not_found" });
+        if (conv == null) return this.NotFoundEnvelope("conversation_not_found");
 
         if (req.SenderId != conv.CustomerId && req.SenderId != conv.OwnerId)
-            return Forbid();
+            return this.ForbiddenEnvelope("not_a_participant");
 
         var recipient = req.SenderId == conv.CustomerId ? conv.OwnerId : conv.CustomerId;
 
@@ -148,29 +148,25 @@ public class MessagesController : ControllerBase
             })
             .Build();
 
-        var result = await _engine.ExecuteAsync(op, ct);
+        var envelope = await _engine.ExecuteEnvelopeAsync(op, msg, ct);
 
-        if (!result.Success)
-            return BadRequest(new
-            {
-                error = "send_failed",
-                opStatus = (result.Success ? "Success" : (result.IsPartial ? "Partial" : "Failed"))
-            });
+        if (envelope.Operation.Status != "Success")
+            return BadRequest(envelope);
 
-        return CreatedAtAction(nameof(GetMessage), new { id = msg.Id }, new { message = msg, opId = op.Id });
+        return Created($"/api/messages/{msg.Id}", envelope);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetMessage(Guid id, CancellationToken ct)
     {
         var m = await _msgs.GetByIdAsync(id, ct);
-        return m == null ? NotFound() : Ok(m);
+        return m == null ? this.NotFoundEnvelope("message_not_found") : this.OkEnvelope("message.get", m);
     }
 
     [HttpGet("conversations/{conversationId:guid}/messages")]
     public async Task<IActionResult> ListInConversation(Guid conversationId, CancellationToken ct)
     {
         var list = await _msgs.GetAllWithPredicateAsync(m => m.ConversationId == conversationId);
-        return Ok(list.OrderBy(m => m.CreatedAt));
+        return this.OkEnvelope("message.list", list.OrderBy(m => m.CreatedAt).ToList());
     }
 }

@@ -1,5 +1,6 @@
 using ACommerce.Files.Operations;
 using ACommerce.Files.Operations.Abstractions;
+using ACommerce.OperationEngine.Wire;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using Ashare.Api2.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -42,16 +43,16 @@ public class MediaController : ControllerBase
         CancellationToken ct = default)
     {
         if (file == null || file.Length == 0)
-            return BadRequest(new { error = "no_file" });
+            return this.BadRequestEnvelope("no_file");
 
         if (file.Length > MaxFileSizeBytes)
-            return BadRequest(new { error = "file_too_large", maxBytes = MaxFileSizeBytes });
+            return this.BadRequestEnvelope("file_too_large", $"max bytes: {MaxFileSizeBytes}");
 
         if (!AllowedContentTypes.Contains(file.ContentType))
-            return BadRequest(new { error = "invalid_content_type", allowed = AllowedContentTypes });
+            return this.BadRequestEnvelope("invalid_content_type", string.Join(",", AllowedContentTypes));
 
         if (!AllowedDirectories.Contains(directory))
-            return BadRequest(new { error = "invalid_directory", allowed = AllowedDirectories });
+            return this.BadRequestEnvelope("invalid_directory", string.Join(",", AllowedDirectories));
 
         var uploader = uploaderId ?? Guid.Empty;
 
@@ -67,9 +68,8 @@ public class MediaController : ControllerBase
         var outcome = await _files.UploadAsync(uploader, request, ct);
 
         if (!outcome.Succeeded)
-            return BadRequest(new { error = outcome.Error });
+            return this.BadRequestEnvelope("upload_failed", outcome.Error);
 
-        // حفظ سجل في DB
         var media = new MediaFile
         {
             Id = Guid.NewGuid(),
@@ -85,14 +85,7 @@ public class MediaController : ControllerBase
         };
         await _repo.AddAsync(media, ct);
 
-        return Ok(new
-        {
-            id = media.Id,
-            url = media.PublicUrl,
-            path = media.FilePath,
-            provider = media.Provider,
-            sizeBytes = media.SizeBytes
-        });
+        return this.OkEnvelope("media.upload", media);
     }
 
     [HttpPost("upload/multiple")]
@@ -104,7 +97,7 @@ public class MediaController : ControllerBase
         CancellationToken ct = default)
     {
         if (files == null || files.Count == 0)
-            return BadRequest(new { error = "no_files" });
+            return this.BadRequestEnvelope("no_files");
 
         var results = new List<object>();
         var errors = new List<object>();
@@ -147,34 +140,34 @@ public class MediaController : ControllerBase
             }
         }
 
-        return Ok(new { uploaded = results, failed = errors });
+        return this.OkEnvelope("media.upload_multiple", new { uploaded = results, failed = errors });
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
         var media = await _repo.GetByIdAsync(id, ct);
-        return media == null ? NotFound() : Ok(media);
+        return media == null ? this.NotFoundEnvelope("media_not_found") : this.OkEnvelope("media.get", media);
     }
 
     [HttpGet("user/{userId:guid}")]
     public async Task<IActionResult> ByUser(Guid userId, CancellationToken ct)
     {
         var list = await _repo.GetAllWithPredicateAsync(m => m.UploaderId == userId);
-        return Ok(list);
+        return this.OkEnvelope("media.list", list.ToList());
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, [FromQuery] Guid? actorId = null, CancellationToken ct = default)
     {
         var media = await _repo.GetByIdAsync(id, ct);
-        if (media == null) return NotFound();
+        if (media == null) return this.NotFoundEnvelope("media_not_found");
 
         var deleted = await _files.DeleteAsync(actorId ?? media.UploaderId, media.FilePath, ct);
         if (!deleted)
-            return StatusCode(500, new { error = "delete_failed" });
+            return StatusCode(500, OperationEnvelopeFactory.Error<object>("storage_delete_failed"));
 
         await _repo.SoftDeleteAsync(id, ct);
-        return NoContent();
+        return this.NoContentEnvelope("media.delete");
     }
 }

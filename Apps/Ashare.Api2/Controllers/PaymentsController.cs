@@ -40,10 +40,10 @@ public class PaymentsController : ControllerBase
     public async Task<IActionResult> Initiate([FromBody] InitiatePaymentRequest req, CancellationToken ct)
     {
         var booking = await _bookings.GetByIdAsync(req.BookingId, ct);
-        if (booking == null) return NotFound(new { error = "booking_not_found" });
+        if (booking == null) return this.NotFoundEnvelope("booking_not_found");
 
         if (booking.Status == BookingStatus.Paid)
-            return BadRequest(new { error = "already_paid" });
+            return this.BadRequestEnvelope("already_paid");
 
         var payment = new PaymentEntity
         {
@@ -75,7 +75,7 @@ public class PaymentsController : ControllerBase
             payment.Status = PaymentEntityStatus.Failed;
             payment.FailureReason = outcome.Error;
             await _payRepo.UpdateAsync(payment, ct);
-            return BadRequest(new { error = outcome.Error, paymentId = payment.Id });
+            return this.BadRequestEnvelope("payment_initiate_failed", outcome.Error);
         }
 
         payment.GatewayReference = outcome.PaymentReference;
@@ -83,17 +83,7 @@ public class PaymentsController : ControllerBase
         payment.Status = PaymentEntityStatus.Authorized;
         await _payRepo.UpdateAsync(payment, ct);
 
-        return Ok(new
-        {
-            paymentId = payment.Id,
-            bookingId = booking.Id,
-            gateway = "noon",
-            amount = payment.Amount,
-            currency = payment.Currency,
-            paymentUrl = outcome.PaymentUrl,
-            reference = outcome.PaymentReference,
-            status = payment.Status.ToString()
-        });
+        return this.OkEnvelope("payment.initiate", payment);
     }
 
     /// <summary>
@@ -104,7 +94,7 @@ public class PaymentsController : ControllerBase
     public async Task<IActionResult> Callback(Guid paymentId, [FromQuery] bool success = true, CancellationToken ct = default)
     {
         var payment = await _payRepo.GetByIdAsync(paymentId, ct);
-        if (payment == null) return NotFound();
+        if (payment == null) return this.NotFoundEnvelope("payment_not_found");
 
         if (success)
         {
@@ -130,23 +120,23 @@ public class PaymentsController : ControllerBase
             }
         }
 
-        return Ok(new { paymentId = payment.Id, status = payment.Status.ToString() });
+        return this.OkEnvelope("payment.callback", payment);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
         var p = await _payRepo.GetByIdAsync(id, ct);
-        return p == null ? NotFound() : Ok(p);
+        return p == null ? this.NotFoundEnvelope("payment_not_found") : this.OkEnvelope("payment.get", p);
     }
 
     [HttpPost("{id:guid}/refund")]
     public async Task<IActionResult> Refund(Guid id, [FromQuery] decimal? amount, CancellationToken ct)
     {
         var payment = await _payRepo.GetByIdAsync(id, ct);
-        if (payment == null) return NotFound();
+        if (payment == null) return this.NotFoundEnvelope("payment_not_found");
         if (payment.Status != PaymentEntityStatus.Captured)
-            return BadRequest(new { error = "cannot_refund_uncaptured" });
+            return this.BadRequestEnvelope("cannot_refund_uncaptured");
 
         var refundAmount = amount ?? payment.Amount;
         var outcome = await _payments.RefundAsync(
@@ -160,13 +150,13 @@ public class PaymentsController : ControllerBase
             ct: ct);
 
         if (!outcome.Succeeded)
-            return BadRequest(new { error = outcome.Error });
+            return this.BadRequestEnvelope("refund_failed", outcome.Error);
 
         payment.Status = PaymentEntityStatus.Refunded;
         payment.RefundedAmount = refundAmount;
         payment.RefundedAt = DateTime.UtcNow;
         await _payRepo.UpdateAsync(payment, ct);
 
-        return Ok(payment);
+        return this.OkEnvelope("payment.refund", payment);
     }
 }
