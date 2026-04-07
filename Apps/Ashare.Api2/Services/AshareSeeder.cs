@@ -40,6 +40,39 @@ public class AshareSeeder
         await SeedCategoriesAsync(ct);
         await SeedUsersAsync(ct);
         await SeedListingsAsync(ct);
+        await SeedPlansAsync(ct);
+        await SeedDefaultSubscriptionsAsync(ct);
+    }
+
+    private async Task SeedPlansAsync(CancellationToken ct)
+    {
+        var repo = _repoFactory.CreateRepository<Plan>();
+        if (await repo.CountAsync(cancellationToken: ct) > 0) return;
+
+        foreach (var plan in AsharePlansSeed.GetAll())
+            await repo.AddAsync(plan, ct);
+    }
+
+    private async Task SeedDefaultSubscriptionsAsync(CancellationToken ct)
+    {
+        var subRepo = _repoFactory.CreateRepository<Subscription>();
+        if (await subRepo.CountAsync(cancellationToken: ct) > 0) return;
+
+        // اشتراك تجريبي للمالك أحمد على باقة المنشآت السنوية
+        var now = DateTime.UtcNow;
+        await subRepo.AddAsync(new Subscription
+        {
+            Id = Guid.NewGuid(),
+            CreatedAt = now,
+            UserId = UserIds.OwnerAhmed,
+            PlanId = AsharePlansSeed.PlanIds.BusinessAnnual,
+            BillingCycle = "annual",
+            StartDate = now,
+            EndDate = now.AddYears(1),
+            Status = SubscriptionStatus.Active,
+            AmountPaid = 4800,
+            Currency = "SAR"
+        }, ct);
     }
 
     private async Task SeedCategoriesAsync(CancellationToken ct)

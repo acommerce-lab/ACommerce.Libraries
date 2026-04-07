@@ -1,0 +1,176 @@
+using ACommerce.OperationEngine.Core;
+using ACommerce.OperationEngine.Patterns;
+using ACommerce.SharedKernel.Abstractions.Repositories;
+using Ashare.Api2.Entities;
+using Ashare.Api2.Services;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Ashare.Api2.Controllers;
+
+[ApiController]
+[Route("api/subscriptions")]
+public class SubscriptionsController : ControllerBase
+{
+    private readonly IBaseAsyncRepository<Subscription> _subs;
+    private readonly IBaseAsyncRepository<Plan> _plans;
+    private readonly SubscriptionGuard _guard;
+    private readonly OpEngine _engine;
+
+    public SubscriptionsController(
+        IRepositoryFactory factory,
+        SubscriptionGuard guard,
+        OpEngine engine)
+    {
+        _subs = factory.CreateRepository<Subscription>();
+        _plans = factory.CreateRepository<Plan>();
+        _guard = guard;
+        _engine = engine;
+    }
+
+    public record SubscribeRequest(Guid UserId, Guid PlanId, string BillingCycle);
+
+    /// <summary>
+    /// إنشاء اشتراك - يُمثل كقيد محاسبي:
+    /// المستخدم (مدين) ← المنصة (دائن) بقيمة الاشتراك.
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> Subscribe([FromBody] SubscribeRequest req, CancellationToken ct)
+    {
+        var plan = await _plans.GetByIdAsync(req.PlanId, ct);
+        if (plan == null) return NotFound(new { error = "plan_not_found" });
+        if (!plan.IsActive) return BadRequest(new { error = "plan_inactive" });
+
+        var amount = plan.GetPrice(req.BillingCycle);
+
+        var now = DateTime.UtcNow;
+        DateTime endDate = req.BillingCycle.ToLowerInvariant() switch
+        {
+            "annual"     => now.AddYears(1),
+            "semiannual" => now.AddMonths(6),
+            "quarterly"  => now.AddMonths(3),
+            _            => now.AddMonths(1)
+        };
+
+        var subscription = new Subscription
+        {
+            Id = Guid.NewGuid(),
+            CreatedAt = now,
+            UserId = req.UserId,
+            PlanId = plan.Id,
+            BillingCycle = req.BillingCycle,
+            StartDate = now,
+            EndDate = endDate,
+            TrialEndDate = plan.TrialDays > 0 ? now.AddDays(plan.TrialDays) : null,
+            Status = plan.TrialDays > 0 ? SubscriptionStatus.Trial : SubscriptionStatus.Pending,
+            AmountPaid = amount,
+            Currency = plan.Currency
+        };
+
+        var op = Entry.Create("subscription.create")
+            .Describe($"User:{req.UserId} subscribes to {plan.Slug} ({req.BillingCycle})")
+            .From($"User:{req.UserId}", amount,
+                ("role", "subscriber"),
+                ("subscription_status", "pending"))
+            .To($"Plan:{plan.Slug}", amount,
+                ("role", "plan"),
+                ("plan_id", plan.Id.ToString()))
+            .Tag("subscription_id", subscription.Id.ToString())
+            .Tag("billing_cycle", req.BillingCycle)
+            .Tag("currency", plan.Currency)
+            .Validate(ctx =>
+            {
+                if (amount < 0)
+                {
+                    ctx.AddValidationError("amount", "negative_amount");
+                    return false;
+                }
+                return true;
+            })
+            .Execute(async ctx =>
+            {
+                await _subs.AddAsync(subscription, ctx.CancellationToken);
+                ctx.Set("subscriptionId", subscription.Id);
+            })
+            .OnAfterComplete(async ctx =>
+            {
+                // إذا كانت تجريبية تكون نشطة فوراً، وإلا تظل Pending حتى الدفع
+                if (plan.TrialDays > 0 || plan.MonthlyPrice == 0)
+                {
+                    subscription.Status = SubscriptionStatus.Active;
+                    subscription.OperationId = ctx.Operation.Id;
+                    await _subs.UpdateAsync(subscription, ctx.CancellationToken);
+                }
+            })
+            .Build();
+
+        var result = await _engine.ExecuteAsync(op, ct);
+
+        if (!result.Success)
+            return BadRequest(new { error = "subscription_failed" });
+
+        return CreatedAtAction(nameof(GetById), new { id = subscription.Id }, new
+        {
+            subscription,
+            operationId = op.Id,
+            requiresPayment = subscription.Status == SubscriptionStatus.Pending,
+            amount,
+            plan = new { plan.Id, plan.Slug, plan.Name }
+        });
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
+    {
+        var s = await _subs.GetByIdAsync(id, ct);
+        return s == null ? NotFound() : Ok(s);
+    }
+
+    [HttpGet("user/{userId:guid}")]
+    public async Task<IActionResult> ByUser(Guid userId, CancellationToken ct)
+    {
+        var list = await _subs.GetAllWithPredicateAsync(s => s.UserId == userId);
+        return Ok(list.OrderByDescending(s => s.StartDate));
+    }
+
+    [HttpGet("user/{userId:guid}/active")]
+    public async Task<IActionResult> ActiveByUser(Guid userId, CancellationToken ct)
+    {
+        var sub = await _guard.GetActiveAsync(userId, ct);
+        if (sub == null) return NotFound(new { hasActive = false });
+
+        var plan = await _plans.GetByIdAsync(sub.PlanId, ct);
+        return Ok(new
+        {
+            hasActive = true,
+            subscription = sub,
+            plan
+        });
+    }
+
+    [HttpGet("user/{userId:guid}/can-create-listing")]
+    public async Task<IActionResult> CanCreateListing(
+        Guid userId,
+        [FromQuery] Guid categoryId,
+        CancellationToken ct = default)
+    {
+        var check = await _guard.CheckCanCreateListingAsync(userId, categoryId, ct);
+        return Ok(new
+        {
+            allowed = check.Allowed,
+            reason = check.Reason,
+            remainingListings = check.RemainingListings,
+            plan = check.Plan != null ? new { check.Plan.Id, check.Plan.Slug, check.Plan.Name } : null
+        });
+    }
+
+    [HttpPost("{id:guid}/cancel")]
+    public async Task<IActionResult> Cancel(Guid id, CancellationToken ct)
+    {
+        var sub = await _subs.GetByIdAsync(id, ct);
+        if (sub == null) return NotFound();
+        sub.Status = SubscriptionStatus.Cancelled;
+        sub.EndDate = DateTime.UtcNow;
+        await _subs.UpdateAsync(sub, ct);
+        return Ok(sub);
+    }
+}

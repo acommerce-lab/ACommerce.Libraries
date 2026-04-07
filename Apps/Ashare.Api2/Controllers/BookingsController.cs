@@ -1,3 +1,4 @@
+using ACommerce.OperationEngine.Analyzers;
 using ACommerce.OperationEngine.Core;
 using ACommerce.OperationEngine.Patterns;
 using ACommerce.SharedKernel.Abstractions.Repositories;
@@ -77,15 +78,11 @@ public class BookingsController : ControllerBase
             .Tag("listing_id", listing.Id.ToString())
             .Tag("category_id", listing.CategoryId.ToString())
             .Tag("currency", listing.Currency)
-            .Validate(ctx =>
-            {
-                if (req.EndDate <= req.StartDate)
-                {
-                    ctx.AddValidationError("dates", "end_date must be after start_date");
-                    return false;
-                }
-                return true;
-            })
+            // محلل: تواريخ الحجز يجب أن تكون منطقية
+            .Analyze(new ConditionAnalyzer(
+                "valid_date_range",
+                _ => req.EndDate > req.StartDate,
+                "end_date_must_be_after_start_date"))
             .Execute(async ctx =>
             {
                 // تعديل بيانات حسب نتيجة العملية وحفظها

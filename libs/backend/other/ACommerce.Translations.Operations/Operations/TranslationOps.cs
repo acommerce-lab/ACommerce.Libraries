@@ -1,3 +1,4 @@
+using ACommerce.OperationEngine.Analyzers;
 using ACommerce.OperationEngine.Core;
 using ACommerce.OperationEngine.Patterns;
 using ACommerce.SharedKernel.Abstractions.Repositories;
@@ -50,15 +51,9 @@ public static class TranslationOps
             .Tag(TranslationTags.FieldName, fieldName)
             .Tag(TranslationTags.Language, language)
             .Tag(TranslationTags.Verified, isVerified.ToString().ToLowerInvariant())
-            .Validate(ctx =>
-            {
-                if (string.IsNullOrWhiteSpace(translatedText))
-                {
-                    ctx.AddValidationError("text", "empty_translation");
-                    return false;
-                }
-                return true;
-            })
+            // محلل: لا يقبل ترجمة فارغة
+            .Analyze(new RequiredFieldAnalyzer("translated_text", () => translatedText))
+            .Analyze(new RequiredFieldAnalyzer("language", () => language))
             .Execute(async ctx =>
             {
                 // upsert: إذا كانت موجودة حدّثها وإلا أضفها

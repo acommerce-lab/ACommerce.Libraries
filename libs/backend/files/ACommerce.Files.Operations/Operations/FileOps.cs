@@ -1,5 +1,6 @@
 using ACommerce.Files.Abstractions.Providers;
 using ACommerce.Files.Operations.Abstractions;
+using ACommerce.OperationEngine.Analyzers;
 using ACommerce.OperationEngine.Core;
 using ACommerce.OperationEngine.Patterns;
 
@@ -36,20 +37,10 @@ public static class FileOps
             .Tag(FileTags.ContentType, request.ContentType)
             .Tag(FileTags.SizeBytes, request.SizeBytes.ToString())
             .Tag(FileTags.Directory, request.Directory ?? "default")
-            .Validate(ctx =>
-            {
-                if (request.SizeBytes <= 0)
-                {
-                    ctx.AddValidationError(FileTags.Reason, "empty_file");
-                    return false;
-                }
-                if (string.IsNullOrWhiteSpace(request.FileName))
-                {
-                    ctx.AddValidationError(FileTags.Reason, "missing_filename");
-                    return false;
-                }
-                return true;
-            })
+            // محللات ما قبل النواة بدل .Validate
+            .Analyze(new RangeAnalyzer("size_bytes", () => request.SizeBytes, min: 1))
+            .Analyze(new RequiredFieldAnalyzer("file_name", () => request.FileName))
+            .Analyze(new RequiredFieldAnalyzer("content_type", () => request.ContentType))
             .Execute(async ctx =>
             {
                 try

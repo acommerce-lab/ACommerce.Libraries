@@ -1,8 +1,10 @@
+using ACommerce.OperationEngine.Analyzers;
 using ACommerce.OperationEngine.Core;
 using ACommerce.OperationEngine.Patterns;
 using ACommerce.Realtime.Operations.Abstractions;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using Ashare.Api2.Entities;
+using Ashare.Api2.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ashare.Api2.Controllers;
@@ -16,17 +18,20 @@ public class MessagesController : ControllerBase
     private readonly IBaseAsyncRepository<Listing> _listings;
     private readonly IRealtimeTransport _transport;
     private readonly OpEngine _engine;
+    private readonly SubscriptionGuard _guard;
 
     public MessagesController(
         IRepositoryFactory factory,
         IRealtimeTransport transport,
-        OpEngine engine)
+        OpEngine engine,
+        SubscriptionGuard guard)
     {
         _convs = factory.CreateRepository<Conversation>();
         _msgs = factory.CreateRepository<Message>();
         _listings = factory.CreateRepository<Listing>();
         _transport = transport;
         _engine = engine;
+        _guard = guard;
     }
 
     public record StartConversationRequest(Guid ListingId, Guid CustomerId);
@@ -103,21 +108,24 @@ public class MessagesController : ControllerBase
             MessageType = req.MessageType ?? "text"
         };
 
-        var op = Entry.Create("chat.send")
+        // إذا كان المُرسل مالك العرض، نضيف SubscriptionAnalyzer للقيد
+        var builder = Entry.Create("chat.send")
             .Describe($"Message from User:{req.SenderId} to User:{recipient}")
             .From($"User:{req.SenderId}", 1, ("role", "sender"))
             .To($"User:{recipient}", 1, ("role", "recipient"), ("delivery", "pending"))
             .Tag("conversation_id", conv.Id.ToString())
             .Tag("message_type", msg.MessageType)
-            .Validate(ctx =>
-            {
-                if (string.IsNullOrWhiteSpace(req.Content))
-                {
-                    ctx.AddValidationError("content", "empty_content");
-                    return false;
-                }
-                return true;
-            })
+            // محلل: المحتوى لا يكون فارغاً
+            .Analyze(new RequiredFieldAnalyzer("content", () => req.Content));
+
+        if (req.SenderId == conv.OwnerId)
+        {
+            builder.Tag("subscription_check", "send_message");
+            builder.Analyze(new SubscriptionAnalyzer(
+                _guard, req.SenderId, SubscriptionCheckKind.SendMessage));
+        }
+
+        var op = builder
             .Execute(async ctx =>
             {
                 // حفظ الرسالة وتحديث المحادثة

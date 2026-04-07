@@ -1,4 +1,6 @@
 using ACommerce.Authentication.TwoFactor.Operations.Abstractions;
+using ACommerce.Authentication.TwoFactor.Operations.Analyzers;
+using ACommerce.OperationEngine.Analyzers;
 using ACommerce.OperationEngine.Core;
 using ACommerce.OperationEngine.Patterns;
 
@@ -93,7 +95,7 @@ public static class TwoFactorOps
         string? providedCode = null,
         IChallengeStore? store = null)
     {
-        return Entry.Create("tfa.verify")
+        var builder = Entry.Create("tfa.verify")
             .Describe($"Verify {channel.Name} challenge for {user}")
             .From(TwoFactorPartyId.Challenge(challengeId), 1,
                 (TwoFactorTags.Role, "challenge"),
@@ -101,33 +103,13 @@ public static class TwoFactorOps
             .To(user, 1,
                 (TwoFactorTags.Role, "subject"))
             .Tag(TwoFactorTags.Channel, channel.Name)
-            .Tag(TwoFactorTags.Challenge, challengeId)
-            .Validate(async ctx =>
-            {
-                // التحقق من وجود التحدي وصلاحيته
-                if (store != null)
-                {
-                    var existing = await store.GetAsync(challengeId, ctx.CancellationToken);
-                    if (existing == null)
-                    {
-                        ctx.AddValidationError(TwoFactorTags.Reason, "challenge_not_found");
-                        return false;
-                    }
-                    if (existing.IsExpired)
-                    {
-                        ctx.AddValidationError(TwoFactorTags.Reason, "expired");
-                        await store.UpdateStatusAsync(challengeId, ChallengeStatus.Expired, ctx.CancellationToken);
-                        return false;
-                    }
-                    if (existing.ExceededAttempts)
-                    {
-                        ctx.AddValidationError(TwoFactorTags.Reason, "too_many_attempts");
-                        return false;
-                    }
-                    ctx.Set("challenge", existing);
-                }
-                return true;
-            })
+            .Tag(TwoFactorTags.Challenge, challengeId);
+
+        // محلل حالة التحدي - يفحص الوجود والصلاحية والمحاولات قبل التنفيذ
+        if (store != null)
+            builder.Analyze(new ChallengeStateAnalyzer(store, challengeId));
+
+        return builder
             .Execute(async ctx =>
             {
                 var result = await channel.VerifyAsync(challengeId, providedCode, ctx.CancellationToken);

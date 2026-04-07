@@ -1,4 +1,5 @@
 using ACommerce.Favorites.Operations.Entities;
+using ACommerce.OperationEngine.Analyzers;
 using ACommerce.OperationEngine.Core;
 using ACommerce.OperationEngine.Patterns;
 using ACommerce.SharedKernel.Abstractions.Repositories;
@@ -37,7 +38,8 @@ public static class FavoriteOps
             .Tag(FavoriteTags.EntityId, entityId.ToString())
             .Tag(FavoriteTags.ListName, listName)
             .Tag(FavoriteTags.Action, "add")
-            .Validate(async ctx =>
+            // محلل idempotency - يفحص هل المفضلة موجودة سابقاً
+            .Analyze(new PredicateAnalyzer("favorite_idempotency", async ctx =>
             {
                 var existing = await repo.GetAllWithPredicateAsync(f =>
                     f.UserId == userId &&
@@ -49,10 +51,9 @@ public static class FavoriteOps
                 {
                     ctx.Set("favoriteId", existing[0].Id);
                     ctx.Set("alreadyExists", true);
-                    return true; // idempotent
                 }
-                return true;
-            })
+                return AnalyzerResult.Pass();  // دائماً ينجح - الـ Execute يتعامل
+            }))
             .Execute(async ctx =>
             {
                 if (ctx.TryGet<bool>("alreadyExists", out var exists) && exists) return;

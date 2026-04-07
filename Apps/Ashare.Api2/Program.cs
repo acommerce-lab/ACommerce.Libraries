@@ -186,12 +186,41 @@ switch (storageProvider.ToLowerInvariant())
 builder.Services.AddFileOperations();
 
 // ─────────────────────────────────────────────────────────
-// Authentication
+// Authentication: JWT حقيقي (مطابق لما تفعله Ashare القديمة)
 // ─────────────────────────────────────────────────────────
-builder.Services.AddSingleton<AshareTokenStore>();
-builder.Services.AddSingleton<ITokenValidator>(sp => sp.GetRequiredService<AshareTokenStore>());
-builder.Services.AddSingleton<ITokenIssuer>(sp => sp.GetRequiredService<AshareTokenStore>());
+var jwtOptions = new JwtOptions
+{
+    Issuer = builder.Configuration["JWT:Issuer"] ?? "https://ashare.app",
+    Audience = builder.Configuration["JWT:Audience"] ?? "ashare-api",
+    SecretKey = builder.Configuration["JWT:SecretKey"]
+        ?? "ChangeThisInProduction-secret-key-32-chars-min!!",
+    AccessTokenLifetime = TimeSpan.TryParse(
+        builder.Configuration["JWT:AccessTokenLifetime"], out var lt) ? lt : TimeSpan.FromDays(30)
+};
+builder.Services.AddSingleton(jwtOptions);
+builder.Services.AddSingleton<JwtTokenStore>();
+builder.Services.AddSingleton<ITokenValidator>(sp => sp.GetRequiredService<JwtTokenStore>());
+builder.Services.AddSingleton<ITokenIssuer>(sp => sp.GetRequiredService<JwtTokenStore>());
 builder.Services.AddTokenAuthenticator();
+
+// ASP.NET Core JWT Bearer لحماية النقاط الطرفية بـ [Authorize]
+builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                System.Text.Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
+            ValidateIssuer = true,
+            ValidIssuer = jwtOptions.Issuer,
+            ValidateAudience = true,
+            ValidAudience = jwtOptions.Audience,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromSeconds(30)
+        };
+    });
+builder.Services.AddAuthorization();
 
 builder.Services.AddSingleton<AuthConfig>(sp =>
 {
@@ -266,6 +295,67 @@ builder.Services.AddTranslationOperations();
 builder.Services.AddFavoriteOperations();
 
 // ─────────────────────────────────────────────────────────
+// Subscriptions: Plan + Subscription entities + Guard service
+// ─────────────────────────────────────────────────────────
+EntityDiscoveryRegistry.RegisterEntity(typeof(Plan));
+EntityDiscoveryRegistry.RegisterEntity(typeof(Subscription));
+builder.Services.AddScoped<SubscriptionGuard>();
+
+// ─────────────────────────────────────────────────────────
+// Rate Limiting (ASP.NET Core 8+)
+// ─────────────────────────────────────────────────────────
+builder.Services.AddRateLimiter(options =>
+{
+    options.GlobalLimiter = System.Threading.RateLimiting.PartitionedRateLimiter.Create<HttpContext, string>(
+        httpContext => System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+            factory: _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+            {
+                AutoReplenishment = true,
+                PermitLimit = 100,
+                Window = TimeSpan.FromMinutes(1)
+            }));
+
+    options.AddPolicy("strict", httpContext =>
+        System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+            factory: _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+            {
+                AutoReplenishment = true,
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1)
+            }));
+
+    options.OnRejected = async (context, ct) =>
+    {
+        context.HttpContext.Response.StatusCode = 429;
+        await context.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            error = "rate_limit_exceeded",
+            retryAfterSeconds = 60
+        }, ct);
+    };
+});
+
+// ─────────────────────────────────────────────────────────
+// HSTS (Strict Transport Security)
+// ─────────────────────────────────────────────────────────
+if (builder.Environment.IsProduction())
+{
+    builder.Services.AddHsts(options =>
+    {
+        options.Preload = true;
+        options.IncludeSubDomains = true;
+        options.MaxAge = TimeSpan.FromDays(365);
+    });
+
+    builder.Services.AddHttpsRedirection(options =>
+    {
+        options.HttpsPort = 443;
+    });
+}
+
+// ─────────────────────────────────────────────────────────
 // Seeder
 // ─────────────────────────────────────────────────────────
 builder.Services.AddScoped<AshareSeeder>();
@@ -275,7 +365,16 @@ builder.Services.AddScoped<AshareSeeder>();
 // ─────────────────────────────────────────────────────────
 var app = builder.Build();
 
+if (app.Environment.IsProduction())
+{
+    app.UseHsts();
+    app.UseHttpsRedirection();
+}
+
 app.UseCors();
+app.UseRateLimiter();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseSwagger();
 app.UseSwaggerUI();
 

@@ -15,13 +15,13 @@ public class AuthController : ControllerBase
 {
     private readonly AuthService _auth;
     private readonly TwoFactorService _tfa;
-    private readonly AshareTokenStore _tokenStore;
+    private readonly JwtTokenStore _tokenStore;
     private readonly IBaseAsyncRepository<User> _users;
 
     public AuthController(
         AuthService auth,
         TwoFactorService tfa,
-        AshareTokenStore tokenStore,
+        JwtTokenStore tokenStore,
         IRepositoryFactory repoFactory)
     {
         _auth = auth;

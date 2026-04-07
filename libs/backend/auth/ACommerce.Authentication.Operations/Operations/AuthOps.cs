@@ -1,4 +1,5 @@
 using ACommerce.Authentication.Operations.Abstractions;
+using ACommerce.Authentication.Operations.Analyzers;
 using ACommerce.OperationEngine.Core;
 using ACommerce.OperationEngine.Patterns;
 
@@ -38,21 +39,8 @@ public static class AuthOps
                 (AuthTags.Credential, credential.CredentialType))
             .Tag(AuthTags.Authenticator, authenticator.Name)
             .Tag(AuthTags.Credential, credential.CredentialType)
-            .Validate(async ctx =>
-            {
-                // تمرير التحقق إلى المُصادق
-                try
-                {
-                    var principal = await authenticator.AuthenticateAsync(credential, ctx.CancellationToken);
-                    ctx.Set("principal", principal);
-                    return true;
-                }
-                catch (AuthenticationException ex)
-                {
-                    ctx.AddValidationError(AuthTags.Reason, ex.Reason);
-                    return false;
-                }
-            })
+            // فحص بيانات الاعتماد كمحلل ما قبل النواة (PreAnalyzer)
+            .Analyze(new CredentialAnalyzer(credential, authenticator))
             .Execute(async ctx =>
             {
                 ctx.TryGet<IPrincipal>("principal", out var principal);
@@ -174,32 +162,18 @@ public static class AuthOps
             .To(AuthPartyId.System, 1, (AuthTags.Role, "validator"))
             .Tag(AuthTags.Authenticator, authenticator.Name)
             .Tag(AuthTags.Credential, credential.CredentialType)
-            .Execute(async ctx =>
+            // فحص بيانات الاعتماد كمحلل (يتم قبل التنفيذ - فشله = فشل العملية)
+            .Analyze(new CredentialAnalyzer(credential, authenticator))
+            .Execute(ctx =>
             {
-                try
-                {
-                    var principal = await authenticator.AuthenticateAsync(credential, ctx.CancellationToken);
-                    ctx.Set("principal", principal);
-                    ctx.Set("valid", true);
+                // إذا وصلنا هنا فالمحلل نجح والـ principal موجود في الـ context
+                ctx.Set("valid", true);
 
-                    var issuerParty = ctx.Operation.GetPartiesByTag(AuthTags.Role, "issuer").FirstOrDefault();
-                    if (issuerParty != null)
-                    {
-                        issuerParty.RemoveTag(AuthTags.Status);
-                        issuerParty.AddTag(AuthTags.Status, AuthStatus.Authenticated);
-                    }
-                }
-                catch (AuthenticationException ex)
+                var issuerParty = ctx.Operation.GetPartiesByTag(AuthTags.Role, "issuer").FirstOrDefault();
+                if (issuerParty != null)
                 {
-                    ctx.Set("valid", false);
-                    ctx.Set("reason", ex.Reason);
-
-                    var issuerParty = ctx.Operation.GetPartiesByTag(AuthTags.Role, "issuer").FirstOrDefault();
-                    if (issuerParty != null)
-                    {
-                        issuerParty.RemoveTag(AuthTags.Status);
-                        issuerParty.AddTag(AuthTags.Status, AuthStatus.Rejected);
-                    }
+                    issuerParty.RemoveTag(AuthTags.Status);
+                    issuerParty.AddTag(AuthTags.Status, AuthStatus.Authenticated);
                 }
             })
             .Build();
