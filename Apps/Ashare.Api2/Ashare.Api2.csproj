@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <RollForward>LatestMajor</RollForward>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Ashare.Api2</RootNamespace>
+    <AssemblyName>Ashare.Api2</AssemblyName>
+    <UserSecretsId>ashare-api2</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.10" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Core SharedKernel -->
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.Infrastructure.EFCores\ACommerce.SharedKernel.Infrastructure.EFCores.csproj" />
+
+    <!-- The new accounting-based OperationEngine -->
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.OperationEngine\ACommerce.OperationEngine.csproj" />
+
+    <!-- Authentication (operations + token provider) -->
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.Operations\ACommerce.Authentication.Operations.csproj" />
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.Providers.Token\ACommerce.Authentication.Providers.Token.csproj" />
+
+    <!-- 2FA (operations + Nafath/SMS/Email providers) -->
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.TwoFactor.Operations\ACommerce.Authentication.TwoFactor.Operations.csproj" />
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.TwoFactor.Providers.Nafath\ACommerce.Authentication.TwoFactor.Providers.Nafath.csproj" />
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.TwoFactor.Providers.Sms\ACommerce.Authentication.TwoFactor.Providers.Sms.csproj" />
+    <ProjectReference Include="..\..\libs\backend\auth\ACommerce.Authentication.TwoFactor.Providers.Email\ACommerce.Authentication.TwoFactor.Providers.Email.csproj" />
+
+    <!-- Payments (operations + Noon provider) -->
+    <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Payments.Operations\ACommerce.Payments.Operations.csproj" />
+    <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Payments.Providers.Noon\ACommerce.Payments.Providers.Noon.csproj" />
+
+    <!-- Realtime (operations + InMemory transport for testing) -->
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Realtime.Operations\ACommerce.Realtime.Operations.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Realtime.Providers.InMemory\ACommerce.Realtime.Providers.InMemory.csproj" />
+
+    <!-- Notifications (operations + InApp + Firebase providers) -->
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notification.Operations\ACommerce.Notification.Operations.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Notification.Providers.InApp\ACommerce.Notification.Providers.InApp.csproj" />
+
+    <!-- Chat operations -->
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Chat.Operations\ACommerce.Chat.Operations.csproj" />
+
+    <!-- Service messaging (in-memory) -->
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.ServiceMessaging.Operations\ACommerce.ServiceMessaging.Operations.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.ServiceMessaging.InMemory\ACommerce.ServiceMessaging.InMemory.csproj" />
+  </ItemGroup>
+</Project>
