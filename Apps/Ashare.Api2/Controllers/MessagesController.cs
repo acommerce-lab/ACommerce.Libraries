@@ -1,11 +1,12 @@
 using ACommerce.OperationEngine.Analyzers;
+using ACommerce.Subscriptions.Operations;
+using Ashare.Api2.Services;
 using ACommerce.OperationEngine.Core;
 using ACommerce.OperationEngine.Patterns;
 using ACommerce.OperationEngine.Wire;
 using ACommerce.Realtime.Operations.Abstractions;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using Ashare.Api2.Entities;
-using Ashare.Api2.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ashare.Api2.Controllers;
@@ -106,19 +107,19 @@ public class MessagesController : ControllerBase
         };
 
         // قيد بسيط - المعترضات المحقونة من الـ registry تتدخّل تلقائياً
-        var builder = Entry.Create("chat.send")
+        var builder = Entry.Create(AshareOps.ChatSend)
             .Describe($"Message from User:{req.SenderId} to User:{recipient}")
-            .From($"User:{req.SenderId}", 1, ("role", "sender"))
-            .To($"User:{recipient}", 1, ("role", "recipient"), ("delivery", "pending"))
-            .Tag("conversation_id", conv.Id.ToString())
-            .Tag("message_type", msg.MessageType)
+            .From($"User:{req.SenderId}", 1, ("role", AshareRoles.Sender.Name))
+            .To($"User:{recipient}", 1, ("role", AshareRoles.Recipient.Name), ("delivery", "pending"))
+            .Tag(AshareTags.ConversationId, conv.Id)
+            .Tag(AshareTags.MessageType, msg.MessageType)
             .Analyze(new RequiredFieldAnalyzer("content", () => req.Content));
 
         // إذا كان المُرسل مالك العرض → حصة على الرسائل (المعترض يتدخّل تلقائياً)
         if (req.SenderId == conv.OwnerId)
         {
-            builder.Tag("quota_check", "messages.send");
-            builder.Tag("quota_user_id", req.SenderId.ToString());
+            builder.Tag(QuotaTagKeys.Check, QuotaCheckKinds.MessagesSend);
+            builder.Tag(QuotaTagKeys.UserId, req.SenderId);
         }
 
         var op = builder

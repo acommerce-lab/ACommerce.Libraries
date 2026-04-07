@@ -3,6 +3,7 @@ using ACommerce.OperationEngine.Wire;
 using ACommerce.OperationEngine.Patterns;
 using ACommerce.SharedKernel.Abstractions.Repositories;
 using Ashare.Api2.Entities;
+using ACommerce.Subscriptions.Operations;
 using Ashare.Api2.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -110,19 +111,18 @@ public class ListingsController : ControllerBase
         };
 
         // === قيد بسيط - الجوانب المتقاطعة محقونة من الـ registry ===
-        // المتحكم لا يعرف عن SubscriptionLinkAnalyzer أو QuotaConsumptionAnalyzer.
-        // فقط يضع العلامات المعيارية والمعترضات تتدخّل تلقائياً عبر OpEngine + Registry.
-        var op = Entry.Create("listing.create")
+        // القيد يستخدم كتالوجات typed: AshareOps, AshareTags, QuotaTagKeys
+        var op = Entry.Create(AshareOps.ListingCreate)
             .Describe($"Owner:{req.OwnerId} creates listing in Category:{req.CategoryId}")
-            .From($"User:{req.OwnerId}", 1, ("role", "owner"))
-            .To($"Category:{req.CategoryId}", 1, ("role", "category"))
-            .Tag("listing_id", listing.Id.ToString())
-            .Tag("category_id", req.CategoryId.ToString())
-            // ↓↓↓ علامات تُفعّل المعترضات المحقونة:
-            .Tag("quota_check", "listings.create")
-            .Tag("quota_user_id", req.OwnerId.ToString())
-            .Tag("quota_scope_key", "listing_categories")
-            .Tag("quota_scope_value", category.Slug)
+            .From($"User:{req.OwnerId}", 1, ("role", AshareRoles.Owner.Name))
+            .To($"Category:{req.CategoryId}", 1, ("role", AshareRoles.Category.Name))
+            .Tag(AshareTags.ListingId, listing.Id)
+            .Tag(AshareTags.CategoryId, req.CategoryId)
+            // ↓↓↓ علامات typed تُفعّل معترضات الاشتراكات تلقائياً:
+            .Tag(QuotaTagKeys.Check, QuotaCheckKinds.ListingsCreate)
+            .Tag(QuotaTagKeys.UserId, req.OwnerId)
+            .Tag(QuotaTagKeys.ScopeKey, "listing_categories")
+            .Tag(QuotaTagKeys.ScopeValue, category.Slug)
             .Execute(async ctx =>
             {
                 // المعترض ربط العرض باشتراك - نستخدم بياناته من الـ context

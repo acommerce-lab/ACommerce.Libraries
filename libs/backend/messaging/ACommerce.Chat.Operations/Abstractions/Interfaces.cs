@@ -1,3 +1,4 @@
+using ACommerce.OperationEngine.Core;
 namespace ACommerce.Chat.Operations.Abstractions;
 
 /// <summary>
@@ -53,25 +54,25 @@ public static class ChatTags
     /// <summary>
     /// معرف المحادثة. القيمة: Guid كنص
     /// </summary>
-    public const string Conversation = "conversation";
+    public static readonly TagKey Conversation = new("conversation");
 
     /// <summary>
     /// نوع المحادثة. القيم: "direct", "group", "channel", "support"
     /// </summary>
-    public const string ConversationType = "conversation_type";
+    public static readonly TagKey ConversationType = new("conversation_type");
 
     /// <summary>
     /// نوع الرسالة. القيم: "text", "image", "file", "voice", "video", "location"
     /// </summary>
-    public const string MessageType = "message_type";
+    public static readonly TagKey MessageType = new("message_type");
 
     /// <summary>
     /// معرف الرسالة المُرد عليها. القيمة: Guid كنص
     /// </summary>
-    public const string ReplyTo = "reply_to";
+    public static readonly TagKey ReplyTo = new("reply_to");
 
     /// <summary>
     /// حالة الكتابة. القيم: "typing", "stopped"
     /// </summary>
-    public const string Typing = "typing";
+    public static readonly TagKey Typing = new("typing");
 }

@@ -1,3 +1,4 @@
+using ACommerce.OperationEngine.Core;
 namespace ACommerce.Payments.Operations.Abstractions;
 
 /// <summary>
@@ -56,28 +57,28 @@ public sealed class Currency
 public static class PayTags
 {
     /// <summary>اسم البوابة. القيم: "noon", "moyasar", "stripe"</summary>
-    public const string Gateway = "gateway";
+    public static readonly TagKey Gateway = new("gateway");
 
     /// <summary>العملة. القيم: "SAR", "USD", ...</summary>
-    public const string Currency = "currency";
+    public static readonly TagKey Currency = new("currency");
 
     /// <summary>حالة الدفع. القيم: "pending", "captured", ...</summary>
-    public const string Status = "payment_status";
+    public static readonly TagKey Status = new("payment_status");
 
     /// <summary>معرف المرجع من البوابة</summary>
-    public const string Reference = "payment_reference";
+    public static readonly TagKey Reference = new("payment_reference");
 
     /// <summary>معرف الطلب</summary>
-    public const string Order = "order_reference";
+    public static readonly TagKey Order = new("order_reference");
 
     /// <summary>نوع العملية. القيم: "initiate", "capture", "refund", "void"</summary>
-    public const string Operation = "pay_operation";
+    public static readonly TagKey Operation = new("pay_operation");
 
     /// <summary>دور الطرف. القيم: "customer", "merchant", "gateway"</summary>
-    public const string Role = "role";
+    public static readonly TagKey Role = new("role");
 
     /// <summary>سبب الفشل</summary>
-    public const string Reason = "reason";
+    public static readonly TagKey Reason = new("reason");
 }
 
 /// <summary>

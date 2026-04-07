@@ -1,3 +1,4 @@
+using ACommerce.OperationEngine.Core;
 namespace ACommerce.Authentication.Operations.Abstractions;
 
 /// <summary>
@@ -74,25 +75,25 @@ public record AuthSession(
 public static class AuthTags
 {
     /// <summary>اسم المُصادق. القيم: "token", "password", "nafath"</summary>
-    public const string Authenticator = "authenticator";
+    public static readonly TagKey Authenticator = new("authenticator");
 
     /// <summary>نوع بيانات الاعتماد. القيم: "password", "token", ...</summary>
-    public const string Credential = "credential";
+    public static readonly TagKey Credential = new("credential");
 
     /// <summary>حالة المصادقة. القيم: "pending", "authenticated", ...</summary>
-    public const string Status = "auth_status";
+    public static readonly TagKey Status = new("auth_status");
 
     /// <summary>معرف الجلسة</summary>
-    public const string Session = "session_id";
+    public static readonly TagKey Session = new("session_id");
 
     /// <summary>نوع الرمز. القيم: "access", "refresh", "id"</summary>
-    public const string TokenKind = "token_kind";
+    public static readonly TagKey TokenKind = new("token_kind");
 
     /// <summary>دور الطرف. القيم: "subject" (المستخدم), "issuer" (المصدر)</summary>
-    public const string Role = "role";
+    public static readonly TagKey Role = new("role");
 
     /// <summary>سبب الرفض. القيم: "invalid_credential", "expired", "locked"</summary>
-    public const string Reason = "reason";
+    public static readonly TagKey Reason = new("reason");
 }
 
 /// <summary>

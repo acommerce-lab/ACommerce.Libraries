@@ -18,7 +18,7 @@ public class CredentialAnalyzer : IOperationAnalyzer
     public string Name => $"CredentialAnalyzer({_authenticator.Name})";
 
     /// <summary>يراقب أي عملية فيها علامة auth.credential</summary>
-    public IReadOnlyList<string> WatchedTagKeys => new[] { AuthTags.Credential };
+    public IReadOnlyList<string> WatchedTagKeys => new[] { AuthTags.Credential.Name };
 
     public CredentialAnalyzer(ICredential credential, IAuthenticator authenticator)
     {

@@ -33,12 +33,12 @@ public class QuotaInterceptor : IOperationInterceptor
         _logger = logger;
     }
 
-    public bool AppliesTo(Operation op) => op.HasTag("quota_check");
+    public bool AppliesTo(Operation op) => op.HasTag(QuotaTagKeys.Check.Name);
 
     public async Task<AnalyzerResult> InterceptAsync(OperationContext context, OperationResult? result = null)
     {
         var op = context.Operation;
-        var quotaKey = op.GetTagValue("quota_check");
+        var quotaKey = op.GetTagValue(QuotaTagKeys.Check.Name);
         if (string.IsNullOrEmpty(quotaKey))
             return AnalyzerResult.Fail("quota_check_tag_missing");
 
@@ -46,8 +46,8 @@ public class QuotaInterceptor : IOperationInterceptor
         if (userId == Guid.Empty)
             return AnalyzerResult.Fail("quota_user_not_resolved");
 
-        var scopeKey = op.GetTagValue("quota_scope_key");
-        var scopeValue = op.GetTagValue("quota_scope_value");
+        var scopeKey = op.GetTagValue(QuotaTagKeys.ScopeKey.Name);
+        var scopeValue = op.GetTagValue(QuotaTagKeys.ScopeValue.Name);
 
         var subs = await _provider.GetActiveSubscriptionsAsync(userId, context.CancellationToken);
         var ordered = subs.Where(s => s.IsCurrentlyActive).OrderBy(s => s.StartDate).ToList();
@@ -125,7 +125,7 @@ public class QuotaInterceptor : IOperationInterceptor
     private static Guid ResolveUserId(Operation op)
     {
         // 1) من علامة صريحة
-        var explicitId = op.GetTagValue("quota_user_id");
+        var explicitId = op.GetTagValue(QuotaTagKeys.UserId.Name);
         if (!string.IsNullOrEmpty(explicitId) && Guid.TryParse(explicitId, out var id))
             return id;
 
@@ -166,7 +166,7 @@ public class QuotaConsumptionInterceptor : IOperationInterceptor
         _logger = logger;
     }
 
-    public bool AppliesTo(Operation op) => op.HasTag("quota_check");
+    public bool AppliesTo(Operation op) => op.HasTag(QuotaTagKeys.Check.Name);
 
     public async Task<AnalyzerResult> InterceptAsync(OperationContext context, OperationResult? result = null)
     {

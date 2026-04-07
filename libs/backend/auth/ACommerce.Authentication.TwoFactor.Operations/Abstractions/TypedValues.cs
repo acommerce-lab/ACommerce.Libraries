@@ -1,3 +1,4 @@
+using ACommerce.OperationEngine.Core;
 namespace ACommerce.Authentication.TwoFactor.Operations.Abstractions;
 
 /// <summary>
@@ -53,22 +54,22 @@ public class Challenge
 public static class TwoFactorTags
 {
     /// <summary>اسم القناة. القيم: "sms", "email", "nafath", "totp"</summary>
-    public const string Channel = "tfa_channel";
+    public static readonly TagKey Channel = new("tfa_channel");
 
     /// <summary>حالة التحدي. القيم: "initiated", "verified", "failed", ...</summary>
-    public const string Status = "tfa_status";
+    public static readonly TagKey Status = new("tfa_status");
 
     /// <summary>معرف التحدي</summary>
-    public const string Challenge = "challenge_id";
+    public static readonly TagKey Challenge = new("challenge_id");
 
     /// <summary>المعرف الخارجي عند المزود</summary>
-    public const string ExternalId = "external_id";
+    public static readonly TagKey ExternalId = new("external_id");
 
     /// <summary>دور الطرف. القيم: "subject" (المستخدم), "channel" (القناة)</summary>
-    public const string Role = "role";
+    public static readonly TagKey Role = new("role");
 
     /// <summary>سبب الفشل. القيم: "wrong_code", "expired", "too_many_attempts"</summary>
-    public const string Reason = "reason";
+    public static readonly TagKey Reason = new("reason");
 }
 
 /// <summary>

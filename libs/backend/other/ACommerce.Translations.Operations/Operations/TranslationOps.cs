@@ -11,13 +11,13 @@ namespace ACommerce.Translations.Operations.Operations;
 /// </summary>
 public static class TranslationTags
 {
-    public const string EntityType = "entity_type";
-    public const string EntityId   = "entity_id";
-    public const string FieldName  = "field_name";
-    public const string Language   = "language";
-    public const string Translator = "translator";
-    public const string Verified   = "verified";
-    public const string Role       = "role";
+    public static readonly TagKey EntityType = new("entity_type");
+    public static readonly TagKey EntityId = new("entity_id");
+    public static readonly TagKey FieldName = new("field_name");
+    public static readonly TagKey Language = new("language");
+    public static readonly TagKey Translator = new("translator");
+    public static readonly TagKey Verified = new("verified");
+    public static readonly TagKey Role = new("role");
 }
 
 /// <summary>

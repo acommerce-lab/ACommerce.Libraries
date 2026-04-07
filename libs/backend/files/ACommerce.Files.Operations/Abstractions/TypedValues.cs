@@ -1,3 +1,4 @@
+using ACommerce.OperationEngine.Core;
 namespace ACommerce.Files.Operations.Abstractions;
 
 /// <summary>
@@ -42,16 +43,16 @@ public sealed class FileStatus
 /// </summary>
 public static class FileTags
 {
-    public const string Provider   = "storage_provider";  // "aliyun", "gcs", "local"
-    public const string Operation  = "file_operation";    // "upload", "download", "delete"
-    public const string Directory  = "directory";         // "listings", "profiles"
-    public const string FileName   = "file_name";
-    public const string ContentType = "content_type";
-    public const string SizeBytes  = "size_bytes";
-    public const string Status     = "file_status";
-    public const string Url        = "file_url";
-    public const string Role       = "role";              // "uploader", "storage"
-    public const string Reason     = "reason";
+    public static readonly TagKey Provider = new("storage_provider");  // "aliyun", "gcs", "local"
+    public static readonly TagKey Operation = new("file_operation");    // "upload", "download", "delete"
+    public static readonly TagKey Directory = new("directory");         // "listings", "profiles"
+    public static readonly TagKey FileName = new("file_name");
+    public static readonly TagKey ContentType = new("content_type");
+    public static readonly TagKey SizeBytes = new("size_bytes");
+    public static readonly TagKey Status = new("file_status");
+    public static readonly TagKey Url = new("file_url");
+    public static readonly TagKey Role = new("role");              // "uploader", "storage"
+    public static readonly TagKey Reason = new("reason");
 }
 
 /// <summary>

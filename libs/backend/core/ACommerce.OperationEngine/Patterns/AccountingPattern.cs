@@ -30,6 +30,9 @@ namespace ACommerce.OperationEngine.Patterns;
 public static class Entry
 {
     public static AccountingBuilder Create(string type) => new(type);
+
+    /// <summary>Type-safe overload باستخدام OperationType</summary>
+    public static AccountingBuilder Create(OperationType type) => new(type.Name);
 }
 
 public class AccountingBuilder
@@ -172,6 +175,15 @@ public class AccountingBuilder
         _inner.Tag(key, value);
         return this;
     }
+
+    /// <summary>Type-safe overload: TagKey + string value</summary>
+    public AccountingBuilder Tag(TagKey key, string value) => Tag(key.Name, value);
+
+    /// <summary>Type-safe overload: TagKey + TagValue</summary>
+    public AccountingBuilder Tag(TagKey key, TagValue value) => Tag(key.Name, value.Value);
+
+    /// <summary>Type-safe overload: TagKey + Guid</summary>
+    public AccountingBuilder Tag(TagKey key, Guid value) => Tag(key.Name, value.ToString());
 
     /// <summary>
     /// يختم القيد - يمنع كل المعترضات العامة من الحقن.

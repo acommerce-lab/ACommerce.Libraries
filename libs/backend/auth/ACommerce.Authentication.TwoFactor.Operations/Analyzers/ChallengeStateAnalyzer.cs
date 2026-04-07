@@ -18,7 +18,7 @@ public class ChallengeStateAnalyzer : IOperationAnalyzer
 
     public string Name => $"ChallengeState({_challengeId})";
 
-    public IReadOnlyList<string> WatchedTagKeys => new[] { TwoFactorTags.Challenge };
+    public IReadOnlyList<string> WatchedTagKeys => new[] { TwoFactorTags.Challenge.Name };
 
     public ChallengeStateAnalyzer(IChallengeStore store, string challengeId)
     {

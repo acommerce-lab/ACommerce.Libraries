@@ -8,11 +8,11 @@ namespace ACommerce.Favorites.Operations.Operations;
 
 public static class FavoriteTags
 {
-    public const string EntityType = "favorite_entity_type";
-    public const string EntityId   = "favorite_entity_id";
-    public const string ListName   = "favorite_list";
-    public const string Action     = "favorite_action";
-    public const string Role       = "role";
+    public static readonly TagKey EntityType = new("favorite_entity_type");
+    public static readonly TagKey EntityId = new("favorite_entity_id");
+    public static readonly TagKey ListName = new("favorite_list");
+    public static readonly TagKey Action = new("favorite_action");
+    public static readonly TagKey Role = new("role");
 }
 
 /// <summary>

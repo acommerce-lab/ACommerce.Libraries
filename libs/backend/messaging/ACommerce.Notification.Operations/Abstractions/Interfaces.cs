@@ -1,3 +1,4 @@
+using ACommerce.OperationEngine.Core;
 namespace ACommerce.Notification.Operations.Abstractions;
 
 /// <summary>
@@ -31,20 +32,20 @@ public static class NotifyTags
     /// <summary>
     /// القناة. القيم: "inapp", "push", "email", "sms", "whatsapp"
     /// </summary>
-    public const string Channel = "channel";
+    public static readonly TagKey Channel = new("channel");
 
     /// <summary>
     /// نوع الإشعار. القيم من التطبيق: "new_order", "message", "payment", "system"
     /// </summary>
-    public const string NotificationType = "notification_type";
+    public static readonly TagKey NotificationType = new("notification_type");
 
     /// <summary>
     /// الأولوية. القيم: "low", "normal", "high", "urgent"
     /// </summary>
-    public const string Priority = "priority";
+    public static readonly TagKey Priority = new("priority");
 
     /// <summary>
     /// حالة التسليم لكل قناة. القيم: "pending", "sent", "failed"
     /// </summary>
-    public const string ChannelDelivery = "channel_delivery";
+    public static readonly TagKey ChannelDelivery = new("channel_delivery");
 }
