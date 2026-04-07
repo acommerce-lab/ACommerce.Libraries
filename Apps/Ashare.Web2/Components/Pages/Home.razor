@@ -1,0 +1,111 @@
+@page "/"
+@rendermode InteractiveServer
+@inject AshareApiClient Api
+@inject NavigationManager Nav
+
+<PageTitle>العروض - عشير</PageTitle>
+
+<h1>عروض عشير</h1>
+<p class="text-muted">استعراض كل العروض المتاحة</p>
+
+<div class="row mb-3">
+    <div class="col-md-4">
+        <select class="form-select" @bind="selectedCategory" @bind:after="LoadAsync">
+            <option value="">كل الفئات</option>
+            @foreach (var cat in categories)
+            {
+                <option value="@cat.Id">@cat.NameAr</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-4">
+        <input class="form-control" placeholder="المدينة" @bind="city" @bind:after="LoadAsync" />
+    </div>
+</div>
+
+@if (loading)
+{
+    <div class="text-center p-5">
+        <div class="spinner-border text-primary"></div>
+        <p>جاري التحميل...</p>
+    </div>
+}
+else if (listings.Count == 0)
+{
+    <div class="alert alert-info">لا توجد عروض مطابقة</div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var listing in listings)
+        {
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@listing.Title</h5>
+                        <p class="text-muted small">@listing.City • @listing.District</p>
+                        <p class="card-text">@(listing.Description.Length > 100 ? listing.Description[..100] + "..." : listing.Description)</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong class="text-primary">@listing.Price.ToString("N0") @listing.Currency / @listing.TimeUnit</strong>
+                            <a class="btn btn-sm btn-outline-primary" href="/listing/@listing.Id">تفاصيل</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<ListingDto> listings = new();
+    private List<CategoryDto> categories = new();
+    private bool loading = true;
+    private string selectedCategory = string.Empty;
+    private string city = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var catResp = await Api.GetAsync<List<CategoryDto>>("/api/categories");
+        categories = catResp.Data ?? new();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        loading = true;
+        var qs = new List<string>();
+        if (!string.IsNullOrEmpty(selectedCategory)) qs.Add($"categoryId={selectedCategory}");
+        if (!string.IsNullOrEmpty(city)) qs.Add($"city={Uri.EscapeDataString(city)}");
+        var query = qs.Count > 0 ? "?" + string.Join("&", qs) : "";
+
+        var resp = await Api.GetAsync<PagedResult>("/api/listings" + query);
+        listings = resp.Data?.Items ?? new();
+        loading = false;
+    }
+
+    public class ListingDto
+    {
+        public Guid Id { get; set; }
+        public string Title { get; set; } = "";
+        public string Description { get; set; } = "";
+        public decimal Price { get; set; }
+        public string Currency { get; set; } = "";
+        public string City { get; set; } = "";
+        public string? District { get; set; }
+        public string TimeUnit { get; set; } = "";
+        public Guid CategoryId { get; set; }
+    }
+
+    public class CategoryDto
+    {
+        public Guid Id { get; set; }
+        public string Slug { get; set; } = "";
+        public string NameAr { get; set; } = "";
+    }
+
+    public class PagedResult
+    {
+        public List<ListingDto> Items { get; set; } = new();
+        public int TotalCount { get; set; }
+    }
+}

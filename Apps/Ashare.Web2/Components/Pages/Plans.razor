@@ -1,0 +1,122 @@
+@page "/plans"
+@rendermode InteractiveServer
+@inject AshareApiClient Api
+@inject AuthStateService Auth
+@inject NavigationManager Nav
+
+<PageTitle>الباقات - عشير</PageTitle>
+
+<h1>باقات الاشتراك</h1>
+<p class="text-muted">اختر الباقة المناسبة لنشاطك - 9 باقات (مطابقة لبيانات عشير الحالية)</p>
+
+@if (plans.Count == 0)
+{
+    <div class="spinner-border"></div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var p in plans)
+        {
+            <div class="col-md-4">
+                <div class="card h-100 @(p.IsRecommended ? "border-primary border-2" : "")">
+                    @if (p.IsRecommended)
+                    {
+                        <div class="card-header bg-primary text-white">⭐ موصى بها</div>
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">@p.Name</h5>
+                        <p class="text-muted small">@p.Description</p>
+                        <h3 class="text-primary">@p.MonthlyPrice.ToString("N0") <small class="text-muted">@p.Currency/شهر</small></h3>
+                        @if (p.AnnualPrice.HasValue)
+                        {
+                            <p class="text-success small">أو @p.AnnualPrice.Value.ToString("N0") @p.Currency/سنة</p>
+                        }
+
+                        <ul class="list-unstyled small mt-3">
+                            <li>✅ عروض: @(p.MaxListings == -1 ? "غير محدود" : p.MaxListings.ToString())</li>
+                            <li>✅ صور لكل عرض: @p.MaxImagesPerListing</li>
+                            <li>✅ عمولة: @p.CommissionPercentage%</li>
+                            @if (p.HasVerifiedBadge) { <li>✅ شارة موثّق</li> }
+                            @if (p.AllowApiAccess) { <li>✅ وصول API</li> }
+                        </ul>
+
+                        @if (Auth.IsAuthenticated)
+                        {
+                            <button class="btn btn-primary w-100" @onclick="() => Subscribe(p.Id)" disabled="@(subscribing == p.Id)">
+                                @(subscribing == p.Id ? "..." : "اشترك")
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-info mt-3">@message</div>
+}
+
+@code {
+    private List<PlanDto> plans = new();
+    private Guid? subscribing;
+    private string message = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var resp = await Api.GetAsync<List<PlanDto>>("/api/plans");
+        plans = resp.Data ?? new();
+    }
+
+    private async Task Subscribe(Guid planId)
+    {
+        if (!Auth.UserId.HasValue) return;
+        subscribing = planId;
+        message = "";
+        try
+        {
+            var resp = await Api.PostAsync<SubscribeResult>("/api/subscriptions", new
+            {
+                userId = Auth.UserId.Value,
+                planId,
+                billingCycle = "monthly"
+            });
+
+            if (resp.Operation.Status == "Success")
+            {
+                message = $"تم الاشتراك بنجاح! الحالة: {(resp.Meta?.GetValueOrDefault("requiresPayment")?.ToString() == "True" ? "يحتاج دفع" : "نشط")}";
+                await Task.Delay(1200);
+                Nav.NavigateTo("/my-subscription");
+            }
+            else
+            {
+                message = "فشل: " + resp.Operation.ErrorMessage;
+            }
+        }
+        finally { subscribing = null; }
+    }
+
+    public class PlanDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Slug { get; set; } = "";
+        public string? Description { get; set; }
+        public decimal MonthlyPrice { get; set; }
+        public decimal? AnnualPrice { get; set; }
+        public string Currency { get; set; } = "SAR";
+        public int MaxListings { get; set; }
+        public int MaxImagesPerListing { get; set; }
+        public decimal CommissionPercentage { get; set; }
+        public bool IsRecommended { get; set; }
+        public bool HasVerifiedBadge { get; set; }
+        public bool AllowApiAccess { get; set; }
+    }
+
+    public class SubscribeResult
+    {
+        public Guid Id { get; set; }
+    }
+}

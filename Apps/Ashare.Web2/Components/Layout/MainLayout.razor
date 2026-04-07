@@ -1,0 +1,70 @@
+@inherits LayoutComponentBase
+@inject AuthStateService Auth
+@implements IDisposable
+
+<div class="d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">🏠 عشير</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="nav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="/">العروض</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/plans">الباقات</a></li>
+                    @if (Auth.IsAuthenticated)
+                    {
+                        <li class="nav-item"><a class="nav-link" href="/create-listing">+ عرض جديد</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/my-bookings">حجوزاتي</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/messages">الرسائل</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/notifications">🔔 الإشعارات</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/my-subscription">اشتراكي</a></li>
+                    }
+                </ul>
+                <ul class="navbar-nav">
+                    @if (Auth.IsAuthenticated)
+                    {
+                        <li class="nav-item">
+                            <span class="nav-link">@Auth.PhoneNumber</span>
+                        </li>
+                        <li class="nav-item">
+                            <button class="btn btn-outline-light btn-sm" @onclick="SignOut">خروج</button>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item"><a class="nav-link" href="/login">دخول</a></li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container my-4 flex-grow-1">
+        @Body
+    </main>
+
+    <footer class="text-center text-muted py-3 border-top">
+        <small>عشير - تطبيق تجريبي مبني على ACommerce OperationEngine</small>
+    </footer>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Auth.OnAuthStateChanged += OnChange;
+    }
+
+    private void OnChange() => InvokeAsync(StateHasChanged);
+
+    private void SignOut()
+    {
+        Auth.SignOut();
+    }
+
+    public void Dispose()
+    {
+        Auth.OnAuthStateChanged -= OnChange;
+    }
+}
