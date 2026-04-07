@@ -1,3 +1,5 @@
+using ACommerce.Payments.Abstractions.Enums;
+using ACommerce.Payments.Abstractions.Models;
 using ACommerce.Templates.Customer.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -36,7 +38,9 @@ public class WebPaymentService : IPaymentService
         return Task.FromResult(new PaymentResult
         {
             Success = false,
-            Message = "In-app payment not supported on web"
+            Message = "In-app payment not supported on web",
+            Status = PaymentStatus.Failed,
+            TransactionId = Guid.NewGuid().ToString()
         });
     }
 

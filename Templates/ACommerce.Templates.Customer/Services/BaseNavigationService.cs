@@ -17,6 +17,11 @@ public abstract class BaseNavigationService : IAppNavigationService
     }
 
     /// <summary>
+    /// هل التطبيق يعمل كتطبيق جوال (MAUI) أم كتطبيق ويب
+    /// </summary>
+    public virtual bool IsMobileApp => false;
+
+    /// <summary>
     /// المسار الحالي
     /// </summary>
     public string CurrentUri => NavigationManager.Uri;

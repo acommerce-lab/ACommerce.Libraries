@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <!-- Core Infrastructure -->
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.Notifications.Abstractions\ACommerce.Notifications.Abstractions.csproj" />
     <ProjectReference Include="..\..\libs\backend\integration\ACommerce.Authentication.AspNetCore.Swagger\ACommerce.Authentication.AspNetCore.Swagger.csproj" />
     <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
     <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />

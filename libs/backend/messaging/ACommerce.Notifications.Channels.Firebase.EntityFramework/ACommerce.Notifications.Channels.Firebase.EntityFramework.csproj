@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ACommerce.Notifications.Channels.Firebase\ACommerce.Notifications.Channels.Firebase.csproj" />
+    <ProjectReference Include="..\..\messaging\ACommerce.Notifications.Channels.Firebase\ACommerce.Notifications.Channels.Firebase.csproj" />
     <ProjectReference Include="..\..\core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
   </ItemGroup>
 

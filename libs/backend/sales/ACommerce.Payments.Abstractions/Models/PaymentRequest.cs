@@ -23,10 +23,12 @@ public record PaymentRequest
 public record PaymentResult
 {
 	public required bool Success { get; init; }
-	public required string TransactionId { get; init; }
+    public bool Cancelled { get; set; }
+    public required string TransactionId { get; init; }
 	public required PaymentStatus Status { get; init; }
 	public string? PaymentUrl { get; init; }
-	public string? ErrorMessage { get; init; }
+    public string? Message { get; set; }
+    public string? ErrorMessage { get; init; }
 	/// <summary>
 	/// المبلغ (متاح عند جلب حالة الدفع)
 	/// </summary>

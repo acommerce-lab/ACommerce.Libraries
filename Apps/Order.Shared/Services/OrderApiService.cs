@@ -1,5 +1,6 @@
-using System.Net.Http.Json;
+using ACommerce.Templates.Customer.Pages;
 using Order.Shared.Models;
+using System.Net.Http.Json;
 
 namespace Order.Shared.Services;
 
@@ -321,7 +322,7 @@ public class OrderApiService
         }
     }
 
-    public async Task MarkNotificationReadAsync(string notificationId)
+    public async Task MarkNotificationReadAsync(Guid notificationId)
     {
         await _httpClient.PostAsync($"api/customer/notifications/{notificationId}/read", null);
     }
@@ -502,10 +503,10 @@ public class CreateTicketResponse
 
 public class NotificationDto
 {
-    public string Id { get; set; } = "";
+    public Guid Id { get; set; } = Guid.Empty;
     public string Title { get; set; } = "";
     public string Message { get; set; } = "";
-    public string Type { get; set; } = "";
+    public NotificationType Type { get; set; } = NotificationType.General;
     public bool IsRead { get; set; }
     public DateTime CreatedAt { get; set; }
     public Dictionary<string, string>? Data { get; set; }

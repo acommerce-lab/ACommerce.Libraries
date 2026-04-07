@@ -14,4 +14,8 @@ public class AppNavigationService : BaseNavigationService
     }
 
     public override bool IsMobileApp => true;
+
+    public override Task OpenExternalAsync(string url) => null;
+
+    public override Task OpenMapAsync(double latitude, double longitude, string? label = null) => null;
 }

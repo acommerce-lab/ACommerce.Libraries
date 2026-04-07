@@ -1,3 +1,4 @@
+using ACommerce.Payments.Abstractions.Enums;
 using System.Web;
 
 namespace Ashare.App.Pages;
@@ -94,7 +95,7 @@ public partial class PaymentPage : ContentPage
                 {
                     Success = false,
                     OrderId = orderId,
-                    Status = "failed",
+                    Status = PaymentStatus.Failed,
                     Message = error
                 });
                 ClosePageAsync();
@@ -112,7 +113,7 @@ public partial class PaymentPage : ContentPage
                 Success = false, // لا نفترض النجاح - يجب التحقق عبر API
                 OrderId = orderId ?? merchantReference, // استخدام merchantReference كبديل
                 TransactionId = transactionId ?? orderId,
-                Status = "pending_verification", // حالة تحتاج تحقق من API
+                Status = PaymentStatus.Pending, // حالة تحتاج تحقق من API
                 Message = "جاري التحقق من حالة الدفع..."
             };
 
@@ -126,7 +127,7 @@ public partial class PaymentPage : ContentPage
             _resultTcs.TrySetResult(new PaymentPageResult
             {
                 Success = false,
-                Status = "error",
+                Status = PaymentStatus.Failed,
                 Message = "حدث خطأ في معالجة نتيجة الدفع"
             });
             ClosePageAsync();
@@ -197,6 +198,6 @@ public class PaymentPageResult
     public bool Cancelled { get; set; }
     public string? OrderId { get; set; }
     public string? TransactionId { get; set; }
-    public string? Status { get; set; }
+    public PaymentStatus? Status { get; set; }
     public string? Message { get; set; }
 }

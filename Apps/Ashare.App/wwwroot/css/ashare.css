@@ -186,84 +186,6 @@
     background-color: var(--ashare-white);
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   CRITICAL: Prevent System Font Scaling - منع تكبير الخط من النظام
-   Ensures consistent UI regardless of iOS Dynamic Type or Android
-   accessibility font size settings
-   ───────────────────────────────────────────────────────────────── */
-html {
-    -webkit-text-size-adjust: 100% !important;
-    -moz-text-size-adjust: 100% !important;
-    -ms-text-size-adjust: 100% !important;
-    text-size-adjust: 100% !important;
-    font-size: 16px !important;
-}
-
-body {
-    -webkit-text-size-adjust: 100% !important;
-    text-size-adjust: 100% !important;
-    font-size: 16px !important;
-}
-
-/* Apply to all elements to prevent any scaling */
-* {
-    -webkit-text-size-adjust: 100% !important;
-    text-size-adjust: 100% !important;
-}
-
-/* Ensure fixed font sizes for critical UI elements */
-.ac-navbar, .ac-bottom-nav, .ac-btn,
-.ashare-header, .ashare-title,
-.ac-card-title, .ac-card-subtitle {
-    font-size: inherit !important;
-    -webkit-text-size-adjust: 100% !important;
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   Mobile Focus Ring Removal - إزالة إطار التركيز للموبايل
-   ───────────────────────────────────────────────────────────────── */
-/* Remove focus outline/ring from all interactive elements on mobile */
-*:focus {
-    outline: none !important;
-    -webkit-tap-highlight-color: transparent !important;
-}
-
-*:focus-visible {
-    outline: none !important;
-}
-
-/* Remove blue highlight on tap for iOS/Android */
-a, button, input, select, textarea,
-[role="button"], [tabindex],
-.ac-btn, .ac-bottom-nav-item, .ac-navbar-item,
-.ashare-tab, .ashare-card, .ac-card {
-    -webkit-tap-highlight-color: transparent !important;
-    -webkit-touch-callout: none !important;
-    outline: none !important;
-}
-
-a:focus, a:active,
-button:focus, button:active,
-input:focus, input:active,
-select:focus, select:active,
-textarea:focus, textarea:active,
-[role="button"]:focus, [role="button"]:active,
-[tabindex]:focus, [tabindex]:active,
-.ac-btn:focus, .ac-btn:active,
-.ac-bottom-nav-item:focus, .ac-bottom-nav-item:active {
-    outline: none !important;
-    box-shadow: none !important;
-    -webkit-tap-highlight-color: transparent !important;
-}
-
-/* Blazor specific - remove focus from navigation links */
-.nav-link:focus, .nav-link:active,
-nav a:focus, nav a:active,
-.mud-nav-link:focus, .mud-nav-link:active {
-    outline: none !important;
-    box-shadow: none !important;
-}
-
 .ac-dark .ac-navbar {
     background-color: var(--ashare-surface);
     border-bottom-color: var(--ashare-gray-200);
@@ -2367,72 +2289,22 @@ h1, h2, h3, .ashare-logo-text {
     backdrop-filter: blur(4px);
 }
 
-/* Container for left buttons (favorite + share) - using flexbox for reliable alignment */
-.ashare-gallery-actions-left {
-    position: absolute;
-    top: calc(var(--safe-area-top) + var(--ashare-spacing-md));
-    left: var(--ashare-spacing-md);
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-    z-index: 10;
-}
-
-/* Favorite button in flex container */
-.ashare-gallery-actions-left .ashare-favorite-btn {
-    position: relative;
-    top: auto;
-    left: auto;
-    background-color: rgba(255,255,255,0.9);
-    border-radius: var(--ashare-radius-full);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-}
-
-/* Share button in flex container */
-.ashare-gallery-actions-left .ashare-share-btn {
-    position: relative;
-    top: auto;
-    left: auto;
-}
-
 .ashare-share-btn {
     position: absolute;
     top: calc(var(--safe-area-top) + var(--ashare-spacing-md));
     left: 56px;
     width: 40px;
     height: 40px;
-    min-width: 40px;
-    min-height: 40px;
-    max-width: 40px;
-    max-height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: rgba(255,255,255,0.9);
     border: none;
-    border-radius: 50%;
+    border-radius: var(--ashare-radius-full);
     color: var(--ashare-gray-700);
     font-size: 18px;
-    line-height: 1;
     cursor: pointer;
     backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    box-sizing: border-box;
-    padding: 0;
-    overflow: hidden;
-    box-shadow: var(--ashare-shadow-sm);
-}
-
-.ashare-share-btn i {
-    font-size: 18px;
-    line-height: 1;
-    width: 18px;
-    height: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .ashare-gallery-thumbnails {
@@ -3698,13 +3570,12 @@ h1, h2, h3, .ashare-logo-text {
 /* Fixed bottom actions for create listing page */
 .ac-create-listing-page .ac-form-actions {
     position: fixed;
-    bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom)); /* Above the bottom navigation + safe area */
+    bottom: 70px; /* Above the bottom navigation */
     left: 0;
     right: 0;
     border-top: 1px solid var(--ashare-gray-100);
     z-index: 100;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-    padding-bottom: var(--ashare-spacing-md);
 }
 
 /* Images Section */

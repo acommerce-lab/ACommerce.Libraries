@@ -1,3 +1,5 @@
+using ACommerce.Payments.Abstractions.Enums;
+using ACommerce.Payments.Abstractions.Models;
 using ACommerce.Templates.Customer.Services;
 using Ashare.App.Pages;
 using Microsoft.Maui.ApplicationModel;
@@ -29,7 +31,9 @@ public class MauiPaymentService : IPaymentService
             return new PaymentResult
             {
                 Success = false,
-                Message = "رابط الدفع غير متوفر"
+                Message = "رابط الدفع غير متوفر",
+                Status = PaymentStatus.Failed,
+                TransactionId = string.Empty,
             };
         }
 
@@ -49,7 +53,9 @@ public class MauiPaymentService : IPaymentService
                 return new PaymentResult
                 {
                     Success = false,
-                    Message = "لا يمكن فتح صفحة الدفع"
+                    Message = "لا يمكن فتح صفحة الدفع",
+                    Status = PaymentStatus.Failed,
+                    TransactionId = string.Empty,
                 };
             }
 
@@ -73,7 +79,7 @@ public class MauiPaymentService : IPaymentService
                 Cancelled = pageResult.Cancelled,
                 OrderId = pageResult.OrderId,
                 TransactionId = pageResult.TransactionId ?? string.Empty,
-                Status = pageResult.Status,
+                Status = pageResult.Status ?? PaymentStatus.Failed,
                 Message = pageResult.Message
             };
         }
@@ -83,7 +89,9 @@ public class MauiPaymentService : IPaymentService
             return new PaymentResult
             {
                 Success = false,
-                Message = $"حدث خطأ: {ex.Message}"
+                Message = $"حدث خطأ: {ex.Message}",
+                Status = PaymentStatus.Failed,
+                TransactionId = string.Empty,
             };
         }
     }

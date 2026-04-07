@@ -353,7 +353,7 @@
                         _errorMessage = null;
                         Console.WriteLine("[SubscriptionCheckout] Payment cancelled by user");
                     }
-                    else if (result.Status == "pending_verification" && !string.IsNullOrEmpty(result.OrderId))
+                    else if (result.Status == ACommerce.Payments.Abstractions.Enums.PaymentStatus.Pending && !string.IsNullOrEmpty(result.OrderId))
                     {
                         // التحقق من حالة الدفع عبر API (مصدر الحقيقة الوحيد)
                         Console.WriteLine($"[SubscriptionCheckout] 🔍 Verifying payment via API for orderId: {result.OrderId}");
@@ -539,7 +539,7 @@
         }
     }
 
-    private void HandlePaymentCompleted(ACommerce.Templates.Customer.Services.PaymentResult result)
+    private void HandlePaymentCompleted(ACommerce.Payments.Abstractions.Models.PaymentResult result)
     {
         if (result.Success)
         {

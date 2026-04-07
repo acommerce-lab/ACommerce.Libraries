@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -12,12 +12,12 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\core\ACommerce.Notifications.Abstractions\ACommerce.Notifications.Abstractions.csproj" />
     <ProjectReference Include="..\ACommerce.Bookings\ACommerce.Bookings.csproj" />
     <ProjectReference Include="..\..\integration\ACommerce.SharedKernel.AspNetCore\ACommerce.SharedKernel.AspNetCore.csproj" />
     <ProjectReference Include="..\..\core\ACommerce.SharedKernel.CQRS\ACommerce.SharedKernel.CQRS.csproj" />
     <ProjectReference Include="..\..\marketing\ACommerce.Marketing.Analytics\ACommerce.Marketing.Analytics.csproj" />
     <ProjectReference Include="..\..\catalog\ACommerce.Catalog.Listings\ACommerce.Catalog.Listings.csproj" />
-    <ProjectReference Include="..\..\messaging\ACommerce.Notifications.Abstractions\ACommerce.Notifications.Abstractions.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

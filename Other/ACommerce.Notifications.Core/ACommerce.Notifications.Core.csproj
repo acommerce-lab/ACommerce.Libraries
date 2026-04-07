@@ -17,7 +17,7 @@
     <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.10" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\ACommerce.Messaging.Abstractions\ACommerce.Messaging.Abstractions.csproj" />
+    <ProjectReference Include="..\..\libs\backend\messaging\ACommerce.Messaging.Abstractions\ACommerce.Messaging.Abstractions.csproj" />
     <ProjectReference Include="..\..\libs\backend\core\ACommerce.Notifications.Abstractions\ACommerce.Notifications.Abstractions.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">

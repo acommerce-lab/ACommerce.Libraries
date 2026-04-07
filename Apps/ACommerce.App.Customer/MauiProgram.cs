@@ -27,6 +27,7 @@ using ACommerce.Client.Realtime;
 using ACommerce.Client.Core.Extensions;
 using ACommerce.ServiceRegistry.Client.Extensions;
 using Microsoft.Extensions.Logging;
+using ACommerce.Client.Core.Storage;
 
 namespace ACommerce.App.Customer;
 
@@ -180,6 +181,8 @@ public class MauiStorageService : IStorageService
         Preferences.Default.Remove(key);
         return Task.CompletedTask;
     }
+
+    public Task<bool> ContainsKeyAsync(string key) => Task.FromResult(Preferences.Default.ContainsKey(key));
 }
 
 // ═══════════════════════════════════════════════════════════════════

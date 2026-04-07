@@ -25,8 +25,8 @@
 		<ApplicationId>com.ashare.ashare</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>1.224</ApplicationDisplayVersion>
-		<ApplicationVersion>224</ApplicationVersion>
+		<ApplicationDisplayVersion>1.230</ApplicationDisplayVersion>
+		<ApplicationVersion>230</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>

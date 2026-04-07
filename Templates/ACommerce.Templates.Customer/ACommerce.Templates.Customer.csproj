@@ -19,6 +19,7 @@
 
         <ItemGroup>
                 <!-- Core -->
+                <ProjectReference Include="..\..\libs\backend\sales\ACommerce.Payments.Abstractions\ACommerce.Payments.Abstractions.csproj" />
                 <ProjectReference Include="..\..\libs\frontend\core\ACommerce.Client.Core\ACommerce.Client.Core.csproj" />
 
                 <!-- Clients -->

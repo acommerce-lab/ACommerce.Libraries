@@ -1,3 +1,4 @@
+@using ACommerce.Payments.Abstractions.Models
 @using Microsoft.JSInterop
 
 @using Ashare.Shared.Models
@@ -207,7 +208,7 @@
 
     [Parameter]
 
-    public EventCallback<ACommerce.Templates.Customer.Services.PaymentResult> OnPaymentCompleted { get; set; }
+    public EventCallback<ACommerce.Payments.Abstractions.Models.PaymentResult> OnPaymentCompleted { get; set; }
 
 
 
@@ -425,7 +426,7 @@
 
 
 
-        var result = new PaymentResult
+        var result = new PaymentResult()
 
         {
 
@@ -437,7 +438,8 @@
 
             TransactionId = query["orderId"] ?? query["transactionId"] ?? "",
 
-            Message = query["message"] ?? query["error"] ?? ""
+            Message = query["message"] ?? query["error"] ?? "",
+            Status = ACommerce.Payments.Abstractions.Enums.PaymentStatus.Processing
 
         };
 
@@ -473,7 +475,11 @@
 
                     TransactionId = message.TransactionId ?? "",
 
-                    Message = message.Message ?? ""
+                    Message = message.Message ?? "",
+                    Status =
+                        message.Status == "success" ?
+                        ACommerce.Payments.Abstractions.Enums.PaymentStatus.Completed :
+                        ACommerce.Payments.Abstractions.Enums.PaymentStatus.Failed
 
                 };
 

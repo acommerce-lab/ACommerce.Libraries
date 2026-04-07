@@ -419,7 +419,7 @@
                         _errorMessage = null;
                         Console.WriteLine("[BookingCreate] Payment cancelled by user");
                     }
-                    else if (result.Status == "pending_verification" && !string.IsNullOrEmpty(result.OrderId))
+                    else if (result.Status == ACommerce.Payments.Abstractions.Enums.PaymentStatus.Pending && !string.IsNullOrEmpty(result.OrderId))
                     {
                         // Verify payment via API
                         Console.WriteLine($"[BookingCreate] Verifying payment via API for orderId: {result.OrderId}");
