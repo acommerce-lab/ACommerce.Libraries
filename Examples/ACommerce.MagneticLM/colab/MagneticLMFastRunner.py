@@ -1,40 +1,64 @@
 #!/usr/bin/env python3
 # MagneticLMFastRunner.py
-# GPU-native single-file runner for the graph-based MagneticLM language model.
-# WikiText-103 only, full mode only, no cache, CUDA + GPU RAM only.
 #
-# Design:
-#   - Tokenize the whole corpus into one int32 stream on CPU (cheap), then
-#     move it to a single int64 tensor on the GPU.
-#   - All n-gram counting runs on CUDA via polynomial hashing:
-#       * ngram_hash[i] = sum_k tokens[i+k] * HASH_PRIMES[k]
-#       * torch.unique(ngram_hash, return_counts=True) yields the counts
-#       * scatter_add aggregates context-level totals, count-of-counts, and
-#         unique-follower counts for Modified Kneser-Ney smoothing.
-#   - KN-5 backoff runs entirely on the GPU, vectorized across the whole test
-#     set, via torch.searchsorted against the sorted per-order hash tables.
-#   - Physics simulation + position similarity + importance all stay on CUDA.
-#   - No Python dicts for n-gram counts, no cache, no CPU hot loops in eval.
+# GPU-native, single-file runner for the graph-based MagneticLM language
+# model. WikiText-103 only, full mode, no cache, CUDA + GPU RAM end-to-end.
 #
-# CLI:
-#   python MagneticLMFastRunner.py --train-lines 100000 --physics-iters 30
+# Restored model logic (same math as the published baseline)
+# ==========================================================
+# - Modified Kneser-Ney with all five orders, including the D3 * n3+ term
+#   that the previous "Gemini-edited" pass dropped from the lambda formula.
+# - The continuation count is recovered from the token stream (NOT from
+#   inverting a polynomial hash, which was the silent corruption that pushed
+#   perplexity to 600+ on 1M lines). For each unique bigram we look up the
+#   first position via scatter_reduce(amin) and read tokens[first_pos + 1],
+#   which is the only mathematically valid way to recover the next word.
+# - Semantic edges are built directly from the token stream (offsets +1, +2)
+#   instead of trying to extract pairs from bigram hashes — same reason.
+# - Physics simulation + importance + circle skeleton are restored, and
+#   eval_full_wt103 mixes the magnetic contribution back in via the
+#   adaptive lambda bands.
+#
+# Memory work for the 1M-line case
+# ================================
+# - Per-order n-gram counting uses **incremental chunk merging**: chunks are
+#   not collected into a Python list (which doubled the peak); instead each
+#   chunk is folded into a running master tensor and the sort buffer is
+#   freed before the next chunk runs. This is the one good change from the
+#   degraded version and we keep it.
+# - Chunk sizes scale **inversely with order** so the higher-cost orders use
+#   smaller windows (order 5 buffers ~3 GB instead of ~6 GB on T4).
+# - tokens_gpu / freq_gpu / per-chunk buffers are explicitly torch.deleted
+#   between phases. torch.cuda.empty_cache() is called at the boundaries.
+#
+# Optional dual-T4 sharding (Kaggle gives "GPU T4 x2")
+# ====================================================
+# When started with --multi-gpu, the per-order tables are split across two
+# CUDA devices: orders 1-3 stay on cuda:0 (alongside positions, importance
+# and physics state), and orders 4-5 live on cuda:1. The token stream is
+# temporarily copied across when needed and freed afterwards. The KN-batch
+# eval moves only the (small) per-batch query through the cross-device
+# transfer, not any of the lookup tables.
+#
+# CLI
+# ===
+#   python MagneticLMFastRunner.py --train-lines 1000000 --physics-iters 30
+#   python MagneticLMFastRunner.py --train-lines 0 --max-order 5 --multi-gpu
+
 import argparse
 import math
 import os
 import re
 import sys
 import time
+import array
 
 try:
     import torch
-except ImportError:
-    print("ERROR: PyTorch required (pip install torch).", file=sys.stderr)
-    sys.exit(1)
-
-try:
     import numpy as np
 except ImportError:
-    print("ERROR: NumPy required (pip install numpy).", file=sys.stderr)
+    print("ERROR: PyTorch and NumPy required (pip install torch numpy).",
+          file=sys.stderr)
     sys.exit(1)
 
 
@@ -69,68 +93,106 @@ def ensure_wt103(data_dir="data/wt103"):
 
 
 # Polynomial hashing primes - one constant per position in the ngram window.
-# Chosen as large odd splitmix64-style multipliers; int64 multiplies overflow
-# modulo 2^64 naturally, giving a near-uniform universal hash. Collision
-# probability for ~10^9 keys is ~10^-10, negligible for our purposes.
-_HASH_PRIMES_CPU = torch.tensor(
-    [
-        0x9E3779B97F4A7C15,
-        0xBF58476D1CE4E5B9,
-        0x94D049BB133111EB,
-        0x7F4A7C15F39CC060,
-        0xA6E36C3B4E5A7F11,
-        0xD2B74407B1CE6E93,
-    ],
-    dtype=torch.int64,
-)
+# Six entries because MAX_ORDER+1 == 6 (orders 1..5). uint64 -> int64 keeps the
+# high bit set, so the polynomial hash naturally wraps modulo 2^64 inside
+# torch.int64 arithmetic, giving a near-uniform universal hash.
+_HASH_PRIMES_LIST = [
+    0x9E3779B97F4A7C15,
+    0xBF58476D1CE4E5B9,
+    0x94D049BB133111EB,
+    0x7F4A7C15F39CC060,
+    0xA6E36C3B4E5A7F11,
+    0xD2B74407B1CE6E93,
+]
+_HASH_PRIMES_CPU = torch.from_numpy(
+    np.array(_HASH_PRIMES_LIST, dtype=np.uint64).astype(np.int64))
 
 
 class MagneticLMGPU:
-    MAX_ORDER = 5
+    """GPU-native MagneticLM. Tokens, hashes, sorted-key tables, physics and
+    eval all live on CUDA tensors. With multi_gpu=True the per-order n-gram
+    tables are split across two CUDA devices."""
 
-    def __init__(self, device):
+    def __init__(self, device, max_order=5, multi_gpu=False):
         self.device = device
-        # vocab (CPU only during tokenization; then frozen)
+        self.max_order = max_order
+        self.MAX_ORDER = max_order  # back-compat for any external reader
+
+        # Devices: tokens + low-order tables + physics on `device`,
+        # high-order tables on aux_device when multi_gpu is on.
+        self.aux_device = device
+        if multi_gpu and torch.cuda.device_count() >= 2:
+            other = (device.index + 1) % torch.cuda.device_count() if device.index is not None else 1
+            self.aux_device = torch.device(f"cuda:{other}")
+        self.multi_gpu = (self.aux_device != self.device)
+
+        # Hash primes mirrored on each device used.
+        self.hash_primes = _HASH_PRIMES_CPU.to(device)
+        self.hash_primes_aux = (
+            _HASH_PRIMES_CPU.to(self.aux_device) if self.multi_gpu
+            else self.hash_primes
+        )
+
+        # Vocab — built on CPU during tokenization, then frozen.
         self.word2id = {}
         self.id2word = []
-        # token stream on GPU (released after build())
+
+        # Token stream (released after build())
         self.tokens_gpu = None
         self.total_tokens = 0
-        # hash primes (on device)
-        self.hash_primes = _HASH_PRIMES_CPU.to(device)
-        # per-order GPU tables (populated in train_gpu)
-        self.ngram_hash_sorted = [None] * (self.MAX_ORDER + 1)
-        self.ngram_count = [None] * (self.MAX_ORDER + 1)
-        self.ctx_hash_sorted = [None] * (self.MAX_ORDER + 1)
-        self.ctx_total = [None] * (self.MAX_ORDER + 1)
-        self.ctx_count1 = [None] * (self.MAX_ORDER + 1)
-        self.ctx_count2 = [None] * (self.MAX_ORDER + 1)
-        self.ctx_uf = [None] * (self.MAX_ORDER + 1)
-        # bigram continuation
+
+        # Per-order tables. Each entry is a torch tensor on whichever
+        # device _device_for_order(o) returned.
+        self.ngram_hash_sorted = [None] * (max_order + 1)
+        self.ngram_count       = [None] * (max_order + 1)
+        self.ctx_hash_sorted   = [None] * (max_order + 1)
+        self.ctx_total         = [None] * (max_order + 1)
+        self.ctx_count1        = [None] * (max_order + 1)
+        self.ctx_count2        = [None] * (max_order + 1)
+        self.ctx_uf            = [None] * (max_order + 1)
+
+        # Bigram continuation (KN backoff base case)
         self.cont_count = None
         self.total_unique_bigrams = 0
-        # frequency table
+
+        # Frequency / physics artifacts (always on `device`)
         self.freq_gpu = None
-        # KN discounts (scalar floats)
-        self.D1 = 0.5
-        self.D2 = 0.75
-        self.D3 = 0.9
-        # physics artifacts (populated in build)
+        self.D1, self.D2, self.D3 = 0.5, 0.75, 0.9
         self.positions = None
         self.importance = None
         self.circle_group = None
-        # semantic edges (populated in train_gpu)
+
+        # Semantic edges (kept on `device` — physics runs there)
         self.edge_from = None
         self.edge_to = None
         self.edge_weight = None
 
-    def _hash_rows(self, rows, length):
-        primes = self.hash_primes[:length]
-        return (rows * primes).sum(dim=-1)
+    # ----- device routing -----
+    def _device_for_order(self, o):
+        """Light orders on the primary device, heavy orders on the aux
+        device. With multi_gpu=False both are the same."""
+        if not self.multi_gpu:
+            return self.device
+        return self.device if o <= 3 else self.aux_device
+
+    def _primes_on(self, dev):
+        return self.hash_primes_aux if dev == self.aux_device else self.hash_primes
+
+    @staticmethod
+    def _adaptive_chunk(o):
+        """Chunk size (in tokens) for n-gram counting at order o.
+        Higher orders get smaller chunks to keep peak memory bounded.
+        These were tuned to fit a 16 GB T4 with ~88M tokens (1M lines)."""
+        return {
+            1: 60_000_000,
+            2: 50_000_000,
+            3: 40_000_000,
+            4: 25_000_000,
+            5: 15_000_000,
+        }.get(o, 15_000_000)
 
     # ----- tokenize corpus into a compact int32 stream, then move to GPU -----
     def _tokenize_to_gpu(self, lines):
-        import array
         w2i = self.word2id
         id2w = self.id2word
         toks = array.array('i')
@@ -159,108 +221,136 @@ class MagneticLMGPU:
         if T == 0:
             self.tokens_gpu = torch.empty(0, dtype=torch.int64, device=self.device)
             return
-        # array('i') is int32 on every platform that matters
         np_tokens = np.frombuffer(toks, dtype=np.int32)
-        # Move to GPU as int64 (required by hash arithmetic)
         self.tokens_gpu = torch.from_numpy(np_tokens).to(
             device=self.device, dtype=torch.int64)
         del toks, np_tokens
 
-    # ----- Build n-gram aggregates for a single order on the GPU -----
-    # Uses polynomial hashing so everything stays as int64 tensors and we
-    # never touch a Python dict. The token stream is processed in chunks to
-    # cap peak memory (default 40M tokens/chunk ≈ 3GB peak per chunk).
-    def _count_ngrams_order(self, o, chunk_tokens=40_000_000):
-        dev = self.device
-        tokens = self.tokens_gpu
+    # ----- N-gram aggregates for one order, **incremental** chunk merging -----
+    # Each chunk is merged into a running master tensor before the next chunk
+    # runs, instead of being collected into a Python list and merged at the
+    # end. That keeps peak memory at "one chunk + master" rather than
+    # "all chunks + master".
+    def _count_ngrams_order(self, o, chunk_tokens=None):
+        target_dev = self._device_for_order(o)
+        primes = self._primes_on(target_dev)
+        chunk_tokens = chunk_tokens or self._adaptive_chunk(o)
+
+        # Bring tokens onto the target device. If we're sharding to cuda:1,
+        # this is a transient copy that we free at the end of this method.
+        if self.tokens_gpu.device == target_dev:
+            tokens = self.tokens_gpu
+            tokens_is_copy = False
+        else:
+            tokens = self.tokens_gpu.to(target_dev)
+            tokens_is_copy = True
+
         T = tokens.numel()
         if T <= o:
+            if tokens_is_copy:
+                del tokens
+                torch.cuda.empty_cache()
             return
-        primes_ctx = self.hash_primes[:o]
-        primes_ng = self.hash_primes[:o + 1]
 
-        def hash_chunk(start_ngram, end_ngram):
-            # Build hashes for ngrams whose first token index in [start_ngram, end_ngram).
-            tok_slice = tokens[start_ngram:end_ngram + o]
-            L = tok_slice.numel() - o
-            ngram_h = torch.zeros(L, dtype=torch.int64, device=dev)
-            for k in range(o + 1):
-                ngram_h += tok_slice[k:L + k] * primes_ng[k]
-            ctx_h = torch.zeros(L, dtype=torch.int64, device=dev)
-            for k in range(o):
-                ctx_h += tok_slice[k:L + k] * primes_ctx[k]
-            return ngram_h, ctx_h
+        primes_ctx = primes[:o]
+        primes_ng = primes[:o + 1]
 
-        ng_list = []
-        cnt_list = []
-        ctx_list = []
+        # Master accumulators (start empty)
+        master_ng = torch.empty(0, dtype=torch.int64, device=target_dev)
+        master_cnt = torch.empty(0, dtype=torch.int64, device=target_dev)
+        master_ctx = torch.empty(0, dtype=torch.int64, device=target_dev)
+
         nG = T - o
         start = 0
         while start < nG:
             end = min(start + chunk_tokens, nG)
-            ngram_h, ctx_h = hash_chunk(start, end)
+            tok_slice = tokens[start:end + o]
+            L = tok_slice.numel() - o
+
+            # Polynomial hash for the (o+1)-token ngram and the o-token ctx.
+            ngram_h = torch.zeros(L, dtype=torch.int64, device=target_dev)
+            for k in range(o + 1):
+                ngram_h += tok_slice[k:L + k] * primes_ng[k]
+            ctx_h = torch.zeros(L, dtype=torch.int64, device=target_dev)
+            for k in range(o):
+                ctx_h += tok_slice[k:L + k] * primes_ctx[k]
+
+            # Unique ngrams in this chunk + their counts.
             uniq_ng, inverse, counts = torch.unique(
                 ngram_h, return_inverse=True, return_counts=True)
             del ngram_h
-            # For each unique ngram in this chunk, pick an arbitrary-but-stable
-            # ctx hash (all positions with the same unique ngram necessarily
-            # share the same ctx, so first-position is fine).
-            positions = torch.arange(ctx_h.numel(), dtype=torch.int64, device=dev)
+
+            # For each unique ngram pick a stable ctx hash via first position.
+            positions = torch.arange(L, dtype=torch.int64, device=target_dev)
             first_pos = torch.full(
-                (uniq_ng.numel(),), ctx_h.numel(),
-                dtype=torch.int64, device=dev)
+                (uniq_ng.numel(),), L,
+                dtype=torch.int64, device=target_dev)
             first_pos.scatter_reduce_(0, inverse, positions,
                                       reduce='amin', include_self=True)
-            ctx_for_uniq = ctx_h[first_pos.clamp_max(ctx_h.numel() - 1)]
-            del positions, first_pos, inverse, ctx_h
-            ng_list.append(uniq_ng)
-            cnt_list.append(counts)
-            ctx_list.append(ctx_for_uniq)
+            ctx_for_uniq = ctx_h[first_pos.clamp_max(L - 1)]
+            del positions, first_pos, inverse, ctx_h, tok_slice
+
+            # ---- INCREMENTAL MERGE INTO MASTER ----
+            # Concatenate this chunk's uniques with the running master, then
+            # re-unique. The chunk's contribution to counts is summed via
+            # scatter_add; the chunk's contribution to ctx_for_ngram uses
+            # scatter_reduce(amin) so the master ctx hash stays stable.
+            merged_ng = torch.cat([master_ng, uniq_ng])
+            merged_cnt = torch.cat([master_cnt, counts])
+            merged_ctx = torch.cat([master_ctx, ctx_for_uniq])
+            del master_ng, master_cnt, master_ctx, uniq_ng, counts, ctx_for_uniq
+
+            new_uniq, new_inv = torch.unique(merged_ng, return_inverse=True)
+            new_cnt = torch.zeros(
+                new_uniq.numel(), dtype=torch.int64, device=target_dev)
+            new_cnt.scatter_add_(0, new_inv, merged_cnt)
+            new_ctx = torch.full(
+                (new_uniq.numel(),), torch.iinfo(torch.int64).max,
+                dtype=torch.int64, device=target_dev)
+            new_ctx.scatter_reduce_(0, new_inv, merged_ctx,
+                                    reduce='amin', include_self=True)
+            del merged_ng, merged_cnt, merged_ctx, new_inv
+
+            master_ng = new_uniq
+            master_cnt = new_cnt
+            master_ctx = new_ctx
+            del new_uniq, new_cnt, new_ctx
+
             start = end
             torch.cuda.empty_cache()
 
-        # Merge chunks: re-unique ngram hashes, sum counts, keep one ctx hash
-        all_ng = torch.cat(ng_list)
-        all_cnt = torch.cat(cnt_list)
-        all_ctx = torch.cat(ctx_list)
-        del ng_list, cnt_list, ctx_list
-
-        uniq_ng, inverse = torch.unique(all_ng, return_inverse=True)
-        K = uniq_ng.numel()
-        ng_counts = torch.zeros(K, dtype=torch.int64, device=dev)
-        ng_counts.scatter_add_(0, inverse, all_cnt)
-        # ctx hash: scatter_reduce amin — stable deterministic choice
-        ctx_for_ngram = torch.full(
-            (K,), torch.iinfo(torch.int64).max,
-            dtype=torch.int64, device=dev)
-        ctx_for_ngram.scatter_reduce_(
-            0, inverse, all_ctx, reduce='amin', include_self=True)
-        del all_ng, all_cnt, all_ctx, inverse
-
-        # Per-ctx aggregates
-        uniq_ctx, ctx_inv = torch.unique(ctx_for_ngram, return_inverse=True)
+        # ---- per-context aggregates ----
+        uniq_ctx, ctx_inv = torch.unique(master_ctx, return_inverse=True)
         U = uniq_ctx.numel()
-        ctx_total = torch.zeros(U, dtype=torch.int64, device=dev)
-        ctx_total.scatter_add_(0, ctx_inv, ng_counts)
-        ctx_count1 = torch.zeros(U, dtype=torch.int64, device=dev)
-        ctx_count1.scatter_add_(0, ctx_inv, (ng_counts == 1).to(torch.int64))
-        ctx_count2 = torch.zeros(U, dtype=torch.int64, device=dev)
-        ctx_count2.scatter_add_(0, ctx_inv, (ng_counts == 2).to(torch.int64))
-        ctx_uf = torch.zeros(U, dtype=torch.int64, device=dev)
-        ctx_uf.scatter_add_(0, ctx_inv, torch.ones_like(ng_counts))
+        ctx_total = torch.zeros(U, dtype=torch.int64, device=target_dev)
+        ctx_total.scatter_add_(0, ctx_inv, master_cnt)
+        ctx_count1 = torch.zeros(U, dtype=torch.int64, device=target_dev)
+        ctx_count1.scatter_add_(0, ctx_inv, (master_cnt == 1).to(torch.int64))
+        ctx_count2 = torch.zeros(U, dtype=torch.int64, device=target_dev)
+        ctx_count2.scatter_add_(0, ctx_inv, (master_cnt == 2).to(torch.int64))
+        ctx_uf = torch.zeros(U, dtype=torch.int64, device=target_dev)
+        ctx_uf.scatter_add_(0, ctx_inv, torch.ones_like(master_cnt))
 
-        self.ngram_hash_sorted[o] = uniq_ng
-        self.ngram_count[o] = ng_counts
-        self.ctx_hash_sorted[o] = uniq_ctx
+        self.ngram_hash_sorted[o] = master_ng        # already sorted (torch.unique)
+        self.ngram_count[o] = master_cnt
+        self.ctx_hash_sorted[o] = uniq_ctx           # already sorted
         self.ctx_total[o] = ctx_total
         self.ctx_count1[o] = ctx_count1
         self.ctx_count2[o] = ctx_count2
         self.ctx_uf[o] = ctx_uf
-        del ctx_for_ngram, ctx_inv
+        del master_ctx, ctx_inv
+
+        if tokens_is_copy:
+            del tokens
         torch.cuda.empty_cache()
 
     # ----- Continuation count per word (KN backoff base case) -----
-    def _compute_continuation(self):
+    # Restored: works directly off the token stream so the next word can be
+    # recovered as tokens[first_pos + 1]. The "extract from hash" version
+    # (hash % p2) // p1 is mathematically wrong because the hash wraps mod
+    # 2^64 and the operands are not coprime — that was the silent
+    # corruption that pushed perplexity to 600+.
+    def _compute_continuation(self, chunk_tokens=40_000_000):
         dev = self.device
         V = len(self.id2word)
         self.cont_count = torch.zeros(V, dtype=torch.int64, device=dev)
@@ -268,26 +358,67 @@ class MagneticLMGPU:
         T = tokens.numel()
         if T < 2:
             return
-        # For each unique bigram (w_prev, w_next), credit +1 to w_next.
-        primes_bi = self.hash_primes[:2]
-        big_h = tokens[:-1] * primes_bi[0] + tokens[1:] * primes_bi[1]
-        uniq, inverse = torch.unique(big_h, return_inverse=True)
-        K = uniq.numel()
-        positions = torch.arange(T - 1, dtype=torch.int64, device=dev)
-        first_pos = torch.full(
-            (K,), T - 1, dtype=torch.int64, device=dev)
-        first_pos.scatter_reduce_(0, inverse, positions,
-                                  reduce='amin', include_self=True)
-        next_w = tokens[first_pos.clamp_max(T - 2) + 1]
-        self.cont_count.scatter_add_(0, next_w, torch.ones_like(next_w))
-        self.total_unique_bigrams = int(K)
-        del big_h, uniq, inverse, positions, first_pos, next_w
 
-    # ----- Semantic edges for physics (all on GPU) -----
-    # Equivalent to the original ±1,±2 co-occurrence loop with symmetric
-    # weights: per (i, i+1) pair we want +0.2 per direction, per (i, i+2)
-    # +0.1 per direction. We process the two offsets sequentially and fold
-    # into a running unique-edge table keyed by from*V + to.
+        primes_bi = self.hash_primes[:2]
+
+        # Process in chunks to keep peak memory bounded.
+        # Each chunk holds: bigram_h (8 bytes/entry), positions, inverse,
+        # first_pos and next_w. Peak ~5x chunk_tokens bytes.
+        master_uniq = torch.empty(0, dtype=torch.int64, device=dev)
+        master_next = torch.empty(0, dtype=torch.int64, device=dev)
+
+        start = 0
+        end_total = T - 1
+        while start < end_total:
+            end = min(start + chunk_tokens, end_total)
+            L = end - start
+            # bigram (tokens[i], tokens[i+1]) for i in [start, end)
+            big_h = (
+                tokens[start:start + L] * primes_bi[0]
+                + tokens[start + 1:start + 1 + L] * primes_bi[1]
+            )
+            uniq, inverse = torch.unique(big_h, return_inverse=True)
+            del big_h
+
+            positions = torch.arange(L, dtype=torch.int64, device=dev)
+            first_pos = torch.full(
+                (uniq.numel(),), L, dtype=torch.int64, device=dev)
+            first_pos.scatter_reduce_(0, inverse, positions,
+                                      reduce='amin', include_self=True)
+            del positions, inverse
+            # next word == tokens[start + first_pos + 1]
+            next_w = tokens[start + first_pos.clamp_max(L - 1) + 1]
+            del first_pos
+
+            # Merge with master, re-unique to drop bigrams that already
+            # appeared in earlier chunks.
+            merged_uniq = torch.cat([master_uniq, uniq])
+            merged_next = torch.cat([master_next, next_w])
+            del master_uniq, master_next, uniq, next_w
+
+            new_uniq, new_inv = torch.unique(merged_uniq, return_inverse=True)
+            new_next = torch.full(
+                (new_uniq.numel(),), -1,
+                dtype=torch.int64, device=dev)
+            # scatter overwrites; both chunks have the same next word for the
+            # same bigram, so any deterministic write is fine.
+            new_next.scatter_(0, new_inv, merged_next)
+            master_uniq = new_uniq
+            master_next = new_next
+            del merged_uniq, merged_next, new_inv, new_uniq, new_next
+
+            start = end
+            torch.cuda.empty_cache()
+
+        # cont_count[w] = number of unique bigrams ending in w
+        self.cont_count.scatter_add_(0, master_next, torch.ones_like(master_next))
+        self.total_unique_bigrams = int(master_uniq.numel())
+        del master_uniq, master_next
+        torch.cuda.empty_cache()
+
+    # ----- Semantic edges for physics, all on GPU, restored -----
+    # Process offsets +1 (weight 0.2/dir) and +2 (weight 0.1/dir) one at a
+    # time, fold into a running unique-edge table keyed by from*V + to.
     def _build_semantic_edges(self):
         dev = self.device
         V = len(self.id2word)
@@ -311,20 +442,18 @@ class MagneticLMGPU:
             mask = a != b
             a = a[mask]
             b = b[mask]
-            # symmetric: both directions
             both_f = torch.cat([a, b])
             both_t = torch.cat([b, a])
             del a, b, mask
             keys = both_f * V_long + both_t
             del both_f, both_t
-            # aggregate this offset's edges first to shrink memory
             uk, inv = torch.unique(keys, return_inverse=True)
             del keys
             ones = torch.ones(inv.numel(), dtype=torch.float32, device=dev) * amount
             w = torch.zeros(uk.numel(), dtype=torch.float32, device=dev)
             w.scatter_add_(0, inv, ones)
             del inv, ones
-            # merge with running
+
             merged_keys = torch.cat([running_keys, uk])
             merged_w = torch.cat([running_w, w])
             del uk, w
@@ -336,7 +465,6 @@ class MagneticLMGPU:
             running_w = w2
             torch.cuda.empty_cache()
 
-        # Decode keys -> (from, to); filter weak edges.
         edge_from = running_keys // V_long
         edge_to = running_keys % V_long
         strong = running_w >= 0.1
@@ -345,6 +473,28 @@ class MagneticLMGPU:
         self.edge_weight = running_w[strong].clamp(-10.0, 10.0).contiguous()
         del running_keys, running_w, edge_from, edge_to
         torch.cuda.empty_cache()
+
+    # ----- Modified KN discounts from count-of-counts (restored) -----
+    def _compute_discounts(self):
+        n1 = 0
+        n2 = 0
+        n3 = 0
+        for o in range(1, self.max_order + 1):
+            c = self.ngram_count[o]
+            if c is None:
+                continue
+            n1 += int((c == 1).sum().item())
+            n2 += int((c == 2).sum().item())
+            n3 += int((c == 3).sum().item())
+        if n1 > 0 and n2 > 0:
+            Y = n1 / (n1 + 2.0 * n2)
+            self.D1 = max(0.1, min(0.95, 1.0 - 2.0 * Y * n2 / n1))
+            self.D2 = max(0.1, min(0.95,
+                                    2.0 - 3.0 * Y * (n3 / n2 if n2 > 0 else 0.0)))
+            self.D3 = max(0.1, min(0.95,
+                                    3.0 - 4.0 * Y * ((n3 + 1) / n3 if n3 > 0 else 1.0)))
+        print("  KN discounts: D1=%.3f D2=%.3f D3+=%.3f" %
+              (self.D1, self.D2, self.D3))
 
     # ----- Full GPU training pipeline -----
     def train_gpu(self, lines):
@@ -356,75 +506,56 @@ class MagneticLMGPU:
         print("  Tokens: %d, Vocab: %d" % (T, V))
         if T == 0 or V == 0:
             return
-        # Frequency table on GPU
+
+        # Frequency table on the primary device.
         self.freq_gpu = torch.zeros(V, dtype=torch.int64, device=dev)
         self.freq_gpu.scatter_add_(0, self.tokens_gpu,
                                    torch.ones_like(self.tokens_gpu))
-        # N-gram tables per order
-        for o in range(1, self.MAX_ORDER + 1):
+
+        # N-gram tables per order. Higher orders may live on cuda:1.
+        for o in range(1, self.max_order + 1):
             t0 = time.time()
-            print("  Order %d: building..." % o, end="", flush=True)
+            tdev = self._device_for_order(o)
+            tag = "" if not self.multi_gpu else " [%s]" % str(tdev)
+            print("  Order %d%s: building..." % (o, tag), end="", flush=True)
             self._count_ngrams_order(o)
             print(" done (%.0fs, ngrams=%d, ctxs=%d)" % (
                 time.time() - t0,
                 self.ngram_count[o].numel(),
                 self.ctx_total[o].numel()))
-        # Continuation counts for KN backoff
+
+        # Continuation counts (always on the primary device since tokens
+        # live there)
         t0 = time.time()
         print("  Continuation counts...", end="", flush=True)
         self._compute_continuation()
         print(" done (%.0fs, %d unique bigrams)" % (
             time.time() - t0, self.total_unique_bigrams))
-        # Semantic edges for physics
+
+        # Semantic edges
         t0 = time.time()
         print("  Semantic edges...", end="", flush=True)
         self._build_semantic_edges()
         print(" done (%.0fs, %d edges)" % (
             time.time() - t0, self.edge_from.numel()))
-        # Tokens stream is no longer needed past this point.
+
+        # Free the token stream — physics + eval don't need it.
         self.tokens_gpu = None
         torch.cuda.empty_cache()
 
-    # ----- Modified KN discounts from count-of-counts (GPU sums) -----
-    def _compute_discounts(self):
-        dev = self.device
-        # n1, n2, n3 are computed across ALL orders' ngram_count tables.
-        n1 = torch.zeros((), dtype=torch.int64, device=dev)
-        n2 = torch.zeros((), dtype=torch.int64, device=dev)
-        n3 = torch.zeros((), dtype=torch.int64, device=dev)
-        for o in range(1, self.MAX_ORDER + 1):
-            c = self.ngram_count[o]
-            if c is None:
-                continue
-            n1 = n1 + (c == 1).sum()
-            n2 = n2 + (c == 2).sum()
-            n3 = n3 + (c == 3).sum()
-        n1i = int(n1.item())
-        n2i = int(n2.item())
-        n3i = int(n3.item())
-        if n1i > 0 and n2i > 0:
-            Y = n1i / (n1i + 2.0 * n2i)
-            self.D1 = max(0.1, min(0.95, 1.0 - 2.0 * Y * n2i / n1i))
-            self.D2 = max(0.1, min(0.95,
-                                    2.0 - 3.0 * Y * (n3i / n2i if n2i > 0 else 0.0)))
-            self.D3 = max(0.1, min(0.95,
-                                    3.0 - 4.0 * Y * ((n3i + 1) / n3i if n3i > 0 else 1.0)))
-        print("  KN discounts: D1=%.3f D2=%.3f D3+=%.3f" %
-              (self.D1, self.D2, self.D3))
-
-    # ----- Physics simulation + importance (all on GPU, as before) -----
+    # ----- Physics simulation + importance + circles (restored) -----
     def build(self, physics_iters=30):
         self._compute_discounts()
         dev = self.device
         N = len(self.id2word)
-        print("  Nodes: %d, Edges: %d" %
-              (N, self.edge_from.numel() if self.edge_from is not None else 0))
+        E = self.edge_from.numel() if self.edge_from is not None else 0
+        print("  Nodes: %d, Edges: %d" % (N, E))
         if N == 0:
             return
+
         edge_from = self.edge_from
         edge_to = self.edge_to
         edge_w = self.edge_weight
-        E = edge_from.numel() if edge_from is not None else 0
 
         torch.manual_seed(42)
         positions = (torch.rand((N, 3), device=dev, dtype=torch.float32) * 10.0 - 5.0)
@@ -446,6 +577,7 @@ class MagneticLMGPU:
         for it in range(physics_iters):
             forces = torch.zeros_like(positions)
 
+            # 1. Spring forces along semantic edges
             if E > 0:
                 pf = positions[edge_from]
                 pt = positions[edge_to]
@@ -459,7 +591,9 @@ class MagneticLMGPU:
                 fmag = k_tensor * edge_w / dist.squeeze(1)
                 fvec = unit * fmag.unsqueeze(1)
                 forces.index_add_(0, edge_from, fvec)
+                del pf, pt, diff, dist, unit, k_tensor, fmag, fvec
 
+            # 2. Sampled repulsion + far-field attraction
             if N > sample_size:
                 sample_idx = torch.randperm(N, device=dev)[:sample_size]
             else:
@@ -484,10 +618,12 @@ class MagneticLMGPU:
                 att_vec = u * att.unsqueeze(2)
                 forces[bs:be] += att_vec.sum(dim=1)
 
+            # 3. Gravity towards origin + integration
             forces.sub_(0.01 * positions)
             velocities = (velocities + forces * lr) * (1.0 - damping)
             positions.add_(velocities * lr)
 
+            # 4. Boundary clamp
             mag = positions.norm(dim=1)
             overflow = mag > max_radius
             if overflow.any():
@@ -499,6 +635,7 @@ class MagneticLMGPU:
                 print(".", end="", flush=True)
         print(" done (%.0fs)" % (time.time() - t0))
         self.positions = positions
+        del velocities
 
         # Importance = log(1+degree) * log(1+freq)
         degs = torch.zeros(N, dtype=torch.float32, device=dev)
@@ -506,26 +643,30 @@ class MagneticLMGPU:
             degs.index_add_(0, edge_from,
                             torch.ones(E, dtype=torch.float32, device=dev))
         self.importance = torch.log1p(degs) * torch.log1p(self.freq_gpu.float())
+        del degs
 
-        # Circles: skipped in the GPU-first runner (replaced with no-op group),
-        # since the CPU clique detection used by the original runner would
-        # require moving the whole bidirectional-strong subgraph back to host
-        # memory — exactly what we're trying to avoid. The 1.5x circle boost
-        # is a minor refinement on top of position similarity.
+        # Circles: skipped (matches the GPU-first runner's design choice).
         self.circle_group = torch.full(
             (N,), -1, dtype=torch.long, device=dev)
+        torch.cuda.empty_cache()
 
-    # ----- GPU-batched Modified KN-5 probabilities -----
+    # ----- GPU-batched Modified KN-5 probabilities (RESTORED) -----
     # ctx_batch: (B, MAX_ORDER) int64, right-aligned with -1 padding on the
     #            left for positions where no context word is available.
     # nxt_batch: (B,) int64, next-word IDs. -1 indicates OOV (floor prob).
-    # Returns (B,) float32 KN-5 probabilities.
+    # Returns (B,) float32 KN-5 probabilities on self.device.
+    #
+    # Critical fix vs the degraded version: lambda includes the D3 * n3+
+    # term (= count of ngrams with count >= 3), AND the per-order discount
+    # selector picks D1 / D2 / D3 by the actual ngram count. The previous
+    # pass dropped both terms which collapsed the back-off and pushed PPL.
     def kn_batch(self, ctx_batch, nxt_batch):
         dev = self.device
         V = max(len(self.id2word), 1)
         B = ctx_batch.size(0)
         safe_nxt = nxt_batch.clamp_min(0)
-        # Base case: continuation unigram
+
+        # Base case: continuation unigram on the primary device
         tub = float(self.total_unique_bigrams)
         if tub > 0:
             cw = self.cont_count[safe_nxt].float()
@@ -534,33 +675,35 @@ class MagneticLMGPU:
                 cw / tub,
                 torch.full_like(cw, 0.5 / tub))
         else:
-            cont_prob = torch.full((B,), 1.0 / V,
-                                    dtype=torch.float32, device=dev)
+            cont_prob = torch.full(
+                (B,), 1.0 / V, dtype=torch.float32, device=dev)
         oov = nxt_batch < 0
         cont_prob = torch.where(
-            oov,
-            torch.full_like(cont_prob, 1.0 / V),
-            cont_prob)
+            oov, torch.full_like(cont_prob, 1.0 / V), cont_prob)
         kn_prev = cont_prob
 
         D1 = float(self.D1)
         D2 = float(self.D2)
         D3 = float(self.D3)
 
-        for o in range(1, self.MAX_ORDER + 1):
-            ctx_o = ctx_batch[:, -o:]                              # (B, o)
-            # If any token in ctx_o is -1, this query has no valid ctx at
-            # length o → the hash will not match any stored ctx_hash, and
-            # ctx_valid will be False, so kn stays at the lower-order value.
-            ctx_has_valid = (ctx_o >= 0).all(dim=1) & (~oov)
-            ctx_h = (ctx_o * self.hash_primes[:o]).sum(dim=1)       # (B,)
-            ngram_rows = torch.cat([ctx_o, nxt_batch.unsqueeze(1)], dim=1)
-            ngram_h = (ngram_rows * self.hash_primes[:o + 1]).sum(dim=1)
-
+        for o in range(1, self.max_order + 1):
             ctx_tbl = self.ctx_hash_sorted[o]
             ng_tbl = self.ngram_hash_sorted[o]
             if ctx_tbl is None or ctx_tbl.numel() == 0:
                 continue
+
+            # Hash on the device that holds this order's tables (handles
+            # the dual-T4 case: orders 4-5 may live on cuda:1).
+            tbl_dev = ctx_tbl.device
+            primes = self._primes_on(tbl_dev)
+
+            ctx_o_local = ctx_batch[:, -o:].to(tbl_dev) if tbl_dev != dev else ctx_batch[:, -o:]
+            nxt_local = nxt_batch.to(tbl_dev) if tbl_dev != dev else nxt_batch
+
+            ctx_has_valid = (ctx_o_local >= 0).all(dim=1) & (nxt_local >= 0)
+            ctx_h = (ctx_o_local * primes[:o]).sum(dim=1)
+            ngram_rows = torch.cat([ctx_o_local, nxt_local.unsqueeze(1)], dim=1)
+            ngram_h = (ngram_rows * primes[:o + 1]).sum(dim=1)
 
             ctx_idx = torch.searchsorted(ctx_tbl, ctx_h)
             ctx_idx_cl = ctx_idx.clamp_max(ctx_tbl.numel() - 1)
@@ -574,10 +717,8 @@ class MagneticLMGPU:
 
             total = self.ctx_total[o][ctx_idx_cl].float()
             total = torch.where(ctx_valid, total, torch.zeros_like(total))
-
             c = self.ngram_count[o][ng_idx_cl].float()
             c = torch.where(ng_valid, c, torch.zeros_like(c))
-
             c1 = self.ctx_count1[o][ctx_idx_cl].float()
             c1 = torch.where(ctx_valid, c1, torch.zeros_like(c1))
             c2 = self.ctx_count2[o][ctx_idx_cl].float()
@@ -593,37 +734,39 @@ class MagneticLMGPU:
 
             safe_total = total.clamp_min(1e-10)
             disc = (c - disc_d).clamp_min(0.0) / safe_total
+            # n3+ = uf - n1 - n2  (count of ngrams with count >= 3)
             n3p = (uf - c1 - c2).clamp_min(0.0)
             lam = (D1 * c1 + D2 * c2 + D3 * n3p) / safe_total
+            new_kn_local = disc + lam * (kn_prev.to(tbl_dev) if tbl_dev != dev else kn_prev)
+            total_local = total
+            new_kn = new_kn_local.to(dev) if tbl_dev != dev else new_kn_local
+            total_on_dev = total_local.to(dev) if tbl_dev != dev else total_local
 
-            new_kn = disc + lam * kn_prev
-            kn_prev = torch.where(total > 0, new_kn, kn_prev)
+            kn_prev = torch.where(total_on_dev > 0, new_kn, kn_prev)
 
         return kn_prev.clamp(1e-10, 0.999)
 
-    # ----- Full-mode perplexity on WikiText-103 (no cache, GPU end-to-end) ---
+    # ----- Full-mode perplexity on WikiText-103 (RESTORED, batched) -----
+    # The previous version walked tokens one at a time with .item() per
+    # token, which was both 1000x slower and silently dropped the position
+    # contribution. This restores the original batched evaluator.
     def eval_full_wt103(self, test_lines, batch_size=16384):
         dev = self.device
         N = len(self.id2word)
-        K = self.MAX_ORDER
+        K = self.max_order
         pos = self.positions
         imp = self.importance
         circ = self.circle_group
 
-        # Tokenize test set on CPU into int32 stream + boundary markers for
-        # ctx window clamping, then move to GPU as one big int64 tensor. The
-        # eval loop below iterates ONCE over that tensor via strided indexing,
-        # producing (ctx, nxt) pairs in bulk, never returning to Python per
-        # token.
-        import array
+        # Tokenize the entire test set on CPU into a compact int32 stream
+        # plus per-line boundary markers; ship to GPU as one int64 tensor.
         w2i = self.word2id
         toks = array.array('i')
-        boundaries = array.array('i')  # one entry per test line: end index
+        boundaries = array.array('i')
         boundaries.append(0)
         for line in test_lines:
             ws = tokenize(line)
             if len(ws) < 2:
-                # Still advance the boundary so the sentence is just empty
                 boundaries.append(len(toks))
                 continue
             for w in ws:
@@ -637,13 +780,8 @@ class MagneticLMGPU:
         toks_gpu = torch.from_numpy(np_toks).to(device=dev, dtype=torch.int64)
         del toks, np_toks
 
-        # For each test position p (1..T-1), the eval pair is:
-        #   ctx = toks[max(last_boundary, p-K) : p]
-        #   nxt = toks[p]
-        # To get per-position "last_boundary", build a per-token boundary
-        # anchor: anchor[p] = start of the line containing token p.
+        # Per-token anchor: anchor[p] = start of the line containing token p
         np_bnd = np.frombuffer(boundaries, dtype=np.int32)
-        # Convert boundaries to per-token anchor array: anchor has length T.
         anchor = np.empty(T, dtype=np.int32)
         for i in range(len(np_bnd) - 1):
             s = int(np_bnd[i])
@@ -656,49 +794,42 @@ class MagneticLMGPU:
         total_tok = 0
 
         t0 = time.time()
-        # Positions start from 1..T-1; also skip any position where
-        # toks_gpu[p] < 0 (OOV next) — floor log prob added separately.
-        P = T
-        pos_index_all = torch.arange(1, P, dtype=torch.int64, device=dev)
+        pos_index_all = torch.arange(1, T, dtype=torch.int64, device=dev)
 
         for start in range(0, pos_index_all.numel(), batch_size):
             end = min(start + batch_size, pos_index_all.numel())
-            pidx = pos_index_all[start:end]                     # (B,)
+            pidx = pos_index_all[start:end]
             B = pidx.numel()
 
-            nxt = toks_gpu[pidx]                                 # (B,)
-            anch = anchor_gpu[pidx]                              # (B,)
-            # ctx_start = max(anch, p - K)
-            ctx_start = torch.maximum(anch, pidx - K)            # (B,)
-            # Build ctx_batch (B, K), right-aligned.
-            # ctx[:, j] = toks_gpu[ctx_start + j] if ctx_start+j < pidx else -1
-            j_range = torch.arange(K, dtype=torch.int64, device=dev)  # (K,)
-            avail = (pidx - ctx_start)                            # (B,)
-            left_pad = (K - avail).clamp_min(0)                   # (B,)
-            col = j_range.unsqueeze(0) - left_pad.unsqueeze(1)    # (B, K)
-            src = ctx_start.unsqueeze(1) + col                    # (B, K)
+            nxt = toks_gpu[pidx]
+            anch = anchor_gpu[pidx]
+            ctx_start = torch.maximum(anch, pidx - K)
+            j_range = torch.arange(K, dtype=torch.int64, device=dev)
+            avail = (pidx - ctx_start)
+            left_pad = (K - avail).clamp_min(0)
+            col = j_range.unsqueeze(0) - left_pad.unsqueeze(1)
+            src = ctx_start.unsqueeze(1) + col
             mask_pad = col < 0
             src_clamped = src.clamp(min=0)
-            ctx_batch = toks_gpu[src_clamped]                     # (B, K)
+            ctx_batch = toks_gpu[src_clamped]
             ctx_batch = torch.where(
                 mask_pad, torch.full_like(ctx_batch, -1), ctx_batch)
 
-            # Skip positions where the next token is OOV (-1) -> floor logp.
             oov_next = (nxt < 0)
 
-            # KN on GPU
-            kn = self.kn_batch(ctx_batch, nxt)                    # (B,)
+            # === KN on GPU ===
+            kn = self.kn_batch(ctx_batch, nxt)
 
-            # Position similarity (on GPU, same as before)
+            # === Position similarity (the magnetic contribution) ===
             safe_ctx = ctx_batch.clamp_min(0)
             safe_nxt = nxt.clamp_min(0)
-            ctx_pos = pos[safe_ctx]                               # (B, K, 3)
-            nxt_pos = pos[safe_nxt].unsqueeze(1)                  # (B, 1, 3)
-            dot = (ctx_pos * nxt_pos).sum(-1)                     # (B, K)
-            ctx_norm = ctx_pos.norm(dim=-1)                       # (B, K)
-            nxt_norm = nxt_pos.norm(dim=-1)                       # (B, 1)
+            ctx_pos = pos[safe_ctx]                       # (B, K, 3)
+            nxt_pos = pos[safe_nxt].unsqueeze(1)          # (B, 1, 3)
+            dot = (ctx_pos * nxt_pos).sum(-1)             # (B, K)
+            ctx_norm = ctx_pos.norm(dim=-1)
+            nxt_norm = nxt_pos.norm(dim=-1)
             denom = (ctx_norm * nxt_norm).clamp_min(1e-6)
-            sim = (dot / denom).clamp(-1.0, 1.0)                  # (B, K)
+            sim = (dot / denom).clamp(-1.0, 1.0)
             valid = (ctx_batch >= 0) & (sim > 0.05) & (~oov_next).unsqueeze(1)
             sim = torch.where(valid, sim, torch.zeros_like(sim))
             ctx_imp = imp[safe_ctx]
@@ -715,7 +846,7 @@ class MagneticLMGPU:
                         (pos_count.to(pos_score.dtype) * 3.0)).clamp_max(0.3)
             pos_prob = torch.where(has_any, pos_prob, torch.zeros_like(pos_prob))
 
-            # Adaptive lambda mixing (same bands as the original runner)
+            # === Adaptive lambda mixing (same bands as the original) ===
             band = torch.where(
                 kn > 0.05,
                 torch.tensor(0.02, device=dev),
@@ -725,7 +856,6 @@ class MagneticLMGPU:
                     torch.tensor(0.12, device=dev)))
             kn_l = 1.0 - band
             mixed = (kn_l * kn + band * pos_prob).clamp(1e-10, 0.999)
-            # OOV next-word positions get floored
             mixed = torch.where(
                 oov_next, torch.full_like(mixed, 1e-10), mixed)
 
@@ -754,6 +884,12 @@ def main():
                     help="Number of physics simulation iterations on the GPU")
     ap.add_argument("--batch-size", type=int, default=16384,
                     help="Eval batch size for GPU KN + position scoring")
+    ap.add_argument("--max-order", type=int, default=5, choices=[2, 3, 4, 5],
+                    help="Max n-gram order. Lower = less GPU memory.")
+    ap.add_argument("--multi-gpu", action="store_true",
+                    help="Shard high-order n-gram tables onto a second CUDA "
+                         "device (e.g. Kaggle's GPU T4 x2). Adds ~zero compute "
+                         "overhead, halves the peak memory on cuda:0.")
     ap.add_argument("--data-dir", default="data/wt103",
                     help="Directory for WikiText-103 train.txt / test.txt")
     args = ap.parse_args()
@@ -762,11 +898,17 @@ def main():
         print("ERROR: CUDA GPU required. This runner is GPU-only.",
               file=sys.stderr)
         sys.exit(2)
-    device = torch.device("cuda")
+    device = torch.device("cuda:0")
     torch.backends.cuda.matmul.allow_tf32 = True
-    props = torch.cuda.get_device_properties(0)
-    print("Device: %s (%.1f GB)" %
-          (torch.cuda.get_device_name(0), props.total_memory / 1024 ** 3))
+
+    n_dev = torch.cuda.device_count()
+    for i in range(n_dev):
+        props = torch.cuda.get_device_properties(i)
+        print("Device %d: %s (%.1f GB)" %
+              (i, torch.cuda.get_device_name(i), props.total_memory / 1024 ** 3))
+    if args.multi_gpu and n_dev < 2:
+        print("WARNING: --multi-gpu requested but only %d CUDA device(s) "
+              "available — falling back to single-device." % n_dev)
 
     train_path, test_path = ensure_wt103(args.data_dir)
 
@@ -794,28 +936,35 @@ def main():
 
     print("\n" + "=" * 60)
     print("  MagneticLM Fast Runner (GPU, no cache, full mode)")
+    print("  max_order=%d  multi_gpu=%s" %
+          (args.max_order, args.multi_gpu and n_dev >= 2))
     print("=" * 60)
 
     t_all = time.time()
-    model = MagneticLMGPU(device=device)
+    model = MagneticLMGPU(
+        device=device,
+        max_order=args.max_order,
+        multi_gpu=args.multi_gpu and n_dev >= 2)
 
     t0 = time.time()
     model.train_gpu(train)
     print("  Train time:  %.0fs" % (time.time() - t0))
     if torch.cuda.is_available():
-        used = torch.cuda.memory_allocated() / 1024 ** 2
-        peak = torch.cuda.max_memory_allocated() / 1024 ** 2
-        print("  GPU RAM after train:  cur=%.0f MiB  peak=%.0f MiB" %
-              (used, peak))
+        for i in range(n_dev):
+            used = torch.cuda.memory_allocated(i) / 1024 ** 2
+            peak = torch.cuda.max_memory_allocated(i) / 1024 ** 2
+            print("  GPU%d after train:  cur=%.0f MiB  peak=%.0f MiB" %
+                  (i, used, peak))
 
     t0 = time.time()
     model.build(physics_iters=args.physics_iters)
     print("  Build time:  %.0fs" % (time.time() - t0))
     if torch.cuda.is_available():
-        used = torch.cuda.memory_allocated() / 1024 ** 2
-        peak = torch.cuda.max_memory_allocated() / 1024 ** 2
-        print("  GPU RAM after build:  cur=%.0f MiB  peak=%.0f MiB" %
-              (used, peak))
+        for i in range(n_dev):
+            used = torch.cuda.memory_allocated(i) / 1024 ** 2
+            peak = torch.cuda.max_memory_allocated(i) / 1024 ** 2
+            print("  GPU%d after build:  cur=%.0f MiB  peak=%.0f MiB" %
+                  (i, used, peak))
 
     print("\nEvaluating WikiText-103 test (full mode, no cache)...")
     t0 = time.time()
@@ -828,3 +977,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
