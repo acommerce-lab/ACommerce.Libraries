@@ -93,9 +93,10 @@ def ensure_wt103(data_dir="data/wt103"):
 
 
 # Polynomial hashing primes - one constant per position in the ngram window.
-# Six entries because MAX_ORDER+1 == 6 (orders 1..5). uint64 -> int64 keeps the
-# high bit set, so the polynomial hash naturally wraps modulo 2^64 inside
-# torch.int64 arithmetic, giving a near-uniform universal hash.
+# Ten entries because max_order can now go up to 9 (ngram = 10 tokens). uint64
+# -> int64 keeps the high bit set, so the polynomial hash naturally wraps
+# modulo 2^64 inside torch.int64 arithmetic, giving a near-uniform universal
+# hash. Constants are well-known splitmix64 / Knuth multiplicative generators.
 _HASH_PRIMES_LIST = [
     0x9E3779B97F4A7C15,
     0xBF58476D1CE4E5B9,
@@ -103,6 +104,10 @@ _HASH_PRIMES_LIST = [
     0x7F4A7C15F39CC060,
     0xA6E36C3B4E5A7F11,
     0xD2B74407B1CE6E93,
+    0xCBF29CE484222325,
+    0x100000001B3,
+    0xFF51AFD7ED558CCD,
+    0xC4CEB9FE1A85EC53,
 ]
 _HASH_PRIMES_CPU = torch.from_numpy(
     np.array(_HASH_PRIMES_LIST, dtype=np.uint64).astype(np.int64))
@@ -182,14 +187,19 @@ class MagneticLMGPU:
     def _adaptive_chunk(o):
         """Chunk size (in tokens) for n-gram counting at order o.
         Higher orders get smaller chunks to keep peak memory bounded.
-        These were tuned to fit a 16 GB T4 with ~88M tokens (1M lines)."""
+        Tuned empirically for a 16 GB T4 with ~88M tokens (1M WT103 lines):
+        order 5 peaks around ~13.5 GB, orders 6-9 scale down linearly."""
         return {
             1: 60_000_000,
             2: 50_000_000,
             3: 40_000_000,
             4: 25_000_000,
             5: 15_000_000,
-        }.get(o, 15_000_000)
+            6: 10_000_000,
+            7:  8_000_000,
+            8:  6_000_000,
+            9:  5_000_000,
+        }.get(o, 5_000_000)
 
     # ----- tokenize corpus into a compact int32 stream, then move to GPU -----
     def _tokenize_to_gpu(self, lines):
@@ -884,8 +894,12 @@ def main():
                     help="Number of physics simulation iterations on the GPU")
     ap.add_argument("--batch-size", type=int, default=16384,
                     help="Eval batch size for GPU KN + position scoring")
-    ap.add_argument("--max-order", type=int, default=5, choices=[2, 3, 4, 5],
-                    help="Max n-gram order. Lower = less GPU memory.")
+    ap.add_argument("--max-order", type=int, default=5,
+                    help="Max n-gram order (2..9). Lower = less GPU memory. "
+                         "Diminishing returns kick in hard past order 5 on "
+                         "WikiText-103 — the vast majority of 6-grams already "
+                         "occur exactly once, so adding orders 6+ mostly "
+                         "just inflates the back-off coefficient.")
     ap.add_argument("--multi-gpu", action="store_true",
                     help="Shard high-order n-gram tables onto a second CUDA "
                          "device (e.g. Kaggle's GPU T4 x2). Adds ~zero compute "
@@ -893,6 +907,12 @@ def main():
     ap.add_argument("--data-dir", default="data/wt103",
                     help="Directory for WikiText-103 train.txt / test.txt")
     args = ap.parse_args()
+
+    if args.max_order < 2 or args.max_order > 9:
+        print("ERROR: --max-order must be in the range [2, 9]. "
+              "(The hash prime table has 10 entries, enough for ngrams of "
+              "length up to 10.)", file=sys.stderr)
+        sys.exit(2)
 
     if not torch.cuda.is_available():
         print("ERROR: CUDA GPU required. This runner is GPU-only.",
