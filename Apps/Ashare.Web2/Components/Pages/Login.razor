@@ -6,57 +6,50 @@
 
 <PageTitle>دخول - عشير</PageTitle>
 
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-body">
-                <h2 class="card-title text-center">دخول بالهاتف</h2>
-
-                @if (step == 1)
-                {
-                    <div class="mb-3">
-                        <label class="form-label">رقم الهاتف</label>
-                        <input class="form-control" placeholder="+966500000000" @bind="phoneNumber" />
-                    </div>
-                    <button class="btn btn-primary w-100" @onclick="RequestOtp" disabled="@loading">
-                        @(loading ? "جاري الإرسال..." : "إرسال رمز التحقق")
-                    </button>
-                }
-                else if (step == 2)
-                {
-                    <div class="alert alert-info">
-                        <strong>وضع تجريبي:</strong> الكود أُرسل للـ logs. راجع طرفية Ashare.Api2 أو استخدم أي كود مطابق.
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">رمز التحقق (6 أرقام)</label>
-                        <input class="form-control" placeholder="123456" @bind="code" />
-                    </div>
-                    <button class="btn btn-success w-100" @onclick="VerifyOtp" disabled="@loading">
-                        @(loading ? "جاري التحقق..." : "تحقق ودخول")
-                    </button>
-                    <button class="btn btn-link w-100 mt-2" @onclick="() => step = 1">رجوع</button>
-                }
-
-                @if (!string.IsNullOrEmpty(error))
-                {
-                    <div class="alert alert-danger mt-3">@error</div>
-                }
+<AcAuthPanel Title="دخول بالهاتف" Subtitle="سنرسل لك رمز تحقق عبر SMS">
+    <ChildContent>
+        @if (step == 1)
+        {
+            <AcField Label="رقم الهاتف">
+                <AcInput @bind-Value="phoneNumber" Placeholder="+966500000000" />
+            </AcField>
+            <AcButton Text="@(loading ? "جاري الإرسال..." : "إرسال رمز التحقق")"
+                      Loading="@loading" Block="true" OnClick="RequestOtp" />
+        }
+        else if (step == 2)
+        {
+            <AcAlert Variant="info" Title="وضع تجريبي"
+                     Message="الكود أُرسل للـ logs. راجع طرفية Ashare.Api2." />
+            <AcField Label="رمز التحقق (6 أرقام)">
+                <AcInput @bind-Value="code" Placeholder="123456" />
+            </AcField>
+            <AcButton Text="@(loading ? "جاري التحقق..." : "تحقق ودخول")"
+                      Variant="success" Loading="@loading" Block="true" OnClick="VerifyOtp" />
+            <div class="ac-mt-sm" style="text-align:center;">
+                <AcButton Text="رجوع" Variant="ghost" Size="sm" OnClick="() => step = 1" />
             </div>
-        </div>
+        }
 
-        <div class="mt-4 text-center text-muted">
-            <small>
-                حسابات تجريبية:<br />
-                المالك أحمد: <code>+966500000001</code> | العميلة سارة: <code>+966500000002</code>
-            </small>
-        </div>
-    </div>
-</div>
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="ac-mt-md">
+                <AcAlert Variant="danger" Message="@error" />
+            </div>
+        }
+    </ChildContent>
+    <Footer>
+        <small class="ac-text-muted">
+            حسابات تجريبية:<br />
+            المالك: <code>+966500000001</code><br />
+            العميلة: <code>+966500000002</code>
+        </small>
+    </Footer>
+</AcAuthPanel>
 
 @code {
     private int step = 1;
-    private string phoneNumber = "+966500000001";
-    private string code = "";
+    private string? phoneNumber = "+966500000001";
+    private string? code = "";
     private string challengeId = "";
     private Guid userId;
     private bool loading;

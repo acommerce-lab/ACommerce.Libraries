@@ -5,53 +5,57 @@
 
 <PageTitle>العروض - عشير</PageTitle>
 
-<h1>عروض عشير</h1>
-<p class="text-muted">استعراض كل العروض المتاحة</p>
+<AcPageHeader Title="عروض عشير" Subtitle="استعراض كل العروض المتاحة" />
 
-<div class="row mb-3">
-    <div class="col-md-4">
-        <select class="form-select" @bind="selectedCategory" @bind:after="LoadAsync">
-            <option value="">كل الفئات</option>
-            @foreach (var cat in categories)
-            {
-                <option value="@cat.Id">@cat.NameAr</option>
-            }
-        </select>
+<div class="ac-row ac-mb-lg">
+    <div style="flex:1;">
+        <AcField Label="الفئة">
+            <select class="ac-select" @bind="selectedCategory" @bind:after="LoadAsync">
+                <option value="">كل الفئات</option>
+                @foreach (var cat in categories)
+                {
+                    <option value="@cat.Id">@cat.NameAr</option>
+                }
+            </select>
+        </AcField>
     </div>
-    <div class="col-md-4">
-        <input class="form-control" placeholder="المدينة" @bind="city" @bind:after="LoadAsync" />
+    <div style="flex:1;">
+        <AcField Label="المدينة">
+            <AcInput @bind-Value="city" Placeholder="اكتب المدينة" />
+        </AcField>
+    </div>
+    <div style="display:flex;align-items:end;">
+        <AcButton Text="بحث" OnClick="LoadAsync" Loading="@loading" />
     </div>
 </div>
 
 @if (loading)
 {
-    <div class="text-center p-5">
-        <div class="spinner-border text-primary"></div>
-        <p>جاري التحميل...</p>
+    <div style="text-align:center;padding:3rem;">
+        <AcSpinner Large="true" />
+        <p class="ac-text-muted ac-mt-md">جاري التحميل...</p>
     </div>
 }
 else if (listings.Count == 0)
 {
-    <div class="alert alert-info">لا توجد عروض مطابقة</div>
+    <AcEmpty Icon="🔍" Title="لا توجد عروض مطابقة" Message="جرّب تغيير الفلتر أو البحث بمدينة أخرى" />
 }
 else
 {
-    <div class="row g-3">
+    <div class="ac-grid ac-grid-cols-3">
         @foreach (var listing in listings)
         {
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">@listing.Title</h5>
-                        <p class="text-muted small">@listing.City • @listing.District</p>
-                        <p class="card-text">@(listing.Description.Length > 100 ? listing.Description[..100] + "..." : listing.Description)</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <strong class="text-primary">@listing.Price.ToString("N0") @listing.Currency / @listing.TimeUnit</strong>
-                            <a class="btn btn-sm btn-outline-primary" href="/listing/@listing.Id">تفاصيل</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <AcProductCard Title="@listing.Title"
+                           Meta="@($"{listing.City}{(string.IsNullOrEmpty(listing.District) ? "" : " • " + listing.District)}")"
+                           Description="@listing.Description"
+                           Price="@($"{listing.Price:N0} {listing.Currency} / {listing.TimeUnit}")"
+                           IconFallback="🏠">
+                <Actions>
+                    <a href="/listing/@listing.Id" style="flex:1;">
+                        <AcButton Text="تفاصيل" Variant="outline-primary" Block="true" />
+                    </a>
+                </Actions>
+            </AcProductCard>
         }
     </div>
 }
@@ -61,7 +65,7 @@ else
     private List<CategoryDto> categories = new();
     private bool loading = true;
     private string selectedCategory = string.Empty;
-    private string city = string.Empty;
+    private string? city = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
