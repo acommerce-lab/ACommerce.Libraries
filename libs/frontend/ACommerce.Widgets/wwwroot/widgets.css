@@ -67,6 +67,14 @@
 /* ===== Reset (minimal) ===== */
 .ac-root { font-family: var(--ac-font-family); color: var(--ac-text); line-height: var(--ac-line-height-base); }
 .ac-root *, .ac-root *::before, .ac-root *::after { box-sizing: border-box; }
+.ac-root h1, .ac-root h2, .ac-root h3, .ac-root h4, .ac-root h5, .ac-root h6 { margin: 0; }
+.ac-root p { margin: 0; }
+.ac-root ul { margin: 0; padding: 0; }
+
+/* Suppress focus outline when focus is programmatic (e.g. Blazor FocusOnNavigate),
+   but keep it for keyboard users (:focus-visible). */
+:focus:not(:focus-visible) { outline: none; }
+h1:focus, h2:focus, h3:focus { outline: none; }
 
 /* =========================================================================
    Button (.ac-btn)
