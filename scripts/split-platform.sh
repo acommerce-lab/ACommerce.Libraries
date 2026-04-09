@@ -14,9 +14,14 @@
 #   cd /tmp/acommerce-platform
 #   git push -u origin main
 #
-# The script uses `git subtree split` so it works on any git install
-# without needing `git-filter-repo`. If you DO have filter-repo, this
-# is still correct — it just takes slightly longer than filter-repo would.
+# The script uses `git subtree split` + `git fetch` + `git read-tree` so
+# it works on any git install (no `git-filter-repo` needed). The trade-off
+# is that the new repo has a single "import" commit per path rather than
+# per-file history that walks back to the original. If you need full
+# per-file history preservation (so `git log Apps/Order.Api2/Program.cs`
+# in the new repo shows every commit that touched it in the old repo),
+# install `git-filter-repo` and use the alternate path described in
+# docs/SPLIT-PLAN.md.
 
 set -euo pipefail
 
@@ -197,18 +202,30 @@ git add README.md .gitignore
 git commit -q -m "chore: bootstrap acommerce-platform from split" \
     -m "First commit on the split repo. Everything else is pulled in via the subtree merges that follow."
 
-# Pull each split branch into the right destination directory
-cd "$SRC"
+# Fetch each split SHA from the source repo INTO the destination repo so
+# its object database knows them. Without this, `git read-tree` would fail
+# with "fatal: failed to unpack tree object" because it operates on the
+# current repo (which is the destination, not the source).
+echo "==> Fetching split objects into $DEST"
+cd "$DEST"
 for p in "${PATHS[@]}"; do
     sha="${SHA_MAP[$p]:-}"
     if [ -z "$sha" ]; then continue; fi
-    echo "  PULL  $p"
-    (cd "$DEST" && \
-        git read-tree --prefix="$p/" -u "$sha" 2>&1 | sed 's/^/      /' || true)
+    git fetch -q "$SRC" "$sha" 2>&1 | sed 's/^/      /' || true
+done
+
+# Now read each split tree into its destination prefix. The -u flag makes
+# read-tree update the working tree alongside the index. Multiple
+# --prefix= calls in sequence are additive (they touch disjoint paths).
+echo "==> Importing $DEST"
+for p in "${PATHS[@]}"; do
+    sha="${SHA_MAP[$p]:-}"
+    if [ -z "$sha" ]; then continue; fi
+    echo "  IMPORT $p"
+    git read-tree --prefix="$p/" -u "$sha" 2>&1 | sed 's/^/      /'
 done
 
 # Commit the reconstructed tree
-cd "$DEST"
 git add -A
 git commit -q -m "feat: import platform libraries + apps + docs from monorepo split" \
     -m "$(for p in "${PATHS[@]}"; do
@@ -218,21 +235,49 @@ git commit -q -m "feat: import platform libraries + apps + docs from monorepo sp
         fi
     done)" || true
 
+# Quick sanity check on the new repo
+TRACKED=$(cd "$DEST" && git ls-files | wc -l)
+COMMITS=$(cd "$DEST" && git rev-list --count HEAD)
+
 echo
 echo "==============================================================="
 echo "  DONE. New repo at $DEST"
+echo "  Files tracked: $TRACKED       Commits: $COMMITS"
 echo "==============================================================="
 echo
+if [ "$TRACKED" -lt 100 ]; then
+    echo "  WARNING: only $TRACKED tracked files. Something is wrong —"
+    echo "  the import step probably failed. Check the IMPORT messages above"
+    echo "  for 'fatal: failed to unpack tree object'. If you see those,"
+    echo "  delete $DEST and re-run after pulling the latest scripts/."
+    echo
+fi
 echo "Next steps:"
 echo
-echo "  1. Create the empty GitHub repo:"
-echo "     gh repo create $ACCOUNT/$REPO_NAME --public \\"
-echo "         --description \"Multi-vendor e-commerce platform on the accounting OperationEngine\""
+echo "  1. Create an empty repo on GitHub. Two ways:"
 echo
-echo "  2. Push:"
-echo "     cd $DEST"
-echo "     git remote add origin git@github.com:$ACCOUNT/$REPO_NAME.git"
-echo "     git push -u origin main"
+echo "     a) With the GitHub CLI (if you have it installed):"
+echo "        gh repo create $ACCOUNT/$REPO_NAME --public \\"
+echo "            --description \"Multi-vendor e-commerce platform on the accounting OperationEngine\""
+echo
+echo "     b) Without 'gh' — open this URL in a browser:"
+echo "        https://github.com/new"
+echo "        Owner = $ACCOUNT"
+echo "        Name  = $REPO_NAME"
+echo "        DO NOT initialise with README / .gitignore / license."
+echo
+echo "  2. Push the local repo. Two ways:"
+echo
+echo "     a) With HTTPS (no SSH key needed; uses your saved git credentials"
+echo "        or prompts for a personal access token the first time):"
+echo "        cd $DEST"
+echo "        git remote add origin https://github.com/$ACCOUNT/$REPO_NAME.git"
+echo "        git push -u origin main"
+echo
+echo "     b) With SSH (if you've already added an SSH key to GitHub):"
+echo "        cd $DEST"
+echo "        git remote add origin git@github.com:$ACCOUNT/$REPO_NAME.git"
+echo "        git push -u origin main"
 echo
 echo "  3. Verify:"
 echo "     cd $DEST && dotnet build Apps/Order.Api2/Order.Api2.csproj"

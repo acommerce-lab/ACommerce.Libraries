@@ -52,12 +52,19 @@ echo -n "  SPLIT $PATH_IN_MONOREPO ... "
 SHA=$(git subtree split --prefix="$PATH_IN_MONOREPO" HEAD)
 echo "${SHA:0:10}"
 
-# Clone just that sha into a fresh repo
+# Bootstrap the destination repo + import the split sha. We use
+# fetch-then-read-tree because it works in a single fresh init without
+# the "unrelated histories" gymnastics that `git pull` requires.
 echo "==> Bootstrapping $DEST"
 mkdir -p "$DEST"
 cd "$DEST"
 git init -q -b main
-git pull -q "$SRC" "$SHA"
+git fetch -q "$SRC" "$SHA"
+# Files from the split land at the repo root (the split already lifted
+# the prefix away). --reset is required so read-tree happily writes into
+# a fresh empty repo and updates the working tree in one shot. The README
+# we add below sits next to colab/.
+git read-tree --reset -u "$SHA"
 
 # Root-level README pointing to the research notes
 cat > README.md <<'EOF'
@@ -98,22 +105,47 @@ For comparison on WT103: Transformer-XL ≈ 16.4, GPT-2 small ≈ 35,
 AWD-LSTM+Cache ≈ 52, published KN-5 ≈ 141.
 EOF
 
-git add README.md
+git add -A
+# This is the second commit (the first was the read-tree import).
 git commit -q -m "docs: root README pointing to RESEARCH-NOTES.md" || true
+
+# Sanity check
+TRACKED=$(git ls-files | wc -l)
+COMMITS=$(git rev-list --count HEAD)
 
 echo
 echo "==============================================================="
 echo "  DONE. New repo at $DEST"
+echo "  Files tracked: $TRACKED       Commits: $COMMITS"
 echo "==============================================================="
 echo
+if [ "$TRACKED" -lt 5 ]; then
+    echo "  WARNING: only $TRACKED tracked files. Something is wrong —"
+    echo "  the import step probably failed. Check the messages above."
+    echo
+fi
 echo "Next steps:"
 echo
-echo "  1. Create the empty GitHub repo:"
-echo "     gh repo create $ACCOUNT/$REPO_NAME --public \\"
-echo "         --description \"Graph-based LM — 14.20 PPL on WikiText-103\""
+echo "  1. Create an empty repo on GitHub. Two ways:"
 echo
-echo "  2. Push:"
-echo "     cd $DEST"
-echo "     git remote add origin git@github.com:$ACCOUNT/$REPO_NAME.git"
-echo "     git push -u origin main"
+echo "     a) With the GitHub CLI (if installed):"
+echo "        gh repo create $ACCOUNT/$REPO_NAME --public \\"
+echo "            --description \"Graph-based LM — 14.20 PPL on WikiText-103\""
+echo
+echo "     b) Without 'gh' — open in a browser:"
+echo "        https://github.com/new"
+echo "        Owner = $ACCOUNT     Name = $REPO_NAME"
+echo "        DO NOT initialise with README / .gitignore / license."
+echo
+echo "  2. Push the local repo. Two ways:"
+echo
+echo "     a) HTTPS (no SSH key needed):"
+echo "        cd $DEST"
+echo "        git remote add origin https://github.com/$ACCOUNT/$REPO_NAME.git"
+echo "        git push -u origin main"
+echo
+echo "     b) SSH (if you've added an SSH key to GitHub):"
+echo "        cd $DEST"
+echo "        git remote add origin git@github.com:$ACCOUNT/$REPO_NAME.git"
+echo "        git push -u origin main"
 echo
