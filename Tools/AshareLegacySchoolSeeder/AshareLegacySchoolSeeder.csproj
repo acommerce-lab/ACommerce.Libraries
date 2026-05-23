@@ -1,0 +1,79 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    مَشروع بَذر مُنفَصِل لِـ "عشير القديم" (مُستودَع ACommerce.Libraries).
+    يَضيف فئات + خصائص احترافيّة لِلمَدارِس (مُشارَكة/استثمار)، يَبذُر عُروض
+    مَدارِس عَيِّنَة مَع صُوَر مِن الويب (تَنزيل → رَفع عَبر IStorageProvider)،
+    وَيُعَطِّل (حَذف ناعِم) كلّ الفئات والخصائص القَديمَة.
+
+    الوَضع الافتراضيّ: DRY-RUN (لا يَكتُب). لِلكِتابَة الفِعليّة: SEED_APPLY=true.
+
+    ════════════════════════════════════════════════════════════════════════
+    ⚠️ المَراجِع تُشير إلى مَشاريع "عشير القديم" (مُستودَع ACommerce.Libraries)
+       — وهي ليست في مُستودَع acommerce-platform. لِذا يَجِب أَن تَملُك نُسخَة
+       مُستَنسَخَة مِن ACommerce.Libraries، وَتُشير إليها عَبر الخاصّيّة
+       AshareLegacyRoot.
+
+    الافتراضيّ يَفتَرِض تَخطيطاً جَنباً إلى جَنب (الأكثر شُيوعاً):
+        C:\Users\i\source\repos\acommerce-platform\Tools\AshareLegacySchoolSeeder
+        C:\Users\i\source\repos\ACommerce.Libraries          ← المُستودَع القَديم
+       فَيَحُلّ AshareLegacyRoot تِلقائيّاً إلى ...\repos\ACommerce.Libraries.
+
+    لَو كانَ مُستودَعك القَديم في مَكان آخَر، مَرِّر المَسار صَراحَةً:
+        dotnet build -p:AshareLegacyRoot=D:\path\to\ACommerce.Libraries
+        dotnet run   -p:AshareLegacyRoot=D:\path\to\ACommerce.Libraries
+       أو اضبط مُتغَيِّر بيئة AshareLegacyRoot.
+    ════════════════════════════════════════════════════════════════════════
+  -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Ashare.Legacy.SchoolSeeder</RootNamespace>
+    <AssemblyName>AshareLegacySchoolSeeder</AssemblyName>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+
+  <!-- جَذر مُستودَع عشير القديم. يُمكِن تَجاوُزه بِـ -p:AshareLegacyRoot=...
+       أو مُتغَيِّر بيئة. الافتراضيّ: نُسخَة جَنباً إلى جَنب (sibling clone). -->
+  <PropertyGroup>
+    <AshareLegacyRoot Condition="'$(AshareLegacyRoot)' == ''">$(MSBuildThisFileDirectory)..\..\..\ACommerce.Libraries</AshareLegacyRoot>
+    <_AshareLibs>$(AshareLegacyRoot)\libs\backend</_AshareLibs>
+  </PropertyGroup>
+
+  <Target Name="_VerifyAshareLegacyRoot" BeforeTargets="CollectPackageReferences;Restore;ResolveProjectReferences">
+    <Error Condition="!Exists('$(_AshareLibs)\core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj')" Text="لَم يُعثَر عَلى مَشاريع عشير القديم تَحت '$(AshareLegacyRoot)'. استَنسِخ acommerce-lab/ACommerce.Libraries جَنباً إلى جَنب، أو مَرِّر -p:AshareLegacyRoot=PATH يُشير إلى نُسخَتك. (راجِع README.md)" />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- كِيانات + بُنية تَحتيّة EF + التَّخزين، مِن مُستودَع عشير القديم
+         عَبر $(AshareLegacyRoot). -->
+    <ProjectReference Include="$(_AshareLibs)\catalog\ACommerce.Catalog.Listings\ACommerce.Catalog.Listings.csproj" />
+    <ProjectReference Include="$(_AshareLibs)\catalog\ACommerce.Catalog.Products\ACommerce.Catalog.Products.csproj" />
+    <ProjectReference Include="$(_AshareLibs)\catalog\ACommerce.Catalog.Attributes\ACommerce.Catalog.Attributes.csproj" />
+    <ProjectReference Include="$(_AshareLibs)\catalog\ACommerce.Catalog.Currencies\ACommerce.Catalog.Currencies.csproj" />
+    <ProjectReference Include="$(_AshareLibs)\auth\ACommerce.Profiles\ACommerce.Profiles.csproj" />
+    <ProjectReference Include="$(_AshareLibs)\core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
+    <ProjectReference Include="$(_AshareLibs)\core\ACommerce.SharedKernel.Infrastructure.EFCores\ACommerce.SharedKernel.Infrastructure.EFCores.csproj" />
+    <ProjectReference Include="$(_AshareLibs)\files\ACommerce.Files.Abstractions\ACommerce.Files.Abstractions.csproj" />
+    <ProjectReference Include="$(_AshareLibs)\files\ACommerce.Files.Storage.GoogleCloud\ACommerce.Files.Storage.GoogleCloud.csproj" />
+    <ProjectReference Include="$(_AshareLibs)\files\ACommerce.Files.Storage.AliyunOSS\ACommerce.Files.Storage.AliyunOSS.csproj" />
+    <ProjectReference Include="$(_AshareLibs)\files\ACommerce.Files.Storage.Local\ACommerce.Files.Storage.Local.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.Local.json" CopyToOutputDirectory="PreserveNewest" Condition="Exists('appsettings.Local.json')" />
+    <None Update="appsettings.Local.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

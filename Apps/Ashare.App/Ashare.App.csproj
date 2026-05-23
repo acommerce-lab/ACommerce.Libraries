@@ -25,8 +25,8 @@
 		<ApplicationId>com.ashare.ashare</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>1.230</ApplicationDisplayVersion>
-		<ApplicationVersion>230</ApplicationVersion>
+		<ApplicationDisplayVersion>1.232</ApplicationDisplayVersion>
+		<ApplicationVersion>232</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
@@ -38,7 +38,16 @@
 		<WindowsPackageType>None</WindowsPackageType>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(TargetFramework)'=='net9.0-ios'">
+  <PropertyGroup>
+    <MtouchUseLlvm>false</MtouchUseLlvm>
+    <MtouchDebugSymbols>false</MtouchDebugSymbols>
+    <MtouchSymbolMode>None</MtouchSymbolMode>
+  </PropertyGroup>
+
+
+  <PropertyGroup Condition="'$(TargetFramework)'=='net9.0-ios'">
+    <UseSimulator>false</UseSimulator>
+    <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
 		<ProvisioningType>manual</ProvisioningType>
 		<CodesignKey>Apple Distribution: SAFQAT ASHEER DIGITAL BORKERAGE CO (CTX2C777UU)</CodesignKey>
 		<CodesignProvision>With Associated Domains</CodesignProvision>
@@ -46,6 +55,8 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-ios|AnyCPU'">
+    <UseSimulator>false</UseSimulator>
+    <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
 		<MtouchLink>SdkOnly</MtouchLink>
 		<MtouchDebug>False</MtouchDebug>
 		<EmbedOnDemandResources>False</EmbedOnDemandResources>
@@ -55,6 +66,8 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-ios|AnyCPU'">
+    <UseSimulator>false</UseSimulator>
+    <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
 		<MtouchDebug>False</MtouchDebug>
 		<EmbedOnDemandResources>False</EmbedOnDemandResources>
 		<OptimizePNGs>True</OptimizePNGs>
