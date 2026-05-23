@@ -1,0 +1,1455 @@
+@page "/space/{SpaceId:guid}"
+@using ACommerce.Client.Chats
+@using ACommerce.Client.Auth
+@using ACommerce.Client.Profiles
+@inject NadenaApiService ApiService
+@inject IAppNavigationService Navigation
+@inject IJSRuntime JS
+@inject ChatsClient ChatsClient
+@inject ProfilesClient ProfilesClient
+@inject TokenManager TokenManager
+@inject ILocalizationService L
+
+
+<div class="ac-page ashare-space-details">
+    @if (_space != null)
+    {
+        @* Image Gallery *@
+        <div class="ashare-gallery">
+            <div class="ashare-gallery-main">
+                @if (_space.Images.Any())
+                {
+                    <img src="@_space.Images[_currentImageIndex]" alt="@_space.Name" />
+                }
+                else
+                {
+                    <div class="ashare-space-no-image large">
+                        <i class="bi bi-building"></i>
+                    </div>
+                }
+                <button class="ashare-back-btn" @onclick="GoBack">
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+                <div class="ashare-gallery-actions-left">
+                    <button class="ashare-favorite-btn large" @onclick="ToggleFavorite">
+                        <i class="bi @(_isFavorite ? "bi-heart-fill" : "bi-heart")"></i>
+                    </button>
+                    <button class="ashare-share-btn" @onclick="ShareSpace">
+                        <i class="bi bi-share"></i>
+                    </button>
+                </div>
+            </div>
+            @if (_space.Images.Count > 1)
+            {
+                <div class="ashare-gallery-thumbnails">
+                    @for (int i = 0; i < _space.Images.Count; i++)
+                    {
+                        var index = i;
+                        <button class="ashare-thumbnail @(index == _currentImageIndex ? "active" : "")"
+                                @onclick="() => _currentImageIndex = index">
+                            <img src="@_space.Images[index]" alt="" />
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+
+        @* Space Info *@
+        <div class="ashare-space-info">
+            <div class="ashare-space-header">
+                <span class="ashare-space-category">@_space.CategoryName</span>
+                <div class="ashare-space-rating-large">
+                    <i class="bi bi-star-fill"></i>
+                    <span>@_space.Rating</span>
+                    <span class="ashare-reviews-count">(@_space.ReviewsCount @L["ReviewsCount"])</span>
+                </div>
+            </div>
+
+            <h1 class="ashare-space-title">@_space.Name</h1>
+
+            <div class="ashare-space-location-large">
+                <i class="bi bi-geo-alt"></i>
+                <span>@GetLocationDisplay()</span>
+                @if (_space.Latitude.HasValue && _space.Longitude.HasValue)
+                {
+                    <a href="#map" class="ashare-map-link">@L["ViewMap"]</a>
+                }
+            </div>
+
+            @* رقم الترخيص - عرض بارز *@
+            @if (HasLicenseNumber())
+            {
+                <div class="ashare-license-badge">
+                    <div class="ashare-license-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div class="ashare-license-info">
+                        <span class="ashare-license-label">@L["FaalLicense"]</span>
+                        <span class="ashare-license-number" dir="ltr">@GetAttribute("license_number")</span>
+                        @if (!GetBoolAttribute("has_owner_license"))
+                        {
+                            <span class="ashare-license-note">@L["PlatformLicense"]</span>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Main Attributes - Quick Stats *@
+            <div class="ashare-space-stats">
+                @if (HasAttribute("property_type"))
+                {
+                    <div class="ashare-stat">
+                        <i class="bi bi-house"></i>
+                        <span>@TranslatePropertyType(GetAttribute("property_type"))</span>
+                    </div>
+                }
+                @if (HasAttribute("area"))
+                {
+                    <div class="ashare-stat">
+                        <i class="bi bi-rulers"></i>
+                        <span>@L["AreaLabel"]: @GetAttribute("area") @L["SquareMeter"]</span>
+                    </div>
+                }
+                @if (HasAttribute("rooms_count"))
+                {
+                    <div class="ashare-stat">
+                        <i class="bi bi-door-open"></i>
+                        <span>@GetAttribute("rooms_count") @L["RoomsLabel"]</span>
+                    </div>
+                }
+                @if (HasAttribute("bathrooms_count"))
+                {
+                    <div class="ashare-stat">
+                        <i class="bi bi-droplet"></i>
+                        <span>@GetAttribute("bathrooms_count") @L["BathroomsLabel"]</span>
+                    </div>
+                }
+                @if (_space.Capacity > 0)
+                {
+                    <div class="ashare-stat">
+                        <i class="bi bi-people"></i>
+                        <span>@L["Capacity"]: @_space.Capacity @L["PersonUnit"]</span>
+                    </div>
+                }
+                @if (_space.Area > 0 && !HasAttribute("area"))
+                {
+                    <div class="ashare-stat">
+                        <i class="bi bi-rulers"></i>
+                        <span>@L["AreaLabel"]: @_space.Area @L["SquareMeter"]</span>
+                    </div>
+                }
+            </div>
+
+            @* Description *@
+            @if (!string.IsNullOrEmpty(GetDescription()))
+            {
+                <div class="ashare-section">
+                    <h2 class="ashare-section-title">@L["Description"]</h2>
+                    <p class="ashare-description">@GetDescription()</p>
+                </div>
+            }
+
+            @* Property Details - Dynamic Attributes *@
+            @{
+                var propertyDetails = GetPropertyDetails();
+            }
+            @if (propertyDetails.Any())
+            {
+                <div class="ashare-section">
+                    <h2 class="ashare-section-title">@L["PropertyDetails"]</h2>
+                    <div class="ashare-details-list">
+                        @foreach (var detail in propertyDetails)
+                        {
+                            <div class="ashare-detail-item">
+                                <span class="ashare-detail-label">@detail.Label</span>
+                                <span class="ashare-detail-value">@detail.Value</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Amenities - Dynamic from Attributes *@
+            @{
+                var amenities = GetAmenities();
+            }
+            @if (amenities.Any())
+            {
+                <div class="ashare-section">
+                    <h2 class="ashare-section-title">@L["Amenities"]</h2>
+                    <div class="ashare-amenities-list">
+                        @foreach (var amenity in amenities)
+                        {
+                            <div class="ashare-amenity-item">
+                                <i class="bi @GetAmenityIcon(amenity)"></i>
+                                <span>@amenity</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Pricing *@
+            @if (HasPrice())
+            {
+                <div class="ashare-section">
+                    <h2 class="ashare-section-title">@L["Pricing"]</h2>
+                    <div class="ashare-pricing-display">
+                        <span class="ashare-price-amount">@GetPriceDisplay()</span>
+                    </div>
+                </div>
+            }
+
+            @* Rules *@
+            @if (_space.Rules?.Any() == true)
+            {
+                <div class="ashare-section">
+                    <h2 class="ashare-section-title">@L["Rules"]</h2>
+                    <ul class="ashare-rules-list">
+                        @foreach (var rule in _space.Rules)
+                        {
+                            <li><i class="bi bi-check-circle"></i> @rule</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @* Contact Options - Only show if not own listing *@
+            @if (!_isOwnListing)
+            {
+                var contactOptions = GetContactOptions();
+                if (contactOptions.Any())
+                {
+                    <div class="ashare-section">
+                        <h2 class="ashare-section-title">@L["ContactMethods"]</h2>
+                        <div class="ashare-contact-options">
+                            @foreach (var option in contactOptions)
+                            {
+                                <button class="ashare-contact-btn @option.Class" @onclick="() => HandleContact(option.Type)">
+                                    <i class="bi @option.Icon"></i>
+                                    <span>@option.Label</span>
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+
+            @* Location Map *@
+            @if (_space.Latitude.HasValue && _space.Longitude.HasValue)
+            {
+                <div class="ashare-section" id="map">
+                    <h2 class="ashare-section-title">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        @L["Location"]
+                    </h2>
+                    <div class="ashare-location-card">
+                        @* Mini Map *@
+                        <div class="ashare-mini-map" id="detailsMap">
+                            <div class="ashare-map-loading">
+                                <i class="bi bi-map"></i>
+                                <span>@L["LoadingMap"]</span>
+                            </div>
+                        </div>
+
+                        @* Address *@
+                        @if (!string.IsNullOrEmpty(GetLocationDisplay()))
+                        {
+                            <div class="ashare-location-address">
+                                <i class="bi bi-signpost"></i>
+                                <span>@GetLocationDisplay()</span>
+                            </div>
+                        }
+
+                        @* Open in Maps Button *@
+                        <button class="ashare-open-maps-btn" @onclick="OpenInNativeMaps">
+                            <i class="bi bi-box-arrow-up-right"></i>
+                            <span>@L["OpenInMapsApp"]</span>
+                        </button>
+                    </div>
+                </div>
+            }
+
+            @* Listing Stats *@
+            <div class="ashare-section ashare-listing-stats">
+                <h2 class="ashare-section-title">@L["ListingStats"]</h2>
+                <div class="ashare-stats-grid">
+                    @if (_space.ViewCount > 0)
+                    {
+                        <div class="ashare-stat-card">
+                            <i class="bi bi-eye"></i>
+                            <span class="ashare-stat-value">@_space.ViewCount</span>
+                            <span class="ashare-stat-label">@L["ViewsCount"]</span>
+                        </div>
+                    }
+                    @if (_space.CreatedAt != default)
+                    {
+                        <div class="ashare-stat-card">
+                            <i class="bi bi-calendar-plus"></i>
+                            <span class="ashare-stat-value">@GetRelativeDate(_space.CreatedAt)</span>
+                            <span class="ashare-stat-label">@L["DateAdded"]</span>
+                        </div>
+                    }
+                    @if (_space.IsAvailable)
+                    {
+                        <div class="ashare-stat-card ashare-stat-available">
+                            <i class="bi bi-check-circle"></i>
+                            <span class="ashare-stat-value">@L["Available"]</span>
+                            <span class="ashare-stat-label">@L["Status"]</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="ashare-stat-card ashare-stat-unavailable">
+                            <i class="bi bi-x-circle"></i>
+                            <span class="ashare-stat-value">@L["NotAvailable"]</span>
+                            <span class="ashare-stat-label">@L["Status"]</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @* Owner Info *@
+            <div class="ashare-section ashare-owner-section">
+                <h2 class="ashare-section-title">@L["SpaceOwner"]</h2>
+                <div class="ashare-owner-card">
+                    <div class="ashare-owner-avatar">
+                        @if (!string.IsNullOrEmpty(_ownerProfile?.Avatar))
+                        {
+                            <img src="@_ownerProfile.Avatar" alt="@GetOwnerDisplayName()" />
+                        }
+                        else
+                        {
+                            <i class="bi bi-person-circle"></i>
+                        }
+                    </div>
+                    <div class="ashare-owner-info">
+                        <h3>@GetOwnerDisplayName()</h3>
+                        @if (_ownerProfile?.CreatedAt != null && _ownerProfile.CreatedAt != default)
+                        {
+                            <span>@L["MemberSince"] @_ownerProfile.CreatedAt.ToString("yyyy")</span>
+                        }
+                        else if (_space.OwnerJoinDate != default)
+                        {
+                            <span>@L["MemberSince"] @_space.OwnerJoinDate.ToString("yyyy")</span>
+                        }
+                    </div>
+                    @if (_isOwnListing)
+                    {
+                        <span class="ac-badge ac-badge-primary">@L["YourListing"]</span>
+                    }
+                    else
+                    {
+                        <button class="ac-btn ac-btn-secondary" @onclick="ContactOwner">
+                            <i class="bi bi-chat"></i>
+                            @L["Contact"]
+                        </button>
+                    }
+                </div>
+            </div>
+
+            @* Reviews *@
+            <div class="ashare-section" id="reviews">
+                <div class="ashare-section-header">
+                    <h2 class="ashare-section-title">@L["Reviews"]</h2>
+                    <a href="/space/@SpaceId/reviews" class="ashare-view-all">@L["ViewAll"]</a>
+                </div>
+                @if (_reviews?.Any() == true)
+                {
+                    @foreach (var review in _reviews.Take(3))
+                    {
+                        <div class="ashare-review-card">
+                            <div class="ashare-review-header">
+                                <div class="ashare-review-avatar">
+                                    <i class="bi bi-person-circle"></i>
+                                </div>
+                                <div class="ashare-review-info">
+                                    <h4>@review.UserName</h4>
+                                    <span>@review.Date.ToString("yyyy/MM/dd")</span>
+                                </div>
+                                <div class="ashare-review-rating">
+                                    @for (int i = 0; i < 5; i++)
+                                    {
+                                        <i class="bi @(i < review.Rating ? "bi-star-fill" : "bi-star")"></i>
+                                    }
+                                </div>
+                            </div>
+                            <p class="ashare-review-text">@review.Comment</p>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="ashare-no-reviews">@L["NoReviews"]</p>
+                }
+            </div>
+        </div>
+
+        @* Booking Bar *@
+        @if (!_isOwnListing)
+        {
+            <div class="ashare-booking-bar">
+                <div class="ashare-booking-price">
+                    @if (HasPrice())
+                    {
+                        <span class="ashare-booking-amount">@GetPriceDisplay()</span>
+                    }
+                </div>
+                @if (_existingBooking != null)
+                {
+                    @* عرض رسالة وزر للانتقال للحجز الموجود *@
+                    <button class="ac-btn ac-btn-secondary ac-btn-lg" @onclick="ViewExistingBooking">
+                        <i class="bi bi-calendar-check-fill"></i>
+                        <span>عرض حجزك</span>
+                    </button>
+                }
+                else
+                {
+                    <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="StartBooking">
+                        <i class="bi bi-calendar-check"></i>
+                        <span>@L["BookNow"]</span>
+                    </button>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <div class="ashare-loading">
+            <div class="ac-spinner"></div>
+            <span>@L["Loading"]</span>
+        </div>
+    }
+</div>
+
+
+@code {
+    [Parameter]
+    public Guid SpaceId { get; set; }
+
+    private SpaceItem? _space;
+    private List<SpaceReview>? _reviews;
+    private ProfileDto? _ownerProfile; // بروفايل صاحب العرض
+    private bool _isFavorite;
+    private bool _isOwnListing; // هل هذا معلن المستخدم الحالي
+    private int _currentImageIndex;
+    private bool _isLoading = true;
+    private BookingItem? _existingBooking; // حجز سابق على نفس المكان
+
+    private bool _mapInitialized;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Initialize mini map after data is loaded
+        if (!_mapInitialized && _space?.Latitude != null && _space?.Longitude != null)
+        {
+            _mapInitialized = true;
+            try
+            {
+                await JS.InvokeVoidAsync("AcMap.initializeDetailsMap",
+                    "detailsMap",
+                    _space.Latitude.Value,
+                    _space.Longitude.Value,
+                    _space.Name ?? "الموقع");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error initializing map: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task OpenInNativeMaps()
+    {
+        if (_space?.Latitude == null || _space?.Longitude == null)
+        {
+            Console.WriteLine("[SpaceDetails] Cannot open map - coordinates are null");
+            return;
+        }
+
+        try
+        {
+            // Open in native maps using platform-specific service
+            var label = _space.Name ?? "الموقع";
+            await Navigation.OpenMapAsync(_space.Latitude.Value, _space.Longitude.Value, label);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[SpaceDetails] Error opening native maps: {ex.Message}");
+        }
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            var spaceTask = ApiService.GetSpaceByIdAsync(SpaceId);
+            var reviewsTask = ApiService.GetSpaceReviewsAsync(SpaceId);
+
+            await Task.WhenAll(spaceTask, reviewsTask);
+
+            _space = await spaceTask;
+            _reviews = await reviewsTask;
+            _isFavorite = ApiService.GetFavorites().Contains(SpaceId);
+
+            if (_space != null)
+            {
+                // التحقق من أن هذا المعلن خاص بالمستخدم الحالي
+                var currentUserId = TokenManager.GetUserIdFromToken();
+                _isOwnListing = !string.IsNullOrEmpty(currentUserId) &&
+                                _space.OwnerId != Guid.Empty &&
+                                _space.OwnerId.ToString().Equals(currentUserId, StringComparison.OrdinalIgnoreCase);
+
+                // جلب بروفايل صاحب العرض
+                if (_space.OwnerId != Guid.Empty)
+                {
+                    try
+                    {
+                        _ownerProfile = await ProfilesClient.GetByUserIdAsync(_space.OwnerId.ToString());
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[SpaceDetails] Error loading owner profile: {ex.Message}");
+                    }
+                }
+
+                // التحقق من وجود حجز سابق على نفس المكان
+                if (!_isOwnListing && !string.IsNullOrEmpty(currentUserId))
+                {
+                    try
+                    {
+                        var userBookings = await ApiService.GetBookingsAsync(currentUserId);
+                        // البحث عن حجز نشط (قيد المراجعة أو مؤكد) على نفس المكان
+                        _existingBooking = userBookings.FirstOrDefault(b =>
+                            b.SpaceId == SpaceId &&
+                            (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed));
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[SpaceDetails] Error checking existing bookings: {ex.Message}");
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading space details: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Attribute Helpers
+    // ═══════════════════════════════════════════════════════════════════
+
+    private bool HasAttribute(string key)
+    {
+        return _space?.Attributes?.ContainsKey(key) == true &&
+               _space.Attributes[key] != null &&
+               !string.IsNullOrEmpty(_space.Attributes[key].ToString());
+    }
+
+    private string GetAttribute(string key)
+    {
+        if (_space?.Attributes?.TryGetValue(key, out var value) == true && value != null)
+        {
+            // Handle JsonElement from System.Text.Json deserialization
+            if (value is System.Text.Json.JsonElement jsonElement)
+            {
+                return jsonElement.ValueKind switch
+                {
+                    System.Text.Json.JsonValueKind.String => jsonElement.GetString() ?? "",
+                    System.Text.Json.JsonValueKind.Number => jsonElement.GetRawText(),
+                    System.Text.Json.JsonValueKind.True => "true",
+                    System.Text.Json.JsonValueKind.False => "false",
+                    _ => jsonElement.GetRawText()
+                };
+            }
+            return value.ToString() ?? "";
+        }
+        return "";
+    }
+
+    private bool GetBoolAttribute(string key)
+    {
+        if (_space?.Attributes?.TryGetValue(key, out var value) == true && value != null)
+        {
+            if (value is bool b) return b;
+            if (value is string s) return s.ToLower() == "true" || s == "1";
+            // Handle JsonElement from System.Text.Json deserialization
+            if (value is System.Text.Json.JsonElement jsonElement)
+            {
+                if (jsonElement.ValueKind == System.Text.Json.JsonValueKind.True) return true;
+                if (jsonElement.ValueKind == System.Text.Json.JsonValueKind.False) return false;
+                if (jsonElement.ValueKind == System.Text.Json.JsonValueKind.String)
+                {
+                    var str = jsonElement.GetString()?.ToLower();
+                    return str == "true" || str == "1";
+                }
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// التحقق من وجود رقم ترخيص صالح
+    /// </summary>
+    private bool HasLicenseNumber()
+    {
+        if (!HasAttribute("license_number")) return false;
+        var license = GetAttribute("license_number");
+        return !string.IsNullOrWhiteSpace(license) && license != "0";
+    }
+
+    private string GetDescription()
+    {
+        // Try to get description from attributes first
+        if (HasAttribute("description"))
+            return GetAttribute("description");
+
+        return _space?.Description ?? "";
+    }
+
+    private string GetLocationDisplay()
+    {
+        var parts = new List<string>();
+
+        if (HasAttribute("district"))
+            parts.Add(GetAttribute("district"));
+        else if (!string.IsNullOrEmpty(_space?.Location))
+            parts.Add(_space.Location);
+
+        if (HasAttribute("city"))
+            parts.Add(TranslateCity(GetAttribute("city")));
+        else if (!string.IsNullOrEmpty(_space?.City))
+            parts.Add(_space.City);
+
+        return parts.Any() ? string.Join("، ", parts) : "غير محدد";
+    }
+
+    private string GetDisplayPrice()
+    {
+        if (_space == null) return "";
+
+        if (HasAttribute("price"))
+        {
+            var price = GetAttribute("price");
+            var rentType = HasAttribute("rent_type") ? TranslateRentType(GetAttribute("rent_type")) : "شهرياً";
+            return $"{price} ر.س / {rentType}";
+        }
+
+        return _space.DisplayPrice;
+    }
+
+    /// <summary>
+    /// التحقق من وجود سعر (من الخصائص أو من SpaceItem)
+    /// </summary>
+    private bool HasPrice()
+    {
+        // التحقق من وجود السعر في الخصائص
+        if (HasAttribute("price")) return true;
+
+        // التحقق من وجود السعر في SpaceItem
+        return _space != null && (_space.PricePerHour > 0 || _space.PricePerDay > 0 || _space.PricePerMonth > 0);
+    }
+
+    /// <summary>
+    /// الحصول على عرض السعر مع وحدة الوقت
+    /// </summary>
+    private string GetPriceDisplay()
+    {
+        if (_space == null) return "";
+
+        // أولاً: استخدام السعر من الخصائص إن وجد
+        if (HasAttribute("price"))
+        {
+            var price = GetAttribute("price");
+
+            // تحديد وحدة الوقت
+            var timeUnit = "شهر"; // افتراضي
+            if (HasAttribute("time_unit"))
+            {
+                timeUnit = TranslateTimeUnit(GetAttribute("time_unit"));
+            }
+            else if (HasAttribute("rent_type"))
+            {
+                timeUnit = TranslateTimeUnit(GetAttribute("rent_type"));
+            }
+            else if (HasAttribute("duration") && HasAttribute("time_unit"))
+            {
+                var duration = GetAttribute("duration");
+                timeUnit = TranslateTimeUnit(GetAttribute("time_unit"));
+                return $"{price} ر.س / {duration} {timeUnit}";
+            }
+
+            return $"{price} ر.س / {timeUnit}";
+        }
+
+        // ثانياً: استخدام DisplayPrice من SpaceItem
+        return _space.DisplayPrice;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Property Details Builder
+    // ═══════════════════════════════════════════════════════════════════
+
+    // الخصائص المعروفة مع ترجماتها
+    private static readonly Dictionary<string, string> _knownAttributeLabels = new()
+    {
+        // Property info
+        ["property_type"] = "نوع العقار",
+        ["unit_type"] = "نوع الوحدة",
+        ["area"] = "المساحة",
+        ["rooms_count"] = "عدد الغرف",
+        ["rooms"] = "عدد الغرف",
+        ["bathrooms_count"] = "عدد الحمامات",
+        ["bathrooms"] = "عدد الحمامات",
+        ["floor_number"] = "الطابق",
+        ["floor"] = "الطابق",
+        ["building_age"] = "عمر المبنى",
+        ["furnished"] = "مفروش",
+
+        // Location
+        ["city"] = "المدينة",
+        ["district"] = "الحي",
+        ["street"] = "الشارع",
+
+        // Rental info
+        ["rent_type"] = "نوع الإيجار",
+        ["rental_type"] = "نوع الإيجار",
+        ["time_unit"] = "وحدة الوقت",
+        ["duration"] = "المدة",
+        ["bill_type"] = "نوع الفاتورة",
+        ["price"] = "السعر",
+
+        // Additional
+        ["description"] = "الوصف",
+        ["capacity"] = "السعة",
+        ["beds_count"] = "عدد الأسرّة",
+        ["beds"] = "عدد الأسرّة",
+        ["living_rooms_count"] = "عدد الصالات",
+        ["living_rooms"] = "عدد الصالات",
+        ["kitchen_count"] = "عدد المطابخ",
+        ["kitchens"] = "عدد المطابخ",
+        ["parking_spaces"] = "مواقف السيارات",
+        ["facade"] = "الواجهة",
+        ["view"] = "الإطلالة",
+        ["electricity"] = "الكهرباء",
+        ["water"] = "المياه",
+        ["gas"] = "الغاز",
+        ["internet"] = "الإنترنت",
+        ["gender"] = "الجنس",
+        ["nationality"] = "الجنسية",
+        ["min_stay"] = "أقل مدة إقامة",
+        ["max_stay"] = "أقصى مدة إقامة",
+        ["deposit"] = "مبلغ التأمين",
+        ["available_from"] = "متاح من",
+        ["contact_phone"] = "رقم التواصل",
+        ["features"] = "المميزات",
+
+        // License info (رقم الترخيص)
+        ["license_number"] = "رقم الترخيص",
+        ["requires_license"] = "يتطلب ترخيص",
+        ["has_owner_license"] = "ترخيص المالك"
+    };
+
+    // الخصائص المنطقية (مرافق) - يجب تجاهلها في قسم التفاصيل
+    private static readonly HashSet<string> _booleanAmenityKeys = new()
+    {
+        "has_wifi", "wifi", "has_parking", "parking", "has_ac", "ac",
+        "has_elevator", "elevator", "has_kitchen", "kitchen", "has_pool", "pool",
+        "has_gym", "gym", "has_security", "security", "has_garden", "garden",
+        "has_balcony", "balcony", "has_storage", "storage", "has_maid_room", "maid_room",
+        "has_driver_room", "driver_room", "is_phone_allowed", "is_whatsapp_allowed",
+        "is_messaging_allowed",
+        // License attributes (معروضة في البادج بالفعل)
+        "requires_license", "has_owner_license", "license_number"
+    };
+
+    private List<(string Label, string Value)> GetPropertyDetails()
+    {
+        var details = new List<(string Label, string Value)>();
+        var processedKeys = new HashSet<string>();
+
+        // أولاً: عرض الخصائص المعروفة بالترتيب المحدد
+        if (HasAttribute("property_type"))
+        {
+            details.Add(("نوع العقار", TranslatePropertyType(GetAttribute("property_type"))));
+            processedKeys.Add("property_type");
+        }
+
+        if (HasAttribute("area"))
+        {
+            details.Add(("المساحة", $"{GetAttribute("area")} م²"));
+            processedKeys.Add("area");
+        }
+
+        if (HasAttribute("rooms_count"))
+        {
+            details.Add(("عدد الغرف", GetAttribute("rooms_count")));
+            processedKeys.Add("rooms_count");
+        }
+
+        if (HasAttribute("bathrooms_count"))
+        {
+            details.Add(("عدد الحمامات", GetAttribute("bathrooms_count")));
+            processedKeys.Add("bathrooms_count");
+        }
+
+        if (HasAttribute("beds_count"))
+        {
+            details.Add(("عدد الأسرّة", GetAttribute("beds_count")));
+            processedKeys.Add("beds_count");
+        }
+
+        if (HasAttribute("living_rooms_count"))
+        {
+            details.Add(("عدد الصالات", GetAttribute("living_rooms_count")));
+            processedKeys.Add("living_rooms_count");
+        }
+
+        if (HasAttribute("floor_number"))
+        {
+            details.Add(("الطابق", GetAttribute("floor_number")));
+            processedKeys.Add("floor_number");
+        }
+
+        if (HasAttribute("building_age"))
+        {
+            details.Add(("عمر المبنى", $"{GetAttribute("building_age")} سنة"));
+            processedKeys.Add("building_age");
+        }
+
+        if (HasAttribute("furnished"))
+        {
+            details.Add(("مفروش", TranslateFurnished(GetAttribute("furnished"))));
+            processedKeys.Add("furnished");
+        }
+
+        if (HasAttribute("city"))
+        {
+            details.Add(("المدينة", TranslateCity(GetAttribute("city"))));
+            processedKeys.Add("city");
+        }
+
+        if (HasAttribute("district"))
+        {
+            details.Add(("الحي", GetAttribute("district")));
+            processedKeys.Add("district");
+        }
+
+        if (HasAttribute("street"))
+        {
+            details.Add(("الشارع", GetAttribute("street")));
+            processedKeys.Add("street");
+        }
+
+        if (HasAttribute("gender"))
+        {
+            details.Add(("الجنس", TranslateGender(GetAttribute("gender"))));
+            processedKeys.Add("gender");
+        }
+
+        if (HasAttribute("nationality"))
+        {
+            details.Add(("الجنسية", GetAttribute("nationality")));
+            processedKeys.Add("nationality");
+        }
+
+        if (HasAttribute("min_stay"))
+        {
+            details.Add(("أقل مدة إقامة", GetAttribute("min_stay")));
+            processedKeys.Add("min_stay");
+        }
+
+        if (HasAttribute("max_stay"))
+        {
+            details.Add(("أقصى مدة إقامة", GetAttribute("max_stay")));
+            processedKeys.Add("max_stay");
+        }
+
+        if (HasAttribute("deposit"))
+        {
+            details.Add(("مبلغ التأمين", $"{GetAttribute("deposit")} ر.س"));
+            processedKeys.Add("deposit");
+        }
+
+        if (HasAttribute("available_from"))
+        {
+            details.Add(("متاح من", GetAttribute("available_from")));
+            processedKeys.Add("available_from");
+        }
+
+        if (HasAttribute("rent_type"))
+        {
+            details.Add(("نوع الإيجار", TranslateRentType(GetAttribute("rent_type"))));
+            processedKeys.Add("rent_type");
+        }
+
+        if (HasAttribute("price"))
+        {
+            details.Add(("السعر", $"{GetAttribute("price")} ر.س"));
+            processedKeys.Add("price");
+        }
+
+        // ثانياً: عرض أي خصائص إضافية غير معروفة (ديناميكياً)
+        if (_space?.Attributes != null)
+        {
+            foreach (var attr in _space.Attributes)
+            {
+                // تجاهل الخصائص التي تمت معالجتها، والمرافق، والوصف
+                if (processedKeys.Contains(attr.Key) ||
+                    _booleanAmenityKeys.Contains(attr.Key) ||
+                    attr.Key == "description" ||
+                    attr.Value == null ||
+                    string.IsNullOrEmpty(attr.Value.ToString()))
+                    continue;
+
+                var label = _knownAttributeLabels.TryGetValue(attr.Key, out var knownLabel)
+                    ? knownLabel
+                    : FormatAttributeKey(attr.Key);
+
+                // ترجمة القيمة
+                var rawValue = attr.Value.ToString() ?? "";
+                var translatedValue = TranslateAttributeValue(attr.Key, rawValue);
+
+                details.Add((label, translatedValue));
+            }
+        }
+
+        return details;
+    }
+
+    private string TranslateGender(string gender) => gender?.ToLower() switch
+    {
+        "male" => "ذكور فقط",
+        "female" => "إناث فقط",
+        "any" or "both" => "الجنسين",
+        _ => gender ?? ""
+    };
+
+    private string FormatAttributeKey(string key)
+    {
+        // تحويل snake_case إلى نص قابل للقراءة
+        return key.Replace("_", " ").Replace("-", " ");
+    }
+
+    /// <summary>
+    /// ترجمة القيم الإنجليزية الشائعة إلى العربية
+    /// </summary>
+    private string TranslateAttributeValue(string key, string value)
+    {
+        if (string.IsNullOrEmpty(value)) return value;
+
+        var lowerValue = value.ToLower().Trim();
+
+        // ترجمة القيم حسب نوع الخاصية
+        return key?.ToLower() switch
+        {
+            "floor" => TranslateFloor(lowerValue),
+            "unit_type" => TranslateUnitType(lowerValue),
+            "rental_type" or "rent_type" => TranslateRentalType(lowerValue),
+            "bill_type" => TranslateBillType(lowerValue),
+            "time_unit" => TranslateTimeUnit(lowerValue),
+            "furnished" => TranslateFurnished(lowerValue),
+            "gender" => TranslateGender(lowerValue),
+            _ => TranslateCommonValue(lowerValue) ?? value
+        };
+    }
+
+    private string TranslateFloor(string value) => value switch
+    {
+        "ground" => "الأرضي",
+        "first" => "الأول",
+        "second" => "الثاني",
+        "third" => "الثالث",
+        "fourth" => "الرابع",
+        "fifth" => "الخامس",
+        "sixth" => "السادس",
+        "seventh" => "السابع",
+        "eighth" => "الثامن",
+        "ninth" => "التاسع",
+        "tenth" => "العاشر",
+        "basement" => "القبو",
+        "roof" => "السطح",
+        _ => value
+    };
+
+    private string TranslateUnitType(string value) => value switch
+    {
+        "room" => "غرفة",
+        "apartment" => "شقة",
+        "villa" => "فيلا",
+        "studio" => "استوديو",
+        "duplex" => "دوبلكس",
+        "floor" => "دور كامل",
+        "building" => "عمارة",
+        "office" => "مكتب",
+        "shop" => "محل",
+        _ => value
+    };
+
+    private string TranslateRentalType(string value) => value switch
+    {
+        "shared" => "مشترك",
+        "private" => "خاص",
+        "full" => "كامل",
+        "partial" => "جزئي",
+        _ => TranslateRentType(value)
+    };
+
+    private string TranslateBillType(string value) => value switch
+    {
+        "included" => "شامل",
+        "excluded" or "separate" => "منفصل",
+        "offer" => "عرض",
+        "fixed" => "ثابت",
+        "variable" => "متغير",
+        _ => value
+    };
+
+    private string TranslateTimeUnit(string value) => value switch
+    {
+        "hour" or "hourly" => "ساعة",
+        "day" or "daily" => "يوم",
+        "week" or "weekly" => "أسبوع",
+        "month" or "monthly" => "شهر",
+        "year" or "yearly" or "annual" => "سنة",
+        _ => value
+    };
+
+    private string? TranslateCommonValue(string value) => value switch
+    {
+        // Yes/No
+        "yes" => "نعم",
+        "no" => "لا",
+        "true" => "نعم",
+        "false" => "لا",
+
+        // Common values
+        "available" => "متاح",
+        "unavailable" or "not available" => "غير متاح",
+        "new" => "جديد",
+        "used" => "مستعمل",
+        "excellent" => "ممتاز",
+        "good" => "جيد",
+        "fair" => "مقبول",
+
+        // Directions
+        "north" => "شمال",
+        "south" => "جنوب",
+        "east" => "شرق",
+        "west" => "غرب",
+        "northeast" => "شمال شرق",
+        "northwest" => "شمال غرب",
+        "southeast" => "جنوب شرق",
+        "southwest" => "جنوب غرب",
+
+        _ => null
+    };
+
+    private string GetRelativeDate(DateTime date)
+    {
+        var diff = DateTime.Now - date;
+
+        if (diff.TotalDays < 1)
+            return "اليوم";
+        if (diff.TotalDays < 2)
+            return "أمس";
+        if (diff.TotalDays < 7)
+            return $"منذ {(int)diff.TotalDays} أيام";
+        if (diff.TotalDays < 30)
+            return $"منذ {(int)(diff.TotalDays / 7)} أسابيع";
+        if (diff.TotalDays < 365)
+            return $"منذ {(int)(diff.TotalDays / 30)} أشهر";
+        return date.ToString("yyyy/MM/dd");
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Amenities Builder
+    // ═══════════════════════════════════════════════════════════════════
+
+    private List<string> GetAmenities()
+    {
+        var amenities = new List<string>();
+
+        // Check boolean amenity attributes
+        if (GetBoolAttribute("has_wifi") || GetBoolAttribute("wifi"))
+            amenities.Add("واي فاي");
+
+        if (GetBoolAttribute("has_parking") || GetBoolAttribute("parking"))
+            amenities.Add("موقف سيارات");
+
+        if (GetBoolAttribute("has_ac") || GetBoolAttribute("ac"))
+            amenities.Add("مكيف");
+
+        if (GetBoolAttribute("has_elevator") || GetBoolAttribute("elevator"))
+            amenities.Add("مصعد");
+
+        if (GetBoolAttribute("has_kitchen") || GetBoolAttribute("kitchen"))
+            amenities.Add("مطبخ");
+
+        if (GetBoolAttribute("has_pool") || GetBoolAttribute("pool"))
+            amenities.Add("مسبح");
+
+        if (GetBoolAttribute("has_gym") || GetBoolAttribute("gym"))
+            amenities.Add("صالة رياضية");
+
+        if (GetBoolAttribute("has_security") || GetBoolAttribute("security"))
+            amenities.Add("حراسة أمنية");
+
+        if (GetBoolAttribute("has_garden") || GetBoolAttribute("garden"))
+            amenities.Add("حديقة");
+
+        if (GetBoolAttribute("has_balcony") || GetBoolAttribute("balcony"))
+            amenities.Add("شرفة");
+
+        if (GetBoolAttribute("has_storage") || GetBoolAttribute("storage"))
+            amenities.Add("مخزن");
+
+        if (GetBoolAttribute("has_maid_room") || GetBoolAttribute("maid_room"))
+            amenities.Add("غرفة خادمة");
+
+        if (GetBoolAttribute("has_driver_room") || GetBoolAttribute("driver_room"))
+            amenities.Add("غرفة سائق");
+
+        // Fallback to legacy amenities list
+        if (!amenities.Any() && _space?.Amenities?.Any() == true)
+        {
+            return _space.Amenities;
+        }
+
+        return amenities;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Contact Options Builder
+    // ═══════════════════════════════════════════════════════════════════
+
+    private List<(string Type, string Icon, string Label, string Class)> GetContactOptions()
+    {
+        var options = new List<(string Type, string Icon, string Label, string Class)>();
+
+        if (GetBoolAttribute("is_phone_allowed"))
+        {
+            options.Add(("phone", "bi-telephone", "اتصال", "contact-phone"));
+        }
+
+        if (GetBoolAttribute("is_whatsapp_allowed"))
+        {
+            options.Add(("whatsapp", "bi-whatsapp", "واتساب", "contact-whatsapp"));
+        }
+
+        if (GetBoolAttribute("is_messaging_allowed"))
+        {
+            options.Add(("chat", "bi-chat-dots", "رسالة", "contact-chat"));
+        }
+
+        // Default fallback if no contact options specified
+        if (!options.Any())
+        {
+            options.Add(("chat", "bi-chat-dots", "تواصل", "contact-chat"));
+        }
+
+        return options;
+    }
+
+    private async Task HandleContact(string type)
+    {
+        // الحصول على رقم الهاتف من الخصائص أو من بروفايل المالك
+        var phone = GetOwnerPhone();
+
+        switch (type)
+        {
+            case "phone":
+                if (!string.IsNullOrEmpty(phone))
+                {
+                    // فتح تطبيق الهاتف مع الرقم
+                    await Navigation.OpenExternalAsync($"tel:{phone}");
+                }
+                break;
+            case "whatsapp":
+                if (!string.IsNullOrEmpty(phone))
+                {
+                    var cleanPhone = phone.Replace("+", "").Replace(" ", "").Replace("-", "");
+                    // إضافة رسالة أولية تشير للإعلان
+                    var message = Uri.EscapeDataString($"مرحباً، أنا مهتم بإعلانك: {_space?.Name ?? ""}");
+                    await Navigation.OpenExternalAsync($"https://wa.me/{cleanPhone}?text={message}");
+                }
+                break;
+            case "chat":
+            default:
+                await ContactOwnerWithInitialMessage();
+                break;
+        }
+    }
+
+    /// <summary>
+    /// الحصول على رقم هاتف المالك من الخصائص أو البروفايل
+    /// </summary>
+    private string? GetOwnerPhone()
+    {
+        // أولاً: من خاصية contact_phone
+        if (HasAttribute("contact_phone"))
+            return GetAttribute("contact_phone");
+
+        // ثانياً: من خاصية phone
+        if (HasAttribute("phone"))
+            return GetAttribute("phone");
+
+        // ثالثاً: من بروفايل المالك
+        if (!string.IsNullOrEmpty(_ownerProfile?.PhoneNumber))
+            return _ownerProfile.PhoneNumber;
+
+        return null;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Translation Helpers
+    // ═══════════════════════════════════════════════════════════════════
+
+    private string TranslatePropertyType(string type) => type?.ToLower() switch
+    {
+        "apartment" => "شقة",
+        "villa" => "فيلا",
+        "duplex" => "دوبلكس",
+        "studio" => "استوديو",
+        "room" => "غرفة",
+        "office" => "مكتب",
+        "shop" => "محل",
+        "warehouse" => "مستودع",
+        "land" => "أرض",
+        "building" => "عمارة",
+        "floor" => "دور كامل",
+        "chalet" => "شاليه",
+        "farm" => "مزرعة",
+        "rest_house" => "استراحة",
+        "tent" => "خيمة",
+        _ => type ?? ""
+    };
+
+    private string TranslateCity(string city) => city?.ToLower() switch
+    {
+        "riyadh" => "الرياض",
+        "jeddah" => "جدة",
+        "makkah" or "mecca" => "مكة المكرمة",
+        "madinah" or "medina" => "المدينة المنورة",
+        "dammam" => "الدمام",
+        "khobar" => "الخبر",
+        "dhahran" => "الظهران",
+        "taif" => "الطائف",
+        "tabuk" => "تبوك",
+        "abha" => "أبها",
+        "khamis_mushait" => "خميس مشيط",
+        "hail" => "حائل",
+        "najran" => "نجران",
+        "jubail" => "الجبيل",
+        "yanbu" => "ينبع",
+        "qatif" => "القطيف",
+        "hofuf" => "الهفوف",
+        "buraydah" => "بريدة",
+        _ => city ?? ""
+    };
+
+    private string TranslateRentType(string type) => type?.ToLower() switch
+    {
+        "daily" => "يومياً",
+        "weekly" => "أسبوعياً",
+        "monthly" => "شهرياً",
+        "yearly" or "annual" => "سنوياً",
+        "hourly" => "بالساعة",
+        _ => type ?? ""
+    };
+
+    private string TranslateFurnished(string value) => value?.ToLower() switch
+    {
+        "furnished" or "true" or "yes" or "1" => "نعم",
+        "semi_furnished" or "semi" => "شبه مفروش",
+        "unfurnished" or "false" or "no" or "0" => "لا",
+        _ => value ?? ""
+    };
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Owner Profile Helper
+    // ═══════════════════════════════════════════════════════════════════
+
+    private string GetOwnerDisplayName()
+    {
+        // أولاً: من البروفايل
+        if (_ownerProfile != null)
+        {
+            if (!string.IsNullOrEmpty(_ownerProfile.FullName))
+                return _ownerProfile.FullName;
+            if (!string.IsNullOrEmpty(_ownerProfile.BusinessName))
+                return _ownerProfile.BusinessName;
+        }
+
+        // ثانياً: من بيانات المساحة
+        if (!string.IsNullOrEmpty(_space?.OwnerName))
+            return _space.OwnerName;
+
+        return "المعلن";
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Navigation & Actions
+    // ═══════════════════════════════════════════════════════════════════
+
+    private void GoBack()
+    {
+        Navigation.NavigateBack();
+    }
+
+    private void ToggleFavorite()
+    {
+        ApiService.ToggleFavorite(SpaceId);
+        _isFavorite = !_isFavorite;
+    }
+
+    private void ShareSpace()
+    {
+        // Platform share functionality
+    }
+
+    private async Task ContactOwner()
+    {
+        await ContactOwnerWithInitialMessage(null);
+    }
+
+    /// <summary>
+    /// التواصل مع المالك مع إرسال رسالة أولية تشير للإعلان
+    /// </summary>
+    private async Task ContactOwnerWithInitialMessage()
+    {
+        var initialMessage = $"مرحباً، أنا مهتم بإعلانك: {_space?.Name ?? ""}";
+        await ContactOwnerWithInitialMessage(initialMessage);
+    }
+
+    /// <summary>
+    /// التواصل مع المالك مع رسالة مخصصة
+    /// </summary>
+    private async Task ContactOwnerWithInitialMessage(string? initialMessage)
+    {
+        if (_space?.OwnerId == null || _space.OwnerId == Guid.Empty)
+        {
+            Console.WriteLine("[SpaceDetails] Cannot contact owner - OwnerId is null or empty");
+            return;
+        }
+
+        // التحقق من أن المستخدم لا يحاول التواصل مع نفسه
+        var currentUserId = TokenManager.GetUserIdFromToken();
+        if (!string.IsNullOrEmpty(currentUserId) &&
+            _space.OwnerId.ToString().Equals(currentUserId, StringComparison.OrdinalIgnoreCase))
+        {
+            Console.WriteLine("[SpaceDetails] Cannot contact yourself - this is your own listing");
+            return;
+        }
+
+        try
+        {
+            // الحصول على أو إنشاء محادثة مع المالك
+            var conversation = await ChatsClient.GetOrCreateConversationAsync(_space.OwnerId.ToString());
+
+            if (conversation != null)
+            {
+                // إرسال رسالة أولية إذا كانت موجودة
+                if (!string.IsNullOrEmpty(initialMessage))
+                {
+                    try
+                    {
+                        await ChatsClient.SendMessageAsync(conversation.Id, initialMessage);
+                    }
+                    catch (Exception msgEx)
+                    {
+                        Console.WriteLine($"[SpaceDetails] Error sending initial message: {msgEx.Message}");
+                        // نستمر للتنقل حتى لو فشل إرسال الرسالة
+                    }
+                }
+
+                Navigation.NavigateTo($"/chat/{conversation.Id}");
+            }
+            else
+            {
+                Console.WriteLine("[SpaceDetails] Failed to create/get conversation");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[SpaceDetails] Error contacting owner: {ex.Message}");
+        }
+    }
+
+    private string GetRentTypeLabel()
+    {
+        if (!HasAttribute("rent_type")) return "شهرياً";
+
+        return GetAttribute("rent_type").ToLower() switch
+        {
+            "monthly" => "شهرياً",
+            "yearly" or "annual" => "سنوياً",
+            "daily" => "يومياً",
+            "weekly" => "أسبوعياً",
+            _ => "شهرياً"
+        };
+    }
+
+    private string GetAmenityIcon(string amenity) => amenity switch
+    {
+        "واي فاي" => "bi-wifi",
+        "موقف سيارات" => "bi-p-square",
+        "مكيف" => "bi-snow",
+        "مصعد" => "bi-arrow-up-square",
+        "مطبخ" => "bi-cup-hot",
+        "مسبح" => "bi-water",
+        "صالة رياضية" => "bi-bicycle",
+        "حراسة أمنية" => "bi-shield-check",
+        "حديقة" => "bi-tree",
+        "شرفة" => "bi-box-arrow-up-right",
+        "مخزن" => "bi-box",
+        "غرفة خادمة" => "bi-person",
+        "غرفة سائق" => "bi-car-front",
+        "شاشة عرض" => "bi-display",
+        "غرفة اجتماعات" => "bi-people",
+        "طابعة" => "bi-printer",
+        "قهوة وشاي" => "bi-cup",
+        "إنترنت سريع" => "bi-router",
+        "سبورة" => "bi-easel",
+        "إضاءة احترافية" => "bi-lightbulb",
+        "نظام صوت" => "bi-speaker",
+        "مسرح" => "bi-film",
+        "كراسي" => "bi-grid",
+        "غرفة مفروشة" => "bi-house-door",
+        "مطبخ مشترك" => "bi-cup-straw",
+        "غسالة" => "bi-droplet-half",
+        "نظافة أسبوعية" => "bi-stars",
+        _ => "bi-check-circle"
+    };
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Booking
+    // ═══════════════════════════════════════════════════════════════════
+
+    private void StartBooking()
+    {
+        // Navigate to booking page with space ID
+        Navigation.NavigateTo($"/book/{SpaceId}");
+    }
+
+    private void ViewExistingBooking()
+    {
+        // Navigate to existing booking details
+        if (_existingBooking != null)
+        {
+            Navigation.NavigateTo($"/booking/{_existingBooking.Id}");
+        }
+    }
+}

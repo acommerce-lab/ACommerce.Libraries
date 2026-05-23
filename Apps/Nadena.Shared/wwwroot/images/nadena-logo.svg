@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 120" fill="none" role="img" aria-label="نادينا">
+  <!-- Nadena leaf/flower mark (placeholder approximation of the official brand mark) -->
+  <g transform="translate(312 56)">
+    <g>
+      <path d="M0 0 C 9 -11 9 -30 0 -44 C -9 -30 -9 -11 0 0 Z" fill="#09B269"/>
+      <path d="M0 0 C 9 -11 9 -30 0 -44 C -9 -30 -9 -11 0 0 Z" fill="#2CCB84" transform="rotate(52)"/>
+      <path d="M0 0 C 9 -11 9 -30 0 -44 C -9 -30 -9 -11 0 0 Z" fill="#007567" transform="rotate(104)"/>
+      <path d="M0 0 C 9 -11 9 -30 0 -44 C -9 -30 -9 -11 0 0 Z" fill="#0A5566" transform="rotate(156)"/>
+      <path d="M0 0 C 9 -11 9 -30 0 -44 C -9 -30 -9 -11 0 0 Z" fill="#2F6FB0" transform="rotate(208)"/>
+      <path d="M0 0 C 9 -11 9 -30 0 -44 C -9 -30 -9 -11 0 0 Z" fill="#1A8296" transform="rotate(260)"/>
+      <path d="M0 0 C 9 -11 9 -30 0 -44 C -9 -30 -9 -11 0 0 Z" fill="#3DCB8A" transform="rotate(312)"/>
+    </g>
+    <circle cx="0" cy="0" r="7" fill="#09B269"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="244" y="66" text-anchor="end" font-family="'Noto Kufi Arabic','Cairo','Segoe UI',sans-serif" font-size="50" font-weight="700" fill="#09B269">نادينا</text>
+  <text x="244" y="98" text-anchor="end" font-family="'Rubik','Segoe UI',sans-serif" font-size="20" font-weight="600" letter-spacing="3" fill="#2CCB84">NADENA</text>
+</svg>

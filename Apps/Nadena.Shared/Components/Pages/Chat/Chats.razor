@@ -1,0 +1,227 @@
+@page "/chats"
+@using ACommerce.Client.Chats
+@using ACommerce.Client.Profiles
+@using ACommerce.Client.Auth
+@using Nadena.Shared.Services
+@inject ChatsClient ChatsClient
+@inject ProfilesClient ProfilesClient
+@inject TokenManager TokenManager
+@inject IAppNavigationService Navigation
+@inject ILocalizationService L
+@inject ITimezoneService Timezone
+
+<div class="ashare-chats-page">
+    @* Header *@
+    <div class="chats-header">
+        <h1>@L["Messages"]</h1>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="chats-loading">
+            <div class="ac-spinner"></div>
+        </div>
+    }
+    else if (_chats?.Any() == true)
+    {
+        <div class="chats-list">
+            @foreach (var chat in _chats)
+            {
+                <div class="chat-item @(chat.UnreadCount > 0 ? "unread" : "")" @onclick="() => OpenChat(chat.Id)">
+                    <div class="chat-avatar">
+                        @if (!string.IsNullOrEmpty(chat.Avatar))
+                        {
+                            <img src="@chat.Avatar" alt="@chat.Name" />
+                        }
+                        else
+                        {
+                            <div class="avatar-placeholder">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                        }
+                        @if (chat.IsOnline)
+                        {
+                            <span class="online-dot"></span>
+                        }
+                    </div>
+                    <div class="chat-content">
+                        <div class="chat-row">
+                            <span class="chat-name">@chat.Name</span>
+                            <span class="chat-time">@GetFormattedTime(chat.Id)</span>
+                        </div>
+                        <div class="chat-row">
+                            <span class="chat-preview @(chat.UnreadCount > 0 ? "unread-text" : "")">
+                                @if (chat.IsTyping)
+                                {
+                                    <em class="typing-indicator">@L["Typing"]...</em>
+                                }
+                                else
+                                {
+                                    @(string.IsNullOrEmpty(chat.LastMessage) ? L["NoMessages"] : chat.LastMessage)
+                                }
+                            </span>
+                            @if (chat.UnreadCount > 0)
+                            {
+                                <span class="unread-badge">@chat.UnreadCount</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="chats-empty">
+            <div class="empty-icon">
+                <i class="bi bi-chat-dots"></i>
+            </div>
+            <h3>@L["NoChats"]</h3>
+            <p>@L["StartChatHint"]</p>
+        </div>
+    }
+</div>
+
+@code {
+    private List<ChatListItem>? _chats;
+    private bool _isLoading = true;
+    private Dictionary<Guid, string> _formattedTimes = new();
+    private string? _currentUserId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _currentUserId = TokenManager.GetUserIdFromToken();
+
+            var conversations = await ChatsClient.GetConversationsAsync();
+
+            if (conversations == null || !conversations.Any())
+            {
+                _chats = [];
+                return;
+            }
+
+            // تحويل المحادثات إلى قائمة وجلب البروفايلات مباشرة
+            _chats = new List<ChatListItem>();
+
+            foreach (var chat in conversations)
+            {
+                var otherPartyId = GetOtherPartyUserId(chat);
+                var item = new ChatListItem
+                {
+                    Id = chat.Id,
+                    OtherPartyUserId = otherPartyId,
+                    Avatar = chat.OtherPartyAvatar,
+                    IsOnline = chat.IsOnline,
+                    LastMessage = chat.LastMessage?.Content ?? "",
+                    LastMessageAt = chat.LastMessage?.CreatedAt ?? chat.CreatedAt,
+                    Name = chat.OtherPartyName ?? chat.Title ?? L["Chat"],
+                    UnreadCount = chat.UnreadCount,
+                    IsTyping = false,
+                };
+
+                // جلب البروفايل مباشرة إذا كان الاسم فارغ أو افتراضي
+                if (!string.IsNullOrEmpty(otherPartyId) &&
+                    (string.IsNullOrEmpty(item.Name) || item.Name == "محادثة مباشرة" || item.Name == L["Chat"]))
+                {
+                    try
+                    {
+                        var profile = await ProfilesClient.GetByUserIdAsync(otherPartyId);
+                        if (profile != null)
+                        {
+                            item.Name = !string.IsNullOrEmpty(profile.FullName)
+                                ? profile.FullName
+                                : (!string.IsNullOrEmpty(profile.BusinessName) ? profile.BusinessName : item.Name);
+
+                            if (string.IsNullOrEmpty(item.Avatar) && !string.IsNullOrEmpty(profile.Avatar))
+                                item.Avatar = profile.Avatar;
+                        }
+                    }
+                    catch { /* تجاهل الأخطاء */ }
+                }
+
+                _chats.Add(item);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Chats] Error: {ex.Message}");
+            _chats = [];
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // تنسيق الأوقات
+        if (_chats != null && _chats.Any(c => !_formattedTimes.ContainsKey(c.Id)))
+        {
+            foreach (var chat in _chats.Where(c => !_formattedTimes.ContainsKey(c.Id)))
+            {
+                var formattedTime = await Timezone.FormatRelativeTimeAsync(chat.LastMessageAt, L);
+                _formattedTimes[chat.Id] = formattedTime;
+            }
+            StateHasChanged();
+        }
+    }
+
+    private string? GetOtherPartyUserId(ConversationResponse chat)
+    {
+        // من OtherPartyId مباشرة
+        if (!string.IsNullOrEmpty(chat.OtherPartyId))
+            return chat.OtherPartyId;
+
+        // من قائمة المشاركين
+        if (chat.Participants?.Any() == true && !string.IsNullOrEmpty(_currentUserId))
+        {
+            var otherParty = chat.Participants.FirstOrDefault(p => p != _currentUserId);
+            if (!string.IsNullOrEmpty(otherParty))
+                return otherParty;
+        }
+
+        return null;
+    }
+
+    private void OpenChat(Guid chatId)
+    {
+        Navigation.NavigateTo($"/chat/{chatId}");
+    }
+
+    private string GetFormattedTime(Guid chatId)
+    {
+        if (_formattedTimes.TryGetValue(chatId, out var formatted))
+            return formatted;
+
+        var chat = _chats?.FirstOrDefault(c => c.Id == chatId);
+        if (chat != null)
+            return FormatTimeQuick(chat.LastMessageAt);
+        return "";
+    }
+
+    private string FormatTimeQuick(DateTime utcTime)
+    {
+        var diff = DateTime.UtcNow - utcTime;
+        if (diff.TotalMinutes < 1) return L["Now"];
+        if (diff.TotalHours < 1) return $"{(int)diff.TotalMinutes}m";
+        if (diff.TotalDays < 1) return $"{(int)diff.TotalHours}h";
+        if (diff.TotalDays < 7) return $"{(int)diff.TotalDays}d";
+        return utcTime.ToString("MM/dd");
+    }
+
+    public class ChatListItem
+    {
+        public Guid Id { get; set; }
+        public string? OtherPartyUserId { get; set; }
+        public string Name { get; set; } = "";
+        public string? Avatar { get; set; }
+        public string? LastMessage { get; set; }
+        public DateTime LastMessageAt { get; set; }
+        public int UnreadCount { get; set; }
+        public bool IsOnline { get; set; }
+        public bool IsTyping { get; set; }
+    }
+}

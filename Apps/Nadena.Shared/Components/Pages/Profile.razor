@@ -1,0 +1,483 @@
+@page "/profile"
+@using ACommerce.Client.Auth
+@using ACommerce.Client.Profiles
+@using ACommerce.Client.LegalPages
+@inject NadenaApiService ApiService
+@inject AuthClient AuthClient
+@inject ProfilesClient ProfilesClient
+@inject LegalPagesClient LegalPagesClient
+@inject TokenManager TokenManager
+@inject ACommerce.Templates.Customer.Services.GuestModeService GuestMode
+@inject IAppNavigationService Navigation
+@inject Nadena.Shared.Services.ThemeService ThemeService
+@inject ILocalizationService L
+
+<div class="ac-page ashare-profile-page @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
+
+    @if (_isLoading)
+    {
+        <div class="ashare-loading">
+            <div class="ac-spinner"></div>
+            <span>@L["Loading"]</span>
+        </div>
+    }
+    else if (GuestMode.IsGuestMode)
+    {
+        @* Guest Mode Profile *@
+        <div class="guest-profile-header">
+            <div class="guest-profile-avatar">
+                <img src="images/app-icon.png" alt="@L["AppName"]" onerror="this.style.display='none'" />
+            </div>
+            <h1 class="guest-profile-name">@L["Guest"]</h1>
+            <p class="guest-profile-subtitle">@L["LoginToAccessProfile"]</p>
+            <button class="guest-login-btn" @onclick='() => Navigation.NavigateTo("/login")'>
+                <i class="bi bi-box-arrow-in-right"></i>
+                @L["Login"]
+            </button>
+        </div>
+
+        @* Menu Sections for Guest *@
+        <div class="ashare-profile-menu">
+            @* Settings Section *@
+            <div class="ashare-menu-section">
+                <h3 class="ashare-menu-title">@L["Settings"]</h3>
+                <div class="ashare-menu-items">
+                    <div class="ashare-menu-item">
+                        <div class="ashare-menu-icon">
+                            <i class="bi bi-moon"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["DarkMode"]</span>
+                        </div>
+                        <label class="ashare-toggle">
+                            <input type="checkbox" @bind="ThemeService.IsDarkMode" />
+                            <span class="ashare-toggle-slider"></span>
+                        </label>
+                    </div>
+                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/language")'>
+                        <div class="ashare-menu-icon">
+                            <i class="bi bi-globe"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["Language"]</span>
+                            <span class="ashare-menu-value">@GetCurrentLanguageName()</span>
+                        </div>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            @* Legal Pages Section (Dynamic) *@
+            @if (_legalPages.Any())
+            {
+                <div class="ashare-menu-section">
+                    <h3 class="ashare-menu-title">@L["LegalAndPolicies"]</h3>
+                    <div class="ashare-menu-items">
+                        @foreach (var page in _legalPages)
+                        {
+                            <button class="ashare-menu-item" @onclick="@(() => OpenLegalPage(page.Key))">
+                                <div class="ashare-menu-icon">
+                                    <i class="bi @(page.Icon)"></i>
+                                </div>
+                                <div class="ashare-menu-content">
+                                    <span class="ashare-menu-label">@GetLegalPageTitle(page)</span>
+                                </div>
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Support Section *@
+            <div class="ashare-menu-section">
+                <h3 class="ashare-menu-title">@L["Help"]</h3>
+                <div class="ashare-menu-items">
+                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/help")'>
+                        <div class="ashare-menu-icon">
+                            <i class="bi bi-question-circle"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["HelpCenter"]</span>
+                        </div>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/about")'>
+                        <div class="ashare-menu-icon">
+                            <i class="bi bi-info-circle"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["About"]</span>
+                        </div>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            @* App Version *@
+            <div class="ashare-app-version">
+                <span>@L["AppName"] v1.0.0</span>
+            </div>
+        </div>
+    }
+    else if (!_isLoggedIn)
+    {
+        @* Not Logged In - Redirect to Nafath login *@
+        <div class="ashare-loading">
+            <div class="ac-spinner"></div>
+            <span>@L["RedirectingToLogin"]</span>
+        </div>
+    }
+    else
+    {
+        @* Profile Header *@
+        <div class="ashare-profile-header">
+            <div class="ashare-profile-avatar">
+                @if (!string.IsNullOrEmpty(_avatarUrl))
+                {
+                    <img src="@_avatarUrl" alt="@_userName" />
+                }
+                else
+                {
+                    <i class="bi bi-person-circle"></i>
+                }
+                <button class="ashare-edit-avatar" @onclick='() => Navigation.NavigateTo("/profile/edit")'>
+                    <i class="bi bi-camera"></i>
+                </button>
+            </div>
+            <h1 class="ashare-profile-name">@_userName</h1>
+            @if (!string.IsNullOrEmpty(_phoneNumber))
+            {
+                <p class="ashare-profile-phone">@_phoneNumber</p>
+            }
+            <div class="ashare-profile-stats">
+                <div class="ashare-stat-item">
+                    <span class="ashare-stat-value">@_bookingsCount</span>
+                    <span class="ashare-stat-label">@L["Bookings"]</span>
+                </div>
+                <div class="ashare-stat-item">
+                    <span class="ashare-stat-value">@_favoritesCount</span>
+                    <span class="ashare-stat-label">@L["Favorites"]</span>
+                </div>
+                <div class="ashare-stat-item">
+                    <span class="ashare-stat-value">@_reviewsCount</span>
+                    <span class="ashare-stat-label">@L["Reviews"]</span>
+                </div>
+            </div>
+        </div>
+
+        @* Menu Sections *@
+        <div class="ashare-profile-menu">
+            @* Account Section *@
+            <div class="ashare-menu-section">
+                <h3 class="ashare-menu-title">@L["Account"]</h3>
+                <div class="ashare-menu-items">
+                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/profile/edit")'>
+                        <div class="ashare-menu-icon">
+                            <i class="bi bi-person"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["EditProfile"]</span>
+                        </div>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/notifications")'>
+                        <div class="ashare-menu-icon">
+                            <i class="bi bi-bell"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["Notifications"]</span>
+                            @if (_notificationsCount > 0)
+                            {
+                                <span class="ashare-menu-badge">@_notificationsCount</span>
+                            }
+                        </div>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            @* Settings Section *@
+            <div class="ashare-menu-section">
+                <h3 class="ashare-menu-title">@L["Settings"]</h3>
+                <div class="ashare-menu-items">
+                    <div class="ashare-menu-item">
+                        <div class="ashare-menu-icon">
+                            <i class="bi bi-moon"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["DarkMode"]</span>
+                        </div>
+                        <label class="ashare-toggle">
+                            <input type="checkbox" @bind="ThemeService.IsDarkMode" />
+                            <span class="ashare-toggle-slider"></span>
+                        </label>
+                    </div>
+                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/language")'>
+                        <div class="ashare-menu-icon">
+                            <i class="bi bi-globe"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["Language"]</span>
+                            <span class="ashare-menu-value">@GetCurrentLanguageName()</span>
+                        </div>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            @* Host Section *@
+            <div class="ashare-menu-section">
+                <h3 class="ashare-menu-title">@L["Host"]</h3>
+                <div class="ashare-menu-items">
+                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/host/subscription/dashboard")'>
+                        <div class="ashare-menu-icon ashare-menu-icon-accent">
+                            <i class="bi bi-gem"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["MySubscription"]</span>
+                        </div>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/host/spaces")'>
+                        <div class="ashare-menu-icon">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["MySpaces"]</span>
+                        </div>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/host/add")'>
+                        <div class="ashare-menu-icon">
+                            <i class="bi bi-plus-circle"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["AddNewSpace"]</span>
+                        </div>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            @* Legal Pages Section (Dynamic) *@
+            @if (_legalPages.Any())
+            {
+                <div class="ashare-menu-section">
+                    <h3 class="ashare-menu-title">@L["LegalAndPolicies"]</h3>
+                    <div class="ashare-menu-items">
+                        @foreach (var page in _legalPages)
+                        {
+                            <button class="ashare-menu-item" @onclick="@(() => OpenLegalPage(page.Key))">
+                                <div class="ashare-menu-icon">
+                                    <i class="bi @(page.Icon)"></i>
+                                </div>
+                                <div class="ashare-menu-content">
+                                    <span class="ashare-menu-label">@GetLegalPageTitle(page)</span>
+                                </div>
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Support Section *@
+            <div class="ashare-menu-section">
+                <h3 class="ashare-menu-title">@L["Help"]</h3>
+                <div class="ashare-menu-items">
+                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/complaints")'>
+                        <div class="ashare-menu-icon">
+                            <i class="bi bi-chat-square-text"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["ComplaintsAndSuggestions"]</span>
+                            @if (_complaintsCount > 0)
+                            {
+                                <span class="ashare-menu-badge">@_complaintsCount</span>
+                            }
+                        </div>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/help")'>
+                        <div class="ashare-menu-icon">
+                            <i class="bi bi-question-circle"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["HelpCenter"]</span>
+                        </div>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button class="ashare-menu-item" @onclick='() => Navigation.NavigateTo("/about")'>
+                        <div class="ashare-menu-icon">
+                            <i class="bi bi-info-circle"></i>
+                        </div>
+                        <div class="ashare-menu-content">
+                            <span class="ashare-menu-label">@L["About"]</span>
+                        </div>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            @* Logout *@
+            <div class="ashare-logout-section">
+                <button class="ashare-logout-btn" @onclick="Logout">
+                    <i class="bi bi-box-arrow-right"></i>
+                    @L["Logout"]
+                </button>
+            </div>
+
+            @* App Version *@
+            <div class="ashare-app-version">
+                <span>@L["AppName"] v1.0.0</span>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool _isLoading = true;
+    private bool _isLoggedIn;
+    private string _userName = "";
+    private string? _phoneNumber;
+    private string? _avatarUrl;
+    private int _bookingsCount;
+    private int _favoritesCount;
+    private int _reviewsCount;
+    private int _notificationsCount;
+    private int _complaintsCount;
+    private IEnumerable<LegalPageDto> _legalPages = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        // في وضع الضيف، لا نحتاج لتحميل بيانات المستخدم
+        if (GuestMode.IsGuestMode)
+        {
+            _isLoading = false;
+            await LoadLegalPages();
+            return;
+        }
+
+        await LoadUserData();
+        await LoadLegalPages();
+    }
+
+    private async Task LoadUserData()
+    {
+        // لا تحميل في وضع الضيف
+        if (GuestMode.IsGuestMode)
+        {
+            _isLoading = false;
+            return;
+        }
+
+        _isLoading = true;
+
+        try
+        {
+            var token = await AuthClient.GetTokenAsync();
+            _isLoggedIn = !string.IsNullOrEmpty(token);
+
+            if (_isLoggedIn)
+            {
+                try
+                {
+                    var userInfo = await AuthClient.GetMeAsync();
+                    if (userInfo != null)
+                    {
+                        _userName = userInfo.FullName ?? L["Guest"];
+                        _phoneNumber = userInfo.PhoneNumber;
+                        _avatarUrl = userInfo.ProfilePictureUrl;
+                    }
+                }
+                catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    Console.WriteLine("[Profile] Token expired or invalid - clearing token and redirecting to Nafath");
+                    TokenManager.ClearToken();
+                    await GuestMode.DisableGuestModeAsync();
+                    _isLoggedIn = false;
+                    _isLoading = false;
+                    Navigation.NavigateTo("/login", forceLoad: true);
+                    return;
+                }
+
+                try
+                {
+                    var profile = await ProfilesClient.GetMyProfileAsync();
+                    if (profile != null)
+                    {
+                        _userName = profile.FullName ?? _userName;
+                        _phoneNumber = profile.PhoneNumber ?? _phoneNumber;
+                        _avatarUrl = profile.Avatar ?? _avatarUrl;
+                    }
+                }
+                catch
+                {
+                }
+
+                _bookingsCount = await ApiService.GetBookingsCountAsync();
+                _favoritesCount = ApiService.GetFavorites().Count;
+                _reviewsCount = 0;
+                _notificationsCount = ApiService.GetNotificationsCount();
+            }
+            else
+            {
+                Console.WriteLine("[Profile] No token - redirecting to Nafath");
+                _isLoading = false;
+                Navigation.NavigateTo("/login", forceLoad: true);
+                return;
+            }
+        }
+        catch
+        {
+            Console.WriteLine("[Profile] Auth check failed - redirecting to Nafath");
+            _isLoggedIn = false;
+            _isLoading = false;
+            Navigation.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+
+        _isLoading = false;
+    }
+
+    private async Task LoadLegalPages()
+    {
+        try
+        {
+            _legalPages = await LegalPagesClient.GetActiveAsync();
+        }
+        catch
+        {
+            _legalPages = [];
+        }
+    }
+
+    private string GetCurrentLanguageName()
+    {
+        return L.SupportedLanguages
+            .FirstOrDefault(lang => lang.Code == L.CurrentLanguage)?.NativeName ?? "العربية";
+    }
+
+    private string GetLegalPageTitle(LegalPageDto page)
+    {
+        return L.CurrentLanguage == "ar" ? page.TitleAr : page.TitleEn;
+    }
+
+    private void OpenLegalPage(string key)
+    {
+        Navigation.NavigateTo($"/legal/{key}");
+    }
+
+    private async Task Logout()
+    {
+        await AuthClient.LogoutAsync();
+        _isLoggedIn = false;
+
+        // تصفير العدادات عند تسجيل الخروج
+        MainLayout.InvalidateBookingsCache();
+        MainLayout.InvalidateMessagesCache();
+
+        Navigation.NavigateToAndClearHistory("/");
+    }
+}

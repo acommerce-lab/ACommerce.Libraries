@@ -1,0 +1,16 @@
+@page "/register"
+@inject IAppNavigationService Navigation
+@inject ILocalizationService L
+
+@*
+    صفحة التسجيل تحول مباشرة لتسجيل الدخول بنفاذ
+    لأن التسجيل يحدث تلقائياً عند أول تسجيل دخول بنفاذ
+*@
+
+@code {
+    protected override void OnInitialized()
+    {
+        // توجيه المستخدم لصفحة تسجيل الدخول بنفاذ
+        Navigation.NavigateTo("/login");
+    }
+}
