@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Rukkab.Driver.Web.Blazor</RootNamespace>
+    <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Use the driver template project as the canonical shared UI/template for driver apps -->
+    <!-- Point to the driver shared project which itself references the driver template -->
+    <ProjectReference Include="..\..\Shared\Rukkab.Shared.Driver\Rukkab.Shared.Driver.csproj" />
+    <ProjectReference Include="..\..\..\..\libs\frontend\realtime\ACommerce.Client.Realtime\ACommerce.Client.Realtime.csproj" />
+    <!-- Shared UI static web assets (site.css, images) -->
+    <ProjectReference Include="..\..\..\..\libs\frontend\Rukkab.UI\Rukkab.UI.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0-*" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.0-*" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
+  </ItemGroup>
+</Project>

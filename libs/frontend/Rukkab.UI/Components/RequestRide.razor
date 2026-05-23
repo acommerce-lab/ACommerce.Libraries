@@ -1,0 +1,25 @@
+@inject HttpClient Http
+
+<div class="request-ride">
+  <button @onclick="RequestRide">Request Ride</button>
+  <div class="status">@Status</div>
+</div>
+
+@code {
+  private string Status { get; set; } = "idle";
+
+  private async Task RequestRideAsync()
+  {
+    Status = "posting...";
+    try
+    {
+      var res = await Http.PostAsJsonAsync("http://127.0.0.1:5001/api/rides/request", new { pickupLocation = new { latitude = 40.72, longitude = -73.995 }, vehicleType = "car" });
+      var txt = await res.Content.ReadAsStringAsync();
+      Status = $"{res.StatusCode}: {txt}";
+    }
+    catch (Exception ex)
+    {
+      Status = "error: " + ex.Message;
+    }
+  }
+}

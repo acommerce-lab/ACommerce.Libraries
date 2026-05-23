@@ -7,7 +7,9 @@ public class NotificationItem
     public string Message { get; set; } = string.Empty;
     public NotificationType Type { get; set; } = NotificationType.General;
     public DateTime CreatedAt { get; set; }
-    public DateTime Timestamp { get; set; }
+
+    // Compatibility property used by templates expecting Timestamp
+    public DateTime Timestamp => CreatedAt;
     public bool IsRead { get; set; }
     public string? ActionUrl { get; set; }
     public string? ImageUrl { get; set; }

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Rukkab Driver (PWA)</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#0b5cff" />
+    <style>
+      body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;margin:1rem}
+      button{padding:.6rem 1rem;margin:.5rem}
+      #log{white-space:pre-wrap;background:#f7f7f7;padding:1rem;border-radius:6px;max-height:40vh;overflow:auto}
+    </style>
+  </head>
+  <body>
+    <h1>Rukkab Driver — PWA demo</h1>
+    <p>Installable web app that calls Driver API for Accept / Arrive / Start / Complete.</p>
+
+    <div>
+      <input id="rideId" placeholder="Ride id" style="width:320px;padding:.4rem" />
+      <input id="driverId" placeholder="Driver id (driver-1)" style="width:160px;padding:.4rem" value="driver-1" />
+    </div>
+    <div>
+      <button id="btnAccept">Accept</button>
+      <button id="btnArrive">Arrive</button>
+      <button id="btnStart">Start</button>
+      <button id="btnComplete">Complete</button>
+    </div>
+
+    <h3>Console</h3>
+    <div id="log">Ready.</div>
+
+    <script>
+      const DRIVER_URL = location.origin.replace(/:\d+$/, ':5002');
+      const log = (s) => { const el = document.getElementById('log'); el.textContent = (new Date()).toISOString() + ' ' + s + '\n' + el.textContent; };
+      async function post(path){
+        const rideId = document.getElementById('rideId').value.trim();
+        const driverId = document.getElementById('driverId').value.trim() || 'driver-1';
+        if(!rideId){ alert('enter ride id'); return; }
+        const url = `${DRIVER_URL}${path.replace('{rideId}', rideId)}${path.includes('?') ? '&' : '?'}driverId=${encodeURIComponent(driverId)}`;
+        log('POST ' + url);
+        try{
+          const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'});
+          const txt = await res.text();
+          log('HTTP ' + res.status + ' -> ' + txt);
+        }catch(e){ log('ERROR ' + e.message); }
+      }
+      document.getElementById('btnAccept').onclick = () => post('/api/assignments/{rideId}/accept');
+      document.getElementById('btnArrive').onclick = () => post('/api/assignments/{rideId}/arrive');
+      document.getElementById('btnStart').onclick = () => post('/api/assignments/{rideId}/start');
+      document.getElementById('btnComplete').onclick = () => post('/api/assignments/{rideId}/complete');
+
+      // Register service worker for offline/installability (basic)
+      if('serviceWorker' in navigator){
+        navigator.serviceWorker.register('/sw.js').then(()=>console.log('sw registered')).catch(()=>{});
+      }
+    </script>
+  </body>
+</html>

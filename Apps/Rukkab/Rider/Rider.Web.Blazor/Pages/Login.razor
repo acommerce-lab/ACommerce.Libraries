@@ -1,0 +1,51 @@
+@page "/login"
+@inject NavigationManager Nav
+@inject Microsoft.JSInterop.IJSRuntime JS
+@inject HttpClient Http
+
+<h2>Rukkab — Rider Login (demo)</h2>
+<style>
+  .rukkab-card { max-width:520px; padding:18px; border:1px solid #ddd; border-radius:8px; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.04); }
+  .rukkab-row { margin:8px 0 }
+  .rukkab-input { padding:8px; width:100%; box-sizing:border-box }
+  .rukkab-btn { padding:8px 14px; background:#0b69ff; color:white; border:none; border-radius:4px }
+</style>
+
+<div class="rukkab-card">
+  <div class="rukkab-row"><strong>Demo credentials</strong></div>
+  <div class="rukkab-row">Rider id: <code>rider-1</code> (pre-filled)</div>
+  <div class="rukkab-row"><input class="rukkab-input" @bind="UserId" /></div>
+  <div class="rukkab-row"><button class="rukkab-btn" @onclick="DoLogin">Login as Rider</button></div>
+  <div class="rukkab-row">Backend status: <em>@BackendStatus</em></div>
+  <div class="rukkab-row"><a href="/chats">Go to Chats</a> • <a href="/">Home</a></div>
+</div>
+
+@code {
+  private string UserId { get; set; } = "rider-1";
+  private string BackendStatus { get; set; } = "checking...";
+
+  protected override async Task OnInitializedAsync()
+  {
+    await CheckBackendAsync();
+  }
+
+  private async Task CheckBackendAsync()
+  {
+    try
+    {
+      var resp = await Http.GetAsync("http://127.0.0.1:5001/");
+      BackendStatus = resp.IsSuccessStatusCode ? "Rider API reachable" : $"Rider API responded {resp.StatusCode}";
+    }
+    catch (Exception)
+    {
+      BackendStatus = "unreachable — chat will fall back to local demo";
+    }
+  }
+
+  private async Task DoLogin()
+  {
+    await JS.InvokeAsync<object>("localStorage.setItem", new object[] { "rukkab-user", UserId });
+    Nav.NavigateTo("/");
+  }
+}
+

@@ -1,0 +1,22 @@
+[
+  "Other/ACommerce.Accounting.Core.Api/ACommerce.Accounting.Core.Api.csproj",
+  "Other/ACommerce.Accounting.Core/ACommerce.Accounting.Core.csproj",
+  "Other/ACommerce.Catalog.Attributes.Api/ACommerce.Catalog.Attributes.Api.csproj",
+  "Other/ACommerce.Catalog.Currencies.Api/ACommerce.Catalog.Currencies.Api.csproj",
+  "Other/ACommerce.Catalog.Simple.Api/ACommerce.Catalog.Simple.Api.csproj",
+  "Other/ACommerce.Catalog.Units.Api/ACommerce.Catalog.Units.Api.csproj",
+  "Other/ACommerce.Chats.Api/ACommerce.Chats.Api.csproj",
+  "Other/ACommerce.Chats.Core/ACommerce.Chats.Core.csproj",
+  "Other/ACommerce.Notifications.Channels.Email/ACommerce.Notifications.Channels.Email.csproj",
+  "Other/ACommerce.Notifications.Channels.Firebase/ACommerce.Notifications.Channels.Firebase.csproj",
+  "Other/ACommerce.Notifications.Channels.InApp/ACommerce.Notifications.Channels.InApp.csproj",
+  "Other/ACommerce.Notifications.Core/ACommerce.Notifications.Core.csproj",
+  "Other/ACommerce.Notifications.Recipients.Api/ACommerce.Notifications.Recipients.Api.csproj",
+  "Other/ACommerce.Notifications.Recipients/ACommerce.Notifications.Recipients.csproj",
+  "Other/ACommerce.Realtime.SignalR/ACommerce.Realtime.SignalR.csproj",
+  "Other/ACommerce.Transactions.Core.Api/ACommerce.Transactions.Core.Api.csproj",
+  "Other/ACommerce.Transactions.Core/ACommerce.Transactions.Core.csproj",
+  "libs/backend/auth/ACommerce.Profiles.Core/ACommerce.Profiles.Core.csproj",
+  "libs/backend/auth/ACommerce.Profiles.Messaging/ACommerce.Profiles.Messaging.csproj",
+  "libs/backend/shipping/ACommerce.Shipping.Api/ACommerce.Shipping.Api.csproj"
+]

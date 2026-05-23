@@ -1,18 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ACommerce.Locations</RootNamespace>
     <PackageId>ACommerce.Locations</PackageId>
     <Version>1.0.0</Version>
     <Authors>ACommerce</Authors>
-    <Description>Location and geography implementation for ACommerce - EF Core configurations, services, and repositories</Description>
+    <Description>Location and geography implementation for ACommerce - core models and services (dev in-memory impl).</Description>
   </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\..\libs\backend\core\ACommerce.Locations.Abstractions\ACommerce.Locations.Abstractions.csproj" />
-    <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.Infrastructure.EFCores\ACommerce.SharedKernel.Infrastructure.EFCores.csproj" />
+    <PackageReference Include="NetTopologySuite" Version="2.6.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.11" />
   </ItemGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Reference the shared abstractions project in the solution -->
+    <ProjectReference Include="../../libs/backend/core/ACommerce.Locations.Abstractions/ACommerce.Locations.Abstractions.csproj" />
+  </ItemGroup>
 </Project>
