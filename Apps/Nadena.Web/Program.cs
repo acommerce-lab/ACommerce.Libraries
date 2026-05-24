@@ -50,6 +50,8 @@ builder.Services.AddScoped<SpaceDataService>();
 builder.Services.AddScoped<ITimezoneService, BrowserTimezoneService>();
 builder.Services.AddScoped<IPaymentService, WebPaymentService>();
 builder.Services.AddSingleton<IAppVersionService, WebAppVersionService>();
+builder.Services.AddScoped<IMediaPickerService, WebMediaPickerService>();
+builder.Services.AddScoped<IImageCompressionService, WebImageCompressionService>();
 builder.Services.AddACommerceAnalytics(builder.Configuration);
 builder.Services.AddLocalizationValidation();
 
