@@ -26,7 +26,8 @@ public class VersionCheckService : ACommerce.Client.Versions.VersionCheckService
     {
         MobileAppCode = MobileAppCode,
         WebAppCode = WebAppCode,
-        BlockOnCheckFailure = true
+        // لا تحظر التطبيق إذا فشل فحص الإصدار (مثلاً مهلة الشبكة على خادم بطيء) — مجرد تحذير
+        BlockOnCheckFailure = false
     };
 
     public VersionCheckService(
