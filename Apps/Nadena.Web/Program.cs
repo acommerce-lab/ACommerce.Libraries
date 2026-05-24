@@ -45,6 +45,7 @@ builder.Services.AddNadenaServices();
 builder.Services.AddScoped<ThemeService>();
 builder.Services.AddSingleton<GuestModeService>();
 builder.Services.AddScoped<IAppNavigationService, WebNavigationService>();
+builder.Services.AddSingleton<IAppLifecycleService, WebAppLifecycleService>();
 builder.Services.AddScoped<SpaceDataService>();
 builder.Services.AddScoped<ITimezoneService, BrowserTimezoneService>();
 builder.Services.AddScoped<IPaymentService, WebPaymentService>();

@@ -12,12 +12,12 @@ public class VersionCheckService : ACommerce.Client.Versions.VersionCheckService
     /// <summary>
     /// كود تطبيق الموبايل لنادينا
     /// </summary>
-    public new const string MobileAppCode = "ashare-mobile";
+    public new const string MobileAppCode = "nadena-mobile";
 
     /// <summary>
     /// كود تطبيق الويب لنادينا
     /// </summary>
-    public new const string WebAppCode = "ashare-web";
+    public new const string WebAppCode = "nadena-web";
 
     /// <summary>
     /// إعدادات نادينا الافتراضية
