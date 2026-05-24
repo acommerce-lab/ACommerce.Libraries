@@ -45,13 +45,16 @@ builder.Services.AddNadenaServices();
 builder.Services.AddScoped<ThemeService>();
 builder.Services.AddSingleton<GuestModeService>();
 builder.Services.AddScoped<IAppNavigationService, WebNavigationService>();
-builder.Services.AddSingleton<IAppLifecycleService, WebAppLifecycleService>();
+builder.Services.AddSingleton<WebAppLifecycleService>();
+builder.Services.AddSingleton<IAppLifecycleService>(sp => sp.GetRequiredService<WebAppLifecycleService>());
 builder.Services.AddScoped<SpaceDataService>();
 builder.Services.AddScoped<ITimezoneService, BrowserTimezoneService>();
 builder.Services.AddScoped<IPaymentService, WebPaymentService>();
 builder.Services.AddSingleton<IAppVersionService, WebAppVersionService>();
 builder.Services.AddScoped<IMediaPickerService, WebMediaPickerService>();
 builder.Services.AddScoped<IImageCompressionService, WebImageCompressionService>();
+builder.Services.AddSingleton<ITrackingConsentService, WebTrackingConsentService>();
+builder.Services.AddSingleton<ACommerce.Client.Files.IDeviceInfoProvider, ACommerce.Client.Files.DefaultDeviceInfoProvider>();
 builder.Services.AddACommerceAnalytics(builder.Configuration);
 builder.Services.AddLocalizationValidation();
 
