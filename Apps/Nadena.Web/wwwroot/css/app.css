@@ -1,0 +1,139 @@
+/* Nadena.Web (Blazor WebAssembly) host styles.
+   The full UI theme is served from the shared library: _content/Nadena.Shared/css/nadena.css */
+
+/* Blazor WebAssembly error UI */
+#blazor-error-ui {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #b32121;
+    color: #fff;
+    padding: 12px 16px;
+    text-align: center;
+    z-index: 10000;
+    box-shadow: 0 -1px 6px rgba(0, 0, 0, .25);
+    font-family: 'Noto Kufi Arabic', 'Cairo', sans-serif;
+}
+
+#blazor-error-ui .reload,
+#blazor-error-ui .dismiss {
+    color: #fff;
+    text-decoration: underline;
+    cursor: pointer;
+    margin: 0 8px;
+}
+
+/* Blazor WASM loading bar (shown by the framework during startup) */
+.loading-progress {
+    position: relative;
+    display: block;
+    width: 8rem;
+    height: 8rem;
+    margin: 20vh auto 1rem auto;
+}
+
+.loading-progress-text {
+    position: absolute;
+    text-align: center;
+    font-weight: 600;
+    inset: calc(20vh + 3.25rem) 0 auto 0;
+    color: #002E39;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   Large screens: center the app in a phone-width column so the
+   fixed navbar / bottom-nav align with the content instead of
+   stretching as a full-width bar on the side.
+   ─────────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+    body {
+        background: #e8edef;
+    }
+
+    .ashare-app {
+        max-width: 480px;
+        margin-inline: auto;
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+        box-shadow: 0 0 60px rgba(0, 0, 0, .12);
+    }
+
+    .ac-navbar,
+    .ac-bottom-nav,
+    .ashare-booking-bar {
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 480px;
+    }
+}
+
+/* ───────────────────────────────────────────────────────────────
+   PWA bars (install / update / iOS hint) — created by pwa.js
+   ─────────────────────────────────────────────────────────────── */
+.nadena-pwa-bar {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(var(--bottom-nav-height, 64px) + env(safe-area-inset-bottom, 0px) + 12px);
+    width: calc(100% - 24px);
+    max-width: 456px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #ffffff;
+    color: #1c1917;
+    border: 1px solid #e6e2dd;
+    border-radius: 14px;
+    box-shadow: 0 10px 34px rgba(0, 0, 0, .20);
+    z-index: 4000;
+    font-family: 'Noto Kufi Arabic', 'Cairo', sans-serif;
+    animation: nadenaPwaUp .28s ease-out;
+}
+
+@keyframes nadenaPwaUp {
+    from { opacity: 0; transform: translate(-50%, 14px); }
+    to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.nadena-pwa-icon { font-size: 22px; line-height: 1; flex: 0 0 auto; }
+
+.nadena-pwa-text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.nadena-pwa-text strong { font-size: 14px; font-weight: 700; color: #002E39; }
+.nadena-pwa-text small { font-size: 11.5px; color: #57534e; }
+
+.nadena-pwa-btn {
+    flex: 0 0 auto;
+    border: none;
+    background: #09B269;
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+}
+.nadena-pwa-btn:active { background: #079457; }
+
+.nadena-pwa-close {
+    flex: 0 0 auto;
+    border: none;
+    background: transparent;
+    color: #78716c;
+    font-size: 20px;
+    line-height: 1;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    border-radius: 8px;
+}
+.nadena-pwa-close:active { background: #f0ede9; }
+
+.nadena-pwa-update { border-color: #09B269; }
+.nadena-pwa-ios .nadena-pwa-text small { white-space: normal; }

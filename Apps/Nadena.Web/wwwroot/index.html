@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <!-- Nadena Brand Color: Deep Teal -->
+    <meta name="theme-color" content="#002E39" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <title>نادينا - Nadena | أندية الحي</title>
+    <meta name="description" content="نادينا - منصة أندية الحي: أنشطة وبرامج تعليمية وترفيهية قريبة منك" />
+
+    <base href="/" />
+
+    <!-- Google Fonts: Noto Kufi Arabic (brand) + Cairo + Rubik -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;500;600;700&family=Cairo:wght@300;400;500;600;700&family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+    <!-- Leaflet.js for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- ACommerce base styles + Nadena brand overrides -->
+    <link rel="stylesheet" href="_content/ACommerce.Templates.Customer/css/acommerce.css" />
+    <link rel="stylesheet" href="_content/Nadena.Shared/css/nadena.css" />
+    <link rel="stylesheet" href="css/app.css" />
+
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="_content/Nadena.Shared/images/nadena-icon.svg" />
+</head>
+<body>
+    <div class="status-bar-spacer"></div>
+    <div id="app">
+        <div class="ashare-loading-screen">
+            <div class="ashare-loading-logo">
+                <img src="_content/Nadena.Shared/images/nadena-logo.svg" alt="نادينا" width="200" height="120" />
+            </div>
+            <div class="ashare-loading-spinner">
+                <div class="spinner"></div>
+            </div>
+            <p class="ashare-loading-text">جاري التحميل...</p>
+        </div>
+    </div>
+
+    <div id="blazor-error-ui">
+        <div class="blazor-error-content">
+            <i class="bi bi-exclamation-triangle"></i>
+            <p>حدث خطأ غير متوقع</p>
+            <a href="" class="reload">إعادة تحميل</a>
+            <a class="dismiss">تجاهل</a>
+        </div>
+    </div>
+
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="_content/Nadena.Shared/js/ac-map.js"></script>
+    <script src="media-picker.js"></script>
+    <script src="_content/Nadena.Shared/js/analytics-init.js"></script>
+    <script src="pwa.js"></script>
+</body>
+</html>
