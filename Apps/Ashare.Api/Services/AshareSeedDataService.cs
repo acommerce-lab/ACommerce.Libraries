@@ -28,8 +28,10 @@ public class AshareSeedDataService
                 public static readonly Guid Residential = Guid.Parse("10000000-0000-0000-0001-000000000001");
                 public static readonly Guid LookingForHousing = Guid.Parse("10000000-0000-0000-0001-000000000002");
                 public static readonly Guid LookingForPartner = Guid.Parse("10000000-0000-0000-0001-000000000003");
-                public static readonly Guid Administrative = Guid.Parse("10000000-0000-0000-0001-000000000004");
-                public static readonly Guid Commercial = Guid.Parse("10000000-0000-0000-0001-000000000005");
+                // ❌ مهجور — لا تُستخدم لتوجه عشير للسكن المشترك فقط
+                // Administrative / Commercial categories were removed.
+                // Existing rows in DB should be deactivated via the cleanup
+                // migration in scripts/sql/2026-05-30-ashir-housing-only-cleanup.sql
         }
 
         public static class CurrencyIds
@@ -51,19 +53,10 @@ public class AshareSeedDataService
 
         public static class ProductIds
         {
-                // Residential spaces
+                // Residential spaces (only — Ashir is housing-only)
                 public static readonly Guid Apartment1 = Guid.Parse("30000000-0000-0000-0001-000000000001");
                 public static readonly Guid Apartment2 = Guid.Parse("30000000-0000-0000-0001-000000000002");
                 public static readonly Guid Villa1 = Guid.Parse("30000000-0000-0000-0001-000000000003");
-
-                // Commercial spaces
-                public static readonly Guid Office1 = Guid.Parse("30000000-0000-0000-0002-000000000001");
-                public static readonly Guid Coworking1 = Guid.Parse("30000000-0000-0000-0002-000000000002");
-                public static readonly Guid MeetingRoom1 = Guid.Parse("30000000-0000-0000-0002-000000000003");
-
-                // Administrative spaces
-                public static readonly Guid AdminOffice1 = Guid.Parse("30000000-0000-0000-0003-000000000001");
-                public static readonly Guid AdminOffice2 = Guid.Parse("30000000-0000-0000-0003-000000000002");
         }
 
         public static class AttributeIds
@@ -157,9 +150,8 @@ public class AshareSeedDataService
                         AttributeIds.Amenities,       // المرافق
                         AttributeIds.City,            // المدينة
                         AttributeIds.Location,        // الموقع (عنوان + إحداثيات)
-                        AttributeIds.IsPhoneAllowed,  // السماح بالاتصال
-                        AttributeIds.IsWhatsAppAllowed, // السماح بواتساب
                         AttributeIds.IsMessagingAllowed, // السماح بالرسائل
+                        // ملاحظة: IsPhoneAllowed / IsWhatsAppAllowed أُلغيت كقنوات تواصل
                         AttributeIds.Images           // الصور
                 },
 
@@ -179,8 +171,6 @@ public class AshareSeedDataService
                         AttributeIds.Gender,          // الجنس (ذكر/أنثى)
                         AttributeIds.City,            // المدينة
                         AttributeIds.Location,        // الموقع المفضل
-                        AttributeIds.IsPhoneAllowed,
-                        AttributeIds.IsWhatsAppAllowed,
                         AttributeIds.IsMessagingAllowed
                 },
 
@@ -200,64 +190,10 @@ public class AshareSeedDataService
                         AttributeIds.Furnished,       // هل يفضل مفروش؟
                         AttributeIds.Smoking,         // حالة التدخين
                         AttributeIds.Description,     // وصف إضافي
-                        AttributeIds.IsPhoneAllowed,
-                        AttributeIds.IsWhatsAppAllowed,
                         AttributeIds.IsMessagingAllowed,
                         AttributeIds.Images           // صور شخصية (اختياري)
-                },
-
-                // ═══════════════════════════════════════════════════════════════════
-                // مساحة إدارية - Administrative Space
-                // PropertyType = عمارة فقط، بدون غرف/حمامات
-                // ═══════════════════════════════════════════════════════════════════
-                [CategoryIds.Administrative] = new List<Guid>
-                {
-                        AttributeIds.Title,
-                        AttributeIds.Description,
-                        AttributeIds.Price,
-                        AttributeIds.Duration,
-                        AttributeIds.TimeUnit,
-                        AttributeIds.LicenseNumber,   // رقم الترخيص
-                        AttributeIds.PropertyType,    // عمارة فقط
-                        AttributeIds.Floor,
-                        AttributeIds.Area,
-                        AttributeIds.Capacity,        // السعة (عدد الأشخاص)
-                        AttributeIds.Parking,         // المواقف
-                        AttributeIds.WorkingHours,    // ساعات العمل
-                        AttributeIds.Facilities,      // التجهيزات
-                        AttributeIds.City,
-                        AttributeIds.Location,
-                        AttributeIds.IsPhoneAllowed,
-                        AttributeIds.IsWhatsAppAllowed,
-                        AttributeIds.IsMessagingAllowed,
-                        AttributeIds.Images
-                },
-
-                // ═══════════════════════════════════════════════════════════════════
-                // مساحة تجارية - Commercial Space
-                // PropertyType = محل/مجمع/مول، بدون غرف/حمامات
-                // ═══════════════════════════════════════════════════════════════════
-                [CategoryIds.Commercial] = new List<Guid>
-                {
-                        AttributeIds.Title,
-                        AttributeIds.Description,
-                        AttributeIds.Price,
-                        AttributeIds.Duration,
-                        AttributeIds.TimeUnit,
-                        AttributeIds.LicenseNumber,   // رقم الترخيص
-                        AttributeIds.CommercialPropertyType, // محل/مجمع/مول
-                        AttributeIds.Floor,
-                        AttributeIds.Area,
-                        AttributeIds.Capacity,
-                        AttributeIds.Parking,
-                        AttributeIds.Facilities,
-                        AttributeIds.City,
-                        AttributeIds.Location,
-                        AttributeIds.IsPhoneAllowed,
-                        AttributeIds.IsWhatsAppAllowed,
-                        AttributeIds.IsMessagingAllowed,
-                        AttributeIds.Images
                 }
+                // ❌ Administrative + Commercial removed — Ashir focuses on shared housing only.
         };
 
         public AshareSeedDataService(IRepositoryFactory repositoryFactory, IConfiguration configuration)
@@ -490,29 +426,8 @@ public class AshareSeedDataService
                                 SortOrder = 3,
                                 IsActive = true,
                                 CreatedAt = DateTime.UtcNow
-                        },
-                        new()
-                        {
-                                Id = CategoryIds.Administrative,
-                                Name = "مساحة إدارية",
-                                Slug = "administrative",
-                                Description = "مكاتب ومساحات عمل مشتركة",
-                                Icon = "bi-building",
-                                SortOrder = 4,
-                                IsActive = true,
-                                CreatedAt = DateTime.UtcNow
-                        },
-                        new()
-                        {
-                                Id = CategoryIds.Commercial,
-                                Name = "مساحة تجارية",
-                                Slug = "commercial",
-                                Description = "محلات ومستودعات ومساحات تجارية",
-                                Icon = "bi-shop",
-                                SortOrder = 5,
-                                IsActive = true,
-                                CreatedAt = DateTime.UtcNow
                         }
+                        // ❌ Administrative + Commercial categories removed — Ashir is housing-only.
                 };
 
                 foreach (var category in categories)
@@ -520,6 +435,23 @@ public class AshareSeedDataService
                         if (!existingIds.Contains(category.Id))
                         {
                                 await repo.AddAsync(category);
+                        }
+                }
+
+                // إيقاف الفئات القديمة (إدارية/تجارية) إذا وُجدت من seed سابق
+                var legacyIds = new[]
+                {
+                        Guid.Parse("10000000-0000-0000-0001-000000000004"), // Administrative
+                        Guid.Parse("10000000-0000-0000-0001-000000000005")  // Commercial
+                };
+                foreach (var legacyId in legacyIds)
+                {
+                        var legacy = existing.FirstOrDefault(c => c.Id == legacyId);
+                        if (legacy != null && legacy.IsActive)
+                        {
+                                legacy.IsActive = false;
+                                await repo.UpdateAsync(legacy);
+                                Console.WriteLine($"[Seed] Deactivated legacy category {legacy.Slug}");
                         }
                 }
         }
@@ -584,7 +516,9 @@ public class AshareSeedDataService
                 var existing = await mappingRepo.GetAllWithPredicateAsync();
                 var existingPairs = existing.Select(m => (m.CategoryId, m.AttributeDefinitionId)).ToHashSet();
 
-                // تعريف الربطات بالأكواد (ديناميكي)
+                // تعريف الربطات بالأكواد (ديناميكي) — السكن المشترك فقط
+                // ⚠️ قنوات التواصل المعتمدة: is_messaging_allowed فقط.
+                //   is_phone_allowed و is_whatsapp_allowed أُلغيتا (نشأت محلهما المحادثة + اتصال الفيديو).
                 var categoryAttributeCodes = new Dictionary<string, List<string>>
                 {
                         // ═══════════════════════════════════════════════════════════════════
@@ -596,7 +530,7 @@ public class AshareSeedDataService
                                 "property_type", "unit_type", "floor", "bill_type", "rental_type",
                                 "gender", "area", "rooms", "bathrooms", "furnished", "amenities",
                                 "city", "location",
-                                "is_phone_allowed", "is_whatsapp_allowed", "is_messaging_allowed",
+                                "is_messaging_allowed",
                                 "images"
                         },
 
@@ -608,7 +542,7 @@ public class AshareSeedDataService
                                 "title", "description", "min_price", "max_price",
                                 "property_type", "unit_type", "rooms", "furnished", "gender",
                                 "city", "location",
-                                "is_phone_allowed", "is_whatsapp_allowed", "is_messaging_allowed"
+                                "is_messaging_allowed"
                         },
 
                         // ═══════════════════════════════════════════════════════════════════
@@ -619,35 +553,10 @@ public class AshareSeedDataService
                                 "personal_name", "age", "gender", "nationality", "job",
                                 "city", "min_price", "max_price", "furnished", "smoking",
                                 "description",
-                                "is_phone_allowed", "is_whatsapp_allowed", "is_messaging_allowed",
-                                "images"
-                        },
-
-                        // ═══════════════════════════════════════════════════════════════════
-                        // مساحة إدارية - Administrative Space
-                        // ═══════════════════════════════════════════════════════════════════
-                        ["administrative"] = new List<string>
-                        {
-                                "title", "description", "price", "duration", "time_unit",
-                                "property_type", "floor", "area", "capacity", "parking",
-                                "working_hours", "facilities",
-                                "city", "location",
-                                "is_phone_allowed", "is_whatsapp_allowed", "is_messaging_allowed",
-                                "images"
-                        },
-
-                        // ═══════════════════════════════════════════════════════════════════
-                        // مساحة تجارية - Commercial Space
-                        // ═══════════════════════════════════════════════════════════════════
-                        ["commercial"] = new List<string>
-                        {
-                                "title", "description", "price", "duration", "time_unit",
-                                "commercial_property_type", "floor", "area", "capacity", "parking",
-                                "facilities",
-                                "city", "location",
-                                "is_phone_allowed", "is_whatsapp_allowed", "is_messaging_allowed",
+                                "is_messaging_allowed",
                                 "images"
                         }
+                        // ❌ administrative / commercial mappings removed — Ashir is housing-only.
                 };
 
                 var mappingsToAdd = new List<CategoryAttributeMapping>();
@@ -1589,100 +1498,15 @@ public class AshareSeedDataService
                                 Sku = "RES-VIL-001",
                                 Type = ProductType.Simple,
                                 Status = ProductStatus.Active,
-                                ShortDescription = "فيلا 5 غرف مع حديقة ومسبح خاص",
-                                LongDescription = "فيلا فاخرة في حي الياسمين، تتكون من 5 غرف نوم، 3 صالات، مطبخ واسع، 4 حمامات، غرفة خادمة، موقف لسيارتين، حديقة خارجية مع مسبح خاص. الفيلا مؤثثة جزئياً.",
+                                ShortDescription = "فيلا 5 غرف مع حديقة - متاح غرف للمشاركة",
+                                LongDescription = "فيلا في حي الياسمين، تتكون من 5 غرف نوم، 3 صالات، مطبخ واسع، 4 حمامات، حديقة خارجية. متاح غرفة للسكن المشترك مع شريك ملتزم.",
                                 FeaturedImage = "https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800",
                                 IsFeatured = true,
                                 IsNew = false,
                                 SortOrder = 3,
                                 CreatedAt = DateTime.UtcNow.AddDays(-10)
-                        },
-
-                        // ═══════════════════════════════════════════════════════════════════
-                        // مساحات تجارية
-                        // ═══════════════════════════════════════════════════════════════════
-                        new()
-                        {
-                                Id = ProductIds.Office1,
-                                Name = "مكتب مجهز في برج المملكة",
-                                Sku = "COM-OFF-001",
-                                Type = ProductType.Simple,
-                                Status = ProductStatus.Active,
-                                ShortDescription = "مكتب فاخر 80 متر في برج المملكة",
-                                LongDescription = "مكتب مجهز بالكامل في برج المملكة الشهير. المساحة 80 متر مربع، يتسع لـ 6-8 أشخاص. يشمل أثاث مكتبي فاخر، إنترنت عالي السرعة، غرفة اجتماعات صغيرة، ومنطقة استراحة. موقف سيارة مجاني.",
-                                FeaturedImage = "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800",
-                                IsFeatured = true,
-                                IsNew = true,
-                                NewUntil = DateTime.UtcNow.AddDays(14),
-                                SortOrder = 4,
-                                CreatedAt = DateTime.UtcNow
-                        },
-                        new()
-                        {
-                                Id = ProductIds.Coworking1,
-                                Name = "مكتب مشترك - مساحة عمل مرنة",
-                                Sku = "COM-COW-001",
-                                Type = ProductType.Simple,
-                                Status = ProductStatus.Active,
-                                ShortDescription = "مقعد في مساحة عمل مشتركة حديثة",
-                                LongDescription = "انضم إلى مجتمع العمل المشترك في قلب الرياض! احصل على مكتب خاص في بيئة عمل ديناميكية. يشمل الاشتراك: مكتب وكرسي، إنترنت فائق السرعة، قهوة ومشروبات مجانية، استخدام غرف الاجتماعات، طابعة وماسح ضوئي.",
-                                FeaturedImage = "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?w=800",
-                                IsFeatured = true,
-                                IsNew = true,
-                                NewUntil = DateTime.UtcNow.AddDays(7),
-                                SortOrder = 5,
-                                CreatedAt = DateTime.UtcNow
-                        },
-                        new()
-                        {
-                                Id = ProductIds.MeetingRoom1,
-                                Name = "قاعة اجتماعات VIP",
-                                Sku = "COM-MTG-001",
-                                Type = ProductType.Simple,
-                                Status = ProductStatus.Active,
-                                ShortDescription = "قاعة اجتماعات فاخرة تتسع لـ 12 شخص",
-                                LongDescription = "قاعة اجتماعات VIP مجهزة بأحدث التقنيات. تتسع لـ 12 شخصاً حول طاولة اجتماعات فاخرة. تشمل: شاشة عرض 75 بوصة، نظام مؤتمرات فيديو، سبورة ذكية، نظام صوت احترافي، خدمة ضيافة. مثالية لاجتماعات العمل الهامة.",
-                                FeaturedImage = "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=800",
-                                IsFeatured = false,
-                                IsNew = false,
-                                SortOrder = 6,
-                                CreatedAt = DateTime.UtcNow.AddDays(-5)
-                        },
-
-                        // ═══════════════════════════════════════════════════════════════════
-                        // مساحات إدارية
-                        // ═══════════════════════════════════════════════════════════════════
-                        new()
-                        {
-                                Id = ProductIds.AdminOffice1,
-                                Name = "مكتب إداري في مجمع الأعمال",
-                                Sku = "ADM-OFF-001",
-                                Type = ProductType.Simple,
-                                Status = ProductStatus.Active,
-                                ShortDescription = "مكتب إداري 120 متر مع استقبال",
-                                LongDescription = "مكتب إداري فسيح في مجمع الأعمال بحي العليا. المساحة الكلية 120 متر مربع، تشمل: منطقة استقبال، 3 مكاتب خاصة، قاعة اجتماعات صغيرة، مخزن، ومطبخ صغير. الموقع استراتيجي مع سهولة الوصول.",
-                                FeaturedImage = "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800",
-                                IsFeatured = false,
-                                IsNew = true,
-                                NewUntil = DateTime.UtcNow.AddDays(21),
-                                SortOrder = 7,
-                                CreatedAt = DateTime.UtcNow
-                        },
-                        new()
-                        {
-                                Id = ProductIds.AdminOffice2,
-                                Name = "طابق إداري كامل",
-                                Sku = "ADM-FLR-001",
-                                Type = ProductType.Simple,
-                                Status = ProductStatus.Active,
-                                ShortDescription = "طابق كامل 500 متر في برج تجاري",
-                                LongDescription = "فرصة استثنائية! طابق إداري كامل في برج تجاري راقٍ. المساحة 500 متر مربع قابلة للتقسيم حسب الحاجة. يشمل: 8 مواقف سيارات، مصعد خاص، نظام أمان متكامل، تكييف مركزي. مناسب للشركات الكبرى.",
-                                FeaturedImage = "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800",
-                                IsFeatured = true,
-                                IsNew = false,
-                                SortOrder = 8,
-                                CreatedAt = DateTime.UtcNow.AddDays(-15)
                         }
+                        // ❌ Commercial/Administrative seed products removed — Ashir is housing-only.
                 };
 
                 foreach (var product in products)
@@ -1713,17 +1537,12 @@ public class AshareSeedDataService
                         return; // لا يمكن إضافة الأسعار بدون عملات أو منتجات
                 }
 
-                // تعريف الأسعار مع SKU للمنتج
+                // تعريف الأسعار مع SKU للمنتج — السكن المشترك فقط
                 var priceDefinitions = new Dictionary<string, decimal>
                 {
                         { "RES-APT-001", 3500 },  // شقة مفروشة
                         { "RES-STD-001", 2500 },  // استوديو
-                        { "RES-VIL-001", 15000 }, // فيلا
-                        { "COM-OFF-001", 8000 },  // مكتب
-                        { "COM-COW-001", 1500 },  // مساحة عمل مشتركة
-                        { "COM-MTG-001", 500 },   // قاعة اجتماعات
-                        { "ADM-OFF-001", 12000 }, // مكتب إداري
-                        { "ADM-FLR-001", 50000 }  // طابق إداري
+                        { "RES-VIL-001", 15000 }  // فيلا
                 };
 
                 // إضافة الأسعار باستخدام معرّفات المنتجات الفعلية
