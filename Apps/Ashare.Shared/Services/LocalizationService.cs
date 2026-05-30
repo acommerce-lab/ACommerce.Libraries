@@ -478,14 +478,12 @@ public class LocalizationService : BaseLocalizationService
         ar["NotSpecified"] = "غير محدد";
         ar["ExploreSpaces"] = "استكشف العروض";
 
-        // Contact (Ashare-specific) — قنوات التواصل المعتمدة
+        // Contact (Ashare-specific) — قناة التواصل المعتمدة: المحادثة فقط
         ar["ContactChat"] = "محادثة";
-        ar["ContactVideoCall"] = "اتصال فيديو";
-        ar["VideoCallInviteMessage"] = "أرسلت لك دعوة اتصال فيديو عبر عشير، انقر على الرابط للانضمام:";
 
         // Disclaimer (إخلاء مسؤولية في صفحة العرض)
         ar["Disclaimer"] = "إخلاء مسؤولية";
-        ar["ListingDisclaimerBody"] = "منصة عشير وسيط تعريفي بين الباحثين عن سكن مشترك. لا تتحمل المنصة أي مسؤولية عن صحة بيانات الإعلان أو سلوك أصحاب الإعلانات أو الاتفاقيات والمدفوعات بين الأطراف. يرجى التحقق من الإعلان والمعاينة شخصياً قبل أي التزام، والتواصل فقط عبر القنوات الرسمية للمنصة (المحادثة أو اتصال الفيديو) لضمان حقوقك.";
+        ar["ListingDisclaimerBody"] = "منصة عشير وسيط تعريفي بين الباحثين عن سكن مشترك. لا تتحمل المنصة أي مسؤولية عن صحة بيانات الإعلان أو سلوك أصحاب الإعلانات أو الاتفاقيات والمدفوعات بين الأطراف. يرجى التحقق من الإعلان والمعاينة شخصياً قبل أي التزام، والتواصل فقط عبر المحادثة الرسمية داخل المنصة لضمان حقوقك.";
 
         // Profile Photo (صورة البروفايل الإلزامية)
         ar["ProfilePhotoRequired"] = "اختر صورة لبروفايلك (إلزامي)";
@@ -1092,14 +1090,12 @@ public class LocalizationService : BaseLocalizationService
         en["NotSpecified"] = "Not specified";
         en["ExploreSpaces"] = "Explore Listings";
 
-        // Contact — approved channels only
+        // Contact — only approved channel: in-app chat
         en["ContactChat"] = "Chat";
-        en["ContactVideoCall"] = "Video Call";
-        en["VideoCallInviteMessage"] = "I'm inviting you to a video call via Ashir. Click the link to join:";
 
         // Disclaimer
         en["Disclaimer"] = "Disclaimer";
-        en["ListingDisclaimerBody"] = "Ashir is an introducing platform between people seeking shared housing. The platform takes no responsibility for the accuracy of listing data, the conduct of advertisers, or any agreements or payments between parties. Please verify the listing and inspect in person before any commitment, and only communicate via the platform's official channels (chat or video call) to safeguard your rights.";
+        en["ListingDisclaimerBody"] = "Ashir is an introducing platform between people seeking shared housing. The platform takes no responsibility for the accuracy of listing data, the conduct of advertisers, or any agreements or payments between parties. Please verify the listing and inspect in person before any commitment, and only communicate via the platform's official in-app chat to safeguard your rights.";
 
         // Profile photo (mandatory)
         en["ProfilePhotoRequired"] = "Choose a profile photo (required)";
@@ -1343,14 +1339,12 @@ public class LocalizationService : BaseLocalizationService
         ur["Studios"] = "عشیر جس کے پاس رہائش ہے";
         ur["Commercial"] = "عشیر جس کے پاس رہائش ہے";
 
-        // Contact — approved channels only
+        // Contact — only approved channel: in-app chat
         ur["ContactChat"] = "چیٹ";
-        ur["ContactVideoCall"] = "ویڈیو کال";
-        ur["VideoCallInviteMessage"] = "میں نے آپ کو عشیر کے ذریعے ویڈیو کال کی دعوت دی ہے، شامل ہونے کے لیے لنک پر کلک کریں:";
 
         // Disclaimer
         ur["Disclaimer"] = "ذمہ داری کی برات";
-        ur["ListingDisclaimerBody"] = "عشیر مشترکہ رہائش تلاش کرنے والوں کے درمیان ایک تعارفی پلیٹ فارم ہے۔ پلیٹ فارم اشتہار کی صحت، اشتہار دہندگان کے رویے یا فریقین کے درمیان کسی بھی معاہدے اور ادائیگیوں کی ذمہ داری نہیں لیتا۔ کسی بھی عہد سے پہلے براہ کرم اشتہار کی تصدیق کریں اور خود معائنہ کریں، اور اپنے حقوق کی حفاظت کے لیے صرف پلیٹ فارم کے سرکاری چینلز (چیٹ یا ویڈیو کال) کے ذریعے رابطہ کریں۔";
+        ur["ListingDisclaimerBody"] = "عشیر مشترکہ رہائش تلاش کرنے والوں کے درمیان ایک تعارفی پلیٹ فارم ہے۔ پلیٹ فارم اشتہار کی صحت، اشتہار دہندگان کے رویے یا فریقین کے درمیان کسی بھی معاہدے اور ادائیگیوں کی ذمہ داری نہیں لیتا۔ کسی بھی عہد سے پہلے براہ کرم اشتہار کی تصدیق کریں اور خود معائنہ کریں، اور اپنے حقوق کی حفاظت کے لیے صرف پلیٹ فارم کی سرکاری ان-ایپ چیٹ کے ذریعے رابطہ کریں۔";
 
         // Profile photo
         ur["ProfilePhotoRequired"] = "اپنی پروفائل تصویر منتخب کریں (لازمی)";

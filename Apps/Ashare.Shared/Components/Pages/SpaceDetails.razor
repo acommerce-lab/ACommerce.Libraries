@@ -781,10 +781,10 @@
         "has_gym", "gym", "has_security", "security", "has_garden", "garden",
         "has_balcony", "balcony", "has_storage", "storage", "has_maid_room", "maid_room",
         "has_driver_room", "driver_room",
-        // قنوات التواصل المعتمدة فقط: شات + اتصال فيديو
-        "is_messaging_allowed", "is_video_call_allowed",
-        // قنوات قديمة (اتصال هاتفي / واتساب) - مهملة، تُتجاهل من الواجهة
-        "is_phone_allowed", "is_whatsapp_allowed",
+        // قناة التواصل المعتمدة: المحادثة فقط
+        "is_messaging_allowed",
+        // قنوات قديمة (اتصال هاتفي / واتساب / فيديو) - مهملة، تُتجاهل من الواجهة
+        "is_phone_allowed", "is_whatsapp_allowed", "is_video_call_allowed",
         // License attributes (معروضة في البادج بالفعل)
         "requires_license", "has_owner_license", "license_number"
     };
@@ -1160,16 +1160,6 @@
             options.Add(("chat", "bi-chat-dots", L["ContactChat"], "contact-chat"));
         }
 
-        // اتصال فيديو - متاح دائماً ما لم يُعطّل صراحةً
-        var videoDisabled = _space?.Attributes != null
-            && _space.Attributes.ContainsKey("is_video_call_allowed")
-            && !GetBoolAttribute("is_video_call_allowed");
-
-        if (!videoDisabled)
-        {
-            options.Add(("video", "bi-camera-video", L["ContactVideoCall"], "contact-video"));
-        }
-
         // ضمان عدم الفراغ
         if (!options.Any())
         {
@@ -1181,64 +1171,8 @@
 
     private async Task HandleContact(string type)
     {
-        switch (type)
-        {
-            case "video":
-                await StartVideoCallAsync();
-                break;
-            case "chat":
-            default:
-                await ContactOwnerWithInitialMessage();
-                break;
-        }
-    }
-
-    /// <summary>
-    /// بدء مكالمة فيديو عبر غرفة Jitsi Meet خارجية مرتبطة بالمحادثة
-    /// تُرسل أيضاً رسالة شات بالرابط ليصل للطرف الآخر
-    /// </summary>
-    private async Task StartVideoCallAsync()
-    {
-        if (_space?.OwnerId == null || _space.OwnerId == Guid.Empty)
-        {
-            Console.WriteLine("[SpaceDetails] Cannot start video call - OwnerId is empty");
-            return;
-        }
-
-        var currentUserId = TokenManager.GetUserIdFromToken();
-        if (string.IsNullOrEmpty(currentUserId) ||
-            _space.OwnerId.ToString().Equals(currentUserId, StringComparison.OrdinalIgnoreCase))
-        {
-            return;
-        }
-
-        try
-        {
-            var conversation = await ChatsClient.GetOrCreateConversationAsync(_space.OwnerId.ToString());
-            if (conversation == null) return;
-
-            // غرفة فريدة لكل محادثة - Jitsi Meet العامة
-            var roomName = $"ashir-{conversation.Id:N}";
-            var meetUrl = $"https://meet.jit.si/{roomName}";
-
-            // إرسال الرابط في الشات حتى يستلمه الطرف الآخر
-            var msg = $"{L["VideoCallInviteMessage"]}\n{meetUrl}";
-            try
-            {
-                await ChatsClient.SendMessageAsync(conversation.Id, msg);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[SpaceDetails] Failed to send video call invite: {ex.Message}");
-            }
-
-            // فتح الغرفة في تطبيق Jitsi/المتصفح
-            await Navigation.OpenExternalAsync(meetUrl);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[SpaceDetails] Error starting video call: {ex.Message}");
-        }
+        // قناة التواصل الوحيدة المعتمدة حالياً: المحادثة
+        await ContactOwnerWithInitialMessage();
     }
 
     // ═══════════════════════════════════════════════════════════════════

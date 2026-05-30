@@ -2558,15 +2558,6 @@ h1, h2, h3, .ashare-logo-text {
     background-color: var(--ashare-primary-dark);
 }
 
-.ashare-contact-btn.contact-video {
-    background-color: var(--ashare-secondary, #F4844C);
-    color: white;
-}
-
-.ashare-contact-btn.contact-video:hover {
-    filter: brightness(0.92);
-}
-
 /* Disclaimer (إخلاء مسؤولية) */
 .ashare-disclaimer-section .ashare-disclaimer-card {
     background-color: #FFF7ED;
