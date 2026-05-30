@@ -12,7 +12,7 @@
             <i class="bi bi-search"></i>
             <input type="text"
                    class="ashare-search-input"
-                   placeholder="ابحث عن مساحة..."
+                   placeholder="ابحث عن سكن مشترك أو عشير..."
                    @bind="_searchQuery"
                    @bind:event="oninput"
                    @onkeyup="HandleSearch"
@@ -179,8 +179,8 @@
     private List<SpaceItem>? _searchResults;
     private List<SpaceCategory>? _categories;
     private HashSet<Guid> _favorites = new();
-    private List<string> _recentSearches = new() { "قاعة اجتماعات", "مكتب مشترك", "استوديو تصوير" };
-    private List<string> _popularSearches = new() { "قاعة مؤتمرات", "مكتب خاص", "صالة رياضية", "مساحة فعاليات", "استوديو", "محل تجاري" };
+    private List<string> _recentSearches = new() { "غرفة في الرياض", "عشير عنده سكن", "سكن طلابي" };
+    private List<string> _popularSearches = new() { "غرفة في شقة", "سكن طلابي", "غرفة في فيلا", "عشير موظف", "سكن قريب من الجامعة", "سكن للموظفين" };
     private bool _isSearching;
     private bool _locationFilter;
     private string? _priceFilter;

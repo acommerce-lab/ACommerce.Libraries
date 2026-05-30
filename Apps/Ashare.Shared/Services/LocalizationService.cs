@@ -40,7 +40,7 @@ public class LocalizationService : BaseLocalizationService
     {
         // App (Required)
         ar["AppName"] = "عشير";
-        ar["AppTagline"] = "شارك المساحات، شارك الإمكانيات";
+        ar["AppTagline"] = "ابحث عن عشيرك في السكن";
 
         // Bookings (Ashare-specific)
         ar["Bookings"] = "حجوزاتي";
@@ -85,21 +85,27 @@ public class LocalizationService : BaseLocalizationService
         ar["LoginRequiredDescription"] = "سجل دخولك للوصول لهذا المحتوى";
         ar["LoginToCreateListing"] = "يجب تسجيل الدخول لإنشاء عرض جديد";
 
-        // Spaces (Ashare-specific)
-        ar["Spaces"] = "المساحات";
-        ar["AllSpaces"] = "كل المساحات";
-        ar["FeaturedSpaces"] = "المساحات المميزة";
-        ar["NewSpaces"] = "أحدث المساحات";
+        // Spaces (Ashare-specific) — جميعها مرتبطة بالسكن المشترك
+        ar["Spaces"] = "العروض";
+        ar["AllSpaces"] = "كل العروض";
+        ar["FeaturedSpaces"] = "عروض مميزة";
+        ar["NewSpaces"] = "أحدث العروض";
         ar["NearbySpaces"] = "القريبة منك";
-        ar["NoSpaces"] = "لا توجد مساحات";
+        ar["NoSpaces"] = "لا توجد عروض حالياً";
 
-        // Categories (Ashare-specific)
-        ar["MeetingRooms"] = "قاعات اجتماعات";
-        ar["CoWorking"] = "مكاتب مشتركة";
-        ar["EventHalls"] = "قاعات فعاليات";
-        ar["Studios"] = "استوديوهات";
-        ar["Commercial"] = "مساحات تجارية";
-        ar["CoLiving"] = "سكن مشترك";
+        // Categories (Ashare-specific) — فئتان فقط حسب نموذج عشير
+        ar["AshirHasHousing"] = "عشير عنده سكن";
+        ar["AshirSeeksHousing"] = "عشير يدور سكن";
+        ar["AshirHasHousingDescription"] = "أعلن عن نفسك كعشير عنده سكن يبحث عن عشير يشاركه";
+        ar["AshirSeeksHousingDescription"] = "أعلن عن نفسك كعشير يدور سكن مع عشير عنده سكن";
+
+        // اختصارات للتوافق مع الكود القديم - كلها مرتبطة بالسكن المشترك
+        ar["CoLiving"] = "عشير عنده سكن";
+        ar["MeetingRooms"] = "عشير عنده سكن";
+        ar["CoWorking"] = "عشير يدور سكن";
+        ar["EventHalls"] = "عشير عنده سكن";
+        ar["Studios"] = "عشير عنده سكن";
+        ar["Commercial"] = "عشير عنده سكن";
 
         // Space Details
         ar["Amenities"] = "المرافق والخدمات";
@@ -466,11 +472,24 @@ public class LocalizationService : BaseLocalizationService
         ar["Available"] = "متاح";
         ar["NotAvailable"] = "غير متاح";
         ar["Status"] = "الحالة";
-        ar["SpaceOwner"] = "مالك المساحة";
-        ar["YourListing"] = "معلنك";
+        ar["SpaceOwner"] = "صاحب الإعلان";
+        ar["YourListing"] = "إعلانك";
         ar["ViewAll"] = "عرض الكل";
         ar["NotSpecified"] = "غير محدد";
-        ar["ExploreSpaces"] = "استكشف المساحات";
+        ar["ExploreSpaces"] = "استكشف العروض";
+
+        // Contact (Ashare-specific) — قنوات التواصل المعتمدة
+        ar["ContactChat"] = "محادثة";
+        ar["ContactVideoCall"] = "اتصال فيديو";
+        ar["VideoCallInviteMessage"] = "أرسلت لك دعوة اتصال فيديو عبر عشير، انقر على الرابط للانضمام:";
+
+        // Disclaimer (إخلاء مسؤولية في صفحة العرض)
+        ar["Disclaimer"] = "إخلاء مسؤولية";
+        ar["ListingDisclaimerBody"] = "منصة عشير وسيط تعريفي بين الباحثين عن سكن مشترك. لا تتحمل المنصة أي مسؤولية عن صحة بيانات الإعلان أو سلوك أصحاب الإعلانات أو الاتفاقيات والمدفوعات بين الأطراف. يرجى التحقق من الإعلان والمعاينة شخصياً قبل أي التزام، والتواصل فقط عبر القنوات الرسمية للمنصة (المحادثة أو اتصال الفيديو) لضمان حقوقك.";
+
+        // Profile Photo (صورة البروفايل الإلزامية)
+        ar["ProfilePhotoRequired"] = "اختر صورة لبروفايلك (إلزامي)";
+        ar["ProfilePhotoRequiredError"] = "صورة البروفايل إلزامية للمتابعة. يرجى اختيار صورة واضحة.";
 
         // Property Attributes Labels
         ar["AttrPropertyType"] = "نوع العقار";
@@ -634,8 +653,8 @@ public class LocalizationService : BaseLocalizationService
     private static void AddEnglishTranslations(Dictionary<string, string> en)
     {
         // App (Required)
-        en["AppName"] = "Ashare";
-        en["AppTagline"] = "Share Spaces, Share Possibilities";
+        en["AppName"] = "Ashir";
+        en["AppTagline"] = "Find your Ashir in shared housing";
 
         // Bookings (Ashare-specific)
         en["Bookings"] = "Bookings";
@@ -680,21 +699,27 @@ public class LocalizationService : BaseLocalizationService
         en["LoginRequiredDescription"] = "Please login to access this content";
         en["LoginToCreateListing"] = "Please login to create a listing";
 
-        // Spaces (Ashare-specific)
-        en["Spaces"] = "Spaces";
-        en["AllSpaces"] = "All Spaces";
-        en["FeaturedSpaces"] = "Featured Spaces";
-        en["NewSpaces"] = "New Spaces";
+        // Spaces (Ashare-specific) — all shared housing related
+        en["Spaces"] = "Listings";
+        en["AllSpaces"] = "All Listings";
+        en["FeaturedSpaces"] = "Featured Listings";
+        en["NewSpaces"] = "New Listings";
         en["NearbySpaces"] = "Nearby";
-        en["NoSpaces"] = "No spaces found";
+        en["NoSpaces"] = "No listings found";
 
-        // Categories (Ashare-specific)
-        en["MeetingRooms"] = "Meeting Rooms";
-        en["CoWorking"] = "Co-Working";
-        en["EventHalls"] = "Event Halls";
-        en["Studios"] = "Studios";
-        en["Commercial"] = "Commercial";
-        en["CoLiving"] = "Co-Living";
+        // Categories — only two per Ashir concept
+        en["AshirHasHousing"] = "Ashir with housing";
+        en["AshirSeeksHousing"] = "Ashir seeking housing";
+        en["AshirHasHousingDescription"] = "Post yourself as an Ashir with housing looking for someone to share with";
+        en["AshirSeeksHousingDescription"] = "Post yourself as an Ashir seeking an Ashir with housing";
+
+        // Legacy aliases — all map to shared housing
+        en["CoLiving"] = "Ashir with housing";
+        en["MeetingRooms"] = "Ashir with housing";
+        en["CoWorking"] = "Ashir seeking housing";
+        en["EventHalls"] = "Ashir with housing";
+        en["Studios"] = "Ashir with housing";
+        en["Commercial"] = "Ashir with housing";
 
         // Space Details
         en["Amenities"] = "Amenities";
@@ -1061,11 +1086,24 @@ public class LocalizationService : BaseLocalizationService
         en["Available"] = "Available";
         en["NotAvailable"] = "Not Available";
         en["Status"] = "Status";
-        en["SpaceOwner"] = "Space Owner";
+        en["SpaceOwner"] = "Listing Owner";
         en["YourListing"] = "Your Listing";
         en["ViewAll"] = "View All";
         en["NotSpecified"] = "Not specified";
-        en["ExploreSpaces"] = "Explore Spaces";
+        en["ExploreSpaces"] = "Explore Listings";
+
+        // Contact — approved channels only
+        en["ContactChat"] = "Chat";
+        en["ContactVideoCall"] = "Video Call";
+        en["VideoCallInviteMessage"] = "I'm inviting you to a video call via Ashir. Click the link to join:";
+
+        // Disclaimer
+        en["Disclaimer"] = "Disclaimer";
+        en["ListingDisclaimerBody"] = "Ashir is an introducing platform between people seeking shared housing. The platform takes no responsibility for the accuracy of listing data, the conduct of advertisers, or any agreements or payments between parties. Please verify the listing and inspect in person before any commitment, and only communicate via the platform's official channels (chat or video call) to safeguard your rights.";
+
+        // Profile photo (mandatory)
+        en["ProfilePhotoRequired"] = "Choose a profile photo (required)";
+        en["ProfilePhotoRequiredError"] = "Profile photo is required to continue. Please choose a clear photo.";
 
         // Property Attributes Labels
         en["AttrPropertyType"] = "Property Type";
@@ -1230,7 +1268,7 @@ public class LocalizationService : BaseLocalizationService
     {
         // App (Required)
         ur["AppName"] = "عشیر";
-        ur["AppTagline"] = "جگہیں شیئر کریں، امکانات شیئر کریں";
+        ur["AppTagline"] = "مشترکہ رہائش میں اپنا عشیر تلاش کریں";
 
         // Navigation
         ur["Home"] = "ہوم";
@@ -1292,14 +1330,31 @@ public class LocalizationService : BaseLocalizationService
         ur["PageNotFound"] = "صفحہ نہیں ملا";
         ur["ErrorLoadingPage"] = "صفحہ لوڈ کرنے میں خرابی";
 
-        // Categories
+        // Categories — only two per Ashir concept
         ur["Categories"] = "زمرے";
-        ur["MeetingRooms"] = "میٹنگ رومز";
-        ur["CoWorking"] = "شیئرڈ آفس";
-        ur["EventHalls"] = "ایونٹ ہالز";
-        ur["Studios"] = "اسٹوڈیوز";
-        ur["Commercial"] = "کمرشل";
-        ur["CoLiving"] = "شیئرڈ رہائش";
+        ur["AshirHasHousing"] = "عشیر جس کے پاس رہائش ہے";
+        ur["AshirSeeksHousing"] = "عشیر جو رہائش تلاش کر رہا ہے";
+
+        // Legacy aliases — all map to shared housing
+        ur["CoLiving"] = "عشیر جس کے پاس رہائش ہے";
+        ur["MeetingRooms"] = "عشیر جس کے پاس رہائش ہے";
+        ur["CoWorking"] = "عشیر جو رہائش تلاش کر رہا ہے";
+        ur["EventHalls"] = "عشیر جس کے پاس رہائش ہے";
+        ur["Studios"] = "عشیر جس کے پاس رہائش ہے";
+        ur["Commercial"] = "عشیر جس کے پاس رہائش ہے";
+
+        // Contact — approved channels only
+        ur["ContactChat"] = "چیٹ";
+        ur["ContactVideoCall"] = "ویڈیو کال";
+        ur["VideoCallInviteMessage"] = "میں نے آپ کو عشیر کے ذریعے ویڈیو کال کی دعوت دی ہے، شامل ہونے کے لیے لنک پر کلک کریں:";
+
+        // Disclaimer
+        ur["Disclaimer"] = "ذمہ داری کی برات";
+        ur["ListingDisclaimerBody"] = "عشیر مشترکہ رہائش تلاش کرنے والوں کے درمیان ایک تعارفی پلیٹ فارم ہے۔ پلیٹ فارم اشتہار کی صحت، اشتہار دہندگان کے رویے یا فریقین کے درمیان کسی بھی معاہدے اور ادائیگیوں کی ذمہ داری نہیں لیتا۔ کسی بھی عہد سے پہلے براہ کرم اشتہار کی تصدیق کریں اور خود معائنہ کریں، اور اپنے حقوق کی حفاظت کے لیے صرف پلیٹ فارم کے سرکاری چینلز (چیٹ یا ویڈیو کال) کے ذریعے رابطہ کریں۔";
+
+        // Profile photo
+        ur["ProfilePhotoRequired"] = "اپنی پروفائل تصویر منتخب کریں (لازمی)";
+        ur["ProfilePhotoRequiredError"] = "جاری رکھنے کے لیے پروفائل تصویر لازمی ہے۔ براہ کرم واضح تصویر منتخب کریں۔";
 
         // Bookings
         ur["BookNow"] = "ابھی بک کریں";

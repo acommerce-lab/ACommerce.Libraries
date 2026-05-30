@@ -5,45 +5,42 @@ namespace Ashare.Shared.Services;
 /// </summary>
 public class SpaceDataService
 {
+    // فئتان فقط حسب نموذج "عشير" للسكن المشترك
     private static readonly List<SpaceCategory> _categories =
     [
-        new() { Id = Guid.NewGuid(), Name = "قاعات اجتماعات", NameEn = "Meeting Rooms", Icon = "bi-people", Color = "#0EA5E9" },
-        new() { Id = Guid.NewGuid(), Name = "مكاتب مشتركة", NameEn = "Co-Working", Icon = "bi-laptop", Color = "#8B5CF6" },
-        new() { Id = Guid.NewGuid(), Name = "قاعات فعاليات", NameEn = "Event Halls", Icon = "bi-calendar-event", Color = "#F59E0B" },
-        new() { Id = Guid.NewGuid(), Name = "استوديوهات", NameEn = "Studios", Icon = "bi-camera-video", Color = "#EC4899" },
-        new() { Id = Guid.NewGuid(), Name = "مساحات تجارية", NameEn = "Commercial", Icon = "bi-shop", Color = "#10B981" },
-        new() { Id = Guid.NewGuid(), Name = "سكن مشترك", NameEn = "Co-Living", Icon = "bi-house", Color = "#6366F1" },
+        new() { Id = Guid.NewGuid(), Name = "عشير عنده سكن", NameEn = "Ashir with housing", Icon = "bi-house-heart", Color = "#345454" },
+        new() { Id = Guid.NewGuid(), Name = "عشير يدور سكن", NameEn = "Ashir seeking housing", Icon = "bi-person-walking", Color = "#F4844C" },
     ];
 
     private static readonly Guid _ownerId = Guid.NewGuid();
 
+    // ملاحظة: _categories[0] = عشير عنده سكن، _categories[1] = عشير يدور سكن
     private static readonly List<SpaceItem> _spaces =
     [
         new()
         {
             Id = Guid.NewGuid(),
-            Name = "قاعة الأعمال الذهبية",
-            NameEn = "Golden Business Hall",
-            Description = "قاعة اجتماعات فاخرة مجهزة بأحدث التقنيات. تتميز بموقعها المتميز في قلب حي العليا، وتوفر بيئة عمل احترافية مثالية للاجتماعات المهمة والعروض التقديمية.",
+            Name = "غرفة في شقة مشتركة - حي الملقا",
+            NameEn = "Room in shared apartment - Al Malqa",
+            Description = "أنا عشير عنده سكن في شقة بحي الملقا، غرفة خاصة فاضية وأبحث عن عشير يشاركني السكن. الشقة مفروشة بالكامل وفيها كل الاحتياجات الأساسية، ومناسبة لشخص هادئ وملتزم.",
             CategoryId = _categories[0].Id,
-            CategoryName = "قاعات اجتماعات",
-            Location = "الرياض، حي العليا",
+            CategoryName = "عشير عنده سكن",
+            Location = "الرياض، حي الملقا",
             City = "الرياض",
-            PricePerHour = 150,
-            PricePerDay = 1000,
-            PricePerMonth = 15000,
+            PricePerHour = 0,
+            PricePerDay = 0,
+            PricePerMonth = 1500,
             Currency = "ر.س",
-            Capacity = 20,
-            Area = 50,
-            Rating = 4.8m,
-            ReviewsCount = 124,
+            Capacity = 1,
+            Area = 18,
+            Rating = 4.6m,
+            ReviewsCount = 12,
             Images = [
-                "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800",
-                "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800",
-                "https://images.unsplash.com/photo-1497215842964-222b430dc094?w=800"
+                "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800",
+                "https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=800"
             ],
-            Amenities = ["واي فاي", "شاشة عرض", "سبورة", "مكيف", "قهوة وشاي", "موقف سيارات"],
-            Rules = ["الالتزام بالمواعيد", "الحفاظ على نظافة المكان", "عدم التدخين داخل القاعة"],
+            Amenities = ["غرفة مفروشة", "مطبخ مشترك", "واي فاي", "غسالة", "مكيف"],
+            Rules = ["عدم التدخين داخل الشقة", "الهدوء بعد الساعة 11 مساءً", "احترام خصوصية الجميع"],
             OwnerId = _ownerId,
             OwnerName = "أحمد العتيبي",
             OwnerJoinDate = new DateTime(2022, 1, 15),
@@ -54,56 +51,55 @@ public class SpaceDataService
         new()
         {
             Id = Guid.NewGuid(),
-            Name = "مساحة العمل المشترك",
-            NameEn = "Shared Workspace Hub",
-            Description = "بيئة عمل ملهمة مع مكاتب مريحة وخدمات متكاملة. مثالية للمستقلين والشركات الناشئة الباحثين عن مساحة عمل احترافية بتكلفة معقولة.",
+            Name = "موظف يبحث عن عشير في الرياض",
+            NameEn = "Employee seeking Ashir in Riyadh",
+            Description = "أنا عشير ما عنده سكن، موظف في الرياض وأبحث عن عشير عنده سكن (غرفة مستقلة) في شمال الرياض. ميزانيتي حتى 1800 ر.س شهرياً، شخص ملتزم بمواعيد العمل وهادئ.",
             CategoryId = _categories[1].Id,
-            CategoryName = "مكاتب مشتركة",
-            Location = "جدة، حي الروضة",
-            City = "جدة",
-            PricePerHour = 50,
-            PricePerDay = 300,
-            PricePerMonth = 3000,
+            CategoryName = "عشير يدور سكن",
+            Location = "الرياض، شمال الرياض",
+            City = "الرياض",
+            PricePerHour = 0,
+            PricePerDay = 0,
+            PricePerMonth = 1800,
             Currency = "ر.س",
-            Capacity = 50,
-            Area = 200,
-            Rating = 4.6m,
-            ReviewsCount = 89,
+            Capacity = 1,
+            Area = 0,
+            Rating = 4.8m,
+            ReviewsCount = 8,
             Images = [
-                "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800",
-                "https://images.unsplash.com/photo-1497215842964-222b430dc094?w=800"
+                "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800"
             ],
-            Amenities = ["واي فاي", "طابعة", "مطبخ", "غرفة اجتماعات", "موقف سيارات"],
-            Rules = ["احترام خصوصية الآخرين", "الهدوء أثناء العمل"],
+            Amenities = [],
+            Rules = ["مدة الإقامة سنة على الأقل", "أفضّل شخصاً غير مدخّن"],
             OwnerId = _ownerId,
             OwnerName = "سارة الغامدي",
-            OwnerJoinDate = new DateTime(2021, 6, 10),
+            OwnerJoinDate = new DateTime(2023, 6, 10),
             IsFeatured = true,
-            CreatedAt = DateTime.Now.AddDays(-30)
+            CreatedAt = DateTime.Now.AddDays(-10)
         },
         new()
         {
             Id = Guid.NewGuid(),
-            Name = "قاعة المناسبات الكبرى",
-            NameEn = "Grand Events Hall",
-            Description = "قاعة واسعة للحفلات والمؤتمرات الكبيرة. مجهزة بأحدث أنظمة الصوت والإضاءة لتقديم تجربة استثنائية لضيوفك.",
-            CategoryId = _categories[2].Id,
-            CategoryName = "قاعات فعاليات",
-            Location = "الرياض، حي الملقا",
+            Name = "غرفة في فيلا - حي النرجس",
+            NameEn = "Room in villa - Al Narjis",
+            Description = "غرفة واسعة في فيلا بحي النرجس، أبحث عن عشير يشاركني السكن. الفيلا فيها مجلس مشترك ومطبخ كبير وحديقة صغيرة، والموقع قريب من مترو الرياض.",
+            CategoryId = _categories[0].Id,
+            CategoryName = "عشير عنده سكن",
+            Location = "الرياض، حي النرجس",
             City = "الرياض",
-            PricePerHour = 500,
-            PricePerDay = 5000,
-            PricePerMonth = 50000,
+            PricePerHour = 0,
+            PricePerDay = 0,
+            PricePerMonth = 2000,
             Currency = "ر.س",
-            Capacity = 300,
-            Area = 500,
+            Capacity = 1,
+            Area = 22,
             Rating = 4.9m,
-            ReviewsCount = 56,
+            ReviewsCount = 21,
             Images = [
-                "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800"
+                "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800"
             ],
-            Amenities = ["إضاءة احترافية", "نظام صوت", "مسرح", "كراسي", "مكيف"],
-            Rules = ["الحجز المسبق بأسبوع على الأقل", "دفعة مقدمة 50%"],
+            Amenities = ["غرفة مفروشة", "مكيف", "واي فاي", "موقف سيارات", "حديقة"],
+            Rules = ["عدم التدخين", "احترام أوقات الراحة"],
             OwnerId = _ownerId,
             OwnerName = "محمد القحطاني",
             OwnerJoinDate = new DateTime(2020, 3, 1),
@@ -113,86 +109,59 @@ public class SpaceDataService
         new()
         {
             Id = Guid.NewGuid(),
-            Name = "استوديو التصوير الإبداعي",
-            NameEn = "Creative Photo Studio",
-            Description = "استوديو مجهز للتصوير الفوتوغرافي والفيديو. يوفر بيئة مثالية للمصورين ومنشئي المحتوى مع جميع المعدات الاحترافية.",
-            CategoryId = _categories[3].Id,
-            CategoryName = "استوديوهات",
-            Location = "الدمام، حي الفيصلية",
-            City = "الدمام",
-            PricePerHour = 200,
-            PricePerDay = 1500,
-            PricePerMonth = 12000,
-            Currency = "ر.س",
-            Capacity = 10,
-            Area = 80,
-            Rating = 4.7m,
-            ReviewsCount = 43,
-            Images = [
-                "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=800"
-            ],
-            Amenities = ["إضاءة استوديو", "خلفيات متنوعة", "غرفة تغيير", "معدات تصوير"],
-            OwnerId = _ownerId,
-            OwnerName = "نورة الشهري",
-            OwnerJoinDate = new DateTime(2023, 2, 20),
-            CreatedAt = DateTime.Now.AddDays(-60)
-        },
-        new()
-        {
-            Id = Guid.NewGuid(),
-            Name = "محل تجاري في مول",
-            NameEn = "Mall Retail Space",
-            Description = "موقع استراتيجي في مول تجاري حيوي. فرصة ممتازة للعلامات التجارية للوصول إلى جمهور واسع من المتسوقين.",
-            CategoryId = _categories[4].Id,
-            CategoryName = "مساحات تجارية",
-            Location = "الرياض، غرناطة مول",
-            City = "الرياض",
-            PricePerHour = 0,
-            PricePerDay = 0,
-            PricePerMonth = 15000,
-            Currency = "ر.س",
-            Capacity = 0,
-            Area = 100,
-            Rating = 4.5m,
-            ReviewsCount = 28,
-            Images = [
-                "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800"
-            ],
-            Amenities = ["واجهة زجاجية", "مكيف", "كهرباء", "موقف سيارات"],
-            Rules = ["عقد سنوي كحد أدنى", "التزام بنظام المول"],
-            OwnerId = _ownerId,
-            OwnerName = "فهد الدوسري",
-            OwnerJoinDate = new DateTime(2019, 11, 5),
-            CreatedAt = DateTime.Now.AddDays(-120)
-        },
-        new()
-        {
-            Id = Guid.NewGuid(),
-            Name = "شقة سكن مشترك للطلاب",
-            NameEn = "Student Co-Living Apartment",
-            Description = "سكن مشترك مريح بالقرب من الجامعات. بيئة آمنة ومريحة للطلاب مع جميع الخدمات الأساسية.",
-            CategoryId = _categories[5].Id,
-            CategoryName = "سكن مشترك",
+            Name = "غرفة سكن طلابي قرب الجامعة",
+            NameEn = "Student room near university",
+            Description = "غرفة سكن مشترك بالقرب من جامعة الملك سعود. بيئة هادئة مناسبة للدراسة، أبحث عن عشير طالب يشاركني الشقة.",
+            CategoryId = _categories[0].Id,
+            CategoryName = "عشير عنده سكن",
             Location = "الرياض، حي النزهة",
             City = "الرياض",
             PricePerHour = 0,
             PricePerDay = 0,
-            PricePerMonth = 1500,
+            PricePerMonth = 1200,
             Currency = "ر.س",
-            Capacity = 4,
-            Area = 120,
+            Capacity = 1,
+            Area = 16,
             Rating = 4.4m,
             ReviewsCount = 67,
             Images = [
-                "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800"
+                "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800"
             ],
-            Amenities = ["غرفة مفروشة", "مطبخ مشترك", "واي فاي", "غسالة", "نظافة أسبوعية"],
+            Amenities = ["غرفة مفروشة", "مطبخ مشترك", "واي فاي", "غسالة"],
             Rules = ["للطلاب فقط", "عدم التدخين", "الهدوء بعد الساعة 10 مساءً"],
             OwnerId = _ownerId,
             OwnerName = "خالد السالم",
             OwnerJoinDate = new DateTime(2022, 8, 1),
             IsNew = true,
             CreatedAt = DateTime.Now.AddDays(-7)
+        },
+        new()
+        {
+            Id = Guid.NewGuid(),
+            Name = "طالب جامعي يبحث عن عشير في جدة",
+            NameEn = "University student seeking Ashir in Jeddah",
+            Description = "طالب جامعي في جدة، أبحث عن عشير عنده سكن قريب من جامعة الملك عبدالعزيز. ميزانيتي حتى 1200 ر.س، شخص ملتزم بدراسته وهادئ.",
+            CategoryId = _categories[1].Id,
+            CategoryName = "عشير يدور سكن",
+            Location = "جدة، حي السلامة",
+            City = "جدة",
+            PricePerHour = 0,
+            PricePerDay = 0,
+            PricePerMonth = 1200,
+            Currency = "ر.س",
+            Capacity = 1,
+            Area = 0,
+            Rating = 4.5m,
+            ReviewsCount = 5,
+            Images = [
+                "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800"
+            ],
+            Amenities = [],
+            Rules = ["مدة الإقامة فصل دراسي على الأقل"],
+            OwnerId = _ownerId,
+            OwnerName = "فهد الدوسري",
+            OwnerJoinDate = new DateTime(2024, 1, 5),
+            CreatedAt = DateTime.Now.AddDays(-15)
         }
     ];
 

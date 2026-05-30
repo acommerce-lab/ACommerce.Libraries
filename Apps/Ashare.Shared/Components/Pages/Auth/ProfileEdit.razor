@@ -70,7 +70,7 @@
     {
         @* Avatar Section *@
         <div class="ashare-avatar-section">
-            <div class="ashare-avatar-edit">
+            <div class="ashare-avatar-edit @(_isNewUser && string.IsNullOrEmpty(_avatarUrl) ? "ashare-avatar-required" : "")">
                 @if (!string.IsNullOrEmpty(_avatarUrl))
                 {
                     <img src="@_avatarUrl" alt="@_fullName" />
@@ -86,7 +86,16 @@
                     <InputFile OnChange="HandleAvatarChange" accept="image/*" style="display: none" />
                 </label>
             </div>
-            <span class="ashare-change-avatar-text">@L["ChangePhoto"]</span>
+            <span class="ashare-change-avatar-text">
+                @if (_isNewUser)
+                {
+                    <span style="color: var(--ashare-error, #EF4444); font-weight: 600;">@L["ProfilePhotoRequired"]</span>
+                }
+                else
+                {
+                    @L["ChangePhoto"]
+                }
+            </span>
         </div>
 
         @* Error/Success Messages *@
@@ -328,6 +337,14 @@
         if (_isNewUser && string.IsNullOrWhiteSpace(_fullName))
         {
             _errorMessage = L["FullNameRequired"];
+            _isSaving = false;
+            return;
+        }
+
+        // صورة البروفايل إلزامية للمستخدمين الجدد
+        if (_isNewUser && string.IsNullOrWhiteSpace(_avatarUrl))
+        {
+            _errorMessage = L["ProfilePhotoRequiredError"];
             _isSaving = false;
             return;
         }
