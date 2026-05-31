@@ -8,6 +8,8 @@ using ACommerce.Subscriptions.Entities;
 using ACommerce.LegalPages.Entities;
 using ACommerce.Versions.Entities;
 using ACommerce.Versions.Enums;
+using ACommerce.AppConfig.Entities;
+using ACommerce.AppConfig.Enums;
 using Ashare.Shared.Services;
 using Microsoft.Extensions.Configuration;
 
@@ -231,6 +233,7 @@ public class AshareSeedDataService
                 await SeedSubscriptionPlansAsync();
                 await SeedLegalPagesAsync();
                 await SeedAppVersionsAsync();
+                await SeedAppConfigAsync();
         }
 
         private async Task SeedLegalPagesAsync()
@@ -1667,5 +1670,150 @@ public class AshareSeedDataService
                 }
 
                 Console.WriteLine($"[Seed] App versions seeding complete. Total: {versions.Count}");
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // AppConfig: Feature Flags + UI Strings + Theme Tokens
+        // ═══════════════════════════════════════════════════════════
+
+        private async Task SeedAppConfigAsync()
+        {
+                await SeedFeatureFlagsAsync();
+                await SeedUiStringsAsync();
+                await SeedThemeTokensAsync();
+        }
+
+        private async Task SeedFeatureFlagsAsync()
+        {
+                var repo = _repositoryFactory.CreateRepository<FeatureFlag>();
+                var existing = await repo.GetAllWithPredicateAsync();
+                var existingKeys = existing.Select(f => f.Key).ToHashSet();
+
+                var flags = new List<FeatureFlag>
+                {
+                        // ── Payments ──
+                        new() { Id = Guid.NewGuid(), Key = "payments.enabled",          Enabled = true, Description = "نظام الدفع العام", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "payments.noon",             Enabled = true, Description = "بوابة نون للدفع", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "payments.moyasar",          Enabled = false, Description = "بوابة ميسر للدفع (احتياطية)", CreatedAt = DateTime.UtcNow },
+
+                        // ── Booking ──
+                        new() { Id = Guid.NewGuid(), Key = "booking.enabled",           Enabled = true, Description = "إظهار زر الحجز ومسار BookingCreate", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "booking.deposit_required",  Enabled = true, Description = "اشتراط دفع العربون قبل التواصل", CreatedAt = DateTime.UtcNow },
+
+                        // ── Subscriptions ──
+                        new() { Id = Guid.NewGuid(), Key = "subscriptions.enabled",     Enabled = true, Description = "نظام باقات المعلنين", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "subscriptions.partner_seeker", Enabled = true, Description = "باقة الباحث عن شريك", CreatedAt = DateTime.UtcNow },
+
+                        // ── Auth ──
+                        new() { Id = Guid.NewGuid(), Key = "auth.nafath",               Enabled = true, Description = "تسجيل الدخول عبر نفاذ", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "auth.guest_mode",           Enabled = true, Description = "السماح بوضع الزائر بدون تسجيل", CreatedAt = DateTime.UtcNow },
+
+                        // ── Version Check ──
+                        new() { Id = Guid.NewGuid(), Key = "version_check.enabled",     Enabled = true, Description = "فحص توفر تحديث للتطبيق", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "version_check.force_update", Enabled = false, Description = "إجبار المستخدمين على تحديث الإصدارات القديمة", CreatedAt = DateTime.UtcNow },
+
+                        // ── Communication ──
+                        new() { Id = Guid.NewGuid(), Key = "chat.enabled",              Enabled = true, Description = "نظام المحادثات (شات داخل التطبيق)", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "complaints.enabled",        Enabled = true, Description = "نظام الشكاوى والاقتراحات", CreatedAt = DateTime.UtcNow },
+
+                        // ── Marketing Analytics ──
+                        new() { Id = Guid.NewGuid(), Key = "analytics.meta",            Enabled = false, Description = "تتبع Meta (Facebook/Instagram) Conversions", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "analytics.google",          Enabled = false, Description = "تتبع Google Analytics/GA4", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "analytics.tiktok",          Enabled = false, Description = "تتبع TikTok Events", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "analytics.snapchat",        Enabled = false, Description = "تتبع Snapchat Pixel/SDK", CreatedAt = DateTime.UtcNow },
+
+                        // ── Listings & UX ──
+                        new() { Id = Guid.NewGuid(), Key = "listing.disclaimer.show",   Enabled = true, Description = "إظهار قسم إخلاء المسؤولية في صفحة العرض", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "profile.photo_required",    Enabled = true, Description = "إجبار صورة البروفايل عند أول تسجيل", CreatedAt = DateTime.UtcNow }
+                };
+
+                foreach (var flag in flags)
+                {
+                        if (!existingKeys.Contains(flag.Key))
+                        {
+                                await repo.AddAsync(flag);
+                                Console.WriteLine($"[Seed] Added feature flag: {flag.Key} = {flag.Enabled}");
+                        }
+                }
+                Console.WriteLine($"[Seed] Feature flags seeding complete. Total: {flags.Count}");
+        }
+
+        private async Task SeedUiStringsAsync()
+        {
+                var repo = _repositoryFactory.CreateRepository<UiString>();
+                var existing = await repo.GetAllWithPredicateAsync();
+                var existingPairs = existing.Select(s => $"{s.Key}:{s.Language}").ToHashSet();
+
+                // Hybrid strategy: only "marketing copy" strings live in DB; rest stay in code.
+                var strings = new List<UiString>
+                {
+                        // App tagline
+                        new() { Id = Guid.NewGuid(), Key = "AppTagline", Language = "ar", Value = "ابحث عن عشيرك في السكن", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "AppTagline", Language = "en", Value = "Find your Ashir in shared housing", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "AppTagline", Language = "ur", Value = "مشترکہ رہائش میں اپنا عشیر تلاش کریں", IsActive = true, CreatedAt = DateTime.UtcNow },
+
+                        // Disclaimer
+                        new() { Id = Guid.NewGuid(), Key = "ListingDisclaimerBody", Language = "ar",
+                                Value = "منصة عشير وسيط تعريفي بين الباحثين عن سكن مشترك. لا تتحمل المنصة أي مسؤولية عن صحة بيانات الإعلان أو سلوك أصحاب الإعلانات أو الاتفاقيات والمدفوعات بين الأطراف. يرجى التحقق من الإعلان والمعاينة شخصياً قبل أي التزام، والتواصل فقط عبر المحادثة الرسمية داخل المنصة لضمان حقوقك.",
+                                IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "ListingDisclaimerBody", Language = "en",
+                                Value = "Ashir is an introducing platform between people seeking shared housing. The platform takes no responsibility for the accuracy of listing data, the conduct of advertisers, or any agreements or payments between parties. Please verify the listing and inspect in person before any commitment, and only communicate via the platform's official in-app chat to safeguard your rights.",
+                                IsActive = true, CreatedAt = DateTime.UtcNow },
+
+                        // Categories — easy to rename later without redeploy
+                        new() { Id = Guid.NewGuid(), Key = "AshirHasHousing",    Language = "ar", Value = "عشير عنده سكن",  IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "AshirSeeksHousing",  Language = "ar", Value = "عشير يدور سكن",  IsActive = true, CreatedAt = DateTime.UtcNow },
+
+                        // Welcome
+                        new() { Id = Guid.NewGuid(), Key = "WelcomeToAshare", Language = "ar", Value = "مرحباً بك في عشير", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "PleaseCompleteYourProfile", Language = "ar", Value = "الرجاء إكمال بياناتك للمتابعة", IsActive = true, CreatedAt = DateTime.UtcNow }
+                };
+
+                foreach (var s in strings)
+                {
+                        var key = $"{s.Key}:{s.Language}";
+                        if (!existingPairs.Contains(key))
+                        {
+                                await repo.AddAsync(s);
+                        }
+                }
+                Console.WriteLine($"[Seed] UiStrings seeding complete. Total: {strings.Count}");
+        }
+
+        private async Task SeedThemeTokensAsync()
+        {
+                var repo = _repositoryFactory.CreateRepository<ThemeToken>();
+                var existing = await repo.GetAllWithPredicateAsync();
+                var existingPairs = existing.Select(t => $"{t.Key}:{t.Mode}").ToHashSet();
+
+                // Values match Ashare Visual Identity Guidelines 2025.
+                var tokens = new List<ThemeToken>
+                {
+                        // ── Light ──
+                        new() { Id = Guid.NewGuid(), Key = "primary",        Mode = ThemeMode.Light, Value = "#345454", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "primary-light",  Mode = ThemeMode.Light, Value = "#4A6B6B", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "primary-dark",   Mode = ThemeMode.Light, Value = "#263F3F", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "secondary",      Mode = ThemeMode.Light, Value = "#F4844C", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "secondary-light",Mode = ThemeMode.Light, Value = "#F69B6B", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "secondary-dark", Mode = ThemeMode.Light, Value = "#E06D34", IsActive = true, CreatedAt = DateTime.UtcNow },
+
+                        // ── Dark ──
+                        new() { Id = Guid.NewGuid(), Key = "primary",        Mode = ThemeMode.Dark, Value = "#5A8585", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "primary-light",  Mode = ThemeMode.Dark, Value = "#7BA8A8", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "primary-dark",   Mode = ThemeMode.Dark, Value = "#345454", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "secondary",      Mode = ThemeMode.Dark, Value = "#F69B6B", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "secondary-light",Mode = ThemeMode.Dark, Value = "#FAB793", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "secondary-dark", Mode = ThemeMode.Dark, Value = "#F4844C", IsActive = true, CreatedAt = DateTime.UtcNow }
+                };
+
+                foreach (var t in tokens)
+                {
+                        var key = $"{t.Key}:{t.Mode}";
+                        if (!existingPairs.Contains(key))
+                        {
+                                await repo.AddAsync(t);
+                        }
+                }
+                Console.WriteLine($"[Seed] ThemeTokens seeding complete. Total: {tokens.Count}");
         }
 }

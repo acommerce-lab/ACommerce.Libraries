@@ -97,6 +97,10 @@ using ACommerce.Marketing.Analytics.Controllers;
 using ACommerce.Complaints.Api.Controllers;
 using ACommerce.Complaints.Extensions;
 
+// AppConfig (server-driven texts, theme, feature flags)
+using ACommerce.AppConfig.Extensions;
+using ACommerce.AppConfig.Api.Controllers;
+
 // Data Protection
 using Microsoft.AspNetCore.DataProtection;
 using Ashare.Api.Data;
@@ -123,6 +127,12 @@ ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEnt
 ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Complaints.Entities.Complaint>();
 ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Complaints.Entities.ComplaintReply>();
 ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.Notifications.Channels.Firebase.EntityFramework.Entities.DeviceTokenEntity>();
+
+// AppConfig entities — texts, theme tokens, feature flags, generic kv entries
+ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.AppConfig.Entities.UiString>();
+ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.AppConfig.Entities.ThemeToken>();
+ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.AppConfig.Entities.FeatureFlag>();
+ACommerce.SharedKernel.Abstractions.Entities.EntityDiscoveryRegistry.RegisterEntity<ACommerce.AppConfig.Entities.AppConfigEntry>();
 
 try
 {
@@ -200,7 +210,8 @@ try
         .AddApplicationPart(typeof(AppVersionsController).Assembly) // Version Management
         .AddApplicationPart(typeof(BookingsController).Assembly) // Bookings
         .AddApplicationPart(typeof(MarketingStatsController).Assembly) // Marketing Analytics
-        .AddApplicationPart(typeof(ComplaintsController).Assembly); // Complaints & Support
+        .AddApplicationPart(typeof(ComplaintsController).Assembly) // Complaints & Support
+        .AddApplicationPart(typeof(AppConfigController).Assembly); // AppConfig (texts/theme/flags)
 
     builder.Services.AddEndpointsApiExplorer();
 
@@ -395,6 +406,9 @@ try
 
     // Complaints & Support
     builder.Services.AddComplaintsModule();
+
+    // AppConfig — server-driven texts, theme tokens, feature flags
+    builder.Services.AddAppConfig();
 
     // Meta Conversions API (Facebook Server-Side Events)
     builder.Services.AddMetaConversions(builder.Configuration);

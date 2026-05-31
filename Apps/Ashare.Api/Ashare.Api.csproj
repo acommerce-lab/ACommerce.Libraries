@@ -118,6 +118,9 @@
     <!-- Complaints & Support -->
     <ProjectReference Include="..\..\Modules\ACommerce.Complaints\ACommerce.Complaints.csproj" />
 
+    <!-- AppConfig (server-driven texts, theme, feature flags) -->
+    <ProjectReference Include="..\..\libs\backend\core\ACommerce.AppConfig\ACommerce.AppConfig.csproj" />
+
     <!-- Shared -->
     <ProjectReference Include="..\Ashare.Shared\Ashare.Shared.csproj" />
   </ItemGroup>
