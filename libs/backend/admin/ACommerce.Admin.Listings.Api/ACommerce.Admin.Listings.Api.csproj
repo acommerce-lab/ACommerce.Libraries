@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ACommerce.Admin.Listings\ACommerce.Admin.Listings.csproj" />
+    <ProjectReference Include="..\ACommerce.Admin.AuditLog\ACommerce.Admin.AuditLog.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(ACOMMERCE_BUILD_MODE)' != 'CLOUD'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
