@@ -1,0 +1,207 @@
+@page "/bookings"
+@inject AdminModerationService Moderation
+@inject IJSRuntime JS
+
+<div class="bookings-page">
+    <div class="page-header">
+        <div class="search-filters">
+            <SfTextBox Placeholder="بحث باسم العرض أو الموقع..." @bind-Value="_search" Width="280px" />
+            <SfDropDownList TItem="StatusOption" TValue="string" DataSource="@_statusOptions"
+                            @bind-Value="_status" Width="180px" Placeholder="الحالة">
+                <DropDownListFieldSettings Text="Name" Value="Code" />
+            </SfDropDownList>
+            <SfButton CssClass="e-primary" OnClick="Load">بحث</SfButton>
+        </div>
+    </div>
+
+    @if (_message != null)
+    {
+        <div class="action-message @(_messageOk ? "ok" : "err")">@_message</div>
+    }
+
+    <div class="card">
+        @if (_loading)
+        {
+            <div class="loading"><SfSpinner Visible="true" /></div>
+        }
+        else
+        {
+            <SfGrid DataSource="@_items" AllowPaging="true" AllowSorting="true">
+                <GridPageSettings PageSize="15" />
+                <GridColumns>
+                    <GridColumn Field="@nameof(BookingAdminVm.SpaceName)" HeaderText="العرض" Width="200" />
+                    <GridColumn Field="@nameof(BookingAdminVm.SpaceLocation)" HeaderText="الموقع" Width="160" />
+                    <GridColumn HeaderText="الفترة" Width="180">
+                        <Template>
+                            @{ var b = context as BookingAdminVm; }
+                            <span>@b?.CheckInDate.ToString("yyyy/MM/dd") → @b?.CheckOutDate.ToString("yyyy/MM/dd")</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn HeaderText="المبلغ" Width="120">
+                        <Template>
+                            @{ var b = context as BookingAdminVm; }
+                            <span>@b?.TotalPrice.ToString("N0") ر.س</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn HeaderText="الحالة" Width="120">
+                        <Template>
+                            @{ var b = context as BookingAdminVm; }
+                            <span class="status-badge @StatusClass(b?.Status)">@StatusAr(b?.Status)</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn HeaderText="الضمان" Width="110">
+                        <Template>
+                            @{ var b = context as BookingAdminVm; }
+                            <span class="escrow-badge">@EscrowAr(b?.EscrowStatus)</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(BookingAdminVm.CreatedAt)" HeaderText="التاريخ" Width="120" Format="d" />
+                    <GridColumn HeaderText="الإجراءات" Width="240">
+                        <Template>
+                            @{ var b = context as BookingAdminVm; }
+                            <div class="action-buttons">
+                                @if (b?.Status is "Pending" or "DepositPaid")
+                                {
+                                    <SfButton CssClass="e-flat e-success" IconCss="e-icons e-check" Title="تأكيد"
+                                              OnClick="@(() => Confirm(b!))" />
+                                    <SfButton CssClass="e-flat e-danger" IconCss="e-icons e-close" Title="رفض"
+                                              OnClick="@(() => Act(b!, "reject"))" />
+                                }
+                                @if (b?.Status is "Confirmed" or "Active")
+                                {
+                                    <SfButton CssClass="e-flat e-warning" IconCss="e-icons e-close" Title="إلغاء"
+                                              OnClick="@(() => Act(b!, "cancel"))" />
+                                }
+                                @if (b?.EscrowStatus == "Held")
+                                {
+                                    <SfButton CssClass="e-flat e-primary" IconCss="e-icons e-export" Title="تحرير الضمان للمعلن"
+                                              OnClick="@(() => Release(b!))" />
+                                    <SfButton CssClass="e-flat e-danger" IconCss="e-icons e-undo" Title="استرداد للمستأجر"
+                                              OnClick="@(() => Act(b!, "refund"))" />
+                                }
+                            </div>
+                        </Template>
+                    </GridColumn>
+                </GridColumns>
+            </SfGrid>
+        }
+    </div>
+</div>
+
+<SfDialog @bind-Visible="_reasonDialog" Width="420px" ShowCloseIcon="true" IsModal="true">
+    <DialogTemplates>
+        <Header>@_reasonTitle</Header>
+        <Content>
+            <p>اذكر السبب — سيظهر للطرفين ويُحفظ في السجل.</p>
+            <SfTextBox Multiline="true" @bind-Value="_reason" Placeholder="السبب..." Width="100%" />
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="إلغاء" OnClick="@(() => _reasonDialog = false)" />
+        <DialogButton Content="تأكيد" IsPrimary="true" OnClick="ConfirmReason" />
+    </DialogButtons>
+</SfDialog>
+
+<style>
+    .action-buttons { display: flex; gap: 4px; flex-wrap: wrap; }
+    .action-message { padding: 10px 16px; border-radius: 8px; margin-bottom: 12px; }
+    .action-message.ok { background: #dcfce7; color: #166534; }
+    .action-message.err { background: #fee2e2; color: #991b1b; }
+    .loading { display: flex; justify-content: center; padding: 40px; }
+    .escrow-badge { font-size: 12px; color: #475569; }
+</style>
+
+@code {
+    private record StatusOption(string Code, string Name);
+    private List<StatusOption> _statusOptions = new()
+    {
+        new("", "كل الحالات"), new("Pending", "بانتظار الدفع"), new("DepositPaid", "عربون مدفوع"),
+        new("Confirmed", "مؤكد"), new("Active", "نشط"), new("Completed", "مكتمل"),
+        new("Cancelled", "ملغي"), new("Rejected", "مرفوض"), new("Disputed", "متنازع")
+    };
+
+    private List<BookingAdminVm> _items = new();
+    private string _search = "";
+    private string _status = "";
+    private bool _loading = true;
+
+    private bool _reasonDialog;
+    private string _reason = "";
+    private string _reasonTitle = "";
+    private string _reasonAction = "";
+    private BookingAdminVm? _reasonTarget;
+
+    private string? _message;
+    private bool _messageOk;
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load()
+    {
+        _loading = true;
+        StateHasChanged();
+        var result = await Moderation.GetBookingsAsync(string.IsNullOrEmpty(_status) ? null : _status,
+                                                       string.IsNullOrWhiteSpace(_search) ? null : _search);
+        _items = result.Items;
+        _loading = false;
+    }
+
+    private async Task Confirm(BookingAdminVm b)
+        => await Run(await Moderation.ConfirmBookingAsync(b.Id), "تم تأكيد الحجز");
+
+    private async Task Release(BookingAdminVm b)
+        => await Run(await Moderation.ReleaseEscrowAsync(b.Id), "تم تحرير الضمان للمعلن");
+
+    private void Act(BookingAdminVm b, string action)
+    {
+        _reasonTarget = b;
+        _reasonAction = action;
+        _reason = "";
+        _reasonTitle = action switch { "reject" => "رفض الحجز", "cancel" => "إلغاء الحجز", "refund" => "استرداد الضمان", _ => "تأكيد" };
+        _reasonDialog = true;
+    }
+
+    private async Task ConfirmReason()
+    {
+        _reasonDialog = false;
+        if (_reasonTarget == null || string.IsNullOrWhiteSpace(_reason)) return;
+        var b = _reasonTarget;
+        bool ok = _reasonAction switch
+        {
+            "reject" => await Moderation.RejectBookingAsync(b.Id, _reason),
+            "cancel" => await Moderation.CancelBookingAsync(b.Id, _reason),
+            "refund" => await Moderation.RefundBookingAsync(b.Id, _reason),
+            _ => false
+        };
+        await Run(ok, "تمت العملية بنجاح");
+    }
+
+    private async Task Run(bool ok, string okMsg)
+    {
+        _messageOk = ok;
+        _message = ok ? okMsg : "فشلت العملية، حاول مرة أخرى";
+        if (ok) await Load();
+        StateHasChanged();
+    }
+
+    private string StatusAr(string? s) => s switch
+    {
+        "Pending" => "بانتظار الدفع", "DepositPaid" => "عربون مدفوع", "Confirmed" => "مؤكد",
+        "Active" => "نشط", "Completed" => "مكتمل", "Cancelled" => "ملغي",
+        "Rejected" => "مرفوض", "Disputed" => "متنازع", _ => s ?? "—"
+    };
+
+    private string StatusClass(string? s) => s switch
+    {
+        "Confirmed" or "Active" or "Completed" => "success",
+        "Pending" or "DepositPaid" => "warning",
+        "Cancelled" or "Rejected" or "Disputed" => "danger",
+        _ => "primary"
+    };
+
+    private string EscrowAr(string? s) => s switch
+    {
+        "Held" => "محتجز", "Released" => "محرّر", "Refunded" => "مسترد",
+        "HeldForDispute" => "معلّق لنزاع", "PartiallyReleased" => "محرّر جزئياً", _ => "—"
+    };
+}

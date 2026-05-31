@@ -1,0 +1,178 @@
+@page "/complaints"
+@inject AdminSupportService Support
+@inject IJSRuntime JS
+
+<div class="complaints-page">
+    <div class="page-header">
+        <div class="search-filters">
+            <SfDropDownList TItem="Opt" TValue="string" DataSource="@_statusOptions" @bind-Value="_status" Width="180px" Placeholder="الحالة">
+                <DropDownListFieldSettings Text="Name" Value="Code" />
+            </SfDropDownList>
+            <SfButton CssClass="e-primary" OnClick="Load">تحديث</SfButton>
+        </div>
+    </div>
+
+    @if (_message != null)
+    {
+        <div class="action-message @(_messageOk ? "ok" : "err")">@_message</div>
+    }
+
+    <div class="card">
+        @if (_loading)
+        {
+            <div class="loading"><SfSpinner Visible="true" /></div>
+        }
+        else
+        {
+            <SfGrid DataSource="@_items" AllowPaging="true" AllowSorting="true">
+                <GridPageSettings PageSize="15" />
+                <GridColumns>
+                    <GridColumn Field="@nameof(ComplaintAdminVm.TicketNumber)" HeaderText="التذكرة" Width="120" />
+                    <GridColumn Field="@nameof(ComplaintAdminVm.Title)" HeaderText="العنوان" Width="240" />
+                    <GridColumn HeaderText="النوع" Width="100">
+                        <Template>@{ var c = context as ComplaintAdminVm; }<span>@TypeAr(c?.Type)</span></Template>
+                    </GridColumn>
+                    <GridColumn HeaderText="الأولوية" Width="100">
+                        <Template>@{ var c = context as ComplaintAdminVm; }<span>@PriorityAr(c?.Priority)</span></Template>
+                    </GridColumn>
+                    <GridColumn HeaderText="الحالة" Width="120">
+                        <Template>
+                            @{ var c = context as ComplaintAdminVm; }
+                            <span class="status-badge @StatusClass(c?.Status)">@StatusAr(c?.Status)</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(ComplaintAdminVm.RepliesCount)" HeaderText="الردود" Width="80" />
+                    <GridColumn Field="@nameof(ComplaintAdminVm.CreatedAt)" HeaderText="التاريخ" Width="120" Format="d" />
+                    <GridColumn HeaderText="الإجراءات" Width="120">
+                        <Template>
+                            @{ var c = context as ComplaintAdminVm; }
+                            <SfButton CssClass="e-flat e-primary" IconCss="e-icons e-eye" Title="فتح" OnClick="@(() => Open(c!))" />
+                        </Template>
+                    </GridColumn>
+                </GridColumns>
+            </SfGrid>
+        }
+    </div>
+</div>
+
+<SfDialog @bind-Visible="_dialog" Width="600px" ShowCloseIcon="true" IsModal="true">
+    <DialogTemplates>
+        <Header>@(_detail?.TicketNumber) — @(_detail?.Title)</Header>
+        <Content>
+            @if (_detail != null)
+            {
+                <div class="complaint-meta">
+                    <span class="status-badge @StatusClass(_detail.Status)">@StatusAr(_detail.Status)</span>
+                    <span>@TypeAr(_detail.Type)</span>
+                    <span>@PriorityAr(_detail.Priority)</span>
+                </div>
+                <p class="complaint-desc">@_detail.Description</p>
+
+                <div class="status-actions">
+                    <SfDropDownList TItem="Opt" TValue="string" DataSource="@_setStatusOptions" @bind-Value="_newStatus" Width="180px" Placeholder="تغيير الحالة" />
+                    <SfButton CssClass="e-primary" OnClick="ApplyStatus">تطبيق</SfButton>
+                </div>
+
+                <h4 class="replies-title">الردود (@_replies.Count)</h4>
+                <div class="replies">
+                    @foreach (var r in _replies)
+                    {
+                        <div class="reply @(r.IsStaff ? "staff" : "user")">
+                            <div class="reply-head"><strong>@r.SenderName</strong><span>@r.CreatedAt.ToString("yyyy/MM/dd HH:mm")</span></div>
+                            <p>@r.Message</p>
+                        </div>
+                    }
+                    @if (_replies.Count == 0) { <p class="muted">لا ردود بعد</p> }
+                </div>
+
+                <div class="reply-box">
+                    <SfTextBox Multiline="true" @bind-Value="_replyText" Placeholder="اكتب رداً..." Width="100%" />
+                    <SfButton CssClass="e-primary" OnClick="SendReply">إرسال الرد</SfButton>
+                </div>
+            }
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+<style>
+    .action-message { padding: 10px 16px; border-radius: 8px; margin-bottom: 12px; }
+    .action-message.ok { background: #dcfce7; color: #166534; }
+    .action-message.err { background: #fee2e2; color: #991b1b; }
+    .loading { display: flex; justify-content: center; padding: 40px; }
+    .complaint-meta { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+    .complaint-desc { background: #f8fafc; padding: 12px; border-radius: 8px; }
+    .status-actions { display: flex; gap: 8px; align-items: center; margin: 16px 0; }
+    .replies-title { margin: 12px 0 8px; }
+    .replies { max-height: 240px; overflow-y: auto; }
+    .reply { padding: 10px; border-radius: 8px; margin-bottom: 8px; }
+    .reply.staff { background: #eff6ff; }
+    .reply.user { background: #f1f5f9; }
+    .reply-head { display: flex; justify-content: space-between; font-size: 13px; color: #64748b; }
+    .reply-box { display: flex; gap: 8px; margin-top: 12px; align-items: flex-start; }
+    .muted { color: #94a3b8; }
+</style>
+
+@code {
+    private record Opt(string Code, string Name);
+    private List<Opt> _statusOptions = new() { new("", "الكل"), new("Open", "مفتوح"), new("InProgress", "قيد المعالجة"), new("Resolved", "تم الحل"), new("Closed", "مغلق") };
+    private List<Opt> _setStatusOptions = new() { new("Open", "مفتوح"), new("InProgress", "قيد المعالجة"), new("Resolved", "تم الحل"), new("Closed", "مغلق") };
+
+    private List<ComplaintAdminVm> _items = new();
+    private string _status = "";
+    private bool _loading = true;
+
+    private bool _dialog;
+    private ComplaintDetailVm? _detail;
+    private List<ComplaintReplyVm> _replies = new();
+    private string _replyText = "";
+    private string _newStatus = "";
+
+    private string? _message;
+    private bool _messageOk;
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load()
+    {
+        _loading = true;
+        StateHasChanged();
+        _items = await Support.GetComplaintsAsync(string.IsNullOrEmpty(_status) ? null : _status);
+        _loading = false;
+    }
+
+    private async Task Open(ComplaintAdminVm c)
+    {
+        _detail = await Support.GetComplaintAsync(c.Id);
+        _replies = await Support.GetRepliesAsync(c.Id);
+        _newStatus = _detail?.Status ?? "";
+        _replyText = "";
+        _dialog = true;
+    }
+
+    private async Task SendReply()
+    {
+        if (_detail == null || string.IsNullOrWhiteSpace(_replyText)) return;
+        if (await Support.ReplyAsync(_detail.Id, _replyText))
+        {
+            _replies = await Support.GetRepliesAsync(_detail.Id);
+            _replyText = "";
+        }
+    }
+
+    private async Task ApplyStatus()
+    {
+        if (_detail == null || string.IsNullOrEmpty(_newStatus)) return;
+        if (await Support.SetComplaintStatusAsync(_detail.Id, _newStatus))
+        {
+            _detail.Status = _newStatus;
+            _messageOk = true; _message = "تم تحديث الحالة";
+            await Load();
+        }
+        else { _messageOk = false; _message = "تعذّر تحديث الحالة"; }
+    }
+
+    private string TypeAr(string? t) => t switch { "Complaint" => "شكوى", "Suggestion" => "اقتراح", "Inquiry" => "استفسار", "Refund" => "استرداد", _ => t ?? "—" };
+    private string PriorityAr(string? p) => p switch { "Low" => "منخفضة", "Medium" => "متوسطة", "High" => "عالية", "Urgent" => "عاجلة", _ => p ?? "—" };
+    private string StatusAr(string? s) => s switch { "Open" => "مفتوح", "InProgress" => "قيد المعالجة", "Resolved" => "تم الحل", "Closed" => "مغلق", _ => s ?? "—" };
+    private string StatusClass(string? s) => s switch { "Resolved" or "Closed" => "success", "InProgress" => "warning", "Open" => "primary", _ => "primary" };
+}
