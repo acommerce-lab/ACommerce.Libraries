@@ -67,8 +67,8 @@
                             <SfDropDownList TItem="LangOption" TValue="string" DataSource="@_langOptions"
                                             @bind-Value="_stringLang" Width="160px" Placeholder="اللغة">
                                 <DropDownListFieldSettings Text="Name" Value="Code" />
-                                <DropDownListEvents TItem="LangOption" TValue="string" ValueChange="@(async _ => await LoadStrings())" />
                             </SfDropDownList>
+                            <SfButton CssClass="e-primary" OnClick="LoadStrings">عرض</SfButton>
                         </div>
                         @if (_strings == null)
                         {
@@ -236,7 +236,7 @@
     .tab-body { padding: 20px; }
     .tab-hint { color: #64748b; margin-bottom: 16px; font-size: 14px; }
     .add-btn { margin-top: 16px; }
-    .lang-filter { margin-bottom: 12px; }
+    .lang-filter { margin-bottom: 12px; display: flex; gap: 8px; align-items: center; }
     .loading { display: flex; justify-content: center; padding: 40px; }
     .form-group { margin-bottom: 14px; }
     .form-group label { display: block; margin-bottom: 6px; font-weight: 500; }
@@ -345,7 +345,7 @@
     }
 
     // ── Theme ──
-    private async Task OnColorChanged(ThemeTokenVm t, ChangeEventArgs e)
+    private async Task OnColorChanged(ThemeTokenVm t, Microsoft.AspNetCore.Components.ChangeEventArgs e)
     {
         var newValue = e.Value?.ToString();
         if (string.IsNullOrEmpty(newValue)) return;
