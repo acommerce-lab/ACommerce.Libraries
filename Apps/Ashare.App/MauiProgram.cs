@@ -106,7 +106,23 @@ public static class MauiProgram
         });
 #endif
 
-        builder.Services.AddAshareServices();
+        // platform + version are sent with every AppConfig snapshot request so the
+        // server can evaluate Feature Flags' Platform/MinVersion/MaxVersion rules.
+        var platformName =
+#if ANDROID
+            "android";
+#elif IOS
+            "ios";
+#elif MACCATALYST
+            "macos";
+#elif WINDOWS
+            "windows";
+#else
+            "maui";
+#endif
+        builder.Services.AddAshareServices(
+            appVersion: AppInfo.VersionString,
+            platform: platformName);
 
         // Override VersionCheckService registration with explicit mobile app code
         // This is needed because OperatingSystem.IsAndroid() doesn't work correctly in Blazor Hybrid

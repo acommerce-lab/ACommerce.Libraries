@@ -11,6 +11,8 @@
 @inject Ashare.Shared.Services.VersionCheckService VersionCheck
 @inject ACommerce.Templates.Customer.Services.IAppVersionService AppVersion
 @inject ILocalizationService L
+@inject ACommerce.Client.AppConfig.Services.AppConfigBootstrapper AppConfigBootstrap
+@inject Ashare.Shared.Services.RemoteThemeApplier ThemeApplier
 @implements IDisposable
 
 @* Version Blocker تم نقله إلى AppStartup.razor للتحقق عند بدء التطبيق *@
@@ -458,6 +460,17 @@
             // تهيئة حالة وضع الضيف من التخزين
             await GuestMode.InitializeAsync();
             _initialized = true;
+
+            // تهيئة AppConfig (يحمّل من Storage فوراً ثم يحدّث من الخادم في الخلفية)
+            try
+            {
+                await AppConfigBootstrap.InitializeAsync();
+                await ThemeApplier.InitializeAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[MainLayout] AppConfig bootstrap failed (non-fatal): {ex.Message}");
+            }
 
             // تحميل العدادات بعد تهيئة التوكن
             await LoadCountsAsync();

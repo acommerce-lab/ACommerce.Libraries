@@ -1,3 +1,4 @@
+using ACommerce.Client.AppConfig.Services;
 using ACommerce.Client.Core.Storage;
 using ACommerce.Templates.Customer.Services;
 using ACommerce.Templates.Customer.Services.Localization;
@@ -5,13 +6,38 @@ using ACommerce.Templates.Customer.Services.Localization;
 namespace Ashare.Shared.Services;
 
 /// <summary>
-/// خدمة الترجمة لـ Ashare مع دعم العربية والإنجليزية والأردية
-/// ترث من BaseLocalizationService وتضيف الترجمات الخاصة بـ Ashare
+/// خدمة الترجمة لـ Ashare مع دعم العربية والإنجليزية والأردية.
+/// تجلب defaults من الكود، وعند توفر AppConfigStore تطبّق overrides من DB
+/// (Hybrid resolution: server-override > code-default > English fallback).
 /// </summary>
 public class LocalizationService : BaseLocalizationService
 {
-    public LocalizationService(IStorageService storageService) : base(storageService)
+    private readonly AppConfigStore? _appConfig;
+
+    public LocalizationService(IStorageService storageService) : base(storageService) { }
+
+    /// <summary>
+    /// Constructor المُفضّل في DI: يحقن AppConfigStore لتطبيق الـ overrides عن بُعد.
+    /// </summary>
+    public LocalizationService(IStorageService storageService, AppConfigStore appConfig)
+        : base(storageService)
     {
+        _appConfig = appConfig;
+    }
+
+    /// <inheritdoc />
+    protected override string? OverrideValue(string key, string language)
+    {
+        if (_appConfig?.Current == null) return null;
+
+        // Only override when the user is on the requested language. We don't
+        // re-key into other languages — that would defeat the purpose of an
+        // English fallback baked into the code.
+        if (_appConfig.Current.Language != language) return null;
+
+        return _appConfig.Current.Strings.TryGetValue(key, out var v) && !string.IsNullOrEmpty(v)
+            ? v
+            : null;
     }
 
     protected override void ConfigureLanguages(List<LanguageInfo> languages)
