@@ -70,11 +70,8 @@
     else
     {
         @* Avatar Section — "إلزامي" يعتمد على علامة profile.photo_required *@
-        @{
-            var photoIsRequired = _isNewUser && FeatureGuard.IsEnabled("profile.photo_required");
-        }
         <div class="ashare-avatar-section">
-            <div class="ashare-avatar-edit @(photoIsRequired && string.IsNullOrEmpty(_avatarUrl) ? "ashare-avatar-required" : "")">
+            <div class="ashare-avatar-edit @(_isNewUser && FeatureGuard.IsEnabled("profile.photo_required") && string.IsNullOrEmpty(_avatarUrl) ? "ashare-avatar-required" : "")">
                 @if (!string.IsNullOrEmpty(_avatarUrl))
                 {
                     <img src="@_avatarUrl" alt="@_fullName" />
@@ -91,7 +88,7 @@
                 </label>
             </div>
             <span class="ashare-change-avatar-text">
-                @if (photoIsRequired)
+                @if (_isNewUser && FeatureGuard.IsEnabled("profile.photo_required"))
                 {
                     <span style="color: var(--ashare-error, #EF4444); font-weight: 600;">@L["ProfilePhotoRequired"]</span>
                 }

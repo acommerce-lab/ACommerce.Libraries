@@ -42,28 +42,30 @@
                 }
 
                 <FeatureGate Feature="auth.nafath">
-                    <div class="ac-form-group">
-                        <label>@L["NationalId"]</label>
-                        <input type="text"
-                               class="ac-input"
-                               placeholder="@L["EnterNationalId"]"
-                               @bind="_nationalId"
-                               maxlength="10"
-                               inputmode="numeric" />
-                    </div>
+                    <ChildContent>
+                        <div class="ac-form-group">
+                            <label>@L["NationalId"]</label>
+                            <input type="text"
+                                   class="ac-input"
+                                   placeholder="@L["EnterNationalId"]"
+                                   @bind="_nationalId"
+                                   maxlength="10"
+                                   inputmode="numeric" />
+                        </div>
 
-                    <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
-                            @onclick="StartNafathLogin"
-                            disabled="@(_isLoading || _nationalId.Length != 10)">
-                        @if (_isLoading)
-                        {
-                            <span class="ac-spinner"></span>
-                        }
-                        else
-                        {
-                            <span>@L["ContinueWithNafath"]</span>
-                        }
-                    </button>
+                        <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
+                                @onclick="StartNafathLogin"
+                                disabled="@(_isLoading || _nationalId.Length != 10)">
+                            @if (_isLoading)
+                            {
+                                <span class="ac-spinner"></span>
+                            }
+                            else
+                            {
+                                <span>@L["ContinueWithNafath"]</span>
+                            }
+                        </button>
+                    </ChildContent>
                     <Disabled>
                         <div class="ashare-feature-disabled-banner">
                             <i class="bi bi-info-circle"></i>

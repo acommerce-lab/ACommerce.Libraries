@@ -157,25 +157,27 @@
                 @* Payment Button — gated by payments.enabled مستقل عن subscriptions.enabled *@
                 <div class="ashare-checkout-actions">
                     <FeatureGate Feature="payments.enabled">
-                        <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
-                                disabled="@_isProcessing"
-                                @onclick="ProcessPayment">
-                            @if (_isProcessing)
-                            {
-                                <div class="ac-spinner ac-spinner-sm"></div>
-                                <span>@L["Processing"]</span>
-                            }
-                            else if (_selectedPlan.TrialDays > 0 && _currentSubscription == null)
-                            {
-                                <i class="bi bi-gift"></i>
-                                <span>@L["StartFreeTrial"]</span>
-                            }
-                            else
-                            {
-                                <i class="bi bi-credit-card"></i>
-                                <span>@L["PayNow"]</span>
-                            }
-                        </button>
+                        <ChildContent>
+                            <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
+                                    disabled="@_isProcessing"
+                                    @onclick="ProcessPayment">
+                                @if (_isProcessing)
+                                {
+                                    <div class="ac-spinner ac-spinner-sm"></div>
+                                    <span>@L["Processing"]</span>
+                                }
+                                else if (_selectedPlan.TrialDays > 0 && _currentSubscription == null)
+                                {
+                                    <i class="bi bi-gift"></i>
+                                    <span>@L["StartFreeTrial"]</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-credit-card"></i>
+                                    <span>@L["PayNow"]</span>
+                                }
+                            </button>
+                        </ChildContent>
                         <Disabled>
                             <div class="ashare-feature-disabled-banner">
                                 <i class="bi bi-info-circle"></i>

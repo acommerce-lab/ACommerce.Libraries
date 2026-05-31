@@ -193,28 +193,32 @@
              - إذا = false → زر تأكيد حجز مباشر (لا يحتاج payments.enabled) *@
         <div class="ashare-booking-submit">
             <FeatureGate Feature="booking.deposit_required">
-                <FeatureGate Feature="payments.enabled">
-                    <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
-                            @onclick="StartPayment"
-                            disabled="@(!_agreedToTerms || _isSubmitting)">
-                        @if (_isSubmitting)
-                        {
-                            <div class="ac-spinner ac-spinner-sm"></div>
-                            <span>جاري تجهيز الدفع...</span>
-                        }
-                        else
-                        {
-                            <i class="bi bi-shield-lock"></i>
-                            <span>دفع العربون @GetRequiredAmount() ر.س</span>
-                        }
-                    </button>
-                    <Disabled>
-                        <div class="ashare-feature-disabled-banner">
-                            <i class="bi bi-info-circle"></i>
-                            الدفع غير متاح حالياً والعربون مطلوب — يرجى المحاولة لاحقاً.
-                        </div>
-                    </Disabled>
-                </FeatureGate>
+                <ChildContent>
+                    <FeatureGate Feature="payments.enabled">
+                        <ChildContent>
+                            <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
+                                    @onclick="StartPayment"
+                                    disabled="@(!_agreedToTerms || _isSubmitting)">
+                                @if (_isSubmitting)
+                                {
+                                    <div class="ac-spinner ac-spinner-sm"></div>
+                                    <span>جاري تجهيز الدفع...</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-shield-lock"></i>
+                                    <span>دفع العربون @GetRequiredAmount() ر.س</span>
+                                }
+                            </button>
+                        </ChildContent>
+                        <Disabled>
+                            <div class="ashare-feature-disabled-banner">
+                                <i class="bi bi-info-circle"></i>
+                                الدفع غير متاح حالياً والعربون مطلوب — يرجى المحاولة لاحقاً.
+                            </div>
+                        </Disabled>
+                    </FeatureGate>
+                </ChildContent>
                 <Disabled>
                     @* deposit_required = false → نمر مباشرة بدون دفع *@
                     <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
