@@ -1,0 +1,381 @@
+@page "/appconfig"
+@inject AdminAppConfigService ConfigService
+@inject IJSRuntime JS
+
+<div class="appconfig-page">
+    <SfTab>
+        <TabItems>
+            <!-- ═══════════ Feature Flags ═══════════ -->
+            <TabItem>
+                <ChildContent>
+                    <TabHeader Text="🚩 أعلام الميزات"></TabHeader>
+                </ChildContent>
+                <ContentTemplate>
+                    <div class="tab-body">
+                        <p class="tab-hint">عطّل أو فعّل ميزات التطبيق فوراً دون نشر تحديث جديد. التغيير يصل للأجهزة خلال دقائق.</p>
+                        @if (_flags == null)
+                        {
+                            <div class="loading"><SfSpinner Visible="true" /></div>
+                        }
+                        else
+                        {
+                            <SfGrid DataSource="@_flags" AllowSorting="true">
+                                <GridColumns>
+                                    <GridColumn Field="@nameof(FeatureFlagVm.Key)" HeaderText="المفتاح" Width="200" />
+                                    <GridColumn Field="@nameof(FeatureFlagVm.Description)" HeaderText="الوصف" Width="320" />
+                                    <GridColumn Field="@nameof(FeatureFlagVm.Platforms)" HeaderText="المنصات" Width="110">
+                                        <Template>
+                                            @{ var f = context as FeatureFlagVm; }
+                                            <span>@(string.IsNullOrEmpty(f?.Platforms) ? "الكل" : f!.Platforms)</span>
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn HeaderText="الإصدار" Width="110">
+                                        <Template>
+                                            @{ var f = context as FeatureFlagVm; }
+                                            <span>@FormatVersionRange(f)</span>
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn HeaderText="الحالة" Width="120">
+                                        <Template>
+                                            @{ var f = context as FeatureFlagVm; }
+                                            <SfSwitch TChecked="bool" Checked="@(f!.Enabled)"
+                                                      ValueChange="@((Syncfusion.Blazor.Buttons.ChangeEventArgs<bool> e) => ToggleFlag(f, e.Checked))" />
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn HeaderText="الإجراءات" Width="110">
+                                        <Template>
+                                            @{ var f = context as FeatureFlagVm; }
+                                            <SfButton CssClass="e-flat e-primary" IconCss="e-icons e-edit"
+                                                      OnClick="@(() => EditFlag(f!))" Title="تعديل" />
+                                        </Template>
+                                    </GridColumn>
+                                </GridColumns>
+                            </SfGrid>
+                            <SfButton CssClass="e-primary add-btn" OnClick="@(() => EditFlag(new FeatureFlagVm()))">+ علامة جديدة</SfButton>
+                        }
+                    </div>
+                </ContentTemplate>
+            </TabItem>
+
+            <!-- ═══════════ UI Strings ═══════════ -->
+            <TabItem>
+                <ChildContent><TabHeader Text="📝 النصوص"></TabHeader></ChildContent>
+                <ContentTemplate>
+                    <div class="tab-body">
+                        <p class="tab-hint">عدّل النصوص التسويقية الظاهرة في التطبيق (الشعار، إخلاء المسؤولية، أسماء الفئات…). القيم غير المعرّفة هنا تعود لقيم الكود الافتراضية.</p>
+                        <div class="lang-filter">
+                            <SfDropDownList TItem="LangOption" TValue="string" DataSource="@_langOptions"
+                                            @bind-Value="_stringLang" Width="160px" Placeholder="اللغة">
+                                <DropDownListFieldSettings Text="Name" Value="Code" />
+                                <DropDownListEvents TItem="LangOption" TValue="string" ValueChange="@(async _ => await LoadStrings())" />
+                            </SfDropDownList>
+                        </div>
+                        @if (_strings == null)
+                        {
+                            <div class="loading"><SfSpinner Visible="true" /></div>
+                        }
+                        else
+                        {
+                            <SfGrid DataSource="@_strings" AllowSorting="true" AllowPaging="true">
+                                <GridPageSettings PageSize="15" />
+                                <GridColumns>
+                                    <GridColumn Field="@nameof(UiStringVm.Key)" HeaderText="المفتاح" Width="180" />
+                                    <GridColumn Field="@nameof(UiStringVm.Value)" HeaderText="النص" Width="380" />
+                                    <GridColumn Field="@nameof(UiStringVm.Language)" HeaderText="اللغة" Width="80" />
+                                    <GridColumn HeaderText="الإجراءات" Width="120">
+                                        <Template>
+                                            @{ var s = context as UiStringVm; }
+                                            <SfButton CssClass="e-flat e-primary" IconCss="e-icons e-edit" OnClick="@(() => EditString(s!))" Title="تعديل" />
+                                            <SfButton CssClass="e-flat e-danger" IconCss="e-icons e-delete" OnClick="@(() => DeleteString(s!))" Title="حذف" />
+                                        </Template>
+                                    </GridColumn>
+                                </GridColumns>
+                            </SfGrid>
+                            <SfButton CssClass="e-primary add-btn" OnClick="@(() => EditString(new UiStringVm { Language = _stringLang }))">+ نص جديد</SfButton>
+                        }
+                    </div>
+                </ContentTemplate>
+            </TabItem>
+
+            <!-- ═══════════ Theme ═══════════ -->
+            <TabItem>
+                <ChildContent><TabHeader Text="🎨 الألوان"></TabHeader></ChildContent>
+                <ContentTemplate>
+                    <div class="tab-body">
+                        <p class="tab-hint">عدّل ألوان هوية عشير. التغيير ينعكس على التطبيق فوراً عبر متغيرات CSS.</p>
+                        @if (_theme == null)
+                        {
+                            <div class="loading"><SfSpinner Visible="true" /></div>
+                        }
+                        else
+                        {
+                            <div class="theme-grid">
+                                @foreach (var t in _theme)
+                                {
+                                    <div class="theme-token">
+                                        <div class="token-meta">
+                                            <span class="token-key">--ashare-@t.Key</span>
+                                            <span class="token-mode">@(t.Mode == 1 ? "داكن" : "فاتح")</span>
+                                        </div>
+                                        <div class="token-edit">
+                                            <input type="color" value="@t.Value" @onchange="@(e => OnColorChanged(t, e))" />
+                                            <span class="token-value">@t.Value</span>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </ContentTemplate>
+            </TabItem>
+
+            <!-- ═══════════ General entries ═══════════ -->
+            <TabItem>
+                <ChildContent><TabHeader Text="⚙️ إعدادات عامة"></TabHeader></ChildContent>
+                <ContentTemplate>
+                    <div class="tab-body">
+                        <p class="tab-hint">إعدادات رقمية/نصية عامة (حدود الرفع، مهلات، روابط…). الإعدادات العامة فقط (IsPublic) تصل للتطبيق.</p>
+                        @if (_entries == null)
+                        {
+                            <div class="loading"><SfSpinner Visible="true" /></div>
+                        }
+                        else
+                        {
+                            <SfGrid DataSource="@_entries" AllowSorting="true">
+                                <GridColumns>
+                                    <GridColumn Field="@nameof(AppConfigEntryVm.Key)" HeaderText="المفتاح" Width="220" />
+                                    <GridColumn Field="@nameof(AppConfigEntryVm.Value)" HeaderText="القيمة" Width="220" />
+                                    <GridColumn Field="@nameof(AppConfigEntryVm.Description)" HeaderText="الوصف" Width="260" />
+                                    <GridColumn HeaderText="الإجراءات" Width="120">
+                                        <Template>
+                                            @{ var en = context as AppConfigEntryVm; }
+                                            <SfButton CssClass="e-flat e-primary" IconCss="e-icons e-edit" OnClick="@(() => EditEntry(en!))" Title="تعديل" />
+                                            <SfButton CssClass="e-flat e-danger" IconCss="e-icons e-delete" OnClick="@(() => DeleteEntry(en!))" Title="حذف" />
+                                        </Template>
+                                    </GridColumn>
+                                </GridColumns>
+                            </SfGrid>
+                            <SfButton CssClass="e-primary add-btn" OnClick="@(() => EditEntry(new AppConfigEntryVm()))">+ إعداد جديد</SfButton>
+                        }
+                    </div>
+                </ContentTemplate>
+            </TabItem>
+        </TabItems>
+    </SfTab>
+</div>
+
+<!-- Flag editor dialog -->
+<SfDialog @bind-Visible="_flagDialog" Width="480px" ShowCloseIcon="true" IsModal="true">
+    <DialogTemplates>
+        <Header>تعديل علامة ميزة</Header>
+        <Content>
+            @if (_editFlag != null)
+            {
+                <div class="form-group"><label>المفتاح</label><SfTextBox @bind-Value="_editFlag.Key" Placeholder="مثال: booking.enabled" /></div>
+                <div class="form-group"><label>الوصف</label><SfTextBox @bind-Value="_editFlag.Description" /></div>
+                <div class="form-group"><label>المنصات (CSV، فارغ = الكل)</label><SfTextBox @bind-Value="_editFlag.Platforms" Placeholder="android,ios,web" /></div>
+                <div class="form-row">
+                    <div class="form-group"><label>أدنى إصدار</label><SfTextBox @bind-Value="_editFlag.MinAppVersion" Placeholder="1.18" /></div>
+                    <div class="form-group"><label>أعلى إصدار</label><SfTextBox @bind-Value="_editFlag.MaxAppVersion" /></div>
+                </div>
+                <div class="form-group"><SfCheckBox @bind-Checked="_editFlag.Enabled" Label="مفعّلة" /></div>
+            }
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="إلغاء" OnClick="@(() => _flagDialog = false)" />
+        <DialogButton Content="حفظ" IsPrimary="true" OnClick="SaveFlag" />
+    </DialogButtons>
+</SfDialog>
+
+<!-- String editor dialog -->
+<SfDialog @bind-Visible="_stringDialog" Width="480px" ShowCloseIcon="true" IsModal="true">
+    <DialogTemplates>
+        <Header>تعديل نص</Header>
+        <Content>
+            @if (_editString != null)
+            {
+                <div class="form-group"><label>المفتاح</label><SfTextBox @bind-Value="_editString.Key" /></div>
+                <div class="form-group"><label>اللغة</label>
+                    <SfDropDownList TItem="LangOption" TValue="string" DataSource="@_langOptionsNoAll" @bind-Value="_editString.Language">
+                        <DropDownListFieldSettings Text="Name" Value="Code" />
+                    </SfDropDownList>
+                </div>
+                <div class="form-group"><label>النص</label><SfTextBox Multiline="true" @bind-Value="_editString.Value" /></div>
+                <div class="form-group"><SfCheckBox @bind-Checked="_editString.IsActive" Label="نشط" /></div>
+            }
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="إلغاء" OnClick="@(() => _stringDialog = false)" />
+        <DialogButton Content="حفظ" IsPrimary="true" OnClick="SaveString" />
+    </DialogButtons>
+</SfDialog>
+
+<!-- Entry editor dialog -->
+<SfDialog @bind-Visible="_entryDialog" Width="480px" ShowCloseIcon="true" IsModal="true">
+    <DialogTemplates>
+        <Header>تعديل إعداد</Header>
+        <Content>
+            @if (_editEntry != null)
+            {
+                <div class="form-group"><label>المفتاح</label><SfTextBox @bind-Value="_editEntry.Key" Placeholder="search.maxResults" /></div>
+                <div class="form-group"><label>القيمة</label><SfTextBox @bind-Value="_editEntry.Value" /></div>
+                <div class="form-group"><label>الوصف</label><SfTextBox @bind-Value="_editEntry.Description" /></div>
+                <div class="form-group"><SfCheckBox @bind-Checked="_editEntry.IsPublic" Label="عام (يصل للتطبيق)" /></div>
+            }
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="إلغاء" OnClick="@(() => _entryDialog = false)" />
+        <DialogButton Content="حفظ" IsPrimary="true" OnClick="SaveEntry" />
+    </DialogButtons>
+</SfDialog>
+
+<style>
+    .tab-body { padding: 20px; }
+    .tab-hint { color: #64748b; margin-bottom: 16px; font-size: 14px; }
+    .add-btn { margin-top: 16px; }
+    .lang-filter { margin-bottom: 12px; }
+    .loading { display: flex; justify-content: center; padding: 40px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 500; }
+    .form-row { display: flex; gap: 12px; }
+    .form-row .form-group { flex: 1; }
+    .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .theme-token { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; }
+    .token-meta { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .token-key { font-family: monospace; font-size: 13px; color: #334155; }
+    .token-mode { font-size: 12px; color: #94a3b8; }
+    .token-edit { display: flex; align-items: center; gap: 10px; }
+    .token-edit input[type=color] { width: 44px; height: 36px; border: none; cursor: pointer; }
+    .token-value { font-family: monospace; }
+</style>
+
+@code {
+    private List<FeatureFlagVm>? _flags;
+    private List<UiStringVm>? _strings;
+    private List<ThemeTokenVm>? _theme;
+    private List<AppConfigEntryVm>? _entries;
+
+    private string _stringLang = "ar";
+
+    private bool _flagDialog, _stringDialog, _entryDialog;
+    private FeatureFlagVm? _editFlag;
+    private UiStringVm? _editString;
+    private AppConfigEntryVm? _editEntry;
+
+    private record LangOption(string Code, string Name);
+    private List<LangOption> _langOptions = new() { new("ar", "العربية"), new("en", "English"), new("ur", "اردو") };
+    private List<LangOption> _langOptionsNoAll = new() { new("ar", "العربية"), new("en", "English"), new("ur", "اردو") };
+
+    protected override async Task OnInitializedAsync()
+    {
+        _flags = await ConfigService.GetFeatureFlagsAsync();
+        _theme = await ConfigService.GetThemeTokensAsync();
+        _entries = await ConfigService.GetEntriesAsync();
+        await LoadStrings();
+    }
+
+    private async Task LoadStrings()
+    {
+        _strings = null;
+        StateHasChanged();
+        _strings = await ConfigService.GetStringsAsync(_stringLang);
+    }
+
+    private string FormatVersionRange(FeatureFlagVm? f)
+    {
+        if (f == null) return "—";
+        if (string.IsNullOrEmpty(f.MinAppVersion) && string.IsNullOrEmpty(f.MaxAppVersion)) return "الكل";
+        return $"{f.MinAppVersion ?? "—"} → {f.MaxAppVersion ?? "∞"}";
+    }
+
+    // ── Flags ──
+    private async Task ToggleFlag(FeatureFlagVm flag, bool enabled)
+    {
+        await ConfigService.SetFeatureEnabledAsync(flag, enabled);
+    }
+
+    private void EditFlag(FeatureFlagVm flag)
+    {
+        _editFlag = new FeatureFlagVm
+        {
+            Id = flag.Id, Key = flag.Key, Enabled = flag.Enabled, Platforms = flag.Platforms,
+            MinAppVersion = flag.MinAppVersion, MaxAppVersion = flag.MaxAppVersion,
+            Description = flag.Description, RequiresClientRestart = flag.RequiresClientRestart
+        };
+        _flagDialog = true;
+    }
+
+    private async Task SaveFlag()
+    {
+        if (_editFlag != null && !string.IsNullOrWhiteSpace(_editFlag.Key))
+        {
+            await ConfigService.UpsertFeatureFlagAsync(_editFlag);
+            _flags = await ConfigService.GetFeatureFlagsAsync();
+        }
+        _flagDialog = false;
+    }
+
+    // ── Strings ──
+    private void EditString(UiStringVm s)
+    {
+        _editString = new UiStringVm { Id = s.Id, Key = s.Key, Language = s.Language, Value = s.Value, IsActive = s.IsActive, Note = s.Note };
+        _stringDialog = true;
+    }
+
+    private async Task SaveString()
+    {
+        if (_editString != null && !string.IsNullOrWhiteSpace(_editString.Key))
+        {
+            await ConfigService.UpsertStringAsync(_editString);
+            await LoadStrings();
+        }
+        _stringDialog = false;
+    }
+
+    private async Task DeleteString(UiStringVm s)
+    {
+        if (await JS.InvokeAsync<bool>("confirm", $"حذف النص '{s.Key}'؟"))
+        {
+            await ConfigService.DeleteStringAsync(s.Id);
+            await LoadStrings();
+        }
+    }
+
+    // ── Theme ──
+    private async Task OnColorChanged(ThemeTokenVm t, ChangeEventArgs e)
+    {
+        var newValue = e.Value?.ToString();
+        if (string.IsNullOrEmpty(newValue)) return;
+        t.Value = newValue;
+        await ConfigService.UpsertThemeTokenAsync(t);
+    }
+
+    // ── Entries ──
+    private void EditEntry(AppConfigEntryVm en)
+    {
+        _editEntry = new AppConfigEntryVm { Id = en.Id, Key = en.Key, Value = en.Value, ValueType = en.ValueType, IsPublic = en.IsPublic, Description = en.Description };
+        _entryDialog = true;
+    }
+
+    private async Task SaveEntry()
+    {
+        if (_editEntry != null && !string.IsNullOrWhiteSpace(_editEntry.Key))
+        {
+            await ConfigService.UpsertEntryAsync(_editEntry);
+            _entries = await ConfigService.GetEntriesAsync();
+        }
+        _entryDialog = false;
+    }
+
+    private async Task DeleteEntry(AppConfigEntryVm en)
+    {
+        if (await JS.InvokeAsync<bool>("confirm", $"حذف الإعداد '{en.Key}'؟"))
+        {
+            await ConfigService.DeleteEntryAsync(en.Id);
+            _entries = await ConfigService.GetEntriesAsync();
+        }
+    }
+}
