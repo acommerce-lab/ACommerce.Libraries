@@ -99,6 +99,44 @@ public class ComplaintsController(IComplaintsService complaintsService) : Contro
         return Ok();
     }
 
+    // ════════════════════════════════════════════════════════════
+    // Admin (cross-user) — requires Admin role
+    // ════════════════════════════════════════════════════════════
+
+    /// <summary>قائمة كل الشكاوى للوحة الإدارة.</summary>
+    [Authorize(Roles = "Admin")]
+    [HttpGet("admin/all")]
+    public async Task<ActionResult<IEnumerable<ComplaintSummaryDto>>> GetAllForAdmin(
+        [FromQuery] string? status = null,
+        [FromQuery] string? category = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await complaintsService.GetAllForAdminAsync(status, category, page, pageSize, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>عرض تفاصيل أي شكوى (بدون التحقق من الملكية) للإدارة.</summary>
+    [Authorize(Roles = "Admin")]
+    [HttpGet("admin/{id:guid}")]
+    public async Task<ActionResult<ComplaintResponseDto>> GetByIdForAdmin(Guid id, CancellationToken cancellationToken = default)
+    {
+        var result = await complaintsService.GetByIdAsync(id, cancellationToken);
+        return result == null ? NotFound() : Ok(result);
+    }
+
+    /// <summary>تحديث حالة/إسناد شكوى من قبل الإدارة.</summary>
+    [Authorize(Roles = "Admin")]
+    [HttpPut("admin/{id:guid}")]
+    public async Task<ActionResult<ComplaintResponseDto>> AdminUpdate(Guid id, [FromBody] UpdateComplaintDto request, CancellationToken cancellationToken = default)
+    {
+        var assignedToName = GetCurrentUserName();
+        var assignedToId = GetCurrentUserId();
+        var result = await complaintsService.AdminUpdateAsync(id, request, assignedToId, assignedToName, cancellationToken);
+        return result == null ? NotFound() : Ok(result);
+    }
+
     [HttpPost("{id:guid}/reopen")]
     public async Task<IActionResult> Reopen(Guid id, CancellationToken cancellationToken = default)
     {
