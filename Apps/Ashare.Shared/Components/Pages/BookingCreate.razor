@@ -92,76 +92,80 @@
                     <span>@GetPrice() ر.س</span>
                 </div>
 
-                @if (_depositPercentage > 0)
-                {
-                    <div class="ashare-price-row deposit">
-                        <span>العربون (@_depositPercentage%)</span>
-                        <span>@CalculateDeposit() ر.س</span>
+                <FeatureGate Feature="booking.deposit_required">
+                    @if (_depositPercentage > 0)
+                    {
+                        <div class="ashare-price-row deposit">
+                            <span>العربون (@_depositPercentage%)</span>
+                            <span>@CalculateDeposit() ر.س</span>
+                        </div>
+                    }
+
+                    <div class="ashare-price-divider"></div>
+
+                    <div class="ashare-price-row total">
+                        <span>المبلغ المطلوب الآن</span>
+                        <span>@GetRequiredAmount() ر.س</span>
                     </div>
-                }
-
-                <div class="ashare-price-divider"></div>
-
-                <div class="ashare-price-row total">
-                    <span>المبلغ المطلوب الآن</span>
-                    <span>@GetRequiredAmount() ر.س</span>
-                </div>
+                </FeatureGate>
             </div>
         </div>
 
-        @* How It Works *@
-        <div class="ashare-booking-section">
-            <h2 class="ashare-section-title">
-                <i class="bi bi-question-circle"></i>
-                كيف تعمل الحماية؟
-            </h2>
-            <div class="ashare-steps">
-                <div class="ashare-step">
-                    <div class="ashare-step-number">1</div>
-                    <div class="ashare-step-content">
-                        <h4>ادفع العربون</h4>
-                        <p>ادفع العربون الآن وسيتم حفظه في حسابك المحمي</p>
+        @* How It Works — deposit-only narrative *@
+        <FeatureGate Feature="booking.deposit_required">
+            <div class="ashare-booking-section">
+                <h2 class="ashare-section-title">
+                    <i class="bi bi-question-circle"></i>
+                    كيف تعمل الحماية؟
+                </h2>
+                <div class="ashare-steps">
+                    <div class="ashare-step">
+                        <div class="ashare-step-number">1</div>
+                        <div class="ashare-step-content">
+                            <h4>ادفع العربون</h4>
+                            <p>ادفع العربون الآن وسيتم حفظه في حسابك المحمي</p>
+                        </div>
                     </div>
-                </div>
-                <div class="ashare-step">
-                    <div class="ashare-step-number">2</div>
-                    <div class="ashare-step-content">
-                        <h4>تواصل مع المعلن</h4>
-                        <p>تواصل مع المعلن واتفق على تفاصيل العقد والمعاينة</p>
+                    <div class="ashare-step">
+                        <div class="ashare-step-number">2</div>
+                        <div class="ashare-step-content">
+                            <h4>تواصل مع المعلن</h4>
+                            <p>تواصل مع المعلن واتفق على تفاصيل العقد والمعاينة</p>
+                        </div>
                     </div>
-                </div>
-                <div class="ashare-step">
-                    <div class="ashare-step-number">3</div>
-                    <div class="ashare-step-content">
-                        <h4>أكد الاتفاق أو استرد</h4>
-                        <p>بعد الاتفاق، أكد الحجز ليتم تحويل العربون للمعلن، أو استرده فوراً</p>
+                    <div class="ashare-step">
+                        <div class="ashare-step-number">3</div>
+                        <div class="ashare-step-content">
+                            <h4>أكد الاتفاق أو استرد</h4>
+                            <p>بعد الاتفاق، أكد الحجز ليتم تحويل العربون للمعلن، أو استرده فوراً</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        @* Important Notes *@
-        <div class="ashare-booking-section ashare-notes-section">
-            <h2 class="ashare-section-title">ملاحظات مهمة</h2>
-            <ul class="ashare-booking-notes">
-                <li>
-                    <i class="bi bi-check-circle-fill"></i>
-                    <span>العربون <strong>مسترد بالكامل</strong> في حال عدم الاتفاق</span>
-                </li>
-                <li>
-                    <i class="bi bi-check-circle-fill"></i>
-                    <span>لا يتم تحويل أي مبلغ للمعلن إلا <strong>بعد تأكيدك</strong></span>
-                </li>
-                <li>
-                    <i class="bi bi-check-circle-fill"></i>
-                    <span>يمكنك <strong>الاسترداد الفوري</strong> بضغطة زر بدون تعقيدات</span>
-                </li>
-                <li>
-                    <i class="bi bi-check-circle-fill"></i>
-                    <span>باقي الإيجار يتم دفعه <strong>مباشرة للمعلن</strong> عند التسليم</span>
-                </li>
-            </ul>
-        </div>
+            @* Important Notes — deposit-only *@
+            <div class="ashare-booking-section ashare-notes-section">
+                <h2 class="ashare-section-title">ملاحظات مهمة</h2>
+                <ul class="ashare-booking-notes">
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>العربون <strong>مسترد بالكامل</strong> في حال عدم الاتفاق</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>لا يتم تحويل أي مبلغ للمعلن إلا <strong>بعد تأكيدك</strong></span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>يمكنك <strong>الاسترداد الفوري</strong> بضغطة زر بدون تعقيدات</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>باقي الإيجار يتم دفعه <strong>مباشرة للمعلن</strong> عند التسليم</span>
+                    </li>
+                </ul>
+            </div>
+        </FeatureGate>
 
         @* Agreement *@
         <div class="ashare-booking-agreement">
@@ -184,28 +188,49 @@
             </div>
         }
 
-        @* Submit Button — gated by payments.enabled (مستقل عن booking.enabled) *@
+        @* Submit Button — تدفّقان مختلفان:
+             - إذا booking.deposit_required = true → زر دفع عربون (يحتاج payments.enabled)
+             - إذا = false → زر تأكيد حجز مباشر (لا يحتاج payments.enabled) *@
         <div class="ashare-booking-submit">
-            <FeatureGate Feature="payments.enabled">
-                <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
-                        @onclick="StartPayment"
-                        disabled="@(!_agreedToTerms || _isSubmitting)">
-                    @if (_isSubmitting)
-                    {
-                        <div class="ac-spinner ac-spinner-sm"></div>
-                        <span>جاري تجهيز الدفع...</span>
-                    }
-                    else
-                    {
-                        <i class="bi bi-shield-lock"></i>
-                        <span>دفع العربون @GetRequiredAmount() ر.س</span>
-                    }
-                </button>
+            <FeatureGate Feature="booking.deposit_required">
+                <FeatureGate Feature="payments.enabled">
+                    <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
+                            @onclick="StartPayment"
+                            disabled="@(!_agreedToTerms || _isSubmitting)">
+                        @if (_isSubmitting)
+                        {
+                            <div class="ac-spinner ac-spinner-sm"></div>
+                            <span>جاري تجهيز الدفع...</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-shield-lock"></i>
+                            <span>دفع العربون @GetRequiredAmount() ر.س</span>
+                        }
+                    </button>
+                    <Disabled>
+                        <div class="ashare-feature-disabled-banner">
+                            <i class="bi bi-info-circle"></i>
+                            الدفع غير متاح حالياً والعربون مطلوب — يرجى المحاولة لاحقاً.
+                        </div>
+                    </Disabled>
+                </FeatureGate>
                 <Disabled>
-                    <div class="ashare-feature-disabled-banner">
-                        <i class="bi bi-info-circle"></i>
-                        الدفع غير متاح حالياً، يرجى المحاولة لاحقاً.
-                    </div>
+                    @* deposit_required = false → نمر مباشرة بدون دفع *@
+                    <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
+                            @onclick="StartPayment"
+                            disabled="@(!_agreedToTerms || _isSubmitting)">
+                        @if (_isSubmitting)
+                        {
+                            <div class="ac-spinner ac-spinner-sm"></div>
+                            <span>جاري إنشاء الحجز...</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-calendar-check"></i>
+                            <span>تأكيد الحجز</span>
+                        }
+                    </button>
                 </Disabled>
             </FeatureGate>
         </div>
@@ -397,6 +422,15 @@
         if (string.IsNullOrEmpty(userId))
         {
             Navigation.NavigateTo("/login?returnUrl=/book/" + SpaceId);
+            return;
+        }
+
+        // ── علامة booking.deposit_required ──
+        // مفعّلة (افتراضي): التدفّق العادي → ينشئ دفعة عربون ثم حجز.
+        // معطّلة: نتجاوز خطوة الدفع وننشئ الحجز مباشرة بحالة "Confirmed" بدون عربون.
+        if (!FeatureGuard.IsEnabled("booking.deposit_required"))
+        {
+            await CreateBookingWithoutDepositAsync(userId);
             return;
         }
 
@@ -637,6 +671,52 @@
         {
             Console.WriteLine($"[BookingCreate] Error creating booking: {ex.Message}");
             _errorMessage = "حدث خطأ أثناء حفظ الحجز. يرجى المحاولة مرة أخرى.";
+        }
+    }
+
+    /// <summary>
+    /// مسار الحجز بدون عربون (عند تعطيل booking.deposit_required).
+    /// ينشئ الحجز في الباك اند مباشرة بدون أي طلب دفع.
+    /// </summary>
+    private async Task CreateBookingWithoutDepositAsync(string userId)
+    {
+        _isSubmitting = true;
+        _errorMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            Console.WriteLine("[BookingCreate] deposit_required=false → creating booking with no payment");
+
+            var booking = await ApiService.CreateBookingAsync(
+                spaceId: SpaceId,
+                totalPrice: GetPrice(),
+                depositAmount: 0,
+                rentType: GetTimeUnit(),
+                customerId: userId,
+                hostId: _space?.OwnerId,
+                paymentId: null,
+                notes: null);
+
+            if (booking != null)
+            {
+                Console.WriteLine($"[BookingCreate] Booking created without deposit. Id={booking.Id}");
+                Navigation.NavigateTo($"/booking/{booking.Id}");
+            }
+            else
+            {
+                _errorMessage = "فشل في إنشاء الحجز. يرجى المحاولة مرة أخرى.";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[BookingCreate] Error creating no-deposit booking: {ex.Message}");
+            _errorMessage = "حدث خطأ أثناء إنشاء الحجز. يرجى المحاولة مرة أخرى.";
+        }
+        finally
+        {
+            _isSubmitting = false;
+            StateHasChanged();
         }
     }
 

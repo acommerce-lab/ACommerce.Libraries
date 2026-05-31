@@ -1689,42 +1689,42 @@ public class AshareSeedDataService
                 var existing = await repo.GetAllWithPredicateAsync();
                 var existingKeys = existing.Select(f => f.Key).ToHashSet();
 
+                // اتفاقية التسمية:
+                //   *.enabled  → علامة توفّر (availability). معطّلة = الميزة غير موجودة، المستخدم محظور.
+                //   *.required → علامة سياسة. معطّلة = الخطوة تُتجاوز، المستخدم يمر مباشرة.
+                //   *.force_*  → علامة إنفاذ. معطّلة = الإنفاذ غير مفعّل.
                 var flags = new List<FeatureFlag>
                 {
-                        // ── Payments ──
-                        new() { Id = Guid.NewGuid(), Key = "payments.enabled",          Enabled = true, Description = "نظام الدفع العام", CreatedAt = DateTime.UtcNow },
-                        new() { Id = Guid.NewGuid(), Key = "payments.noon",             Enabled = true, Description = "بوابة نون للدفع", CreatedAt = DateTime.UtcNow },
-                        new() { Id = Guid.NewGuid(), Key = "payments.moyasar",          Enabled = false, Description = "بوابة ميسر للدفع (احتياطية)", CreatedAt = DateTime.UtcNow },
+                        // ── Payments (availability) ──
+                        new() { Id = Guid.NewGuid(), Key = "payments.enabled",          Enabled = true, Description = "نظام الدفع العام. معطّلة = لا يستطيع المستخدم إتمام أي دفعة.", CreatedAt = DateTime.UtcNow },
 
-                        // ── Booking ──
-                        new() { Id = Guid.NewGuid(), Key = "booking.enabled",           Enabled = true, Description = "إظهار زر الحجز ومسار BookingCreate", CreatedAt = DateTime.UtcNow },
-                        new() { Id = Guid.NewGuid(), Key = "booking.deposit_required",  Enabled = true, Description = "اشتراط دفع العربون قبل التواصل", CreatedAt = DateTime.UtcNow },
+                        // ── Booking (availability + policy) ──
+                        new() { Id = Guid.NewGuid(), Key = "booking.enabled",           Enabled = true, Description = "إظهار زر الحجز ومسار BookingCreate. معطّلة = لا يوجد حجز.", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "booking.deposit_required",  Enabled = true, Description = "اشتراط دفع العربون قبل تأكيد الحجز. معطّلة = الحجز يُنشأ مباشرة بدون عربون.", CreatedAt = DateTime.UtcNow },
 
-                        // ── Subscriptions ──
-                        new() { Id = Guid.NewGuid(), Key = "subscriptions.enabled",     Enabled = true, Description = "نظام باقات المعلنين", CreatedAt = DateTime.UtcNow },
-                        new() { Id = Guid.NewGuid(), Key = "subscriptions.partner_seeker", Enabled = true, Description = "باقة الباحث عن شريك", CreatedAt = DateTime.UtcNow },
+                        // ── Subscriptions (availability فقط؛ الباقات الفردية تُدار من DB عبر IsActive) ──
+                        new() { Id = Guid.NewGuid(), Key = "subscriptions.enabled",     Enabled = true, Description = "نظام باقات المعلنين. معطّلة = صفحات الاشتراك تختفي ويُتخطّى فحص الاشتراك في إنشاء العرض.", CreatedAt = DateTime.UtcNow },
 
-                        // ── Auth ──
-                        new() { Id = Guid.NewGuid(), Key = "auth.nafath",               Enabled = true, Description = "تسجيل الدخول عبر نفاذ", CreatedAt = DateTime.UtcNow },
-                        new() { Id = Guid.NewGuid(), Key = "auth.guest_mode",           Enabled = true, Description = "السماح بوضع الزائر بدون تسجيل", CreatedAt = DateTime.UtcNow },
+                        // ── Auth (availability) ──
+                        new() { Id = Guid.NewGuid(), Key = "auth.nafath",               Enabled = true, Description = "تسجيل الدخول عبر نفاذ. معطّلة = نموذج نفاذ يختفي من صفحة الدخول.", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "auth.guest_mode",           Enabled = true, Description = "السماح بوضع الزائر بدون تسجيل. معطّلة = زر «متابعة كزائر» يختفي.", CreatedAt = DateTime.UtcNow },
 
-                        // ── Version Check ──
-                        new() { Id = Guid.NewGuid(), Key = "version_check.enabled",     Enabled = true, Description = "فحص توفر تحديث للتطبيق", CreatedAt = DateTime.UtcNow },
-                        new() { Id = Guid.NewGuid(), Key = "version_check.force_update", Enabled = false, Description = "إجبار المستخدمين على تحديث الإصدارات القديمة", CreatedAt = DateTime.UtcNow },
+                        // ── Version Check (availability + enforcement) ──
+                        new() { Id = Guid.NewGuid(), Key = "version_check.enabled",     Enabled = true, Description = "فحص توفر تحديث للتطبيق. معطّلة = لا يحدث فحص ولا تنبيه.", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "version_check.force_update", Enabled = false, Description = "إنفاذ التحديث الإجباري. معطّلة = حتى لو الإصدار قديم لا يُحجَب التطبيق.", CreatedAt = DateTime.UtcNow },
 
-                        // ── Communication ──
-                        new() { Id = Guid.NewGuid(), Key = "chat.enabled",              Enabled = true, Description = "نظام المحادثات (شات داخل التطبيق)", CreatedAt = DateTime.UtcNow },
-                        new() { Id = Guid.NewGuid(), Key = "complaints.enabled",        Enabled = true, Description = "نظام الشكاوى والاقتراحات", CreatedAt = DateTime.UtcNow },
+                        // ── Communication & Support (availability) ──
+                        new() { Id = Guid.NewGuid(), Key = "chat.enabled",              Enabled = true, Description = "نظام المحادثات (شات داخل التطبيق). معطّلة = الشات يختفي تماماً من الواجهة.", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "complaints.enabled",        Enabled = true, Description = "نظام الشكاوى والاقتراحات. معطّلة = صفحات الشكاوى تختفي.", CreatedAt = DateTime.UtcNow },
 
-                        // ── Marketing Analytics ──
-                        new() { Id = Guid.NewGuid(), Key = "analytics.meta",            Enabled = false, Description = "تتبع Meta (Facebook/Instagram) Conversions", CreatedAt = DateTime.UtcNow },
-                        new() { Id = Guid.NewGuid(), Key = "analytics.google",          Enabled = false, Description = "تتبع Google Analytics/GA4", CreatedAt = DateTime.UtcNow },
-                        new() { Id = Guid.NewGuid(), Key = "analytics.tiktok",          Enabled = false, Description = "تتبع TikTok Events", CreatedAt = DateTime.UtcNow },
-                        new() { Id = Guid.NewGuid(), Key = "analytics.snapchat",        Enabled = false, Description = "تتبع Snapchat Pixel/SDK", CreatedAt = DateTime.UtcNow },
+                        // ── Listings & Profile (visibility + policy) ──
+                        new() { Id = Guid.NewGuid(), Key = "listing.disclaimer.show",   Enabled = true, Description = "إظهار قسم إخلاء المسؤولية في صفحة العرض.", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "profile.photo_required",    Enabled = true, Description = "اشتراط صورة البروفايل عند أول تسجيل. معطّلة = الصورة اختيارية.", CreatedAt = DateTime.UtcNow }
 
-                        // ── Listings & UX ──
-                        new() { Id = Guid.NewGuid(), Key = "listing.disclaimer.show",   Enabled = true, Description = "إظهار قسم إخلاء المسؤولية في صفحة العرض", CreatedAt = DateTime.UtcNow },
-                        new() { Id = Guid.NewGuid(), Key = "profile.photo_required",    Enabled = true, Description = "إجبار صورة البروفايل عند أول تسجيل", CreatedAt = DateTime.UtcNow }
+                        // ملاحظات:
+                        //   - باقات الاشتراك (مثل partner-seeker) يتم تنشيطها/تعطيلها فردياً عبر SubscriptionPlan.IsActive في DB.
+                        //   - مزوّدو الدفع (Noon/Moyasar) يُختاران من إعدادات الخادم، لا من Feature Flags.
+                        //   - مزوّدو التحليلات (Meta/Google/TikTok/Snap) يُتحكَّم بهم من appsettings + Marketing.Analytics config.
                 };
 
                 foreach (var flag in flags)
@@ -1735,7 +1735,28 @@ public class AshareSeedDataService
                                 Console.WriteLine($"[Seed] Added feature flag: {flag.Key} = {flag.Enabled}");
                         }
                 }
-                Console.WriteLine($"[Seed] Feature flags seeding complete. Total: {flags.Count}");
+
+                // تنظيف العلامات القديمة التي لم تعد مدعومة في الكود.
+                // (الباقات الفردية / مزوّدو الدفع / مزوّدو التحليلات يُدارون من DB أو appsettings مباشرة.)
+                var obsoleteKeys = new[]
+                {
+                        "payments.noon", "payments.moyasar",
+                        "subscriptions.partner_seeker",
+                        "analytics.meta", "analytics.google", "analytics.tiktok", "analytics.snapchat"
+                };
+                foreach (var key in obsoleteKeys)
+                {
+                        var stale = existing.FirstOrDefault(f => f.Key == key && !f.IsDeleted);
+                        if (stale != null)
+                        {
+                                stale.IsDeleted = true;
+                                stale.UpdatedAt = DateTime.UtcNow;
+                                await repo.UpdateAsync(stale);
+                                Console.WriteLine($"[Seed] Removed obsolete feature flag: {key}");
+                        }
+                }
+
+                Console.WriteLine($"[Seed] Feature flags seeding complete. Total active: {flags.Count}");
         }
 
         private async Task SeedUiStringsAsync()
