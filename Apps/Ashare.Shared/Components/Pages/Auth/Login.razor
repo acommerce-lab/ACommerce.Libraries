@@ -32,7 +32,7 @@
 
             @if (_nafathResult == null)
             {
-                @* إدخال رقم الهوية *@
+                @* إدخال رقم الهوية — تحت auth.nafath فقط *@
                 @if (!string.IsNullOrEmpty(_errorMessage))
                 {
                     <div class="ashare-error-alert">
@@ -41,38 +41,48 @@
                     </div>
                 }
 
-                <div class="ac-form-group">
-                    <label>@L["NationalId"]</label>
-                    <input type="text"
-                           class="ac-input"
-                           placeholder="@L["EnterNationalId"]"
-                           @bind="_nationalId"
-                           maxlength="10"
-                           inputmode="numeric" />
-                </div>
+                <FeatureGate Feature="auth.nafath">
+                    <div class="ac-form-group">
+                        <label>@L["NationalId"]</label>
+                        <input type="text"
+                               class="ac-input"
+                               placeholder="@L["EnterNationalId"]"
+                               @bind="_nationalId"
+                               maxlength="10"
+                               inputmode="numeric" />
+                    </div>
 
-                <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
-                        @onclick="StartNafathLogin"
-                        disabled="@(_isLoading || _nationalId.Length != 10)">
-                    @if (_isLoading)
-                    {
-                        <span class="ac-spinner"></span>
-                    }
-                    else
-                    {
-                        <span>@L["ContinueWithNafath"]</span>
-                    }
-                </button>
+                    <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
+                            @onclick="StartNafathLogin"
+                            disabled="@(_isLoading || _nationalId.Length != 10)">
+                        @if (_isLoading)
+                        {
+                            <span class="ac-spinner"></span>
+                        }
+                        else
+                        {
+                            <span>@L["ContinueWithNafath"]</span>
+                        }
+                    </button>
+                    <Disabled>
+                        <div class="ashare-feature-disabled-banner">
+                            <i class="bi bi-info-circle"></i>
+                            تسجيل الدخول بنفاذ غير متاح حالياً.
+                        </div>
+                    </Disabled>
+                </FeatureGate>
 
-                <div class="ashare-login-divider">
-                    <span>@L["Or"]</span>
-                </div>
+                <FeatureGate Feature="auth.guest_mode">
+                    <div class="ashare-login-divider">
+                        <span>@L["Or"]</span>
+                    </div>
 
-                <button class="ac-btn ac-btn-outline ac-btn-lg ac-btn-block"
-                        @onclick="ContinueAsGuest">
-                    <i class="bi bi-person"></i>
-                    <span>@L["ContinueAsGuest"]</span>
-                </button>
+                    <button class="ac-btn ac-btn-outline ac-btn-lg ac-btn-block"
+                            @onclick="ContinueAsGuest">
+                        <i class="bi bi-person"></i>
+                        <span>@L["ContinueAsGuest"]</span>
+                    </button>
+                </FeatureGate>
             }
             else
             {

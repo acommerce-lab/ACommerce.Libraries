@@ -10,10 +10,20 @@
 @inject IPaymentService PaymentService
 @inject NavigationManager NavigationManager
 @inject RealtimeClient RealtimeClient
+@inject FeatureGuard FeatureGuard
 @implements IAsyncDisposable
 
 <div class="ac-page ashare-booking-create">
-    @if (_isLoading)
+    @if (!_bookingFeatureEnabled)
+    {
+        <div class="ashare-error-state">
+            <i class="bi bi-slash-circle"></i>
+            <h2>الحجز غير متاح حالياً</h2>
+            <p>ميزة الحجز معطّلة من الإدارة. يرجى المحاولة لاحقاً.</p>
+            <button class="ac-btn ac-btn-primary" @onclick="GoBack">العودة</button>
+        </div>
+    }
+    else if (_isLoading)
     {
         <div class="ashare-loading">
             <div class="ac-spinner"></div>
@@ -174,22 +184,30 @@
             </div>
         }
 
-        @* Submit Button *@
+        @* Submit Button — gated by payments.enabled (مستقل عن booking.enabled) *@
         <div class="ashare-booking-submit">
-            <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
-                    @onclick="StartPayment"
-                    disabled="@(!_agreedToTerms || _isSubmitting)">
-                @if (_isSubmitting)
-                {
-                    <div class="ac-spinner ac-spinner-sm"></div>
-                    <span>جاري تجهيز الدفع...</span>
-                }
-                else
-                {
-                    <i class="bi bi-shield-lock"></i>
-                    <span>دفع العربون @GetRequiredAmount() ر.س</span>
-                }
-            </button>
+            <FeatureGate Feature="payments.enabled">
+                <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
+                        @onclick="StartPayment"
+                        disabled="@(!_agreedToTerms || _isSubmitting)">
+                    @if (_isSubmitting)
+                    {
+                        <div class="ac-spinner ac-spinner-sm"></div>
+                        <span>جاري تجهيز الدفع...</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-shield-lock"></i>
+                        <span>دفع العربون @GetRequiredAmount() ر.س</span>
+                    }
+                </button>
+                <Disabled>
+                    <div class="ashare-feature-disabled-banner">
+                        <i class="bi bi-info-circle"></i>
+                        الدفع غير متاح حالياً، يرجى المحاولة لاحقاً.
+                    </div>
+                </Disabled>
+            </FeatureGate>
         </div>
     }
 </div>
@@ -199,6 +217,7 @@
     public Guid SpaceId { get; set; }
 
     private SpaceItem? _space;
+    private bool _bookingFeatureEnabled = true;
     private bool _isLoading = true;
     private bool _isSubmitting;
     private bool _agreedToTerms;
@@ -216,6 +235,14 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // علامة booking.enabled — لو معطّلة نُظهر شاشة "غير متاح" بدلاً من تحميل العرض.
+        _bookingFeatureEnabled = FeatureGuard.IsEnabled("booking.enabled");
+        if (!_bookingFeatureEnabled)
+        {
+            _isLoading = false;
+            return;
+        }
+
         await LoadSpaceAsync();
     }
 

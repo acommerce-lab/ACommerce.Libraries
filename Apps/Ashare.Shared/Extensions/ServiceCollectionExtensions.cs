@@ -113,6 +113,9 @@ public static class ServiceCollectionExtensions
         // Theme applier — يقرأ snapshot ويطبّقه على CSS variables عبر JSInterop
         services.AddScoped<RemoteThemeApplier>();
 
+        // FeatureGuard — اختصار للحماية على مستوى الصفحات
+        services.AddScoped<FeatureGuard>();
+
         return services;
     }
 }

@@ -7,6 +7,7 @@
 @inject ACommerce.Client.Subscriptions.SubscriptionClient SubscriptionClient
 @inject ACommerce.Client.Auth.AuthClient AuthClient
 @inject PendingListingService PendingListingService
+@inject FeatureGuard FeatureGuard
 @using ACommerce.Templates.Customer.Pages
 @using ACommerce.Subscriptions.DTOs
 
@@ -414,7 +415,8 @@ else
         try
         {
             // التحقق من إمكانية إنشاء عرض (الاشتراك) مع فحص الفئة
-            if (_currentUserId.HasValue)
+            // — فقط لو subscriptions.enabled مفعّلة، وإلا نتخطى الفحص ونسمح بإنشاء العرض
+            if (_currentUserId.HasValue && FeatureGuard.IsEnabled("subscriptions.enabled"))
             {
                 var canAddResult = await SubscriptionClient.CanAddListingAsync(_currentUserId.Value, model.CategoryId);
 

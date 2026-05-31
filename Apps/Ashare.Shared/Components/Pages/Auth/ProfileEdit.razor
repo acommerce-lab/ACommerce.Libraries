@@ -9,6 +9,7 @@
 @inject Ashare.Shared.Services.ThemeService Theme
 @inject NavigationManager NavManager
 @inject ACommerce.Templates.Customer.Services.GuestModeService GuestMode
+@inject FeatureGuard FeatureGuard
 
 <div class="ac-page ashare-profile-edit-page @(Theme.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
     @if (GuestMode.IsGuestMode)
@@ -68,9 +69,12 @@
     }
     else
     {
-        @* Avatar Section *@
+        @* Avatar Section — "إلزامي" يعتمد على علامة profile.photo_required *@
+        @{
+            var photoIsRequired = _isNewUser && FeatureGuard.IsEnabled("profile.photo_required");
+        }
         <div class="ashare-avatar-section">
-            <div class="ashare-avatar-edit @(_isNewUser && string.IsNullOrEmpty(_avatarUrl) ? "ashare-avatar-required" : "")">
+            <div class="ashare-avatar-edit @(photoIsRequired && string.IsNullOrEmpty(_avatarUrl) ? "ashare-avatar-required" : "")">
                 @if (!string.IsNullOrEmpty(_avatarUrl))
                 {
                     <img src="@_avatarUrl" alt="@_fullName" />
@@ -87,7 +91,7 @@
                 </label>
             </div>
             <span class="ashare-change-avatar-text">
-                @if (_isNewUser)
+                @if (photoIsRequired)
                 {
                     <span style="color: var(--ashare-error, #EF4444); font-weight: 600;">@L["ProfilePhotoRequired"]</span>
                 }
@@ -341,8 +345,10 @@
             return;
         }
 
-        // صورة البروفايل إلزامية للمستخدمين الجدد
-        if (_isNewUser && string.IsNullOrWhiteSpace(_avatarUrl))
+        // صورة البروفايل إلزامية فقط إذا كانت علامة profile.photo_required مفعّلة
+        if (_isNewUser
+            && FeatureGuard.IsEnabled("profile.photo_required")
+            && string.IsNullOrWhiteSpace(_avatarUrl))
         {
             _errorMessage = L["ProfilePhotoRequiredError"];
             _isSaving = false;

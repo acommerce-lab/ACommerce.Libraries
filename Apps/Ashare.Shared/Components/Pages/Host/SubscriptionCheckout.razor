@@ -12,6 +12,7 @@
 @inject IPaymentService PaymentService
 @inject NavigationManager NavigationManager
 @inject RealtimeClient RealtimeClient
+@inject FeatureGuard FeatureGuard
 @implements IAsyncDisposable
 
 <div class="ac-page ashare-checkout-page @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
@@ -153,27 +154,35 @@
                     </div>
                 }
 
-                @* Payment Button *@
+                @* Payment Button — gated by payments.enabled مستقل عن subscriptions.enabled *@
                 <div class="ashare-checkout-actions">
-                    <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
-                            disabled="@_isProcessing"
-                            @onclick="ProcessPayment">
-                        @if (_isProcessing)
-                        {
-                            <div class="ac-spinner ac-spinner-sm"></div>
-                            <span>@L["Processing"]</span>
-                        }
-                        else if (_selectedPlan.TrialDays > 0 && _currentSubscription == null)
-                        {
-                            <i class="bi bi-gift"></i>
-                            <span>@L["StartFreeTrial"]</span>
-                        }
-                        else
-                        {
-                            <i class="bi bi-credit-card"></i>
-                            <span>@L["PayNow"]</span>
-                        }
-                    </button>
+                    <FeatureGate Feature="payments.enabled">
+                        <button class="ac-btn ac-btn-primary ac-btn-lg ac-btn-block"
+                                disabled="@_isProcessing"
+                                @onclick="ProcessPayment">
+                            @if (_isProcessing)
+                            {
+                                <div class="ac-spinner ac-spinner-sm"></div>
+                                <span>@L["Processing"]</span>
+                            }
+                            else if (_selectedPlan.TrialDays > 0 && _currentSubscription == null)
+                            {
+                                <i class="bi bi-gift"></i>
+                                <span>@L["StartFreeTrial"]</span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-credit-card"></i>
+                                <span>@L["PayNow"]</span>
+                            }
+                        </button>
+                        <Disabled>
+                            <div class="ashare-feature-disabled-banner">
+                                <i class="bi bi-info-circle"></i>
+                                الدفع غير متاح حالياً، يرجى المحاولة لاحقاً.
+                            </div>
+                        </Disabled>
+                    </FeatureGate>
 
                     <p class="ashare-terms-notice">
                         <i class="bi bi-shield-check"></i>
@@ -209,6 +218,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (!FeatureGuard.RequireOrRedirect("subscriptions.enabled", redirectTo: "/profile"))
+        {
+            return;
+        }
+
         if (Cycle.HasValue && Enum.IsDefined(typeof(BillingCycle), Cycle.Value))
         {
             _billingCycle = (BillingCycle)Cycle.Value;

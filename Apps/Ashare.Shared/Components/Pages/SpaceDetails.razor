@@ -214,37 +214,43 @@
                 </div>
             }
 
-            @* Contact Options - Only show if not own listing *@
+            @* Contact Options - Only show if not own listing AND chat feature is enabled *@
             @if (!_isOwnListing)
             {
-                var contactOptions = GetContactOptions();
-                if (contactOptions.Any())
-                {
-                    <div class="ashare-section">
-                        <h2 class="ashare-section-title">@L["ContactMethods"]</h2>
-                        <div class="ashare-contact-options">
-                            @foreach (var option in contactOptions)
-                            {
-                                <button class="ashare-contact-btn @option.Class" @onclick="() => HandleContact(option.Type)">
-                                    <i class="bi @option.Icon"></i>
-                                    <span>@option.Label</span>
-                                </button>
-                            }
+                <FeatureGate Feature="chat.enabled">
+                    @{
+                        var contactOptions = GetContactOptions();
+                    }
+                    @if (contactOptions.Any())
+                    {
+                        <div class="ashare-section">
+                            <h2 class="ashare-section-title">@L["ContactMethods"]</h2>
+                            <div class="ashare-contact-options">
+                                @foreach (var option in contactOptions)
+                                {
+                                    <button class="ashare-contact-btn @option.Class" @onclick="() => HandleContact(option.Type)">
+                                        <i class="bi @option.Icon"></i>
+                                        <span>@option.Label</span>
+                                    </button>
+                                }
+                            </div>
                         </div>
-                    </div>
-                }
+                    }
+                </FeatureGate>
             }
 
-            @* Disclaimer *@
-            <div class="ashare-section ashare-disclaimer-section">
-                <div class="ashare-disclaimer-card">
-                    <div class="ashare-disclaimer-header">
-                        <i class="bi bi-exclamation-triangle-fill"></i>
-                        <h3>@L["Disclaimer"]</h3>
+            @* Disclaimer - يُعطّل عبر listing.disclaimer.show *@
+            <FeatureGate Feature="listing.disclaimer.show">
+                <div class="ashare-section ashare-disclaimer-section">
+                    <div class="ashare-disclaimer-card">
+                        <div class="ashare-disclaimer-header">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <h3>@L["Disclaimer"]</h3>
+                        </div>
+                        <p class="ashare-disclaimer-body">@L["ListingDisclaimerBody"]</p>
                     </div>
-                    <p class="ashare-disclaimer-body">@L["ListingDisclaimerBody"]</p>
                 </div>
-            </div>
+            </FeatureGate>
 
             @* Location Map *@
             @if (_space.Latitude.HasValue && _space.Longitude.HasValue)
@@ -351,10 +357,12 @@
                     }
                     else
                     {
-                        <button class="ac-btn ac-btn-secondary" @onclick="ContactOwner">
-                            <i class="bi bi-chat"></i>
-                            @L["Contact"]
-                        </button>
+                        <FeatureGate Feature="chat.enabled">
+                            <button class="ac-btn ac-btn-secondary" @onclick="ContactOwner">
+                                <i class="bi bi-chat"></i>
+                                @L["Contact"]
+                            </button>
+                        </FeatureGate>
                     }
                 </div>
             </div>
@@ -399,29 +407,31 @@
         @* Booking Bar *@
         @if (!_isOwnListing)
         {
-            <div class="ashare-booking-bar">
-                <div class="ashare-booking-price">
-                    @if (HasPrice())
+            <FeatureGate Feature="booking.enabled">
+                <div class="ashare-booking-bar">
+                    <div class="ashare-booking-price">
+                        @if (HasPrice())
+                        {
+                            <span class="ashare-booking-amount">@GetPriceDisplay()</span>
+                        }
+                    </div>
+                    @if (_existingBooking != null)
                     {
-                        <span class="ashare-booking-amount">@GetPriceDisplay()</span>
+                        @* عرض رسالة وزر للانتقال للحجز الموجود *@
+                        <button class="ac-btn ac-btn-secondary ac-btn-lg" @onclick="ViewExistingBooking">
+                            <i class="bi bi-calendar-check-fill"></i>
+                            <span>عرض حجزك</span>
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="StartBooking">
+                            <i class="bi bi-calendar-check"></i>
+                            <span>@L["BookNow"]</span>
+                        </button>
                     }
                 </div>
-                @if (_existingBooking != null)
-                {
-                    @* عرض رسالة وزر للانتقال للحجز الموجود *@
-                    <button class="ac-btn ac-btn-secondary ac-btn-lg" @onclick="ViewExistingBooking">
-                        <i class="bi bi-calendar-check-fill"></i>
-                        <span>عرض حجزك</span>
-                    </button>
-                }
-                else
-                {
-                    <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="StartBooking">
-                        <i class="bi bi-calendar-check"></i>
-                        <span>@L["BookNow"]</span>
-                    </button>
-                }
-            </div>
+            </FeatureGate>
         }
     }
     else

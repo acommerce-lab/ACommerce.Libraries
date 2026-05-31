@@ -2591,6 +2591,25 @@ h1, h2, h3, .ashare-logo-text {
     color: #7C2D12;
 }
 
+/* Feature Gate — banner when a feature is disabled but UX needs explanation */
+.ashare-feature-disabled-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background-color: #F3F4F6;
+    color: #6B7280;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 8px 0;
+}
+
+.ashare-feature-disabled-banner i {
+    color: #9CA3AF;
+    font-size: 18px;
+}
+
 /* Avatar required state (صورة البروفايل الإلزامية) */
 .ashare-avatar-edit.ashare-avatar-required {
     box-shadow: 0 0 0 3px #EF4444;
