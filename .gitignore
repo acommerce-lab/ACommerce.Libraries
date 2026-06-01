@@ -10,3 +10,6 @@ obj/
 # Deployment secrets
 deploy-alibaba.env
 *.env.local
+secrets-local/
+*-key.pem
+*.pem
