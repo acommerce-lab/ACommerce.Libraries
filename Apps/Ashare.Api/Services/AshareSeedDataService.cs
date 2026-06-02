@@ -410,8 +410,10 @@ public class AshareSeedDataService
         {
                 var repo = _repositoryFactory.CreateRepository<ProductCategory>();
 
-                var existing = await repo.GetAllWithPredicateAsync();
-                var existingIds = existing.Select(c => c.Id).ToHashSet();
+                // Include soft-deleted so we don't try to INSERT an Id that still exists in the table
+                // (it would only be hidden by the IsDeleted filter, causing a PK violation).
+                var existing = await repo.GetAllWithPredicateAsync(predicate: null, includeDeleted: true);
+                var existingById = existing.ToDictionary(c => c.Id);
 
                 var categories = new List<ProductCategory>
                 {
@@ -453,9 +455,24 @@ public class AshareSeedDataService
 
                 foreach (var category in categories)
                 {
-                        if (!existingIds.Contains(category.Id))
+                        if (!existingById.TryGetValue(category.Id, out var row))
                         {
                                 await repo.AddAsync(category);
+                                Console.WriteLine($"[Seed] Added category: {category.Slug}");
+                        }
+                        else if (row.IsDeleted || !row.IsActive)
+                        {
+                                // Revive a soft-deleted/deactivated row and bring it in line with the seed values.
+                                row.IsDeleted = false;
+                                row.IsActive = true;
+                                row.Name = category.Name;
+                                row.Slug = category.Slug;
+                                row.Description = category.Description;
+                                row.Icon = category.Icon;
+                                row.SortOrder = category.SortOrder;
+                                row.UpdatedAt = DateTime.UtcNow;
+                                await repo.UpdateAsync(row);
+                                Console.WriteLine($"[Seed] Restored category: {category.Slug}");
                         }
                 }
 
@@ -467,8 +484,7 @@ public class AshareSeedDataService
                 };
                 foreach (var legacyId in legacyIds)
                 {
-                        var legacy = existing.FirstOrDefault(c => c.Id == legacyId);
-                        if (legacy != null && legacy.IsActive)
+                        if (existingById.TryGetValue(legacyId, out var legacy) && legacy.IsActive)
                         {
                                 legacy.IsActive = false;
                                 await repo.UpdateAsync(legacy);
@@ -1704,8 +1720,10 @@ public class AshareSeedDataService
         private async Task SeedFeatureFlagsAsync()
         {
                 var repo = _repositoryFactory.CreateRepository<FeatureFlag>();
-                var existing = await repo.GetAllWithPredicateAsync();
-                var existingKeys = existing.Select(f => f.Key).ToHashSet();
+                // Include soft-deleted: if a row with the same Key exists but is hidden by
+                // the IsDeleted filter, AddAsync would still hit a unique-key conflict.
+                var existing = await repo.GetAllWithPredicateAsync(predicate: null, includeDeleted: true);
+                var existingByKey = existing.ToDictionary(f => f.Key);
 
                 // اتفاقية التسمية:
                 //   *.enabled  → علامة توفّر (availability). معطّلة = الميزة غير موجودة، المستخدم محظور.
@@ -1747,10 +1765,20 @@ public class AshareSeedDataService
 
                 foreach (var flag in flags)
                 {
-                        if (!existingKeys.Contains(flag.Key))
+                        if (!existingByKey.TryGetValue(flag.Key, out var row))
                         {
                                 await repo.AddAsync(flag);
                                 Console.WriteLine($"[Seed] Added feature flag: {flag.Key} = {flag.Enabled}");
+                        }
+                        else if (row.IsDeleted)
+                        {
+                                // Revive: re-activate a soft-deleted flag, but keep its existing Enabled state
+                                // so we don't surprise an admin who had toggled it off before.
+                                row.IsDeleted = false;
+                                row.Description = flag.Description;
+                                row.UpdatedAt = DateTime.UtcNow;
+                                await repo.UpdateAsync(row);
+                                Console.WriteLine($"[Seed] Restored feature flag: {flag.Key}");
                         }
                 }
 
@@ -1764,8 +1792,7 @@ public class AshareSeedDataService
                 };
                 foreach (var key in obsoleteKeys)
                 {
-                        var stale = existing.FirstOrDefault(f => f.Key == key && !f.IsDeleted);
-                        if (stale != null)
+                        if (existingByKey.TryGetValue(key, out var stale) && !stale.IsDeleted)
                         {
                                 stale.IsDeleted = true;
                                 stale.UpdatedAt = DateTime.UtcNow;
@@ -1780,8 +1807,8 @@ public class AshareSeedDataService
         private async Task SeedUiStringsAsync()
         {
                 var repo = _repositoryFactory.CreateRepository<UiString>();
-                var existing = await repo.GetAllWithPredicateAsync();
-                var existingPairs = existing.Select(s => $"{s.Key}:{s.Language}").ToHashSet();
+                var existing = await repo.GetAllWithPredicateAsync(predicate: null, includeDeleted: true);
+                var existingByPair = existing.ToDictionary(s => $"{s.Key}:{s.Language}");
 
                 // Hybrid strategy: only "marketing copy" strings live in DB; rest stay in code.
                 var strings = new List<UiString>
@@ -1810,10 +1837,17 @@ public class AshareSeedDataService
 
                 foreach (var s in strings)
                 {
-                        var key = $"{s.Key}:{s.Language}";
-                        if (!existingPairs.Contains(key))
+                        var pair = $"{s.Key}:{s.Language}";
+                        if (!existingByPair.TryGetValue(pair, out var row))
                         {
                                 await repo.AddAsync(s);
+                        }
+                        else if (row.IsDeleted)
+                        {
+                                row.IsDeleted = false;
+                                row.UpdatedAt = DateTime.UtcNow;
+                                await repo.UpdateAsync(row);
+                                Console.WriteLine($"[Seed] Restored UiString: {pair}");
                         }
                 }
                 Console.WriteLine($"[Seed] UiStrings seeding complete. Total: {strings.Count}");
@@ -1822,8 +1856,8 @@ public class AshareSeedDataService
         private async Task SeedThemeTokensAsync()
         {
                 var repo = _repositoryFactory.CreateRepository<ThemeToken>();
-                var existing = await repo.GetAllWithPredicateAsync();
-                var existingPairs = existing.Select(t => $"{t.Key}:{t.Mode}").ToHashSet();
+                var existing = await repo.GetAllWithPredicateAsync(predicate: null, includeDeleted: true);
+                var existingByPair = existing.ToDictionary(t => $"{t.Key}:{t.Mode}");
 
                 // Values match Ashare Visual Identity Guidelines 2025.
                 var tokens = new List<ThemeToken>
@@ -1847,10 +1881,17 @@ public class AshareSeedDataService
 
                 foreach (var t in tokens)
                 {
-                        var key = $"{t.Key}:{t.Mode}";
-                        if (!existingPairs.Contains(key))
+                        var pair = $"{t.Key}:{t.Mode}";
+                        if (!existingByPair.TryGetValue(pair, out var row))
                         {
                                 await repo.AddAsync(t);
+                        }
+                        else if (row.IsDeleted)
+                        {
+                                row.IsDeleted = false;
+                                row.UpdatedAt = DateTime.UtcNow;
+                                await repo.UpdateAsync(row);
+                                Console.WriteLine($"[Seed] Restored ThemeToken: {pair}");
                         }
                 }
                 Console.WriteLine($"[Seed] ThemeTokens seeding complete. Total: {tokens.Count}");
