@@ -39,7 +39,11 @@ log_step()  { echo; echo -e "${B}━━━ $1 ━━━${N}"; }
 ssh_opts() {
     local opts="-o ServerAliveInterval=30 -o ConnectTimeout=15"
     local key_resolved="${SSH_KEY/#\~/$HOME}"
-    [ -f "$key_resolved" ] && opts="$opts -i $SSH_KEY"
+    if [ -f "$key_resolved" ]; then
+        opts="$opts -i $key_resolved"
+    else
+        echo "[WARN] SSH key not found at $key_resolved — falling back to password" >&2
+    fi
     echo "$opts"
 }
 ssh_target() { echo "${ECS_USER}@${ECS_HOST}"; }
