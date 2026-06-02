@@ -38,7 +38,9 @@ public class AppConfigController(IAppConfigService service) : ControllerBase
         }
 
         Response.Headers["ETag"] = etag;
-        Response.Headers["Cache-Control"] = "private, max-age=300"; // 5 min client-side
+        // Short max-age so HTTP layer never serves stale flags for more than a minute.
+        // Client-side store is the real cache; this just avoids redundant fetches in bursts.
+        Response.Headers["Cache-Control"] = "private, max-age=30, must-revalidate";
         return Ok(snap);
     }
 }

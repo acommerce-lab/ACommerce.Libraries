@@ -86,6 +86,6 @@ public sealed class AppConfigClientOptions
     /// <summary>إصدار التطبيق ("1.16"). يستخدمه الخادم لتقييم Min/Max version.</summary>
     public string? AppVersion { get; set; }
 
-    /// <summary>فترة التحديث الدورية. أقل قيمة معقولة: 5 دقائق. صفر = بدون refresh دوري.</summary>
-    public TimeSpan RefreshInterval { get; set; } = TimeSpan.FromMinutes(10);
+    /// <summary>فترة التحديث الدورية. الافتراضي دقيقة لاستجابة سريعة لتغييرات الأدمن.</summary>
+    public TimeSpan RefreshInterval { get; set; } = TimeSpan.FromMinutes(1);
 }
