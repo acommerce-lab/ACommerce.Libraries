@@ -224,16 +224,34 @@ public class AshareSeedDataService
 
         public async Task SeedAsync()
         {
-                await SeedCurrenciesAsync();
-                await SeedCategoriesAsync();
-                await SeedAttributeDefinitionsAsync();
-                await SeedCategoryAttributeMappingsAsync();
-                await SeedProductsAsync();
-                await SeedProductPricesAsync();
-                await SeedSubscriptionPlansAsync();
-                await SeedLegalPagesAsync();
-                await SeedAppVersionsAsync();
-                await SeedAppConfigAsync();
+                await TrySeedAsync(SeedCurrenciesAsync, "Currencies");
+                await TrySeedAsync(SeedCategoriesAsync, "Categories");
+                await TrySeedAsync(SeedAttributeDefinitionsAsync, "Attributes");
+                await TrySeedAsync(SeedCategoryAttributeMappingsAsync, "CategoryAttributes");
+                await TrySeedAsync(SeedProductsAsync, "Products");
+                await TrySeedAsync(SeedProductPricesAsync, "Prices");
+                await TrySeedAsync(SeedSubscriptionPlansAsync, "Subscriptions");
+                await TrySeedAsync(SeedLegalPagesAsync, "Legal");
+                await TrySeedAsync(SeedAppVersionsAsync, "AppVersions");
+                await TrySeedAsync(SeedAppConfigAsync, "AppConfig");
+        }
+
+        // Per-step isolation: a failure in one seed (e.g. duplicate-key from a
+        // soft-deleted row that the predicate-filtered query can't see) must not
+        // prevent later steps from running.
+        private static async Task TrySeedAsync(Func<Task> seed, string name)
+        {
+                try
+                {
+                        await seed();
+                        Console.WriteLine($"[Seed] ✅ {name}");
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"[Seed] ❌ {name} failed: {ex.GetType().Name}: {ex.Message}");
+                        if (ex.InnerException != null)
+                                Console.WriteLine($"[Seed]    inner: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}");
+                }
         }
 
         private async Task SeedLegalPagesAsync()
