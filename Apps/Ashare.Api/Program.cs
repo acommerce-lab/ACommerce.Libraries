@@ -619,6 +619,10 @@ Built using ACommerce libraries with configuration-first approach:
         Log.Information("Ensuring schema updates...");
         await EnsureSchemaUpdatesAsync(dbContext);
 
+        // إنشاء الجداول الناقصة (EnsureCreatedAsync لا ينشئ جداول جديدة لو DB فيها أي جداول قديمة)
+        Log.Information("Ensuring AppConfig tables exist...");
+        await EnsureAppConfigTablesAsync(dbContext);
+
         // إنشاء الفهارس إذا لم تكن موجودة (مهم للأداء)
         Log.Information("Ensuring indexes exist...");
         await EnsureIndexesAsync(dbContext);
@@ -768,6 +772,168 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
+}
+
+// إنشاء جداول AppConfig إذا لم تكن موجودة
+// السبب: EnsureCreatedAsync لا يُنشئ جداول جديدة لو DB فيها أي جدول قديم من قبل،
+// فالكيانات الجديدة (FeatureFlag/UiString/ThemeToken/AppConfigEntry) تبقى بلا جداول.
+static async Task EnsureAppConfigTablesAsync(ApplicationDbContext dbContext)
+{
+    var providerName = dbContext.Database.ProviderName ?? "";
+
+    if (providerName.Contains("SqlServer", StringComparison.OrdinalIgnoreCase))
+    {
+        const string sqlServerSql = @"
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'FeatureFlag')
+BEGIN
+    CREATE TABLE [FeatureFlag] (
+        [Id] uniqueidentifier NOT NULL CONSTRAINT [PK_FeatureFlag] PRIMARY KEY,
+        [CreatedAt] datetime2 NOT NULL,
+        [UpdatedAt] datetime2 NULL,
+        [IsDeleted] bit NOT NULL,
+        [Key] nvarchar(200) NOT NULL,
+        [Enabled] bit NOT NULL,
+        [Platforms] nvarchar(100) NULL,
+        [MinAppVersion] nvarchar(50) NULL,
+        [MaxAppVersion] nvarchar(50) NULL,
+        [Description] nvarchar(500) NULL,
+        [RequiresClientRestart] bit NOT NULL
+    );
+    CREATE UNIQUE INDEX [IX_FeatureFlag_Key_Active] ON [FeatureFlag] ([Key]) WHERE [IsDeleted] = 0;
+END;
+
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'UiString')
+BEGIN
+    CREATE TABLE [UiString] (
+        [Id] uniqueidentifier NOT NULL CONSTRAINT [PK_UiString] PRIMARY KEY,
+        [CreatedAt] datetime2 NOT NULL,
+        [UpdatedAt] datetime2 NULL,
+        [IsDeleted] bit NOT NULL,
+        [Key] nvarchar(200) NOT NULL,
+        [Language] nvarchar(10) NOT NULL,
+        [Value] nvarchar(max) NOT NULL,
+        [IsActive] bit NOT NULL,
+        [Note] nvarchar(500) NULL
+    );
+    CREATE UNIQUE INDEX [IX_UiString_Key_Lang_Active] ON [UiString] ([Key], [Language]) WHERE [IsDeleted] = 0;
+END;
+
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'ThemeToken')
+BEGIN
+    CREATE TABLE [ThemeToken] (
+        [Id] uniqueidentifier NOT NULL CONSTRAINT [PK_ThemeToken] PRIMARY KEY,
+        [CreatedAt] datetime2 NOT NULL,
+        [UpdatedAt] datetime2 NULL,
+        [IsDeleted] bit NOT NULL,
+        [Key] nvarchar(100) NOT NULL,
+        [Mode] int NOT NULL,
+        [Value] nvarchar(200) NOT NULL,
+        [IsActive] bit NOT NULL
+    );
+    CREATE UNIQUE INDEX [IX_ThemeToken_Key_Mode_Active] ON [ThemeToken] ([Key], [Mode]) WHERE [IsDeleted] = 0;
+END;
+
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'AppConfigEntry')
+BEGIN
+    CREATE TABLE [AppConfigEntry] (
+        [Id] uniqueidentifier NOT NULL CONSTRAINT [PK_AppConfigEntry] PRIMARY KEY,
+        [CreatedAt] datetime2 NOT NULL,
+        [UpdatedAt] datetime2 NULL,
+        [IsDeleted] bit NOT NULL,
+        [Key] nvarchar(200) NOT NULL,
+        [Value] nvarchar(max) NOT NULL,
+        [ValueType] int NOT NULL,
+        [IsPublic] bit NOT NULL,
+        [Description] nvarchar(500) NULL
+    );
+    CREATE UNIQUE INDEX [IX_AppConfigEntry_Key_Active] ON [AppConfigEntry] ([Key]) WHERE [IsDeleted] = 0;
+    CREATE INDEX [IX_AppConfigEntry_IsDeleted] ON [AppConfigEntry] ([IsDeleted]);
+END;
+";
+        try
+        {
+            await dbContext.Database.ExecuteSqlRawAsync(sqlServerSql);
+            Log.Information("✅ AppConfig tables ensured (SqlServer)");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to ensure AppConfig tables");
+            throw;
+        }
+        return;
+    }
+
+    if (providerName.Contains("Sqlite", StringComparison.OrdinalIgnoreCase))
+    {
+        const string sqliteSql = @"
+CREATE TABLE IF NOT EXISTS ""FeatureFlag"" (
+    ""Id"" TEXT NOT NULL CONSTRAINT ""PK_FeatureFlag"" PRIMARY KEY,
+    ""CreatedAt"" TEXT NOT NULL,
+    ""UpdatedAt"" TEXT NULL,
+    ""IsDeleted"" INTEGER NOT NULL,
+    ""Key"" TEXT NOT NULL,
+    ""Enabled"" INTEGER NOT NULL,
+    ""Platforms"" TEXT NULL,
+    ""MinAppVersion"" TEXT NULL,
+    ""MaxAppVersion"" TEXT NULL,
+    ""Description"" TEXT NULL,
+    ""RequiresClientRestart"" INTEGER NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ""IX_FeatureFlag_Key_Active"" ON ""FeatureFlag"" (""Key"") WHERE ""IsDeleted"" = 0;
+
+CREATE TABLE IF NOT EXISTS ""UiString"" (
+    ""Id"" TEXT NOT NULL CONSTRAINT ""PK_UiString"" PRIMARY KEY,
+    ""CreatedAt"" TEXT NOT NULL,
+    ""UpdatedAt"" TEXT NULL,
+    ""IsDeleted"" INTEGER NOT NULL,
+    ""Key"" TEXT NOT NULL,
+    ""Language"" TEXT NOT NULL,
+    ""Value"" TEXT NOT NULL,
+    ""IsActive"" INTEGER NOT NULL,
+    ""Note"" TEXT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ""IX_UiString_Key_Lang_Active"" ON ""UiString"" (""Key"", ""Language"") WHERE ""IsDeleted"" = 0;
+
+CREATE TABLE IF NOT EXISTS ""ThemeToken"" (
+    ""Id"" TEXT NOT NULL CONSTRAINT ""PK_ThemeToken"" PRIMARY KEY,
+    ""CreatedAt"" TEXT NOT NULL,
+    ""UpdatedAt"" TEXT NULL,
+    ""IsDeleted"" INTEGER NOT NULL,
+    ""Key"" TEXT NOT NULL,
+    ""Mode"" INTEGER NOT NULL,
+    ""Value"" TEXT NOT NULL,
+    ""IsActive"" INTEGER NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ""IX_ThemeToken_Key_Mode_Active"" ON ""ThemeToken"" (""Key"", ""Mode"") WHERE ""IsDeleted"" = 0;
+
+CREATE TABLE IF NOT EXISTS ""AppConfigEntry"" (
+    ""Id"" TEXT NOT NULL CONSTRAINT ""PK_AppConfigEntry"" PRIMARY KEY,
+    ""CreatedAt"" TEXT NOT NULL,
+    ""UpdatedAt"" TEXT NULL,
+    ""IsDeleted"" INTEGER NOT NULL,
+    ""Key"" TEXT NOT NULL,
+    ""Value"" TEXT NOT NULL,
+    ""ValueType"" INTEGER NOT NULL,
+    ""IsPublic"" INTEGER NOT NULL,
+    ""Description"" TEXT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ""IX_AppConfigEntry_Key_Active"" ON ""AppConfigEntry"" (""Key"") WHERE ""IsDeleted"" = 0;
+CREATE INDEX IF NOT EXISTS ""IX_AppConfigEntry_IsDeleted"" ON ""AppConfigEntry"" (""IsDeleted"");
+";
+        try
+        {
+            await dbContext.Database.ExecuteSqlRawAsync(sqliteSql);
+            Log.Information("✅ AppConfig tables ensured (Sqlite)");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to ensure AppConfig tables");
+            throw;
+        }
+        return;
+    }
+
+    Log.Warning("EnsureAppConfigTablesAsync: provider {Provider} not handled — skipping", providerName);
 }
 
 // دالة إضافة الأعمدة الجديدة إلى الجداول الموجودة
