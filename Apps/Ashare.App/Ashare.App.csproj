@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
 	<PropertyGroup>
-		<TargetFrameworks>net9.0-android;net9.0-ios</TargetFrameworks>
+		<TargetFrameworks>net8.0-android;net8.0-ios</TargetFrameworks>
 
 		<!--<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows')) AND '$(AndroidOnly)'!='true'">
-			$(TargetFrameworks);net9.0-windows10.0.19041.0
+			$(TargetFrameworks);net8.0-windows10.0.19041.0
 		</TargetFrameworks>-->
 
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('osx')) AND '$(AndroidOnly)'!='true'">
-			$(TargetFrameworks);net9.0-maccatalyst
+			$(TargetFrameworks);net8.0-maccatalyst
 		</TargetFrameworks>
 
 		<OutputType>Exe</OutputType>
@@ -45,7 +45,7 @@
   </PropertyGroup>
 
 
-  <PropertyGroup Condition="'$(TargetFramework)'=='net9.0-ios'">
+  <PropertyGroup Condition="'$(TargetFramework)'=='net8.0-ios'">
     <UseSimulator>false</UseSimulator>
     <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
 		<ProvisioningType>manual</ProvisioningType>
@@ -54,7 +54,7 @@
 		<CodesignEntitlements>Platforms\iOS\Entitlements.plist</CodesignEntitlements>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-ios|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-ios|AnyCPU'">
     <UseSimulator>false</UseSimulator>
     <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
 		<MtouchLink>SdkOnly</MtouchLink>
@@ -65,7 +65,7 @@
 		<UseInterpreter>false</UseInterpreter>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-ios|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-ios|AnyCPU'">
     <UseSimulator>false</UseSimulator>
     <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
 		<MtouchDebug>False</MtouchDebug>
@@ -73,13 +73,13 @@
 		<OptimizePNGs>True</OptimizePNGs>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(TargetFramework)'=='net9.0-android'">
+	<PropertyGroup Condition="'$(TargetFramework)'=='net8.0-android'">
 		<AndroidLinkMode>None</AndroidLinkMode>
 		<AndroidEnableMultiDex>true</AndroidEnableMultiDex>
 		<AndroidEnableMarshalMethods>false</AndroidEnableMarshalMethods>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android|AnyCPU'">
 		<AndroidLinkMode>None</AndroidLinkMode>
 		<RunAOTCompilation>false</RunAOTCompilation>
 		<PublishTrimmed>false</PublishTrimmed>
@@ -104,26 +104,26 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.*" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.*" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="9.0.*" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.*" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="8.0.*" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.*" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="8.0.*" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.*" />
 		<!-- SkiaSharp for image compression -->
 		<PackageReference Include="SkiaSharp" Version="3.116.1" />
-		<!-- Firebase Cloud Messaging - v4.0+ required for .NET 9 -->
-		<PackageReference Include="Plugin.Firebase.CloudMessaging" Version="4.0.0" />
+		<!-- Firebase Cloud Messaging — v3 is the last line compatible with .NET 8; v4+ requires .NET 9. -->
+		<PackageReference Include="Plugin.Firebase.CloudMessaging" Version="3.1.4" />
 	</ItemGroup>
 
 	<!-- Firebase Configuration - Android -->
 	<!-- Firebase Configuration - Android -->
 	<!-- Note: google-services.json is required for Firebase. Create it from Firebase Console -->
-	<ItemGroup Condition="'$(TargetFramework)'=='net9.0-android' AND Exists('Platforms\Android\google-services.json')">
+	<ItemGroup Condition="'$(TargetFramework)'=='net8.0-android' AND Exists('Platforms\Android\google-services.json')">
 		<GoogleServicesJson Include="Platforms\Android\google-services.json" />
 	</ItemGroup>
 
 	<!-- Firebase Configuration - iOS -->
 	<!-- Note: GoogleService-Info.plist is required for Firebase. Create it from Firebase Console -->
-	<ItemGroup Condition="'$(TargetFramework)'=='net9.0-ios' AND Exists('Platforms\iOS\GoogleService-Info.plist')">
+	<ItemGroup Condition="'$(TargetFramework)'=='net8.0-ios' AND Exists('Platforms\iOS\GoogleService-Info.plist')">
 		<BundleResource Include="Platforms\iOS\GoogleService-Info.plist" />
 	</ItemGroup>
 
