@@ -11,7 +11,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+    <!-- Pin to 8.0.2 so it satisfies the transitive ask from Mvc.Core's
+         Microsoft.Extensions.DependencyInjection (>=8.0.2) and doesn't trigger NU1605. -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\libs\backend\core\ACommerce.SharedKernel.Abstractions\ACommerce.SharedKernel.Abstractions.csproj" />
