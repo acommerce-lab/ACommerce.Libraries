@@ -112,6 +112,12 @@
 		<PackageReference Include="SkiaSharp" Version="3.116.1" />
 		<!-- Firebase Cloud Messaging — v3 is the last line compatible with .NET 8; v4+ requires .NET 9. -->
 		<PackageReference Include="Plugin.Firebase.CloudMessaging" Version="3.1.4" />
+		<!-- Pin Xamarin.Build.Download so its .targets and .dll come from the same version.
+		     Plugin.Firebase transitives request different versions; left to NuGet, MSBuild
+		     ends up loading .targets from 0.11.0 (which passes AndroidFixManifests=true)
+		     against the .dll from 0.11.3 (which removed that parameter), and the task fails
+		     to initialize. -->
+		<PackageReference Include="Xamarin.Build.Download" Version="0.11.4" />
 	</ItemGroup>
 
 	<!-- Firebase Configuration - Android -->
