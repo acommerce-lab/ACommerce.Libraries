@@ -34,13 +34,14 @@ public class AppConfigService(
     public async Task<AppConfigSnapshot> GetSnapshotAsync(
         string language, string? platform, string? appVersion, CancellationToken cancellationToken = default)
     {
-        // Get filtered data in parallel
-        var stringsTask = GetActiveStringsAsync(language, cancellationToken);
-        var themeTask = GetActiveThemeAsync(cancellationToken);
-        var entriesTask = GetActiveEntriesAsync(cancellationToken);
-        var flagsTask = featureFlags.EvaluateAllAsync(platform, appVersion, cancellationToken);
-
-        await Task.WhenAll(stringsTask, themeTask, entriesTask, flagsTask);
+        // Sequential — these four loaders share the same DbContext, which is not thread-safe.
+        // Running them in parallel throws "A second operation was started on this context"
+        // on the first request after cache invalidation. After the cache is warm there's no
+        // DB hit, so the lost parallelism is essentially free.
+        var strings = await GetActiveStringsAsync(language, cancellationToken);
+        var theme   = await GetActiveThemeAsync(cancellationToken);
+        var entries = await GetActiveEntriesAsync(cancellationToken);
+        var flags   = await featureFlags.EvaluateAllAsync(platform, appVersion, cancellationToken);
 
         var snapshot = new AppConfigSnapshot
         {
@@ -48,10 +49,10 @@ public class AppConfigService(
             Language = language,
             Platform = platform,
             AppVersion = appVersion,
-            Features = new Dictionary<string, bool>(await flagsTask),
-            Strings = await stringsTask,
-            Theme = await themeTask,
-            Config = await entriesTask
+            Features = new Dictionary<string, bool>(flags),
+            Strings = strings,
+            Theme = theme,
+            Config = entries
         };
 
         // Compute deterministic ETag (Version)
