@@ -44,6 +44,20 @@
     <MtouchSymbolMode>None</MtouchSymbolMode>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)'=='net8.0-ios'">
+    <!-- Skip bitcode stripping - bitcode is deprecated by Apple, the tool fails on newer Xcode -->
+    <DisableXamarinFirebaseBitcodeStrip>true</DisableXamarinFirebaseBitcodeStrip>
+</PropertyGroup>
+
+<!-- Override the bitcode strip target to do nothing -->
+<Target Name="_StripBitcodeFromGoogleAppMeasurement" AfterTargets="_UnpackLibraryResources" />
+
+<PropertyGroup Condition="'$(TargetFramework)'=='net8.0-ios'">
+    <!-- Disable On-Demand Resources / asset packs (we don't use ODR) -->
+    <EnableODRSupport>false</EnableODRSupport>
+    <DisableODRSupport>true</DisableODRSupport>
+    <IPhoneAssetPackEnable>false</IPhoneAssetPackEnable>
+</PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)'=='net8.0-ios'">
     <UseSimulator>false</UseSimulator>
@@ -59,7 +73,7 @@
     <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
 		<MtouchLink>SdkOnly</MtouchLink>
 		<MtouchDebug>False</MtouchDebug>
-		<EmbedOnDemandResources>False</EmbedOnDemandResources>
+		<EmbedOnDemandResources>True</EmbedOnDemandResources>
 		<OptimizePNGs>True</OptimizePNGs>
 		<EnableSGenConc>false</EnableSGenConc>
 		<UseInterpreter>false</UseInterpreter>
@@ -69,7 +83,7 @@
     <UseSimulator>false</UseSimulator>
     <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
 		<MtouchDebug>False</MtouchDebug>
-		<EmbedOnDemandResources>False</EmbedOnDemandResources>
+		<EmbedOnDemandResources>True</EmbedOnDemandResources>
 		<OptimizePNGs>True</OptimizePNGs>
 	</PropertyGroup>
 
@@ -111,7 +125,7 @@
 		<!-- SkiaSharp for image compression -->
 		<PackageReference Include="SkiaSharp" Version="3.116.1" />
 		<!-- Firebase Cloud Messaging — v3 is the last line compatible with .NET 8; v4+ requires .NET 9. -->
-		<PackageReference Include="Plugin.Firebase.CloudMessaging" Version="3.1.4" />
+		<PackageReference Include="Plugin.Firebase.CloudMessaging" Version="2.0.4" />
 		<!-- Pin Xamarin.Build.Download so its .targets and .dll come from the same version.
 		     Plugin.Firebase transitives request different versions; left to NuGet, MSBuild
 		     ends up loading .targets from 0.11.0 (which passes AndroidFixManifests=true)
