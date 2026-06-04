@@ -14,6 +14,14 @@ public record PaymentRequest
 	public PaymentMethod? Method { get; init; }
 	public string? CallbackUrl { get; init; }
 	public string? Description { get; init; }
+
+	/// <summary>
+	/// قناة الدفع — يُمرَّر للمزوّد للتحكم بواجهة صفحة الدفع.
+	/// لـ Noon: "web" للمتصفّح، "mobile" لتطبيقات الجوال (يُمكّن زر Apple Pay على iOS).
+	/// null = استخدم القيمة الافتراضية من إعدادات المزوّد.
+	/// </summary>
+	public string? Channel { get; init; }
+
 	public Dictionary<string, string> Metadata { get; init; } = new();
 }
 
