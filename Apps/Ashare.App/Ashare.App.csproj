@@ -25,8 +25,8 @@
 		<ApplicationId>com.ashare.ashare</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>1.232</ApplicationDisplayVersion>
-		<ApplicationVersion>232</ApplicationVersion>
+		<ApplicationDisplayVersion>1.233</ApplicationDisplayVersion>
+		<ApplicationVersion>233</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
@@ -124,8 +124,11 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.*" />
 		<!-- SkiaSharp for image compression -->
 		<PackageReference Include="SkiaSharp" Version="3.116.1" />
-		<!-- Firebase Cloud Messaging — v3 is the last line compatible with .NET 8; v4+ requires .NET 9. -->
-		<PackageReference Include="Plugin.Firebase.CloudMessaging" Version="2.0.4" />
+		<!-- Firebase Cloud Messaging — v3 brings Firebase iOS SDK 10.24 with embedded
+		     PrivacyInfo.xcprivacy in every native framework, which is required by
+		     Apple's ITMS-91061. v2.x used SDK 8.x and was rejected at App Review.
+		     v4+ needs .NET 9; v3.x is the latest compatible with our .NET 8 setup. -->
+		<PackageReference Include="Plugin.Firebase.CloudMessaging" Version="3.0.0" />
 		<!-- Pin Xamarin.Build.Download so its .targets and .dll come from the same version.
 		     Plugin.Firebase transitives request different versions; left to NuGet, MSBuild
 		     ends up loading .targets from 0.11.0 (which passes AndroidFixManifests=true)
@@ -145,6 +148,12 @@
 	<!-- Note: GoogleService-Info.plist is required for Firebase. Create it from Firebase Console -->
 	<ItemGroup Condition="'$(TargetFramework)'=='net8.0-ios' AND Exists('Platforms\iOS\GoogleService-Info.plist')">
 		<BundleResource Include="Platforms\iOS\GoogleService-Info.plist" />
+	</ItemGroup>
+
+	<!-- App-level Privacy Manifest (required by Apple ITMS-91061 for the app itself,
+	     in addition to the SDK-level manifests bundled inside each Firebase framework). -->
+	<ItemGroup Condition="'$(TargetFramework)'=='net8.0-ios'">
+		<BundleResource Include="Platforms\iOS\PrivacyInfo.xcprivacy" />
 	</ItemGroup>
 
 	<ItemGroup>
