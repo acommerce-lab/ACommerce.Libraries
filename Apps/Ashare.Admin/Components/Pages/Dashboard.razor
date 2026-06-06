@@ -22,20 +22,20 @@
         </div>
         
         <div class="stat-card">
-            <div class="stat-icon warning">📦</div>
+            <div class="stat-icon warning">📅</div>
             <div class="stat-content">
-                <h3>الطلبات</h3>
+                <h3>الحجوزات</h3>
                 <div class="value">@Stats.TotalOrders.ToString("N0")</div>
                 <div class="change positive">+@Stats.OrdersThisMonth هذا الشهر</div>
             </div>
         </div>
-        
+
         <div class="stat-card">
             <div class="stat-icon danger">💰</div>
             <div class="stat-content">
                 <h3>إجمالي الإيرادات</h3>
                 <div class="value">@Stats.TotalRevenue.ToString("N0") ر.س</div>
-                <div class="change positive">@Stats.ActiveVendors بائع نشط</div>
+                <div class="change positive">@Stats.ActiveVendors معلن نشط</div>
             </div>
         </div>
     </div>
@@ -43,7 +43,7 @@
     <div class="content-grid">
         <div class="card">
             <div class="card-header">
-                <h2>📈 المبيعات الشهرية</h2>
+                <h2>📈 الإيرادات الشهرية</h2>
             </div>
             <div class="card-body">
                 <SfChart Height="300px">
@@ -65,8 +65,8 @@
 
         <div class="card">
             <div class="card-header">
-                <h2>📦 آخر الطلبات</h2>
-                <a href="/orders" class="view-all">عرض الكل</a>
+                <h2>📅 آخر الحجوزات</h2>
+                <a href="/bookings" class="view-all">عرض الكل</a>
             </div>
             <div class="card-body">
                 @foreach (var order in RecentOrders)

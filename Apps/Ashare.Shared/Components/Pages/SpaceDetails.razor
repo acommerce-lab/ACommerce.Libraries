@@ -214,26 +214,43 @@
                 </div>
             }
 
-            @* Contact Options - Only show if not own listing *@
+            @* Contact Options - Only show if not own listing AND chat feature is enabled *@
             @if (!_isOwnListing)
             {
-                var contactOptions = GetContactOptions();
-                if (contactOptions.Any())
-                {
-                    <div class="ashare-section">
-                        <h2 class="ashare-section-title">@L["ContactMethods"]</h2>
-                        <div class="ashare-contact-options">
-                            @foreach (var option in contactOptions)
-                            {
-                                <button class="ashare-contact-btn @option.Class" @onclick="() => HandleContact(option.Type)">
-                                    <i class="bi @option.Icon"></i>
-                                    <span>@option.Label</span>
-                                </button>
-                            }
+                <FeatureGate Feature="chat.enabled">
+                    @{
+                        var contactOptions = GetContactOptions();
+                    }
+                    @if (contactOptions.Any())
+                    {
+                        <div class="ashare-section">
+                            <h2 class="ashare-section-title">@L["ContactMethods"]</h2>
+                            <div class="ashare-contact-options">
+                                @foreach (var option in contactOptions)
+                                {
+                                    <button class="ashare-contact-btn @option.Class" @onclick="() => HandleContact(option.Type)">
+                                        <i class="bi @option.Icon"></i>
+                                        <span>@option.Label</span>
+                                    </button>
+                                }
+                            </div>
                         </div>
-                    </div>
-                }
+                    }
+                </FeatureGate>
             }
+
+            @* Disclaimer - يُعطّل عبر listing.disclaimer.show *@
+            <FeatureGate Feature="listing.disclaimer.show">
+                <div class="ashare-section ashare-disclaimer-section">
+                    <div class="ashare-disclaimer-card">
+                        <div class="ashare-disclaimer-header">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <h3>@L["Disclaimer"]</h3>
+                        </div>
+                        <p class="ashare-disclaimer-body">@L["ListingDisclaimerBody"]</p>
+                    </div>
+                </div>
+            </FeatureGate>
 
             @* Location Map *@
             @if (_space.Latitude.HasValue && _space.Longitude.HasValue)
@@ -340,10 +357,12 @@
                     }
                     else
                     {
-                        <button class="ac-btn ac-btn-secondary" @onclick="ContactOwner">
-                            <i class="bi bi-chat"></i>
-                            @L["Contact"]
-                        </button>
+                        <FeatureGate Feature="chat.enabled">
+                            <button class="ac-btn ac-btn-secondary" @onclick="ContactOwner">
+                                <i class="bi bi-chat"></i>
+                                @L["Contact"]
+                            </button>
+                        </FeatureGate>
                     }
                 </div>
             </div>
@@ -388,29 +407,31 @@
         @* Booking Bar *@
         @if (!_isOwnListing)
         {
-            <div class="ashare-booking-bar">
-                <div class="ashare-booking-price">
-                    @if (HasPrice())
+            <FeatureGate Feature="booking.enabled">
+                <div class="ashare-booking-bar">
+                    <div class="ashare-booking-price">
+                        @if (HasPrice())
+                        {
+                            <span class="ashare-booking-amount">@GetPriceDisplay()</span>
+                        }
+                    </div>
+                    @if (_existingBooking != null)
                     {
-                        <span class="ashare-booking-amount">@GetPriceDisplay()</span>
+                        @* عرض رسالة وزر للانتقال للحجز الموجود *@
+                        <button class="ac-btn ac-btn-secondary ac-btn-lg" @onclick="ViewExistingBooking">
+                            <i class="bi bi-calendar-check-fill"></i>
+                            <span>عرض حجزك</span>
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="StartBooking">
+                            <i class="bi bi-calendar-check"></i>
+                            <span>@L["BookNow"]</span>
+                        </button>
                     }
                 </div>
-                @if (_existingBooking != null)
-                {
-                    @* عرض رسالة وزر للانتقال للحجز الموجود *@
-                    <button class="ac-btn ac-btn-secondary ac-btn-lg" @onclick="ViewExistingBooking">
-                        <i class="bi bi-calendar-check-fill"></i>
-                        <span>عرض حجزك</span>
-                    </button>
-                }
-                else
-                {
-                    <button class="ac-btn ac-btn-primary ac-btn-lg" @onclick="StartBooking">
-                        <i class="bi bi-calendar-check"></i>
-                        <span>@L["BookNow"]</span>
-                    </button>
-                }
-            </div>
+            </FeatureGate>
         }
     }
     else
@@ -769,8 +790,11 @@
         "has_elevator", "elevator", "has_kitchen", "kitchen", "has_pool", "pool",
         "has_gym", "gym", "has_security", "security", "has_garden", "garden",
         "has_balcony", "balcony", "has_storage", "storage", "has_maid_room", "maid_room",
-        "has_driver_room", "driver_room", "is_phone_allowed", "is_whatsapp_allowed",
+        "has_driver_room", "driver_room",
+        // قناة التواصل المعتمدة: المحادثة فقط
         "is_messaging_allowed",
+        // قنوات قديمة (اتصال هاتفي / واتساب / فيديو) - مهملة، تُتجاهل من الواجهة
+        "is_phone_allowed", "is_whatsapp_allowed", "is_video_call_allowed",
         // License attributes (معروضة في البادج بالفعل)
         "requires_license", "has_owner_license", "license_number"
     };
@@ -992,9 +1016,6 @@
         "studio" => "استوديو",
         "duplex" => "دوبلكس",
         "floor" => "دور كامل",
-        "building" => "عمارة",
-        "office" => "مكتب",
-        "shop" => "محل",
         _ => value
     };
 
@@ -1139,25 +1160,20 @@
     {
         var options = new List<(string Type, string Icon, string Label, string Class)>();
 
-        if (GetBoolAttribute("is_phone_allowed"))
+        // الشات (الرسائل) - متاح دائماً ما لم يُعطّل صراحةً
+        var messagingDisabled = _space?.Attributes != null
+            && _space.Attributes.ContainsKey("is_messaging_allowed")
+            && !GetBoolAttribute("is_messaging_allowed");
+
+        if (!messagingDisabled)
         {
-            options.Add(("phone", "bi-telephone", "اتصال", "contact-phone"));
+            options.Add(("chat", "bi-chat-dots", L["ContactChat"], "contact-chat"));
         }
 
-        if (GetBoolAttribute("is_whatsapp_allowed"))
-        {
-            options.Add(("whatsapp", "bi-whatsapp", "واتساب", "contact-whatsapp"));
-        }
-
-        if (GetBoolAttribute("is_messaging_allowed"))
-        {
-            options.Add(("chat", "bi-chat-dots", "رسالة", "contact-chat"));
-        }
-
-        // Default fallback if no contact options specified
+        // ضمان عدم الفراغ
         if (!options.Any())
         {
-            options.Add(("chat", "bi-chat-dots", "تواصل", "contact-chat"));
+            options.Add(("chat", "bi-chat-dots", L["ContactChat"], "contact-chat"));
         }
 
         return options;
@@ -1165,58 +1181,15 @@
 
     private async Task HandleContact(string type)
     {
-        // الحصول على رقم الهاتف من الخصائص أو من بروفايل المالك
-        var phone = GetOwnerPhone();
-
-        switch (type)
-        {
-            case "phone":
-                if (!string.IsNullOrEmpty(phone))
-                {
-                    // فتح تطبيق الهاتف مع الرقم
-                    await Navigation.OpenExternalAsync($"tel:{phone}");
-                }
-                break;
-            case "whatsapp":
-                if (!string.IsNullOrEmpty(phone))
-                {
-                    var cleanPhone = phone.Replace("+", "").Replace(" ", "").Replace("-", "");
-                    // إضافة رسالة أولية تشير للإعلان
-                    var message = Uri.EscapeDataString($"مرحباً، أنا مهتم بإعلانك: {_space?.Name ?? ""}");
-                    await Navigation.OpenExternalAsync($"https://wa.me/{cleanPhone}?text={message}");
-                }
-                break;
-            case "chat":
-            default:
-                await ContactOwnerWithInitialMessage();
-                break;
-        }
-    }
-
-    /// <summary>
-    /// الحصول على رقم هاتف المالك من الخصائص أو البروفايل
-    /// </summary>
-    private string? GetOwnerPhone()
-    {
-        // أولاً: من خاصية contact_phone
-        if (HasAttribute("contact_phone"))
-            return GetAttribute("contact_phone");
-
-        // ثانياً: من خاصية phone
-        if (HasAttribute("phone"))
-            return GetAttribute("phone");
-
-        // ثالثاً: من بروفايل المالك
-        if (!string.IsNullOrEmpty(_ownerProfile?.PhoneNumber))
-            return _ownerProfile.PhoneNumber;
-
-        return null;
+        // قناة التواصل الوحيدة المعتمدة حالياً: المحادثة
+        await ContactOwnerWithInitialMessage();
     }
 
     // ═══════════════════════════════════════════════════════════════════
     // Translation Helpers
     // ═══════════════════════════════════════════════════════════════════
 
+    // أنواع الوحدات السكنية المسموح بها في عشير (استبعاد المكاتب/المحلات/المستودعات/الأراضي)
     private string TranslatePropertyType(string type) => type?.ToLower() switch
     {
         "apartment" => "شقة",
@@ -1224,16 +1197,7 @@
         "duplex" => "دوبلكس",
         "studio" => "استوديو",
         "room" => "غرفة",
-        "office" => "مكتب",
-        "shop" => "محل",
-        "warehouse" => "مستودع",
-        "land" => "أرض",
-        "building" => "عمارة",
         "floor" => "دور كامل",
-        "chalet" => "شاليه",
-        "farm" => "مزرعة",
-        "rest_house" => "استراحة",
-        "tent" => "خيمة",
         _ => type ?? ""
     };
 

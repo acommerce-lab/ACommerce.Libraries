@@ -65,9 +65,11 @@
                         </div>
                         <div class="ashare-favorite-footer">
                             <span class="ashare-favorite-price">@space.DisplayPrice</span>
-                            <button class="ac-btn ac-btn-primary ac-btn-sm" @onclick:stopPropagation="true" @onclick="() => BookSpace(space.Id)">
-                                احجز الآن
-                            </button>
+                            <FeatureGate Feature="booking.enabled">
+                                <button class="ac-btn ac-btn-primary ac-btn-sm" @onclick:stopPropagation="true" @onclick="() => BookSpace(space.Id)">
+                                    احجز الآن
+                                </button>
+                            </FeatureGate>
                         </div>
                     </div>
                 </div>

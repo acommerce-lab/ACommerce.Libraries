@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
         <PropertyGroup>
-                <TargetFramework>net9.0</TargetFramework>
+                <TargetFramework>net8.0</TargetFramework>
                 <Nullable>enable</Nullable>
                 <ImplicitUsings>enable</ImplicitUsings>
                 <RootNamespace>Ashare.Shared</RootNamespace>
@@ -12,7 +12,7 @@
         </ItemGroup>
 
         <ItemGroup>
-                <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.*" />
+                <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.*" />
         </ItemGroup>
 
         <ItemGroup>
@@ -57,6 +57,9 @@
 
                 <!-- Version Management Client -->
                 <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.Versions\ACommerce.Client.Versions.csproj" />
+
+                <!-- AppConfig Client (server-driven texts, theme, feature flags) -->
+                <ProjectReference Include="..\..\libs\frontend\clients\ACommerce.Client.AppConfig\ACommerce.Client.AppConfig.csproj" />
 
                 <!-- Reference to Localization -->
                 <ProjectReference Include="..\..\Modules\ACommerce.Localization\ACommerce.Localization.csproj" />

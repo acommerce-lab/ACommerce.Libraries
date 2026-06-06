@@ -4,7 +4,7 @@
 # =============================================================================
 
 # Stage 1: Build
-FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 WORKDIR /src
 
 # Install dependencies for native compilation (if needed)
@@ -74,7 +74,7 @@ RUN dotnet publish "ACommerce.Marketplace.GCP.csproj" \
 # =============================================================================
 # Stage 2: Runtime
 # =============================================================================
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runtime
 
 # Security: Run as non-root user
 RUN addgroup -g 1000 acommerce && \

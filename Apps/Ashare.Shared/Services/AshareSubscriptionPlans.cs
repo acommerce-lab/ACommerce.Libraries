@@ -423,63 +423,6 @@ public static class AshareSubscriptionPlans
     };
 
     /// <summary>
-    /// باقة العقارات الإدارية والتجارية
-    /// 5% من قيمة الإيجار
-    /// </summary>
-    public static SubscriptionPlan CommercialAdmin => new()
-    {
-        Id = Guid.Parse("30000000-0000-0000-0000-000000000002"),
-        Name = "الإداري والتجاري",
-        NameEn = "Commercial & Administrative",
-        Slug = "commercial-admin",
-        Description = "للعقارات الإدارية والتجارية - 5% من قيمة الإيجار بعد التوقيع",
-        DescriptionEn = "For commercial and administrative properties - 5% of rent after signing",
-        Icon = "bi-shop",
-        Color = "#EF4444",
-        SortOrder = 8,
-        IsActive = true,
-        IsDefault = false,
-        IsRecommended = false,
-
-        // بدون رسوم اشتراك - عمولة فقط
-        MonthlyPrice = 0,
-        Currency = "SAR",
-        TrialDays = 0,
-        GracePeriodDays = 0,
-
-        // الحدود - مفتوح
-        MaxListings = -1,
-        MaxImagesPerListing = 20,
-        MaxFeaturedListings = 5,
-        StorageLimitMB = 1000,
-        MaxTeamMembers = 5,
-        MaxMonthlyMessages = -1,
-        MaxMonthlyApiCalls = 500,
-        ListingDurationDays = 0,
-
-        // العمولة - 5% من قيمة الإيجار
-        CommissionType = CommissionType.Percentage,
-        CommissionPercentage = 5,
-        CommissionFixedAmount = 0,
-
-        // المميزات
-        HasVerifiedBadge = true,
-        SearchPriorityBoost = 5,
-        AnalyticsLevel = AnalyticsLevel.Advanced,
-        SupportLevel = SupportLevel.Priority,
-        AllowDirectMessages = true,
-        AllowApiAccess = true,
-        AllowCustomStorePage = true,
-        AllowPromotionalTools = true,
-        AllowDataExport = true,
-        RemoveBranding = false,
-        EmailReports = true,
-        PushNotifications = true,
-
-        CreatedAt = DateTime.UtcNow
-    };
-
-    /// <summary>
     /// خدمة العقد في المنصة (إضافية)
     /// 129 ريال - اختياري
     /// </summary>
@@ -555,7 +498,6 @@ public static class AshareSubscriptionPlans
         IndividualPack5,
         // باقات خاصة
         PartnerSeeker,
-        CommercialAdmin,
         ContractService
     ];
 
@@ -591,7 +533,6 @@ public static class AshareSubscriptionPlans
         "individual-monthly" => IndividualMonthly,
         "individual-pack-5" => IndividualPack5,
         "partner-seeker" => PartnerSeeker,
-        "commercial-admin" => CommercialAdmin,
         "platform-contract" => ContractService,
         _ => null
     };
