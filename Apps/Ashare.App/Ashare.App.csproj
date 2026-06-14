@@ -13,6 +13,10 @@
 		       Mac:     dotnet publish ... (uses default = ios, picks up .NET 8 SDK via global.json)
 		       Windows: dotnet publish ... -p:MobilePlatform=android (needs .NET 9 SDK active —
 		                use build-android.ps1 which swaps global.json temporarily). -->
+		<!-- Auto-select by OS so the right target shows in Visual Studio without any
+		     command-line flag: Windows is the Android build box, macOS is the iOS box.
+		     An explicit -p:MobilePlatform=... still overrides (these only fire when empty). -->
+		<MobilePlatform Condition="'$(MobilePlatform)' == '' AND $([MSBuild]::IsOSPlatform('windows'))">android</MobilePlatform>
 		<MobilePlatform Condition="'$(MobilePlatform)' == ''">ios</MobilePlatform>
 
 		<TargetFrameworks Condition="'$(MobilePlatform)' == 'ios'">net8.0-ios</TargetFrameworks>

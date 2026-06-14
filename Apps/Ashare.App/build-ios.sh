@@ -2,6 +2,11 @@
 set -e
 cd "$(dirname "$0")/../.."
 
+# 0) ثبّت .NET 8 على الماك (iOS workload 18.x المتوافق مع Xcode 26.3).
+#    global.json مُستثنى من git، فننسخه من القالب على كل ماك.
+cp global.net8.json global.json
+echo "✅ Pinned .NET 8 SDK (global.json from global.net8.json)"
+
 # 1) تطبيق patch لـ bitcode_strip إن لم يكن مطبقاً
 TARGETS="$HOME/.nuget/packages/xamarin.firebase.ios.core/8.10.0.3/buildTransitive/Xamarin.Firebase.iOS.Core.targets"
 if [ -f "$TARGETS" ] && ! grep -q "Skipped bitcode_strip" "$TARGETS"; then

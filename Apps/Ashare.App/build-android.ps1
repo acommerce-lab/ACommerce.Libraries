@@ -27,35 +27,11 @@ $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 Push-Location $repoRoot
 
 try {
-    $globalJson = Join-Path $repoRoot "global.json"
-    $backup     = "$globalJson.ios-bak"
-
-    if (Test-Path $globalJson) {
-        Write-Host "→ Stashing .NET 8 global.json (for iOS) → $backup"
-        Move-Item -Force $globalJson $backup
-    }
-
-    # Pick the highest 9.0.x SDK actually installed (so we don't roll past 9 into 10).
-    $sdkDir = "C:\Program Files\dotnet\sdk"
-    $net9 = Get-ChildItem $sdkDir -Directory `
-        | Where-Object { $_.Name -match '^9\.0\.\d+$' } `
-        | Sort-Object Name -Descending `
-        | Select-Object -First 1
-    if (-not $net9) {
-        throw "No .NET 9 SDK found under $sdkDir. Install 9.0.x from https://dotnet.microsoft.com/download/dotnet/9.0"
-    }
-    $net9Version = $net9.Name
-
-    Write-Host "→ Writing global.json pinned to $net9Version (rollForward=latestFeature, stays in 9.0.x)"
-    @"
-{
-  "sdk": {
-    "version": "$net9Version",
-    "rollForward": "latestFeature",
-    "allowPrerelease": false
-  }
-}
-"@ | Out-File -Encoding utf8 -NoNewline $globalJson
+    # Pin .NET 9 on this (Windows) machine. global.json is gitignored and
+    # per-machine, so we copy the committed template. It PERSISTS afterwards so
+    # Visual Studio's UI also uses .NET 9 and shows Android as a build target.
+    Copy-Item -Force (Join-Path $repoRoot "global.net9.json") (Join-Path $repoRoot "global.json")
+    Write-Host "→ Pinned .NET 9 SDK (global.json from global.net9.json)"
 
     Write-Host "→ Active SDK:"
     dotnet --version
@@ -119,9 +95,7 @@ try {
     }
 }
 finally {
-    if (Test-Path $backup) {
-        Write-Host "→ Restoring .NET 8 global.json (so iOS workflow keeps working)"
-        Move-Item -Force $backup $globalJson
-    }
+    # global.json stays pinned to .NET 9 on this Windows machine (it's gitignored
+    # and per-machine, so it doesn't affect the Mac's iOS build). Nothing to restore.
     Pop-Location
 }
