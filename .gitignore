@@ -13,3 +13,5 @@ deploy-alibaba.env
 secrets-local/
 *-key.pem
 *.pem
+# Build artifacts (APK/AAB/IPA output)
+artifacts/

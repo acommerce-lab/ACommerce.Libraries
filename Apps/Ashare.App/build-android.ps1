@@ -73,22 +73,27 @@ try {
         -p:MobilePlatform=android
     if ($LASTEXITCODE -ne 0) { throw "publish failed" }
 
+    # Output goes to <repo>\artifacts (always exists; Desktop is unreliable under OneDrive).
+    $artifacts = Join-Path $repoRoot "artifacts"
+    New-Item -ItemType Directory -Force -Path $artifacts | Out-Null
+
     $apk = Get-ChildItem -Path "Apps\Ashare.App\bin\Release" -Recurse -Filter "*-Signed.apk" `
         | Select-Object -First 1
-    if ($apk) {
-        Write-Host "`n✅ Signed APK: $($apk.FullName)"
-        Copy-Item $apk.FullName "$env:USERPROFILE\Desktop\"
-        Write-Host "✅ Copied to Desktop"
+    $aab = Get-ChildItem -Path "Apps\Ashare.App\bin\Release" -Recurse -Filter "*.aab" `
+        | Select-Object -First 1
+
+    $artifact = if ($apk) { $apk } elseif ($aab) { $aab } else { $null }
+
+    if ($artifact) {
+        $dest = Join-Path $artifacts $artifact.Name
+        Copy-Item $artifact.FullName $dest -Force
+        Write-Host "`n✅ $($artifact.Name)"
+        Write-Host "   Source: $($artifact.FullName)"
+        Write-Host "   Copied: $dest"
+        # Open Explorer on the artifacts folder with the file selected.
+        Start-Process explorer.exe "/select,`"$dest`""
     } else {
-        $aab = Get-ChildItem -Path "Apps\Ashare.App\bin\Release" -Recurse -Filter "*.aab" `
-            | Select-Object -First 1
-        if ($aab) {
-            Write-Host "`n✅ AAB: $($aab.FullName)"
-            Copy-Item $aab.FullName "$env:USERPROFILE\Desktop\"
-            Write-Host "✅ Copied to Desktop"
-        } else {
-            Write-Warning "Build finished but no APK / AAB found under bin/Release."
-        }
+        Write-Warning "Build finished but no APK / AAB found under bin/Release."
     }
 }
 finally {
