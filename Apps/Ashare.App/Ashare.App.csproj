@@ -46,6 +46,15 @@
 		<WindowsPackageType>None</WindowsPackageType>
 	</PropertyGroup>
 
+	<!-- Android release signing (upload keystore for Google Play App Signing).
+	     The keystore path + passwords live in android-signing.props, which is
+	     gitignored and never committed. Copy android-signing.props.example to
+	     android-signing.props and fill in real values. Without it, Release
+	     Android builds fall back to the debug key (fine for local testing,
+	     rejected by Play). -->
+	<Import Project="android-signing.props"
+	        Condition="Exists('$(MSBuildThisFileDirectory)android-signing.props')" />
+
 	<!-- ─── iOS-only (net8.0-ios) properties ──────────────────────────────────────── -->
 
 	<PropertyGroup Condition="'$(TargetFramework)' == 'net8.0-ios'">

@@ -15,3 +15,8 @@ secrets-local/
 *.pem
 # Build artifacts (APK/AAB/IPA output)
 artifacts/
+
+# Android signing — keystore files and the props that holds their passwords
+*.keystore
+*.jks
+android-signing.props
