@@ -1,4 +1,4 @@
-# Build Android — switches to .NET 9 SDK by swapping global.json temporarily.
+# Build Android - switches to .NET 9 SDK by swapping global.json temporarily.
 # Mac uses .NET 8 (kept in global.json for iOS), Windows uses .NET 9 here.
 #
 # Requirements on Windows:
@@ -14,6 +14,10 @@
 #   .\Apps\Ashare.App\build-android.ps1 -Apk     # APK for sideload testing
 #
 # Run from anywhere; the script cds to the repo root by itself.
+#
+# NOTE: keep this file ASCII-only. Windows PowerShell reads .ps1 files using the
+# system ANSI code page (not UTF-8) when there is no BOM, so non-ASCII glyphs
+# (arrows, check marks, em dashes) corrupt parsing on non-English locales.
 
 param(
     [switch]$Apk
@@ -31,24 +35,24 @@ try {
     # per-machine, so we copy the committed template. It PERSISTS afterwards so
     # Visual Studio's UI also uses .NET 9 and shows Android as a build target.
     Copy-Item -Force (Join-Path $repoRoot "global.net9.json") (Join-Path $repoRoot "global.json")
-    Write-Host "→ Pinned .NET 9 SDK (global.json from global.net9.json)"
+    Write-Host "-> Pinned .NET 9 SDK (global.json from global.net9.json)"
 
-    Write-Host "→ Active SDK:"
+    Write-Host "-> Active SDK:"
     dotnet --version
 
     # Clear obj/ so the stale net8.0-ios project.assets.json is rebuilt for net9.0-android.
     $objDir = Join-Path $repoRoot "Apps\Ashare.App\obj"
     if (Test-Path $objDir) {
-        Write-Host "→ Cleaning Apps\Ashare.App\obj (stale assets file)"
+        Write-Host "-> Cleaning Apps\Ashare.App\obj (stale assets file)"
         Remove-Item -Recurse -Force $objDir
     }
     $binDir = Join-Path $repoRoot "Apps\Ashare.App\bin\Release"
     if (Test-Path $binDir) {
-        Write-Host "→ Cleaning Apps\Ashare.App\bin\Release"
+        Write-Host "-> Cleaning Apps\Ashare.App\bin\Release"
         Remove-Item -Recurse -Force $binDir
     }
 
-    Write-Host "→ Restore (explicit, with MobilePlatform=android so TargetFrameworks resolves to net9.0-android)"
+    Write-Host "-> Restore (explicit, with MobilePlatform=android so TargetFrameworks resolves to net9.0-android)"
     dotnet restore Apps/Ashare.App/Ashare.App.csproj `
         -p:MobilePlatform=android `
         --disable-parallel
@@ -56,12 +60,12 @@ try {
 
     $signing = Join-Path $repoRoot "Apps\Ashare.App\android-signing.props"
     if (Test-Path $signing) {
-        Write-Host "→ Signing: android-signing.props found (release upload key)"
+        Write-Host "-> Signing: android-signing.props found (release upload key)"
     } else {
-        Write-Warning "android-signing.props NOT found — build will be debug-signed (Play will reject it). Copy android-signing.props.example and fill it in for a Play-ready build."
+        Write-Warning "android-signing.props NOT found - build will be debug-signed (Play will reject it). Copy android-signing.props.example and fill it in for a Play-ready build."
     }
 
-    Write-Host "→ Publish for net9.0-android (format: $packageFormat)"
+    Write-Host "-> Publish for net9.0-android (format: $packageFormat)"
     dotnet publish Apps/Ashare.App/Ashare.App.csproj `
         --no-restore `
         -c Release `
@@ -85,7 +89,7 @@ try {
     if ($artifact) {
         $dest = Join-Path $artifacts $artifact.Name
         Copy-Item $artifact.FullName $dest -Force
-        Write-Host "`n✅ $($artifact.Name)"
+        Write-Host "`n[OK] $($artifact.Name)"
         Write-Host "   Source: $($artifact.FullName)"
         Write-Host "   Copied: $dest"
         # Open Explorer on the artifacts folder with the file selected.
