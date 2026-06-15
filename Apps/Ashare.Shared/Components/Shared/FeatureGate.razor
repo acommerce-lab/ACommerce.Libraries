@@ -1,0 +1,79 @@
+@* ════════════════════════════════════════════════════════════════
+   FeatureGate — يعرض المحتوى فقط إذا كانت العلامة مفعّلة في AppConfig.
+   مرتبط بـ AppConfigStore.SnapshotChanged فيُحدّث نفسه فور أي تغيير
+   قادم من الخادم (refresh دوري أو يدوي) بدون reload للصفحة.
+
+   استخدام:
+     <FeatureGate Feature="booking.enabled">
+         <button>احجز الآن</button>
+     </FeatureGate>
+
+     <FeatureGate Feature="payments.enabled" Fallback="false">
+         <PaymentButtons />
+         <Disabled>
+             <div class="ac-disabled-banner">الدفع معطّل حالياً</div>
+         </Disabled>
+     </FeatureGate>
+   ════════════════════════════════════════════════════════════════ *@
+
+@using ACommerce.Client.AppConfig.Services
+@inject IFeatureFlags Features
+@inject AppConfigStore Store
+@implements IDisposable
+
+@if (_enabled)
+{
+    @ChildContent
+}
+else
+{
+    @Disabled
+}
+
+@code {
+    /// <summary>المفتاح كما هو في FeatureFlag.Key (مثلاً "booking.enabled").</summary>
+    [Parameter, EditorRequired]
+    public string Feature { get; set; } = "";
+
+    /// <summary>المحتوى الذي يظهر عند تفعيل الميزة.</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>محتوى بديل عند تعطيل الميزة (اختياري؛ افتراضياً يخفي العنصر تماماً).</summary>
+    [Parameter] public RenderFragment? Disabled { get; set; }
+
+    /// <summary>
+    /// القيمة الافتراضية قبل تحميل أول snapshot أو إذا كانت العلامة غير معرّفة في DB.
+    /// عادةً نختار true للميزات الموجودة، false للميزات الحرجة (دفع/مصادقة)
+    /// لمنع تسرّب مؤقت عند الإقلاع.
+    /// </summary>
+    [Parameter] public bool Fallback { get; set; } = true;
+
+    private bool _enabled;
+    private bool _subscribed;
+
+    protected override void OnInitialized()
+    {
+        _enabled = Features.IsEnabled(Feature, Fallback);
+        Store.SnapshotChanged += OnSnapshotChanged;
+        _subscribed = true;
+    }
+
+    private void OnSnapshotChanged()
+    {
+        var newState = Features.IsEnabled(Feature, Fallback);
+        if (newState != _enabled)
+        {
+            _enabled = newState;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_subscribed)
+        {
+            Store.SnapshotChanged -= OnSnapshotChanged;
+            _subscribed = false;
+        }
+    }
+}

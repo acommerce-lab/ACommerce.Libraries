@@ -1,134 +1,140 @@
 @page "/settings"
+@inject AdminAppConfigService ConfigService
 
 <div class="settings-page">
-    <div class="settings-grid">
-        <div class="card">
-            <div class="card-header">
-                <h2>الإعدادات العامة</h2>
-            </div>
-            <div class="card-body">
-                <div class="form-group">
-                    <label>اسم التطبيق</label>
-                    <SfTextBox @bind-Value="AppName" Width="100%" />
-                </div>
-                <div class="form-group">
-                    <label>البريد الإلكتروني للدعم</label>
-                    <SfTextBox @bind-Value="SupportEmail" Width="100%" />
-                </div>
-                <div class="form-group">
-                    <label>رقم هاتف الدعم</label>
-                    <SfTextBox @bind-Value="SupportPhone" Width="100%" />
-                </div>
-                <div class="form-group">
-                    <label>العملة الافتراضية</label>
-                    <SfDropDownList TItem="string" TValue="string" @bind-Value="DefaultCurrency" 
-                                    DataSource="@CurrencyOptions" 
-                                    Width="100%" />
-                </div>
-                <SfButton CssClass="e-primary" style="margin-top: 16px;">حفظ التغييرات</SfButton>
-            </div>
-        </div>
+    @if (_message != null)
+    {
+        <div class="action-message @(_messageOk ? "ok" : "err")">@_message</div>
+    }
 
-        <div class="card">
-            <div class="card-header">
-                <h2>إعدادات الدفع</h2>
+    @if (_loading)
+    {
+        <div class="loading"><SfSpinner Visible="true" /></div>
+    }
+    else
+    {
+        <div class="settings-grid">
+            <div class="card">
+                <div class="card-header"><h2>الإعدادات العامة</h2></div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>اسم التطبيق</label>
+                        <SfTextBox @bind-Value="_appName" Width="100%" />
+                    </div>
+                    <div class="form-group">
+                        <label>البريد الإلكتروني للدعم</label>
+                        <SfTextBox @bind-Value="_supportEmail" Width="100%" />
+                    </div>
+                    <div class="form-group">
+                        <label>رقم هاتف الدعم</label>
+                        <SfTextBox @bind-Value="_supportPhone" Width="100%" />
+                    </div>
+                    <div class="form-group">
+                        <label>العملة الافتراضية</label>
+                        <SfDropDownList TItem="string" TValue="string" @bind-Value="_currency" DataSource="@_currencyOptions" Width="100%" />
+                    </div>
+                    <SfButton CssClass="e-primary" style="margin-top: 16px;" OnClick="SaveGeneral">حفظ الإعدادات العامة</SfButton>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="form-group">
-                    <label>بوابة الدفع</label>
-                    <SfDropDownList TItem="string" TValue="string" @bind-Value="PaymentGateway" 
-                                    DataSource="@PaymentGatewayOptions" 
-                                    Width="100%" />
-                </div>
-                <div class="form-group">
-                    <label>نسبة العمولة (%)</label>
-                    <SfNumericTextBox TValue="decimal" @bind-Value="CommissionRate" Min="0" Max="50" Step="0.5m" Width="100%" />
-                </div>
-                <div class="form-group">
-                    <SfCheckBox @bind-Checked="AutoPayouts" Label="تحويل تلقائي للبائعين" />
-                </div>
-                <SfButton CssClass="e-primary" style="margin-top: 16px;">حفظ التغييرات</SfButton>
-            </div>
-        </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h2>إعدادات البريد</h2>
+            <div class="card">
+                <div class="card-header"><h2>إعدادات الحجز والعمولة</h2></div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>نسبة عمولة المنصة (%)</label>
+                        <SfNumericTextBox TValue="decimal" @bind-Value="_commissionRate" Min="0" Max="50" Step="0.5m" Width="100%" />
+                    </div>
+                    <div class="form-group">
+                        <label>نسبة العربون الافتراضية (%)</label>
+                        <SfNumericTextBox TValue="decimal" @bind-Value="_depositRate" Min="0" Max="100" Step="5" Width="100%" />
+                    </div>
+                    <SfButton CssClass="e-primary" style="margin-top: 16px;" OnClick="SaveBooking">حفظ إعدادات الحجز</SfButton>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="form-group">
-                    <label>مزود البريد</label>
-                    <SfDropDownList TItem="string" TValue="string" @bind-Value="EmailProvider" 
-                                    DataSource="@EmailProviderOptions" 
-                                    Width="100%" />
-                </div>
-                <div class="form-group">
-                    <label>البريد المرسل</label>
-                    <SfTextBox @bind-Value="SenderEmail" Width="100%" />
-                </div>
-                <div class="form-group">
-                    <SfCheckBox @bind-Checked="EmailNotifications" Label="تفعيل الإشعارات البريدية" />
-                </div>
-                <SfButton CssClass="e-primary" style="margin-top: 16px;">حفظ التغييرات</SfButton>
-            </div>
-        </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h2>إعدادات الإشعارات</h2>
-            </div>
-            <div class="card-body">
-                <div class="form-group">
-                    <SfCheckBox @bind-Checked="NewOrderNotify" Label="إشعار عند طلب جديد" />
+            <div class="card info-card">
+                <div class="card-header"><h2>التحكم المتقدّم</h2></div>
+                <div class="card-body">
+                    <p>أعلام الميزات، النصوص، الألوان، والإعدادات التفصيلية تُدار من صفحة
+                        <a href="/appconfig"><strong>التحكم والإعدادات</strong></a>.</p>
+                    <p class="muted">بوابات الدفع ومزوّدو البريد والتحليلات تُضبط من إعدادات الخادم (appsettings) لأسباب أمنية.</p>
                 </div>
-                <div class="form-group">
-                    <SfCheckBox @bind-Checked="NewUserNotify" Label="إشعار عند مستخدم جديد" />
-                </div>
-                <div class="form-group">
-                    <SfCheckBox @bind-Checked="PendingListingNotify" Label="إشعار عند عرض بانتظار الموافقة" />
-                </div>
-                <SfButton CssClass="e-primary" style="margin-top: 16px;">حفظ التغييرات</SfButton>
             </div>
         </div>
-    </div>
+    }
 </div>
 
 <style>
-    .settings-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-        gap: 24px;
-    }
-
-    .form-group {
-        margin-bottom: 16px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 500;
-        color: #1e293b;
-    }
+    .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #1e293b; }
+    .action-message { padding: 10px 16px; border-radius: 8px; margin-bottom: 16px; }
+    .action-message.ok { background: #dcfce7; color: #166534; }
+    .action-message.err { background: #fee2e2; color: #991b1b; }
+    .loading { display: flex; justify-content: center; padding: 40px; }
+    .info-card { background: #f8fafc; }
+    .muted { color: #94a3b8; font-size: 13px; }
 </style>
 
 @code {
-    private string AppName { get; set; } = "عشير";
-    private string SupportEmail { get; set; } = "support@ashare.sa";
-    private string SupportPhone { get; set; } = "+966 50 123 4567";
-    private string DefaultCurrency { get; set; } = "SAR";
-    private string PaymentGateway { get; set; } = "Moyasar";
-    private decimal CommissionRate { get; set; } = 5;
-    private string EmailProvider { get; set; } = "SMTP";
-    private string SenderEmail { get; set; } = "noreply@ashare.sa";
-    
-    private bool AutoPayouts { get; set; } = true;
-    private bool EmailNotifications { get; set; } = true;
-    private bool NewOrderNotify { get; set; } = true;
-    private bool NewUserNotify { get; set; } = true;
-    private bool PendingListingNotify { get; set; } = true;
+    private bool _loading = true;
+    private string? _message;
+    private bool _messageOk;
 
-    private List<string> CurrencyOptions = new() { "SAR", "USD", "EUR" };
-    private List<string> PaymentGatewayOptions = new() { "Moyasar", "Stripe", "PayPal" };
-    private List<string> EmailProviderOptions = new() { "SMTP", "SendGrid", "AWS SES" };
+    private string _appName = "عشير";
+    private string _supportEmail = "";
+    private string _supportPhone = "";
+    private string _currency = "SAR";
+    private decimal _commissionRate = 5;
+    private decimal _depositRate = 10;
+
+    private List<string> _currencyOptions = new() { "SAR", "USD", "AED" };
+    private List<AppConfigEntryVm> _entries = new();
+
+    private const string KeyAppName = "store.name";
+    private const string KeySupportEmail = "support.email";
+    private const string KeySupportPhone = "support.phone";
+    private const string KeyCurrency = "store.currency";
+    private const string KeyCommission = "commission.rate";
+    private const string KeyDeposit = "booking.deposit_rate";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _entries = await ConfigService.GetEntriesAsync();
+        _appName = Get(KeyAppName, "عشير");
+        _supportEmail = Get(KeySupportEmail, "support@ashare.sa");
+        _supportPhone = Get(KeySupportPhone, "");
+        _currency = Get(KeyCurrency, "SAR");
+        _commissionRate = decimal.TryParse(Get(KeyCommission, "5"), out var c) ? c : 5;
+        _depositRate = decimal.TryParse(Get(KeyDeposit, "10"), out var d) ? d : 10;
+        _loading = false;
+    }
+
+    private string Get(string key, string fallback)
+        => _entries.FirstOrDefault(e => e.Key == key)?.Value ?? fallback;
+
+    private async Task SaveGeneral()
+    {
+        var ok = await Upsert(KeyAppName, _appName, "اسم التطبيق")
+                 & await Upsert(KeySupportEmail, _supportEmail, "بريد الدعم")
+                 & await Upsert(KeySupportPhone, _supportPhone, "هاتف الدعم")
+                 & await Upsert(KeyCurrency, _currency, "العملة الافتراضية");
+        Report(ok);
+    }
+
+    private async Task SaveBooking()
+    {
+        var ok = await Upsert(KeyCommission, _commissionRate.ToString(), "نسبة العمولة")
+                 & await Upsert(KeyDeposit, _depositRate.ToString(), "نسبة العربون");
+        Report(ok);
+    }
+
+    private async Task<bool> Upsert(string key, string value, string description)
+        => await ConfigService.UpsertEntryAsync(new AppConfigEntryVm { Key = key, Value = value, Description = description, IsPublic = true });
+
+    private void Report(bool ok)
+    {
+        _messageOk = ok;
+        _message = ok ? "تم حفظ التغييرات" : "تعذّر حفظ بعض القيم";
+    }
 }

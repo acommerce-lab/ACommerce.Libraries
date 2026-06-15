@@ -10,3 +10,17 @@ obj/
 # Deployment secrets
 deploy-alibaba.env
 *.env.local
+secrets-local/
+*-key.pem
+*.pem
+# Build artifacts (APK/AAB/IPA output)
+artifacts/
+
+# Android signing — keystore files and the props that holds their passwords
+*.keystore
+*.jks
+android-signing.props
+
+# Per-machine SDK pin (Mac=.NET8 for iOS, Windows=.NET9 for Android).
+# Copy global.net8.json or global.net9.json to global.json on each machine.
+global.json

@@ -55,6 +55,7 @@ public class PaymentsController : ControllerBase
                 OrderId = request.OrderId.ToString(),
                 CustomerId = userId,
                 Method = ParsePaymentMethod(request.PaymentMethod),
+                Channel = request.Channel,
                 CallbackUrl = request.Metadata?.GetValueOrDefault("returnUrl"),
                 Description = $"Payment for order {request.OrderId}",
                 Metadata = request.Metadata ?? new Dictionary<string, string>()
@@ -300,6 +301,13 @@ public class CreatePaymentApiRequest
     public decimal Amount { get; set; }
     public string Currency { get; set; } = "SAR";
     public string? PaymentMethod { get; set; }
+
+    /// <summary>
+    /// قناة الدفع لصفحة المزوّد. لـ Noon: "web" أو "mobile". null = افتراضي إعدادات الخادم.
+    /// تطبيقات الجوال ترسل "mobile" — يُمكّن Apple Pay على iOS تلقائياً عند توفّر الشهادة.
+    /// </summary>
+    public string? Channel { get; set; }
+
     public Dictionary<string, string>? Metadata { get; set; }
 }
 

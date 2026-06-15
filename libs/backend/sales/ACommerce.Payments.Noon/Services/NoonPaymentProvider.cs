@@ -111,7 +111,10 @@ public class NoonPaymentProvider : IPaymentProvider
 					Currency = request.Currency ?? _options.DefaultCurrency,
 					Name = orderName,
 					Category = _options.DefaultOrderCategory,
-					Channel = _options.DefaultChannel
+					// channel = "mobile" يُفعّل واجهة Noon المُهيّأة للجوال — مع شهادة Apple Pay
+					// المُحمَّلة في لوحة Noon، تكتشف الصفحة المُستضافة User-Agent على iOS وتُظهر زر
+					// Apple Pay تلقائياً. "web" للمتصفّح. القيمة من PaymentRequest تتجاوز DefaultChannel.
+					Channel = !string.IsNullOrWhiteSpace(request.Channel) ? request.Channel : _options.DefaultChannel
 				},
 				Configuration = new NoonConfiguration
 				{

@@ -22,4 +22,11 @@ public interface IComplaintsService
 
     // Stats
     Task<ComplaintStatsDto> GetUserStatsAsync(string userId, CancellationToken cancellationToken = default);
+
+    // ── Admin (cross-user) ──────────────────────────────────────
+    /// <summary>قائمة كل الشكاوى عبر المستخدمين (للوحة الإدارة) مع فلاتر اختيارية.</summary>
+    Task<IEnumerable<ComplaintSummaryDto>> GetAllForAdminAsync(string? status = null, string? category = null, int page = 1, int pageSize = 20, CancellationToken cancellationToken = default);
+
+    /// <summary>تغيير حالة/إسناد/حل شكوى من قبل الإدارة (بدون التحقق من الملكية).</summary>
+    Task<ComplaintResponseDto?> AdminUpdateAsync(Guid id, UpdateComplaintDto request, string? assignedToId = null, string? assignedToName = null, CancellationToken cancellationToken = default);
 }

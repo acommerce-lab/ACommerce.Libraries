@@ -14,6 +14,7 @@
 @inject ILocalizationService L
 @inject ITimezoneService Timezone
 @inject IJSRuntime JS
+@inject FeatureGuard FeatureGuard
 @implements IAsyncDisposable
 
 <div class="ac-page ashare-chatroom-page">
@@ -133,6 +134,12 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // chat.enabled — لو معطّلة، نُعيد المستخدم للقائمة الرئيسية
+        if (!FeatureGuard.RequireOrRedirect("chat.enabled", redirectTo: "/"))
+        {
+            return;
+        }
+
         try
         {
             // Get current user ID first (sync operation)

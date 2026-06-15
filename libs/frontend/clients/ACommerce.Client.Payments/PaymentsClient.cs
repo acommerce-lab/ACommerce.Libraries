@@ -76,6 +76,15 @@ public sealed class CreatePaymentRequest
 	public decimal Amount { get; set; }
 	public string Currency { get; set; } = "SAR";
 	public string PaymentMethod { get; set; } = string.Empty; // "CreditCard", "PayPal", "Mada", etc.
+
+	/// <summary>
+	/// قناة الدفع — يتحكم بواجهة صفحة المزوّد. لـ Noon: "web" أو "mobile".
+	/// تطبيقات الجوال (iOS/Android) ترسل "mobile" — هذا يُمكّن زر Apple Pay على iOS تلقائياً
+	/// (شريطة رفع شهادة Apple Pay في لوحة Noon).
+	/// null = افتراضي الخادم (web).
+	/// </summary>
+	public string? Channel { get; set; }
+
 	[NotMapped] public Dictionary<string, string> Metadata { get; set; } = new();
 }
 

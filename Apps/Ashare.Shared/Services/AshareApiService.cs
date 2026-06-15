@@ -907,6 +907,7 @@ public class AshareApiService
                                 Amount = subscription.Price,
                                 Currency = subscription.Plan?.Currency ?? "SAR",
                                 PaymentMethod = "Noon", // أو حسب الاختيار
+                                Channel = GetPaymentChannel(), // "mobile" على iOS/Android، "web" بخلاف ذلك — يُمكّن Apple Pay على iOS
                                 Metadata = new Dictionary<string, string>
                                 {
                                         ["subscriptionId"] = subscription.Id.ToString(),
@@ -1067,6 +1068,7 @@ public class AshareApiService
                                 Amount = request.DepositAmount,
                                 Currency = "SAR",
                                 PaymentMethod = "CreditCard",
+                                Channel = GetPaymentChannel(), // "mobile" على iOS/Android، "web" بخلاف ذلك — يُمكّن Apple Pay على iOS
                                 Metadata = new Dictionary<string, string>
                                 {
                                         { "space_id", request.SpaceId.ToString() },
@@ -1285,6 +1287,19 @@ public class AshareApiService
                         "completed" or "delivered" => BookingStatus.Completed,
                         _ => BookingStatus.Pending
                 };
+        }
+
+        /// <summary>
+        /// قناة الدفع للمزوّد (Noon). "mobile" عند تشغيل التطبيق على iOS/Android (MAUI)،
+        /// "web" عند تشغيله في المتصفّح (Blazor WASM).
+        /// عند Noon: "mobile" + شهادة Apple Pay المُحمَّلة = ظهور زر Apple Pay تلقائياً على iOS.
+        /// </summary>
+        private static string GetPaymentChannel()
+        {
+                return OperatingSystem.IsIOS() || OperatingSystem.IsAndroid()
+                        || OperatingSystem.IsMacCatalyst()
+                        ? "mobile"
+                        : "web";
         }
 }
 

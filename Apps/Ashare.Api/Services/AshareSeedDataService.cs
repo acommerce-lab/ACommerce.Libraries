@@ -8,6 +8,8 @@ using ACommerce.Subscriptions.Entities;
 using ACommerce.LegalPages.Entities;
 using ACommerce.Versions.Entities;
 using ACommerce.Versions.Enums;
+using ACommerce.AppConfig.Entities;
+using ACommerce.AppConfig.Enums;
 using Ashare.Shared.Services;
 using Microsoft.Extensions.Configuration;
 
@@ -28,8 +30,10 @@ public class AshareSeedDataService
                 public static readonly Guid Residential = Guid.Parse("10000000-0000-0000-0001-000000000001");
                 public static readonly Guid LookingForHousing = Guid.Parse("10000000-0000-0000-0001-000000000002");
                 public static readonly Guid LookingForPartner = Guid.Parse("10000000-0000-0000-0001-000000000003");
-                public static readonly Guid Administrative = Guid.Parse("10000000-0000-0000-0001-000000000004");
-                public static readonly Guid Commercial = Guid.Parse("10000000-0000-0000-0001-000000000005");
+                // ❌ مهجور — لا تُستخدم لتوجه عشير للسكن المشترك فقط
+                // Administrative / Commercial categories were removed.
+                // Existing rows in DB should be deactivated via the cleanup
+                // migration in scripts/sql/2026-05-30-ashir-housing-only-cleanup.sql
         }
 
         public static class CurrencyIds
@@ -51,19 +55,10 @@ public class AshareSeedDataService
 
         public static class ProductIds
         {
-                // Residential spaces
+                // Residential spaces (only — Ashir is housing-only)
                 public static readonly Guid Apartment1 = Guid.Parse("30000000-0000-0000-0001-000000000001");
                 public static readonly Guid Apartment2 = Guid.Parse("30000000-0000-0000-0001-000000000002");
                 public static readonly Guid Villa1 = Guid.Parse("30000000-0000-0000-0001-000000000003");
-
-                // Commercial spaces
-                public static readonly Guid Office1 = Guid.Parse("30000000-0000-0000-0002-000000000001");
-                public static readonly Guid Coworking1 = Guid.Parse("30000000-0000-0000-0002-000000000002");
-                public static readonly Guid MeetingRoom1 = Guid.Parse("30000000-0000-0000-0002-000000000003");
-
-                // Administrative spaces
-                public static readonly Guid AdminOffice1 = Guid.Parse("30000000-0000-0000-0003-000000000001");
-                public static readonly Guid AdminOffice2 = Guid.Parse("30000000-0000-0000-0003-000000000002");
         }
 
         public static class AttributeIds
@@ -157,9 +152,8 @@ public class AshareSeedDataService
                         AttributeIds.Amenities,       // المرافق
                         AttributeIds.City,            // المدينة
                         AttributeIds.Location,        // الموقع (عنوان + إحداثيات)
-                        AttributeIds.IsPhoneAllowed,  // السماح بالاتصال
-                        AttributeIds.IsWhatsAppAllowed, // السماح بواتساب
                         AttributeIds.IsMessagingAllowed, // السماح بالرسائل
+                        // ملاحظة: IsPhoneAllowed / IsWhatsAppAllowed أُلغيت كقنوات تواصل
                         AttributeIds.Images           // الصور
                 },
 
@@ -179,8 +173,6 @@ public class AshareSeedDataService
                         AttributeIds.Gender,          // الجنس (ذكر/أنثى)
                         AttributeIds.City,            // المدينة
                         AttributeIds.Location,        // الموقع المفضل
-                        AttributeIds.IsPhoneAllowed,
-                        AttributeIds.IsWhatsAppAllowed,
                         AttributeIds.IsMessagingAllowed
                 },
 
@@ -200,64 +192,10 @@ public class AshareSeedDataService
                         AttributeIds.Furnished,       // هل يفضل مفروش؟
                         AttributeIds.Smoking,         // حالة التدخين
                         AttributeIds.Description,     // وصف إضافي
-                        AttributeIds.IsPhoneAllowed,
-                        AttributeIds.IsWhatsAppAllowed,
                         AttributeIds.IsMessagingAllowed,
                         AttributeIds.Images           // صور شخصية (اختياري)
-                },
-
-                // ═══════════════════════════════════════════════════════════════════
-                // مساحة إدارية - Administrative Space
-                // PropertyType = عمارة فقط، بدون غرف/حمامات
-                // ═══════════════════════════════════════════════════════════════════
-                [CategoryIds.Administrative] = new List<Guid>
-                {
-                        AttributeIds.Title,
-                        AttributeIds.Description,
-                        AttributeIds.Price,
-                        AttributeIds.Duration,
-                        AttributeIds.TimeUnit,
-                        AttributeIds.LicenseNumber,   // رقم الترخيص
-                        AttributeIds.PropertyType,    // عمارة فقط
-                        AttributeIds.Floor,
-                        AttributeIds.Area,
-                        AttributeIds.Capacity,        // السعة (عدد الأشخاص)
-                        AttributeIds.Parking,         // المواقف
-                        AttributeIds.WorkingHours,    // ساعات العمل
-                        AttributeIds.Facilities,      // التجهيزات
-                        AttributeIds.City,
-                        AttributeIds.Location,
-                        AttributeIds.IsPhoneAllowed,
-                        AttributeIds.IsWhatsAppAllowed,
-                        AttributeIds.IsMessagingAllowed,
-                        AttributeIds.Images
-                },
-
-                // ═══════════════════════════════════════════════════════════════════
-                // مساحة تجارية - Commercial Space
-                // PropertyType = محل/مجمع/مول، بدون غرف/حمامات
-                // ═══════════════════════════════════════════════════════════════════
-                [CategoryIds.Commercial] = new List<Guid>
-                {
-                        AttributeIds.Title,
-                        AttributeIds.Description,
-                        AttributeIds.Price,
-                        AttributeIds.Duration,
-                        AttributeIds.TimeUnit,
-                        AttributeIds.LicenseNumber,   // رقم الترخيص
-                        AttributeIds.CommercialPropertyType, // محل/مجمع/مول
-                        AttributeIds.Floor,
-                        AttributeIds.Area,
-                        AttributeIds.Capacity,
-                        AttributeIds.Parking,
-                        AttributeIds.Facilities,
-                        AttributeIds.City,
-                        AttributeIds.Location,
-                        AttributeIds.IsPhoneAllowed,
-                        AttributeIds.IsWhatsAppAllowed,
-                        AttributeIds.IsMessagingAllowed,
-                        AttributeIds.Images
                 }
+                // ❌ Administrative + Commercial removed — Ashir focuses on shared housing only.
         };
 
         public AshareSeedDataService(IRepositoryFactory repositoryFactory, IConfiguration configuration)
@@ -286,15 +224,34 @@ public class AshareSeedDataService
 
         public async Task SeedAsync()
         {
-                await SeedCurrenciesAsync();
-                await SeedCategoriesAsync();
-                await SeedAttributeDefinitionsAsync();
-                await SeedCategoryAttributeMappingsAsync();
-                await SeedProductsAsync();
-                await SeedProductPricesAsync();
-                await SeedSubscriptionPlansAsync();
-                await SeedLegalPagesAsync();
-                await SeedAppVersionsAsync();
+                await TrySeedAsync(SeedCurrenciesAsync, "Currencies");
+                await TrySeedAsync(SeedCategoriesAsync, "Categories");
+                await TrySeedAsync(SeedAttributeDefinitionsAsync, "Attributes");
+                await TrySeedAsync(SeedCategoryAttributeMappingsAsync, "CategoryAttributes");
+                await TrySeedAsync(SeedProductsAsync, "Products");
+                await TrySeedAsync(SeedProductPricesAsync, "Prices");
+                await TrySeedAsync(SeedSubscriptionPlansAsync, "Subscriptions");
+                await TrySeedAsync(SeedLegalPagesAsync, "Legal");
+                await TrySeedAsync(SeedAppVersionsAsync, "AppVersions");
+                await TrySeedAsync(SeedAppConfigAsync, "AppConfig");
+        }
+
+        // Per-step isolation: a failure in one seed (e.g. duplicate-key from a
+        // soft-deleted row that the predicate-filtered query can't see) must not
+        // prevent later steps from running.
+        private static async Task TrySeedAsync(Func<Task> seed, string name)
+        {
+                try
+                {
+                        await seed();
+                        Console.WriteLine($"[Seed] ✅ {name}");
+                }
+                catch (Exception ex)
+                {
+                        Console.WriteLine($"[Seed] ❌ {name} failed: {ex.GetType().Name}: {ex.Message}");
+                        if (ex.InnerException != null)
+                                Console.WriteLine($"[Seed]    inner: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}");
+                }
         }
 
         private async Task SeedLegalPagesAsync()
@@ -453,8 +410,10 @@ public class AshareSeedDataService
         {
                 var repo = _repositoryFactory.CreateRepository<ProductCategory>();
 
-                var existing = await repo.GetAllWithPredicateAsync();
-                var existingIds = existing.Select(c => c.Id).ToHashSet();
+                // Include soft-deleted so we don't try to INSERT an Id that still exists in the table
+                // (it would only be hidden by the IsDeleted filter, causing a PK violation).
+                var existing = await repo.GetAllWithPredicateAsync(predicate: null, includeDeleted: true);
+                var existingById = existing.ToDictionary(c => c.Id);
 
                 var categories = new List<ProductCategory>
                 {
@@ -490,36 +449,46 @@ public class AshareSeedDataService
                                 SortOrder = 3,
                                 IsActive = true,
                                 CreatedAt = DateTime.UtcNow
-                        },
-                        new()
-                        {
-                                Id = CategoryIds.Administrative,
-                                Name = "مساحة إدارية",
-                                Slug = "administrative",
-                                Description = "مكاتب ومساحات عمل مشتركة",
-                                Icon = "bi-building",
-                                SortOrder = 4,
-                                IsActive = true,
-                                CreatedAt = DateTime.UtcNow
-                        },
-                        new()
-                        {
-                                Id = CategoryIds.Commercial,
-                                Name = "مساحة تجارية",
-                                Slug = "commercial",
-                                Description = "محلات ومستودعات ومساحات تجارية",
-                                Icon = "bi-shop",
-                                SortOrder = 5,
-                                IsActive = true,
-                                CreatedAt = DateTime.UtcNow
                         }
+                        // ❌ Administrative + Commercial categories removed — Ashir is housing-only.
                 };
 
                 foreach (var category in categories)
                 {
-                        if (!existingIds.Contains(category.Id))
+                        if (!existingById.TryGetValue(category.Id, out var row))
                         {
                                 await repo.AddAsync(category);
+                                Console.WriteLine($"[Seed] Added category: {category.Slug}");
+                        }
+                        else if (row.IsDeleted || !row.IsActive)
+                        {
+                                // Revive a soft-deleted/deactivated row and bring it in line with the seed values.
+                                row.IsDeleted = false;
+                                row.IsActive = true;
+                                row.Name = category.Name;
+                                row.Slug = category.Slug;
+                                row.Description = category.Description;
+                                row.Icon = category.Icon;
+                                row.SortOrder = category.SortOrder;
+                                row.UpdatedAt = DateTime.UtcNow;
+                                await repo.UpdateAsync(row);
+                                Console.WriteLine($"[Seed] Restored category: {category.Slug}");
+                        }
+                }
+
+                // إيقاف الفئات القديمة (إدارية/تجارية) إذا وُجدت من seed سابق
+                var legacyIds = new[]
+                {
+                        Guid.Parse("10000000-0000-0000-0001-000000000004"), // Administrative
+                        Guid.Parse("10000000-0000-0000-0001-000000000005")  // Commercial
+                };
+                foreach (var legacyId in legacyIds)
+                {
+                        if (existingById.TryGetValue(legacyId, out var legacy) && legacy.IsActive)
+                        {
+                                legacy.IsActive = false;
+                                await repo.UpdateAsync(legacy);
+                                Console.WriteLine($"[Seed] Deactivated legacy category {legacy.Slug}");
                         }
                 }
         }
@@ -584,7 +553,9 @@ public class AshareSeedDataService
                 var existing = await mappingRepo.GetAllWithPredicateAsync();
                 var existingPairs = existing.Select(m => (m.CategoryId, m.AttributeDefinitionId)).ToHashSet();
 
-                // تعريف الربطات بالأكواد (ديناميكي)
+                // تعريف الربطات بالأكواد (ديناميكي) — السكن المشترك فقط
+                // ⚠️ قنوات التواصل المعتمدة: is_messaging_allowed فقط.
+                //   is_phone_allowed و is_whatsapp_allowed أُلغيتا (نشأت محلهما المحادثة + اتصال الفيديو).
                 var categoryAttributeCodes = new Dictionary<string, List<string>>
                 {
                         // ═══════════════════════════════════════════════════════════════════
@@ -596,7 +567,7 @@ public class AshareSeedDataService
                                 "property_type", "unit_type", "floor", "bill_type", "rental_type",
                                 "gender", "area", "rooms", "bathrooms", "furnished", "amenities",
                                 "city", "location",
-                                "is_phone_allowed", "is_whatsapp_allowed", "is_messaging_allowed",
+                                "is_messaging_allowed",
                                 "images"
                         },
 
@@ -608,7 +579,7 @@ public class AshareSeedDataService
                                 "title", "description", "min_price", "max_price",
                                 "property_type", "unit_type", "rooms", "furnished", "gender",
                                 "city", "location",
-                                "is_phone_allowed", "is_whatsapp_allowed", "is_messaging_allowed"
+                                "is_messaging_allowed"
                         },
 
                         // ═══════════════════════════════════════════════════════════════════
@@ -619,35 +590,10 @@ public class AshareSeedDataService
                                 "personal_name", "age", "gender", "nationality", "job",
                                 "city", "min_price", "max_price", "furnished", "smoking",
                                 "description",
-                                "is_phone_allowed", "is_whatsapp_allowed", "is_messaging_allowed",
-                                "images"
-                        },
-
-                        // ═══════════════════════════════════════════════════════════════════
-                        // مساحة إدارية - Administrative Space
-                        // ═══════════════════════════════════════════════════════════════════
-                        ["administrative"] = new List<string>
-                        {
-                                "title", "description", "price", "duration", "time_unit",
-                                "property_type", "floor", "area", "capacity", "parking",
-                                "working_hours", "facilities",
-                                "city", "location",
-                                "is_phone_allowed", "is_whatsapp_allowed", "is_messaging_allowed",
-                                "images"
-                        },
-
-                        // ═══════════════════════════════════════════════════════════════════
-                        // مساحة تجارية - Commercial Space
-                        // ═══════════════════════════════════════════════════════════════════
-                        ["commercial"] = new List<string>
-                        {
-                                "title", "description", "price", "duration", "time_unit",
-                                "commercial_property_type", "floor", "area", "capacity", "parking",
-                                "facilities",
-                                "city", "location",
-                                "is_phone_allowed", "is_whatsapp_allowed", "is_messaging_allowed",
+                                "is_messaging_allowed",
                                 "images"
                         }
+                        // ❌ administrative / commercial mappings removed — Ashir is housing-only.
                 };
 
                 var mappingsToAdd = new List<CategoryAttributeMapping>();
@@ -1589,100 +1535,15 @@ public class AshareSeedDataService
                                 Sku = "RES-VIL-001",
                                 Type = ProductType.Simple,
                                 Status = ProductStatus.Active,
-                                ShortDescription = "فيلا 5 غرف مع حديقة ومسبح خاص",
-                                LongDescription = "فيلا فاخرة في حي الياسمين، تتكون من 5 غرف نوم، 3 صالات، مطبخ واسع، 4 حمامات، غرفة خادمة، موقف لسيارتين، حديقة خارجية مع مسبح خاص. الفيلا مؤثثة جزئياً.",
+                                ShortDescription = "فيلا 5 غرف مع حديقة - متاح غرف للمشاركة",
+                                LongDescription = "فيلا في حي الياسمين، تتكون من 5 غرف نوم، 3 صالات، مطبخ واسع، 4 حمامات، حديقة خارجية. متاح غرفة للسكن المشترك مع شريك ملتزم.",
                                 FeaturedImage = "https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800",
                                 IsFeatured = true,
                                 IsNew = false,
                                 SortOrder = 3,
                                 CreatedAt = DateTime.UtcNow.AddDays(-10)
-                        },
-
-                        // ═══════════════════════════════════════════════════════════════════
-                        // مساحات تجارية
-                        // ═══════════════════════════════════════════════════════════════════
-                        new()
-                        {
-                                Id = ProductIds.Office1,
-                                Name = "مكتب مجهز في برج المملكة",
-                                Sku = "COM-OFF-001",
-                                Type = ProductType.Simple,
-                                Status = ProductStatus.Active,
-                                ShortDescription = "مكتب فاخر 80 متر في برج المملكة",
-                                LongDescription = "مكتب مجهز بالكامل في برج المملكة الشهير. المساحة 80 متر مربع، يتسع لـ 6-8 أشخاص. يشمل أثاث مكتبي فاخر، إنترنت عالي السرعة، غرفة اجتماعات صغيرة، ومنطقة استراحة. موقف سيارة مجاني.",
-                                FeaturedImage = "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800",
-                                IsFeatured = true,
-                                IsNew = true,
-                                NewUntil = DateTime.UtcNow.AddDays(14),
-                                SortOrder = 4,
-                                CreatedAt = DateTime.UtcNow
-                        },
-                        new()
-                        {
-                                Id = ProductIds.Coworking1,
-                                Name = "مكتب مشترك - مساحة عمل مرنة",
-                                Sku = "COM-COW-001",
-                                Type = ProductType.Simple,
-                                Status = ProductStatus.Active,
-                                ShortDescription = "مقعد في مساحة عمل مشتركة حديثة",
-                                LongDescription = "انضم إلى مجتمع العمل المشترك في قلب الرياض! احصل على مكتب خاص في بيئة عمل ديناميكية. يشمل الاشتراك: مكتب وكرسي، إنترنت فائق السرعة، قهوة ومشروبات مجانية، استخدام غرف الاجتماعات، طابعة وماسح ضوئي.",
-                                FeaturedImage = "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?w=800",
-                                IsFeatured = true,
-                                IsNew = true,
-                                NewUntil = DateTime.UtcNow.AddDays(7),
-                                SortOrder = 5,
-                                CreatedAt = DateTime.UtcNow
-                        },
-                        new()
-                        {
-                                Id = ProductIds.MeetingRoom1,
-                                Name = "قاعة اجتماعات VIP",
-                                Sku = "COM-MTG-001",
-                                Type = ProductType.Simple,
-                                Status = ProductStatus.Active,
-                                ShortDescription = "قاعة اجتماعات فاخرة تتسع لـ 12 شخص",
-                                LongDescription = "قاعة اجتماعات VIP مجهزة بأحدث التقنيات. تتسع لـ 12 شخصاً حول طاولة اجتماعات فاخرة. تشمل: شاشة عرض 75 بوصة، نظام مؤتمرات فيديو، سبورة ذكية، نظام صوت احترافي، خدمة ضيافة. مثالية لاجتماعات العمل الهامة.",
-                                FeaturedImage = "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=800",
-                                IsFeatured = false,
-                                IsNew = false,
-                                SortOrder = 6,
-                                CreatedAt = DateTime.UtcNow.AddDays(-5)
-                        },
-
-                        // ═══════════════════════════════════════════════════════════════════
-                        // مساحات إدارية
-                        // ═══════════════════════════════════════════════════════════════════
-                        new()
-                        {
-                                Id = ProductIds.AdminOffice1,
-                                Name = "مكتب إداري في مجمع الأعمال",
-                                Sku = "ADM-OFF-001",
-                                Type = ProductType.Simple,
-                                Status = ProductStatus.Active,
-                                ShortDescription = "مكتب إداري 120 متر مع استقبال",
-                                LongDescription = "مكتب إداري فسيح في مجمع الأعمال بحي العليا. المساحة الكلية 120 متر مربع، تشمل: منطقة استقبال، 3 مكاتب خاصة، قاعة اجتماعات صغيرة، مخزن، ومطبخ صغير. الموقع استراتيجي مع سهولة الوصول.",
-                                FeaturedImage = "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800",
-                                IsFeatured = false,
-                                IsNew = true,
-                                NewUntil = DateTime.UtcNow.AddDays(21),
-                                SortOrder = 7,
-                                CreatedAt = DateTime.UtcNow
-                        },
-                        new()
-                        {
-                                Id = ProductIds.AdminOffice2,
-                                Name = "طابق إداري كامل",
-                                Sku = "ADM-FLR-001",
-                                Type = ProductType.Simple,
-                                Status = ProductStatus.Active,
-                                ShortDescription = "طابق كامل 500 متر في برج تجاري",
-                                LongDescription = "فرصة استثنائية! طابق إداري كامل في برج تجاري راقٍ. المساحة 500 متر مربع قابلة للتقسيم حسب الحاجة. يشمل: 8 مواقف سيارات، مصعد خاص، نظام أمان متكامل، تكييف مركزي. مناسب للشركات الكبرى.",
-                                FeaturedImage = "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800",
-                                IsFeatured = true,
-                                IsNew = false,
-                                SortOrder = 8,
-                                CreatedAt = DateTime.UtcNow.AddDays(-15)
                         }
+                        // ❌ Commercial/Administrative seed products removed — Ashir is housing-only.
                 };
 
                 foreach (var product in products)
@@ -1713,17 +1574,12 @@ public class AshareSeedDataService
                         return; // لا يمكن إضافة الأسعار بدون عملات أو منتجات
                 }
 
-                // تعريف الأسعار مع SKU للمنتج
+                // تعريف الأسعار مع SKU للمنتج — السكن المشترك فقط
                 var priceDefinitions = new Dictionary<string, decimal>
                 {
                         { "RES-APT-001", 3500 },  // شقة مفروشة
                         { "RES-STD-001", 2500 },  // استوديو
-                        { "RES-VIL-001", 15000 }, // فيلا
-                        { "COM-OFF-001", 8000 },  // مكتب
-                        { "COM-COW-001", 1500 },  // مساحة عمل مشتركة
-                        { "COM-MTG-001", 500 },   // قاعة اجتماعات
-                        { "ADM-OFF-001", 12000 }, // مكتب إداري
-                        { "ADM-FLR-001", 50000 }  // طابق إداري
+                        { "RES-VIL-001", 15000 }  // فيلا
                 };
 
                 // إضافة الأسعار باستخدام معرّفات المنتجات الفعلية
@@ -1848,5 +1704,196 @@ public class AshareSeedDataService
                 }
 
                 Console.WriteLine($"[Seed] App versions seeding complete. Total: {versions.Count}");
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // AppConfig: Feature Flags + UI Strings + Theme Tokens
+        // ═══════════════════════════════════════════════════════════
+
+        private async Task SeedAppConfigAsync()
+        {
+                await SeedFeatureFlagsAsync();
+                await SeedUiStringsAsync();
+                await SeedThemeTokensAsync();
+        }
+
+        private async Task SeedFeatureFlagsAsync()
+        {
+                var repo = _repositoryFactory.CreateRepository<FeatureFlag>();
+                // Include soft-deleted: if a row with the same Key exists but is hidden by
+                // the IsDeleted filter, AddAsync would still hit a unique-key conflict.
+                var existing = await repo.GetAllWithPredicateAsync(predicate: null, includeDeleted: true);
+                var existingByKey = existing.ToDictionary(f => f.Key);
+
+                // اتفاقية التسمية:
+                //   *.enabled  → علامة توفّر (availability). معطّلة = الميزة غير موجودة، المستخدم محظور.
+                //   *.required → علامة سياسة. معطّلة = الخطوة تُتجاوز، المستخدم يمر مباشرة.
+                //   *.force_*  → علامة إنفاذ. معطّلة = الإنفاذ غير مفعّل.
+                var flags = new List<FeatureFlag>
+                {
+                        // ── Payments (availability) ──
+                        new() { Id = Guid.NewGuid(), Key = "payments.enabled",          Enabled = true, Description = "نظام الدفع العام. معطّلة = لا يستطيع المستخدم إتمام أي دفعة.", CreatedAt = DateTime.UtcNow },
+
+                        // ── Booking (availability + policy) ──
+                        new() { Id = Guid.NewGuid(), Key = "booking.enabled",           Enabled = true, Description = "إظهار زر الحجز ومسار BookingCreate. معطّلة = لا يوجد حجز.", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "booking.deposit_required",  Enabled = true, Description = "اشتراط دفع العربون قبل تأكيد الحجز. معطّلة = الحجز يُنشأ مباشرة بدون عربون.", CreatedAt = DateTime.UtcNow },
+
+                        // ── Subscriptions (availability فقط؛ الباقات الفردية تُدار من DB عبر IsActive) ──
+                        new() { Id = Guid.NewGuid(), Key = "subscriptions.enabled",     Enabled = true, Description = "نظام باقات المعلنين. معطّلة = صفحات الاشتراك تختفي ويُتخطّى فحص الاشتراك في إنشاء العرض.", CreatedAt = DateTime.UtcNow },
+
+                        // ── Auth (availability) ──
+                        new() { Id = Guid.NewGuid(), Key = "auth.nafath",               Enabled = true, Description = "تسجيل الدخول عبر نفاذ. معطّلة = نموذج نفاذ يختفي من صفحة الدخول.", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "auth.guest_mode",           Enabled = true, Description = "السماح بوضع الزائر بدون تسجيل. معطّلة = زر «متابعة كزائر» يختفي.", CreatedAt = DateTime.UtcNow },
+
+                        // ── Version Check (availability + enforcement) ──
+                        new() { Id = Guid.NewGuid(), Key = "version_check.enabled",     Enabled = true, Description = "فحص توفر تحديث للتطبيق. معطّلة = لا يحدث فحص ولا تنبيه.", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "version_check.force_update", Enabled = false, Description = "إنفاذ التحديث الإجباري. معطّلة = حتى لو الإصدار قديم لا يُحجَب التطبيق.", CreatedAt = DateTime.UtcNow },
+
+                        // ── Communication & Support (availability) ──
+                        new() { Id = Guid.NewGuid(), Key = "chat.enabled",              Enabled = true, Description = "نظام المحادثات (شات داخل التطبيق). معطّلة = الشات يختفي تماماً من الواجهة.", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "complaints.enabled",        Enabled = true, Description = "نظام الشكاوى والاقتراحات. معطّلة = صفحات الشكاوى تختفي.", CreatedAt = DateTime.UtcNow },
+
+                        // ── Listings & Profile (visibility + policy) ──
+                        new() { Id = Guid.NewGuid(), Key = "listing.disclaimer.show",   Enabled = true, Description = "إظهار قسم إخلاء المسؤولية في صفحة العرض.", CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "profile.photo_required",    Enabled = true, Description = "اشتراط صورة البروفايل عند أول تسجيل. معطّلة = الصورة اختيارية.", CreatedAt = DateTime.UtcNow }
+
+                        // ملاحظات:
+                        //   - باقات الاشتراك (مثل partner-seeker) يتم تنشيطها/تعطيلها فردياً عبر SubscriptionPlan.IsActive في DB.
+                        //   - مزوّدو الدفع (Noon/Moyasar) يُختاران من إعدادات الخادم، لا من Feature Flags.
+                        //   - مزوّدو التحليلات (Meta/Google/TikTok/Snap) يُتحكَّم بهم من appsettings + Marketing.Analytics config.
+                };
+
+                foreach (var flag in flags)
+                {
+                        if (!existingByKey.TryGetValue(flag.Key, out var row))
+                        {
+                                await repo.AddAsync(flag);
+                                Console.WriteLine($"[Seed] Added feature flag: {flag.Key} = {flag.Enabled}");
+                        }
+                        else if (row.IsDeleted)
+                        {
+                                // Revive: re-activate a soft-deleted flag, but keep its existing Enabled state
+                                // so we don't surprise an admin who had toggled it off before.
+                                row.IsDeleted = false;
+                                row.Description = flag.Description;
+                                row.UpdatedAt = DateTime.UtcNow;
+                                await repo.UpdateAsync(row);
+                                Console.WriteLine($"[Seed] Restored feature flag: {flag.Key}");
+                        }
+                }
+
+                // تنظيف العلامات القديمة التي لم تعد مدعومة في الكود.
+                // (الباقات الفردية / مزوّدو الدفع / مزوّدو التحليلات يُدارون من DB أو appsettings مباشرة.)
+                var obsoleteKeys = new[]
+                {
+                        "payments.noon", "payments.moyasar",
+                        "subscriptions.partner_seeker",
+                        "analytics.meta", "analytics.google", "analytics.tiktok", "analytics.snapchat"
+                };
+                foreach (var key in obsoleteKeys)
+                {
+                        if (existingByKey.TryGetValue(key, out var stale) && !stale.IsDeleted)
+                        {
+                                stale.IsDeleted = true;
+                                stale.UpdatedAt = DateTime.UtcNow;
+                                await repo.UpdateAsync(stale);
+                                Console.WriteLine($"[Seed] Removed obsolete feature flag: {key}");
+                        }
+                }
+
+                Console.WriteLine($"[Seed] Feature flags seeding complete. Total active: {flags.Count}");
+        }
+
+        private async Task SeedUiStringsAsync()
+        {
+                var repo = _repositoryFactory.CreateRepository<UiString>();
+                var existing = await repo.GetAllWithPredicateAsync(predicate: null, includeDeleted: true);
+                var existingByPair = existing.ToDictionary(s => $"{s.Key}:{s.Language}");
+
+                // Hybrid strategy: only "marketing copy" strings live in DB; rest stay in code.
+                var strings = new List<UiString>
+                {
+                        // App tagline
+                        new() { Id = Guid.NewGuid(), Key = "AppTagline", Language = "ar", Value = "ابحث عن عشيرك في السكن", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "AppTagline", Language = "en", Value = "Find your Ashir in shared housing", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "AppTagline", Language = "ur", Value = "مشترکہ رہائش میں اپنا عشیر تلاش کریں", IsActive = true, CreatedAt = DateTime.UtcNow },
+
+                        // Disclaimer
+                        new() { Id = Guid.NewGuid(), Key = "ListingDisclaimerBody", Language = "ar",
+                                Value = "منصة عشير وسيط تعريفي بين الباحثين عن سكن مشترك. لا تتحمل المنصة أي مسؤولية عن صحة بيانات الإعلان أو سلوك أصحاب الإعلانات أو الاتفاقيات والمدفوعات بين الأطراف. يرجى التحقق من الإعلان والمعاينة شخصياً قبل أي التزام، والتواصل فقط عبر المحادثة الرسمية داخل المنصة لضمان حقوقك.",
+                                IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "ListingDisclaimerBody", Language = "en",
+                                Value = "Ashir is an introducing platform between people seeking shared housing. The platform takes no responsibility for the accuracy of listing data, the conduct of advertisers, or any agreements or payments between parties. Please verify the listing and inspect in person before any commitment, and only communicate via the platform's official in-app chat to safeguard your rights.",
+                                IsActive = true, CreatedAt = DateTime.UtcNow },
+
+                        // Categories — easy to rename later without redeploy
+                        new() { Id = Guid.NewGuid(), Key = "AshirHasHousing",    Language = "ar", Value = "عشير عنده سكن",  IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "AshirSeeksHousing",  Language = "ar", Value = "عشير يدور سكن",  IsActive = true, CreatedAt = DateTime.UtcNow },
+
+                        // Welcome
+                        new() { Id = Guid.NewGuid(), Key = "WelcomeToAshare", Language = "ar", Value = "مرحباً بك في عشير", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "PleaseCompleteYourProfile", Language = "ar", Value = "الرجاء إكمال بياناتك للمتابعة", IsActive = true, CreatedAt = DateTime.UtcNow }
+                };
+
+                foreach (var s in strings)
+                {
+                        var pair = $"{s.Key}:{s.Language}";
+                        if (!existingByPair.TryGetValue(pair, out var row))
+                        {
+                                await repo.AddAsync(s);
+                        }
+                        else if (row.IsDeleted)
+                        {
+                                row.IsDeleted = false;
+                                row.UpdatedAt = DateTime.UtcNow;
+                                await repo.UpdateAsync(row);
+                                Console.WriteLine($"[Seed] Restored UiString: {pair}");
+                        }
+                }
+                Console.WriteLine($"[Seed] UiStrings seeding complete. Total: {strings.Count}");
+        }
+
+        private async Task SeedThemeTokensAsync()
+        {
+                var repo = _repositoryFactory.CreateRepository<ThemeToken>();
+                var existing = await repo.GetAllWithPredicateAsync(predicate: null, includeDeleted: true);
+                var existingByPair = existing.ToDictionary(t => $"{t.Key}:{t.Mode}");
+
+                // Values match Ashare Visual Identity Guidelines 2025.
+                var tokens = new List<ThemeToken>
+                {
+                        // ── Light ──
+                        new() { Id = Guid.NewGuid(), Key = "primary",        Mode = ThemeMode.Light, Value = "#345454", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "primary-light",  Mode = ThemeMode.Light, Value = "#4A6B6B", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "primary-dark",   Mode = ThemeMode.Light, Value = "#263F3F", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "secondary",      Mode = ThemeMode.Light, Value = "#F4844C", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "secondary-light",Mode = ThemeMode.Light, Value = "#F69B6B", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "secondary-dark", Mode = ThemeMode.Light, Value = "#E06D34", IsActive = true, CreatedAt = DateTime.UtcNow },
+
+                        // ── Dark ──
+                        new() { Id = Guid.NewGuid(), Key = "primary",        Mode = ThemeMode.Dark, Value = "#5A8585", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "primary-light",  Mode = ThemeMode.Dark, Value = "#7BA8A8", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "primary-dark",   Mode = ThemeMode.Dark, Value = "#345454", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "secondary",      Mode = ThemeMode.Dark, Value = "#F69B6B", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "secondary-light",Mode = ThemeMode.Dark, Value = "#FAB793", IsActive = true, CreatedAt = DateTime.UtcNow },
+                        new() { Id = Guid.NewGuid(), Key = "secondary-dark", Mode = ThemeMode.Dark, Value = "#F4844C", IsActive = true, CreatedAt = DateTime.UtcNow }
+                };
+
+                foreach (var t in tokens)
+                {
+                        var pair = $"{t.Key}:{t.Mode}";
+                        if (!existingByPair.TryGetValue(pair, out var row))
+                        {
+                                await repo.AddAsync(t);
+                        }
+                        else if (row.IsDeleted)
+                        {
+                                row.IsDeleted = false;
+                                row.UpdatedAt = DateTime.UtcNow;
+                                await repo.UpdateAsync(row);
+                                Console.WriteLine($"[Seed] Restored ThemeToken: {pair}");
+                        }
+                }
+                Console.WriteLine($"[Seed] ThemeTokens seeding complete. Total: {tokens.Count}");
         }
 }

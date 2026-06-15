@@ -1,0 +1,31 @@
+<!--
+  Android release signing for Google Play.
+
+  SETUP (once):
+    1. Copy this file to:  android-signing.props   (same folder; it is gitignored)
+    2. Put your existing Play UPLOAD keystore somewhere outside the repo,
+       e.g.  C:\keys\ashare-upload.keystore
+       (do NOT commit the .keystore / .jks file — it is a secret).
+    3. Fill in the four values below with the SAME alias and passwords that
+       were used to create that keystore. A different key = Play rejects the
+       upload ("Your Android App Bundle is signed with the wrong key").
+
+  After that, .\Apps\Ashare.App\build-android.ps1 produces a signed .aab
+  ready to upload to Play Console.
+
+  To read the alias inside a keystore (if you forget it):
+    keytool -list -v -keystore C:\keys\ashare-upload.keystore
+-->
+<Project>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release' AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+    <AndroidKeyStore>true</AndroidKeyStore>
+    <!-- Absolute path to the keystore file (forward slashes or escaped backslashes). -->
+    <AndroidSigningKeyStore>C:/keys/ashare-upload.keystore</AndroidSigningKeyStore>
+    <!-- The key alias inside the keystore. -->
+    <AndroidSigningKeyAlias>upload</AndroidSigningKeyAlias>
+    <!-- Keystore (store) password. -->
+    <AndroidSigningStorePass>CHANGE_ME_STORE_PASSWORD</AndroidSigningStorePass>
+    <!-- Key password (often the same as the store password). -->
+    <AndroidSigningKeyPass>CHANGE_ME_KEY_PASSWORD</AndroidSigningKeyPass>
+  </PropertyGroup>
+</Project>

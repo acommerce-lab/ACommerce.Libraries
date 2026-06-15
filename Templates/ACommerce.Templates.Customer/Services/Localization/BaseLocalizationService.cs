@@ -51,8 +51,16 @@ public abstract class BaseLocalizationService : ILocalizationService
 
     public string this[string key] => Get(key);
 
-    public string Get(string key, params object[] args)
+    public virtual string Get(string key, params object[] args)
     {
+        // Subclasses may override OverrideValue() to consult remote overrides
+        // (e.g., AppConfig snapshot) before falling back to code defaults.
+        var overridden = OverrideValue(key, _currentLanguage);
+        if (!string.IsNullOrEmpty(overridden))
+        {
+            return args.Length > 0 ? string.Format(overridden, args) : overridden;
+        }
+
         // Try current language
         if (_translations.TryGetValue(_currentLanguage, out var langStrings) &&
             langStrings.TryGetValue(key, out var value))
@@ -70,6 +78,13 @@ public abstract class BaseLocalizationService : ILocalizationService
         // Return key if not found
         return key;
     }
+
+    /// <summary>
+    /// Hook for subclasses to provide a runtime override for a key (e.g., from a
+    /// remote AppConfig snapshot). Return null/empty to fall through to the
+    /// code-baked translation.
+    /// </summary>
+    protected virtual string? OverrideValue(string key, string language) => null;
 
     /// <summary>
     /// Check if a translation key exists

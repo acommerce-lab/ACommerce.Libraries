@@ -54,6 +54,9 @@ builder.Services.AddScoped<VersionsClient>();
 
 builder.Services.AddScoped<AdminApiService>();
 builder.Services.AddScoped<MarketingAnalyticsService>();
+builder.Services.AddScoped<AdminAppConfigService>();
+builder.Services.AddScoped<AdminModerationService>();
+builder.Services.AddScoped<AdminSupportService>();
 
 var app = builder.Build();
 

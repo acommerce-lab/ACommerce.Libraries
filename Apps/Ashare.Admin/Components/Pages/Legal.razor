@@ -1,0 +1,121 @@
+@page "/legal"
+@inject AdminSupportService Support
+
+<div class="legal-page">
+    <div class="page-header">
+        <SfButton CssClass="e-primary" OnClick="@(() => Edit(new LegalPageVm()))">+ صفحة قانونية</SfButton>
+    </div>
+
+    @if (_message != null)
+    {
+        <div class="action-message @(_messageOk ? "ok" : "err")">@_message</div>
+    }
+
+    <div class="card">
+        @if (_loading)
+        {
+            <div class="loading"><SfSpinner Visible="true" /></div>
+        }
+        else
+        {
+            <SfGrid DataSource="@_pages" AllowSorting="true">
+                <GridColumns>
+                    <GridColumn Field="@nameof(LegalPageVm.SortOrder)" HeaderText="الترتيب" Width="90" />
+                    <GridColumn Field="@nameof(LegalPageVm.TitleAr)" HeaderText="العنوان (ع)" Width="200" />
+                    <GridColumn Field="@nameof(LegalPageVm.TitleEn)" HeaderText="العنوان (EN)" Width="200" />
+                    <GridColumn Field="@nameof(LegalPageVm.Key)" HeaderText="المفتاح" Width="160" />
+                    <GridColumn HeaderText="الحالة" Width="100">
+                        <Template>
+                            @{ var p = context as LegalPageVm; }
+                            <span class="status-badge @(p!.IsActive ? "success" : "danger")">@(p.IsActive ? "نشطة" : "معطّلة")</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn HeaderText="الإجراءات" Width="100">
+                        <Template>
+                            @{ var p = context as LegalPageVm; }
+                            <SfButton CssClass="e-flat e-primary" IconCss="e-icons e-edit" OnClick="@(() => Edit(p!))" Title="تعديل" />
+                        </Template>
+                    </GridColumn>
+                </GridColumns>
+            </SfGrid>
+        }
+    </div>
+</div>
+
+<SfDialog @bind-Visible="_dialog" Width="480px" ShowCloseIcon="true" IsModal="true">
+    <DialogTemplates>
+        <Header>@(_edit?.Id == Guid.Empty ? "صفحة قانونية جديدة" : "تعديل صفحة")</Header>
+        <Content>
+            @if (_edit != null)
+            {
+                <div class="form-group"><label>المفتاح (Key)</label><SfTextBox @bind-Value="_edit.Key" Placeholder="privacy-policy" /></div>
+                <div class="form-group"><label>العنوان بالعربية</label><SfTextBox @bind-Value="_edit.TitleAr" /></div>
+                <div class="form-group"><label>العنوان بالإنجليزية</label><SfTextBox @bind-Value="_edit.TitleEn" /></div>
+                <div class="form-group"><label>الرابط (URL)</label><SfTextBox @bind-Value="_edit.Url" Placeholder="/legal/privacy أو https://..." /></div>
+                <div class="form-row">
+                    <div class="form-group"><label>الأيقونة</label><SfTextBox @bind-Value="_edit.Icon" Placeholder="bi-shield-lock" /></div>
+                    <div class="form-group"><label>الترتيب</label><SfNumericTextBox TValue="int" @bind-Value="_edit.SortOrder" /></div>
+                </div>
+                <div class="form-group"><SfCheckBox @bind-Checked="_edit.IsActive" Label="نشطة" /></div>
+            }
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="إلغاء" OnClick="@(() => _dialog = false)" />
+        <DialogButton Content="حفظ" IsPrimary="true" OnClick="Save" />
+    </DialogButtons>
+</SfDialog>
+
+<style>
+    .page-header { margin-bottom: 16px; }
+    .action-message { padding: 10px 16px; border-radius: 8px; margin-bottom: 12px; }
+    .action-message.ok { background: #dcfce7; color: #166534; }
+    .action-message.err { background: #fee2e2; color: #991b1b; }
+    .loading { display: flex; justify-content: center; padding: 40px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 500; }
+    .form-row { display: flex; gap: 12px; }
+    .form-row .form-group { flex: 1; }
+</style>
+
+@code {
+    private List<LegalPageVm> _pages = new();
+    private bool _loading = true;
+    private bool _dialog;
+    private LegalPageVm? _edit;
+    private string? _message;
+    private bool _messageOk;
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load()
+    {
+        _loading = true;
+        StateHasChanged();
+        _pages = (await Support.GetLegalPagesAsync()).OrderBy(p => p.SortOrder).ToList();
+        _loading = false;
+    }
+
+    private void Edit(LegalPageVm p)
+    {
+        _edit = new LegalPageVm
+        {
+            Id = p.Id, Key = p.Key, TitleAr = p.TitleAr, TitleEn = p.TitleEn,
+            Url = p.Url, Icon = string.IsNullOrEmpty(p.Icon) ? "bi-file-text" : p.Icon,
+            SortOrder = p.SortOrder, IsActive = p.IsActive
+        };
+        _dialog = true;
+    }
+
+    private async Task Save()
+    {
+        if (_edit == null || string.IsNullOrWhiteSpace(_edit.Key)) { _dialog = false; return; }
+        bool ok = _edit.Id == Guid.Empty
+            ? await Support.CreateLegalPageAsync(_edit)
+            : await Support.UpdateLegalPageAsync(_edit.Id, _edit);
+        _messageOk = ok;
+        _message = ok ? "تم الحفظ" : "تعذّر الحفظ";
+        _dialog = false;
+        if (ok) await Load();
+    }
+}

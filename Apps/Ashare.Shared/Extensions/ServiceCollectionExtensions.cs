@@ -25,6 +25,8 @@ using ACommerce.Client.Subscriptions;
 using ACommerce.Client.LegalPages;
 using ACommerce.Client.Complaints;
 using ACommerce.Client.Versions;
+using ACommerce.Client.AppConfig.Extensions;
+using ACommerce.Client.AppConfig.Services;
 using ACommerce.ServiceRegistry.Client.Extensions;
 using Ashare.Shared.Services;
 using ACommerce.Templates.Customer.Services;
@@ -84,12 +86,35 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddAshareServices(this IServiceCollection services)
+    /// <summary>
+    /// تسجيل خدمات Ashare المشتركة.
+    /// </summary>
+    /// <param name="appVersion">إصدار التطبيق (مثلاً "1.16") — يُمرَّر لـ AppConfig لتقييم Feature Flags بحسب النسخة.</param>
+    /// <param name="platform">المنصة ("android", "ios", "web") — يُمرَّر لـ AppConfig لتقييم العلامات حسب المنصة.</param>
+    public static IServiceCollection AddAshareServices(
+        this IServiceCollection services,
+        string? appVersion = null,
+        string? platform = null)
     {
         services.AddScoped<ILocalizationService, LocalizationService>();
         services.AddScoped<AshareApiService>();
         services.AddScoped<PendingListingService>();
         services.AddScoped<Services.VersionCheckService>();
+
+        // AppConfig client — يفترض أن AddAshareClients مُسجّل (IApiClient + IStorageService جاهزان)
+        services.AddACommerceAppConfigClient(o =>
+        {
+            o.Language = "ar";
+            o.Platform = platform;
+            o.AppVersion = appVersion;
+            o.RefreshInterval = TimeSpan.FromMinutes(10);
+        });
+
+        // Theme applier — يقرأ snapshot ويطبّقه على CSS variables عبر JSInterop
+        services.AddScoped<RemoteThemeApplier>();
+
+        // FeatureGuard — اختصار للحماية على مستوى الصفحات
+        services.AddScoped<FeatureGuard>();
 
         return services;
     }

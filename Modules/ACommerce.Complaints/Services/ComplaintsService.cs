@@ -88,6 +88,53 @@ public class ComplaintsService(
         });
     }
 
+    public async Task<IEnumerable<ComplaintSummaryDto>> GetAllForAdminAsync(string? status = null, string? category = null, int page = 1, int pageSize = 20, CancellationToken cancellationToken = default)
+    {
+        var allComplaints = await complaintsRepository.ListAllAsync(cancellationToken);
+        var filtered = allComplaints
+            .Where(c => !c.IsDeleted)
+            .Where(c => status == null || c.Status == status)
+            .Where(c => category == null || c.Category == category)
+            .OrderByDescending(c => c.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        var allReplies = await repliesRepository.ListAllAsync(cancellationToken);
+
+        return filtered.Select(c => new ComplaintSummaryDto
+        {
+            Id = c.Id,
+            TicketNumber = c.TicketNumber,
+            Type = c.Type,
+            Title = c.Title,
+            Status = c.Status,
+            Priority = c.Priority,
+            Category = c.Category,
+            CreatedAt = c.CreatedAt,
+            RepliesCount = allReplies.Count(r => r.ComplaintId == c.Id && !r.IsDeleted)
+        });
+    }
+
+    public async Task<ComplaintResponseDto?> AdminUpdateAsync(Guid id, UpdateComplaintDto request, string? assignedToId = null, string? assignedToName = null, CancellationToken cancellationToken = default)
+    {
+        var complaint = await complaintsRepository.GetByIdAsync(id, cancellationToken);
+        if (complaint == null || complaint.IsDeleted) return null;
+
+        if (request.Title != null) complaint.Title = request.Title;
+        if (request.Description != null) complaint.Description = request.Description;
+        if (request.Status != null) complaint.Status = request.Status;
+        if (request.Priority != null) complaint.Priority = request.Priority;
+        if (request.Category != null) complaint.Category = request.Category;
+        if (assignedToId != null) complaint.AssignedToId = assignedToId;
+        if (assignedToName != null) complaint.AssignedToName = assignedToName;
+        complaint.UpdatedAt = DateTime.UtcNow;
+
+        await complaintsRepository.UpdateAsync(complaint, cancellationToken);
+        var replies = await repliesRepository.ListAllAsync(cancellationToken);
+        return MapToResponse(complaint, replies.Count(r => r.ComplaintId == complaint.Id && !r.IsDeleted));
+    }
+
     public async Task<ComplaintResponseDto?> UpdateAsync(Guid id, string userId, UpdateComplaintDto request, CancellationToken cancellationToken = default)
     {
         var complaint = await complaintsRepository.GetByIdAsync(id, cancellationToken);

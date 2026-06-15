@@ -46,7 +46,17 @@ public static class MauiProgram
 #if ANDROID
                 events.AddAndroid(android => android.OnCreate((activity, _) =>
                 {
-                    CrossFirebase.Initialize(activity, () => Microsoft.Maui.ApplicationModel.Platform.CurrentActivity!);
+                    // Plugin.Firebase.Core 4.x signature:
+                    //   Initialize(Activity activity, Func<Activity> activityLocator,
+                    //              FirebaseOptions firebaseOptions, string name)
+                    // Pass all four positionally (last two null → read from google-services.json)
+                    // so it compiles whether the trailing params are optional or required in the
+                    // resolved Core version.
+                    CrossFirebase.Initialize(
+                        activity,
+                        () => Microsoft.Maui.ApplicationModel.Platform.CurrentActivity!,
+                        null,
+                        null);
                 }));
 #endif
             });
@@ -106,7 +116,23 @@ public static class MauiProgram
         });
 #endif
 
-        builder.Services.AddAshareServices();
+        // platform + version are sent with every AppConfig snapshot request so the
+        // server can evaluate Feature Flags' Platform/MinVersion/MaxVersion rules.
+        var platformName =
+#if ANDROID
+            "android";
+#elif IOS
+            "ios";
+#elif MACCATALYST
+            "macos";
+#elif WINDOWS
+            "windows";
+#else
+            "maui";
+#endif
+        builder.Services.AddAshareServices(
+            appVersion: AppInfo.VersionString,
+            platform: platformName);
 
         // Override VersionCheckService registration with explicit mobile app code
         // This is needed because OperatingSystem.IsAndroid() doesn't work correctly in Blazor Hybrid

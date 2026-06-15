@@ -8,6 +8,7 @@
 @inject IAppNavigationService Navigation
 @inject Ashare.Shared.Services.ThemeService ThemeService
 @inject ILocalizationService L
+@inject FeatureGuard FeatureGuard
 
 <div class="ac-page ashare-complaints-page @(ThemeService.IsDarkMode ? "ac-dark" : "")" dir="@(L.IsRtl ? "rtl" : "ltr")">
 
@@ -20,7 +21,15 @@
         <div class="ashare-header-spacer"></div>
     </div>
 
-    @if (_isLoading)
+    @if (!_complaintsEnabled)
+    {
+        <div class="ashare-empty-state">
+            <i class="bi bi-slash-circle"></i>
+            <h3>الشكاوى غير متاحة حالياً</h3>
+            <p>تم تعطيل هذه الميزة مؤقتاً من الإدارة.</p>
+        </div>
+    }
+    else if (_isLoading)
     {
         <div class="ashare-loading">
             <div class="ac-spinner"></div>
@@ -539,6 +548,7 @@
 
 @code {
     private bool _isLoading = true;
+    private bool _complaintsEnabled = true;
     private bool _isLoggedIn;
     private bool _isSubmitting;
     private string _activeTab = "list";
@@ -577,6 +587,14 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // complaints.enabled — لو معطّلة لا نُحمّل
+        _complaintsEnabled = FeatureGuard.IsEnabled("complaints.enabled");
+        if (!_complaintsEnabled)
+        {
+            _isLoading = false;
+            return;
+        }
+
         await CheckAuthAndLoad();
     }
 

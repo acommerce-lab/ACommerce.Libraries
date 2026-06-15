@@ -1,57 +1,65 @@
 @page "/listings"
 @inject AdminApiService ApiService
+@inject AdminModerationService Moderation
+@inject IJSRuntime JS
 
 <div class="listings-page">
     <div class="page-header">
         <div class="search-filters">
             <SfTextBox Placeholder="بحث بالعنوان..." @bind-Value="SearchTerm" Width="250px" />
-            <SfDropDownList TItem="string" TValue="string" Placeholder="الحالة" Width="150px" 
+            <SfDropDownList TItem="string" TValue="string" Placeholder="الحالة" Width="160px"
                             DataSource="@StatusOptions" @bind-Value="SelectedStatus" />
-            <SfDropDownList TItem="string" TValue="string" Placeholder="الفئة" Width="150px" 
-                            DataSource="@CategoryOptions" @bind-Value="SelectedCategory" />
             <SfButton CssClass="e-primary" OnClick="SearchListings">بحث</SfButton>
         </div>
     </div>
+
+    @if (_message != null)
+    {
+        <div class="action-message @(_messageOk ? "ok" : "err")">@_message</div>
+    }
 
     <div class="card">
         <SfGrid DataSource="@ListingItems" AllowPaging="true" AllowSorting="true">
             <GridPageSettings PageSize="10" />
             <GridColumns>
-                <GridColumn Field="@nameof(ListingDto.Id)" HeaderText="الرقم" Width="80" />
-                <GridColumn Field="@nameof(ListingDto.Title)" HeaderText="العنوان" Width="200" />
-                <GridColumn Field="@nameof(ListingDto.VendorName)" HeaderText="البائع" Width="150" />
-                <GridColumn Field="@nameof(ListingDto.Category)" HeaderText="الفئة" Width="120" />
-                <GridColumn Field="@nameof(ListingDto.Price)" HeaderText="السعر" Width="100" Format="N0">
+                <GridColumn Field="@nameof(ListingDto.Title)" HeaderText="العنوان" Width="220" />
+                <GridColumn Field="@nameof(ListingDto.VendorName)" HeaderText="المعلن" Width="150" />
+                <GridColumn Field="@nameof(ListingDto.Category)" HeaderText="النوع" Width="140" />
+                <GridColumn Field="@nameof(ListingDto.Price)" HeaderText="السعر" Width="110">
                     <Template>
-                        @{
-                            var listing = (context as ListingDto);
-                            <span>@listing?.Price.ToString("N0") ر.س</span>
-                        }
+                        @{ var l = context as ListingDto; }
+                        <span>@l?.Price.ToString("N0") ر.س</span>
                     </Template>
                 </GridColumn>
                 <GridColumn Field="@nameof(ListingDto.Status)" HeaderText="الحالة" Width="120">
                     <Template>
-                        @{
-                            var listing = (context as ListingDto);
-                            <span class="status-badge @GetStatusClass(listing?.Status)">@listing?.Status</span>
-                        }
+                        @{ var l = context as ListingDto; }
+                        <span class="status-badge @GetStatusClass(l?.Status)">@l?.Status</span>
                     </Template>
                 </GridColumn>
                 <GridColumn Field="@nameof(ListingDto.CreatedAt)" HeaderText="تاريخ الإنشاء" Width="130" Format="d" />
-                <GridColumn HeaderText="الإجراءات" Width="200">
+                <GridColumn HeaderText="الإجراءات" Width="240">
                     <Template>
-                        @{
-                            var listing = (context as ListingDto);
-                            <div class="action-buttons">
-                                <SfButton CssClass="e-flat e-primary" IconCss="e-icons e-eye" Title="عرض" />
-                                @if (listing?.Status == "قيد المراجعة" || listing?.Status == "معلق")
-                                {
-                                    <SfButton CssClass="e-flat e-success" IconCss="e-icons e-check" Title="موافقة" />
-                                    <SfButton CssClass="e-flat e-danger" IconCss="e-icons e-close" Title="رفض" />
-                                }
-                                <SfButton CssClass="e-flat e-warning" IconCss="e-icons e-edit" Title="تعديل" />
-                            </div>
-                        }
+                        @{ var l = context as ListingDto; }
+                        <div class="action-buttons">
+                            @if (l?.Status is "قيد المراجعة" or "معلق" or "مرفوض")
+                            {
+                                <SfButton CssClass="e-flat e-success" IconCss="e-icons e-check" Title="موافقة"
+                                          OnClick="@(() => Approve(l!))" />
+                            }
+                            @if (l?.Status is "قيد المراجعة" or "نشط")
+                            {
+                                <SfButton CssClass="e-flat e-danger" IconCss="e-icons e-close" Title="رفض"
+                                          OnClick="@(() => OpenReject(l!))" />
+                            }
+                            @if (l?.Status == "نشط")
+                            {
+                                <SfButton CssClass="e-flat e-warning" IconCss="e-icons e-pause" Title="تعليق"
+                                          OnClick="@(() => Suspend(l!))" />
+                            }
+                            <SfButton CssClass="e-flat e-danger" IconCss="e-icons e-delete" Title="حذف"
+                                      OnClick="@(() => Delete(l!))" />
+                        </div>
                     </Template>
                 </GridColumn>
             </GridColumns>
@@ -59,31 +67,90 @@
     </div>
 </div>
 
+<SfDialog @bind-Visible="_rejectDialog" Width="420px" ShowCloseIcon="true" IsModal="true">
+    <DialogTemplates>
+        <Header>رفض العرض</Header>
+        <Content>
+            <p>اذكر سبب الرفض — سيُسجَّل في سجل التدقيق.</p>
+            <SfTextBox Multiline="true" @bind-Value="_rejectReason" Placeholder="السبب..." Width="100%" />
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="إلغاء" OnClick="@(() => _rejectDialog = false)" />
+        <DialogButton Content="رفض" IsPrimary="true" OnClick="ConfirmReject" />
+    </DialogButtons>
+</SfDialog>
+
 <style>
-    .action-buttons {
-        display: flex;
-        gap: 4px;
-        flex-wrap: wrap;
-    }
+    .action-buttons { display: flex; gap: 4px; flex-wrap: wrap; }
+    .action-message { padding: 10px 16px; border-radius: 8px; margin-bottom: 12px; }
+    .action-message.ok { background: #dcfce7; color: #166534; }
+    .action-message.err { background: #fee2e2; color: #991b1b; }
 </style>
 
 @code {
     private List<ListingDto> ListingItems { get; set; } = new();
     private string SearchTerm { get; set; } = string.Empty;
     private string SelectedStatus { get; set; } = string.Empty;
-    private string SelectedCategory { get; set; } = string.Empty;
 
     private List<string> StatusOptions = new() { "الكل", "نشط", "معلق", "قيد المراجعة", "مرفوض" };
-    private List<string> CategoryOptions = new() { "الكل", "مساحات عمل", "قاعات", "مكاتب", "استوديوهات", "فعاليات" };
 
-    protected override async Task OnInitializedAsync()
+    private bool _rejectDialog;
+    private string _rejectReason = "";
+    private ListingDto? _rejectTarget;
+
+    private string? _message;
+    private bool _messageOk;
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load()
     {
-        ListingItems = await ApiService.GetListingsAsync();
+        var statusParam = SelectedStatus switch
+        {
+            "نشط" => "Active",
+            "معلق" => "Suspended",
+            "قيد المراجعة" => "PendingReview",
+            "مرفوض" => "Rejected",
+            _ => null
+        };
+        ListingItems = await ApiService.GetListingsAsync(status: statusParam);
     }
 
-    private async Task SearchListings()
+    private async Task SearchListings() => await Load();
+
+    private async Task Approve(ListingDto l)
+        => await Run(await Moderation.ApproveListingAsync(Guid.Parse(l.Id)), "تمت الموافقة على العرض");
+
+    private void OpenReject(ListingDto l)
     {
-        ListingItems = await ApiService.GetListingsAsync();
+        _rejectTarget = l;
+        _rejectReason = "";
+        _rejectDialog = true;
+    }
+
+    private async Task ConfirmReject()
+    {
+        _rejectDialog = false;
+        if (_rejectTarget == null || string.IsNullOrWhiteSpace(_rejectReason)) return;
+        await Run(await Moderation.RejectListingAsync(Guid.Parse(_rejectTarget.Id), _rejectReason), "تم رفض العرض");
+    }
+
+    private async Task Suspend(ListingDto l)
+        => await Run(await Moderation.SuspendListingAsync(Guid.Parse(l.Id)), "تم تعليق العرض");
+
+    private async Task Delete(ListingDto l)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", $"حذف العرض '{l.Title}'؟")) return;
+        await Run(await Moderation.DeleteListingAsync(Guid.Parse(l.Id)), "تم حذف العرض");
+    }
+
+    private async Task Run(bool ok, string okMsg)
+    {
+        _messageOk = ok;
+        _message = ok ? okMsg : "فشلت العملية، حاول مرة أخرى";
+        if (ok) await Load();
+        StateHasChanged();
     }
 
     private string GetStatusClass(string? status) => status switch

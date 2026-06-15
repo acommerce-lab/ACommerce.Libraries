@@ -9,6 +9,7 @@
 @inject IAppNavigationService Navigation
 @inject ILocalizationService L
 @inject ITimezoneService Timezone
+@inject FeatureGuard FeatureGuard
 
 <div class="ashare-chats-page">
     @* Header *@
@@ -16,7 +17,15 @@
         <h1>@L["Messages"]</h1>
     </div>
 
-    @if (_isLoading)
+    @if (!_chatEnabled)
+    {
+        <div class="ashare-empty-state">
+            <i class="bi bi-slash-circle"></i>
+            <h3>المحادثات غير متاحة حالياً</h3>
+            <p>تم تعطيل هذه الميزة مؤقتاً من الإدارة.</p>
+        </div>
+    }
+    else if (_isLoading)
     {
         <div class="chats-loading">
             <div class="ac-spinner"></div>
@@ -85,11 +94,20 @@
 @code {
     private List<ChatListItem>? _chats;
     private bool _isLoading = true;
+    private bool _chatEnabled = true;
     private Dictionary<Guid, string> _formattedTimes = new();
     private string? _currentUserId;
 
     protected override async Task OnInitializedAsync()
     {
+        // chat.enabled — لو معطّلة لا نُحمّل المحادثات أصلاً
+        _chatEnabled = FeatureGuard.IsEnabled("chat.enabled");
+        if (!_chatEnabled)
+        {
+            _isLoading = false;
+            return;
+        }
+
         try
         {
             _currentUserId = TokenManager.GetUserIdFromToken();

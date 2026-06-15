@@ -333,6 +333,89 @@ public class BookingsController(
     }
 
     /// <summary>
+    /// قائمة جميع الحجوزات للوحة الإدارة — مع فلاتر اختيارية وتصفّح.
+    /// مقيّدة بدور Admin.
+    /// </summary>
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+    [HttpGet("admin/all")]
+    public async Task<ActionResult<PagedResult<BookingResponseDto>>> GetAllBookingsForAdmin(
+        [FromQuery] BookingStatus? status = null,
+        [FromQuery] Guid? hostId = null,
+        [FromQuery] Guid? customerId = null,
+        [FromQuery] DateTime? startDate = null,
+        [FromQuery] DateTime? endDate = null,
+        [FromQuery] string? search = null,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        try
+        {
+            var result = await _bookingRepository.GetPagedAsync(
+                pageNumber: pageNumber,
+                pageSize: Math.Min(pageSize, 100),
+                predicate: b =>
+                    (!status.HasValue || b.Status == status.Value) &&
+                    (!hostId.HasValue || b.HostId == hostId.Value) &&
+                    (customerId == null || b.CustomerId == customerId.Value.ToString()) &&
+                    (!startDate.HasValue || b.CreatedAt >= startDate.Value) &&
+                    (!endDate.HasValue || b.CreatedAt <= endDate.Value) &&
+                    (string.IsNullOrEmpty(search) ||
+                        (b.SpaceName != null && b.SpaceName.Contains(search)) ||
+                        (b.SpaceLocation != null && b.SpaceLocation.Contains(search))),
+                orderBy: b => b.CreatedAt,
+                ascending: false
+            );
+
+            var dtoItems = result.Items.Select(MapBookingToDto).ToList();
+
+            return Ok(new PagedResult<BookingResponseDto>
+            {
+                Items = dtoItems,
+                TotalCount = result.TotalCount,
+                PageNumber = result.PageNumber,
+                PageSize = result.PageSize
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all bookings for admin");
+            return StatusCode(500, new { message = "An error occurred", detail = ex.Message });
+        }
+    }
+
+    /// <summary>تحويل كيان الحجز إلى DTO (مستخدم في نقاط القائمة الإدارية).</summary>
+    private static BookingResponseDto MapBookingToDto(Booking b) => new()
+    {
+        Id = b.Id,
+        SpaceId = b.SpaceId,
+        CustomerId = b.CustomerId,
+        HostId = b.HostId,
+        SpaceName = b.SpaceName,
+        SpaceImage = b.SpaceImage,
+        SpaceLocation = b.SpaceLocation,
+        CheckInDate = b.CheckInDate,
+        CheckOutDate = b.CheckOutDate,
+        RentType = b.RentType.ToString(),
+        TotalPrice = b.TotalPrice,
+        DepositPercentage = b.DepositPercentage,
+        DepositAmount = b.DepositAmount,
+        RemainingAmount = b.RemainingAmount,
+        Currency = b.Currency,
+        DepositPaymentId = b.DepositPaymentId,
+        DepositPaidAt = b.DepositPaidAt,
+        Status = b.Status.ToString(),
+        EscrowStatus = b.EscrowStatus.ToString(),
+        EscrowReleasedAt = b.EscrowReleasedAt,
+        ConfirmedAt = b.ConfirmedAt,
+        CancelledAt = b.CancelledAt,
+        CancellationReason = b.CancellationReason,
+        CustomerNotes = b.CustomerNotes,
+        GuestsCount = b.GuestsCount,
+        CreatedAt = b.CreatedAt,
+        UpdatedAt = b.UpdatedAt
+    };
+
+    /// <summary>
     /// التحقق من دفع العربون
     /// </summary>
     [HttpPost("{id}/verify-deposit")]

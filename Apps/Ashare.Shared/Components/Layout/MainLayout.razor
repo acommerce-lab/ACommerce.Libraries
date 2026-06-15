@@ -11,6 +11,9 @@
 @inject Ashare.Shared.Services.VersionCheckService VersionCheck
 @inject ACommerce.Templates.Customer.Services.IAppVersionService AppVersion
 @inject ILocalizationService L
+@inject ACommerce.Client.AppConfig.Services.AppConfigBootstrapper AppConfigBootstrap
+@inject ACommerce.Client.AppConfig.Services.IFeatureFlags Features
+@inject Ashare.Shared.Services.RemoteThemeApplier ThemeApplier
 @implements IDisposable
 
 @* Version Blocker تم نقله إلى AppStartup.razor للتحقق عند بدء التطبيق *@
@@ -73,26 +76,30 @@
                 <span class="ac-bottom-nav-icon"><i class="bi bi-compass"></i></span>
                 <span class="ac-bottom-nav-label">@L["Explore"]</span>
             </a>
-            <a href="/bookings" class="ac-bottom-nav-item @(IsActive("/bookings") ? "active" : "")">
-                <span class="ac-bottom-nav-icon">
-                    <i class="bi bi-calendar-check"></i>
-                    @if (BookingsCount > 0)
-                    {
-                        <span class="ac-badge ac-badge-primary ac-badge-sm">@BookingsCount</span>
-                    }
-                </span>
-                <span class="ac-bottom-nav-label">@L["Bookings"]</span>
-            </a>
-            <a href="/chats" class="ac-bottom-nav-item @(IsActive("/chats") ? "active" : "")">
-                <span class="ac-bottom-nav-icon">
-                    <i class="bi bi-chat-dots"></i>
-                    @if (MessagesCount > 0)
-                    {
-                        <span class="ac-badge ac-badge-danger ac-badge-sm">@MessagesCount</span>
-                    }
-                </span>
-                <span class="ac-bottom-nav-label">@L["Messages"]</span>
-            </a>
+            <FeatureGate Feature="booking.enabled">
+                <a href="/bookings" class="ac-bottom-nav-item @(IsActive("/bookings") ? "active" : "")">
+                    <span class="ac-bottom-nav-icon">
+                        <i class="bi bi-calendar-check"></i>
+                        @if (BookingsCount > 0)
+                        {
+                            <span class="ac-badge ac-badge-primary ac-badge-sm">@BookingsCount</span>
+                        }
+                    </span>
+                    <span class="ac-bottom-nav-label">@L["Bookings"]</span>
+                </a>
+            </FeatureGate>
+            <FeatureGate Feature="chat.enabled">
+                <a href="/chats" class="ac-bottom-nav-item @(IsActive("/chats") ? "active" : "")">
+                    <span class="ac-bottom-nav-icon">
+                        <i class="bi bi-chat-dots"></i>
+                        @if (MessagesCount > 0)
+                        {
+                            <span class="ac-badge ac-badge-danger ac-badge-sm">@MessagesCount</span>
+                        }
+                    </span>
+                    <span class="ac-bottom-nav-label">@L["Messages"]</span>
+                </a>
+            </FeatureGate>
             <a href="/favorites" class="ac-bottom-nav-item @(IsActive("/favorites") ? "active" : "")">
                 <span class="ac-bottom-nav-icon"><i class="bi bi-heart"></i></span>
                 <span class="ac-bottom-nav-label">@L["Favorites"]</span>
@@ -134,9 +141,11 @@
     private int CurrentBuildNumber => AppVersion.BuildNumber;
 
     /// <summary>
-    /// هل يجب إظهار تنبيه الإصدار (في كل الحالات ماعدا الإصدار الأحدث أو المحظور)
+    /// هل يجب إظهار تنبيه الإصدار (في كل الحالات ماعدا الإصدار الأحدث أو المحظور).
+    /// لو علامة version_check.enabled معطّلة، لا نُظهر التنبيه أصلاً.
     /// </summary>
     private bool ShouldShowVersionAlert =>
+        Features.IsEnabled("version_check.enabled", fallback: true) &&
         !VersionCheck.IsBlocked &&
         !_versionAlertDismissed &&
         VersionCheck.LastCheckResult != null &&
@@ -318,6 +327,13 @@
     {
         if (_versionChecked) return;
 
+        // علامة version_check.enabled — لو معطّلة، لا نتصل بالخادم لفحص الإصدار.
+        if (!Features.IsEnabled("version_check.enabled", fallback: true))
+        {
+            _versionChecked = true;
+            return;
+        }
+
         try
         {
             var currentVersion = CurrentAppVersion;
@@ -458,6 +474,17 @@
             // تهيئة حالة وضع الضيف من التخزين
             await GuestMode.InitializeAsync();
             _initialized = true;
+
+            // تهيئة AppConfig (يحمّل من Storage فوراً ثم يحدّث من الخادم في الخلفية)
+            try
+            {
+                await AppConfigBootstrap.InitializeAsync();
+                await ThemeApplier.InitializeAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[MainLayout] AppConfig bootstrap failed (non-fatal): {ex.Message}");
+            }
 
             // تحميل العدادات بعد تهيئة التوكن
             await LoadCountsAsync();

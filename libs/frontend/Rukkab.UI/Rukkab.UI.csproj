@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RazorLangVersion>9.0</RazorLangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -8,6 +8,6 @@
   </PropertyGroup>
   <!-- Intentionally no FrameworkReference so this RCL can be consumed by Blazor WASM projects. -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.0-*" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.0-*" />
   </ItemGroup>
 </Project>

@@ -34,7 +34,7 @@ builder.Services.AddAshareClients(apiBaseUrl, options =>
     options.TokenProvider = sp => sp.GetRequiredService<ScopedTokenProvider>();
 });
 
-builder.Services.AddAshareServices();
+builder.Services.AddAshareServices(platform: "web");
 builder.Services.AddScoped<ThemeService>();
 builder.Services.AddSingleton<GuestModeService>();
 builder.Services.AddScoped<IAppNavigationService, WebNavigationService>();

@@ -2,6 +2,7 @@
 @using ACommerce.Templates.Customer.Components
 @using ACommerce.Client.Versions
 @inject Ashare.Shared.Services.VersionCheckService VersionCheck
+@inject Ashare.Shared.Services.FeatureGuard FeatureGuard
 @inject ACommerce.Templates.Customer.Services.IAppVersionService AppVersion
 @inject ACommerce.Templates.Customer.Services.ILocalizationService L
 
@@ -19,7 +20,7 @@
         </div>
     </div>
 }
-else if (VersionCheck.IsBlocked)
+else if (VersionCheck.IsBlocked && FeatureGuard.IsEnabled("version_check.force_update", fallback: true))
 {
     @* شاشة الحظر الكاملة بتصميم عشير *@
     <div class="ashare-update-page" dir="rtl">
@@ -342,6 +343,13 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        // علامة version_check.enabled — لو معطّلة نتخطى الفحص كاملاً.
+        if (!FeatureGuard.IsEnabled("version_check.enabled", fallback: true))
+        {
+            _isLoading = false;
+            return;
+        }
+
         await CheckVersionAsync();
     }
 
