@@ -1,0 +1,44 @@
+name: Backend Deploy (Alibaba ECS)
+
+# Reuses the existing, battle-tested Apps/Ashare.Api/deploy-alibaba.sh:
+# builds the image on the runner, streams it over SSH (docker save | gzip | ssh
+# | docker load), restarts the container, runs the /health check, keeps a
+# rollback marker. The DB connection string and OSS keys are NOT in CI — they
+# stay in /home/ecs-user/ashare.env on the server (read at container runtime).
+on:
+  workflow_dispatch:
+  # To auto-deploy when backend code lands on your default branch, uncomment and
+  # set the branch name (the deploy is idempotent, health-checked, and rolls back):
+  # push:
+  #   branches: [ main ]
+  #   paths:
+  #     - "Apps/Ashare.Api/**"
+  #     - "libs/backend/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # deploy script derives the image tag from the git sha
+
+      - name: Write SSH key
+        env:
+          SSH_KEY: ${{ secrets.ALIBABA_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/ashare-key
+          chmod 600 ~/.ssh/ashare-key
+
+      - name: Trust ECS host key
+        env:
+          ECS_HOST: ${{ secrets.ALIBABA_SSH_HOST }}
+        run: ssh-keyscan -H "$ECS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy
+        env:
+          ECS_HOST: ${{ secrets.ALIBABA_SSH_HOST }}
+          ECS_USER: ${{ secrets.ALIBABA_SSH_USER }}
+          SSH_KEY: /home/runner/.ssh/ashare-key
+        run: bash Apps/Ashare.Api/deploy-alibaba.sh deploy
