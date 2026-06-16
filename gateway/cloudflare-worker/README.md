@@ -3,7 +3,7 @@
 A transparent reverse proxy that lives at `https://api.ashare.sa`:
 
 ```
-app → https://api.ashare.sa → [Worker] → http://8.213.82.216:8080   (primary: Alibaba)
+app → https://api.ashare.sa → [Worker] → http://origin.ashare.sa:8080   (primary: Alibaba)
                                        ↘ on failure → https://ashareapi1.runasp.net  (fallback)
 ```
 
@@ -16,11 +16,17 @@ re-sends the request to the runasp.net backend automatically.
 Cloudflare). If it isn't yet, add the domain to Cloudflare (free) and update the
 nameservers at your registrar first.
 
+> **The primary MUST be a hostname, not a raw IP.** Cloudflare Workers cannot
+> `fetch()` a raw IP address — it returns a 403 with body `error code: 1003`.
+> Add a **DNS-only (grey-cloud)** record, e.g. `origin.ashare.sa` → `8.213.82.216`,
+> and use `http://origin.ashare.sa:8080` as `PRIMARY_ORIGIN`. (The fallback is
+> already a hostname, so it's fine.)
+
 ## Deploy — Option A: Dashboard (no tooling)
 1. Cloudflare → **Workers & Pages → Create → Worker** → name `ashare-api-gateway` → Deploy.
 2. **Edit code** → paste the contents of `worker.js` → **Save and deploy**.
 3. **Settings → Variables and secrets** (Plaintext):
-   - `PRIMARY_ORIGIN` = `http://8.213.82.216:8080`
+   - `PRIMARY_ORIGIN` = `http://origin.ashare.sa:8080`
    - `FALLBACK_ORIGIN` = `https://ashareapi1.runasp.net`
    - (optional) `PRIMARY_TIMEOUT_MS=7000`, `FALLBACK_TIMEOUT_MS=20000`, `CIRCUIT_OPEN_MS=30000`
 4. Bind it to the hostname — pick ONE:

@@ -50,7 +50,11 @@ async function fetchWithTimeout(req, ms) {
 
 export default {
   async fetch(request, env) {
-    const PRIMARY = env.PRIMARY_ORIGIN || "http://8.213.82.216:8080";
+    // Cloudflare Workers CANNOT fetch a raw IP (e.g. http://8.213.82.216:8080) --
+    // it returns a 403 whose body is "error code: 1003". The primary MUST be a
+    // hostname. Create a DNS-only (grey-cloud) record, e.g.
+    // origin.ashare.sa -> 8.213.82.216, and point PRIMARY_ORIGIN at it.
+    const PRIMARY = env.PRIMARY_ORIGIN || "http://origin.ashare.sa:8080";
     const FALLBACK = env.FALLBACK_ORIGIN || "https://ashareapi1.runasp.net";
     const PRIMARY_TIMEOUT_MS = Number(env.PRIMARY_TIMEOUT_MS || 7000);
     const FALLBACK_TIMEOUT_MS = Number(env.FALLBACK_TIMEOUT_MS || 20000);

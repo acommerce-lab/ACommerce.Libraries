@@ -11,7 +11,9 @@ routes = [
 
 # Non-secret config. Override in the dashboard (Settings -> Variables) if needed.
 [vars]
-PRIMARY_ORIGIN = "http://8.213.82.216:8080"
+# Must be a HOSTNAME, not a raw IP (Workers cannot fetch raw IPs -> error 1003).
+# Point a DNS-only (grey-cloud) record at the origin, e.g. origin.ashare.sa -> 8.213.82.216.
+PRIMARY_ORIGIN = "http://origin.ashare.sa:8080"
 FALLBACK_ORIGIN = "https://ashareapi1.runasp.net"
 PRIMARY_TIMEOUT_MS = "7000"
 FALLBACK_TIMEOUT_MS = "20000"
