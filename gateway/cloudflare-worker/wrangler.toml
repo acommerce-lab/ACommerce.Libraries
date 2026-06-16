@@ -1,0 +1,18 @@
+name = "ashare-api-gateway"
+main = "worker.js"
+compatibility_date = "2026-06-01"
+
+# Attach the Worker to the API hostname. The zone (ashare.sa) must be on
+# Cloudflare. Alternatively set a "Custom Domain" for the Worker in the
+# dashboard (recommended — it manages DNS for you) and delete this routes block.
+routes = [
+  { pattern = "api.ashare.sa/*", zone_name = "ashare.sa" }
+]
+
+# Non-secret config. Override in the dashboard (Settings -> Variables) if needed.
+[vars]
+PRIMARY_ORIGIN = "http://8.213.82.216:8080"
+FALLBACK_ORIGIN = "https://ashareapi1.runasp.net"
+PRIMARY_TIMEOUT_MS = "7000"
+FALLBACK_TIMEOUT_MS = "20000"
+CIRCUIT_OPEN_MS = "30000"
